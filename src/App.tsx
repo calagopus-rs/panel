@@ -1,6 +1,6 @@
-import { BrowserRouter, Route, Routes } from "react-router";
-import Home from "@/pages/Home";
-import About from "@/pages/About";
+import { BrowserRouter, Route, Routes } from 'react-router';
+import Home from '@/pages/Home';
+import About from '@/pages/About';
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
