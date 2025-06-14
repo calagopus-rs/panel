@@ -24,7 +24,7 @@ export default function DashboardRouter() {
             className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer"
             onClick={() => setCollapsed(!collapsed)}
           >
-            <img src={CollapsedIcon} className="my-4 w-20" alt={'Pterodactyl Icon'} />
+            <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
             <a className="cursor-pointer">
@@ -49,7 +49,7 @@ export default function DashboardRouter() {
               <KeyIcon />
               <span>SSH Keys</span>
             </NavLink>
-            <NavLink to={'/account/ssh'} end>
+            <NavLink to={'/account/activity'} end>
               <BriefcaseIcon />
               <span>Activity</span>
             </NavLink>

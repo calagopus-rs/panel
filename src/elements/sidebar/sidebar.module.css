@@ -7,12 +7,10 @@
 }
 
 .sidebarCollapsed {
-  @apply w-16;
+  @apply w-22;
 
   & > .section {
     & > a {
-      @apply p-0;
-
       & > span {
         @apply hidden;
       }
