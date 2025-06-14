@@ -1,7 +1,7 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/DashboardHome';
 import { useState } from 'react';
-import { NavLink, Route, Routes } from 'react-router';
+import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import {
   BriefcaseIcon,
@@ -11,6 +11,8 @@ import {
   ServerStackIcon,
   UserIcon,
 } from '@heroicons/react/24/outline';
+import classNames from 'classnames';
+import styles from '@/elements/sidebar/sidebar.module.css';
 
 export default function DashboardRouter() {
   const avatarURL = 'https://placehold.co/400x400/png';
@@ -27,32 +29,32 @@ export default function DashboardRouter() {
             <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
-            <a className="cursor-pointer">
+            <a className={classNames(styles.navLink, 'cursor-pointer')}>
               <MagnifyingGlassIcon />
               <span>Search</span>
             </a>
-            <NavLink to={'/'} end>
+            <Sidebar.Link to={'/'} end>
               <ServerStackIcon />
               <span>Servers</span>
-            </NavLink>
+            </Sidebar.Link>
           </Sidebar.Section>
           <Sidebar.Section>
-            <NavLink to={'/account'} end>
+            <Sidebar.Link to={'/account'} end>
               <UserIcon />
               <span>Account</span>
-            </NavLink>
-            <NavLink to={'/account/api'} end>
+            </Sidebar.Link>
+            <Sidebar.Link to={'/account/api'} end>
               <CloudIcon />
               <span>API Credentials</span>
-            </NavLink>
-            <NavLink to={'/account/ssh'} end>
+            </Sidebar.Link>
+            <Sidebar.Link to={'/account/ssh'} end>
               <KeyIcon />
               <span>SSH Keys</span>
-            </NavLink>
-            <NavLink to={'/account/activity'} end>
+            </Sidebar.Link>
+            <Sidebar.Link to={'/account/activity'} end>
               <BriefcaseIcon />
               <span>Activity</span>
-            </NavLink>
+            </Sidebar.Link>
           </Sidebar.Section>
           <Sidebar.User>
             {avatarURL && (

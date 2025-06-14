@@ -31,23 +31,27 @@
 .section {
   @apply w-full text-neutral-300 whitespace-nowrap uppercase p-4 select-none;
   @apply border-t border-neutral-700;
+}
 
-  & > a {
-    @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-4;
-    @apply hover:text-neutral-50;
+.navLink {
+  @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-4;
+  @apply hover:text-neutral-50;
 
-    & > svg {
-      @apply h-6 w-6 flex flex-shrink-0;
-    }
+  & > svg {
+    @apply h-6 w-6 flex flex-shrink-0;
+  }
 
-    & > span {
-      @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
-    }
+  & > span {
+    @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
+  }
+}
 
-    &:active,
-    &.active {
-      @apply text-neutral-50 bg-neutral-800 rounded;
-    }
+.activeLink,
+.navLink:active {
+  @apply text-neutral-50 bg-neutral-800 rounded;
+
+  & > svg {
+    @apply text-cyan-500;
   }
 }
 
