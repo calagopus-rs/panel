@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import classNames from 'classnames';
-import styles from './styles.module.css';
+import styles from './inputs.module.css';
 
 enum Variant {
   Normal,

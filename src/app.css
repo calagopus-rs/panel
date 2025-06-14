@@ -1,1 +1,35 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  --font-header: 'IBM Plex Sans', 'Roboto', 'system-ui', 'sans-serif';
+}
+
+body {
+  @apply font-sans bg-neutral-800 text-neutral-200;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-medium tracking-normal;
+}
+
+p {
+  @apply text-neutral-200 leading-snug font-sans;
+}
+
+form {
+  @apply m-0;
+}
+
+textarea,
+select,
+input,
+button,
+button:focus,
+button:focus-visible {
+  @apply outline-none;
+}

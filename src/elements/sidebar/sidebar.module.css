@@ -1,0 +1,51 @@
+@reference "../../app.css";
+
+.sidebar {
+  @apply h-screen hidden md:flex flex-col items-center flex-shrink-0 bg-neutral-900 overflow-x-hidden ease-linear;
+  @apply transition-[width] duration-150 ease-in;
+  @apply w-[17.5rem];
+
+  & > a {
+    @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-8;
+    @apply hover:text-neutral-50;
+
+    & > svg {
+      @apply transition-none h-6 w-6 flex flex-shrink-0;
+    }
+
+    & > span {
+      @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
+    }
+  }
+}
+
+.wrapper {
+  @apply w-full flex flex-col px-4;
+}
+
+.section {
+  @apply w-full text-neutral-300 whitespace-nowrap uppercase p-4 select-none;
+  @apply border-t border-neutral-700;
+
+  & > a {
+    @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-4;
+    @apply hover:text-neutral-50;
+
+    & > svg {
+      @apply h-6 w-6 flex flex-shrink-0;
+    }
+
+    & > span {
+      @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
+    }
+
+    &:active,
+    &.active {
+      @apply text-neutral-50 bg-neutral-800 rounded;
+    }
+  }
+}
+
+.user {
+  @apply mt-auto h-16 w-full flex items-center bg-neutral-700 justify-center;
+}
