@@ -4,17 +4,24 @@
   @apply h-screen hidden md:flex flex-col items-center flex-shrink-0 bg-neutral-900 overflow-x-hidden ease-linear;
   @apply transition-[width] duration-150 ease-in;
   @apply w-[17.5rem];
+}
 
-  & > a {
-    @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-8;
-    @apply hover:text-neutral-50;
+.sidebarCollapsed {
+  @apply w-16;
 
-    & > svg {
-      @apply transition-none h-6 w-6 flex flex-shrink-0;
+  & > .section {
+    & > a {
+      @apply p-0;
+
+      & > span {
+        @apply hidden;
+      }
     }
+  }
 
-    & > span {
-      @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
+  & > .user {
+    & > div {
+      @apply hidden;
     }
   }
 }
