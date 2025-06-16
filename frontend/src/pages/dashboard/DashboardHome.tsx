@@ -14,7 +14,7 @@ const servers = [
     status: 'Offline',
   },
   {
-    name: 'This is a very long server name that should exceed the div boundary',
+    name: 'This is a very long server name that should in theory exceed the div boundary to test how text cutoff works',
     status: 'Offline',
   },
   {
@@ -117,9 +117,9 @@ function GridServer({ name, status }: { name: string; status: string }) {
 
 function RowServer({ name, status }: { name: string; status: string }) {
   return (
-    <div className="flex flex-col bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded">
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between gap-2">
+    <div className="grid lg:grid-cols-2 xl:grid-cols-3 justify-between bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded">
+      <div className="px-6 py-4 xl:col-span-2">
+        <div className="flex items-center gap-2">
           <span className="text-xl font-header font-medium truncate" title={name}>
             {name}
           </span>
@@ -137,7 +137,7 @@ function RowServer({ name, status }: { name: string; status: string }) {
         </div>
         <p className="text-sm text-gray-400">localhost:8000</p>
       </div>
-      <div className="rounded-b-md p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
+      <div className="p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
         <div className="flex gap-2 text-sm justify-center items-center">
           <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
           <div>
