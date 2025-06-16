@@ -21,6 +21,16 @@ import {
   faTerminal,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
+import ServerHome from '@/pages/server/ServerHome';
+import ServerFiles from '@/pages/server/ServerFiles';
+import ServerDatabases from '@/pages/server/ServerDatabases';
+import ServerSchedules from '@/pages/server/ServerSchedules';
+import ServerUsers from '@/pages/server/ServerUsers';
+import ServerBackups from '@/pages/server/ServerBackups';
+import ServerNetwork from '@/pages/server/ServerNetwork';
+import ServerStartup from '@/pages/server/ServerStartup';
+import ServerSettings from '@/pages/server/ServerSettings';
+import ServerActivity from '@/pages/server/ServerActivity';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
@@ -105,7 +115,16 @@ export default function ServerRouter() {
           </Sidebar.User>
         </Sidebar>
         <Routes>
-          <Route path="" element={<DashboardHome />} />
+          <Route path="" element={<ServerHome />} />
+          <Route path="/files" element={<ServerFiles />} />
+          <Route path="/databases" element={<ServerDatabases />} />
+          <Route path="/schedules" element={<ServerSchedules />} />
+          <Route path="/users" element={<ServerUsers />} />
+          <Route path="/backups" element={<ServerBackups />} />
+          <Route path="/network" element={<ServerNetwork />} />
+          <Route path="/startup" element={<ServerStartup />} />
+          <Route path="/settings" element={<ServerSettings />} />
+          <Route path="/activity" element={<ServerActivity />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
