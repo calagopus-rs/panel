@@ -1,1 +1,1 @@
-# panel (experimental)
+# pterodactyl-rs panel (experimental)
