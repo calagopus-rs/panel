@@ -3,6 +3,7 @@ import { faHardDrive, faMemory, faMicrochip, faTableCellsLarge, faTableList } fr
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useState } from 'react';
+import { NavLink } from 'react-router';
 
 const servers = [
   {
@@ -68,7 +69,10 @@ export default function DashboardHome() {
 
 function GridServer({ name, status }: { name: string; status: string }) {
   return (
-    <div className="flex flex-col bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded">
+    <NavLink
+      to={'/server/test'}
+      className="flex flex-col bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded"
+    >
       <div className="px-6 py-4">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xl font-header font-medium truncate" title={name}>
@@ -111,13 +115,16 @@ function GridServer({ name, status }: { name: string; status: string }) {
           </div>
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 }
 
 function RowServer({ name, status }: { name: string; status: string }) {
   return (
-    <div className="grid lg:grid-cols-2 xl:grid-cols-3 justify-between bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded">
+    <NavLink
+      to={'/server/test'}
+      className="grid lg:grid-cols-2 xl:grid-cols-3 justify-between bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded"
+    >
       <div className="px-6 py-4 xl:col-span-2">
         <div className="flex items-center gap-2">
           <span className="text-xl font-header font-medium truncate" title={name}>
@@ -160,6 +167,6 @@ function RowServer({ name, status }: { name: string; status: string }) {
           </div>
         </div>
       </div>
-    </div>
+    </NavLink>
   );
 }

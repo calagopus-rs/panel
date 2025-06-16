@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
+import NotFound from '@/pages/NotFound';
 
 export default function DashboardRouter() {
   const avatarURL = 'https://placehold.co/400x400/png';
@@ -72,6 +73,7 @@ export default function DashboardRouter() {
         </Sidebar>
         <Routes>
           <Route path="" element={<DashboardHome />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
     </>
