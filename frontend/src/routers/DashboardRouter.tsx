@@ -16,6 +16,10 @@ import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase, faCloud, faKey, faMagnifyingGlass, faServer, faUser } from '@fortawesome/free-solid-svg-icons';
+import DashboardAccount from '@/pages/dashboard/DashboardAccount';
+import DashboardApi from '@/pages/dashboard/DashboardApi';
+import DashboardSsh from '@/pages/dashboard/DashboardSsh';
+import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 
 export default function DashboardRouter() {
   const avatarURL = 'https://placehold.co/400x400/png';
@@ -75,6 +79,10 @@ export default function DashboardRouter() {
         </Sidebar>
         <Routes>
           <Route path="" element={<DashboardHome />} />
+          <Route path="/account" element={<DashboardAccount />} />
+          <Route path="/account/api" element={<DashboardApi />} />
+          <Route path="/account/ssh" element={<DashboardSsh />} />
+          <Route path="/account/activity" element={<DashboardActivity />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
