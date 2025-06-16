@@ -1,23 +1,30 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/DashboardHome';
 import { useState } from 'react';
-import { Route, Routes } from 'react-router';
+import { Route, Routes, useParams } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
-import {
-  BriefcaseIcon,
-  CloudIcon,
-  KeyIcon,
-  MagnifyingGlassIcon,
-  ServerStackIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faCloud, faKey, faMagnifyingGlass, faServer, faUser } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBoxArchive,
+  faBriefcase,
+  faCog,
+  faDatabase,
+  faFolderOpen,
+  faMagnifyingGlass,
+  faNetworkWired,
+  faPlay,
+  faServer,
+  faStopwatch,
+  faTerminal,
+  faUsers,
+} from '@fortawesome/free-solid-svg-icons';
 
-export default function DashboardRouter() {
+export default function ServerRouter() {
+  const params = useParams<'id'>();
+
   const avatarURL = 'https://placehold.co/400x400/png';
   const [collapsed, setCollapsed] = useState(false);
 
@@ -42,19 +49,43 @@ export default function DashboardRouter() {
             </Sidebar.Link>
           </Sidebar.Section>
           <Sidebar.Section>
-            <Sidebar.Link to={'/account'} end>
-              <FontAwesomeIcon icon={faUser} />
-              <span>Account</span>
+            <Sidebar.Link to={`/server/${params.id}`} end>
+              <FontAwesomeIcon icon={faTerminal} />
+              <span>Console</span>
             </Sidebar.Link>
-            <Sidebar.Link to={'/account/api'} end>
-              <FontAwesomeIcon icon={faCloud} />
-              <span>API Credentials</span>
+            <Sidebar.Link to={`/server/${params.id}/files`} end>
+              <FontAwesomeIcon icon={faFolderOpen} />
+              <span>Files</span>
             </Sidebar.Link>
-            <Sidebar.Link to={'/account/ssh'} end>
-              <FontAwesomeIcon icon={faKey} />
-              <span>SSH Keys</span>
+            <Sidebar.Link to={`/server/${params.id}/databases`} end>
+              <FontAwesomeIcon icon={faDatabase} />
+              <span>Databases</span>
             </Sidebar.Link>
-            <Sidebar.Link to={'/account/activity'} end>
+            <Sidebar.Link to={`/server/${params.id}/schedules`} end>
+              <FontAwesomeIcon icon={faStopwatch} />
+              <span>Schedules</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/users`} end>
+              <FontAwesomeIcon icon={faUsers} />
+              <span>Users</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/backups`} end>
+              <FontAwesomeIcon icon={faBoxArchive} />
+              <span>Backups</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/network`} end>
+              <FontAwesomeIcon icon={faNetworkWired} />
+              <span>Network</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/startup`} end>
+              <FontAwesomeIcon icon={faPlay} />
+              <span>Startup</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/settings`} end>
+              <FontAwesomeIcon icon={faCog} />
+              <span>Settings</span>
+            </Sidebar.Link>
+            <Sidebar.Link to={`/server/${params.id}/activity`} end>
               <FontAwesomeIcon icon={faBriefcase} />
               <span>Activity</span>
             </Sidebar.Link>

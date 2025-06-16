@@ -38,7 +38,7 @@
   @apply hover:text-neutral-50;
 
   & > svg {
-    @apply h-6 w-6 flex flex-shrink-0;
+    @apply h-5 w-5 flex flex-shrink-0;
   }
 
   & > span {
