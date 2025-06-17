@@ -245,7 +245,9 @@ export default function ServerFiles() {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-header font-bold text-white">Files</h1>
         <div className="flex gap-2">
-          <Button>Create new</Button>
+          <Button style={Button.Styles.Gray}>New directory</Button>
+          <Button>Upload</Button>
+          <Button>New File</Button>
         </div>
       </div>
       <Table>
