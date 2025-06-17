@@ -1,11 +1,11 @@
 @reference "../../app.css";
 
 .checkbox_input {
-  @apply w-4 h-4 rounded-sm border-neutral-400 bg-neutral-500 text-blue-500;
+  @apply w-4 h-4 rounded-sm border-gray-400 bg-gray-500 text-blue-500;
 
   &:focus,
   &:active {
-    @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-neutral-600;
+    @apply ring-2 ring-blue-500 ring-offset-2 ring-offset-gray-600;
   }
 
   &.indeterminate:checked {
@@ -16,8 +16,8 @@
 
 .text_input {
   @apply transition-shadow duration-75;
-  @apply w-full bg-neutral-700 rounded px-4 py-2 outline-none border-0;
-  @apply placeholder:text-neutral-400 text-white;
+  @apply w-full bg-gray-800 rounded px-4 py-2 outline-none border-0;
+  @apply placeholder:text-gray-400 text-white;
 
   &:focus,
   &:active {

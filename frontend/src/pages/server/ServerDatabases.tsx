@@ -68,9 +68,9 @@ export default function ServerDatabases() {
                 <TableBody>
                   {databases.map(database => (
                     <TableRow key={database.id}>
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
                         {/* <CopyOnClick text={database.id.toString()}> */}
-                        <code className="font-mono bg-neutral-900 rounded py-1 px-2">{database.id}</code>
+                        <code className="font-mono bg-gray-800 rounded py-1 px-2">{database.id}</code>
                         {/* </CopyOnClick> */}
                       </td>
 
@@ -80,9 +80,9 @@ export default function ServerDatabases() {
                         {/* </NavLink> */}
                       </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
                         {/* <CopyOnClick text={database.getAddress()}> */}
-                        <code className="font-mono bg-neutral-900 rounded py-1 px-2">
+                        <code className="font-mono bg-gray-800 rounded py-1 px-2">
                           {database.host.ip}:{database.host.port}
                         </code>
                         {/* </CopyOnClick> */}

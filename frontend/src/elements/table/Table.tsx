@@ -67,13 +67,13 @@ export const TableHeader = ({
   return (
     <th className="px-6 py-2" onClick={onClick}>
       <span className="flex flex-row items-center cursor-pointer">
-        <span className="text-xs font-medium tracking-wider uppercase text-neutral-300 whitespace-nowrap select-none">
+        <span className="text-xs font-medium tracking-wider uppercase text-gray-300 whitespace-nowrap select-none">
           {name}
         </span>
 
         {direction !== undefined ? (
           <div className="ml-1">
-            <svg fill="none" viewBox="0 0 20 20" className="w-4 h-4 text-neutral-400">
+            <svg fill="none" viewBox="0 0 20 20" className="w-4 h-4 text-gray-400">
               {direction === null || direction === 1 ? (
                 <path
                   stroke="currentColor"
@@ -102,7 +102,7 @@ export const TableHeader = ({
 
 export const TableHead = ({ children }: { children: React.ReactNode }) => {
   return (
-    <thead className="bg-neutral-900 border-t border-b border-neutral-500">
+    <thead className="bg-gray-800 border-t border-b border-gray-500">
       <tr>{children}</tr>
     </thead>
   );
@@ -113,7 +113,7 @@ export const TableBody = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const TableRow = ({ children }: { children: React.ReactNode }) => {
-  return <tr className="h-12 hover:bg-neutral-600">{children}</tr>;
+  return <tr className="h-12 hover:bg-gray-600">{children}</tr>;
 };
 
 interface PaginationButtonProps {
@@ -124,8 +124,8 @@ function PaginationButton({ active, children, ...props }: PaginationButtonProps 
   return (
     <button
       className={classNames(
-        'relative items-center px-3 py-1 -ml-px text-sm font-normal leading-5 transition duration-150 ease-in-out border border-neutral-500 focus:z-10 focus:outline-none focus:border-primary-300 inline-flex',
-        [active ? 'bg-neutral-500 text-neutral-50' : 'bg-neutral-600 text-neutral-200 hover:text-neutral-50'],
+        'relative items-center px-3 py-1 -ml-px text-sm font-normal leading-5 transition duration-150 ease-in-out border border-gray-500 focus:z-10 focus:outline-none focus:border-primary-300 inline-flex',
+        [active ? 'bg-gray-500 text-gray-50' : 'bg-gray-600 text-gray-200 hover:text-gray-50'],
       )}
       {...props}
     >
@@ -138,8 +138,8 @@ function PaginationArrow({ children, ...props }: React.ComponentProps<'button'>)
   return (
     <button
       className={classNames(
-        'relative inline-flex items-center px-1 py-1 text-sm font-medium leading-5 transition duration-150 ease-in-out border border-neutral-500 bg-neutral-600 text-neutral-400 hover:text-neutral-50 focus:z-10 focus:outline-none focus:border-primary-300',
-        [props.disabled ? 'bg-neutral-700 hover:text-neutral-400 cursor-default' : 'cursor-pointer'],
+        'relative inline-flex items-center px-1 py-1 text-sm font-medium leading-5 transition duration-150 ease-in-out border border-gray-500 bg-gray-600 text-gray-400 hover:text-gray-50 focus:z-10 focus:outline-none focus:border-primary-300',
+        [props.disabled ? 'bg-gray-700 hover:text-gray-400 cursor-default' : 'cursor-pointer'],
       )}
       {...props}
     >
@@ -208,17 +208,15 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
     <>
       {children}
 
-      <div className="h-12 flex flex-row items-center w-full px-6 py-3 border-t border-neutral-500">
-        <p className="text-sm leading-5 text-neutral-400">
+      <div className="h-12 flex flex-row items-center w-full px-6 py-3 border-t border-gray-500">
+        <p className="text-sm leading-5 text-gray-400">
           Showing{' '}
-          <span className="text-neutral-300">
+          <span className="text-gray-300">
             {(pagination.currentPage - 1) * pagination.perPage + (pagination.total > 0 ? 1 : 0)}
           </span>{' '}
           to{' '}
-          <span className="text-neutral-300">
-            {(pagination.currentPage - 1) * pagination.perPage + pagination.count}
-          </span>{' '}
-          of <span className="text-neutral-300">{pagination.total}</span> results
+          <span className="text-gray-300">{(pagination.currentPage - 1) * pagination.perPage + pagination.count}</span>{' '}
+          of <span className="text-gray-300">{pagination.total}</span> results
         </p>
 
         {isFirstPage && isLastPage ? null : (
@@ -289,7 +287,7 @@ export const NoItems = ({ className }: { className?: string }) => {
         <img src={'/assets/svgs/not_found.svg'} alt={'No Items'} className="h-full select-none" />
       </div>
 
-      <p className="text-lg text-neutral-300 text-center font-normal sm:mt-8">
+      <p className="text-lg text-gray-300 text-center font-normal sm:mt-8">
         No items could be found, it&apos;s almost like they are hiding.
       </p>
     </div>
@@ -343,7 +341,7 @@ export const ContentWrapper = ({ checked, onSearch, children }: Params) => {
 export default ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex flex-col w-full">
-      <div className="rounded-lg shadow-md bg-neutral-700">{children}</div>
+      <div className="rounded-lg shadow-md bg-gray-700">{children}</div>
     </div>
   );
 };
