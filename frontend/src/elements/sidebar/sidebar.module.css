@@ -46,8 +46,7 @@
   }
 }
 
-.activeLink,
-.navLink:active {
+.activeLink {
   @apply text-neutral-50 bg-neutral-800 rounded;
 
   & > svg {
