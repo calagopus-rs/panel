@@ -70,6 +70,7 @@ export default function ServerUsers() {
                           <FontAwesomeIcon className="text-red-500" icon={faLockOpen} />
                         )}
                       </td>
+
                       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
                         {user.permissions.length}
                       </td>
