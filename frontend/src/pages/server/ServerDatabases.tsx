@@ -1,6 +1,7 @@
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
+import CopyOnClick from '@/elements/CopyOnClick';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 
 const databases = [
@@ -52,16 +53,8 @@ export default function ServerDatabases() {
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
                 <TableHead>
-                  <TableHeader
-                    name={'ID'}
-                    // direction={sort === 'id' ? (sortDirection ? 1 : 2) : null}
-                    // onClick={() => setSort('id')}
-                  />
-                  <TableHeader
-                    name={'Name'}
-                    // direction={sort === 'name' ? (sortDirection ? 1 : 2) : null}
-                    // onClick={() => setSort('name')}
-                  />
+                  <TableHeader name={'ID'} />
+                  <TableHeader name={'Name'} />
                   <TableHeader name={'Address'} />
                   <TableHeader name={'Username'} />
                 </TableHead>
@@ -70,23 +63,17 @@ export default function ServerDatabases() {
                   {databases.map(database => (
                     <TableRow key={database.id}>
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
-                        {/* <CopyOnClick text={database.id.toString()}> */}
                         <Code>{database.id}</Code>
-                        {/* </CopyOnClick> */}
                       </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                        {/* <NavLink to={`${match.url}/${database.id}`} className="text-primary-400 hover:text-primary-300"> */}
-                        {database.name}
-                        {/* </NavLink> */}
-                      </td>
+                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{database.name}</td>
 
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
-                        {/* <CopyOnClick text={database.getAddress()}> */}
-                        <Code>
-                          {database.host.ip}:{database.host.port}
-                        </Code>
-                        {/* </CopyOnClick> */}
+                        <CopyOnClick content={`${database.host.ip}:${database.host.port}`}>
+                          <Code>
+                            {database.host.ip}:{database.host.port}
+                          </Code>
+                        </CopyOnClick>
                       </td>
 
                       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{database.username}</td>
