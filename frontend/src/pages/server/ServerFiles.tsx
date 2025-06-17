@@ -2,11 +2,13 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import CopyOnClick from '@/elements/CopyOnClick';
+import Checkbox from '@/elements/inputs/Checkbox';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
 import { faFile, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useState } from 'react';
 
 const files = [
   {
@@ -205,6 +207,8 @@ const paginationDataset = {
 };
 
 export default function ServerFiles() {
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
   const sortFiles = () => {
     return files.sort((a, b) => {
       // Prioritize directories
@@ -216,6 +220,26 @@ export default function ServerFiles() {
     });
   };
 
+  const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFiles(e.currentTarget.checked ? files.map(file => file.name) || [] : []);
+  };
+
+  const RowCheckbox = ({ id }: { id: string }) => {
+    return (
+      <Checkbox
+        id={id}
+        checked={selectedFiles.includes(id)}
+        onChange={e => {
+          if (e.currentTarget.checked) {
+            setSelectedFiles(prev => [...prev, id]);
+          } else {
+            setSelectedFiles(prev => prev.filter(file => file !== id));
+          }
+        }}
+      />
+    );
+  };
+
   return (
     <Container>
       <div className="mb-4 flex justify-between">
@@ -225,7 +249,7 @@ export default function ServerFiles() {
         </div>
       </div>
       <Table>
-        <ContentWrapper checked={false}>
+        <ContentWrapper checked={selectedFiles.length > 0} onSelectAllClick={onSelectAllClick}>
           <Pagination data={paginationDataset} onPageSelect={() => {}}>
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
@@ -239,7 +263,9 @@ export default function ServerFiles() {
                 <TableBody>
                   {sortFiles().map(file => (
                     <TableRow key={file.name}>
-                      <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap"></td>
+                      <td className="pl-6">
+                        <RowCheckbox id={file.name} />
+                      </td>
 
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap" title={file.name}>
                         {file.type === 'directory' ? (

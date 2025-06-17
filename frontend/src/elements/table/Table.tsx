@@ -1,10 +1,9 @@
-// import Input from '@/components/elements/Input';
-// import InputSpinner from '@/components/elements/InputSpinner';
 import debounce from 'debounce';
 import React, { useCallback, useState } from 'react';
 import Spinner from '@/elements/Spinner';
 import classNames from 'classnames';
 import { Input } from '../inputs';
+import Checkbox from '../inputs/Checkbox';
 
 export interface TableHooks<T> {
   page: number;
@@ -61,7 +60,7 @@ export const TableHeader = ({
   direction?: number | null;
 }) => {
   if (!name) {
-    return <th className="px-6 py-2" />;
+    return <th className="py-2" />;
   }
 
   return (
@@ -296,12 +295,13 @@ export const NoItems = ({ className }: { className?: string }) => {
 
 interface Params {
   checked: boolean;
+  onSelectAllClick: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearch?: (query: string) => Promise<void>;
 
   children: React.ReactNode;
 }
 
-export const ContentWrapper = ({ checked, onSearch, children }: Params) => {
+export const ContentWrapper = ({ checked, onSelectAllClick, onSearch, children }: Params) => {
   const [loading, setLoading] = useState(false);
   const [inputText, setInputText] = useState('');
 
@@ -320,6 +320,22 @@ export const ContentWrapper = ({ checked, onSearch, children }: Params) => {
   return (
     <>
       <div className="flex flex-row items-center h-12 px-6">
+        <div className="flex flex-row items-center">
+          <Checkbox name={'selectAll'} checked={checked} onChange={onSelectAllClick} />
+
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            className="w-4 h-4 ml-1 text-neutral-200"
+          >
+            <path
+              clipRule="evenodd"
+              fillRule="evenodd"
+              d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+            />
+          </svg>
+        </div>
         <div className="flex flex-row items-center ml-auto">
           <Input.Text
             value={inputText}
