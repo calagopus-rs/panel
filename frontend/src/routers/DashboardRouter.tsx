@@ -3,14 +3,6 @@ import DashboardHome from '@/pages/dashboard/DashboardHome';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
-import {
-  BriefcaseIcon,
-  CloudIcon,
-  KeyIcon,
-  MagnifyingGlassIcon,
-  ServerStackIcon,
-  UserIcon,
-} from '@heroicons/react/24/outline';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
@@ -27,7 +19,7 @@ export default function DashboardRouter() {
 
   return (
     <>
-      <div className="h-screen flex">
+      <div className="flex">
         <Sidebar collapsed={collapsed}>
           <div
             className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer"

@@ -40,7 +40,7 @@ export default function ServerRouter() {
 
   return (
     <>
-      <div className="h-screen flex">
+      <div className="flex">
         <Sidebar collapsed={collapsed}>
           <div
             className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer"

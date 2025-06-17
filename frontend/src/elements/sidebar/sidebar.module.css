@@ -1,7 +1,7 @@
 @reference "../../app.css";
 
 .sidebar {
-  @apply h-screen hidden md:flex flex-col items-center flex-shrink-0 bg-neutral-900 overflow-x-hidden ease-linear;
+  @apply h-screen sticky top-0 hidden md:flex flex-col items-center flex-shrink-0 bg-neutral-900 overflow-x-hidden ease-linear;
   @apply transition-[width] duration-150 ease-in;
   @apply w-[17.5rem];
 }
