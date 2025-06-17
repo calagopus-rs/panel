@@ -1,4 +1,5 @@
 import { Button } from '@/elements/button';
+import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 
@@ -70,7 +71,7 @@ export default function ServerDatabases() {
                     <TableRow key={database.id}>
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
                         {/* <CopyOnClick text={database.id.toString()}> */}
-                        <code className="font-mono bg-gray-800 rounded py-1 px-2">{database.id}</code>
+                        <Code>{database.id}</Code>
                         {/* </CopyOnClick> */}
                       </td>
 
@@ -82,9 +83,9 @@ export default function ServerDatabases() {
 
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
                         {/* <CopyOnClick text={database.getAddress()}> */}
-                        <code className="font-mono bg-gray-800 rounded py-1 px-2">
+                        <Code>
                           {database.host.ip}:{database.host.port}
-                        </code>
+                        </Code>
                         {/* </CopyOnClick> */}
                       </td>
 
