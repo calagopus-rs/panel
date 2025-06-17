@@ -39,7 +39,7 @@ export default function ServerDatabases() {
   return (
     <Container>
       <Table>
-        <ContentWrapper checked={false} onSelectAllClick={() => {}} onSearch={() => Promise.resolve()}>
+        <ContentWrapper checked={false}>
           <Pagination data={paginationDataset} onPageSelect={() => {}}>
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
@@ -61,8 +61,6 @@ export default function ServerDatabases() {
                 <TableBody>
                   {databases.map(database => (
                     <TableRow key={database.id}>
-                      <td className="pl-6">{/* <RowCheckbox id={database.id} /> */}</td>
-
                       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
                         {/* <CopyOnClick text={database.id.toString()}> */}
                         <code className="font-mono bg-neutral-900 rounded py-1 px-2">{database.id}</code>
