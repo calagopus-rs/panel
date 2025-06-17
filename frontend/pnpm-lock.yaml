@@ -35,6 +35,9 @@ importers:
       react-router:
         specifier: ^7.6.2
         version: 7.6.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      react-spinners:
+        specifier: ^0.17.0
+        version: 0.17.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       tailwindcss:
         specifier: ^4.1.10
         version: 4.1.10
@@ -1621,6 +1624,12 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
+
+  react-spinners@0.17.0:
+    resolution: {integrity: sha512-L/8HTylaBmIWwQzIjMq+0vyaRXuoAevzWoD35wKpNTxxtYXWZp+xtgkfD7Y4WItuX0YvdxMPU79+7VhhmbmuTQ==}
+    peerDependencies:
+      react: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}
@@ -3511,6 +3520,11 @@ snapshots:
       react: 19.1.0
       set-cookie-parser: 2.7.1
     optionalDependencies:
+      react-dom: 19.1.0(react@19.1.0)
+
+  react-spinners@0.17.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
 
   react@19.1.0: {}

@@ -1,3 +1,4 @@
+import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import {
   faClock,
@@ -14,8 +15,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 export default function ServerConsole() {
   return (
     <Container>
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-header font-bold text-white">Server Console</h1>
+        <div className="flex gap-2">
+          <Button style={Button.Styles.Green}>Start</Button>
+          <Button style={Button.Styles.Gray}>Restart</Button>
+          <Button style={Button.Styles.Red}>Stop</Button>
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-4 mb-4">
         <div className="col-span-3 bg-red-500 h-full">Console</div>
