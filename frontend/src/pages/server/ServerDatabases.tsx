@@ -66,7 +66,9 @@ export default function ServerDatabases() {
                         <Code>{database.id}</Code>
                       </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{database.name}</td>
+                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={database.name}>
+                        {database.name}
+                      </td>
 
                       <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
                         <CopyOnClick content={`${database.host.ip}:${database.host.port}`}>
@@ -76,7 +78,12 @@ export default function ServerDatabases() {
                         </CopyOnClick>
                       </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{database.username}</td>
+                      <td
+                        className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap"
+                        title={database.username}
+                      >
+                        {database.username}
+                      </td>
                     </TableRow>
                   ))}
                 </TableBody>
