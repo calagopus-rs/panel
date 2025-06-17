@@ -21,7 +21,7 @@ import {
   faTerminal,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
-import ServerHome from '@/pages/server/ServerHome';
+import ServerConsole from '@/pages/server/ServerConsole';
 import ServerFiles from '@/pages/server/ServerFiles';
 import ServerDatabases from '@/pages/server/ServerDatabases';
 import ServerSchedules from '@/pages/server/ServerSchedules';
@@ -115,7 +115,7 @@ export default function ServerRouter() {
           </Sidebar.User>
         </Sidebar>
         <Routes>
-          <Route path="" element={<ServerHome />} />
+          <Route path="" element={<ServerConsole />} />
           <Route path="/files" element={<ServerFiles />} />
           <Route path="/databases" element={<ServerDatabases />} />
           <Route path="/schedules" element={<ServerSchedules />} />
