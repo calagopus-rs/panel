@@ -1,3 +1,4 @@
+import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 
@@ -38,6 +39,12 @@ const paginationDataset = {
 export default function ServerDatabases() {
   return (
     <Container>
+      <div className="mb-4 flex justify-between">
+        <h1 className="text-4xl font-header font-bold text-white">Databases</h1>
+        <div className="flex gap-2">
+          <Button>Create new</Button>
+        </div>
+      </div>
       <Table>
         <ContentWrapper checked={false}>
           <Pagination data={paginationDataset} onPageSelect={() => {}}>
