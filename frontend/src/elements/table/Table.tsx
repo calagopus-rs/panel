@@ -111,8 +111,20 @@ export const TableBody = ({ children }: { children: React.ReactNode }) => {
   return <tbody>{children}</tbody>;
 };
 
-export const TableRow = ({ children }: { children: React.ReactNode }) => {
-  return <tr className="h-12 hover:bg-gray-600">{children}</tr>;
+export const TableRow = ({
+  onClick,
+  className,
+  children,
+}: {
+  onClick?: (e: React.MouseEvent) => void;
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <tr className={classNames('h-12 hover:bg-gray-600', className)} onClick={onClick}>
+      {children}
+    </tr>
+  );
 };
 
 interface PaginationButtonProps {

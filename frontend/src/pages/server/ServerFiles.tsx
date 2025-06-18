@@ -9,6 +9,7 @@ import { formatTimestamp } from '@/lib/time';
 import { faFile, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
+import { useNavigate } from 'react-router';
 
 const files = [
   {
@@ -207,6 +208,7 @@ const paginationDataset = {
 };
 
 export default function ServerFiles() {
+  const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   const sortFiles = () => {
@@ -230,12 +232,14 @@ export default function ServerFiles() {
         id={id}
         checked={selectedFiles.includes(id)}
         onChange={e => {
+          e.stopPropagation();
           if (e.currentTarget.checked) {
             setSelectedFiles(prev => [...prev, id]);
           } else {
             setSelectedFiles(prev => prev.filter(file => file !== id));
           }
         }}
+        onClick={e => e.stopPropagation()}
       />
     );
   };
@@ -264,7 +268,17 @@ export default function ServerFiles() {
 
                 <TableBody>
                   {sortFiles().map(file => (
-                    <TableRow key={file.name}>
+                    <TableRow
+                      key={file.name}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        if (file.type === 'directory') {
+                          navigate(`/server/test/files/${file.name}`);
+                        } else {
+                          navigate(`/server/test/files/edit/${file.name}`);
+                        }
+                      }}
+                    >
                       <td className="pl-6">
                         <RowCheckbox id={file.name} />
                       </td>
