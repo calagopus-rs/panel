@@ -63,7 +63,7 @@ export default function ServerRouter() {
               <FontAwesomeIcon icon={faTerminal} />
               <span>Console</span>
             </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/files`} end>
+            <Sidebar.Link to={`/server/${params.id}/files`}>
               <FontAwesomeIcon icon={faFolderOpen} />
               <span>Files</span>
             </Sidebar.Link>
