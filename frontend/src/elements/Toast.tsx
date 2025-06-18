@@ -27,6 +27,10 @@ const toastTimeout = 7500;
 export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const dismissToast = useCallback((id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = toastId++;
     setToasts(prev => [...prev, { id, message, type }]);
@@ -38,10 +42,6 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
 
     return id;
-  }, []);
-
-  const dismissToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
   const promise = useCallback(

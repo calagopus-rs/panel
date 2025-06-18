@@ -2,7 +2,7 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
-import { faCheck, faLock, faLockOpen, faTimes, faX } from '@fortawesome/free-solid-svg-icons';
+import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const users = [

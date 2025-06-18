@@ -24,49 +24,6 @@ const servers = [
   },
 ];
 
-export default function DashboardHome() {
-  const [activeDesign, setActiveDesign] = useState<'row' | 'grid'>('grid');
-
-  return (
-    <Container>
-      <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-header font-bold text-white">Servers</h1>
-        <div className="flex gap-2">
-          <FontAwesomeIcon
-            className={classNames('p-2 rounded-full cursor-pointer', [
-              activeDesign === 'grid' ? 'bg-neutral-700 text-cyan-500' : 'bg-neutral-600 text-neutral-300',
-            ])}
-            size="lg"
-            icon={faTableCellsLarge}
-            onClick={() => setActiveDesign('grid')}
-          />
-          <FontAwesomeIcon
-            className={classNames('p-2 rounded-full cursor-pointer', [
-              activeDesign === 'row' ? 'bg-neutral-700 text-cyan-500' : 'bg-neutral-600 text-neutral-300',
-            ])}
-            size="lg"
-            icon={faTableList}
-            onClick={() => setActiveDesign('row')}
-          />
-        </div>
-      </div>
-      {activeDesign === 'grid' ? (
-        <div className="grid md:grid-cols-2 gap-4">
-          {servers.map(server => (
-            <GridServer key={server.name} name={server.name} status={server.status} />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          {servers.map(server => (
-            <RowServer key={server.name} name={server.name} status={server.status} />
-          ))}
-        </div>
-      )}
-    </Container>
-  );
-}
-
 function GridServer({ name, status }: { name: string; status: string }) {
   return (
     <NavLink
@@ -168,5 +125,48 @@ function RowServer({ name, status }: { name: string; status: string }) {
         </div>
       </div>
     </NavLink>
+  );
+}
+
+export default function DashboardHome() {
+  const [activeDesign, setActiveDesign] = useState<'row' | 'grid'>('grid');
+
+  return (
+    <Container>
+      <div className="justify-between flex items-center mb-2">
+        <h1 className="text-4xl font-header font-bold text-white">Servers</h1>
+        <div className="flex gap-2">
+          <FontAwesomeIcon
+            className={classNames('p-2 rounded-full cursor-pointer', [
+              activeDesign === 'grid' ? 'bg-neutral-700 text-cyan-500' : 'bg-neutral-600 text-neutral-300',
+            ])}
+            size="lg"
+            icon={faTableCellsLarge}
+            onClick={() => setActiveDesign('grid')}
+          />
+          <FontAwesomeIcon
+            className={classNames('p-2 rounded-full cursor-pointer', [
+              activeDesign === 'row' ? 'bg-neutral-700 text-cyan-500' : 'bg-neutral-600 text-neutral-300',
+            ])}
+            size="lg"
+            icon={faTableList}
+            onClick={() => setActiveDesign('row')}
+          />
+        </div>
+      </div>
+      {activeDesign === 'grid' ? (
+        <div className="grid md:grid-cols-2 gap-4">
+          {servers.map(server => (
+            <GridServer key={server.name} name={server.name} status={server.status} />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-4">
+          {servers.map(server => (
+            <RowServer key={server.name} name={server.name} status={server.status} />
+          ))}
+        </div>
+      )}
+    </Container>
   );
 }

@@ -8,7 +8,7 @@ import { formatTimestamp } from '@/lib/time';
 import { faFile, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 const files = [
   {
@@ -210,7 +210,7 @@ export default function ServerFiles() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [filePath, setFilePath] = useState(urlPathToFilePath(location.pathname));
+  const [_, setFilePath] = useState(urlPathToFilePath(location.pathname));
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
 
   useEffect(() => {

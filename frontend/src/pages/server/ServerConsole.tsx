@@ -12,6 +12,30 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+function StatCard({
+  icon,
+  label,
+  value,
+  limit,
+}: {
+  icon: IconDefinition;
+  label: string;
+  value: string;
+  limit?: string;
+}) {
+  return (
+    <div className="bg-gray-600 p-4 rounded flex gap-4">
+      <FontAwesomeIcon className="text-gray-100 bg-gray-500 p-4 rounded-lg" size={'xl'} icon={icon} />
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-400 font-bold">{label}</span>
+        <span className="text-lg font-bold">
+          {value} {limit && <span className="text-sm text-gray-400">/ {limit}</span>}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function ServerConsole() {
   return (
     <Container>
@@ -37,29 +61,5 @@ export default function ServerConsole() {
       </div>
       <div className="bg-green-500 h-48">Stats</div>
     </Container>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  limit,
-}: {
-  icon: IconDefinition;
-  label: string;
-  value: string;
-  limit?: string;
-}) {
-  return (
-    <div className="bg-gray-600 p-4 rounded flex gap-4">
-      <FontAwesomeIcon className="text-gray-100 bg-gray-500 p-4 rounded-lg" size={'xl'} icon={icon} />
-      <div className="flex flex-col">
-        <span className="text-sm text-gray-400 font-bold">{label}</span>
-        <span className="text-lg font-bold">
-          {value} {limit && <span className="text-sm text-gray-400">/ {limit}</span>}
-        </span>
-      </div>
-    </div>
   );
 }
