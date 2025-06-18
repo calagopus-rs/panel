@@ -31,6 +31,7 @@ import ServerNetwork from '@/pages/server/ServerNetwork';
 import ServerStartup from '@/pages/server/ServerStartup';
 import ServerSettings from '@/pages/server/ServerSettings';
 import ServerActivity from '@/pages/server/ServerActivity';
+import ServerFilesEdit from '@/pages/server/ServerFilesEdit';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
@@ -117,6 +118,8 @@ export default function ServerRouter() {
         <Routes>
           <Route path="" element={<ServerConsole />} />
           <Route path="/files" element={<ServerFiles />} />
+          <Route path="/files/edit/*" element={<ServerFilesEdit />} />
+          <Route path="/files/directory/*" element={<ServerFiles />} />
           <Route path="/databases" element={<ServerDatabases />} />
           <Route path="/schedules" element={<ServerSchedules />} />
           <Route path="/users" element={<ServerUsers />} />

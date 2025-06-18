@@ -1,15 +1,14 @@
 import { Button } from '@/elements/button';
-import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import CopyOnClick from '@/elements/CopyOnClick';
 import Checkbox from '@/elements/inputs/Checkbox';
 import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import { urlPathToFilePath } from '@/lib/path';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
 import { faFile, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 const files = [
   {
@@ -208,8 +207,15 @@ const paginationDataset = {
 };
 
 export default function ServerFiles() {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const [filePath, setFilePath] = useState(urlPathToFilePath(location.pathname));
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
+  useEffect(() => {
+    setFilePath(urlPathToFilePath(location.pathname));
+  }, [location]);
 
   const sortFiles = () => {
     return files.sort((a, b) => {
@@ -273,7 +279,7 @@ export default function ServerFiles() {
                       className="cursor-pointer"
                       onClick={() => {
                         if (file.type === 'directory') {
-                          navigate(`/server/test/files/${file.name}`);
+                          navigate(`/server/test/files/directory/${file.name}`);
                         } else {
                           navigate(`/server/test/files/edit/${file.name}`);
                         }
