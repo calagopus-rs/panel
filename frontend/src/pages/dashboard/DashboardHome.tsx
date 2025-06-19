@@ -1,4 +1,5 @@
 import Container from '@/elements/Container';
+import CopyOnClick from '@/elements/CopyOnClick';
 import { faHardDrive, faMemory, faMicrochip, faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -47,7 +48,9 @@ function GridServer({ name, status }: { name: string; status: string }) {
             <span>{status}</span>
           </div>
         </div>
-        <p className="text-sm text-gray-400">localhost:8000</p>
+        <CopyOnClick content="localhost:8000">
+          <p className="text-sm text-gray-400">localhost:8000</p>
+        </CopyOnClick>
       </div>
       <div className="rounded-b-md p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
         <div className="flex gap-2 text-sm justify-center items-center">
@@ -99,7 +102,9 @@ function RowServer({ name, status }: { name: string; status: string }) {
             <span>{status}</span>
           </div>
         </div>
-        <p className="text-sm text-gray-400">localhost:8000</p>
+        <CopyOnClick content="localhost:8000">
+          <p className="text-sm text-gray-400">localhost:8000</p>
+        </CopyOnClick>
       </div>
       <div className="p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
         <div className="flex gap-2 text-sm justify-center items-center">

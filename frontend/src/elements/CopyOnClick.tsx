@@ -3,7 +3,9 @@ import { useToast } from './Toast';
 export default function CopyOnClick({ content, children }: { content: string; children: React.ReactNode }) {
   const { addToast } = useToast();
 
-  const handleCopy = () => {
+  const handleCopy = (e: React.MouseEvent) => {
+    e.preventDefault();
+
     try {
       navigator.clipboard.writeText(content);
       addToast('Copied to clipboard');
