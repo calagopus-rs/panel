@@ -79,39 +79,41 @@ function ServerItem({ activeDesign, server }: { activeDesign: ActiveDesign; serv
           <p className="text-sm text-gray-400">{formatAllocation(getPrimaryAllocation(server.allocations))}</p>
         </CopyOnClick>
       </div>
-      {stats === null ? (
-        <div className="flex flex-col items-center justify-center h-full">
-          <Spinner />
-        </div>
-      ) : (
-        <div
-          className={classNames('p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50', [
-            activeDesign === 'grid' && 'rounded-b-md',
-          ])}
-        >
-          <div className="flex gap-2 text-sm justify-center items-center">
-            <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
-            <div>
-              <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)} %</span>
-              <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
-            </div>
+      <div
+        className={classNames('p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50', [
+          activeDesign === 'grid' && 'rounded-b-md',
+        ])}
+      >
+        {stats === null ? (
+          <div className="col-span-3 flex flex-col items-center justify-center">
+            <Spinner />
           </div>
-          <div className="flex gap-2 text-sm justify-center items-center">
-            <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
-            <div>
-              <span className="mr-1">{bytesToString(stats.memoryUsageInBytes)}</span>
-              <span className="inline-block text-xs text-gray-400">/ {memoryLimit}</span>
+        ) : (
+          <>
+            <div className="flex gap-2 text-sm justify-center items-center">
+              <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
+              <div>
+                <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)} %</span>
+                <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex gap-2 text-sm justify-center items-center">
-            <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
-            <div>
-              <span className="mr-1">{bytesToString(stats.diskUsageInBytes)}</span>
-              <span className="inline-block text-xs text-gray-400">/ {diskLimit}</span>
+            <div className="flex gap-2 text-sm justify-center items-center">
+              <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
+              <div>
+                <span className="mr-1">{bytesToString(stats.memoryUsageInBytes)}</span>
+                <span className="inline-block text-xs text-gray-400">/ {memoryLimit}</span>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+            <div className="flex gap-2 text-sm justify-center items-center">
+              <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
+              <div>
+                <span className="mr-1">{bytesToString(stats.diskUsageInBytes)}</span>
+                <span className="inline-block text-xs text-gray-400">/ {diskLimit}</span>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </NavLink>
   );
 }
