@@ -1,5 +1,5 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
-import DashboardHome from '@/pages/dashboard/DashboardHome';
+import DashboardHome from '@/pages/dashboard/home/DashboardHome';
 import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
