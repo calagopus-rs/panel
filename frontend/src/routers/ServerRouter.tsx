@@ -1,5 +1,5 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
@@ -31,12 +31,19 @@ import ServerStartup from '@/pages/server/ServerStartup';
 import ServerSettings from '@/pages/server/ServerSettings';
 import ServerActivity from '@/pages/server/ServerActivity';
 import ServerFilesEdit from '@/pages/server/ServerFilesEdit';
+import { useServerStore } from '@/stores/server';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
 
+  const getServer = useServerStore(state => state.getServer);
+
   const avatarURL = 'https://placehold.co/400x400/png';
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    getServer(params.id);
+  }, [params.id]);
 
   return (
     <>

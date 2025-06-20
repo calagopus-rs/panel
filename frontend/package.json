@@ -24,9 +24,11 @@
     "motion": "^12.18.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-fast-compare": "^3.2.2",
     "react-router": "^7.6.2",
     "react-spinners": "^0.17.0",
-    "tailwindcss": "^4.1.10"
+    "tailwindcss": "^4.1.10",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/compat": "^1.3.0",
