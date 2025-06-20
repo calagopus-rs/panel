@@ -2,7 +2,7 @@ import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Console from './Console';
 import Spinner from '@/elements/Spinner';
-import ConsoleStats from './ConsoleStats';
+import ServerDetails from './ServerDetails';
 
 export default function ServerConsole() {
   return (
@@ -23,7 +23,7 @@ export default function ServerConsole() {
         </div>
 
         <Spinner.Suspense>
-          <ConsoleStats />
+          <ServerDetails />
         </Spinner.Suspense>
       </div>
       <div className="bg-green-500 h-48">Stats</div>
