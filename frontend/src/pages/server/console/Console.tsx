@@ -9,14 +9,6 @@ import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 
-// import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
-// import { SocketEvent, SocketRequest } from '@/components/server/events';
-// import { ScrollDownHelperAddon } from '@/plugins/XtermScrollDownHelperAddon';
-// import useEventListener from '@/plugins/useEventListener';
-// import { usePermissions } from '@/plugins/usePermissions';
-// import { usePersistedState } from '@/plugins/usePersistedState';
-// import { ServerContext } from '@/state/server';
-
 import '@xterm/xterm/css/xterm.css';
 import styles from './console.module.css';
 import Spinner from '@/elements/Spinner';
