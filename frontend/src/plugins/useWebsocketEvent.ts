@@ -22,7 +22,7 @@ export enum SocketRequest {
   SET_STATE = 'set state',
 }
 
-const useWebsocketEvent = (event: SocketEvent, callback: (data: string) => void) => {
+const useWebsocketEvent = (event: SocketEvent, callback: (...data: string[]) => void) => {
   const { connected, instance } = useServerStore(state => state.socket);
   const savedCallback = useRef<any>(null);
 
@@ -31,7 +31,7 @@ const useWebsocketEvent = (event: SocketEvent, callback: (data: string) => void)
   }, [callback]);
 
   return useEffect(() => {
-    const eventListener = (event: SocketEvent) => savedCallback.current(event);
+    const eventListener = (...data: string[]) => savedCallback.current(...data);
     if (connected && instance) {
       instance.addListener(event, eventListener);
     }
