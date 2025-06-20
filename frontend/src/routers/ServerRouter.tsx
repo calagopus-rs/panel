@@ -20,7 +20,7 @@ import {
   faTerminal,
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
-import ServerConsole from '@/pages/server/ServerConsole';
+import ServerConsole from '@/pages/server/console/ServerConsole';
 import ServerFiles from '@/pages/server/ServerFiles';
 import ServerDatabases from '@/pages/server/ServerDatabases';
 import ServerSchedules from '@/pages/server/ServerSchedules';
@@ -34,6 +34,7 @@ import ServerFilesEdit from '@/pages/server/ServerFilesEdit';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
+import ErrorBoundary from '@/elements/ErrorBoundary';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
@@ -133,21 +134,23 @@ export default function ServerRouter() {
           <>
             <WebsocketHandler />
 
-            <Routes>
-              <Route path="" element={<ServerConsole />} />
-              <Route path="/files" element={<ServerFiles />} />
-              <Route path="/files/edit/*" element={<ServerFilesEdit />} />
-              <Route path="/files/directory/*" element={<ServerFiles />} />
-              <Route path="/databases" element={<ServerDatabases />} />
-              <Route path="/schedules" element={<ServerSchedules />} />
-              <Route path="/users" element={<ServerUsers />} />
-              <Route path="/backups" element={<ServerBackups />} />
-              <Route path="/network" element={<ServerNetwork />} />
-              <Route path="/startup" element={<ServerStartup />} />
-              <Route path="/settings" element={<ServerSettings />} />
-              <Route path="/activity" element={<ServerActivity />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <ErrorBoundary>
+              <Routes>
+                <Route path="" element={<ServerConsole />} />
+                <Route path="/files" element={<ServerFiles />} />
+                <Route path="/files/edit/*" element={<ServerFilesEdit />} />
+                <Route path="/files/directory/*" element={<ServerFiles />} />
+                <Route path="/databases" element={<ServerDatabases />} />
+                <Route path="/schedules" element={<ServerSchedules />} />
+                <Route path="/users" element={<ServerUsers />} />
+                <Route path="/backups" element={<ServerBackups />} />
+                <Route path="/network" element={<ServerNetwork />} />
+                <Route path="/startup" element={<ServerStartup />} />
+                <Route path="/settings" element={<ServerSettings />} />
+                <Route path="/activity" element={<ServerActivity />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
           </>
         )}
       </div>

@@ -16,6 +16,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
+import Console from './Console';
 
 function StatCard({
   icon,
@@ -90,7 +91,9 @@ export default function ServerConsole() {
         </div>
       </div>
       <div className="grid grid-cols-4 gap-4 mb-4">
-        <div className="col-span-3 bg-red-500 h-full">Console</div>
+        <div className="col-span-3 h-full">
+          <Console />
+        </div>
         <div className="col-span-1 grid gap-4">
           <StatCard
             icon={faEthernet}
