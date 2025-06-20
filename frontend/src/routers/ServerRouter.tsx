@@ -32,9 +32,12 @@ import ServerSettings from '@/pages/server/ServerSettings';
 import ServerActivity from '@/pages/server/ServerActivity';
 import ServerFilesEdit from '@/pages/server/ServerFilesEdit';
 import { useServerStore } from '@/stores/server';
+import Spinner from '@/elements/Spinner';
+import WebsocketHandler from '@/pages/server/WebsocketHandler';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
+  const [loading, setLoading] = useState(true);
 
   const getServer = useServerStore(state => state.getServer);
 
@@ -42,7 +45,7 @@ export default function ServerRouter() {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
-    getServer(params.id);
+    getServer(params.id).then(() => setLoading(false));
   }, [params.id]);
 
   return (
@@ -121,21 +124,32 @@ export default function ServerRouter() {
             </div>
           </Sidebar.User>
         </Sidebar>
-        <Routes>
-          <Route path="" element={<ServerConsole />} />
-          <Route path="/files" element={<ServerFiles />} />
-          <Route path="/files/edit/*" element={<ServerFilesEdit />} />
-          <Route path="/files/directory/*" element={<ServerFiles />} />
-          <Route path="/databases" element={<ServerDatabases />} />
-          <Route path="/schedules" element={<ServerSchedules />} />
-          <Route path="/users" element={<ServerUsers />} />
-          <Route path="/backups" element={<ServerBackups />} />
-          <Route path="/network" element={<ServerNetwork />} />
-          <Route path="/startup" element={<ServerStartup />} />
-          <Route path="/settings" element={<ServerSettings />} />
-          <Route path="/activity" element={<ServerActivity />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+
+        {loading ? (
+          <div className="w-full h-screen flex items-center justify-center">
+            <Spinner size={75} />
+          </div>
+        ) : (
+          <>
+            <WebsocketHandler />
+
+            <Routes>
+              <Route path="" element={<ServerConsole />} />
+              <Route path="/files" element={<ServerFiles />} />
+              <Route path="/files/edit/*" element={<ServerFilesEdit />} />
+              <Route path="/files/directory/*" element={<ServerFiles />} />
+              <Route path="/databases" element={<ServerDatabases />} />
+              <Route path="/schedules" element={<ServerSchedules />} />
+              <Route path="/users" element={<ServerUsers />} />
+              <Route path="/backups" element={<ServerBackups />} />
+              <Route path="/network" element={<ServerNetwork />} />
+              <Route path="/startup" element={<ServerStartup />} />
+              <Route path="/settings" element={<ServerSettings />} />
+              <Route path="/activity" element={<ServerActivity />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </>
+        )}
       </div>
     </>
   );

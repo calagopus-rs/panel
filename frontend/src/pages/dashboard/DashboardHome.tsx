@@ -50,7 +50,7 @@ function ServerItem({ activeDesign, server }: { activeDesign: ActiveDesign; serv
 
   const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
   const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
-  const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + ' %' : 'Unlimited';
+  const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited';
 
   return (
     <NavLink
@@ -93,7 +93,7 @@ function ServerItem({ activeDesign, server }: { activeDesign: ActiveDesign; serv
             <div className="flex gap-2 text-sm justify-center items-center">
               <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
               <div>
-                <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)} %</span>
+                <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)}%</span>
                 <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
               </div>
             </div>
