@@ -1,15 +1,15 @@
-import { ServerStatus } from '@/api/types';
+import { ServerPowerState } from '@/api/types';
 
 export interface StatusSlice {
-  value: ServerStatus;
-  setServerStatus: (status: ServerStatus) => void;
+  value: ServerPowerState;
+  setServerStatus: (status: ServerPowerState) => void;
 }
 
 export const createStatusSlice = (set): StatusSlice => ({
   value: null,
 
-  setServerStatus: (status: ServerStatus) =>
+  setServerStatus: (status: ServerPowerState) =>
     set(state => {
-      state.value = status;
+      state.status.value = status;
     }),
 });

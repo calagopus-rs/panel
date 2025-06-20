@@ -2,7 +2,7 @@
 
 .button {
   @apply relative px-4 py-2 inline-flex items-center justify-center;
-  @apply rounded text-base font-semibold transition-all duration-100;
+  @apply rounded cursor-pointer text-base font-semibold transition-all duration-100;
   @apply focus:ring-[3px] focus:ring-offset-2 focus:ring-offset-slate-700/50;
 
   /* Sizing Controls */

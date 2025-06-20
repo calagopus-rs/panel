@@ -98,3 +98,5 @@ export interface ServerStats {
   networkTxInBytes: number;
   uptime: number;
 }
+
+export type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
