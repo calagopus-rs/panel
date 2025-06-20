@@ -1,140 +1,128 @@
+import { getServers } from '@/api/server/getServers';
 import Container from '@/elements/Container';
 import CopyOnClick from '@/elements/CopyOnClick';
+import { Server, ServerPowerState, ServerStats } from '@/api/types';
 import { faHardDrive, faMemory, faMicrochip, faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
+import { PaginatedResult } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import { getServerResourceUsage } from '@/api/server/getServerResourceUsage';
+import { formatAllocation, getPrimaryAllocation } from '@/lib/server';
+import { bytesToString, mbToBytes } from '@/lib/size';
 
-const servers = [
-  {
-    name: 'My SMP Server',
-    status: 'Online',
-  },
-  {
-    name: 'Cheap stuff',
-    status: 'Offline',
-  },
-  {
-    name: 'This is a very long server name that should in theory exceed the div boundary to test how text cutoff works',
-    status: 'Offline',
-  },
-  {
-    name: 'Server',
-    status: 'Online',
-  },
-];
+type ActiveDesign = 'row' | 'grid';
 
-function GridServer({ name, status }: { name: string; status: string }) {
+function ServerItem({ activeDesign, server }: { activeDesign: ActiveDesign; server: Server }) {
+  const [stats, setStats] = useState<ServerStats | null>(null);
+
+  useEffect(() => {
+    getServerResourceUsage(server.id).then(setStats);
+  }, []);
+
+  const statusToColor = (status: ServerPowerState) => {
+    switch (status) {
+      case 'running':
+        return ['bg-emerald-400/30', 'bg-emerald-500'];
+      case 'starting':
+        return ['bg-yellow-400/30', 'bg-yellow-500'];
+      case 'stopping':
+        return ['bg-rose-400/30', 'bg-rose-500'];
+      default:
+        return ['bg-rose-400/30', 'bg-rose-500'];
+    }
+  };
+
+  const statusToText = (status: ServerPowerState) => {
+    switch (status) {
+      case 'running':
+        return 'Online';
+      case 'starting':
+        return 'Starting';
+      case 'stopping':
+        return 'Stopping';
+      default:
+        return 'Offline';
+    }
+  };
+
+  const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
+  const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
+  const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + ' %' : 'Unlimited';
+
   return (
     <NavLink
-      to={'/server/test'}
-      className="flex flex-col bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded"
+      to={`/server/${server.id}`}
+      className={classNames(
+        activeDesign === 'grid' ? 'flex flex-col' : 'grid lg:grid-cols-2 xl:grid-cols-3 justify-between',
+        'bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded',
+      )}
     >
-      <div className="px-6 py-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-xl font-header font-medium truncate" title={name}>
-            {name}
+      <div className={classNames('px-6 py-4', [activeDesign === 'row' && 'xl:col-span-2'])}>
+        <div className={classNames('flex items-center gap-2', [activeDesign === 'grid' && 'justify-between'])}>
+          <span className="text-xl font-header font-medium truncate" title={server.name}>
+            {server.name}
           </span>
           <div
             className={classNames(
               'rounded-full px-2 py-1 text-xs flex items-center gap-1',
-              status === 'Online' ? 'bg-emerald-400/30' : 'bg-rose-400/30',
+              statusToColor(stats?.status)[0],
             )}
           >
-            <div
-              className={classNames('size-2 rounded-full', status === 'Online' ? 'bg-emerald-500' : 'bg-rose-500')}
-            ></div>
-            <span>{status}</span>
+            <div className={classNames('size-2 rounded-full', statusToColor(stats?.status)[1])}></div>
+            <span>{statusToText(stats?.status)}</span>
           </div>
         </div>
-        <CopyOnClick content="localhost:8000">
-          <p className="text-sm text-gray-400">localhost:8000</p>
+        <CopyOnClick content={formatAllocation(getPrimaryAllocation(server.allocations))}>
+          <p className="text-sm text-gray-400">{formatAllocation(getPrimaryAllocation(server.allocations))}</p>
         </CopyOnClick>
       </div>
-      <div className="rounded-b-md p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0.0%</span>
-            <span className="inline-block text-xs text-gray-400">/ 100%</span>
+      {stats === null ? (
+        <div className="flex flex-col items-center justify-center h-full">
+          <Spinner />
+        </div>
+      ) : (
+        <div
+          className={classNames('p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50', [
+            activeDesign === 'grid' && 'rounded-b-md',
+          ])}
+        >
+          <div className="flex gap-2 text-sm justify-center items-center">
+            <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
+            <div>
+              <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)} %</span>
+              <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
+            </div>
+          </div>
+          <div className="flex gap-2 text-sm justify-center items-center">
+            <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
+            <div>
+              <span className="mr-1">{bytesToString(stats.memoryUsageInBytes)}</span>
+              <span className="inline-block text-xs text-gray-400">/ {memoryLimit}</span>
+            </div>
+          </div>
+          <div className="flex gap-2 text-sm justify-center items-center">
+            <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
+            <div>
+              <span className="mr-1">{bytesToString(stats.diskUsageInBytes)}</span>
+              <span className="inline-block text-xs text-gray-400">/ {diskLimit}</span>
+            </div>
           </div>
         </div>
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0 Bytes</span>
-            <span className="inline-block text-xs text-gray-400">/ 4 GiB</span>
-          </div>
-        </div>
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0.00 MiB</span>
-            <span className="inline-block text-xs text-gray-400">/ 4 GiB</span>
-          </div>
-        </div>
-      </div>
-    </NavLink>
-  );
-}
-
-function RowServer({ name, status }: { name: string; status: string }) {
-  return (
-    <NavLink
-      to={'/server/test'}
-      className="grid lg:grid-cols-2 xl:grid-cols-3 justify-between bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded"
-    >
-      <div className="px-6 py-4 xl:col-span-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-header font-medium truncate" title={name}>
-            {name}
-          </span>
-          <div
-            className={classNames(
-              'rounded-full px-2 py-1 text-xs flex items-center gap-1',
-              status === 'Online' ? 'bg-emerald-400/30' : 'bg-rose-400/30',
-            )}
-          >
-            <div
-              className={classNames('size-2 rounded-full', status === 'Online' ? 'bg-emerald-500' : 'bg-rose-500')}
-            ></div>
-            <span>{status}</span>
-          </div>
-        </div>
-        <CopyOnClick content="localhost:8000">
-          <p className="text-sm text-gray-400">localhost:8000</p>
-        </CopyOnClick>
-      </div>
-      <div className="p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50">
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0.0%</span>
-            <span className="inline-block text-xs text-gray-400">/ 100%</span>
-          </div>
-        </div>
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0 Bytes</span>
-            <span className="inline-block text-xs text-gray-400">/ 4 GiB</span>
-          </div>
-        </div>
-        <div className="flex gap-2 text-sm justify-center items-center">
-          <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
-          <div>
-            <span className="mr-1">0.00 MiB</span>
-            <span className="inline-block text-xs text-gray-400">/ 4 GiB</span>
-          </div>
-        </div>
-      </div>
+      )}
     </NavLink>
   );
 }
 
 export default function DashboardHome() {
-  const [activeDesign, setActiveDesign] = useState<'row' | 'grid'>('grid');
+  const [activeDesign, setActiveDesign] = useState<ActiveDesign>('grid');
+  const [serverList, setServerList] = useState<PaginatedResult<Server>>();
+
+  useEffect(() => {
+    getServers().then(setServerList);
+  }, []);
 
   return (
     <Container>
@@ -159,16 +147,14 @@ export default function DashboardHome() {
           />
         </div>
       </div>
-      {activeDesign === 'grid' ? (
-        <div className="grid md:grid-cols-2 gap-4">
-          {servers.map(server => (
-            <GridServer key={server.name} name={server.name} status={server.status} />
-          ))}
+      {!serverList ? (
+        <div className="flex items-center justify-center">
+          <Spinner />
         </div>
       ) : (
-        <div className="flex flex-col gap-4">
-          {servers.map(server => (
-            <RowServer key={server.name} name={server.name} status={server.status} />
+        <div className={classNames('gap-4', [activeDesign === 'grid' ? 'grid md:grid-cols-2' : 'flex flex-col'])}>
+          {serverList.items.map(server => (
+            <ServerItem key={server.name} activeDesign={activeDesign} server={server} />
           ))}
         </div>
       )}
