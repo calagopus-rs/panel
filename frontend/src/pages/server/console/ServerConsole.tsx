@@ -3,6 +3,7 @@ import Console from './Console';
 import Spinner from '@/elements/Spinner';
 import ServerDetails from './ServerDetails';
 import ServerPowerControls from './ServerPowerControls';
+import ServerStats from './ServerStats';
 
 export default function ServerConsole() {
   return (
@@ -22,7 +23,9 @@ export default function ServerConsole() {
           <ServerDetails />
         </Spinner.Suspense>
       </div>
-      <div className="bg-green-500 h-48">Stats</div>
+      <div className="h-48">
+        <ServerStats />
+      </div>
     </Container>
   );
 }

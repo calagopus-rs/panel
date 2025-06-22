@@ -1,6 +1,5 @@
 import { formatAllocation, formatUptime, getPrimaryAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
-import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
 import { useServerStore } from '@/stores/server';
 import {
   faClock,
@@ -13,7 +12,6 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
 
 function StatCard({
   icon,
@@ -39,39 +37,9 @@ function StatCard({
   );
 }
 
-type Stats = Record<'memory' | 'cpu' | 'disk' | 'uptime' | 'rx' | 'tx', number>;
-
-export default function ConsoleStats() {
-  const [stats, setStats] = useState<Stats>({ memory: 0, cpu: 0, disk: 0, uptime: 0, tx: 0, rx: 0 });
-
+export default function ServerDetails() {
   const server = useServerStore(state => state.data);
-  const { connected, instance } = useServerStore(state => state.socket);
-
-  useEffect(() => {
-    if (!connected || !instance) {
-      return;
-    }
-
-    instance.send(SocketRequest.SEND_STATS);
-  }, [instance, connected]);
-
-  useWebsocketEvent(SocketEvent.STATS, data => {
-    let stats: any = {};
-    try {
-      stats = JSON.parse(data);
-    } catch {
-      return;
-    }
-
-    setStats({
-      memory: stats.memory_bytes,
-      cpu: stats.cpu_absolute,
-      disk: stats.disk_bytes,
-      tx: stats.network.tx_bytes,
-      rx: stats.network.rx_bytes,
-      uptime: stats.uptime || 0,
-    });
-  });
+  const stats = useServerStore(state => state.stats);
 
   const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
   const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';

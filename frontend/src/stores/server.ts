@@ -5,6 +5,7 @@ import isEqual from 'react-fast-compare';
 import { getServer } from '@/api/server/getServer';
 import { createWebsocketSlice, WebsocketSlice } from './slices/websocket';
 import { createStatusSlice, StatusSlice } from './slices/status';
+import { createStatsSlice, StatsSlice } from './slices/stats';
 
 interface ServerStore {
   data?: Server;
@@ -24,6 +25,7 @@ interface ServerStore {
   // Slices
   socket: WebsocketSlice;
   status: StatusSlice;
+  stats: StatsSlice;
 }
 
 export const useServerStore = create<ServerStore>()(
@@ -76,5 +78,6 @@ export const useServerStore = create<ServerStore>()(
 
     status: createStatusSlice(set),
     socket: createWebsocketSlice(set),
+    stats: createStatsSlice(set),
   })),
 );

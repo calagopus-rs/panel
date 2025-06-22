@@ -35,6 +35,7 @@ import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
+import WebsocketListener from '@/pages/server/WebsocketListener';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
@@ -133,6 +134,7 @@ export default function ServerRouter() {
         ) : (
           <>
             <WebsocketHandler />
+            <WebsocketListener />
 
             <ErrorBoundary>
               <Routes>
