@@ -1,0 +1,16 @@
+import { FileObject } from '@/api/types';
+import { axiosInstance } from '@/api/axios';
+import { rawDataToFileObject } from '@/api/transformers';
+
+export async function loadDirectory(uuid: string, directory?: string): Promise<FileObject[]> {
+  return new Promise((resolve, reject) => {
+    axiosInstance
+      .get(`/api/client/servers/${uuid}/files/list`, {
+        params: { directory: directory ?? '/' },
+      })
+      .then(({ data }) => resolve((data.data || []).map((datum: any) => rawDataToFileObject(datum))))
+      .catch(error => {
+        reject(error);
+      });
+  });
+}

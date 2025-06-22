@@ -21,7 +21,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import ServerConsole from '@/pages/server/console/ServerConsole';
-import ServerFiles from '@/pages/server/ServerFiles';
+import ServerFiles from '@/pages/server/files/ServerFiles';
 import ServerDatabases from '@/pages/server/ServerDatabases';
 import ServerSchedules from '@/pages/server/ServerSchedules';
 import ServerUsers from '@/pages/server/ServerUsers';

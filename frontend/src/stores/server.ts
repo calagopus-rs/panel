@@ -6,6 +6,7 @@ import { getServer } from '@/api/server/getServer';
 import { createWebsocketSlice, WebsocketSlice } from './slices/websocket';
 import { createStatusSlice, StatusSlice } from './slices/status';
 import { createStatsSlice, StatsSlice } from './slices/stats';
+import { createFilesSlice, FilesSlice } from './slices/files';
 
 interface ServerStore {
   data?: Server;
@@ -26,6 +27,7 @@ interface ServerStore {
   socket: WebsocketSlice;
   status: StatusSlice;
   stats: StatsSlice;
+  files: FilesSlice;
 }
 
 export const useServerStore = create<ServerStore>()(
@@ -79,5 +81,6 @@ export const useServerStore = create<ServerStore>()(
     status: createStatusSlice(set),
     socket: createWebsocketSlice(set),
     stats: createStatsSlice(set),
+    files: createFilesSlice(set),
   })),
 );

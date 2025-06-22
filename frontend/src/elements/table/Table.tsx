@@ -294,10 +294,6 @@ export const Loading = () => {
 export const NoItems = ({ className }: { className?: string }) => {
   return (
     <div className={classNames('w-full flex flex-col items-center justify-center py-6 px-8', className)}>
-      <div className="h-48 flex">
-        <img src={'/assets/svgs/not_found.svg'} alt={'No Items'} className="h-full select-none" />
-      </div>
-
       <p className="text-lg text-gray-300 text-center font-normal sm:mt-8">
         No items could be found, it&apos;s almost like they are hiding.
       </p>
