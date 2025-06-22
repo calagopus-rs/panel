@@ -8,16 +8,13 @@ export default function WebsocketListener() {
 
   useEffect(() => {
     if (!connected || !instance) {
-      console.log('Not connected');
       return;
     }
 
-    console.log('Sending stats');
     instance.send(SocketRequest.SEND_STATS);
   }, [instance, connected]);
 
   useWebsocketEvent(SocketEvent.STATS, data => {
-    console.log('received stats');
     let wsStats: any = {};
     try {
       wsStats = JSON.parse(data);
