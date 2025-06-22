@@ -43,12 +43,12 @@ const options: ChartOptions<'line'> = {
       type: 'linear',
       grid: {
         display: true,
-        color: '#6b7280', // gray-500
+        color: '#4b5563', // gray-600
       },
       ticks: {
         display: true,
         count: 3,
-        color: '#e5e7eb', // gray-200
+        color: '#f3f4f6', // gray-100
         font: {
           size: 11,
           weight: 'lighter',
