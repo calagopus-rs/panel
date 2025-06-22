@@ -11,6 +11,7 @@ import { loadDirectory } from '@/api/server/files/loadDirectory';
 
 export default function ServerFiles() {
   const location = useLocation();
+  const server = useServerStore(state => state.data);
   const { directory, setDirectory, selectedFiles, setSelectedFiles } = useServerStore(state => state.files);
 
   const [fileList, setFileList] = useState<FileObject[]>([]);
@@ -21,7 +22,7 @@ export default function ServerFiles() {
   }, [location]);
 
   useEffect(() => {
-    loadDirectory(directory).then(setFileList);
+    loadDirectory(server.uuid, directory).then(setFileList);
   }, [directory]);
 
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
