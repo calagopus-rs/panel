@@ -8,6 +8,7 @@ import styles from './console.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowDown, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@/elements/Tooltip';
+import { hexToRgba } from '@/lib/color';
 
 function ChartBlock({
   title,
@@ -54,6 +55,8 @@ export default function ServerStats() {
       return {
         ...opts,
         label: !index ? 'Network In' : 'Network Out',
+        borderColor: !index ? '#22d3ee' : '#facc15', // cyan-400 & yellow-400
+        backgroundColor: hexToRgba(!index ? '#0e7490' : '#a16207', 0.5), // cyan-700 & yellow-700
       };
     },
   });
@@ -66,7 +69,7 @@ export default function ServerStats() {
       networkPrevious.current.rx < 0 ? 0 : Math.max(0, stats.rx - networkPrevious.current.rx),
     ]);
 
-    networkPrevious.current = { tx: stats.tx, rx: stats.tx };
+    networkPrevious.current = { tx: stats.tx, rx: stats.rx };
   }, [stats]);
 
   return (
