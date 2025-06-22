@@ -303,13 +303,14 @@ export const NoItems = ({ className }: { className?: string }) => {
 
 interface Params {
   checked: boolean;
+  header?: React.ReactNode;
   onSelectAllClick?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearch?: (query: string) => Promise<void>;
 
   children: React.ReactNode;
 }
 
-export const ContentWrapper = ({ checked, onSelectAllClick, onSearch, children }: Params) => {
+export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, children }: Params) => {
   const [_, setLoading] = useState(false);
   const [inputText, setInputText] = useState('');
 
@@ -346,6 +347,7 @@ export const ContentWrapper = ({ checked, onSelectAllClick, onSearch, children }
             </svg>
           </div>
         )}
+        {header}
         <div className="flex flex-row items-center ml-auto">
           <Input.Text
             value={inputText}

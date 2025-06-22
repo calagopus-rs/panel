@@ -8,6 +8,7 @@ import { useLocation } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import { loadDirectory } from '@/api/server/files/loadDirectory';
+import { FileBreadcrumbs } from './FileBreadcrumbs';
 
 export default function ServerFiles() {
   const location = useLocation();
@@ -51,7 +52,11 @@ export default function ServerFiles() {
         </div>
       </div>
       <Table>
-        <ContentWrapper checked={selectedFiles.length > 0} onSelectAllClick={onSelectAllClick}>
+        <ContentWrapper
+          header={<FileBreadcrumbs />}
+          checked={selectedFiles.length > 0}
+          onSelectAllClick={onSelectAllClick}
+        >
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <TableHead>
