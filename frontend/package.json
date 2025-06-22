@@ -30,6 +30,7 @@
     "events": "^3.3.0",
     "immer": "^10.1.1",
     "motion": "^12.18.1",
+    "pathe": "^2.0.3",
     "react": "^19.1.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.1.0",

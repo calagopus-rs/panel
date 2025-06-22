@@ -6,12 +6,14 @@ import { formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
 import { faFolder, faFile } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { join } from 'pathe';
 import { useNavigate } from 'react-router';
 
 export default function FileRow({ file }: { file: FileObject }) {
   const navigate = useNavigate();
 
-  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore(state => state.files);
+  const server = useServerStore(state => state.data);
+  const { directory, selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore(state => state.files);
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (
@@ -35,11 +37,7 @@ export default function FileRow({ file }: { file: FileObject }) {
     <TableRow
       className="cursor-pointer"
       onClick={() => {
-        if (file.isFile) {
-          navigate(`/server/test/files/edit/${file.name}`);
-        } else {
-          navigate(`/server/test/files/directory/${file.name}`);
-        }
+        navigate(`/server/${server.id}/files/${file.isFile ? 'edit' : 'directory'}${join(directory, file.name)}`);
       }}
     >
       <td className="pl-6">
