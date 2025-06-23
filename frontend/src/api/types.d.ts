@@ -83,6 +83,7 @@ export interface FileObject {
   createdAt: Date;
   modifiedAt: Date;
   isArchiveType: () => boolean;
+  isDirectory: () => boolean;
   isEditable: () => boolean;
 }
 

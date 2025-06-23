@@ -43,6 +43,10 @@ export const rawDataToFileObject = (data: FractalResponseData): FileObject => ({
     );
   },
 
+  isDirectory: function () {
+    return this.mimetype === 'inode/directory';
+  },
+
   isEditable: function () {
     if (this.isArchiveType() || !this.isFile) return false;
 
