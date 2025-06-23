@@ -23,7 +23,7 @@ export default function ServerFiles() {
   }, [location]);
 
   useEffect(() => {
-    loadDirectory(server.uuid, directory).then(setFileList);
+    loadDirectory(server.id, directory).then(setFileList);
   }, [directory]);
 
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {

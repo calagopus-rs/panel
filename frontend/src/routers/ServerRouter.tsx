@@ -30,7 +30,7 @@ import ServerNetwork from '@/pages/server/ServerNetwork';
 import ServerStartup from '@/pages/server/ServerStartup';
 import ServerSettings from '@/pages/server/ServerSettings';
 import ServerActivity from '@/pages/server/ServerActivity';
-import ServerFilesEdit from '@/pages/server/ServerFilesEdit';
+import FileEditor from '@/pages/server/files/FileEditor';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
@@ -140,7 +140,7 @@ export default function ServerRouter() {
               <Routes>
                 <Route path="" element={<ServerConsole />} />
                 <Route path="/files" element={<ServerFiles />} />
-                <Route path="/files/edit/*" element={<ServerFilesEdit />} />
+                <Route path="/files/edit/*" element={<FileEditor />} />
                 <Route path="/files/directory/*" element={<ServerFiles />} />
                 <Route path="/databases" element={<ServerDatabases />} />
                 <Route path="/schedules" element={<ServerSchedules />} />

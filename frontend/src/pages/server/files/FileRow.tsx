@@ -17,19 +17,21 @@ export default function FileRow({ file }: { file: FileObject }) {
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (
-      <Checkbox
-        id={id}
-        checked={selectedFiles.includes(id)}
-        onChange={e => {
-          e.stopPropagation();
-          if (e.currentTarget.checked) {
-            addSelectedFile(id);
-          } else {
-            removeSelectedFile(id);
-          }
-        }}
-        onClick={e => e.stopPropagation()}
-      />
+      <div className="flex items-center">
+        <Checkbox
+          id={id}
+          checked={selectedFiles.includes(id)}
+          onChange={e => {
+            e.stopPropagation();
+            if (e.currentTarget.checked) {
+              addSelectedFile(id);
+            } else {
+              removeSelectedFile(id);
+            }
+          }}
+          onClick={e => e.stopPropagation()}
+        />
+      </div>
     );
   };
 
