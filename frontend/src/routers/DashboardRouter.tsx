@@ -1,6 +1,5 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/home/DashboardHome';
-import { useState } from 'react';
 import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
@@ -15,16 +14,12 @@ import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 
 export default function DashboardRouter() {
   const avatarURL = 'https://placehold.co/400x400/png';
-  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <>
       <div className="flex">
-        <Sidebar collapsed={collapsed}>
-          <div
-            className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer"
-            onClick={() => setCollapsed(!collapsed)}
-          >
+        <Sidebar collapsed={false}>
+          <div className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer">
             <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
