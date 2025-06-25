@@ -5,7 +5,9 @@ export async function saveFileContent(uuid: string, path: string, content: strin
     axiosInstance
       .post(`/api/client/servers/${uuid}/files/write`, content, {
         params: { file: path },
-        responseType: 'text',
+        headers: {
+          'Content-Type': 'text/plain',
+        },
       })
       .then(() => resolve())
       .catch(error => {

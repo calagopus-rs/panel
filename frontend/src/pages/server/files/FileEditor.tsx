@@ -4,7 +4,7 @@ import { getLanguageFromExtension } from '@/lib/files';
 import { urlPathToFilePath } from '@/lib/path';
 import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
@@ -19,6 +19,9 @@ export default function ServerFilesEdit() {
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('plaintext');
 
+  const editorRef = useRef(null);
+  const contentRef = useRef(content);
+
   useEffect(() => {
     setFilePath(urlPathToFilePath(location.pathname));
   }, [location]);
@@ -31,10 +34,17 @@ export default function ServerFilesEdit() {
     });
   }, [filePath]);
 
+  useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
   const saveFile = () => {
+    if (!editorRef.current) return;
+
+    const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.id, filePath, content).then(() => {
+    saveFileContent(server.id, filePath, currentContent).then(() => {
       setLoading(false);
     });
   };
@@ -60,6 +70,12 @@ export default function ServerFilesEdit() {
         defaultValue={content}
         onChange={setContent}
         onMount={(editor, monaco) => {
+          editorRef.current = editor;
+
+          editor.onDidChangeModelContent(() => {
+            contentRef.current = editor.getValue();
+          });
+
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
             saveFile();
           });
