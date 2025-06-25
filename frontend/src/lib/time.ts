@@ -30,3 +30,13 @@ export function formatTimestamp(timestamp) {
   if (diffHours < 24) return format(diffHours, 'hour');
   return format(diffDays, 'day');
 }
+
+export function formatDateTime(timestamp) {
+  return new Date(timestamp).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+}

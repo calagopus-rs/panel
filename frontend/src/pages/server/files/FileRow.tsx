@@ -1,8 +1,9 @@
 import { FileObject } from '@/api/types';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
+import Tooltip from '@/elements/Tooltip';
 import { bytesToString } from '@/lib/size';
-import { formatTimestamp } from '@/lib/time';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
 import { faFolder, faFile } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -69,7 +70,9 @@ export default function FileRow({ file }: { file: FileObject }) {
 
       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{bytesToString(file.size)}</td>
 
-      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{formatTimestamp(file.modifiedAt)}</td>
+      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+        <Tooltip content={formatDateTime(file.modifiedAt)}>{formatTimestamp(file.modifiedAt)}</Tooltip>
+      </td>
     </FileTableRow>
   );
 }
