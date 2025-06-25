@@ -53,7 +53,7 @@ export default function ServerFiles() {
       </div>
       <Table>
         <ContentWrapper
-          header={<FileBreadcrumbs />}
+          header={<FileBreadcrumbs path={directory} />}
           checked={selectedFiles.length > 0}
           onSelectAllClick={onSelectAllClick}
         >

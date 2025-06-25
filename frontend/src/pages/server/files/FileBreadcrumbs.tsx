@@ -3,15 +3,14 @@ import classNames from 'classnames';
 import { NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
-export function FileBreadcrumbs() {
+export function FileBreadcrumbs({ path }: { path: string }) {
   const server = useServerStore(state => state.data);
-  const { directory } = useServerStore(state => state.files);
 
-  const path = directory.split('/').filter(Boolean);
-  const pathItems = path.map((item, index) => {
+  const splittedPath = path.split('/').filter(Boolean);
+  const pathItems = splittedPath.map((item, index) => {
     return {
       name: item,
-      path: path.slice(0, index + 1).join('/'),
+      path: splittedPath.slice(0, index + 1).join('/'),
     };
   });
 
