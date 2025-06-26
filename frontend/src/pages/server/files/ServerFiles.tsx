@@ -4,7 +4,7 @@ import Container from '@/elements/Container';
 import Table, { ContentWrapper, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { urlPathToFilePath } from '@/lib/path';
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import { loadDirectory } from '@/api/server/files/loadDirectory';
@@ -12,6 +12,7 @@ import { FileBreadcrumbs } from './FileBreadcrumbs';
 
 export default function ServerFiles() {
   const location = useLocation();
+  const navigate = useNavigate();
   const server = useServerStore(state => state.data);
   const { directory, setDirectory, selectedFiles, setSelectedFiles } = useServerStore(state => state.files);
 
@@ -48,7 +49,7 @@ export default function ServerFiles() {
         <div className="flex gap-2">
           <Button style={Button.Styles.Gray}>New directory</Button>
           <Button>Upload</Button>
-          <Button>New File</Button>
+          <Button onClick={() => navigate(`/server/${server.id}/files/new${directory}`)}>New File</Button>
         </div>
       </div>
       <Table>

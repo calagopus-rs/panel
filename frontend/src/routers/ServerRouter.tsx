@@ -136,6 +136,7 @@ export default function ServerRouter() {
               <Routes>
                 <Route path="" element={<ServerConsole />} />
                 <Route path="/files" element={<ServerFiles />} />
+                <Route path="/files/new/*" element={<FileEditor />} />
                 <Route path="/files/edit/*" element={<FileEditor />} />
                 <Route path="/files/directory/*" element={<ServerFiles />} />
                 <Route path="/databases" element={<ServerDatabases />} />
