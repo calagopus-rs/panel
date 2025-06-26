@@ -5,7 +5,7 @@ import { urlPathToAction, urlPathToFilePath } from '@/lib/path';
 import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import { saveFileContent } from '@/api/server/files/saveFileContent';
@@ -13,12 +13,13 @@ import FileNameModel from './FileNameModel';
 
 export default function ServerFilesEdit() {
   const location = useLocation();
+  const navigate = useNavigate();
   const action = urlPathToAction(location.pathname);
   const server = useServerStore(state => state.data);
+  const { directory, setDirectory } = useServerStore(state => state.files);
 
   const [loading, setLoading] = useState(false);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
-  const [filePath, setFilePath] = useState(urlPathToFilePath(location.pathname));
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('plaintext');
 
@@ -26,34 +27,37 @@ export default function ServerFilesEdit() {
   const contentRef = useRef(content);
 
   useEffect(() => {
-    if (action === 'new') return;
-
-    setFilePath(urlPathToFilePath(location.pathname));
+    setDirectory(urlPathToFilePath(location.pathname));
   }, [location]);
 
   useEffect(() => {
     if (action === 'new') return;
 
     setLoading(true);
-    getFileContent(server.id, filePath).then(content => {
+    getFileContent(server.id, directory).then(content => {
       setContent(content);
-      setLanguage(getLanguageFromExtension(filePath.split('.').pop()));
+      setLanguage(getLanguageFromExtension(directory.split('.').pop()));
       setLoading(false);
     });
-  }, [filePath]);
+  }, [directory]);
 
   useEffect(() => {
     contentRef.current = content;
   }, [content]);
 
-  const saveFile = () => {
+  const saveFile = (name?: string) => {
     if (!editorRef.current) return;
 
     const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.id, filePath, currentContent).then(() => {
+    saveFileContent(server.id, name ?? directory, currentContent).then(() => {
       setLoading(false);
+      setNameDialogOpen(false);
+
+      if (name) {
+        navigate(`/server/${server.id}/files/edit/${name}`);
+      }
     });
   };
 
@@ -64,13 +68,13 @@ export default function ServerFilesEdit() {
   ) : (
     <div className="flex flex-col w-full">
       <FileNameModel
-        onFileNamed={(name: string) => console.log(name)}
+        onFileNamed={(name: string) => saveFile(name)}
         open={nameDialogOpen}
         onClose={() => setNameDialogOpen(false)}
       />
 
       <div className="flex justify-between w-full p-4">
-        <FileBreadcrumbs path={filePath} />
+        <FileBreadcrumbs path={directory} />
         <div>
           {action === 'edit' ? (
             <Button style={Button.Styles.Green} onClick={() => saveFile()}>
