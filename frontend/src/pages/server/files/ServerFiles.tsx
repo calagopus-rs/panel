@@ -24,6 +24,8 @@ export default function ServerFiles() {
   }, [location]);
 
   useEffect(() => {
+    if (!directory) return;
+
     loadDirectory(server.id, directory).then(setFileList);
   }, [directory]);
 
