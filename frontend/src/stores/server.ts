@@ -60,14 +60,6 @@ export const useServerStore = create<ServerStore>()(
       get().setPermissions(permissions);
     },
 
-    clear: () => {
-      set({
-        data: undefined,
-        permissions: [],
-        status: null,
-      });
-    },
-
     inConflictState: () => {
       const data = get().data;
       return !!(data && (data.status !== null || data.isTransferring || data.isNodeUnderMaintenance));
@@ -82,5 +74,17 @@ export const useServerStore = create<ServerStore>()(
     socket: createWebsocketSlice(set),
     stats: createStatsSlice(set),
     files: createFilesSlice(set),
+
+    clear: () => {
+      set({
+        data: undefined,
+        permissions: [],
+
+        status: createStatusSlice(set),
+        socket: createWebsocketSlice(set),
+        stats: createStatsSlice(set),
+        files: createFilesSlice(set),
+      });
+    },
   })),
 );

@@ -41,9 +41,16 @@ export default function ServerRouter() {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
+  const clearState = useServerStore(state => state.clear);
   const getServer = useServerStore(state => state.getServer);
 
   const avatarURL = 'https://placehold.co/400x400/png';
+
+  useEffect(() => {
+    return () => {
+      clearState();
+    };
+  }, []);
 
   useEffect(() => {
     getServer(params.id).then(() => setLoading(false));
