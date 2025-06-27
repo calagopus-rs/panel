@@ -1,3 +1,5 @@
+import { ServerPowerState } from '@/api/types';
+
 export interface StatsSlice {
   memory: number;
   cpu: number;
@@ -5,6 +7,7 @@ export interface StatsSlice {
   uptime: number;
   tx: number;
   rx: number;
+  state: ServerPowerState;
 
   setMemory: (value: number) => void;
   setCPU: (value: number) => void;
@@ -12,6 +15,7 @@ export interface StatsSlice {
   setUptime: (value: number) => void;
   setTX: (value: number) => void;
   setRX: (value: number) => void;
+  setState: (value: ServerPowerState) => void;
 }
 
 export const createStatsSlice = (set): StatsSlice => ({
@@ -21,6 +25,7 @@ export const createStatsSlice = (set): StatsSlice => ({
   uptime: 0,
   tx: 0,
   rx: 0,
+  state: null,
 
   setMemory: value =>
     set(state => {
@@ -50,5 +55,10 @@ export const createStatsSlice = (set): StatsSlice => ({
   setRX: value =>
     set(state => {
       state.stats.rx = value;
+    }),
+
+  setState: value =>
+    set(state => {
+      state.stats.state = value;
     }),
 });

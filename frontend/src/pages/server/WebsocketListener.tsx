@@ -28,6 +28,7 @@ export default function WebsocketListener() {
     stats.setUptime(wsStats.uptime || 0);
     stats.setTX(wsStats.network.tx_bytes);
     stats.setRX(wsStats.network.rx_bytes);
+    stats.setState(wsStats.state);
   });
 
   return null;

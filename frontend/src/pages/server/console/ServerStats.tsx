@@ -62,6 +62,10 @@ export default function ServerStats() {
   });
 
   useEffect(() => {
+    if (stats.state === 'offline') {
+      return;
+    }
+
     cpu.push(stats.cpu);
     memory.push(Math.floor(stats.memory / 1024 / 1024));
     network.push([
