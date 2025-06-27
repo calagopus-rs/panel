@@ -4,12 +4,15 @@ import Spinner from '@/elements/Spinner';
 import ServerDetails from './ServerDetails';
 import ServerPowerControls from './ServerPowerControls';
 import ServerStats from './ServerStats';
+import { useServerStore } from '@/stores/server';
 
 export default function ServerConsole() {
+  const server = useServerStore(state => state.data);
+
   return (
     <Container>
       <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-header font-bold text-white">Server Console</h1>
+        <h1 className="text-4xl font-header font-bold text-white">{server.name}</h1>
         <ServerPowerControls />
       </div>
       <div className="grid grid-cols-4 gap-4 mb-4">
