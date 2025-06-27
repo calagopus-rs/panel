@@ -9,7 +9,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import { saveFileContent } from '@/api/server/files/saveFileContent';
-import FileNameModel from './FileNameModel';
+import FileNameDialog from './FileNameDialog';
 
 export default function ServerFilesEdit() {
   const location = useLocation();
@@ -67,7 +67,7 @@ export default function ServerFilesEdit() {
     </div>
   ) : (
     <div className="flex flex-col w-full">
-      <FileNameModel
+      <FileNameDialog
         onFileNamed={(name: string) => saveFile(name)}
         open={nameDialogOpen}
         onClose={() => setNameDialogOpen(false)}
