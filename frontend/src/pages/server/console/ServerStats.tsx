@@ -62,7 +62,7 @@ export default function ServerStats() {
   });
 
   useEffect(() => {
-    if (stats.state === 'offline') {
+    if (!stats.state || stats.state === 'offline') {
       return;
     }
 

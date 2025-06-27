@@ -48,12 +48,34 @@ export default function ServerDetails() {
   return (
     <div className="col-span-1 grid gap-4">
       <StatCard icon={faEthernet} label="Address" value={formatAllocation(getPrimaryAllocation(server.allocations))} />
-      <StatCard icon={faClock} label="Uptime" value={formatUptime(stats.uptime || 0)} />
-      <StatCard icon={faMicrochip} label="CPU Load" value={`${stats.cpu.toFixed(2)}%`} limit={cpuLimit} />
-      <StatCard icon={faMemory} label="Memory Load" value={bytesToString(stats.memory)} limit={memoryLimit} />
+      <StatCard
+        icon={faClock}
+        label="Uptime"
+        value={stats.state === 'offline' ? 'Offline' : formatUptime(stats.uptime || 0)}
+      />
+      <StatCard
+        icon={faMicrochip}
+        label="CPU Load"
+        value={stats.state === 'offline' ? 'Offline' : `${stats.cpu.toFixed(2)}%`}
+        limit={stats.state === 'offline' ? null : cpuLimit}
+      />
+      <StatCard
+        icon={faMemory}
+        label="Memory Load"
+        value={stats.state === 'offline' ? 'Offline' : bytesToString(stats.memory)}
+        limit={stats.state === 'offline' ? null : memoryLimit}
+      />
       <StatCard icon={faHardDrive} label="Disk Usage" value={bytesToString(stats.disk)} limit={diskLimit} />
-      <StatCard icon={faCloudDownload} label="Network (In)" value={bytesToString(stats.rx)} />
-      <StatCard icon={faCloudUpload} label="Network (Out)" value={bytesToString(stats.tx)} />
+      <StatCard
+        icon={faCloudDownload}
+        label="Network (In)"
+        value={stats.state === 'offline' ? 'Offline' : bytesToString(stats.rx)}
+      />
+      <StatCard
+        icon={faCloudUpload}
+        label="Network (Out)"
+        value={stats.state === 'offline' ? 'Offline' : bytesToString(stats.tx)}
+      />
     </div>
   );
 }
