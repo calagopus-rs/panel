@@ -1,9 +1,9 @@
 import Container from '@/elements/Container';
 
-export default function ServerSettings() {
+export default () => {
   return (
     <Container>
       <p>Server Settings</p>
     </Container>
   );
-}
+};

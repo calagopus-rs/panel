@@ -1,7 +1,7 @@
 import Login from '@/pages/auth/Login';
 import { Route, Routes } from 'react-router';
 
-export default function AuthenticationRouter() {
+export default () => {
   return (
     <>
       <Routes>
@@ -9,4 +9,4 @@ export default function AuthenticationRouter() {
       </Routes>
     </>
   );
-}
+};

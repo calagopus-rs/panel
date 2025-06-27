@@ -30,7 +30,7 @@ function FileTableRow({ file, children }: { file: FileObject; children: React.Re
   );
 }
 
-export default function FileRow({ file }: { file: FileObject }) {
+export default ({ file }: { file: FileObject }) => {
   const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore(state => state.files);
 
   const RowCheckbox = ({ id }: { id: string }) => {
@@ -75,4 +75,4 @@ export default function FileRow({ file }: { file: FileObject }) {
       </td>
     </FileTableRow>
   );
-}
+};

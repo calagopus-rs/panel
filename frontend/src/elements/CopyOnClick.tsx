@@ -1,6 +1,6 @@
 import { useToast } from './Toast';
 
-export default function CopyOnClick({ content, children }: { content: string; children: React.ReactNode }) {
+export default ({ content, children }: { content: string; children: React.ReactNode }) => {
   const { addToast } = useToast();
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -18,4 +18,4 @@ export default function CopyOnClick({ content, children }: { content: string; ch
       {children}
     </button>
   );
-}
+};

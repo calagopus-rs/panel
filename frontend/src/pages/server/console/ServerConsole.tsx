@@ -6,7 +6,7 @@ import ServerPowerControls from './ServerPowerControls';
 import ServerStats from './ServerStats';
 import { useServerStore } from '@/stores/server';
 
-export default function ServerConsole() {
+export default () => {
   const server = useServerStore(state => state.data);
 
   return (
@@ -31,4 +31,4 @@ export default function ServerConsole() {
       </div>
     </Container>
   );
-}
+};

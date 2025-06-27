@@ -1,9 +1,9 @@
 import Container from '@/elements/Container';
 
-export default function DashboardAccount() {
+export default () => {
   return (
     <Container>
       <p>Dashboard Account</p>
     </Container>
   );
-}
+};

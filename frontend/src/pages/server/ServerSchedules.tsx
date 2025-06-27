@@ -67,7 +67,7 @@ const paginationDataset = {
   },
 };
 
-export default function ServerSchedules() {
+export default () => {
   const toCronExpression = (cron: CronObject) => {
     return `${cron.minute} ${cron.hour} ${cron.day_of_month} ${cron.month} ${cron.day_of_week}`;
   };
@@ -136,4 +136,4 @@ export default function ServerSchedules() {
       </Table>
     </Container>
   );
-}
+};

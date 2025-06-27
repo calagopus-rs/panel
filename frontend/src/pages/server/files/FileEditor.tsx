@@ -11,7 +11,7 @@ import { Button } from '@/elements/button';
 import { saveFileContent } from '@/api/server/files/saveFileContent';
 import FileNameDialog from './FileNameDialog';
 
-export default function ServerFilesEdit() {
+export default () => {
   const location = useLocation();
   const navigate = useNavigate();
   const action = urlPathToAction(location.pathname);
@@ -111,4 +111,4 @@ export default function ServerFilesEdit() {
       />
     </div>
   );
-}
+};

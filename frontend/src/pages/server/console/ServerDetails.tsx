@@ -37,7 +37,7 @@ function StatCard({
   );
 }
 
-export default function ServerDetails() {
+export default () => {
   const server = useServerStore(state => state.data);
   const stats = useServerStore(state => state.stats);
 
@@ -78,4 +78,4 @@ export default function ServerDetails() {
       />
     </div>
   );
-}
+};

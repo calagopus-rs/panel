@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 const reconnectErrors = ['jwt: exp claim is invalid', 'jwt: created too far in past (denylist)'];
 
-export default function WebsocketHandler() {
+export default () => {
   let updatingToken = false;
 
   const { uuid } = useServerStore(state => state.data);
@@ -94,4 +94,4 @@ export default function WebsocketHandler() {
   }, [uuid]);
 
   return null;
-}
+};

@@ -10,7 +10,7 @@ import { useServerStore } from '@/stores/server';
 import { loadDirectory } from '@/api/server/files/loadDirectory';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 
-export default function ServerFiles() {
+export default () => {
   const location = useLocation();
   const navigate = useNavigate();
   const server = useServerStore(state => state.data);
@@ -80,4 +80,4 @@ export default function ServerFiles() {
       </Table>
     </Container>
   );
-}
+};

@@ -23,7 +23,7 @@ function ServerItems({ serverListPromise }: { serverListPromise: Promise<Paginat
   );
 }
 
-export default function DashboardHome() {
+export default () => {
   const { serverListDesign, setServerListDesign } = useSettingsStore(state => state);
   const serverListPromise = getServers();
 
@@ -55,4 +55,4 @@ export default function DashboardHome() {
       </Spinner.Suspense>
     </Container>
   );
-}
+};

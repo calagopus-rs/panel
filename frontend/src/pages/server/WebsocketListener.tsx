@@ -2,7 +2,7 @@ import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebs
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
 
-export default function WebsocketListener() {
+export default () => {
   const stats = useServerStore(state => state.stats);
   const { connected, instance } = useServerStore(state => state.socket);
 
@@ -32,4 +32,4 @@ export default function WebsocketListener() {
   });
 
   return null;
-}
+};

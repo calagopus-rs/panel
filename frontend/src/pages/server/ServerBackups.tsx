@@ -31,7 +31,7 @@ const paginationDataset = {
   },
 };
 
-export default function ServerBackups() {
+export default () => {
   return (
     <Container>
       <div className="mb-4 flex justify-between">
@@ -80,4 +80,4 @@ export default function ServerBackups() {
       </Table>
     </Container>
   );
-}
+};

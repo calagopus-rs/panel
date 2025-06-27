@@ -3,7 +3,7 @@ import { Button } from '@/elements/button';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 
-export default function ServerPowerControls() {
+export default () => {
   const [open, setOpen] = useState(false);
   const status = useServerStore(state => state.status.value);
   const instance = useServerStore(state => state.socket.instance);
@@ -47,4 +47,4 @@ export default function ServerPowerControls() {
       </Button>
     </div>
   );
-}
+};

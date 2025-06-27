@@ -13,7 +13,7 @@ interface TooltipProps {
   float?: boolean;
 }
 
-export default function Tooltip({ children, content, ...tooltipProps }: TooltipProps) {
+export default ({ children, content, ...tooltipProps }: TooltipProps) => {
   return (
     <>
       <span data-tooltip-id="tooltip" data-tooltip-content={content}>
@@ -26,4 +26,4 @@ export default function Tooltip({ children, content, ...tooltipProps }: TooltipP
       />
     </>
   );
-}
+};

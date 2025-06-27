@@ -12,7 +12,7 @@ import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 
-export default function DashboardRouter() {
+export default () => {
   const avatarURL = 'https://placehold.co/400x400/png';
 
   return (
@@ -75,4 +75,4 @@ export default function DashboardRouter() {
       </div>
     </>
   );
-}
+};

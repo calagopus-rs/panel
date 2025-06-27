@@ -1,6 +1,6 @@
 import Container from './Container';
 
-export default function ScreenBlock({ title, description }: { title: string; description: string }) {
+export default ({ title, description }: { title: string; description: string }) => {
   return (
     <Container>
       <div className="flex justify-center">
@@ -11,4 +11,4 @@ export default function ScreenBlock({ title, description }: { title: string; des
       </div>
     </Container>
   );
-}
+};

@@ -37,7 +37,7 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 
-export default function ServerRouter() {
+export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
@@ -162,4 +162,4 @@ export default function ServerRouter() {
       </div>
     </>
   );
-}
+};

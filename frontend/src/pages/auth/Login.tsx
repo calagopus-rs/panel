@@ -2,7 +2,7 @@ import minecraftBackground from '@/assets/minecraft_background.png';
 import { Input } from '@/elements/inputs';
 import { useNavigate } from 'react-router';
 
-export default function Login() {
+export default () => {
   const navigate = useNavigate();
 
   const submitLogin = (e: React.FormEvent) => {
@@ -33,4 +33,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
+};

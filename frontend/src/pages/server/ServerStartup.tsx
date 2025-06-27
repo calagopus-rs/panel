@@ -1,9 +1,9 @@
 import Container from '@/elements/Container';
 
-export default function ServerStartup() {
+export default () => {
   return (
     <Container>
       <p>Server Startup</p>
     </Container>
   );
-}
+};

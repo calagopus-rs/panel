@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
-export default function ServerItem({ server }: { server: Server }) {
+export default ({ server }: { server: Server }) => {
   const { serverListDesign } = useSettingsStore(state => state);
   const [stats, setStats] = useState<ServerStats | null>(null);
 
@@ -113,4 +113,4 @@ export default function ServerItem({ server }: { server: Server }) {
       </div>
     </NavLink>
   );
-}
+};
