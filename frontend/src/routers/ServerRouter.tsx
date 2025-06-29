@@ -22,7 +22,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import ServerConsole from '@/pages/server/console/ServerConsole';
 import ServerFiles from '@/pages/server/files/ServerFiles';
-import ServerDatabases from '@/pages/server/ServerDatabases';
+import ServerDatabases from '@/pages/server/databases/ServerDatabases';
 import ServerSchedules from '@/pages/server/ServerSchedules';
 import ServerUsers from '@/pages/server/ServerUsers';
 import ServerBackups from '@/pages/server/ServerBackups';
