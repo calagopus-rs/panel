@@ -14,6 +14,7 @@ import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
 import deleteDatabase from '@/api/server/databases/deleteDatabase';
 import { useToast } from '@/elements/Toast';
 import { httpErrorToHuman } from '@/api/axios';
+import DatabaseDetailsDialog from './dialogs/DatabaseDetailsDialog';
 
 const DatabaseRow = ({ database }: { database: ServerDatabase }) => {
   const { addToast } = useToast();
@@ -37,6 +38,7 @@ const DatabaseRow = ({ database }: { database: ServerDatabase }) => {
 
   return (
     <>
+      <DatabaseDetailsDialog database={database} open={openDialog === 'details'} onClose={() => setOpenDialog(null)} />
       <DatabaseDeleteDialog
         databaseName={database.name}
         onDeleted={() => doDeleteDatabase()}
