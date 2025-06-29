@@ -9,6 +9,7 @@ import { XMarkIcon } from '@heroicons/react/24/solid';
 import { AnimatePresence, Easing, motion } from 'motion/react';
 import { DialogContext, IconPosition, RenderDialogProps, styles } from './';
 import { Button } from '../button';
+import { createPortal } from 'react-dom';
 
 const variants = {
   open: {
@@ -63,7 +64,7 @@ export default ({
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <DialogContext.Provider value={{ setIcon, setFooter, setIconPosition }}>
@@ -125,6 +126,7 @@ export default ({
           </HDialog>
         </DialogContext.Provider>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 };
