@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import CreateDatabaseButton from './CreateDatabaseButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
-import ContextMenu from '@/elements/ContextMenu';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const server = useServerStore(state => state.data);
@@ -43,55 +43,60 @@ export default () => {
                 <TableHeader />
               </TableHead>
 
-              <TableBody>
-                {databases.map(database => (
-                  <ContextMenu
-                    key={database.id}
-                    items={[
-                      { label: 'Edit', onClick: () => console.log('Edit', database.id) },
-                      { label: 'Delete', onClick: () => console.log('Delete', database.id) },
-                    ]}
-                  >
-                    {({ openMenu }) => (
-                      <TableRow
-                        onContextMenu={e => {
-                          e.preventDefault();
-                          openMenu(e.pageX, e.pageY);
-                        }}
-                      >
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={database.name}>
-                          {database.name}
-                        </td>
-
-                        <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
-                          <CopyOnClick content={database.connectionString}>
-                            <Code>{database.connectionString}</Code>
-                          </CopyOnClick>
-                        </td>
-
-                        <td
-                          className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap"
-                          title={database.username}
+              <ContextMenuProvider>
+                <TableBody>
+                  {databases.map(database => (
+                    <ContextMenu
+                      key={database.id}
+                      items={[
+                        { label: 'Edit', onClick: () => console.log('Edit', database.id) },
+                        { label: 'Delete', onClick: () => console.log('Delete', database.id) },
+                      ]}
+                    >
+                      {({ openMenu }) => (
+                        <TableRow
+                          onContextMenu={e => {
+                            e.preventDefault();
+                            openMenu(e.pageX, e.pageY);
+                          }}
                         >
-                          {database.username}
-                        </td>
+                          <td
+                            className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap"
+                            title={database.name}
+                          >
+                            {database.name}
+                          </td>
 
-                        <td className="relative">
-                          <FontAwesomeIcon
-                            icon={faEllipsis}
-                            className="cursor-pointer"
-                            onClick={e => {
-                              e.stopPropagation();
-                              const rect = e.currentTarget.getBoundingClientRect();
-                              openMenu(rect.left, rect.bottom);
-                            }}
-                          />
-                        </td>
-                      </TableRow>
-                    )}
-                  </ContextMenu>
-                ))}
-              </TableBody>
+                          <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
+                            <CopyOnClick content={database.connectionString}>
+                              <Code>{database.connectionString}</Code>
+                            </CopyOnClick>
+                          </td>
+
+                          <td
+                            className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap"
+                            title={database.username}
+                          >
+                            {database.username}
+                          </td>
+
+                          <td className="relative">
+                            <FontAwesomeIcon
+                              icon={faEllipsis}
+                              className="cursor-pointer"
+                              onClick={e => {
+                                e.stopPropagation();
+                                const rect = e.currentTarget.getBoundingClientRect();
+                                openMenu(rect.left, rect.bottom);
+                              }}
+                            />
+                          </td>
+                        </TableRow>
+                      )}
+                    </ContextMenu>
+                  ))}
+                </TableBody>
+              </ContextMenuProvider>
             </table>
 
             {loading ? <Spinner.Centered /> : databases.length === 0 ? <NoItems /> : null}

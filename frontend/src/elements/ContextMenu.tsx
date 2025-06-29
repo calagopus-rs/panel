@@ -1,48 +1,47 @@
-import { useState, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
-export default ({ items = [], children }) => {
-  const [visible, setVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+const ContextMenuContext = createContext(null);
+
+export const ContextMenuProvider = ({ children }) => {
+  const [state, setState] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    items: [],
+  });
+
   const menuRef = useRef(null);
 
-  const showMenu = (x, y) => {
-    setPosition({ x, y });
-    setVisible(true);
-  };
-
-  const hideMenu = () => {
-    setVisible(false);
-  };
-
-  const handleClickOutside = event => {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      hideMenu();
-    }
-  };
+  const hideMenu = () => setState(prev => ({ ...prev, visible: false }));
 
   useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
+    const handleClickOutside = e => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        hideMenu();
+      }
     };
-  }, []);
+
+    if (state.visible) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [state.visible]);
 
   return (
-    <>
-      {children({
-        openMenu: (x, y) => showMenu(x, y),
-        hideMenu,
-      })}
-
-      {visible &&
+    <ContextMenuContext.Provider value={{ state, setState, hideMenu }}>
+      {children}
+      {state.visible &&
         createPortal(
           <ul
             ref={menuRef}
             className="absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-40"
-            style={{ top: position.y, left: position.x, position: 'absolute' }}
+            style={{ top: state.y, left: state.x }}
           >
-            {items.map((item, idx) => (
+            {state.items.map((item, idx) => (
               <li
                 key={idx}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -57,6 +56,18 @@ export default ({ items = [], children }) => {
           </ul>,
           document.body,
         )}
-    </>
+    </ContextMenuContext.Provider>
   );
 };
+
+const ContextMenu = ({ items = [], children }) => {
+  const { setState, hideMenu } = useContext(ContextMenuContext);
+
+  const openMenu = (x, y) => {
+    setState({ visible: true, x, y, items });
+  };
+
+  return children({ openMenu, hideMenu });
+};
+
+export default ContextMenu;
