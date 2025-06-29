@@ -1,5 +1,5 @@
 import { FractalResponseData, FractalResponseList } from './axios';
-import { Allocation, FileObject, Server, ServerBackup, ServerEggVariable, ServerStats } from './types';
+import { Allocation, FileObject, Server, ServerBackup, ServerDatabase, ServerEggVariable, ServerStats } from './types';
 
 export const rawDataToServerAllocation = (data: FractalResponseData): Allocation => ({
   id: data.attributes.id,
@@ -114,4 +114,13 @@ export const rawDataToServerStats = ({ attributes }: FractalResponseData): Serve
   networkRxInBytes: attributes.resources.network_rx_bytes,
   networkTxInBytes: attributes.resources.network_tx_bytes,
   uptime: attributes.resources.uptime,
+});
+
+export const rawDataToServerDatabase = (data: any): ServerDatabase => ({
+  id: data.id,
+  name: data.name,
+  username: data.username,
+  connectionString: `${data.host.address}:${data.host.port}`,
+  allowConnectionsFrom: data.connections_from,
+  password: data.relationships.password?.attributes?.password,
 });

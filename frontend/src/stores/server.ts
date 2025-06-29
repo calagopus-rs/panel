@@ -7,6 +7,7 @@ import { createWebsocketSlice, WebsocketSlice } from './slices/websocket';
 import { createStatusSlice, StatusSlice } from './slices/status';
 import { createStatsSlice, StatsSlice } from './slices/stats';
 import { createFilesSlice, FilesSlice } from './slices/files';
+import { createDatabasesSlice, DatabasesSlice } from './slices/databases';
 
 interface ServerStore {
   data?: Server;
@@ -27,6 +28,8 @@ interface ServerStore {
   socket: WebsocketSlice;
   status: StatusSlice;
   stats: StatsSlice;
+
+  databases: DatabasesSlice;
   files: FilesSlice;
 }
 
@@ -73,6 +76,8 @@ export const useServerStore = create<ServerStore>()(
     status: createStatusSlice(set),
     socket: createWebsocketSlice(set),
     stats: createStatsSlice(set),
+
+    databases: createDatabasesSlice(set),
     files: createFilesSlice(set),
 
     clear: () => {
@@ -83,6 +88,8 @@ export const useServerStore = create<ServerStore>()(
         status: createStatusSlice(set),
         socket: createWebsocketSlice(set),
         stats: createStatsSlice(set),
+
+        databases: createDatabasesSlice(set),
         files: createFilesSlice(set),
       });
     },

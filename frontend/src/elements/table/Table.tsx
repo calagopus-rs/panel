@@ -302,7 +302,7 @@ export const NoItems = ({ className }: { className?: string }) => {
 };
 
 interface Params {
-  checked: boolean;
+  checked?: boolean;
   header?: React.ReactNode;
   onSelectAllClick?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSearch?: (query: string) => Promise<void>;

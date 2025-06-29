@@ -101,3 +101,12 @@ export interface ServerStats {
 }
 
 export type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
+
+export interface ServerDatabase {
+  id: string;
+  name: string;
+  username: string;
+  connectionString: string;
+  allowConnectionsFrom: string;
+  password?: string;
+}
