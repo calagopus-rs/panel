@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
+import classNames from 'classnames';
 
 const ContextMenuContext = createContext(null);
 
@@ -63,7 +64,10 @@ export const ContextMenuProvider = ({ children }) => {
                 {state.items.map((item, idx) => (
                   <li
                     key={idx}
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    className={classNames(
+                      'px-4 py-2 cursor-pointer',
+                      item.color === 'red' ? 'hover:text-red-100 hover:bg-red-500 ' : 'hover:bg-gray-500',
+                    )}
                     onClick={() => {
                       item.onClick();
                       hideMenu();

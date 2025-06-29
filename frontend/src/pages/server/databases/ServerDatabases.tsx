@@ -49,8 +49,8 @@ export default () => {
                     <ContextMenu
                       key={database.id}
                       items={[
-                        { label: 'Edit', onClick: () => console.log('Edit', database.id) },
-                        { label: 'Delete', onClick: () => console.log('Delete', database.id) },
+                        { label: 'Edit', onClick: () => console.log('Edit', database.id), color: 'gray' },
+                        { label: 'Delete', onClick: () => console.log('Delete', database.id), color: 'red' },
                       ]}
                     >
                       {({ openMenu }) => (
