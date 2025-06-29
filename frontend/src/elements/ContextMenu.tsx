@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'motion/react';
 
 const ContextMenuContext = createContext(null);
 
@@ -11,9 +12,17 @@ export const ContextMenuProvider = ({ children }) => {
     items: [],
   });
 
+  const [shouldRender, setShouldRender] = useState(false);
   const menuRef = useRef(null);
 
-  const hideMenu = () => setState(prev => ({ ...prev, visible: false }));
+  const showMenu = (x, y, items) => {
+    setState({ visible: true, x, y, items });
+    setShouldRender(true);
+  };
+
+  const hideMenu = () => {
+    setState(prev => ({ ...prev, visible: false }));
+  };
 
   useEffect(() => {
     const handleClickOutside = e => {
@@ -32,28 +41,40 @@ export const ContextMenuProvider = ({ children }) => {
   }, [state.visible]);
 
   return (
-    <ContextMenuContext.Provider value={{ state, setState, hideMenu }}>
+    <ContextMenuContext.Provider value={{ state, showMenu, hideMenu }}>
       {children}
-      {state.visible &&
+      {shouldRender &&
         createPortal(
-          <ul
-            ref={menuRef}
-            className="absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-40"
-            style={{ top: state.y, left: state.x }}
+          <AnimatePresence
+            onExitComplete={() => {
+              setShouldRender(false);
+            }}
           >
-            {state.items.map((item, idx) => (
-              <li
-                key={idx}
-                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => {
-                  item.onClick();
-                  hideMenu();
-                }}
+            {state.visible && (
+              <motion.ul
+                ref={menuRef}
+                className="absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-40"
+                style={{ top: state.y, left: state.x }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.07 }}
               >
-                {item.label}
-              </li>
-            ))}
-          </ul>,
+                {state.items.map((item, idx) => (
+                  <li
+                    key={idx}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => {
+                      item.onClick();
+                      hideMenu();
+                    }}
+                  >
+                    {item.label}
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>,
           document.body,
         )}
     </ContextMenuContext.Provider>
@@ -61,10 +82,10 @@ export const ContextMenuProvider = ({ children }) => {
 };
 
 const ContextMenu = ({ items = [], children }) => {
-  const { setState, hideMenu } = useContext(ContextMenuContext);
+  const { showMenu, hideMenu } = useContext(ContextMenuContext);
 
   const openMenu = (x, y) => {
-    setState({ visible: true, x, y, items });
+    showMenu(x, y, items);
   };
 
   return children({ openMenu, hideMenu });
