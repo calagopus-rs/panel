@@ -60,9 +60,7 @@ export default () => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button style={Button.Styles.Green} onClick={() => setOpen(true)}>
-        Create new
-      </Button>
+      <Button onClick={() => setOpen(true)}>Create new</Button>
     </>
   );
 };

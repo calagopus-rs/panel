@@ -6,7 +6,7 @@ import CopyOnClick from '@/elements/CopyOnClick';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/elements/Toast';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsis, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
@@ -45,8 +45,8 @@ export default ({ database }: { database: ServerDatabase }) => {
       <ContextMenu
         key={database.id}
         items={[
-          { label: 'Details', onClick: () => setOpenDialog('details'), color: 'gray' },
-          { label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
+          { icon: faEye, label: 'Details', onClick: () => setOpenDialog('details'), color: 'gray' },
+          { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
