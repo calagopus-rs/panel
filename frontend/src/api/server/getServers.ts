@@ -12,8 +12,6 @@ export async function getServers(): Promise<PaginatedResult<Server>> {
           pagination: getPaginationSet(data.meta.pagination),
         }),
       )
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

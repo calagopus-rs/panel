@@ -7,8 +7,6 @@ export async function getServerResourceUsage(uuid: string): Promise<ServerStats>
     axiosInstance
       .get<FractalResponseData>(`/api/client/servers/${uuid}/resources`)
       .then(({ data }) => resolve(rawDataToServerStats(data)))
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

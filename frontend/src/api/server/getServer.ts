@@ -9,8 +9,6 @@ export async function getServer(uuid: string): Promise<[Server, string[]]> {
       .then(({ data }) =>
         resolve([rawDataToServerObject(data), data.meta?.is_server_owner ? ['*'] : data.meta?.user_permissions || []]),
       )
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

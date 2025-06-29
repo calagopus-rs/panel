@@ -10,8 +10,6 @@ export async function saveFileContent(uuid: string, path: string, content: strin
         },
       })
       .then(() => resolve())
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

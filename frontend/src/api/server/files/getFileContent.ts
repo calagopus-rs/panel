@@ -8,8 +8,6 @@ export async function getFileContent(uuid: string, path: string): Promise<string
         responseType: 'text',
       })
       .then(({ data }) => resolve(data))
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

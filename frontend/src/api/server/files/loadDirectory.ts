@@ -9,8 +9,6 @@ export async function loadDirectory(uuid: string, directory?: string): Promise<F
         params: { directory: directory ?? '/' },
       })
       .then(({ data }) => resolve((data.data || []).map((datum: any) => rawDataToFileObject(datum))))
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

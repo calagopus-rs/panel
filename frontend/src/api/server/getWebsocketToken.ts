@@ -15,8 +15,6 @@ export async function getWebsocketToken(uuid: string): Promise<Response> {
           socket: data.data.socket,
         }),
       )
-      .catch(error => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }

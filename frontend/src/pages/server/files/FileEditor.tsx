@@ -9,7 +9,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import { saveFileContent } from '@/api/server/files/saveFileContent';
-import FileNameDialog from './FileNameDialog';
+import FileNameDialog from './dialogs/FileNameDialog';
 
 export default () => {
   const location = useLocation();
