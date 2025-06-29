@@ -12,6 +12,7 @@ import { FileBreadcrumbs } from './FileBreadcrumbs';
 import DirectoryNameDialog from './dialogs/DirectoryNameDialog';
 import { createDirectory } from '@/api/server/files/createDirectory';
 import { join } from 'pathe';
+import Spinner from '@/elements/Spinner';
 
 export default () => {
   const location = useLocation();
@@ -21,6 +22,7 @@ export default () => {
 
   const [openDialog, setOpenDialog] = useState<'nameDirectory'>(null);
   const [fileList, setFileList] = useState<FileObject[]>([]);
+  const [loading, setLoading] = useState(fileList.length === 0);
 
   useEffect(() => {
     setSelectedFiles([]);
@@ -30,7 +32,10 @@ export default () => {
   useEffect(() => {
     if (!directory) return;
 
-    loadDirectory(server.id, directory).then(setFileList);
+    loadDirectory(server.id, directory).then(data => {
+      setFileList(data);
+      setLoading(false);
+    });
   }, [directory]);
 
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,7 +100,7 @@ export default () => {
               </TableBody>
             </table>
 
-            {fileList.length === 0 && <NoItems />}
+            {loading ? <Spinner.Centered /> : fileList.length === 0 ? <NoItems /> : null}
           </div>
         </ContentWrapper>
       </Table>

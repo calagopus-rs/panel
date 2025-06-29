@@ -3,16 +3,22 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import CopyOnClick from '@/elements/CopyOnClick';
+import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default () => {
   const server = useServerStore(state => state.data);
   const { databases, setDatabases } = useServerStore(state => state.databases);
 
+  const [loading, setLoading] = useState(databases.length === 0);
+
   useEffect(() => {
-    getDatabases(server.uuid).then(setDatabases);
+    getDatabases(server.uuid).then(data => {
+      setDatabases(data);
+      setLoading(false);
+    });
   }, []);
 
   return (
@@ -54,7 +60,7 @@ export default () => {
               </TableBody>
             </table>
 
-            {databases.length === 0 && <NoItems />}
+            {loading ? <Spinner.Centered /> : databases.length === 0 ? <NoItems /> : null}
           </div>
         </ContentWrapper>
       </Table>
