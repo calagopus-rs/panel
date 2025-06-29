@@ -1,7 +1,14 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Helvetica';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Helvetica'), url('/fonts/Helvetica/Helvetica.woff') format('woff');
+}
+
 @theme {
-  --font-header: 'IBM Plex Sans', 'Roboto', 'system-ui', 'sans-serif';
+  --font-sans: 'Helvetica', 'Arial', 'sans-serif';
 }
 
 body {

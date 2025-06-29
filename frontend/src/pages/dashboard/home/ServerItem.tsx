@@ -59,7 +59,7 @@ export default ({ server }: { server: Server }) => {
     >
       <div className={classNames('px-6 py-4', [serverListDesign === 'row' && 'xl:col-span-2'])}>
         <div className={classNames('flex items-center gap-2', [serverListDesign === 'grid' && 'justify-between'])}>
-          <span className="text-xl font-header font-medium truncate" title={server.name}>
+          <span className="text-xl font-medium truncate" title={server.name}>
             {server.name}
           </span>
           <div

@@ -30,7 +30,7 @@ export default () => {
   return (
     <Container>
       <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-header font-bold text-white">Servers</h1>
+        <h1 className="text-4xl font-bold text-white">Servers</h1>
         <div className="flex gap-2">
           <FontAwesomeIcon
             className={classNames('p-2 rounded-full cursor-pointer', [

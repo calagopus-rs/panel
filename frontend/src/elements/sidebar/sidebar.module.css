@@ -42,7 +42,7 @@
   }
 
   & > span {
-    @apply font-header font-medium text-lg whitespace-nowrap leading-none ml-3;
+    @apply font-medium text-lg whitespace-nowrap leading-none ml-3;
   }
 }
 

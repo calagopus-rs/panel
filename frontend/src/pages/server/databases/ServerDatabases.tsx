@@ -107,7 +107,7 @@ export default () => {
   return (
     <Container>
       <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-header font-bold text-white">Databases</h1>
+        <h1 className="text-4xl font-bold text-white">Databases</h1>
         <div className="flex gap-2">
           <CreateDatabaseButton />
         </div>

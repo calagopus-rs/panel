@@ -123,7 +123,7 @@ export default () => {
               <span className="font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight select-none">
                 Jelco
               </span>
-              <span className="font-header font-normal text-xs text-neutral-300 whitespace-nowrap leading-tight select-none">
+              <span className="font-normal text-xs text-neutral-300 whitespace-nowrap leading-tight select-none">
                 Admin
               </span>
             </div>

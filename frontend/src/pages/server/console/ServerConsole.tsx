@@ -12,7 +12,7 @@ export default () => {
   return (
     <Container>
       <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-header font-bold text-white">{server.name}</h1>
+        <h1 className="text-4xl font-bold text-white">{server.name}</h1>
         <ServerPowerControls />
       </div>
       <div className="grid grid-cols-4 gap-4 mb-4">
