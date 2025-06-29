@@ -1,7 +1,15 @@
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Table, {
+  ContentWrapper,
+  NoItems,
+  Pagination,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/elements/table/Table';
 
 const allocations = [
   {
@@ -84,6 +92,8 @@ export default () => {
                   ))}
                 </TableBody>
               </table>
+
+              {allocations.length === 0 && <NoItems />}
             </div>
           </Pagination>
         </ContentWrapper>

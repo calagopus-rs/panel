@@ -1,7 +1,7 @@
 import { FileObject } from '@/api/types';
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
-import Table, { ContentWrapper, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
+import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { urlPathToFilePath } from '@/lib/path';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
@@ -94,6 +94,8 @@ export default () => {
                 ))}
               </TableBody>
             </table>
+
+            {fileList.length === 0 && <NoItems />}
           </div>
         </ContentWrapper>
       </Table>

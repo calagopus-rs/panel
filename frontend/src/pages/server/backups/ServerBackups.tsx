@@ -1,7 +1,15 @@
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Table, {
+  ContentWrapper,
+  NoItems,
+  Pagination,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/elements/table/Table';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
 
@@ -74,6 +82,8 @@ export default () => {
                   ))}
                 </TableBody>
               </table>
+
+              {backups.length === 0 && <NoItems />}
             </div>
           </Pagination>
         </ContentWrapper>

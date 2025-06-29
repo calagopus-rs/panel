@@ -1,7 +1,15 @@
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Table, {
+  ContentWrapper,
+  NoItems,
+  Pagination,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/elements/table/Table';
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -78,6 +86,8 @@ export default () => {
                   ))}
                 </TableBody>
               </table>
+
+              {users.length === 0 && <NoItems />}
             </div>
           </Pagination>
         </ContentWrapper>

@@ -3,7 +3,7 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import CopyOnClick from '@/elements/CopyOnClick';
-import Table, { ContentWrapper, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
 
@@ -53,6 +53,8 @@ export default () => {
                 ))}
               </TableBody>
             </table>
+
+            {databases.length === 0 && <NoItems />}
           </div>
         </ContentWrapper>
       </Table>

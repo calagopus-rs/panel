@@ -291,10 +291,10 @@ export const Loading = () => {
   );
 };
 
-export const NoItems = ({ className }: { className?: string }) => {
+export const NoItems = () => {
   return (
-    <div className={classNames('w-full flex flex-col items-center justify-center py-6 px-8', className)}>
-      <p className="text-lg text-gray-300 text-center font-normal sm:mt-8">
+    <div className="w-full flex flex-col items-center justify-center py-6 px-8">
+      <p className="text-lg text-gray-300 text-center font-normal">
         No items could be found, it&apos;s almost like they are hiding.
       </p>
     </div>

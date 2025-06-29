@@ -1,7 +1,15 @@
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import Table, { ContentWrapper, Pagination, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Table, {
+  ContentWrapper,
+  NoItems,
+  Pagination,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/elements/table/Table';
 import { formatTimestamp } from '@/lib/time';
 import CronExpressionParser, { CronDate } from 'cron-parser';
 import cronstrue from 'cronstrue';
@@ -130,6 +138,8 @@ export default () => {
                   ))}
                 </TableBody>
               </table>
+
+              {schedules.length === 0 && <NoItems />}
             </div>
           </Pagination>
         </ContentWrapper>
