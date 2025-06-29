@@ -114,14 +114,16 @@ export const TableBody = ({ children }: { children: React.ReactNode }) => {
 export const TableRow = ({
   onClick,
   className,
+  onContextMenu,
   children,
 }: {
   onClick?: (e: React.MouseEvent) => void;
   className?: string;
+  onContextMenu?: (e: React.MouseEvent) => void;
   children: React.ReactNode;
 }) => {
   return (
-    <tr className={classNames('h-12 hover:bg-gray-600', className)} onClick={onClick}>
+    <tr className={classNames('h-12 hover:bg-gray-600', className)} onClick={onClick} onContextMenu={onContextMenu}>
       {children}
     </tr>
   );

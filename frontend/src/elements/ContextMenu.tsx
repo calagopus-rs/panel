@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default ({ items = [], children }) => {
   const [visible, setVisible] = useState(false);
@@ -12,11 +13,6 @@ export default ({ items = [], children }) => {
 
   const hideMenu = () => {
     setVisible(false);
-  };
-
-  const handleContextMenu = event => {
-    event.preventDefault();
-    showMenu(event.pageX, event.pageY);
   };
 
   const handleClickOutside = event => {
@@ -33,28 +29,34 @@ export default ({ items = [], children }) => {
   }, []);
 
   return (
-    <div onContextMenu={handleContextMenu} className="w-fit">
-      {children({ openMenu: () => showMenu(100, 100) })}
-      {visible && (
-        <ul
-          ref={menuRef}
-          className="absolute z-50 bg-gray-600 border shadow-md rounded w-40"
-          style={{ top: position.y, left: position.x }}
-        >
-          {items.map((item, idx) => (
-            <li
-              key={idx}
-              className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => {
-                item.onClick();
-                hideMenu();
-              }}
-            >
-              {item.label}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      {children({
+        openMenu: (x, y) => showMenu(x, y),
+        hideMenu,
+      })}
+
+      {visible &&
+        createPortal(
+          <ul
+            ref={menuRef}
+            className="absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-40"
+            style={{ top: position.y, left: position.x, position: 'absolute' }}
+          >
+            {items.map((item, idx) => (
+              <li
+                key={idx}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  item.onClick();
+                  hideMenu();
+                }}
+              >
+                {item.label}
+              </li>
+            ))}
+          </ul>,
+          document.body,
+        )}
+    </>
   );
 };

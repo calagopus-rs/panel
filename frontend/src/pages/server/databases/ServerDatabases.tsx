@@ -48,12 +48,17 @@ export default () => {
                   <ContextMenu
                     key={database.id}
                     items={[
-                      { label: 'Edit', onClick: () => console.log('Edit') },
-                      { label: 'Delete', onClick: () => console.log('Delete') },
+                      { label: 'Edit', onClick: () => console.log('Edit', database.id) },
+                      { label: 'Delete', onClick: () => console.log('Delete', database.id) },
                     ]}
                   >
                     {({ openMenu }) => (
-                      <TableRow>
+                      <TableRow
+                        onContextMenu={e => {
+                          e.preventDefault();
+                          openMenu(e.pageX, e.pageY);
+                        }}
+                      >
                         <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={database.name}>
                           {database.name}
                         </td>
@@ -71,7 +76,7 @@ export default () => {
                           {database.username}
                         </td>
 
-                        <td>
+                        <td className="relative">
                           <FontAwesomeIcon
                             icon={faEllipsis}
                             className="cursor-pointer"
