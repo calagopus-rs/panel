@@ -1,4 +1,5 @@
 import { Button } from '@/elements/button';
+import { Dialog } from '@/elements/dialog';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 
@@ -31,6 +32,17 @@ export default () => {
 
   return (
     <div className="flex gap-2">
+      <Dialog.Confirm
+        open={open}
+        hideCloseIcon
+        onClose={() => setOpen(false)}
+        title={'Forcibly Stop Process'}
+        confirm={'Continue'}
+        onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
+      >
+        Forcibly stopping a server can lead to data corruption.
+      </Dialog.Confirm>
+
       <Button style={Button.Styles.Green} disabled={status !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
         Start
       </Button>
