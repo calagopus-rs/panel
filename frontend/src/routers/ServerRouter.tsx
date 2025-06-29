@@ -36,6 +36,7 @@ import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
+import ScheduleEdit from '@/pages/server/schedules/ScheduleEdit';
 
 export default () => {
   const params = useParams<'id'>();
@@ -148,6 +149,7 @@ export default () => {
                 <Route path="/files/directory/*" element={<ServerFiles />} />
                 <Route path="/databases" element={<ServerDatabases />} />
                 <Route path="/schedules" element={<ServerSchedules />} />
+                <Route path="/schedules/:id" element={<ScheduleEdit />} />
                 <Route path="/users" element={<ServerUsers />} />
                 <Route path="/backups" element={<ServerBackups />} />
                 <Route path="/network" element={<ServerNetwork />} />
