@@ -1,3 +1,4 @@
+import { httpErrorToHuman } from '@/api/axios';
 import createDatabase from '@/api/server/databases/createDatabase';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
@@ -16,11 +17,15 @@ export default () => {
   const [connectionsFrom, setConnectionsFrom] = useState('');
 
   const submit = () => {
-    createDatabase(server.id, { databaseName: dbName, connectionsFrom: connectionsFrom || '%' }).then(database => {
-      addDatabase(database);
-      setOpen(false);
-      addToast('Database created.', 'success');
-    });
+    createDatabase(server.id, { databaseName: dbName, connectionsFrom: connectionsFrom || '%' })
+      .then(database => {
+        addDatabase(database);
+        setOpen(false);
+        addToast('Database created.', 'success');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (
