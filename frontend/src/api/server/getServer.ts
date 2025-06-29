@@ -2,7 +2,7 @@ import { Server } from '@/api/types';
 import { axiosInstance } from '@/api/axios';
 import { rawDataToServerObject } from '@/api/transformers';
 
-export async function getServer(uuid: string): Promise<[Server, string[]]> {
+export default async (uuid: string): Promise<[Server, string[]]> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}`)
@@ -11,4 +11,4 @@ export async function getServer(uuid: string): Promise<[Server, string[]]> {
       )
       .catch(reject);
   });
-}
+};

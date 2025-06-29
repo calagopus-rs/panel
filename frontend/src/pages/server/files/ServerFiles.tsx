@@ -7,10 +7,10 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
-import { loadDirectory } from '@/api/server/files/loadDirectory';
+import loadDirectory from '@/api/server/files/loadDirectory';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import DirectoryNameDialog from './dialogs/DirectoryNameDialog';
-import { createDirectory } from '@/api/server/files/createDirectory';
+import createDirectory from '@/api/server/files/createDirectory';
 import { join } from 'pathe';
 import Spinner from '@/elements/Spinner';
 

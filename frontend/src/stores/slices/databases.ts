@@ -18,11 +18,11 @@ export const createDatabasesSlice = (set): DatabasesSlice => ({
 
   addDatabase: value =>
     set(state => {
-      state.databases.databases = [...state.databases, value];
+      state.databases.databases = [...state.databases.databases, value];
     }),
 
   removeDatabase: value =>
     set(state => {
-      state.databases.databases = state.databases.filter(database => database.id !== value.id);
+      state.databases.databases = state.databases.databases.filter(database => database.id !== value.id);
     }),
 });

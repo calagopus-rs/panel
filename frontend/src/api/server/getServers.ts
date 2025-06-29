@@ -2,7 +2,7 @@ import { Server } from '@/api/types';
 import { axiosInstance, getPaginationSet, PaginatedResult } from '@/api/axios';
 import { rawDataToServerObject } from '@/api/transformers';
 
-export async function getServers(): Promise<PaginatedResult<Server>> {
+export default async (): Promise<PaginatedResult<Server>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/client')
@@ -14,4 +14,4 @@ export async function getServers(): Promise<PaginatedResult<Server>> {
       )
       .catch(reject);
   });
-}
+};

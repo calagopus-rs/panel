@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { use } from 'react';
 import ServerItem from './ServerItem';
 import { Server } from '@/api/types';
-import { getServers } from '@/api/server/getServers';
+import getServers from '@/api/server/getServers';
 
 function ServerItems({ serverListPromise }: { serverListPromise: Promise<PaginatedResult<Server>> }) {
   const { serverListDesign } = useSettingsStore(state => state);

@@ -5,7 +5,7 @@ interface Response {
   socket: string;
 }
 
-export async function getWebsocketToken(uuid: string): Promise<Response> {
+export default async (uuid: string): Promise<Response> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/websocket`)
@@ -17,4 +17,4 @@ export async function getWebsocketToken(uuid: string): Promise<Response> {
       )
       .catch(reject);
   });
-}
+};

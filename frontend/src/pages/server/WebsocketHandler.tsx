@@ -1,4 +1,4 @@
-import { getWebsocketToken } from '@/api/server/getWebsocketToken';
+import getWebsocketToken from '@/api/server/getWebsocketToken';
 import { Websocket } from '@/plugins/Websocket';
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';

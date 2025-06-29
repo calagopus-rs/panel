@@ -1,4 +1,4 @@
-import { getFileContent } from '@/api/server/files/getFileContent';
+import getFileContent from '@/api/server/files/getFileContent';
 import Spinner from '@/elements/Spinner';
 import { getLanguageFromExtension } from '@/lib/files';
 import { urlPathToAction, urlPathToFilePath } from '@/lib/path';
@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
-import { saveFileContent } from '@/api/server/files/saveFileContent';
+import saveFileContent from '@/api/server/files/saveFileContent';
 import FileNameDialog from './dialogs/FileNameDialog';
 
 export default () => {

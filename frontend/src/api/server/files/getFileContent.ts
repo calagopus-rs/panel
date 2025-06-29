@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-export async function getFileContent(uuid: string, path: string): Promise<string> {
+export default async (uuid: string, path: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/files/contents`, {
@@ -10,4 +10,4 @@ export async function getFileContent(uuid: string, path: string): Promise<string
       .then(({ data }) => resolve(data))
       .catch(reject);
   });
-}
+};

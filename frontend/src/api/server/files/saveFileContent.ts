@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-export async function saveFileContent(uuid: string, path: string, content: string): Promise<void> {
+export default async (uuid: string, path: string, content: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/files/write`, content, {
@@ -12,4 +12,4 @@ export async function saveFileContent(uuid: string, path: string, content: strin
       .then(() => resolve())
       .catch(reject);
   });
-}
+};

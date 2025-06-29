@@ -1,5 +1,4 @@
-import { getDatabases } from '@/api/server/databases/getDatabases';
-import { Button } from '@/elements/button';
+import getDatabases from '@/api/server/databases/getDatabases';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import CopyOnClick from '@/elements/CopyOnClick';
@@ -7,6 +6,7 @@ import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
+import CreateDatabaseButton from './CreateDatabaseButton';
 
 export default () => {
   const server = useServerStore(state => state.data);
@@ -26,7 +26,7 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-header font-bold text-white">Databases</h1>
         <div className="flex gap-2">
-          <Button>Create new</Button>
+          <CreateDatabaseButton />
         </div>
       </div>
       <Table>
