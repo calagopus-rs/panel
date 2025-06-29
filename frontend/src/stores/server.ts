@@ -7,6 +7,7 @@ import { createStatusSlice, StatusSlice } from './slices/status';
 import { createStatsSlice, StatsSlice } from './slices/stats';
 import { createFilesSlice, FilesSlice } from './slices/files';
 import { createDatabasesSlice, DatabasesSlice } from './slices/databases';
+import { createSchedulesSlice, SchedulesSlice } from './slices/schedules';
 
 interface ServerStore {
   data?: Server;
@@ -30,6 +31,7 @@ interface ServerStore {
 
   databases: DatabasesSlice;
   files: FilesSlice;
+  schedules: SchedulesSlice;
 }
 
 export const useServerStore = create<ServerStore>()(
@@ -78,6 +80,7 @@ export const useServerStore = create<ServerStore>()(
 
     databases: createDatabasesSlice(set),
     files: createFilesSlice(set),
+    schedules: createSchedulesSlice(set),
 
     clear: () => {
       set({
@@ -90,6 +93,7 @@ export const useServerStore = create<ServerStore>()(
 
         databases: createDatabasesSlice(set),
         files: createFilesSlice(set),
+        schedules: createSchedulesSlice(set),
       });
     },
   })),

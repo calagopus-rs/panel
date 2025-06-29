@@ -1,83 +1,38 @@
+import getSchedules from '@/api/server/schedules/getSchedules';
 import { Button } from '@/elements/button';
-import Code from '@/elements/Code';
 import Container from '@/elements/Container';
-import Table, {
-  ContentWrapper,
-  NoItems,
-  Pagination,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/elements/table/Table';
-import { formatTimestamp } from '@/lib/time';
+import Spinner from '@/elements/Spinner';
+import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader, TableRow } from '@/elements/table/Table';
+import Tooltip from '@/elements/Tooltip';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useServerStore } from '@/stores/server';
 import CronExpressionParser, { CronDate } from 'cron-parser';
 import cronstrue from 'cronstrue';
+import { useEffect, useState } from 'react';
 
-interface CronObject {
-  minute: string;
-  hour: string;
-  day_of_month: string;
-  month: string;
-  day_of_week: string;
-}
+const ActiveBadge = () => (
+  <div className="inline-block rounded bg-green-500 px-2 py-1 text-xs font-bold text-green-100">Active</div>
+);
 
-const schedules = [
-  {
-    id: 1,
-    name: 'Schedule 1',
-    last_run: new Date('2023-01-01 00:00:00'),
-    cron: {
-      minute: '0',
-      hour: '*',
-      day_of_month: '*',
-      month: '*',
-      day_of_week: '*',
-    },
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'Schedule 2',
-    last_run: new Date('2024-01-01 00:00:00'),
-    cron: {
-      minute: '0',
-      hour: '*',
-      day_of_month: '*',
-      month: '*',
-      day_of_week: '*',
-    },
-    status: 'inactive',
-  },
-  {
-    id: 3,
-    name: 'Schedule 3',
-    last_run: new Date('2025-06-17 14:00:00'),
-    cron: {
-      minute: '0',
-      hour: '0',
-      day_of_month: '*',
-      month: '7-12',
-      day_of_week: '*',
-    },
-    status: 'inactive',
-  },
-];
-
-const paginationDataset = {
-  items: schedules,
-  pagination: {
-    total: schedules.length,
-    count: schedules.length,
-    perPage: 10,
-    currentPage: 1,
-    totalPages: 1,
-  },
-};
+const InactiveBadge = () => (
+  <div className="inline-block rounded bg-red-500 px-2 py-1 text-xs font-bold text-red-100">Inactive</div>
+);
 
 export default () => {
+  const server = useServerStore(state => state.data);
+  const { schedules, setSchedules } = useServerStore(state => state.schedules);
+
+  const [loading, setLoading] = useState(schedules.length === 0);
+
+  useEffect(() => {
+    getSchedules(server.uuid).then(data => {
+      setSchedules(data);
+      setLoading(false);
+    });
+  }, []);
+
   const toCronExpression = (cron: CronObject) => {
-    return `${cron.minute} ${cron.hour} ${cron.day_of_month} ${cron.month} ${cron.day_of_week}`;
+    return `${cron.minute} ${cron.hour} ${cron.dayOfMonth} ${cron.month} ${cron.dayOfWeek}`;
   };
 
   const getNextRun = (cron: CronObject): CronDate => {
@@ -94,54 +49,52 @@ export default () => {
         </div>
       </div>
       <Table>
-        <ContentWrapper checked={false}>
-          <Pagination data={paginationDataset} onPageSelect={() => {}}>
-            <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Frequency'} />
-                  <TableHeader name={'Last Run'} />
-                  <TableHeader name={'Next Run'} />
-                  <TableHeader name={'Status'} />
-                </TableHead>
+        <ContentWrapper>
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <TableHead>
+                <TableHeader name={'Name'} />
+                <TableHeader name={'Frequency'} />
+                <TableHeader name={'Last Run'} />
+                <TableHeader name={'Next Run'} />
+                <TableHeader name={'Status'} />
+              </TableHead>
 
-                <TableBody>
-                  {schedules.map(schedule => (
-                    <TableRow key={schedule.id}>
-                      <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
-                        <Code>{schedule.id}</Code>
-                      </td>
+              <TableBody>
+                {schedules.map(schedule => (
+                  <TableRow key={schedule.id}>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={schedule.name}>
+                      {schedule.name}
+                    </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={schedule.name}>
-                        {schedule.name}
-                      </td>
-
-                      <td
-                        className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap"
-                        title={toCronExpression(schedule.cron)}
-                      >
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <Tooltip content={toCronExpression(schedule.cron)}>
                         {cronstrue.toString(toCronExpression(schedule.cron))}
-                      </td>
+                      </Tooltip>
+                    </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                        {formatTimestamp(schedule.last_run)}
-                      </td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <Tooltip content={schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : 'N/A'}>
+                        {schedule.lastRunAt ? formatTimestamp(schedule.lastRunAt) : 'N/A'}
+                      </Tooltip>
+                    </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <Tooltip content={formatDateTime(getNextRun(schedule.cron))}>
                         {formatTimestamp(getNextRun(schedule.cron))}
-                      </td>
+                      </Tooltip>
+                    </td>
 
-                      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{schedule.status}</td>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </table>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      {schedule.isActive ? <ActiveBadge /> : <InactiveBadge />}
+                    </td>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </table>
 
-              {schedules.length === 0 && <NoItems />}
-            </div>
-          </Pagination>
+            {loading ? <Spinner.Centered /> : schedules.length === 0 ? <NoItems /> : null}
+          </div>
         </ContentWrapper>
       </Table>
     </Container>

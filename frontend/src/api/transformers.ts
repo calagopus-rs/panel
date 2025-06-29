@@ -1,5 +1,4 @@
 import { FractalResponseData, FractalResponseList } from './axios';
-import { Allocation, FileObject, Server, ServerBackup, ServerDatabase, ServerEggVariable, ServerStats } from './types';
 
 export const rawDataToServerAllocation = (data: FractalResponseData): Allocation => ({
   id: data.attributes.id,
@@ -123,4 +122,37 @@ export const rawDataToServerDatabase = (data: any): ServerDatabase => ({
   connectionString: `${data.host.address}:${data.host.port}`,
   allowConnectionsFrom: data.connections_from,
   password: data.relationships.password?.attributes?.password,
+});
+
+export const rawDataToServerTask = (data: any): Task => ({
+  id: data.id,
+  sequenceId: data.sequence_id,
+  action: data.action,
+  payload: data.payload,
+  timeOffset: data.time_offset,
+  isQueued: data.is_queued,
+  continueOnFailure: data.continue_on_failure,
+  createdAt: new Date(data.created_at),
+  updatedAt: new Date(data.updated_at),
+});
+
+export const rawDataToServerSchedule = (data: any): Schedule => ({
+  id: data.id,
+  name: data.name,
+  cron: {
+    dayOfWeek: data.cron.day_of_week,
+    month: data.cron.month,
+    dayOfMonth: data.cron.day_of_month,
+    hour: data.cron.hour,
+    minute: data.cron.minute,
+  },
+  isActive: data.is_active,
+  isProcessing: data.is_processing,
+  onlyWhenOnline: data.only_when_online,
+  lastRunAt: data.last_run_at ? new Date(data.last_run_at) : null,
+  nextRunAt: data.next_run_at ? new Date(data.next_run_at) : null,
+  createdAt: new Date(data.created_at),
+  updatedAt: new Date(data.updated_at),
+
+  tasks: (data.relationships?.tasks?.data || []).map((row: any) => rawDataToServerTask(row.attributes)),
 });

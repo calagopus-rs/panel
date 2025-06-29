@@ -104,3 +104,38 @@ interface ServerDatabase {
   allowConnectionsFrom: string;
   password?: string;
 }
+
+interface CronObject {
+  minute: string;
+  hour: string;
+  month: string;
+  dayOfMonth: string;
+  dayOfWeek: string;
+}
+
+interface Schedule {
+  id: number;
+  name: string;
+  cron: CronObject;
+  isActive: boolean;
+  isProcessing: boolean;
+  onlyWhenOnline: boolean;
+  lastRunAt: Date | null;
+  nextRunAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+
+  tasks: Task[];
+}
+
+interface Task {
+  id: number;
+  sequenceId: number;
+  action: string;
+  payload: string;
+  timeOffset: number;
+  isQueued: boolean;
+  continueOnFailure: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
