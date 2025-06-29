@@ -1,4 +1,3 @@
-import { Server } from '@/api/types';
 import { axiosInstance } from '@/api/axios';
 import { rawDataToServerObject } from '@/api/transformers';
 

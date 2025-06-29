@@ -1,5 +1,3 @@
-import { ServerDatabase } from '@/api/types';
-
 export interface DatabasesSlice {
   databases: ServerDatabase[];
 

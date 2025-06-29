@@ -1,4 +1,3 @@
-import { FileObject } from '@/api/types';
 import { axiosInstance } from '@/api/axios';
 import { rawDataToFileObject } from '@/api/transformers';
 

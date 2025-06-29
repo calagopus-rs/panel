@@ -1,4 +1,3 @@
-import { FileObject } from '@/api/types';
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } from '@/elements/table/Table';

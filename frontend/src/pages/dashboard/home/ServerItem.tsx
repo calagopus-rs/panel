@@ -1,5 +1,4 @@
 import getServerResourceUsage from '@/api/server/getServerResourceUsage';
-import { Server, ServerPowerState, ServerStats } from '@/api/types';
 import CopyOnClick from '@/elements/CopyOnClick';
 import Spinner from '@/elements/Spinner';
 import { formatAllocation, getPrimaryAllocation } from '@/lib/server';

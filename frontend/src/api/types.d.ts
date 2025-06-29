@@ -1,12 +1,6 @@
-export type ServerStatus =
-  | 'installing'
-  | 'install_failed'
-  | 'reinstall_failed'
-  | 'suspended'
-  | 'restoring_backup'
-  | null;
+type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
 
-export interface ServerBackup {
+interface ServerBackup {
   uuid: string;
   isSuccessful: boolean;
   isLocked: boolean;
@@ -18,7 +12,7 @@ export interface ServerBackup {
   completedAt: Date | null;
 }
 
-export interface ServerEggVariable {
+interface ServerEggVariable {
   name: string;
   description: string;
   envVariable: string;
@@ -28,7 +22,7 @@ export interface ServerEggVariable {
   rules: string[];
 }
 
-export interface Allocation {
+interface Allocation {
   id: number;
   ip: string;
   alias: string | null;
@@ -37,7 +31,7 @@ export interface Allocation {
   isDefault: boolean;
 }
 
-export interface Server {
+interface Server {
   id: string;
   internalId: number | string;
   uuid: string;
@@ -71,7 +65,7 @@ export interface Server {
   allocations: Allocation[];
 }
 
-export interface FileObject {
+interface FileObject {
   key: string;
   name: string;
   mode: string;
@@ -87,9 +81,9 @@ export interface FileObject {
   isEditable: () => boolean;
 }
 
-export type ServerPowerState = 'offline' | 'starting' | 'running' | 'stopping';
+type ServerPowerState = 'offline' | 'starting' | 'running' | 'stopping';
 
-export interface ServerStats {
+interface ServerStats {
   status: ServerPowerState;
   isSuspended: boolean;
   memoryUsageInBytes: number;
@@ -100,9 +94,9 @@ export interface ServerStats {
   uptime: number;
 }
 
-export type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
+type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
 
-export interface ServerDatabase {
+interface ServerDatabase {
   id: string;
   name: string;
   username: string;

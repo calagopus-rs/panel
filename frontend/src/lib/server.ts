@@ -1,5 +1,3 @@
-import { Allocation } from '@/api/types';
-
 export function getPrimaryAllocation(allocations: Allocation[]) {
   return allocations.find(allocation => allocation.isDefault);
 }

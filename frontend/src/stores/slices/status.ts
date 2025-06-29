@@ -1,5 +1,3 @@
-import { ServerPowerState } from '@/api/types';
-
 export interface StatusSlice {
   value: ServerPowerState;
   setServerStatus: (status: ServerPowerState) => void;

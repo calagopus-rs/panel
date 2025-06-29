@@ -1,4 +1,3 @@
-import { Server } from '@/api/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import isEqual from 'react-fast-compare';

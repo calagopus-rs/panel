@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { use } from 'react';
 import ServerItem from './ServerItem';
-import { Server } from '@/api/types';
 import getServers from '@/api/server/getServers';
 
 function ServerItems({ serverListPromise }: { serverListPromise: Promise<PaginatedResult<Server>> }) {

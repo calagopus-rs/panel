@@ -10,7 +10,6 @@ import CreateDatabaseButton from './CreateDatabaseButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis } from '@fortawesome/free-solid-svg-icons';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import { ServerDatabase } from '@/api/types';
 import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
 import deleteDatabase from '@/api/server/databases/deleteDatabase';
 import { useToast } from '@/elements/Toast';

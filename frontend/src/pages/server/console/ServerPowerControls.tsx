@@ -1,4 +1,3 @@
-import { PowerAction } from '@/api/types';
 import { Button } from '@/elements/button';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';

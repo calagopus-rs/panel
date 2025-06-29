@@ -1,6 +1,5 @@
 import { axiosInstance } from '@/api/axios';
 import { rawDataToServerDatabase } from '@/api/transformers';
-import { ServerDatabase } from '@/api/types';
 
 export default async (
   uuid: string,

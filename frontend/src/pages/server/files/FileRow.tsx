@@ -1,4 +1,3 @@
-import { FileObject } from '@/api/types';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
 import Tooltip from '@/elements/Tooltip';

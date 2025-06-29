@@ -1,5 +1,3 @@
-import { ServerPowerState } from '@/api/types';
-
 export interface StatsSlice {
   memory: number;
   cpu: number;

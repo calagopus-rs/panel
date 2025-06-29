@@ -1,4 +1,3 @@
-import { ServerStats } from '@/api/types';
 import { axiosInstance, FractalResponseData } from '@/api/axios';
 import { rawDataToServerStats } from '@/api/transformers';
 
