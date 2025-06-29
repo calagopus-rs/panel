@@ -6,6 +6,11 @@ export default ({ content, children }: { content: string; children: React.ReactN
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
 
+    if (!window.isSecureContext) {
+      addToast('This feature is only available in secure contexts (HTTPS).', 'error');
+      return;
+    }
+
     try {
       navigator.clipboard.writeText(content);
       addToast('Copied to clipboard');
