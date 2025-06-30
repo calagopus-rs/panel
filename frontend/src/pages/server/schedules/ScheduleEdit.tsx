@@ -17,7 +17,9 @@ export default () => {
   }, [params.id]);
 
   return !schedule ? (
-    <Spinner.Centered />
+    <div className="w-full">
+      <Spinner.Centered />
+    </div>
   ) : (
     <Container>
       <div className="mb-4 flex justify-between">

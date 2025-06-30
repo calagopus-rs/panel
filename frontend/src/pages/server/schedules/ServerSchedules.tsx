@@ -1,11 +1,11 @@
 import getSchedules from '@/api/server/schedules/getSchedules';
-import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
+import CreateScheduleButton from './CreateScheduleButton';
 
 export default () => {
   const server = useServerStore(state => state.data);
@@ -25,7 +25,7 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Schedules</h1>
         <div className="flex gap-2">
-          <Button>Create new</Button>
+          <CreateScheduleButton />
         </div>
       </div>
       <Table>

@@ -87,7 +87,7 @@ export default () => {
               <FontAwesomeIcon icon={faDatabase} />
               <span>Databases</span>
             </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/schedules`} end>
+            <Sidebar.Link to={`/server/${params.id}/schedules`}>
               <FontAwesomeIcon icon={faStopwatch} />
               <span>Schedules</span>
             </Sidebar.Link>
