@@ -7,9 +7,11 @@ import getSchedule from '@/api/server/schedules/getSchedule';
 import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faClockRotateLeft, faHourglass } from '@fortawesome/free-solid-svg-icons';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import { getNextCronRun } from '@/lib/server';
 import AnimatedHourglass from '@/elements/AnimatedHourglass';
+import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/elements/table/Table';
+import Code from '@/elements/Code';
 
 function DetailCard({
   icon,
@@ -61,7 +63,7 @@ export default () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="mb-4 grid grid-cols-3 gap-4">
         <DetailCard
           icon={
             schedule.isProcessing ? (
@@ -88,6 +90,42 @@ export default () => {
           subtext={formatTimestamp(getNextCronRun(schedule.cron))}
         />
       </div>
+
+      <Table>
+        <div className="overflow-x-auto">
+          <table className="w-full table-auto">
+            <TableHead>
+              <TableHeader name={'Action'} />
+              <TableHeader name={'Payload'} />
+              <TableHeader name={'Offset'} />
+              <TableHeader name={'Queued'} />
+              <TableHeader name={'Continue on Failure'} />
+            </TableHead>
+
+            <TableBody>
+              {schedule.tasks.map(task => (
+                <TableRow key={task.id}>
+                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{task.action}</td>
+                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                    <Code>{task.payload}</Code>
+                  </td>
+                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                    {formatMiliseconds(task.timeOffset * 1000)}
+                  </td>
+                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                    {task.isQueued ? 'Yes' : 'No'}
+                  </td>
+                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                    {task.continueOnFailure ? 'Yes' : 'No'}
+                  </td>
+                </TableRow>
+              ))}
+            </TableBody>
+          </table>
+
+          {schedule.tasks.length === 0 ? <NoItems /> : null}
+        </div>
+      </Table>
     </Container>
   );
 };

@@ -1,5 +1,6 @@
-import { formatAllocation, formatUptime, getPrimaryAllocation } from '@/lib/server';
+import { formatAllocation, getPrimaryAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
+import { formatMiliseconds } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
 import {
   faClock,
@@ -51,7 +52,7 @@ export default () => {
       <StatCard
         icon={faClock}
         label="Uptime"
-        value={stats.state === 'offline' ? 'Offline' : formatUptime(stats.uptime || 0)}
+        value={stats.state === 'offline' ? 'Offline' : formatMiliseconds(stats.uptime || 0)}
       />
       <StatCard
         icon={faMicrochip}
