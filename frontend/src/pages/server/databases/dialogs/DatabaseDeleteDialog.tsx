@@ -23,9 +23,7 @@ export default ({ databaseName, onDeleted, open, onClose }: Props) => {
         Deleting a database is a permanent action, it cannot be undone. This will permanently delete the
         <Code>{databaseName}</Code> database and remove all associated data.
       </p>
-      <label htmlFor={'databaseName'} className={'block mt-3'}>
-        Database Name
-      </label>
+      <Input.Label htmlFor={'databaseName'}>Database Name</Input.Label>
       <Input.Text
         id={'databaseName'}
         name={'databaseName'}

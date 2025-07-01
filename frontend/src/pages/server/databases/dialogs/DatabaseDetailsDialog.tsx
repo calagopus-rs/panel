@@ -13,29 +13,19 @@ export default ({ database, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Database connection details'} onClose={onClose} open={open}>
-      <label htmlFor={'endpoint'} className={'block mt-3'}>
-        Endpoint
-      </label>
+      <Input.Label htmlFor={'endpoint'}>Endpoint</Input.Label>
       <Input.Text id={'endpoint'} name={'endpoint'} value={database.connectionString} disabled />
 
-      <label htmlFor={'connectionsFrom'} className={'block mt-3'}>
-        Connections From
-      </label>
+      <Input.Label htmlFor={'connectionsFrom'}>Connections From</Input.Label>
       <Input.Text id={'connectionsFrom'} name={'connectionsFrom'} value={database.allowConnectionsFrom} disabled />
 
-      <label htmlFor={'username'} className={'block mt-3'}>
-        Username
-      </label>
+      <Input.Label htmlFor={'username'}>Username</Input.Label>
       <Input.Text id={'username'} name={'username'} value={database.username} disabled />
 
-      <label htmlFor={'password'} className={'block mt-3'}>
-        Password
-      </label>
+      <Input.Label htmlFor={'password'}>Password</Input.Label>
       <Input.Text id={'password'} name={'password'} value={database.password} disabled />
 
-      <label htmlFor={'jdbcConnectionString'} className={'block mt-3'}>
-        JDBC Connection String
-      </label>
+      <Input.Label htmlFor={'jdbcConnectionString'}>JDBC Connection String</Input.Label>
       <Input.Text id={'jdbcConnectionString'} name={'jdbcConnectionString'} value={jdbcConnectionString} disabled />
 
       <Dialog.Footer>

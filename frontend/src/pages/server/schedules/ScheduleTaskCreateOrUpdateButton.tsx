@@ -44,9 +44,7 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
   return (
     <>
       <Dialog title={task ? 'Update Task' : 'Create Task'} onClose={() => setOpen(false)} open={open}>
-        <label htmlFor={'taskAction'} className={'block mt-3 font-bold'}>
-          Action
-        </label>
+        <Input.Label htmlFor={'taskAction'}>Action</Input.Label>
         <Input.Dropdown
           id={'taskAction'}
           options={[
@@ -58,9 +56,7 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
           onChange={e => setTaskAction(e.target.value)}
         />
 
-        <label htmlFor={'taskPayload'} className={'block mt-3 font-bold'}>
-          Payload
-        </label>
+        <Input.Label htmlFor={'taskPayload'}>Payload</Input.Label>
         <Input.Text
           id={'taskPayload'}
           name={'taskPayload'}
@@ -69,9 +65,7 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
           onChange={e => setTaskPayload(e.target.value)}
         />
 
-        <label htmlFor={'taskOffset'} className={'block mt-3 font-bold'}>
-          Time Offset
-        </label>
+        <Input.Label htmlFor={'taskOffset'}>Time Offset</Input.Label>
         <Input.Text
           id={'taskOffset'}
           name={'taskOffset'}
@@ -81,9 +75,7 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
           onChange={e => setTaskOffset(parseInt(e.target.value))}
         />
 
-        <label htmlFor={'taskContinueOnFailure'} className={'block mt-3 font-bold'}>
-          Continue On Failure
-        </label>
+        <Input.Label htmlFor={'taskContinueOnFailure'}>Continue On Failure</Input.Label>
         <Input.Switch
           description={'Future tasks will be run when this task fails.'}
           name={'taskContinueOnFailure'}

@@ -48,9 +48,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
   return (
     <>
       <Dialog title={schedule ? 'Update Schedule' : 'Create Schedule'} onClose={() => setOpen(false)} open={open}>
-        <label htmlFor={'scheduleName'} className={'block mt-3 font-bold'}>
-          Schedule Name
-        </label>
+        <Input.Label htmlFor={'scheduleName'}>Schedule Name</Input.Label>
         <Input.Text
           id={'scheduleName'}
           name={'scheduleName'}
@@ -61,9 +59,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
         />
 
         <div className={'grid grid-cols-2 gap-2 mt-2 p-2 border-2 border-gray-500 rounded'}>
-          <label htmlFor={'cronMinutes'} className={'block mt-3 font-bold'}>
-            Cron Minutes
-          </label>
+          <Input.Label htmlFor={'cronMinutes'}>Cron Minutes</Input.Label>
           <Input.Text
             id={'cronMinutes'}
             name={'cronMinutes'}
@@ -72,9 +68,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
             onChange={e => setCronMinutes(e.target.value)}
           />
 
-          <label htmlFor={'cronHours'} className={'block mt-3 font-bold'}>
-            Cron Hours
-          </label>
+          <Input.Label htmlFor={'cronHours'}>Cron Hours</Input.Label>
           <Input.Text
             id={'cronHours'}
             name={'cronHours'}
@@ -83,9 +77,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
             onChange={e => setCronHours(e.target.value)}
           />
 
-          <label htmlFor={'cronDayOfMonth'} className={'block mt-3 font-bold'}>
-            Cron Day of Month
-          </label>
+          <Input.Label htmlFor={'cronDayOfMonth'}>Cron Day of Month</Input.Label>
           <Input.Text
             id={'cronDayOfMonth'}
             name={'cronDayOfMonth'}
@@ -94,9 +86,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
             onChange={e => setCronDayOfMonth(e.target.value)}
           />
 
-          <label htmlFor={'cronMonth'} className={'block mt-3 font-bold'}>
-            Cron Month
-          </label>
+          <Input.Label htmlFor={'cronMonth'}>Cron Month</Input.Label>
           <Input.Text
             id={'cronMonth'}
             name={'cronMonth'}
@@ -105,9 +95,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
             onChange={e => setCronMonth(e.target.value)}
           />
 
-          <label htmlFor={'cronDayOfWeek'} className={'block mt-3 font-bold'}>
-            Cron Day of Week
-          </label>
+          <Input.Label htmlFor={'cronDayOfWeek'}>Cron Day of Week</Input.Label>
           <Input.Text
             id={'cronDayOfWeek'}
             name={'cronDayOfWeek'}
@@ -117,9 +105,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
           />
         </div>
 
-        <label htmlFor={'runOnline'} className={'block mt-3 font-bold'}>
-          Run Online
-        </label>
+        <Input.Label htmlFor={'runOnline'}>Run Online</Input.Label>
         <Input.Switch
           description={'Only execute this schedule when the server is in a running state.'}
           name={'runOnline'}
@@ -127,9 +113,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
           onChange={e => setRunOnline(e.target.checked)}
         />
 
-        <label htmlFor={'enabled'} className={'block mt-3 font-bold'}>
-          Enabled
-        </label>
+        <Input.Label htmlFor={'enabled'}>Enabled</Input.Label>
         <Input.Switch
           description={'Enable or disable this schedule.'}
           name={'enabled'}

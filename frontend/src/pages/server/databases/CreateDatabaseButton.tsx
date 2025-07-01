@@ -31,9 +31,7 @@ export default () => {
   return (
     <>
       <Dialog title={'Create Database'} onClose={() => setOpen(false)} open={open}>
-        <label htmlFor={'dbName'} className={'block mt-3'}>
-          Database Name
-        </label>
+        <Input.Label htmlFor={'dbName'}>Database Name</Input.Label>
         <Input.Text
           id={'dbName'}
           name={'dbName'}
@@ -42,9 +40,7 @@ export default () => {
           onChange={e => setDbName(e.target.value)}
         />
 
-        <label htmlFor={'connectionsFrom'} className={'block mt-3'}>
-          Connections From
-        </label>
+        <Input.Label htmlFor={'connectionsFrom'}>Connections From</Input.Label>
         <Input.Text
           id={'connectionsFrom'}
           name={'connectionsFrom'}
