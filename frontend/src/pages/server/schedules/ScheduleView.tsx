@@ -1,4 +1,3 @@
-import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
@@ -6,6 +5,35 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClock, faClockRotateLeft, faHourglass } from '@fortawesome/free-solid-svg-icons';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { getNextCronRun } from '@/lib/server';
+import AnimatedHourglass from '@/elements/AnimatedHourglass';
+
+function DetailCard({
+  icon,
+  label,
+  value,
+  subtext,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  subtext?: string;
+}) {
+  return (
+    <div className="bg-gray-700 p-4 rounded flex gap-4">
+      <div className="text-gray-100 bg-gray-600 p-4 rounded-lg">{icon}</div>
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-400 font-bold">{label}</span>
+        <span className="text-lg font-bold">
+          {value} {subtext && <span className="text-sm text-gray-400">({subtext})</span>}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 export default () => {
   const params = useParams<'id'>();
@@ -31,6 +59,34 @@ export default () => {
             onUpdate={updatedSchedule => setSchedule(updatedSchedule)}
           />
         </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <DetailCard
+          icon={
+            schedule.isProcessing ? (
+              <AnimatedHourglass />
+            ) : schedule.isActive ? (
+              <FontAwesomeIcon size={'xl'} icon={faHourglass} className="text-green-500" />
+            ) : (
+              <FontAwesomeIcon size={'xl'} icon={faHourglass} className="text-red-500" />
+            )
+          }
+          label="Status"
+          value={schedule.isProcessing ? 'Processing' : schedule.isActive ? 'Active' : 'Inactive'}
+        />
+        <DetailCard
+          icon={<FontAwesomeIcon size={'xl'} icon={faClockRotateLeft} />}
+          label="Last Run"
+          value={schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : 'N/A'}
+          subtext={schedule.lastRunAt ? formatTimestamp(schedule.lastRunAt).trim() : 'N/A'}
+        />
+        <DetailCard
+          icon={<FontAwesomeIcon size={'xl'} icon={faClock} />}
+          label="Next Run"
+          value={formatDateTime(getNextCronRun(schedule.cron))}
+          subtext={formatTimestamp(getNextCronRun(schedule.cron))}
+        />
       </div>
     </Container>
   );
