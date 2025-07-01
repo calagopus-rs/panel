@@ -5,6 +5,7 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
+import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
 
 export default () => {
   const params = useParams<'id'>();
@@ -25,7 +26,10 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">{schedule.name}</h1>
         <div className="flex gap-2">
-          <Button>Save</Button>
+          <ScheduleCreateOrUpdateButton
+            schedule={schedule}
+            onUpdate={updatedSchedule => setSchedule(updatedSchedule)}
+          />
         </div>
       </div>
     </Container>

@@ -5,7 +5,7 @@ import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } fro
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
-import CreateScheduleButton from './CreateScheduleButton';
+import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
 
 export default () => {
   const server = useServerStore(state => state.data);
@@ -25,7 +25,7 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Schedules</h1>
         <div className="flex gap-2">
-          <CreateScheduleButton />
+          <ScheduleCreateOrUpdateButton />
         </div>
       </div>
       <Table>

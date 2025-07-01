@@ -7,33 +7,38 @@ import { useToast } from '@/elements/Toast';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
-export default () => {
+export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (schedule: Schedule) => void }) => {
   const server = useServerStore(state => state.data);
   const { addSchedule } = useServerStore(state => state.schedules);
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);
 
-  const [scheduleName, setScheduleName] = useState('');
-  const [cronMinutes, setCronMinutes] = useState('*/5');
-  const [cronHours, setCronHours] = useState('*');
-  const [cronDayOfMonth, setCronDayOfMonth] = useState('*');
-  const [cronMonth, setCronMonth] = useState('*');
-  const [cronDayOfWeek, setCronDayOfWeek] = useState('*');
-  const [runOnline, setRunOnline] = useState(true);
-  const [enabled, setEnabled] = useState(true);
+  const [scheduleName, setScheduleName] = useState(schedule?.name ?? '');
+  const [cronMinutes, setCronMinutes] = useState(schedule?.cron.minute ?? '*');
+  const [cronHours, setCronHours] = useState(schedule?.cron.hour ?? '*');
+  const [cronDayOfMonth, setCronDayOfMonth] = useState(schedule?.cron.dayOfMonth ?? '*');
+  const [cronMonth, setCronMonth] = useState(schedule?.cron.month ?? '*');
+  const [cronDayOfWeek, setCronDayOfWeek] = useState(schedule?.cron.dayOfWeek ?? '*');
+  const [runOnline, setRunOnline] = useState(schedule?.onlyWhenOnline ?? true);
+  const [enabled, setEnabled] = useState(schedule?.isActive ?? true);
 
   const submit = () => {
     createOrUpdateSchedule(server.id, {
+      id: schedule?.id,
       name: scheduleName,
       cron: { minute: cronMinutes, hour: cronHours, day: cronDayOfMonth, month: cronMonth, weekday: cronDayOfWeek },
       onlyWhenOnline: runOnline,
       isActive: enabled,
     })
-      .then(schedule => {
-        addSchedule(schedule);
+      .then(resSchedule => {
+        if (schedule) {
+          onUpdate?.(resSchedule);
+        } else {
+          addSchedule(resSchedule);
+        }
         setOpen(false);
-        addToast('Schedule created.', 'success');
+        addToast(schedule ? 'Schedule updated.' : 'Schedule created.', 'success');
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -42,7 +47,7 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Create Schedule'} onClose={() => setOpen(false)} open={open}>
+      <Dialog title={schedule ? 'Update Schedule' : 'Create Schedule'} onClose={() => setOpen(false)} open={open}>
         <label htmlFor={'scheduleName'} className={'block mt-3 font-bold'}>
           Schedule Name
         </label>
@@ -51,6 +56,7 @@ export default () => {
           name={'scheduleName'}
           placeholder={'A descriptive name for your schedule.'}
           autoFocus
+          value={scheduleName}
           onChange={e => setScheduleName(e.target.value)}
         />
 
@@ -133,14 +139,14 @@ export default () => {
 
         <Dialog.Footer>
           <Button style={Button.Styles.Green} onClick={submit}>
-            Create
+            {schedule ? 'Update' : 'Create'}
           </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button onClick={() => setOpen(true)}>Create new</Button>
+      <Button onClick={() => setOpen(true)}>{schedule ? 'Edit' : 'Create new'}</Button>
     </>
   );
 };
