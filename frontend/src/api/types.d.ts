@@ -108,8 +108,8 @@ interface ServerDatabase {
 interface CronObject {
   minute: string;
   hour: string;
-  month: string;
   dayOfMonth: string;
+  month: string;
   dayOfWeek: string;
 }
 

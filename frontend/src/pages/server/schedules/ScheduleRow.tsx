@@ -1,8 +1,8 @@
 import { TableRow } from '@/elements/table/Table';
 import Tooltip from '@/elements/Tooltip';
+import { getNextCronRun, toCronExpression } from '@/lib/server';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
-import CronExpressionParser, { CronDate } from 'cron-parser';
 import cronstrue from 'cronstrue';
 import { useNavigate } from 'react-router';
 
@@ -17,15 +17,6 @@ const InactiveBadge = () => (
 export default ({ schedule }: { schedule: Schedule }) => {
   const navigate = useNavigate();
   const server = useServerStore(state => state.data);
-
-  const toCronExpression = (cron: CronObject) => {
-    return `${cron.minute} ${cron.hour} ${cron.dayOfMonth} ${cron.month} ${cron.dayOfWeek}`;
-  };
-
-  const getNextRun = (cron: CronObject): CronDate => {
-    const interval = CronExpressionParser.parse(toCronExpression(cron));
-    return interval.next();
-  };
 
   return (
     <TableRow className="cursor-pointer" onClick={() => navigate(`/server/${server.id}/schedules/${schedule.id}`)}>
@@ -46,8 +37,8 @@ export default ({ schedule }: { schedule: Schedule }) => {
       </td>
 
       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-        <Tooltip content={formatDateTime(getNextRun(schedule.cron))}>
-          {formatTimestamp(getNextRun(schedule.cron))}
+        <Tooltip content={formatDateTime(getNextCronRun(schedule.cron))}>
+          {formatTimestamp(getNextCronRun(schedule.cron))}
         </Tooltip>
       </td>
 
