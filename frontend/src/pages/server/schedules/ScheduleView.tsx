@@ -95,6 +95,7 @@ export default () => {
         <div className="overflow-x-auto">
           <table className="w-full table-auto">
             <TableHead>
+              <TableHeader name={'Sequence #'} />
               <TableHeader name={'Action'} />
               <TableHeader name={'Payload'} />
               <TableHeader name={'Offset'} />
@@ -103,23 +104,28 @@ export default () => {
             </TableHead>
 
             <TableBody>
-              {schedule.tasks.map(task => (
-                <TableRow key={task.id}>
-                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{task.action}</td>
-                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                    <Code>{task.payload}</Code>
-                  </td>
-                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                    {formatMiliseconds(task.timeOffset * 1000)}
-                  </td>
-                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                    {task.isQueued ? 'Yes' : 'No'}
-                  </td>
-                  <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                    {task.continueOnFailure ? 'Yes' : 'No'}
-                  </td>
-                </TableRow>
-              ))}
+              {schedule.tasks
+                .sort((a, b) => a.sequenceId - b.sequenceId)
+                .map(task => (
+                  <TableRow key={task.id}>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <Code>{task.sequenceId}</Code>
+                    </td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{task.action}</td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      <Code>{task.payload}</Code>
+                    </td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      {formatMiliseconds(task.timeOffset * 1000)}
+                    </td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      {task.isQueued ? 'Yes' : 'No'}
+                    </td>
+                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                      {task.continueOnFailure ? 'Yes' : 'No'}
+                    </td>
+                  </TableRow>
+                ))}
             </TableBody>
           </table>
 
