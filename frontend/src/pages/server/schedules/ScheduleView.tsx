@@ -12,6 +12,8 @@ import { getNextCronRun } from '@/lib/server';
 import AnimatedHourglass from '@/elements/AnimatedHourglass';
 import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/elements/table/Table';
 import Code from '@/elements/Code';
+import { Button } from '@/elements/button';
+import runSchedule from '@/api/server/schedules/runSchedule';
 
 function DetailCard({
   icon,
@@ -47,6 +49,12 @@ export default () => {
     getSchedule(server.id, Number(params.id)).then(setSchedule);
   }, [params.id]);
 
+  const executeSchedule = () => {
+    runSchedule(server.id, Number(params.id)).then(() => {
+      schedule.isProcessing = true;
+    });
+  };
+
   return !schedule ? (
     <div className="w-full">
       <Spinner.Centered />
@@ -56,6 +64,11 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">{schedule.name}</h1>
         <div className="flex gap-2">
+          {schedule.tasks.length > 0 && (
+            <Button style={Button.Styles.Gray} disabled={schedule.isProcessing} onClick={executeSchedule}>
+              Run
+            </Button>
+          )}
           <ScheduleCreateOrUpdateButton
             schedule={schedule}
             onUpdate={updatedSchedule => setSchedule(updatedSchedule)}
