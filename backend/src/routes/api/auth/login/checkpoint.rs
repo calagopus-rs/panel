@@ -16,6 +16,7 @@ mod post {
     use crate::{
         models::{
             user::{ApiUser, User},
+            user_activity::UserActivity,
             user_recovery_code::UserRecoveryCode,
             user_session::UserSession,
         },
@@ -45,6 +46,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        ip: crate::GetIp,
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
@@ -88,13 +90,50 @@ mod post {
                         axum::Json(ApiError::new_value(&["invalid confirmation code"])),
                     );
                 }
+
+                if let Err(err) = UserActivity::log(
+                    &state.database,
+                    payload.user_id,
+                    None,
+                    "auth:success",
+                    ip.0.into(),
+                    serde_json::json!({
+                        "using": "two_factor",
+                    }),
+                )
+                .await
+                {
+                    tracing::warn!(
+                        user = payload.user_id,
+                        "failed to log user activity: {:#?}",
+                        err
+                    );
+                }
             }
             10 => {
                 if let Some(code) =
                     UserRecoveryCode::delete_by_code(&state.database, payload.user_id, &data.code)
                         .await
                 {
-                    // TODO
+                    if let Err(err) = UserActivity::log(
+                        &state.database,
+                        payload.user_id,
+                        None,
+                        "auth:success",
+                        ip.0.into(),
+                        serde_json::json!({
+                            "using": "recovery_code",
+                            "code": code,
+                        }),
+                    )
+                    .await
+                    {
+                        tracing::warn!(
+                            user = payload.user_id,
+                            "failed to log user activity: {:#?}",
+                            err
+                        );
+                    }
                 } else {
                     return (
                         StatusCode::BAD_REQUEST,

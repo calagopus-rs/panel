@@ -1,5 +1,5 @@
 use hmac::digest::KeyInit;
-use jwt::{RegisteredClaims, SignWithKey, VerifyWithKey};
+use jwt::{SignWithKey, VerifyWithKey};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 #[derive(Deserialize, Serialize)]

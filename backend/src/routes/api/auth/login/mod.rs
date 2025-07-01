@@ -40,6 +40,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        ip: crate::GetIp,
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
@@ -82,6 +83,14 @@ mod post {
                 })
                 .unwrap();
 
+            user.log_activity(
+                &state.database,
+                "auth:checkpoint",
+                ip,
+                serde_json::json!({}),
+            )
+            .await;
+
             (
                 StatusCode::OK,
                 axum::Json(serde_json::to_value(Response::TwoFactorRequired { token }).unwrap()),
@@ -110,6 +119,16 @@ mod post {
                     )
                     .build(),
             );
+
+            user.log_activity(
+                &state.database,
+                "auth:success",
+                ip,
+                serde_json::json!({
+                    "using": "password",
+                }),
+            )
+            .await;
 
             (
                 StatusCode::OK,
