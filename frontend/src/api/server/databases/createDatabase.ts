@@ -1,10 +1,12 @@
 import { axiosInstance } from '@/api/axios';
 import { rawDataToServerDatabase } from '@/api/transformers';
 
-export default async (
-  uuid: string,
-  data: { databaseName: string; connectionsFrom: string },
-): Promise<ServerDatabase> => {
+interface Data {
+  databaseName: string;
+  connectionsFrom: string;
+}
+
+export default async (uuid: string, data: Data): Promise<ServerDatabase> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(

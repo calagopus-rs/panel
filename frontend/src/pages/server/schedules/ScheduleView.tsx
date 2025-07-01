@@ -15,6 +15,7 @@ import Code from '@/elements/Code';
 import { Button } from '@/elements/button';
 import runSchedule from '@/api/server/schedules/runSchedule';
 import ScheduleDeleteButton from './ScheduleDeleteButton';
+import ScheduleTaskCreateOrUpdateButton from './ScheduleTaskCreateOrUpdateButton';
 
 function DetailCard({
   icon,
@@ -106,6 +107,9 @@ export default () => {
         />
       </div>
 
+      <div className="mb-2 flex justify-end">
+        <ScheduleTaskCreateOrUpdateButton schedule={schedule} />
+      </div>
       <Table>
         <div className="overflow-x-auto">
           <table className="w-full table-auto">

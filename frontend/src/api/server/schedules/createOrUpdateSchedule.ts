@@ -1,22 +1,21 @@
 import { axiosInstance } from '@/api/axios';
 import { rawDataToServerSchedule } from '@/api/transformers';
 
-export default async (
-  uuid: string,
-  data: {
-    id?: number;
-    name: string;
-    cron: {
-      minute: string;
-      hour: string;
-      day: string;
-      month: string;
-      weekday: string;
-    };
-    onlyWhenOnline: boolean;
-    isActive: boolean;
-  },
-): Promise<Schedule> => {
+interface Data {
+  id?: number;
+  name: string;
+  cron: {
+    minute: string;
+    hour: string;
+    day: string;
+    month: string;
+    weekday: string;
+  };
+  onlyWhenOnline: boolean;
+  isActive: boolean;
+}
+
+export default async (uuid: string, data: Data): Promise<Schedule> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/schedules${data.id ? `/${data.id}` : ''}`, {
