@@ -14,6 +14,7 @@ import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/e
 import Code from '@/elements/Code';
 import { Button } from '@/elements/button';
 import runSchedule from '@/api/server/schedules/runSchedule';
+import ScheduleDeleteButton from './ScheduleDeleteButton';
 
 function DetailCard({
   icon,
@@ -49,7 +50,7 @@ export default () => {
     getSchedule(server.id, Number(params.id)).then(setSchedule);
   }, [params.id]);
 
-  const executeSchedule = () => {
+  const doRunSchedule = () => {
     runSchedule(server.id, Number(params.id)).then(() => {
       schedule.isProcessing = true;
     });
@@ -65,7 +66,7 @@ export default () => {
         <h1 className="text-4xl font-bold text-white">{schedule.name}</h1>
         <div className="flex gap-2">
           {schedule.tasks.length > 0 && (
-            <Button style={Button.Styles.Gray} disabled={schedule.isProcessing} onClick={executeSchedule}>
+            <Button style={Button.Styles.Gray} disabled={schedule.isProcessing} onClick={doRunSchedule}>
               Run
             </Button>
           )}
@@ -73,6 +74,7 @@ export default () => {
             schedule={schedule}
             onUpdate={updatedSchedule => setSchedule(updatedSchedule)}
           />
+          <ScheduleDeleteButton schedule={schedule} />
         </div>
       </div>
 
