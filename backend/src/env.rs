@@ -116,7 +116,7 @@ impl Env {
                 .expect("failed to create log directory");
         }
 
-        let latest_log_path = std::path::Path::new(&env.app_log_directory).join("wings.log");
+        let latest_log_path = std::path::Path::new(&env.app_log_directory).join("panel.log");
         let latest_file = std::fs::OpenOptions::new()
             .create(true)
             .append(true)
@@ -124,7 +124,7 @@ impl Env {
             .expect("failed to open latest log file");
 
         let rolling_appender = tracing_appender::rolling::Builder::new()
-            .filename_prefix("wings")
+            .filename_prefix("panel")
             .filename_suffix("log")
             .max_log_files(30)
             .rotation(tracing_appender::rolling::Rotation::DAILY)

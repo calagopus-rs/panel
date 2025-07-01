@@ -48,7 +48,7 @@ pub fn validate_data<T: Validate>(data: &T) -> Result<(), Vec<String>> {
                 if let Some(message) = &field_error.message {
                     errors.push(format!("{field}: {message}"));
                 } else {
-                    errors.push(format!("{field}: invalid {field_error.code}"));
+                    errors.push(format!("{field}: invalid {}", field_error.code));
                 }
             }
         }
