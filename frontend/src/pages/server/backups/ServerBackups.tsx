@@ -45,7 +45,7 @@ export default () => {
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Backups</h1>
         <div className="flex gap-2">
-          <Button>Create new</Button>
+          <Button>Create</Button>
         </div>
       </div>
       <Table>

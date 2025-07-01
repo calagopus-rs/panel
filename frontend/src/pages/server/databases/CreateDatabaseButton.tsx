@@ -56,7 +56,7 @@ export default () => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button onClick={() => setOpen(true)}>Create new</Button>
+      <Button onClick={() => setOpen(true)}>Create</Button>
     </>
   );
 };

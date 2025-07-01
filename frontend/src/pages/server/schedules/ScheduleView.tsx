@@ -53,7 +53,7 @@ export default () => {
 
   const doRunSchedule = () => {
     runSchedule(server.id, Number(params.id)).then(() => {
-      schedule.isProcessing = true;
+      setSchedule(schedule => ({ ...schedule, isProcessing: true }));
     });
   };
 
@@ -108,7 +108,10 @@ export default () => {
       </div>
 
       <div className="mb-2 flex justify-end">
-        <ScheduleTaskCreateOrUpdateButton schedule={schedule} />
+        <ScheduleTaskCreateOrUpdateButton
+          schedule={schedule}
+          onSubmit={task => setSchedule({ ...schedule, tasks: [...schedule.tasks, task] })}
+        />
       </div>
       <Table>
         <div className="overflow-x-auto">

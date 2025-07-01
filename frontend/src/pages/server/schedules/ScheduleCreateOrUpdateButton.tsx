@@ -130,7 +130,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button onClick={() => setOpen(true)}>{schedule ? 'Edit' : 'Create new'}</Button>
+      <Button onClick={() => setOpen(true)}>{schedule ? 'Edit' : 'Create'}</Button>
     </>
   );
 };

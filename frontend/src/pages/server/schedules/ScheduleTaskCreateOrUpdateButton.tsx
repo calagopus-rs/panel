@@ -1,5 +1,4 @@
 import { httpErrorToHuman } from '@/api/axios';
-import createOrUpdateSchedule from '@/api/server/schedules/createOrUpdateSchedule';
 import createOrUpdateScheduleTask from '@/api/server/schedules/createOrUpdateScheduleTask';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
@@ -8,9 +7,8 @@ import { useToast } from '@/elements/Toast';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
-export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task; onUpdate?: (task: Task) => void }) => {
+export default ({ schedule, task, onSubmit }: { schedule: Schedule; task?: Task; onSubmit: (task: Task) => void }) => {
   const server = useServerStore(state => state.data);
-  const { addSchedule } = useServerStore(state => state.schedules);
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);
@@ -21,18 +19,14 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
   const [taskContinueOnFailure, setTaskContinueOnFailure] = useState(task?.continueOnFailure ?? false);
 
   const submit = () => {
-    createOrUpdateScheduleTask(server.id, schedule.id, task.id, {
+    createOrUpdateScheduleTask(server.id, schedule.id, task?.id, {
       action: taskAction,
       payload: taskPayload,
       timeOffset: taskOffset,
       continueOnFailure: taskContinueOnFailure,
     })
       .then(resTask => {
-        // if (schedule) {
-        //   onUpdate?.(resSchedule);
-        // } else {
-        //   addSchedule(resSchedule);
-        // }
+        onSubmit(resTask);
         setOpen(false);
         addToast(task ? 'Task updated.' : 'Task created.', 'success');
       })
@@ -92,7 +86,7 @@ export default ({ schedule, task, onUpdate }: { schedule: Schedule; task?: Task;
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button onClick={() => setOpen(true)}>{task ? 'Edit' : 'Create new'}</Button>
+      <Button onClick={() => setOpen(true)}>{task ? 'Edit' : 'Create'}</Button>
     </>
   );
 };
