@@ -1,0 +1,45 @@
+[package]
+name = "panel"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["chrono"] }
+tracing-appender = "0.2.3"
+axum = "0.8.1"
+colored = "3.0.0"
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "chrono", "ipnetwork", "uuid"] }
+dotenvy = "0.15.7"
+rustis = "0.13.3"
+serde = { version = "1.0.218", features = ["derive"] }
+serde_json = { version = "1.0.140", features = ["preserve_order"] }
+tokio = { version = "1.43.0", features = ["full"] }
+utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid"] }
+utoipa-axum = "0.2.0"
+chrono = { version = "0.4.40", features = ["serde"] }
+indexmap = { version = "2.7.1", features = ["serde"] }
+tower-http = { version = "0.6.2", features = ["catch-panic", "cors", "normalize-path"] }
+sentry = { version = "0.37.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
+reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
+sha2 = "0.10.8"
+sentry-tower = { version = "0.37.0", default-features = false, features = ["http", "axum-matched-path"] }
+rand = "0.9.0"
+serde_yaml = "0.9.34"
+toml = "0.8.20"
+image = "0.25.5"
+tower-cookies = "0.11.0"
+rust-s3 = { version = "0.35.1", default-features = false, features = ["tokio-rustls-tls"] }
+futures-util = "0.3.31"
+jwt = "0.16.0"
+hmac = { version = "0.12.1", features = ["std"] }
+tower = "0.5.2"
+include_dir = "0.7.4"
+bcrypt = "0.17.0"
+simple_crypt = "0.2.3"
+uuid = { version = "1.17.0", features = ["v4"] }
+totp-rs = { version = "5.7.0", features = ["gen_secret"] }
+validator = { version = "0.20.0", features = ["derive"] }
+regex = "1.11.1"
+russh = "0.52.1"
+urlencoding = "2.1.3"

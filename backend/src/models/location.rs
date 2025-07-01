@@ -1,0 +1,158 @@
+use super::BaseModel;
+use serde::{Deserialize, Serialize};
+use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use std::collections::BTreeMap;
+use utoipa::ToSchema;
+
+#[derive(Serialize, Deserialize)]
+pub struct Location {
+    pub id: i32,
+
+    pub short_name: String,
+    pub name: String,
+    pub description: Option<String>,
+
+    pub created: NaiveDateTime,
+}
+
+impl BaseModel for Location {
+    #[inline]
+    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let table = table.unwrap_or("locations");
+
+        BTreeMap::from([
+            (
+                format!("{}.id", table),
+                format!("{}id", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.short_name", table),
+                format!("{}short_name", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.name", table),
+                format!("{}name", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.description", table),
+                format!("{}description", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.created", table),
+                format!("{}created", prefix.unwrap_or_default()),
+            ),
+        ])
+    }
+
+    #[inline]
+    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+        let prefix = prefix.unwrap_or_default();
+
+        Self {
+            id: row.get(format!("{}id", prefix).as_str()),
+            short_name: row.get(format!("{}short_name", prefix).as_str()),
+            name: row.get(format!("{}name", prefix).as_str()),
+            description: row.get(format!("{}description", prefix).as_str()),
+            created: row.get(format!("{}created", prefix).as_str()),
+        }
+    }
+}
+
+impl Location {
+    pub async fn new(
+        database: &crate::database::Database,
+        short_name: &str,
+        name: &str,
+        description: Option<&str>,
+    ) -> Self {
+        let row = sqlx::query(&format!(
+            r#"
+            INSERT INTO locations (short_name, name, description)
+            VALUES ($1, $2, $3)
+            RETURNING {}
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(short_name)
+        .bind(name)
+        .bind(description)
+        .fetch_one(database.write())
+        .await
+        .unwrap();
+
+        Self::map(None, &row)
+    }
+
+    pub async fn save(&self, database: &crate::database::Database) {
+        sqlx::query(
+            r#"
+            UPDATE locations
+            SET
+                short_name = $2,
+                name = $3,
+                description = $4
+            WHERE mounts.id = $1
+            "#,
+        )
+        .bind(self.id)
+        .bind(&self.short_name)
+        .bind(&self.name)
+        .bind(&self.description)
+        .execute(database.write())
+        .await
+        .unwrap();
+    }
+
+    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM locations
+            WHERE locations.id = $1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+        sqlx::query(
+            r#"
+            DELETE FROM locations
+            WHERE locations.id = $1
+            "#,
+        )
+        .bind(id)
+        .execute(database.write())
+        .await
+        .unwrap();
+    }
+
+    #[inline]
+    pub fn into_admin_api_object(self) -> AdminApiLocation {
+        AdminApiLocation {
+            id: self.id,
+            short_name: self.short_name,
+            name: self.name,
+            description: self.description,
+            created: self.created,
+        }
+    }
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "Location")]
+pub struct AdminApiLocation {
+    pub id: i32,
+
+    pub short_name: String,
+    pub name: String,
+    pub description: Option<String>,
+
+    pub created: NaiveDateTime,
+}

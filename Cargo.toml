@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = ["backend"]
+default-members = ["backend"]
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+debug = false
+
+[profile.release]
+opt-level = "s"
+lto = true

@@ -1,0 +1,1 @@
+ALTER TABLE "nodes" DROP COLUMN "public_sftp_port";

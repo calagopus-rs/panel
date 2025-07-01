@@ -1,0 +1,1 @@
+ALTER TABLE "nodes" ADD COLUMN "sftp_host" varchar(255);
