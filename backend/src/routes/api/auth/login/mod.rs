@@ -99,7 +99,7 @@ mod post {
             let key = UserSession::create(
                 &state.database,
                 user.id,
-                crate::utils::extract_ip(&headers).unwrap().into(),
+                ip.0.into(),
                 headers
                     .get("User-Agent")
                     .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))

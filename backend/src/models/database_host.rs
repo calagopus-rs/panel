@@ -26,7 +26,7 @@ pub struct DatabaseHost {
     pub port: i32,
 
     pub username: String,
-    pub password: String,
+    pub password: Vec<u8>,
 
     pub created: NaiveDateTime,
 }
@@ -100,7 +100,7 @@ impl BaseModel for DatabaseHost {
 }
 
 impl DatabaseHost {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         name: &str,
         r#type: DatabaseType,
@@ -110,7 +110,7 @@ impl DatabaseHost {
         port: i32,
         username: &str,
         password: &str,
-    ) -> Self {
+    ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO database_hosts (name, type, public_host, host, public_port, port, username, password)
@@ -128,13 +128,12 @@ impl DatabaseHost {
         .bind(username)
         .bind(database.encrypt(password).unwrap())
         .fetch_one(database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        Self::map(None, &row)
+        Ok(Self::map(None, &row))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
+    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             UPDATE database_hosts
@@ -160,8 +159,9 @@ impl DatabaseHost {
         .bind(&self.username)
         .bind(database.encrypt(&self.password).unwrap())
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     pub async fn all_with_pagination(

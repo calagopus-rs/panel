@@ -5,6 +5,7 @@ use axum::{
 };
 use utoipa_axum::router::OpenApiRouter;
 
+mod admin;
 mod auth;
 mod client;
 
@@ -26,5 +27,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         )
         .nest("/auth", auth::router(state))
         .nest("/client", client::router(state))
+        .nest("/admin", admin::router(state))
         .with_state(state.clone())
 }

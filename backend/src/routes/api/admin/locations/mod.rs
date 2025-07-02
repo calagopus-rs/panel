@@ -1,12 +1,12 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _sshkey_;
+mod _location_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, user_ssh_key::UserSshKey},
-        routes::{ApiError, GetState, api::client::GetUser},
+        models::{Pagination, PaginationParams, location::Location},
+        routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -14,7 +14,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        api_keys: Pagination<crate::models::user_ssh_key::ApiUserSshKey>,
+        locations: Pagination<crate::models::location::AdminApiLocation>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -33,7 +33,6 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        user: GetUser,
         Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -43,26 +42,21 @@ mod get {
             );
         }
 
-        let ssh_keys = UserSshKey::by_user_id_with_pagination(
-            &state.database,
-            user.id,
-            params.page,
-            params.per_page,
-        )
-        .await;
+        let locations =
+            Location::all_with_pagination(&state.database, params.page, params.per_page).await;
 
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    api_keys: Pagination {
-                        total: ssh_keys.total,
-                        per_page: ssh_keys.per_page,
-                        page: ssh_keys.page,
-                        data: ssh_keys
+                    locations: Pagination {
+                        total: locations.total,
+                        per_page: locations.per_page,
+                        page: locations.page,
+                        data: locations
                             .data
                             .into_iter()
-                            .map(|ssh_key| ssh_key.into_api_object())
+                            .map(|location| location.into_admin_api_object())
                             .collect(),
                     },
                 })
@@ -74,7 +68,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::user_ssh_key::UserSshKey,
+        models::location::Location,
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::http::StatusCode;
@@ -84,15 +78,18 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 3, max = 31))]
+        #[validate(length(min = 2, max = 31))]
+        short_name: String,
+        #[validate(length(min = 3, max = 255))]
         name: String,
 
-        public_key: String,
+        #[validate(length(max = 1024))]
+        description: Option<String>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        ssh_key: crate::models::user_ssh_key::ApiUserSshKey,
+        location: crate::models::location::AdminApiLocation,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -113,36 +110,33 @@ mod post {
             );
         }
 
-        let public_key = match russh::keys::PublicKey::from_openssh(&data.public_key) {
-            Ok(key) => key,
+        let location = match Location::create(
+            &state.database,
+            &data.short_name,
+            &data.name,
+            data.description.as_deref(),
+        )
+        .await
+        {
+            Ok(location) => location,
             Err(_) => {
                 return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid public key"])),
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&[
+                        "location with short name or name already exists",
+                    ])),
                 );
             }
         };
 
-        let ssh_key =
-            match UserSshKey::create(&state.database, user.id, &data.name, public_key).await {
-                Ok(ssh_key) => ssh_key,
-                Err(_) => {
-                    return (
-                        StatusCode::CONFLICT,
-                        axum::Json(ApiError::new_value(&[
-                            "ssh key with name or fingerprint already exists",
-                        ])),
-                    );
-                }
-            };
-
         user.log_activity(
             &state.database,
-            "user:ssh-key.create",
+            "admin:location.create",
             ip,
             serde_json::json!({
-                "fingerprint": ssh_key.fingerprint,
-                "name": ssh_key.name,
+                "short_name": location.short_name,
+                "name": location.name,
+                "description": location.description,
             }),
         )
         .await;
@@ -151,7 +145,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    ssh_key: ssh_key.into_api_object(),
+                    location: location.into_admin_api_object(),
                 })
                 .unwrap(),
             ),
@@ -163,6 +157,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{sshkey}", _sshkey_::router(state))
+        .nest("/{location}", _location_::router(state))
         .with_state(state.clone())
 }

@@ -72,9 +72,7 @@ impl Jwt {
         token: &str,
         node: &crate::models::node::Node,
     ) -> Result<T, jwt::Error> {
-        token.verify_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(
-            node.token.as_bytes(),
-        )?)
+        token.verify_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(&node.token)?)
     }
 
     #[inline]
@@ -88,8 +86,6 @@ impl Jwt {
         node: &crate::models::node::Node,
         payload: &T,
     ) -> Result<String, jwt::Error> {
-        payload.sign_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(
-            node.token.as_bytes(),
-        )?)
+        payload.sign_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(&node.token)?)
     }
 }

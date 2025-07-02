@@ -1,7 +1,8 @@
-use serde::{Serialize, de::DeserializeOwned};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sqlx::postgres::PgRow;
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
+use validator::Validate;
 
 pub mod database_host;
 pub mod location;
@@ -27,6 +28,16 @@ pub mod user_api_key;
 pub mod user_recovery_code;
 pub mod user_session;
 pub mod user_ssh_key;
+
+#[derive(ToSchema, Validate, Deserialize)]
+pub struct PaginationParams {
+    #[validate(range(min = 1))]
+    #[serde(default = "Pagination::default_page")]
+    pub page: i64,
+    #[validate(range(min = 1, max = 100))]
+    #[serde(default = "Pagination::default_per_page")]
+    pub per_page: i64,
+}
 
 #[derive(ToSchema, Serialize)]
 pub struct Pagination<T: Serialize = serde_json::Value> {

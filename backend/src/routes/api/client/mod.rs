@@ -8,7 +8,7 @@ mod account;
 
 pub type GetUser = axum::extract::Extension<User>;
 
-async fn auth(
+pub async fn auth(
     state: GetState,
     cookies: Cookies,
     mut req: Request,

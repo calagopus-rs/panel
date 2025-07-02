@@ -234,7 +234,7 @@ mod delete {
                     6,
                     1,
                     30,
-                    totp_rs::Secret::Encoded(user.totp_secret.as_ref().unwrap().clone())
+                    totp_rs::Secret::Encoded(user.0.totp_secret.unwrap())
                         .to_bytes()
                         .unwrap(),
                 )
@@ -248,11 +248,10 @@ mod delete {
                 }
             }
             10 => {
-                if let Some(code) =
-                    UserRecoveryCode::delete_by_code(&state.database, user.id, &data.code).await
+                if UserRecoveryCode::delete_by_code(&state.database, user.id, &data.code)
+                    .await
+                    .is_none()
                 {
-                    // TODO
-                } else {
                     return (
                         StatusCode::BAD_REQUEST,
                         axum::Json(ApiError::new_value(&["invalid recovery code"])),
@@ -267,10 +266,10 @@ mod delete {
             }
         }
 
-        UserRecoveryCode::delete_by_user_id(&state.database, user.id).await;
+        UserRecoveryCode::delete_by_user_id(&state.database, user.0.id).await;
 
-        user.totp_enabled = false;
-        user.totp_secret = None;
+        user.0.totp_enabled = false;
+        user.0.totp_secret = None;
         user.save(&state.database).await.unwrap();
 
         user.log_activity(

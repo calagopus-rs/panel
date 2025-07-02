@@ -28,7 +28,9 @@ pub struct Node {
     pub disk: i64,
 
     pub token_id: String,
-    pub token: String,
+    pub token: Vec<u8>,
+
+    pub servers: i64,
 
     pub created: NaiveDateTime,
 }
@@ -104,6 +106,13 @@ impl BaseModel for Node {
                 format!("{}token", prefix.unwrap_or_default()),
             ),
             (
+                format!(
+                    "(SELECT COUNT(*) FROM servers WHERE servers.node_id = {}.id)",
+                    table
+                ),
+                format!("{}servers", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
@@ -149,13 +158,14 @@ impl BaseModel for Node {
             disk: row.get(format!("{}disk", prefix).as_str()),
             token_id: row.get(format!("{}token_id", prefix).as_str()),
             token: row.get(format!("{}token", prefix).as_str()),
+            servers: row.get(format!("{}servers", prefix).as_str()),
             created: row.get(format!("{}created", prefix).as_str()),
         }
     }
 }
 
 impl Node {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         location_id: i32,
         database_host_id: Option<i32>,
@@ -165,18 +175,18 @@ impl Node {
         public_host: Option<&str>,
         host: &str,
         ssl: bool,
+        sftp_host: Option<&str>,
         sftp_port: i32,
         memory: i64,
         disk: i64,
-    ) -> i32 {
-        let mut rng = rand::rng();
-        let token_id = rand::distr::Alphanumeric.sample_string(&mut rng, 16);
-        let token = rand::distr::Alphanumeric.sample_string(&mut rng, 64);
+    ) -> Result<i32, sqlx::Error> {
+        let token_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
+        let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 64);
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_id, database_host_id, name, public, description, public_host, host, ssl, sftp_port, memory, disk, token_id, token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            INSERT INTO nodes (location_id, database_host_id, name, public, description, public_host, host, ssl, sftp_host, sftp_port, memory, disk, token_id, token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             "#
         )
         .bind(location_id)
@@ -187,19 +197,19 @@ impl Node {
         .bind(public_host)
         .bind(host)
         .bind(ssl)
+        .bind(sftp_host)
         .bind(sftp_port)
         .bind(memory)
         .bind(disk)
         .bind(token_id)
         .bind(database.encrypt(token).unwrap())
         .fetch_one(database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        row.get("id")
+        Ok(row.get("id"))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
+    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             UPDATE nodes
@@ -237,8 +247,9 @@ impl Node {
         .bind(&self.token_id)
         .bind(&self.token)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
@@ -362,6 +373,8 @@ impl Node {
             maintenance_message: self.maintenance_message,
             memory: self.memory,
             disk: self.disk,
+            token_id: self.token_id,
+            servers: self.servers,
             created: self.created,
         }
     }
@@ -389,6 +402,10 @@ pub struct AdminApiNode {
 
     pub memory: i64,
     pub disk: i64,
+
+    pub token_id: String,
+
+    pub servers: i64,
 
     pub created: NaiveDateTime,
 }

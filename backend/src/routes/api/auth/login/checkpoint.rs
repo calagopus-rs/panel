@@ -51,10 +51,7 @@ mod post {
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let payload = match state
-            .jwt
-            .verify::<TwoFactorRequiredJwt>(&data.confirmation_token)
-        {
+        let payload: TwoFactorRequiredJwt = match state.jwt.verify(&data.confirmation_token) {
             Ok(payload) => payload,
             Err(_) => {
                 return (
@@ -162,7 +159,7 @@ mod post {
         let key = UserSession::create(
             &state.database,
             user.id,
-            crate::utils::extract_ip(&headers).unwrap().into(),
+            ip.0.into(),
             headers
                 .get("User-Agent")
                 .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))

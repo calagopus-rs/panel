@@ -59,12 +59,12 @@ impl BaseModel for Location {
 }
 
 impl Location {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         short_name: &str,
         name: &str,
         description: Option<&str>,
-    ) -> Self {
+    ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO locations (short_name, name, description)
@@ -77,13 +77,12 @@ impl Location {
         .bind(name)
         .bind(description)
         .fetch_one(database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        Self::map(None, &row)
+        Ok(Self::map(None, &row))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
+    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             UPDATE locations
@@ -91,7 +90,7 @@ impl Location {
                 short_name = $2,
                 name = $3,
                 description = $4
-            WHERE mounts.id = $1
+            WHERE locations.id = $1
             "#,
         )
         .bind(self.id)
@@ -99,8 +98,9 @@ impl Location {
         .bind(&self.name)
         .bind(&self.description)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
@@ -118,6 +118,35 @@ impl Location {
         .unwrap();
 
         row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn all_with_pagination(
+        database: &crate::database::Database,
+        page: i64,
+        per_page: i64,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM locations
+            LIMIT $1 OFFSET $2
+            "#,
+            Self::columns_sql(None, None),
+        ))
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
     }
 
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {

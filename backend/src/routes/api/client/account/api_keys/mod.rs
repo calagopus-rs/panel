@@ -5,23 +5,12 @@ mod _apikey_;
 
 mod get {
     use crate::{
-        models::{Pagination, user_api_key::UserApiKey},
+        models::{Pagination, PaginationParams, user_api_key::UserApiKey},
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::{extract::Query, http::StatusCode};
-    use serde::{Deserialize, Serialize};
+    use serde::Serialize;
     use utoipa::ToSchema;
-    use validator::Validate;
-
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct Params {
-        #[validate(range(min = 1))]
-        #[serde(default = "Pagination::default_page")]
-        page: i64,
-        #[validate(range(min = 1, max = 100))]
-        #[serde(default = "Pagination::default_per_page")]
-        per_page: i64,
-    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
@@ -45,7 +34,7 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        Query(params): Query<Params>,
+        Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (
@@ -137,9 +126,7 @@ mod post {
             Err(_) => {
                 return (
                     StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "api key with name already exists"
-                    ])),
+                    axum::Json(ApiError::new_value(&["api key with name already exists"])),
                 );
             }
         };

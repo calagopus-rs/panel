@@ -159,7 +159,7 @@ export const mounts = pgTable('mounts', {
 export const locations = pgTable('locations', {
 	id: serial('id').primaryKey().notNull(),
 
-	shortName: varchar('short', { length: 32 }).notNull(),
+	shortName: varchar('short_name', { length: 31 }).notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
 
 	description: text('description'),
@@ -196,6 +196,7 @@ export const nodes = pgTable('nodes', {
 
 	created: timestamp('created').default(sql`now()`).notNull(),
 }, (nodes) => [
+	uniqueIndex('nodes_name_idx').on(nodes.name),
 	uniqueIndex('nodes_uuid_idx').on(nodes.uuid),
 	uniqueIndex('nodes_token_id_idx').on(nodes.tokenId),
 	uniqueIndex('nodes_token_idx').on(nodes.token),
@@ -310,6 +311,7 @@ export const databaseHosts = pgTable('database_hosts', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (databaseHosts) => [
+	uniqueIndex('database_hosts_name_idx').on(databaseHosts.name),
 	uniqueIndex('database_hosts_host_port_idx').on(databaseHosts.host, databaseHosts.port)
 ])
 
