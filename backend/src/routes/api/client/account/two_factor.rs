@@ -77,8 +77,10 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(equal = 6))]
+        #[schema(min_length = 6, max_length = 6)]
         code: String,
         #[validate(length(max = 512))]
+        #[schema(max_length = 512)]
         password: String,
     }
 
@@ -200,8 +202,10 @@ mod delete {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 6, max = 10))]
+        #[schema(min_length = 6, max_length = 10)]
         code: String,
         #[validate(length(max = 512))]
+        #[schema(max_length = 512)]
         password: String,
     }
 

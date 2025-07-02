@@ -89,6 +89,7 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 3, max = 31))]
+        #[schema(min_length = 3, max_length = 31)]
         name: String,
 
         permissions: Vec<String>,

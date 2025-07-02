@@ -83,11 +83,14 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 2, max = 31))]
+        #[schema(min_length = 2, max_length = 31)]
         short_name: String,
         #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         name: String,
 
         #[validate(length(max = 1024))]
+        #[schema(max_length = 1024)]
         description: Option<String>,
     }
 

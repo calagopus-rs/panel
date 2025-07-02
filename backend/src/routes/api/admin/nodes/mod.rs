@@ -85,17 +85,22 @@ mod post {
         database_host_id: Option<i32>,
 
         #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         name: String,
         public: bool,
         #[validate(length(max = 1024))]
+        #[schema(max_length = 1024)]
         description: Option<String>,
 
         #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         public_host: Option<String>,
         #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         host: String,
         ssl: bool,
         #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         sftp_host: Option<String>,
         sftp_port: u16,
 

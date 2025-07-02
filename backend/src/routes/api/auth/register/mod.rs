@@ -21,14 +21,20 @@ mod post {
             length(min = 3, max = 15),
             regex(path = "*crate::models::user::USERNAME_REGEX")
         )]
+        #[schema(min_length = 3, max_length = 15)]
+        #[schema(pattern = "^[a-zA-Z0-9_]+$")]
         username: String,
         #[validate(email)]
+        #[schema(format = "email")]
         email: String,
         #[validate(length(min = 2, max = 255))]
+        #[schema(min_length = 2, max_length = 255)]
         name_first: String,
         #[validate(length(min = 2, max = 255))]
+        #[schema(min_length = 2, max_length = 255)]
         name_last: String,
         #[validate(length(min = 8, max = 512))]
+        #[schema(min_length = 8, max_length = 512)]
         password: String,
 
         captcha: Option<String>,

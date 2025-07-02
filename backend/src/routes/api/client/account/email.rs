@@ -14,8 +14,10 @@ mod put {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(email)]
+        #[schema(format = "email")]
         email: String,
         #[validate(length(max = 512))]
+        #[schema(max_length = 512)]
         password: String,
     }
 
@@ -25,6 +27,7 @@ mod put {
     #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = UNAUTHORIZED, body = inline(ApiError)),
+        (status = CONFLICT, body = inline(ApiError)),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,

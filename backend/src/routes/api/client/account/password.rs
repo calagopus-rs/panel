@@ -14,8 +14,10 @@ mod put {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 8, max = 512))]
+        #[schema(min_length = 8, max_length = 512)]
         new_password: String,
         #[validate(length(max = 512))]
+        #[schema(max_length = 512)]
         password: String,
     }
 

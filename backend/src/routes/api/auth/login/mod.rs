@@ -23,6 +23,7 @@ mod post {
     pub struct Payload {
         user: String,
         #[validate(length(max = 512))]
+        #[schema(max_length = 512)]
         password: String,
 
         captcha: Option<String>,
