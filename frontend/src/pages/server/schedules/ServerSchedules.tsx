@@ -5,7 +5,7 @@ import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } fro
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
-import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
+import ScheduleCreateOrUpdateButton from './actions/ScheduleCreateOrUpdateButton';
 
 export default () => {
   const server = useServerStore(state => state.data);

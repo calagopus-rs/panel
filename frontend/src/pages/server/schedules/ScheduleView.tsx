@@ -4,7 +4,6 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
-import ScheduleCreateOrUpdateButton from './ScheduleCreateOrUpdateButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faClockRotateLeft, faHourglass } from '@fortawesome/free-solid-svg-icons';
 import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
@@ -14,8 +13,9 @@ import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/e
 import Code from '@/elements/Code';
 import { Button } from '@/elements/button';
 import runSchedule from '@/api/server/schedules/runSchedule';
-import ScheduleDeleteButton from './ScheduleDeleteButton';
-import ScheduleTaskCreateOrUpdateButton from './ScheduleTaskCreateOrUpdateButton';
+import ScheduleCreateOrUpdateButton from './actions/ScheduleCreateOrUpdateButton';
+import ScheduleDeleteButton from './actions/ScheduleDeleteButton';
+import ScheduleTaskCreateOrUpdateButton from './actions/ScheduleTaskCreateOrUpdateButton';
 
 function DetailCard({
   icon,
