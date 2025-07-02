@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nests\n            SET author = $1, name = $2, description = $3\n            WHERE id = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9b8d7d261a2afc0f092369d3502d894f2805798b05b6dda1c6f309d23ecc1ed"
+}

@@ -12,6 +12,8 @@ pub struct Location {
     pub name: String,
     pub description: Option<String>,
 
+    pub nodes: i64,
+
     pub created: NaiveDateTime,
 }
 
@@ -38,6 +40,13 @@ impl BaseModel for Location {
                 format!("{}description", prefix.unwrap_or_default()),
             ),
             (
+                format!(
+                    "(SELECT COUNT(*) FROM nodes WHERE nodes.location_id = {}.id)",
+                    table
+                ),
+                format!("{}nodes", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
@@ -53,6 +62,7 @@ impl BaseModel for Location {
             short_name: row.get(format!("{}short_name", prefix).as_str()),
             name: row.get(format!("{}name", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
+            nodes: row.get(format!("{}nodes", prefix).as_str()),
             created: row.get(format!("{}created", prefix).as_str()),
         }
     }
@@ -148,6 +158,7 @@ impl Location {
             short_name: self.short_name,
             name: self.name,
             description: self.description,
+            nodes: self.nodes,
             created: self.created,
         }
     }
@@ -161,6 +172,8 @@ pub struct AdminApiLocation {
     pub short_name: String,
     pub name: String,
     pub description: Option<String>,
+
+    pub nodes: i64,
 
     pub created: NaiveDateTime,
 }

@@ -12,6 +12,8 @@ pub struct Nest {
     pub name: String,
     pub description: Option<String>,
 
+    pub eggs: i64,
+
     pub created: NaiveDateTime,
 }
 
@@ -38,6 +40,13 @@ impl BaseModel for Nest {
                 format!("{}description", prefix.unwrap_or_default()),
             ),
             (
+                format!(
+                    "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_id = {}.id)",
+                    table
+                ),
+                format!("{}eggs", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
@@ -53,30 +62,34 @@ impl BaseModel for Nest {
             author: row.get(format!("{}author", prefix).as_str()),
             name: row.get(format!("{}name", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
+            eggs: row.get(format!("{}eggs", prefix).as_str()),
             created: row.get(format!("{}created", prefix).as_str()),
         }
     }
 }
 
 impl Nest {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         author: &str,
         name: &str,
         description: Option<&str>,
-    ) -> bool {
-        sqlx::query(
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
             r#"
             INSERT INTO nests (author, name, description)
             VALUES ($1, $2, $3)
+            RETURNING {}
             "#,
-        )
+            Self::columns_sql(None, None)
+        ))
         .bind(author)
         .bind(name)
         .bind(description)
         .fetch_one(database.write())
-        .await
-        .is_ok()
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
@@ -145,6 +158,7 @@ impl Nest {
             author: self.author,
             name: self.name,
             description: self.description,
+            eggs: self.eggs,
             created: self.created,
         }
     }
@@ -158,6 +172,8 @@ pub struct AdminApiNest {
     pub author: String,
     pub name: String,
     pub description: Option<String>,
+
+    pub eggs: i64,
 
     pub created: NaiveDateTime,
 }

@@ -43,6 +43,8 @@ pub struct NestEgg {
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
 
+    pub servers: i64,
+
     pub created: NaiveDateTime,
 }
 
@@ -105,6 +107,13 @@ impl BaseModel for NestEgg {
                 format!("{}created", prefix.unwrap_or_default()),
             ),
             (
+                format!(
+                    "(SELECT COUNT(*) FROM servers WHERE servers.egg_id = {}.id)",
+                    table
+                ),
+                format!("{}servers", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
@@ -138,6 +147,7 @@ impl BaseModel for NestEgg {
             )
             .unwrap_or_default(),
             file_denylist: row.get(format!("{}file_denylist", prefix).as_str()),
+            servers: row.get(format!("{}servers", prefix).as_str()),
             created: row.get(format!("{}created", prefix).as_str()),
         }
     }
