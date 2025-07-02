@@ -9,9 +9,10 @@ export default defineConfig({
   build: {
     outDir: './dist',
     emptyOutDir: true,
-  }, server: {
+  },
+  server: {
     proxy: {
       '/api': 'http://localhost:8000',
-    }
+    },
   },
 });
