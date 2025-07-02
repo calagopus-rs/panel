@@ -15,6 +15,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         nodes: Pagination<crate::models::node::AdminApiNode>,
     }
 
@@ -26,6 +27,16 @@ mod get {
             "location" = i32,
             description = "The location ID",
             example = "1",
+        ),
+        (
+            "page" = i64, Query,
+            description = "The page number",
+            example = "1",
+        ),
+        (
+            "per_page" = i64, Query,
+            description = "The number of items per page",
+            example = "10",
         ),
     ))]
     pub async fn route(

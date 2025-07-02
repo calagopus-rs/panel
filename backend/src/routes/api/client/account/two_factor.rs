@@ -58,7 +58,10 @@ mod get {
 mod post {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -173,7 +176,10 @@ mod post {
 mod delete {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};

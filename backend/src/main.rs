@@ -24,6 +24,7 @@ use utoipa_axum::router::OpenApiRouter;
 mod cache;
 mod database;
 mod env;
+mod extract;
 mod jwt;
 mod models;
 mod routes;

@@ -14,6 +14,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         locations: Pagination<crate::models::location::AdminApiLocation>,
     }
 
@@ -69,7 +70,10 @@ mod get {
 mod post {
     use crate::{
         models::location::Location,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};

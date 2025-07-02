@@ -4,7 +4,7 @@ use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Location {
     pub id: i32,
 

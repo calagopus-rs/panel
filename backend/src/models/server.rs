@@ -16,7 +16,7 @@ pub enum ServerStatus {
     RestoringBackup,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Server {
     pub id: i32,
     pub uuid: uuid::Uuid,
@@ -43,6 +43,8 @@ pub struct Server {
     pub allocation_limit: i32,
     pub database_limit: i32,
     pub backup_limit: i32,
+
+    pub subuser_permissions: Option<Vec<String>>,
 
     pub created: NaiveDateTime,
 }
@@ -138,6 +140,10 @@ impl BaseModel for Server {
                 format!("{}backup_limit", prefix.unwrap_or_default()),
             ),
             (
+                "server_subusers.permissions".to_string(),
+                format!("{}permissions", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
@@ -190,13 +196,16 @@ impl BaseModel for Server {
             allocation_limit: row.get(format!("{}allocation_limit", prefix).as_str()),
             database_limit: row.get(format!("{}database_limit", prefix).as_str()),
             backup_limit: row.get(format!("{}backup_limit", prefix).as_str()),
+            subuser_permissions: row
+                .try_get::<Vec<String>, _>(format!("{}permissions", prefix).as_str())
+                .ok(),
             created: row.get(format!("{}created", prefix).as_str()),
         }
     }
 }
 
 impl Server {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         node_id: i32,
         owner_id: i32,
@@ -208,62 +217,91 @@ impl Server {
         disk: i64,
         io: i32,
         cpu: i32,
-        pinned_cpus: Vec<i16>,
+        pinned_cpus: &[i16],
         startup: &str,
         image: &str,
         allocation_limit: i32,
         database_limit: i32,
         backup_limit: i32,
-    ) -> (i32, uuid::Uuid) {
-        let row = sqlx::query(
-            r#"
-            INSERT INTO servers (
-                node_id,
-                owner_id,
-                egg_id,
-                name,
-                description,
-                memory,
-                swap,
-                disk,
-                io,
-                cpu,
-                pinned_cpus,
-                startup,
-                image,
-                allocation_limit,
-                database_limit,
-                backup_limit
-            )
-            VALUES (
-                $1, $2, $3, $4, $5, $6,
-                $7, $8, $9, $10, $11, $12,
-                $13, $14, $15, $16
-            )
-            RETURNING id, uuid
-            "#,
-        )
-        .bind(node_id)
-        .bind(owner_id)
-        .bind(egg_id)
-        .bind(name)
-        .bind(description)
-        .bind(memory)
-        .bind(swap)
-        .bind(disk)
-        .bind(io)
-        .bind(cpu)
-        .bind(pinned_cpus)
-        .bind(startup)
-        .bind(image)
-        .bind(allocation_limit)
-        .bind(database_limit)
-        .bind(backup_limit)
-        .fetch_one(database.write())
-        .await
-        .unwrap();
+    ) -> Result<(i32, uuid::Uuid), sqlx::Error> {
+        let mut attempts = 0;
 
-        (row.get("id"), row.get("uuid"))
+        loop {
+            let uuid = uuid::Uuid::new_v4();
+            let uuid_short = uuid.as_fields().0 as i32;
+
+            match sqlx::query(
+                r#"
+                INSERT INTO servers (
+                    uuid,
+                    uuid_short,
+                    node_id,
+                    owner_id,
+                    egg_id,
+                    name,
+                    description,
+                    memory,
+                    swap,
+                    disk,
+                    io,
+                    cpu,
+                    pinned_cpus,
+                    startup,
+                    image,
+                    allocation_limit,
+                    database_limit,
+                    backup_limit
+                )
+                VALUES (
+                    $1, $2, $3, $4, $5, $6,
+                    $7, $8, $9, $10, $11, $12,
+                    $13, $14, $15, $16, $17, $18
+                )
+                RETURNING id, uuid
+                "#,
+            )
+            .bind(uuid)
+            .bind(uuid_short)
+            .bind(node_id)
+            .bind(owner_id)
+            .bind(egg_id)
+            .bind(name)
+            .bind(description)
+            .bind(memory)
+            .bind(swap)
+            .bind(disk)
+            .bind(io)
+            .bind(cpu)
+            .bind(&pinned_cpus)
+            .bind(startup)
+            .bind(image)
+            .bind(allocation_limit)
+            .bind(database_limit)
+            .bind(backup_limit)
+            .fetch_one(database.write())
+            .await
+            {
+                Ok(row) => return Ok((row.get("id"), row.get("uuid"))),
+                Err(err) => {
+                    if attempts >= 8 {
+                        tracing::error!(
+                            "failed to create server after 8 attempts, giving up: {:#?}",
+                            err
+                        );
+
+                        return Err(err);
+                    }
+                    attempts += 1;
+
+                    tracing::warn!(
+                        "failed to create server, retrying with new uuid: {:#?}",
+                        err
+                    );
+
+                    continue;
+                }
+            }
+        }
     }
 
     pub async fn save(&self, database: &crate::database::Database) {
@@ -317,10 +355,14 @@ impl Server {
             r#"
             SELECT {}, {}, {}, {}, {}
             FROM servers
-            LEFT JOIN server_allocations ON allocation.server_id = servers.id
             JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.id = $1
             "#,
             Self::columns_sql(None, None),
@@ -337,9 +379,51 @@ impl Server {
         row.map(|row| Self::map(None, &row))
     }
 
-    pub async fn by_owner_id_with_pagination(
+    pub async fn by_user_id_identifier(
         database: &crate::database::Database,
-        owner_id: i32,
+        user_id: i32,
+        identifier: &str,
+    ) -> Option<Self> {
+        let query = format!(
+            r#"
+            SELECT {}, {}, {}, {}, {}
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            WHERE servers.{} = $2 AND (servers.owner_id = $1 OR server_subusers.user_id = $1)
+            "#,
+            Self::columns_sql(None, None),
+            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
+            super::node::Node::columns_sql(Some("node_"), None),
+            super::user::User::columns_sql(Some("owner_"), None),
+            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None),
+            match identifier.len() {
+                8 => "uuid_short",
+                36 => "uuid",
+                _ => "id",
+            }
+        );
+
+        let mut row = sqlx::query(&query).bind(user_id);
+        row = match identifier.len() {
+            8 => row.bind(u32::from_str_radix(identifier, 16).ok()? as i32),
+            36 => row.bind(uuid::Uuid::parse_str(identifier).ok()?),
+            _ => row.bind(identifier.parse::<i32>().ok()?),
+        };
+        let row = row.fetch_optional(database.read()).await.unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_user_id_with_pagination(
+        database: &crate::database::Database,
+        user_id: i32,
         page: i64,
         per_page: i64,
     ) -> super::Pagination<Self> {
@@ -347,13 +431,18 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, {}, {}, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, COUNT(*) OVER() AS total_count
             FROM servers
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.owner_id = $1
+            JOIN server_subusers ON server_subusers.server_id = servers.id
+            WHERE servers.owner_id = $1 OR server_subusers.user_id = $1
+            ORDER BY servers.id
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
@@ -362,7 +451,52 @@ impl Server {
             super::user::User::columns_sql(Some("owner_"), None),
             super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
         ))
-        .bind(owner_id)
+        .bind(user_id)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
+    }
+
+    pub async fn by_not_user_id_with_pagination(
+        database: &crate::database::Database,
+        user_id: i32,
+        page: i64,
+        per_page: i64,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, COUNT(*) OVER() AS total_count
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            JOIN server_subusers ON server_subusers.server_id = servers.id
+            WHERE servers.owner_id != $1 AND server_subusers.user_id != $1
+            ORDER BY servers.id
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None),
+            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
+            super::node::Node::columns_sql(Some("node_"), None),
+            super::user::User::columns_sql(Some("owner_"), None),
+            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+        ))
+        .bind(user_id)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -388,8 +522,11 @@ impl Server {
             r#"
             SELECT {}, {}, {}, {}, {}, COUNT(*) OVER() AS total_count
             FROM servers
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LIMIT $1 OFFSET $2
@@ -466,7 +603,7 @@ impl Server {
     }
 
     #[inline]
-    pub fn into_api_object(self, user_id: i32, user_permissions: Vec<String>) -> ApiServer {
+    pub fn into_api_object(self) -> ApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 
         ApiServer {
@@ -474,8 +611,10 @@ impl Server {
             uuid: self.uuid,
             uuid_short: format!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
-            is_owner: self.owner.id == user_id,
-            permissions: user_permissions,
+            is_owner: self.subuser_permissions.is_none(),
+            permissions: self
+                .subuser_permissions
+                .unwrap_or_else(|| vec!["*".to_string()]),
             node_uuid: self.node.uuid,
             node_name: self.node.name,
             sftp_host: self

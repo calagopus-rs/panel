@@ -3,26 +3,16 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::{Pagination, user_activity::UserActivity},
+        models::{Pagination, PaginationParams, user_activity::UserActivity},
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::{extract::Query, http::StatusCode};
-    use serde::{Deserialize, Serialize};
+    use serde::Serialize;
     use utoipa::ToSchema;
-    use validator::Validate;
-
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct Params {
-        #[validate(range(min = 1))]
-        #[serde(default = "Pagination::default_page")]
-        page: i64,
-        #[validate(range(min = 1, max = 100))]
-        #[serde(default = "Pagination::default_per_page")]
-        per_page: i64,
-    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         activities: Pagination<crate::models::user_activity::ApiUserActivity>,
     }
 
@@ -43,7 +33,7 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        Query(params): Query<Params>,
+        Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (

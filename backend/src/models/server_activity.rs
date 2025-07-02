@@ -141,7 +141,7 @@ impl ServerActivity {
             id: self.id,
             user: self.user.into_api_object(false),
             event: self.event,
-            ip: self.ip.to_string(),
+            ip: self.ip.ip().to_string(),
             data: self.data,
             is_api: self.api_key_id.is_some(),
             created: self.created,

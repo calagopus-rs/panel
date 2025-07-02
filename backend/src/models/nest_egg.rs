@@ -51,7 +51,7 @@ impl BaseModel for NestEgg {
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
         let table = table.unwrap_or("nest_eggs");
 
-        let mut columns = BTreeMap::from([
+        BTreeMap::from([
             (
                 format!("{}.id", table),
                 format!("{}id", prefix.unwrap_or_default()),
@@ -108,11 +108,7 @@ impl BaseModel for NestEgg {
                 format!("{}.created", table),
                 format!("{}created", prefix.unwrap_or_default()),
             ),
-        ]);
-
-        columns.extend(super::mount::Mount::columns(Some("mount_"), None));
-
-        columns
+        ])
     }
 
     #[inline]

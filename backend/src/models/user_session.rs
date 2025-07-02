@@ -125,7 +125,7 @@ impl UserSession {
     pub fn into_api_object(self) -> ApiUserSession {
         ApiUserSession {
             id: self.id,
-            ip: self.ip.to_string(),
+            ip: self.ip.ip().to_string(),
             user_agent: self.user_agent,
             last_used: self.last_used,
             created: self.created,

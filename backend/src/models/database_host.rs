@@ -13,7 +13,7 @@ pub enum DatabaseType {
     Postgresql,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct DatabaseHost {
     pub id: i32,
 

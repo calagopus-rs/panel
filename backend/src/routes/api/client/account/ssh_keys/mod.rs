@@ -14,6 +14,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         api_keys: Pagination<crate::models::user_ssh_key::ApiUserSshKey>,
     }
 
@@ -75,7 +76,10 @@ mod get {
 mod post {
     use crate::{
         models::user_ssh_key::UserSshKey,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};

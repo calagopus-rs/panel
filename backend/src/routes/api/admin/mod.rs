@@ -6,7 +6,7 @@ use utoipa_axum::router::OpenApiRouter;
 mod locations;
 mod nodes;
 
-pub async fn auth(user: GetUser, req: Request, next: Next) -> Result<Response, StatusCode> {
+pub async fn auth(user: GetUser, mut req: Request, next: Next) -> Result<Response, StatusCode> {
     if !user.admin {
         return Ok(Response::builder()
             .status(StatusCode::UNAUTHORIZED)
@@ -16,6 +16,8 @@ pub async fn auth(user: GetUser, req: Request, next: Next) -> Result<Response, S
             ))
             .unwrap());
     }
+
+    req.extensions_mut().insert(user.0);
 
     Ok(next.run(req).await)
 }

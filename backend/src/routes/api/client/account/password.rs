@@ -2,7 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState};
+    use crate::routes::{
+        ApiError, GetState,
+        api::client::{GetAuthMethod, GetUser},
+    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;

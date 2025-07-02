@@ -5,6 +5,7 @@ use tower_cookies::{Cookie, Cookies};
 use utoipa_axum::router::OpenApiRouter;
 
 mod account;
+mod servers;
 
 #[derive(Clone)]
 pub enum AuthMethod {
@@ -12,8 +13,8 @@ pub enum AuthMethod {
     ApiKey(UserApiKey),
 }
 
-pub type GetUser = axum::extract::Extension<User>;
-pub type GetAuthMethod = axum::extract::Extension<AuthMethod>;
+pub type GetUser = crate::extract::ConsumingExtension<User>;
+pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
 
 pub async fn auth(
     state: GetState,
@@ -33,13 +34,7 @@ pub async fn auth(
                 .unwrap());
         }
 
-        let user = /*state
-        .cache
-        .cached(&format!("user::session::{session_id}"), 300, || {
-            User::by_session(&state.database, &session_id)
-        })
-        .await;*/
-    User::by_session(&state.database, session_id.value()).await;
+        let user = User::by_session(&state.database, session_id.value()).await;
         let (user, mut session) = match user {
             Some(data) => data,
             None => {
@@ -126,6 +121,7 @@ pub async fn auth(
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .nest("/account", account::router(state))
+        .nest("/servers", servers::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

@@ -4,7 +4,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::user_api_key::UserApiKey,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -64,7 +67,10 @@ mod delete {
 mod patch {
     use crate::{
         models::user_api_key::UserApiKey,
-        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};

@@ -4,7 +4,7 @@ use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ServerAllocation {
     pub id: i32,
     pub allocation: super::node_allocation::NodeAllocation,
@@ -17,7 +17,7 @@ pub struct ServerAllocation {
 impl BaseModel for ServerAllocation {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
-        let table = table.unwrap_or("server_mounts");
+        let table = table.unwrap_or("server_allocations");
 
         let mut columns = BTreeMap::from([
             (
@@ -31,10 +31,6 @@ impl BaseModel for ServerAllocation {
             (
                 format!("{}.notes", table),
                 format!("{}notes", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.primary", table),
-                format!("{}primary", prefix.unwrap_or_default()),
             ),
             (
                 format!("{}.created", table),
@@ -146,7 +142,7 @@ impl ServerAllocation {
             port: self.allocation.port,
 
             notes: self.notes,
-            is_default: self.id == default.unwrap_or(-1),
+            is_default: default.is_some_and(|d| d == self.id),
 
             created: self.created,
         }
