@@ -71,21 +71,6 @@ impl ServerSubuser {
         .is_ok()
     }
 
-    pub async fn save(&self, database: &crate::database::Database, server_id: i32) {
-        sqlx::query(
-            r#"
-            UPDATE server_subusers
-            SET permissions = $2
-            WHERE server_subusers.server_id = $1 AND server_subusers.user_id = $2
-            "#,
-        )
-        .bind(server_id)
-        .bind(&self.permissions)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn all_by_server_id_with_pagination(
         database: &crate::database::Database,
         server_id: i32,

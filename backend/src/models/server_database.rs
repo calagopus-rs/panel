@@ -72,12 +72,12 @@ impl BaseModel for ServerDatabase {
 }
 
 impl ServerDatabase {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         server_id: i32,
         database_host_id: i32,
         name: &str,
-    ) -> bool {
+    ) -> Result<i32, sqlx::Error> {
         let mut rng = rand::rng();
 
         let username = format!(
@@ -87,10 +87,11 @@ impl ServerDatabase {
         );
         let password = rand::distr::Alphanumeric.sample_string(&mut rng, 24);
 
-        sqlx::query(
+        let row = sqlx::query(
             r#"
             INSERT INTO server_databases (server_id, database_host_id, name, username, password)
             VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
             "#,
         )
         .bind(server_id)
@@ -99,26 +100,9 @@ impl ServerDatabase {
         .bind(username)
         .bind(database.encrypt(&password).unwrap())
         .fetch_one(database.write())
-        .await
-        .is_ok()
-    }
+        .await?;
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE server_databases
-            SET
-                name = $2,
-                password = $3
-            WHERE server_databases.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(&self.password)
-        .execute(database.write())
-        .await
-        .unwrap();
+        Ok(row.get("id"))
     }
 
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
@@ -140,7 +124,29 @@ impl ServerDatabase {
         row.map(|row| Self::map(None, &row))
     }
 
-    pub async fn all_by_server_id_with_pagination(
+    pub async fn rotate_password(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<String, sqlx::Error> {
+        let mut rng = rand::rng();
+        let new_password = rand::distr::Alphanumeric.sample_string(&mut rng, 24);
+
+        sqlx::query(
+            r#"
+            UPDATE server_databases
+            SET server_databases.password = $1
+            WHERE server_databases.id = $2
+            "#,
+        )
+        .bind(database.encrypt(&new_password).unwrap())
+        .bind(id)
+        .execute(database.write())
+        .await?;
+
+        Ok(new_password)
+    }
+
+    pub async fn by_server_id_with_pagination(
         database: &crate::database::Database,
         server_id: i32,
         page: i64,

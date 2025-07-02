@@ -96,27 +96,6 @@ impl UserApiKey {
         Ok((key, Self::map(None, &row)))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE user_api_keys
-            SET
-                name = $2,
-                permissions = $3,
-                last_used = $4
-            WHERE user_api_keys.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(&self.permissions)
-        .bind(self.last_used)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn by_key_start(
         database: &crate::database::Database,
         user_id: i32,

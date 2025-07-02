@@ -128,7 +128,15 @@ mod patch {
             ssh_key.name = name;
         }
 
-        if ssh_key.save(&state.database).await.is_err() {
+        if sqlx::query!(
+            "UPDATE user_ssh_keys SET name = $1 WHERE id = $2",
+            ssh_key.name,
+            ssh_key.id,
+        )
+        .execute(state.database.write())
+        .await
+        .is_err()
+        {
             return (
                 StatusCode::CONFLICT,
                 axum::Json(ApiError::new_value(&["ssh key with name already exists"])),

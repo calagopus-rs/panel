@@ -125,36 +125,6 @@ impl ServerBackup {
         .is_ok()
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE server_backups
-            SET
-                name = $2,
-                successful = $3,
-                locked = $4,
-                ignored_files = $5,
-                checksum = $6,
-                bytes = $7,
-                completed = $8,
-                deleted = $9
-            WHERE server_backups.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(self.successful)
-        .bind(self.locked)
-        .bind(&self.ignored_files)
-        .bind(&self.checksum)
-        .bind(self.bytes)
-        .bind(self.completed)
-        .bind(self.deleted)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn by_uuid(database: &crate::database::Database, uuid: uuid::Uuid) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

@@ -35,7 +35,7 @@ pub async fn auth(
         }
 
         let user = User::by_session(&state.database, session_id.value()).await;
-        let (user, mut session) = match user {
+        let (user, session) = match user {
             Some(data) => data,
             None => {
                 return Ok(Response::builder()
@@ -48,15 +48,26 @@ pub async fn auth(
             }
         };
 
-        session.ip = crate::utils::extract_ip(req.headers()).unwrap().into();
-        session.user_agent = req
-            .headers()
-            .get("User-Agent")
-            .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
-            .unwrap_or("unknown")
-            .to_string();
-        session.last_used = chrono::Utc::now().naive_utc();
-        session.save(&state.database).await;
+        sqlx::query!(
+            "UPDATE user_sessions
+            SET ip = $1, user_agent = $2, last_used = $3
+            WHERE id = $4",
+            sqlx::types::ipnetwork::IpNetwork::from(
+                crate::utils::extract_ip(req.headers()).unwrap()
+            ),
+            crate::utils::slice_up_to(
+                req.headers()
+                    .get("User-Agent")
+                    .map(|ua| ua.to_str().unwrap_or("unknown"))
+                    .unwrap_or("unknown"),
+                255,
+            ),
+            chrono::Utc::now().naive_utc(),
+            session.id,
+        )
+        .execute(state.database.write())
+        .await
+        .unwrap();
 
         cookies.add(
             Cookie::build(("session", session_id.value().to_string()))
@@ -86,7 +97,7 @@ pub async fn auth(
         }
 
         let user = User::by_api_key(&state.database, api_token.to_str().unwrap_or("")).await;
-        let (user, mut api_key) = match user {
+        let (user, api_key) = match user {
             Some(data) => data,
             None => {
                 return Ok(Response::builder()
@@ -99,8 +110,16 @@ pub async fn auth(
             }
         };
 
-        api_key.last_used = Some(chrono::Utc::now().naive_utc());
-        api_key.save(&state.database).await.unwrap();
+        sqlx::query!(
+            "UPDATE user_api_keys
+            SET last_used = $1
+            WHERE id = $2",
+            chrono::Utc::now().naive_utc(),
+            api_key.id,
+        )
+        .execute(state.database.write())
+        .await
+        .unwrap();
 
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::ApiKey(api_key));

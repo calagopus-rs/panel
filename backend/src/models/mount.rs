@@ -109,32 +109,6 @@ impl Mount {
         Self::map(None, &row)
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE mounts
-            SET
-                name = $2,
-                description = $3,
-                source = $4,
-                target = $5,
-                read_only = $6,
-                user_mountable = $7
-            WHERE mounts.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(&self.description)
-        .bind(&self.source)
-        .bind(&self.target)
-        .bind(self.read_only)
-        .bind(self.user_mountable)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

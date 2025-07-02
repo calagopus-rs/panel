@@ -19,7 +19,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        mut user: GetUser,
+        user: GetUser,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if user.totp_enabled {
             return (
@@ -35,8 +35,14 @@ mod get {
             _ => unreachable!(),
         };
 
-        user.totp_secret = Some(secret.clone());
-        user.save(&state.database).await.unwrap();
+        sqlx::query!(
+            "UPDATE users SET totp_secret = $1 WHERE id = $2",
+            secret,
+            user.id
+        )
+        .execute(state.database.write())
+        .await
+        .unwrap();
 
         (
             StatusCode::OK,
@@ -91,7 +97,7 @@ mod post {
         state: GetState,
         ip: crate::GetIp,
         auth: GetAuthMethod,
-        mut user: GetUser,
+        user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if user.totp_enabled {
@@ -154,8 +160,13 @@ mod post {
             .await
             .unwrap();
 
-        user.totp_enabled = true;
-        user.save(&state.database).await.unwrap();
+        sqlx::query!(
+            "UPDATE users SET totp_enabled = true WHERE id = $1",
+            user.id
+        )
+        .execute(state.database.write())
+        .await
+        .unwrap();
 
         user.log_activity(
             &state.database,
@@ -243,7 +254,7 @@ mod delete {
                     6,
                     1,
                     30,
-                    totp_rs::Secret::Encoded(user.0.totp_secret.unwrap())
+                    totp_rs::Secret::Encoded(user.0.totp_secret.take().unwrap())
                         .to_bytes()
                         .unwrap(),
                 )
@@ -275,11 +286,15 @@ mod delete {
             }
         }
 
-        UserRecoveryCode::delete_by_user_id(&state.database, user.0.id).await;
+        UserRecoveryCode::delete_by_user_id(&state.database, user.id).await;
 
-        user.0.totp_enabled = false;
-        user.0.totp_secret = None;
-        user.save(&state.database).await.unwrap();
+        sqlx::query!(
+            "UPDATE users SET totp_enabled = false, totp_secret = NULL WHERE id = $1",
+            user.id
+        )
+        .execute(state.database.write())
+        .await
+        .unwrap();
 
         user.log_activity(
             &state.database,

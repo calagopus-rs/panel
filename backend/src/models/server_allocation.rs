@@ -78,22 +78,6 @@ impl ServerAllocation {
         .is_ok()
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE server_allocations
-            SET notes = $3, primary = $4
-            WHERE server_allocations.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(self.allocation.id)
-        .bind(&self.notes)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn all_by_server_id(
         database: &crate::database::Database,
         server_id: i32,

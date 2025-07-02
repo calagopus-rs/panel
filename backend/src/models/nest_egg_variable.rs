@@ -114,34 +114,6 @@ impl NestEggVariable {
         .is_ok()
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE nest_egg_variables
-            SET
-                name = $2,
-                description = $3,
-                env_variable = $4,
-                default_value = $5,
-                user_viewable = $6,
-                user_editable = $7,
-                rules = $8
-            WHERE nest_egg_variables.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(&self.description)
-        .bind(&self.env_variable)
-        .bind(&self.default_value)
-        .bind(self.user_viewable)
-        .bind(self.user_editable)
-        .bind(&self.rules)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn all_by_egg_id(database: &crate::database::Database, egg_id: i32) -> Vec<Self> {
         let rows = sqlx::query(&format!(
             r#"

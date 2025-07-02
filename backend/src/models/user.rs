@@ -135,37 +135,6 @@ impl User {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE users
-            SET
-                external_id = $2,
-                avatar = $3,
-                email = $4,
-                name_first = $5,
-                name_last = $6,
-                admin = $7,
-                totp_enabled = $8,
-                totp_secret = $9
-            WHERE users.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.external_id)
-        .bind(&self.avatar)
-        .bind(&self.email)
-        .bind(&self.name_first)
-        .bind(&self.name_last)
-        .bind(self.admin)
-        .bind(self.totp_enabled)
-        .bind(&self.totp_secret)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

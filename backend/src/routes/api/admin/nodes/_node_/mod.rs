@@ -237,7 +237,30 @@ mod patch {
             node.disk = disk;
         }
 
-        if node.save(&state.database).await.is_err() {
+        if sqlx::query!(
+            "UPDATE nodes
+            SET name = $1, public = $2,
+                description = $3, public_host = $4,
+                host = $5, ssl = $6,
+                sftp_host = $7, sftp_port = $8,
+                memory = $9, disk = $10
+            WHERE id = $11",
+            node.name,
+            node.public,
+            node.description,
+            node.public_host,
+            node.host,
+            node.ssl,
+            node.sftp_host,
+            node.sftp_port,
+            node.memory,
+            node.disk,
+            node.id,
+        )
+        .execute(state.database.write())
+        .await
+        .is_err()
+        {
             return (
                 StatusCode::CONFLICT,
                 axum::Json(ApiError::new_value(&["node with name already exists"])),

@@ -101,7 +101,7 @@ impl ServerActivity {
         Self::map(None, &row)
     }
 
-    pub async fn all_by_server_id_with_pagination(
+    pub async fn by_server_id_with_pagination(
         database: &crate::database::Database,
         server_id: i32,
         page: i64,

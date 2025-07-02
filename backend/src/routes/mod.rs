@@ -1,10 +1,11 @@
+use serde::Serialize;
 use std::{sync::Arc, time::Instant};
 use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 
 pub mod api;
 
-#[derive(ToSchema)]
+#[derive(ToSchema, Serialize)]
 pub struct ApiError {
     pub errors: Vec<String>,
 }

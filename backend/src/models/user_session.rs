@@ -88,26 +88,6 @@ impl UserSession {
         hash
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE user_sessions
-            SET
-                ip = $2,
-                user_agent = $3,
-                last_used = $4
-            WHERE user_sessions.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(self.ip)
-        .bind(&self.user_agent)
-        .bind(self.last_used)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
         sqlx::query(
             r#"

@@ -209,49 +209,6 @@ impl Node {
         Ok(row.get("id"))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE nodes
-            SET
-                location_id = $2,
-                database_host_id = $3,
-                name = $4,
-                public = $5,
-                description = $6,
-                public_host = $7,
-                host = $8,
-                ssl = $9,
-                sftp_port = $10,
-                memory = $11,
-                disk = $12,
-                maintenance_message = $13,
-                token_id = $14,
-                token = $15
-            WHERE nodes.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(self.location.id)
-        .bind(self.database_host.as_ref().map(|host| host.id))
-        .bind(&self.name)
-        .bind(self.public)
-        .bind(&self.description)
-        .bind(&self.public_host)
-        .bind(&self.host)
-        .bind(self.ssl)
-        .bind(self.sftp_port)
-        .bind(self.memory)
-        .bind(self.disk)
-        .bind(&self.maintenance_message)
-        .bind(&self.token_id)
-        .bind(&self.token)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

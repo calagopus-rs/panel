@@ -133,37 +133,6 @@ impl DatabaseHost {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE database_hosts
-            SET
-                name = $2,
-                type = $3,
-                public_host = $4,
-                host = $5,
-                public_port = $6,
-                port = $7,
-                username = $8,
-                password = $9
-            WHERE database_hosts.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .bind(self.r#type)
-        .bind(&self.public_host)
-        .bind(&self.host)
-        .bind(self.public_port)
-        .bind(self.port)
-        .bind(&self.username)
-        .bind(database.encrypt(&self.password).unwrap())
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn all_with_pagination(
         database: &crate::database::Database,
         page: i64,

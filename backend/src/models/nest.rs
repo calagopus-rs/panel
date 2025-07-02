@@ -79,26 +79,6 @@ impl Nest {
         .is_ok()
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE nests
-            SET
-                author = $2,
-                name = $3,
-                description = $4
-            WHERE nests.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.author)
-        .bind(&self.name)
-        .bind(&self.description)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

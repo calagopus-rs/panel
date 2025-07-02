@@ -30,7 +30,7 @@ mod put {
         state: GetState,
         ip: crate::GetIp,
         auth: GetAuthMethod,
-        mut user: GetUser,
+        user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -51,10 +51,15 @@ mod put {
         }
 
         if user.email != data.email {
-            let old_email = user.email.clone();
-
-            user.email = data.email;
-            if user.save(&state.database).await.is_err() {
+            if sqlx::query!(
+                "UPDATE users SET email = $1 WHERE id = $2",
+                data.email,
+                user.id
+            )
+            .execute(state.database.write())
+            .await
+            .is_err()
+            {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["user with email already exists"])),
@@ -67,8 +72,8 @@ mod put {
                 ip,
                 auth,
                 serde_json::json!({
-                    "old": old_email,
-                    "new": user.email,
+                    "old": user.email,
+                    "new": data.email,
                 }),
             )
             .await;

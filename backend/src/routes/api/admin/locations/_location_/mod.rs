@@ -144,7 +144,19 @@ mod patch {
             }
         }
 
-        if location.save(&state.database).await.is_err() {
+        if sqlx::query!(
+            "UPDATE locations
+            SET short_name = $1, name = $2, description = $3
+            WHERE id = $4",
+            location.short_name,
+            location.name,
+            location.description,
+            location.id,
+        )
+        .execute(state.database.write())
+        .await
+        .is_err()
+        {
             return (
                 StatusCode::CONFLICT,
                 axum::Json(ApiError::new_value(&["location with name already exists"])),

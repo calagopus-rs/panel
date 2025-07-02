@@ -304,52 +304,6 @@ impl Server {
         }
     }
 
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE servers
-            SET
-                node_id = $2,
-                owner_id = $3,
-                egg_id = $4,
-                name = $5,
-                description = $6,
-                memory = $7,
-                swap = $8,
-                disk = $9,
-                io = $10,
-                cpu = $11,
-                pinned_cpus = $12,
-                startup = $13,
-                image = $14,
-                allocation_limit = $15,
-                database_limit = $16,
-                backup_limit = $17
-            WHERE servers.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(self.node.id)
-        .bind(self.owner.id)
-        .bind(self.egg.id)
-        .bind(&self.name)
-        .bind(&self.description)
-        .bind(self.memory)
-        .bind(self.swap)
-        .bind(self.disk)
-        .bind(self.io)
-        .bind(self.cpu)
-        .bind(&self.pinned_cpus)
-        .bind(&self.startup)
-        .bind(&self.image)
-        .bind(self.allocation_limit)
-        .bind(self.database_limit)
-        .bind(self.backup_limit)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

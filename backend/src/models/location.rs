@@ -82,27 +82,6 @@ impl Location {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE locations
-            SET
-                short_name = $2,
-                name = $3,
-                description = $4
-            WHERE locations.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.short_name)
-        .bind(&self.name)
-        .bind(&self.description)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

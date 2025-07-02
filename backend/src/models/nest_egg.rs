@@ -144,43 +144,7 @@ impl BaseModel for NestEgg {
 }
 
 impl NestEgg {
-    pub async fn save(&self, database: &crate::database::Database) {
-        sqlx::query(
-            r#"
-            UPDATE nest_eggs
-            SET
-                author = $2,
-                name = $3,
-                description = $4,
-                config_files = $5,
-                config_startup = $6,
-                config_stop = $7,
-                config_script = $8,
-                startup = $9,
-                features = $10,
-                docker_images = $11,
-                file_denylist = $12
-            WHERE nest_eggs.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.author)
-        .bind(&self.name)
-        .bind(&self.description)
-        .bind(&self.config_files)
-        .bind(serde_json::to_value(&self.config_startup).unwrap())
-        .bind(serde_json::to_value(&self.config_stop).unwrap())
-        .bind(serde_json::to_value(&self.config_script).unwrap())
-        .bind(&self.startup)
-        .bind(&self.features)
-        .bind(serde_json::to_value(&self.docker_images).unwrap())
-        .bind(&self.file_denylist)
-        .execute(database.write())
-        .await
-        .unwrap();
-    }
-
-    pub async fn all_by_nest_id_with_pagination(
+    pub async fn by_nest_id_with_pagination(
         database: &crate::database::Database,
         nest_id: i32,
         page: i64,

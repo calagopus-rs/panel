@@ -132,7 +132,18 @@ mod patch {
             api_key.permissions = permissions;
         }
 
-        if api_key.save(&state.database).await.is_err() {
+        if sqlx::query!(
+            "UPDATE user_api_keys
+            SET name = $1, permissions = $2
+            WHERE id = $3",
+            api_key.name,
+            &api_key.permissions,
+            api_key.id,
+        )
+        .execute(state.database.write())
+        .await
+        .is_err()
+        {
             return (
                 StatusCode::CONFLICT,
                 axum::Json(ApiError::new_value(&["api key with name already exists"])),

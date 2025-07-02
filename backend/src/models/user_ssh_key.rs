@@ -140,22 +140,6 @@ impl UserSshKey {
         }
     }
 
-    pub async fn save(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
-        sqlx::query(
-            r#"
-            UPDATE user_ssh_keys
-            SET name = $2
-            WHERE user_ssh_keys.id = $1
-            "#,
-        )
-        .bind(self.id)
-        .bind(&self.name)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
         sqlx::query(
             r#"
