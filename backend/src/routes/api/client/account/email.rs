@@ -2,7 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{ApiError, GetState, api::client::GetUser};
+    use crate::routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState};
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -26,6 +26,7 @@ mod put {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         mut user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -61,6 +62,7 @@ mod put {
                 &state.database,
                 "user:account.email-changed",
                 ip,
+                auth,
                 serde_json::json!({
                     "old": old_email,
                     "new": user.email,

@@ -5,9 +5,9 @@ use axum::{
 };
 use utoipa_axum::router::OpenApiRouter;
 
-mod admin;
-mod auth;
-mod client;
+pub mod admin;
+pub mod auth;
+pub mod client;
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()

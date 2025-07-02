@@ -1,7 +1,7 @@
 use super::BaseModel;
+use crate::routes::api::client::{AuthMethod, GetAuthMethod};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use sha2::Digest;
 use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
 use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
@@ -324,12 +324,16 @@ impl User {
         database: &crate::database::Database,
         event: &str,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         data: serde_json::Value,
     ) {
         if let Err(err) = super::user_activity::UserActivity::log(
             database,
             self.id,
-            None,
+            match auth.0 {
+                AuthMethod::ApiKey(api_key) => Some(api_key.id),
+                _ => None,
+            },
             event,
             ip.0.into(),
             data,

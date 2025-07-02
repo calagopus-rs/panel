@@ -69,7 +69,7 @@ mod get {
 mod post {
     use crate::{
         models::location::Location,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -100,6 +100,7 @@ mod post {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -133,6 +134,7 @@ mod post {
             &state.database,
             "admin:location.create",
             ip,
+            auth,
             serde_json::json!({
                 "short_name": location.short_name,
                 "name": location.name,

@@ -8,6 +8,7 @@ mod post {
         jwt::BasePayload,
         models::{
             user::{ApiUser, User},
+            user_activity::UserActivity,
             user_session::UserSession,
         },
         routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
@@ -83,13 +84,18 @@ mod post {
                 })
                 .unwrap();
 
-            user.log_activity(
+            if let Err(err) = UserActivity::log(
                 &state.database,
+                user.id,
+                None,
                 "auth:checkpoint",
-                ip,
+                ip.0.into(),
                 serde_json::json!({}),
             )
-            .await;
+            .await
+            {
+                tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
+            }
 
             (
                 StatusCode::OK,
@@ -120,15 +126,20 @@ mod post {
                     .build(),
             );
 
-            user.log_activity(
+            if let Err(err) = UserActivity::log(
                 &state.database,
+                user.id,
+                None,
                 "auth:success",
-                ip,
+                ip.0.into(),
                 serde_json::json!({
                     "using": "password",
                 }),
             )
-            .await;
+            .await
+            {
+                tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
+            }
 
             (
                 StatusCode::OK,

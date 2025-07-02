@@ -6,7 +6,10 @@ mod nodes;
 mod delete {
     use crate::{
         models::location::Location,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -28,6 +31,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         user: GetUser,
         Path(location): Path<i32>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -47,6 +51,7 @@ mod delete {
             &state.database,
             "admin:location.delete",
             ip,
+            auth,
             serde_json::json!({
                 "short_name": location.short_name,
                 "name": location.name,
@@ -64,7 +69,10 @@ mod delete {
 mod patch {
     use crate::{
         models::location::Location,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -100,6 +108,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         user: GetUser,
         Path(location): Path<i32>,
         axum::Json(data): axum::Json<Payload>,
@@ -146,6 +155,7 @@ mod patch {
             &state.database,
             "admin:location.update",
             ip,
+            auth,
             serde_json::json!({
                 "short_name": location.short_name,
                 "name": location.name,

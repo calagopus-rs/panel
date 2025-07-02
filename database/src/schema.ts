@@ -196,8 +196,8 @@ export const nodes = pgTable('nodes', {
 
 	created: timestamp('created').default(sql`now()`).notNull(),
 }, (nodes) => [
-	uniqueIndex('nodes_name_idx').on(nodes.name),
 	uniqueIndex('nodes_uuid_idx').on(nodes.uuid),
+	uniqueIndex('nodes_name_idx').on(nodes.name),
 	uniqueIndex('nodes_token_id_idx').on(nodes.tokenId),
 	uniqueIndex('nodes_token_idx').on(nodes.token),
 ])

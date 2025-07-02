@@ -58,7 +58,7 @@ mod get {
 mod post {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -87,6 +87,7 @@ mod post {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         mut user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -157,6 +158,7 @@ mod post {
             &state.database,
             "user:account.two-factor.enable",
             ip,
+            auth,
             serde_json::json!({}),
         )
         .await;
@@ -171,7 +173,7 @@ mod post {
 mod delete {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -198,6 +200,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         mut user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -276,6 +279,7 @@ mod delete {
             &state.database,
             "user:account.two-factor.disable",
             ip,
+            auth,
             serde_json::json!({}),
         )
         .await;

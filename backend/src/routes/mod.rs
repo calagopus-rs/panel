@@ -1,9 +1,8 @@
-use serde::Serialize;
 use std::{sync::Arc, time::Instant};
 use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 
-mod api;
+pub mod api;
 
 #[derive(ToSchema)]
 pub struct ApiError {

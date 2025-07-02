@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::node::Node,
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -27,6 +27,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         user: GetUser,
         Path(node): Path<i32>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -53,6 +54,7 @@ mod delete {
             &state.database,
             "admin:node.delete",
             ip,
+            auth,
             serde_json::json!({
                 "name": node.name,
             }),
@@ -69,7 +71,7 @@ mod delete {
 mod patch {
     use crate::{
         models::{location::Location, node::Node},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{api::client::{GetAuthMethod, GetUser}, ApiError, GetState},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -121,6 +123,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
+        auth: GetAuthMethod,
         user: GetUser,
         Path(node): Path<i32>,
         axum::Json(data): axum::Json<Payload>,
@@ -237,6 +240,7 @@ mod patch {
             &state.database,
             "admin:node.update",
             ip,
+            auth,
             serde_json::json!({
                 "name": node.name,
                 "public": node.public,

@@ -5,7 +5,7 @@ use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct UserApiKey {
     pub id: i32,
 
@@ -102,8 +102,8 @@ impl UserApiKey {
             UPDATE user_api_keys
             SET
                 name = $2,
-                permissions = $4,
-                last_used = $5
+                permissions = $3,
+                last_used = $4
             WHERE user_api_keys.id = $1
             "#,
         )
