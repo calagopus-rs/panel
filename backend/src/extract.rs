@@ -16,8 +16,6 @@ impl IntoResponse for ConsumingExtensionError {
     }
 }
 
-#[derive(Debug, Default)]
-#[must_use]
 pub struct ConsumingExtension<T>(pub T);
 
 impl<T> ConsumingExtension<T>

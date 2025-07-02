@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 pub struct NodeAllocation {
     pub id: i32,
 
-    pub ip: String,
+    pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub ip_alias: Option<String>,
     pub port: i32,
 
@@ -59,10 +59,10 @@ impl BaseModel for NodeAllocation {
 }
 
 impl NodeAllocation {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         node_id: i32,
-        ip: &str,
+        ip: &sqlx::types::ipnetwork::IpNetwork,
         ip_alias: Option<&str>,
         port: i32,
     ) -> bool {
@@ -81,7 +81,7 @@ impl NodeAllocation {
         .is_ok()
     }
 
-    pub async fn all_by_node_id_with_pagination(
+    pub async fn by_node_id_with_pagination(
         database: &crate::database::Database,
         node_id: i32,
         page: i64,
@@ -94,6 +94,7 @@ impl NodeAllocation {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_allocations
             WHERE node_allocations.node_id = $1
+            ORDER BY node_allocations.ip, node_allocations.port
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -130,7 +131,7 @@ impl NodeAllocation {
     pub fn into_admin_api_object(self) -> AdminApiNodeAllocation {
         AdminApiNodeAllocation {
             id: self.id,
-            ip: self.ip,
+            ip: self.ip.ip().to_string(),
             ip_alias: self.ip_alias,
             port: self.port,
             created: self.created,

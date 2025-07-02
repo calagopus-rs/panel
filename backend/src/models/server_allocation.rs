@@ -116,19 +116,19 @@ impl ServerAllocation {
         rows.into_iter().map(|row| Self::map(None, &row)).collect()
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_id(
         database: &crate::database::Database,
         server_id: i32,
-        allocation_ids: &[i32],
+        allocation_id: i32,
     ) {
         sqlx::query(
             r#"
             DELETE FROM server_allocations
-            WHERE server_id = $1 AND allocation_id = ANY($2)
+            WHERE server_id = $1 AND allocation_id = $2
             "#,
         )
         .bind(server_id)
-        .bind(allocation_ids)
+        .bind(allocation_id)
         .execute(database.write())
         .await
         .unwrap();
@@ -137,13 +137,11 @@ impl ServerAllocation {
     #[inline]
     pub fn into_api_object(self, default: Option<i32>) -> ApiServerAllocation {
         ApiServerAllocation {
-            ip: self.allocation.ip,
+            ip: self.allocation.ip.ip().to_string(),
             ip_alias: self.allocation.ip_alias,
             port: self.allocation.port,
-
             notes: self.notes,
             is_default: default.is_some_and(|d| d == self.id),
-
             created: self.created,
         }
     }

@@ -1,6 +1,8 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod allocations;
+
 mod delete {
     use crate::{
         models::node::Node,
@@ -276,5 +278,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/allocations", allocations::router(state))
         .with_state(state.clone())
 }

@@ -217,6 +217,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{location}", _node_::router(state))
+        .nest("/{node}", _node_::router(state))
         .with_state(state.clone())
 }

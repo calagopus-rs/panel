@@ -260,10 +260,23 @@ impl NestEgg {
             created: self.created,
         }
     }
+
+    #[inline]
+    pub fn into_api_object(self) -> ApiNestEgg {
+        ApiNestEgg {
+            id: self.id,
+            name: self.name,
+            description: self.description,
+            startup: self.startup,
+            features: self.features,
+            docker_images: self.docker_images,
+            created: self.created,
+        }
+    }
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "NestEgg")]
+#[schema(title = "AdminNestEgg")]
 pub struct AdminApiNestEgg {
     pub id: i32,
 
@@ -281,6 +294,22 @@ pub struct AdminApiNestEgg {
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
+
+    pub created: NaiveDateTime,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "NestEgg")]
+pub struct ApiNestEgg {
+    pub id: i32,
+
+    pub name: String,
+    pub description: Option<String>,
+
+    pub startup: String,
+
+    pub features: Vec<String>,
+    pub docker_images: IndexMap<String, String>,
 
     pub created: NaiveDateTime,
 }

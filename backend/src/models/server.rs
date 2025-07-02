@@ -386,7 +386,7 @@ impl Server {
     ) -> Option<Self> {
         let query = format!(
             r#"
-            SELECT {}, {}, {}, {}, {}
+            SELECT {}, {}, {}, {}, {}, server_subusers.permissions
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -440,7 +440,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            JOIN server_subusers ON server_subusers.server_id = servers.id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.owner_id = $1 OR server_subusers.user_id = $1
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
@@ -485,7 +485,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            JOIN server_subusers ON server_subusers.server_id = servers.id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.owner_id != $1 AND server_subusers.user_id != $1
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
@@ -611,6 +611,7 @@ impl Server {
             uuid: self.uuid,
             uuid_short: format!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
+            egg: self.egg.into_api_object(),
             is_owner: self.subuser_permissions.is_none(),
             permissions: self
                 .subuser_permissions
@@ -693,6 +694,7 @@ pub struct ApiServer {
     pub uuid: uuid::Uuid,
     pub uuid_short: String,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,
+    pub egg: super::nest_egg::ApiNestEgg,
 
     pub is_owner: bool,
     pub permissions: Vec<String>,
