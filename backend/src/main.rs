@@ -32,7 +32,7 @@ mod utils;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
-const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/public");
+const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
 #[inline]
 fn render_index(meta: HashMap<&str, String>, state: GetState) -> (StatusCode, HeaderMap, String) {
