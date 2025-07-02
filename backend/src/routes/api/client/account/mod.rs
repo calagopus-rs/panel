@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod activity;
 mod api_keys;
 mod email;
+mod logout;
 mod password;
 mod ssh_keys;
 mod two_factor;
@@ -38,6 +39,7 @@ mod get {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
+        .nest("/logout", logout::router(state))
         .nest("/email", email::router(state))
         .nest("/password", password::router(state))
         .nest("/two-factor", two_factor::router(state))
