@@ -22,7 +22,7 @@ export default () => {
 
   const [faToken, setFaToken] = useState('');
 
-  const submitLogin = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
     checkpointLogin({ code: faToken, confirmation_token: auth.token! })
@@ -37,7 +37,7 @@ export default () => {
 
   return (
     <AuthWrapper title="Two Factor Authentication">
-      <form onSubmit={submitLogin}>
+      <form onSubmit={submit}>
         <div className="mb-4">
           <Input.Text
             autoFocus
