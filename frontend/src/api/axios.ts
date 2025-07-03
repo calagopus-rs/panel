@@ -30,6 +30,10 @@ export function httpErrorToHuman(error: any): string {
       return data.errors[0].detail;
     }
 
+    if (data.errors && data.errors[0] && typeof data.errors[0] === 'string') {
+      return data.errors[0];
+    }
+
     // Errors from wings directory, mostly just for file uploads.
     if (data.error && typeof data.error === 'string') {
       return data.error;
