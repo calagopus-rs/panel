@@ -6,9 +6,12 @@ import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
+import { useToast } from '@/elements/Toast';
+import { httpErrorToHuman } from '@/api/axios';
 
 export default () => {
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const { setUser, setAuthToken } = useUserStore();
 
   const [username, setUsername] = useState('');
@@ -17,16 +20,20 @@ export default () => {
   const submitLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
-    login({ user: username, password }).then(response => {
-      if (response.type === 'two_factor_required') {
-        setAuthToken(response.token!);
-        navigate('/auth/two-factor');
-        return;
-      }
+    login({ user: username, password })
+      .then(response => {
+        if (response.type === 'two_factor_required') {
+          setAuthToken(response.token!);
+          navigate('/auth/two-factor');
+          return;
+        }
 
-      setUser(response.user!);
-      navigate('/');
-    });
+        setUser(response.user!);
+        navigate('/');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (
