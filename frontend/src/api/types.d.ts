@@ -1,3 +1,15 @@
+interface User {
+  id: number;
+  avatar?: string;
+  username: string;
+  email: string;
+  name_first: string;
+  name_last: string;
+  admin: boolean;
+  totp_enabled: boolean;
+  created: Date;
+}
+
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
 
 interface ServerBackup {
