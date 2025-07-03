@@ -26,8 +26,8 @@ mod put {
 
     #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = UNAUTHORIZED, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
+        (status = UNAUTHORIZED, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,

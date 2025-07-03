@@ -18,7 +18,7 @@ mod delete {
 
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
             "apikey" = String,
@@ -91,9 +91,9 @@ mod patch {
 
     #[utoipa::path(patch, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
-        (status = BAD_REQUEST, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "apikey" = String,

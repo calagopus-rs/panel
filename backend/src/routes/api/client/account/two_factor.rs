@@ -15,7 +15,7 @@ mod get {
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = CONFLICT, body = inline(ApiError)),
+        (status = CONFLICT, body = ApiError),
     ))]
     pub async fn route(
         state: GetState,
@@ -91,9 +91,9 @@ mod post {
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = BAD_REQUEST, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
-        (status = UNAUTHORIZED, body = inline(ApiError)),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = CONFLICT, body = ApiError),
+        (status = UNAUTHORIZED, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
@@ -214,9 +214,9 @@ mod delete {
 
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = BAD_REQUEST, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
-        (status = UNAUTHORIZED, body = inline(ApiError)),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = CONFLICT, body = ApiError),
+        (status = UNAUTHORIZED, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,

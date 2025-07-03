@@ -8,7 +8,7 @@
     "dev": "pnpm build && cd lib && NODE_ENV=development node --enable-source-maps index && cd .."
   },
   "keywords": [],
-  "author": "MCJars",
+  "author": "pterodactyl-rs",
   "license": "MIT",
   "dependencies": {
     "@rjweb/utils": "^1.12.28",

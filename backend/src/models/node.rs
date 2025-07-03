@@ -312,6 +312,29 @@ impl Node {
         .unwrap();
     }
 
+    pub fn api_client(
+        &self,
+        database: &crate::database::Database,
+    ) -> wings_api::client::WingsClient {
+        wings_api::client::WingsClient::new(
+            if self.ssl {
+                format!("https://{}", self.host)
+            } else {
+                format!("http://{}", self.host)
+            },
+            database.decrypt(&self.token).unwrap(),
+        )
+    }
+
+    pub fn create_jwt<T: Serialize>(
+        &self,
+        database: &crate::database::Database,
+        jwt: &crate::jwt::Jwt,
+        payload: &T,
+    ) -> Result<String, jwt::Error> {
+        jwt.create_custom(database.decrypt(&self.token).unwrap().as_bytes(), payload)
+    }
+
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNode {
         AdminApiNode {

@@ -102,8 +102,8 @@ mod post {
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = BAD_REQUEST, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,

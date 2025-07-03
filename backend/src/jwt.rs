@@ -67,25 +67,16 @@ impl Jwt {
     }
 
     #[inline]
-    pub fn verify_node<T: DeserializeOwned>(
-        &self,
-        token: &str,
-        node: &crate::models::node::Node,
-    ) -> Result<T, jwt::Error> {
-        token.verify_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(&node.token)?)
-    }
-
-    #[inline]
     pub fn create<T: Serialize>(&self, payload: &T) -> Result<String, jwt::Error> {
         payload.sign_with_key(&self.key)
     }
 
     #[inline]
-    pub fn create_node<T: Serialize>(
+    pub fn create_custom<T: Serialize>(
         &self,
-        node: &crate::models::node::Node,
+        key: &[u8],
         payload: &T,
     ) -> Result<String, jwt::Error> {
-        payload.sign_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(&node.token)?)
+        payload.sign_with_key(&hmac::Hmac::<sha2::Sha256>::new_from_slice(key)?)
     }
 }

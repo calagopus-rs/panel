@@ -5,8 +5,8 @@ use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[schema(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "lowercase")]
+#[schema(rename_all = "lowercase")]
 #[sqlx(type_name = "database_type", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum DatabaseType {
     Mariadb,

@@ -19,7 +19,7 @@ mod post {
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = BAD_REQUEST, body = inline(ApiError)),
+        (status = BAD_REQUEST, body = ApiError),
     ))]
     pub async fn route(
         state: GetState,

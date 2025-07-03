@@ -3,30 +3,26 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, location::Location, node::Node},
-        routes::{ApiError, GetState},
+        models::{Pagination, PaginationParams, server_activity::ServerActivity},
+        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
-    use axum::{
-        extract::{Path, Query},
-        http::StatusCode,
-    };
+    use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        nodes: Pagination<crate::models::node::AdminApiNode>,
+        activities: Pagination<crate::models::server_activity::ApiServerActivity>,
     }
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
-            description = "The location ID",
-            example = "1",
+            "server" = uuid::Uuid,
+            description = "The server ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -41,8 +37,8 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        server: GetServer,
         Query(params): Query<PaginationParams>,
-        Path(location): Path<i32>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (
@@ -51,19 +47,9 @@ mod get {
             );
         }
 
-        let location = match Location::by_id(&state.database, location).await {
-            Some(location) => location,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["location not found"])),
-                );
-            }
-        };
-
-        let nodes = Node::by_location_id_with_pagination(
+        let activities = ServerActivity::by_server_id_with_pagination(
             &state.database,
-            location.id,
+            server.id,
             params.page,
             params.per_page,
         )
@@ -73,14 +59,14 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    nodes: Pagination {
-                        total: nodes.total,
-                        per_page: nodes.per_page,
-                        page: nodes.page,
-                        data: nodes
+                    activities: Pagination {
+                        total: activities.total,
+                        per_page: activities.per_page,
+                        page: activities.page,
+                        data: activities
                             .data
                             .into_iter()
-                            .map(|node| node.into_admin_api_object())
+                            .map(|activity| activity.into_api_object())
                             .collect(),
                     },
                 })

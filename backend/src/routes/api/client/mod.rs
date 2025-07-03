@@ -85,7 +85,7 @@ pub async fn auth(
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::Session(session));
     } else if let Some(api_token) = req.headers().get("Authorization") {
-        if api_token.len() != 48 {
+        if api_token.len() != 48 + 7 {
             return Ok(Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
                 .header("Content-Type", "application/json")
@@ -96,7 +96,14 @@ pub async fn auth(
                 .unwrap());
         }
 
-        let user = User::by_api_key(&state.database, api_token.to_str().unwrap_or("")).await;
+        let user = User::by_api_key(
+            &state.database,
+            api_token
+                .to_str()
+                .unwrap_or("")
+                .trim_start_matches("Bearer "),
+        )
+        .await;
         let (user, api_key) = match user {
             Some(data) => data,
             None => {

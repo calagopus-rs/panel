@@ -21,7 +21,7 @@ mod get {
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
             "node" = i32,
@@ -112,14 +112,14 @@ mod delete {
 
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
             "node" = i32,
             description = "The node ID",
             example = "1",
         ),
-    ))]
+    ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         ip: crate::GetIp,
@@ -187,7 +187,7 @@ mod put {
 
     #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
             "node" = i32,

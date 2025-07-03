@@ -14,14 +14,21 @@ impl ApiError {
     #[inline]
     pub fn new_value(errors: &[&str]) -> serde_json::Value {
         serde_json::json!({
-            "errors": errors
+            "errors": errors,
         })
     }
 
     #[inline]
     pub fn new_strings_value(errors: Vec<String>) -> serde_json::Value {
         serde_json::json!({
-            "errors": errors
+            "errors": errors,
+        })
+    }
+
+    #[inline]
+    pub fn new_wings_value(error: wings_api::ApiError) -> serde_json::Value {
+        serde_json::json!({
+            "errors": [error.error],
         })
     }
 }

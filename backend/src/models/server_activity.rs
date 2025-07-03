@@ -71,7 +71,7 @@ impl BaseModel for ServerActivity {
 }
 
 impl ServerActivity {
-    pub async fn new(
+    pub async fn log(
         database: &crate::database::Database,
         server_id: i32,
         user_id: i32,
@@ -79,26 +79,23 @@ impl ServerActivity {
         event: &str,
         ip: sqlx::types::ipnetwork::IpNetwork,
         data: serde_json::Value,
-    ) -> Self {
-        let row = sqlx::query(&format!(
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
             r#"
             INSERT INTO server_activities (server_id, user_id, api_key_id, event, ip, data)
             VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING {}
             "#,
-            Self::columns_sql(None, None)
-        ))
+        )
         .bind(server_id)
         .bind(user_id)
         .bind(api_key_id)
         .bind(event)
         .bind(ip)
         .bind(data)
-        .fetch_one(database.write())
-        .await
-        .unwrap();
+        .execute(database.write())
+        .await?;
 
-        Self::map(None, &row)
+        Ok(())
     }
 
     pub async fn by_server_id_with_pagination(
