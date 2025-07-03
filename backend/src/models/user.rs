@@ -7,7 +7,7 @@ use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
 
 pub static USERNAME_REGEX: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"^[a-zA-Z0-9_]$").expect("Failed to compile username regex"));
+    LazyLock::new(|| Regex::new(r"^[a-zA-Z0-9_]+$").expect("Failed to compile username regex"));
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct User {
