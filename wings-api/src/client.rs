@@ -231,16 +231,11 @@ impl WingsClient {
         server: uuid::Uuid,
         file: String,
         download: bool,
+        max_size: u64,
     ) -> Result<super::servers_server_files_contents::get::Response200, (StatusCode, super::ApiError)>
     {
         let file = urlencoding::encode(&file);
-        request_impl(
-            self,
-            Method::GET,
-            format!("/api/servers/{server}/files/contents?file={file}&download={download}"),
-            None,
-        )
-        .await
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/contents?file={file}&download={download}&max_size={max_size}"), None).await
     }
 
     pub async fn post_servers_server_files_copy(

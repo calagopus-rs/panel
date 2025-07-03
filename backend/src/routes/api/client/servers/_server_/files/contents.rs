@@ -39,7 +39,7 @@ mod get {
         let content = match server
             .node
             .api_client(&state.database)
-            .get_servers_server_files_contents(server.uuid, params.file, false)
+            .get_servers_server_files_contents(server.uuid, params.file, false, 15 * 1024 * 1024)
             .await
         {
             Ok(data) => data,
@@ -51,6 +51,16 @@ mod get {
                         "application/json".parse().unwrap(),
                     )]),
                     ApiError::new_value(&["file not found"]).to_string(),
+                );
+            }
+            Err((StatusCode::PAYLOAD_TOO_LARGE, _)) => {
+                return (
+                    StatusCode::PAYLOAD_TOO_LARGE,
+                    HeaderMap::from_iter([(
+                        axum::http::header::CONTENT_TYPE,
+                        "application/json".parse().unwrap(),
+                    )]),
+                    ApiError::new_value(&["file size exceeds limit"]).to_string(),
                 );
             }
             Err((_, err)) => {

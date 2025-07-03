@@ -32,7 +32,7 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 });
 
 #[inline]
-async fn request_impl<T: DeserializeOwned>(
+async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,
     endpoint: String,

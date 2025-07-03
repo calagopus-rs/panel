@@ -471,6 +471,8 @@ pub mod servers_server_files_contents {
 
         pub type Response404 = ApiError;
 
+        pub type Response413 = ApiError;
+
         pub type Response417 = ApiError;
 
     }
