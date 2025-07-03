@@ -18,6 +18,7 @@ pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
 
 pub async fn auth(
     state: GetState,
+    ip: crate::GetIp,
     cookies: Cookies,
     mut req: Request,
     next: Next,
@@ -52,9 +53,7 @@ pub async fn auth(
             "UPDATE user_sessions
             SET ip = $1, user_agent = $2, last_used = $3
             WHERE id = $4",
-            sqlx::types::ipnetwork::IpNetwork::from(
-                crate::utils::extract_ip(req.headers()).unwrap()
-            ),
+            sqlx::types::ipnetwork::IpNetwork::from(ip.0),
             crate::utils::slice_up_to(
                 req.headers()
                     .get("User-Agent")

@@ -1,6 +1,6 @@
 // This file is auto-generated from OpenAPI spec. Do not edit manually.
-use serde::{Deserialize, Serialize};
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub mod client;
@@ -267,7 +267,6 @@ pub mod extensions {
                 pub extensions: Vec<ExtensionInfo>,
             }
         }
-
     }
 }
 pub mod servers {
@@ -277,7 +276,6 @@ pub mod servers {
         use super::*;
 
         pub type Response200 = Vec<Server>;
-
     }
 
     pub mod post {
@@ -298,7 +296,6 @@ pub mod servers {
         }
 
         pub type Response409 = ApiError;
-
     }
 }
 pub mod servers_server {
@@ -308,7 +305,6 @@ pub mod servers_server {
         use super::*;
 
         pub type Response200 = Server;
-
     }
 
     pub mod delete {
@@ -318,7 +314,6 @@ pub mod servers_server {
             #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
             }
         }
-
     }
 }
 pub mod servers_server_backup {
@@ -344,7 +339,6 @@ pub mod servers_server_backup {
         }
 
         pub type Response409 = ApiError;
-
     }
 }
 pub mod servers_server_backup_backup {
@@ -359,7 +353,6 @@ pub mod servers_server_backup_backup {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_backup_backup_restore {
@@ -385,7 +378,6 @@ pub mod servers_server_backup_backup_restore {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_commands {
@@ -407,7 +399,6 @@ pub mod servers_server_commands {
         }
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_chmod {
@@ -435,7 +426,6 @@ pub mod servers_server_files_chmod {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_compress {
@@ -458,7 +448,6 @@ pub mod servers_server_files_compress {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_contents {
@@ -474,7 +463,6 @@ pub mod servers_server_files_contents {
         pub type Response413 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_copy {
@@ -497,7 +485,6 @@ pub mod servers_server_files_copy {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_create_directory {
@@ -523,7 +510,6 @@ pub mod servers_server_files_create_directory {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_decompress {
@@ -549,7 +535,6 @@ pub mod servers_server_files_decompress {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_delete {
@@ -577,7 +562,6 @@ pub mod servers_server_files_delete {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_fingerprints {
@@ -592,7 +576,6 @@ pub mod servers_server_files_fingerprints {
                 pub fingerprints: IndexMap<String, String>,
             }
         }
-
     }
 }
 pub mod servers_server_files_list_directory {
@@ -606,7 +589,6 @@ pub mod servers_server_files_list_directory {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_pull {
@@ -621,7 +603,6 @@ pub mod servers_server_files_pull {
                 pub downloads: Vec<Download>,
             }
         }
-
     }
 
     pub mod post {
@@ -650,7 +631,6 @@ pub mod servers_server_files_pull {
         }
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_files_pull_pull {
@@ -665,7 +645,6 @@ pub mod servers_server_files_pull_pull {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_files_rename {
@@ -691,7 +670,6 @@ pub mod servers_server_files_rename {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_files_search {
@@ -723,7 +701,6 @@ pub mod servers_server_files_search {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_files_write {
@@ -742,7 +719,6 @@ pub mod servers_server_files_write {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
-
     }
 }
 pub mod servers_server_logs {
@@ -757,7 +733,6 @@ pub mod servers_server_logs {
                 pub data: String,
             }
         }
-
     }
 }
 pub mod servers_server_power {
@@ -779,7 +754,6 @@ pub mod servers_server_power {
             #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response202 {
             }
         }
-
     }
 }
 pub mod servers_server_reinstall {
@@ -794,7 +768,6 @@ pub mod servers_server_reinstall {
         }
 
         pub type Response409 = ApiError;
-
     }
 }
 pub mod servers_server_sync {
@@ -807,7 +780,6 @@ pub mod servers_server_sync {
             #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
             }
         }
-
     }
 }
 pub mod servers_server_transfer {
@@ -822,7 +794,6 @@ pub mod servers_server_transfer {
         }
 
         pub type Response417 = ApiError;
-
     }
 
     pub mod post {
@@ -852,7 +823,6 @@ pub mod servers_server_transfer {
         }
 
         pub type Response409 = ApiError;
-
     }
 }
 pub mod servers_server_version {
@@ -869,7 +839,6 @@ pub mod servers_server_version {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod servers_server_ws_deny {
@@ -889,7 +858,6 @@ pub mod servers_server_ws_deny {
             #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
             }
         }
-
     }
 }
 pub mod stats {
@@ -948,7 +916,6 @@ pub mod stats {
 
             }
         }
-
     }
 }
 pub mod system {
@@ -971,7 +938,6 @@ pub mod system {
                 pub version: String,
             }
         }
-
     }
 }
 pub mod transfers {
@@ -988,7 +954,6 @@ pub mod transfers {
         pub type Response401 = ApiError;
 
         pub type Response409 = ApiError;
-
     }
 }
 pub mod transfers_server {
@@ -1003,7 +968,6 @@ pub mod transfers_server {
         }
 
         pub type Response404 = ApiError;
-
     }
 }
 pub mod update {
@@ -1061,6 +1025,5 @@ pub mod update {
                 pub applied: bool,
             }
         }
-
     }
 }
