@@ -52,6 +52,20 @@ async fn request_impl<T: DeserializeOwned>(
     match request.send().await {
         Ok(response) => {
             if response.status().is_success() {
+                if std::any::type_name::<T>() == "alloc::string::String" {
+                    return match response.text().await {
+                        Ok(text) => Ok(*(Box::new(text) as Box<dyn std::any::Any>)
+                            .downcast::<T>()
+                            .unwrap()),
+                        Err(err) => Err((
+                            StatusCode::PRECONDITION_FAILED,
+                            super::ApiError {
+                                error: err.to_string(),
+                            },
+                        )),
+                    };
+                }
+
                 match response.json::<T>().await {
                     Ok(data) => Ok(data),
                     Err(err) => Err((
@@ -161,12 +175,16 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             let query = ""
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {
                 if (param.in === 'query') {
-                    query += `${param.name}={${param.name}}`
+                    if (params.find((p) => p.startsWith(param.name))?.endsWith('String')) {
+                        clientOutput.write(`        let ${param.name} = urlencoding::encode(&${param.name});\n`)
+                    }
+
+                    query += `${param.name}={${param.name}}&`
                 }
             }
 
             if (query) {
-                query = '?' + query
+                query = '?' + query.slice(0, -1)
             }
 
             clientOutput.write(`        request_impl(self, Method::${method.toUpperCase()}, format!("${path}${query}"), ${

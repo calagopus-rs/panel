@@ -40,4 +40,4 @@ totp-rs = { version = "5.7.0", features = ["gen_secret"] }
 validator = { version = "0.20.0", features = ["derive"] }
 regex = "1.11.1"
 russh = "0.52.1"
-urlencoding = "2.1.3"
+urlencoding = { workspace = true }

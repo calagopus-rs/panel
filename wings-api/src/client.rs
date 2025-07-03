@@ -15,7 +15,7 @@ type Algorithm = String;
 type Game = String;
 
 #[inline]
-async fn request_impl<T: DeserializeOwned>(
+async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,
     endpoint: String,
@@ -35,6 +35,20 @@ async fn request_impl<T: DeserializeOwned>(
     match request.send().await {
         Ok(response) => {
             if response.status().is_success() {
+                if std::any::type_name::<T>() == "alloc::string::String" {
+                    return match response.text().await {
+                        Ok(text) => Ok(*(Box::new(text) as Box<dyn std::any::Any>)
+                            .downcast::<T>()
+                            .unwrap()),
+                        Err(err) => Err((
+                            StatusCode::PRECONDITION_FAILED,
+                            super::ApiError {
+                                error: err.to_string(),
+                            },
+                        )),
+                    };
+                }
+
                 match response.json::<T>().await {
                     Ok(data) => Ok(data),
                     Err(err) => Err((
@@ -219,10 +233,11 @@ impl WingsClient {
         download: bool,
     ) -> Result<super::servers_server_files_contents::get::Response200, (StatusCode, super::ApiError)>
     {
+        let file = urlencoding::encode(&file);
         request_impl(
             self,
             Method::GET,
-            format!("/api/servers/{server}/files/contents?file={file}download={download}"),
+            format!("/api/servers/{server}/files/contents?file={file}&download={download}"),
             None,
         )
         .await
@@ -301,10 +316,11 @@ impl WingsClient {
         super::servers_server_files_fingerprints::get::Response200,
         (StatusCode, super::ApiError),
     > {
+        let files = urlencoding::encode(&files);
         request_impl(
             self,
             Method::GET,
-            format!("/api/servers/{server}/files/fingerprints?algorithm={algorithm}files={files}"),
+            format!("/api/servers/{server}/files/fingerprints?algorithm={algorithm}&files={files}"),
             None,
         )
         .await
@@ -314,17 +330,14 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         directory: String,
+        per_page: u64,
+        page: u64,
     ) -> Result<
         super::servers_server_files_list_directory::get::Response200,
         (StatusCode, super::ApiError),
     > {
-        request_impl(
-            self,
-            Method::GET,
-            format!("/api/servers/{server}/files/list-directory?directory={directory}"),
-            None,
-        )
-        .await
+        let directory = urlencoding::encode(&directory);
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list-directory?directory={directory}&per_page={per_page}&page={page}"), None).await
     }
 
     pub async fn get_servers_server_files_pull(

@@ -11,4 +11,5 @@ reqwest = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 indexmap = { workspace = true }
+urlencoding = { workspace = true }
 nestify = "0.3.3"
