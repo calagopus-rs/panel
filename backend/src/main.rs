@@ -23,6 +23,7 @@ use utoipa_axum::router::OpenApiRouter;
 
 mod cache;
 mod database;
+mod deserialize;
 mod env;
 mod extract;
 mod jwt;

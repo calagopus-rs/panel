@@ -66,7 +66,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                     };
                 }
 
-                match response.json::<T>().await {
+                match response.json().await {
                     Ok(data) => Ok(data),
                     Err(err) => Err((
                         StatusCode::PRECONDITION_FAILED,
@@ -78,12 +78,9 @@ async fn request_impl<T: DeserializeOwned + 'static>(
             } else {
                 Err((
                     response.status(),
-                    response
-                        .json::<super::ApiError>()
-                        .await
-                        .unwrap_or_else(|err| super::ApiError {
-                            error: err.to_string(),
-                        }),
+                    response.json().await.unwrap_or_else(|err| super::ApiError {
+                        error: err.to_string(),
+                    }),
                 ))
             }
         }
@@ -162,11 +159,12 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             const params: string[] = []
 
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {
-                params.push(`${param.name}: ${param.schema? convertType(param.schema) : 'String'}`)
+                const type = param.schema? convertType(param.schema) : 'String'
+                params.push(`${param.name}: ${type === 'String' ? '&str' : type}`)
             }
 
             if (data.requestBody) {
-                params.push(`data: super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
+                params.push(`data: &super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
             }
 
             clientOutput.write(`    pub async fn ${method}_${snakeCase(path).slice(4)}(&self${params.length ? `, ${params.join(', ')}` : ''})`)

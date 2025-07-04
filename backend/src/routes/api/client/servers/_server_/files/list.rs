@@ -72,7 +72,7 @@ mod get {
             .api_client(&state.database)
             .get_servers_server_files_list_directory(
                 server.uuid,
-                params.directory,
+                &params.directory,
                 params.per_page as u64,
                 params.page as u64,
             )

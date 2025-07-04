@@ -127,6 +127,13 @@
       "when": 1751428282642,
       "tag": "0017_watery_steve_rogers",
       "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1751619837084,
+      "tag": "0018_parched_malice",
+      "breakpoints": false
     }
   ]
 }

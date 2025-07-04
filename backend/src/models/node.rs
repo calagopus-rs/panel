@@ -16,9 +16,8 @@ pub struct Node {
     pub public: bool,
     pub description: Option<String>,
 
-    pub public_host: Option<String>,
-    pub host: String,
-    pub ssl: bool,
+    pub public_url: Option<reqwest::Url>,
+    pub url: reqwest::Url,
     pub sftp_host: Option<String>,
     pub sftp_port: i32,
 
@@ -66,16 +65,12 @@ impl BaseModel for Node {
                 format!("{}description", prefix.unwrap_or_default()),
             ),
             (
-                format!("{}.public_host", table),
-                format!("{}public_host", prefix.unwrap_or_default()),
+                format!("{}.public_url", table),
+                format!("{}public_url", prefix.unwrap_or_default()),
             ),
             (
-                format!("{}.host", table),
-                format!("{}host", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.ssl", table),
-                format!("{}ssl", prefix.unwrap_or_default()),
+                format!("{}.url", table),
+                format!("{}url", prefix.unwrap_or_default()),
             ),
             (
                 format!("{}.sftp_host", table),
@@ -148,9 +143,13 @@ impl BaseModel for Node {
             name: row.get(format!("{}name", prefix).as_str()),
             public: row.get(format!("{}public", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
-            public_host: row.get(format!("{}public_host", prefix).as_str()),
-            host: row.get(format!("{}host", prefix).as_str()),
-            ssl: row.get(format!("{}ssl", prefix).as_str()),
+            public_url: row
+                .get::<Option<String>, _>(format!("{}public_url", prefix).as_str())
+                .map(|url| url.parse().unwrap()),
+            url: row
+                .get::<String, _>(format!("{}url", prefix).as_str())
+                .parse()
+                .unwrap(),
             sftp_host: row.get(format!("{}sftp_host", prefix).as_str()),
             sftp_port: row.get(format!("{}sftp_port", prefix).as_str()),
             maintenance_message: row.get(format!("{}maintenance_message", prefix).as_str()),
@@ -172,9 +171,8 @@ impl Node {
         name: &str,
         public: bool,
         description: Option<&str>,
-        public_host: Option<&str>,
-        host: &str,
-        ssl: bool,
+        public_url: Option<&str>,
+        url: &str,
         sftp_host: Option<&str>,
         sftp_port: i32,
         memory: i64,
@@ -185,8 +183,8 @@ impl Node {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_id, database_host_id, name, public, description, public_host, host, ssl, sftp_host, sftp_port, memory, disk, token_id, token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+            INSERT INTO nodes (location_id, database_host_id, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
             "#
         )
         .bind(location_id)
@@ -194,9 +192,8 @@ impl Node {
         .bind(name)
         .bind(public)
         .bind(description)
-        .bind(public_host)
-        .bind(host)
-        .bind(ssl)
+        .bind(public_url)
+        .bind(url)
         .bind(sftp_host)
         .bind(sftp_port)
         .bind(memory)
@@ -312,20 +309,23 @@ impl Node {
         .unwrap();
     }
 
+    #[inline]
+    pub fn public_url(&self) -> reqwest::Url {
+        self.public_url.clone().unwrap_or(self.url.clone())
+    }
+
+    #[inline]
     pub fn api_client(
         &self,
         database: &crate::database::Database,
     ) -> wings_api::client::WingsClient {
         wings_api::client::WingsClient::new(
-            if self.ssl {
-                format!("https://{}", self.host)
-            } else {
-                format!("http://{}", self.host)
-            },
+            self.url.to_string(),
             database.decrypt(&self.token).unwrap(),
         )
     }
 
+    #[inline]
     pub fn create_jwt<T: Serialize>(
         &self,
         database: &crate::database::Database,
@@ -345,9 +345,8 @@ impl Node {
             name: self.name,
             public: self.public,
             description: self.description,
-            public_host: self.public_host,
-            host: self.host,
-            ssl: self.ssl,
+            public_url: self.public_url.map(|url| url.to_string()),
+            url: self.url.to_string(),
             sftp_host: self.sftp_host,
             sftp_port: self.sftp_port,
             maintenance_message: self.maintenance_message,
@@ -372,9 +371,10 @@ pub struct AdminApiNode {
     pub public: bool,
     pub description: Option<String>,
 
-    pub public_host: Option<String>,
-    pub host: String,
-    pub ssl: bool,
+    #[schema(format = "uri")]
+    pub public_url: Option<String>,
+    #[schema(format = "uri")]
+    pub url: String,
     pub sftp_host: Option<String>,
     pub sftp_port: i32,
 

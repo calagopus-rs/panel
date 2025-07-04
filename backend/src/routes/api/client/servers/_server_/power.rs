@@ -33,25 +33,15 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        activity_logger
-            .log(
-                "server:power.signal",
-                serde_json::json!({
-                    "signal": data.signal
-                }),
-            )
-            .await;
+        let request_body = wings_api::servers_server_power::post::RequestBody {
+            action: data.signal,
+            wait_seconds: None,
+        };
 
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_power(
-                server.uuid,
-                wings_api::servers_server_power::post::RequestBody {
-                    action: data.signal,
-                    wait_seconds: None,
-                },
-            )
+            .post_servers_server_power(server.uuid, &request_body)
             .await
         {
             Ok(data) => data,
@@ -66,6 +56,15 @@ mod post {
                 );
             }
         };
+
+        activity_logger
+            .log(
+                "server:power.signal",
+                serde_json::json!({
+                    "signal": request_body.action
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

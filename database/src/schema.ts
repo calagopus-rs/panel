@@ -180,9 +180,8 @@ export const nodes = pgTable('nodes', {
 	public: boolean('public').notNull(),
 	description: text('description'),
 
-	publicHost: varchar('public_host', { length: 255 }),
-	host: varchar('host', { length: 255 }).notNull(),
-	ssl: boolean('ssl').default(false).notNull(),
+	publicUrl: varchar('public_url', { length: 255 }),
+	url: varchar('url', { length: 255 }).notNull(),
 	sftpHost: varchar('sftp_host', { length: 255 }),
 	sftpPort: integer('sftp_port').notNull(),
 

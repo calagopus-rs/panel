@@ -92,13 +92,12 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        public_host: Option<String>,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        host: String,
-        ssl: bool,
+        #[validate(length(min = 3, max = 255), url)]
+        #[schema(min_length = 3, max_length = 255, format = "uri")]
+        public_url: Option<String>,
+        #[validate(length(min = 3, max = 255), url)]
+        #[schema(min_length = 3, max_length = 255, format = "uri")]
+        url: String,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         sftp_host: Option<String>,
@@ -164,9 +163,8 @@ mod post {
             &data.name,
             data.public,
             data.description.as_deref(),
-            data.public_host.as_deref(),
-            &data.host,
-            data.ssl,
+            data.public_url.as_deref(),
+            &data.url,
             data.sftp_host.as_deref(),
             data.sftp_port as i32,
             data.memory,
@@ -192,9 +190,8 @@ mod post {
                 "name": node.name,
                 "public": node.public,
                 "description": node.description,
-                "public_host": node.public_host,
-                "host": node.host,
-                "ssl": node.ssl,
+                "public_url": node.public_url,
+                "url": node.url,
                 "sftp_host": node.sftp_host,
                 "sftp_port": node.sftp_port,
                 "memory": node.memory,

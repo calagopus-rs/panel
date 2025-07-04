@@ -43,24 +43,14 @@ mod post {
             );
         }
 
-        activity_logger
-            .log(
-                "server:console.command",
-                serde_json::json!({
-                    "command": data.command,
-                }),
-            )
-            .await;
+        let request_body = wings_api::servers_server_commands::post::RequestBody {
+            commands: vec![data.command],
+        };
 
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_commands(
-                server.uuid,
-                wings_api::servers_server_commands::post::RequestBody {
-                    commands: vec![data.command],
-                },
-            )
+            .post_servers_server_commands(server.uuid, &request_body)
             .await
         {
             Ok(data) => data,
@@ -73,6 +63,15 @@ mod post {
                 );
             }
         };
+
+        activity_logger
+            .log(
+                "server:console.command",
+                serde_json::json!({
+                    "command": request_body.commands[0],
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

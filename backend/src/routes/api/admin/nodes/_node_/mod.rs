@@ -99,13 +99,12 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        public_host: Option<String>,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        host: Option<String>,
-        ssl: Option<bool>,
+        #[validate(length(min = 3, max = 255), url)]
+        #[schema(min_length = 3, max_length = 255, format = "uri")]
+        public_url: Option<String>,
+        #[validate(length(min = 3, max = 255), url)]
+        #[schema(min_length = 3, max_length = 255, format = "uri")]
+        url: Option<String>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         sftp_host: Option<String>,
@@ -206,18 +205,15 @@ mod patch {
                 node.description = Some(description);
             }
         }
-        if let Some(public_host) = data.public_host {
-            if public_host.is_empty() {
-                node.public_host = None;
+        if let Some(public_url) = data.public_url {
+            if public_url.is_empty() {
+                node.public_url = None;
             } else {
-                node.public_host = Some(public_host);
+                node.public_url = Some(public_url.parse().unwrap());
             }
         }
-        if let Some(host) = data.host {
-            node.host = host;
-        }
-        if let Some(ssl) = data.ssl {
-            node.ssl = ssl;
+        if let Some(url) = data.url {
+            node.url = url.parse().unwrap();
         }
         if let Some(sftp_host) = data.sftp_host {
             if sftp_host.is_empty() {
@@ -246,17 +242,15 @@ mod patch {
         if sqlx::query!(
             "UPDATE nodes
             SET name = $1, public = $2,
-                description = $3, public_host = $4,
-                host = $5, ssl = $6,
-                sftp_host = $7, sftp_port = $8,
-                memory = $9, disk = $10
-            WHERE id = $11",
+                description = $3, public_url = $4,
+                url = $5, sftp_host = $6, sftp_port = $7,
+                memory = $8, disk = $9
+            WHERE id = $10",
             node.name,
             node.public,
             node.description,
-            node.public_host,
-            node.host,
-            node.ssl,
+            node.public_url.as_ref().map(|url| url.to_string()),
+            node.url.to_string(),
             node.sftp_host,
             node.sftp_port,
             node.memory,
@@ -282,9 +276,8 @@ mod patch {
                 "name": node.name,
                 "public": node.public,
                 "description": node.description,
-                "public_host": node.public_host,
-                "host": node.host,
-                "ssl": node.ssl,
+                "public_url": node.public_url,
+                "url": node.url,
                 "sftp_host": node.sftp_host,
                 "sftp_port": node.sftp_port,
                 "memory": node.memory,

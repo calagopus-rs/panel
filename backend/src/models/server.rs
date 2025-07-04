@@ -572,10 +572,14 @@ impl Server {
                 .unwrap_or_else(|| vec!["*".to_string()]),
             node_uuid: self.node.uuid,
             node_name: self.node.name,
-            sftp_host: self
-                .node
-                .sftp_host
-                .unwrap_or(self.node.public_host.unwrap_or(self.node.host)),
+            sftp_host: self.node.sftp_host.unwrap_or_else(|| {
+                self.node
+                    .public_url
+                    .unwrap_or(self.node.url)
+                    .host_str()
+                    .unwrap()
+                    .to_string()
+            }),
             sftp_port: self.node.sftp_port,
             name: self.name,
             description: self.description,

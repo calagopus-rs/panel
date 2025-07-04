@@ -49,7 +49,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                     };
                 }
 
-                match response.json::<T>().await {
+                match response.json().await {
                     Ok(data) => Ok(data),
                     Err(err) => Err((
                         StatusCode::PRECONDITION_FAILED,
@@ -61,12 +61,9 @@ async fn request_impl<T: DeserializeOwned + 'static>(
             } else {
                 Err((
                     response.status(),
-                    response
-                        .json::<super::ApiError>()
-                        .await
-                        .unwrap_or_else(|err| super::ApiError {
-                            error: err.to_string(),
-                        }),
+                    response.json().await.unwrap_or_else(|err| super::ApiError {
+                        error: err.to_string(),
+                    }),
                 ))
             }
         }
@@ -104,7 +101,7 @@ impl WingsClient {
 
     pub async fn post_servers(
         &self,
-        data: super::servers::post::RequestBody,
+        data: &super::servers::post::RequestBody,
     ) -> Result<super::servers::post::Response200, (StatusCode, super::ApiError)> {
         request_impl(
             self,
@@ -132,7 +129,7 @@ impl WingsClient {
     pub async fn post_servers_server_backup(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_backup::post::RequestBody,
+        data: &super::servers_server_backup::post::RequestBody,
     ) -> Result<super::servers_server_backup::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -165,7 +162,7 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         backup: uuid::Uuid,
-        data: super::servers_server_backup_backup_restore::post::RequestBody,
+        data: &super::servers_server_backup_backup_restore::post::RequestBody,
     ) -> Result<
         super::servers_server_backup_backup_restore::post::Response200,
         (StatusCode, super::ApiError),
@@ -182,7 +179,7 @@ impl WingsClient {
     pub async fn post_servers_server_commands(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_commands::post::RequestBody,
+        data: &super::servers_server_commands::post::RequestBody,
     ) -> Result<super::servers_server_commands::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -197,7 +194,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_chmod(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_chmod::post::RequestBody,
+        data: &super::servers_server_files_chmod::post::RequestBody,
     ) -> Result<super::servers_server_files_chmod::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -212,7 +209,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_compress(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_compress::post::RequestBody,
+        data: &super::servers_server_files_compress::post::RequestBody,
     ) -> Result<
         super::servers_server_files_compress::post::Response200,
         (StatusCode, super::ApiError),
@@ -229,7 +226,7 @@ impl WingsClient {
     pub async fn get_servers_server_files_contents(
         &self,
         server: uuid::Uuid,
-        file: String,
+        file: &str,
         download: bool,
         max_size: u64,
     ) -> Result<super::servers_server_files_contents::get::Response200, (StatusCode, super::ApiError)>
@@ -241,7 +238,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_copy(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_copy::post::RequestBody,
+        data: &super::servers_server_files_copy::post::RequestBody,
     ) -> Result<super::servers_server_files_copy::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -256,7 +253,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_create_directory(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_create_directory::post::RequestBody,
+        data: &super::servers_server_files_create_directory::post::RequestBody,
     ) -> Result<
         super::servers_server_files_create_directory::post::Response200,
         (StatusCode, super::ApiError),
@@ -273,7 +270,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_decompress(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_decompress::post::RequestBody,
+        data: &super::servers_server_files_decompress::post::RequestBody,
     ) -> Result<
         super::servers_server_files_decompress::post::Response200,
         (StatusCode, super::ApiError),
@@ -290,7 +287,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_delete(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_delete::post::RequestBody,
+        data: &super::servers_server_files_delete::post::RequestBody,
     ) -> Result<super::servers_server_files_delete::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -306,7 +303,7 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         algorithm: Algorithm,
-        files: String,
+        files: &str,
     ) -> Result<
         super::servers_server_files_fingerprints::get::Response200,
         (StatusCode, super::ApiError),
@@ -324,7 +321,7 @@ impl WingsClient {
     pub async fn get_servers_server_files_list_directory(
         &self,
         server: uuid::Uuid,
-        directory: String,
+        directory: &str,
         per_page: u64,
         page: u64,
     ) -> Result<
@@ -352,7 +349,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_pull(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_pull::post::RequestBody,
+        data: &super::servers_server_files_pull::post::RequestBody,
     ) -> Result<super::servers_server_files_pull::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -384,7 +381,7 @@ impl WingsClient {
     pub async fn put_servers_server_files_rename(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_rename::put::RequestBody,
+        data: &super::servers_server_files_rename::put::RequestBody,
     ) -> Result<super::servers_server_files_rename::put::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -399,7 +396,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_search(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_search::post::RequestBody,
+        data: &super::servers_server_files_search::post::RequestBody,
     ) -> Result<super::servers_server_files_search::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -414,7 +411,7 @@ impl WingsClient {
     pub async fn post_servers_server_files_write(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_files_write::post::RequestBody,
+        data: &super::servers_server_files_write::post::RequestBody,
     ) -> Result<super::servers_server_files_write::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -442,7 +439,7 @@ impl WingsClient {
     pub async fn post_servers_server_power(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_power::post::RequestBody,
+        data: &super::servers_server_power::post::RequestBody,
     ) -> Result<super::servers_server_power::post::Response202, (StatusCode, super::ApiError)> {
         request_impl(
             self,
@@ -497,7 +494,7 @@ impl WingsClient {
     pub async fn post_servers_server_transfer(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_transfer::post::RequestBody,
+        data: &super::servers_server_transfer::post::RequestBody,
     ) -> Result<super::servers_server_transfer::post::Response202, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -527,7 +524,7 @@ impl WingsClient {
     pub async fn post_servers_server_ws_deny(
         &self,
         server: uuid::Uuid,
-        data: super::servers_server_ws_deny::post::RequestBody,
+        data: &super::servers_server_ws_deny::post::RequestBody,
     ) -> Result<super::servers_server_ws_deny::post::Response200, (StatusCode, super::ApiError)>
     {
         request_impl(
@@ -572,7 +569,7 @@ impl WingsClient {
 
     pub async fn post_update(
         &self,
-        data: super::update::post::RequestBody,
+        data: &super::update::post::RequestBody,
     ) -> Result<super::update::post::Response200, (StatusCode, super::ApiError)> {
         request_impl(
             self,

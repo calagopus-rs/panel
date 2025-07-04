@@ -2,7 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::client::servers::_server_::GetServer};
+    use crate::routes::{
+        ApiError, GetState,
+        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    };
     use axum::{
         extract::Query,
         http::{HeaderMap, StatusCode},
@@ -12,7 +15,6 @@ mod get {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
-        #[serde(default)]
         file: String,
     }
 
@@ -34,12 +36,13 @@ mod get {
     pub async fn route(
         state: GetState,
         server: GetServer,
+        activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, HeaderMap, String) {
-        let content = match server
+        let contents = match server
             .node
             .api_client(&state.database)
-            .get_servers_server_files_contents(server.uuid, params.file, false, 15 * 1024 * 1024)
+            .get_servers_server_files_contents(server.uuid, &params.file, false, 15 * 1024 * 1024)
             .await
         {
             Ok(data) => data,
@@ -77,7 +80,16 @@ mod get {
             }
         };
 
-        (StatusCode::OK, HeaderMap::new(), content)
+        activity_logger
+            .log(
+                "server:file.read",
+                serde_json::json!({
+                    "file": params.file,
+                }),
+            )
+            .await;
+
+        (StatusCode::OK, HeaderMap::new(), contents)
     }
 }
 
