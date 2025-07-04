@@ -55,5 +55,5 @@
 }
 
 .user {
-  @apply mt-auto h-16 w-full flex items-center bg-neutral-700 justify-center;
+  @apply mt-auto p-6 h-16 w-full flex items-center bg-neutral-700 justify-between;
 }
