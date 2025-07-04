@@ -78,6 +78,7 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[serde(default)]
+        #[schema(default = "/")]
         root: String,
 
         #[validate(url)]
@@ -86,8 +87,10 @@ mod post {
         name: Option<String>,
 
         #[serde(default)]
+        #[schema(default = "false")]
         use_header: bool,
         #[serde(default)]
+        #[schema(default = "false")]
         foreground: bool,
     }
 

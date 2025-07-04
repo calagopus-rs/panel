@@ -13,6 +13,7 @@ mod put {
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
         #[serde(default)]
+        #[schema(default = "/")]
         root: String,
 
         #[schema(inline)]

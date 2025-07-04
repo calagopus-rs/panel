@@ -13,6 +13,7 @@ mod post {
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
         #[serde(default)]
+        #[schema(default = "/")]
         root: String,
 
         files: Vec<String>,
