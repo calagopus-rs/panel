@@ -4,7 +4,7 @@ import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
-import { useToast } from '@/elements/Toast';
+import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import register from '@/api/auth/register';
 

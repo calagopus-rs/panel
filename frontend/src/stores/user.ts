@@ -3,7 +3,7 @@ import { immer } from 'zustand/middleware/immer';
 import isEqual from 'react-fast-compare';
 
 interface UserStore {
-  user: User | null;
+  user: User | null | undefined;
   auth: {
     token: string;
   };
@@ -15,7 +15,7 @@ interface UserStore {
 
 export const useUserStore = create<UserStore>()(
   immer((set, get) => ({
-    user: null,
+    user: undefined,
     auth: {
       token: '',
     },
@@ -34,7 +34,7 @@ export const useUserStore = create<UserStore>()(
 
     clear: () => {
       set({
-        user: null,
+        user: undefined,
       });
     },
   })),

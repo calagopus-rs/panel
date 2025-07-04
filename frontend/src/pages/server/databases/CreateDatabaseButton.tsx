@@ -3,7 +3,7 @@ import createDatabase from '@/api/server/databases/createDatabase';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
-import { useToast } from '@/elements/Toast';
+import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 

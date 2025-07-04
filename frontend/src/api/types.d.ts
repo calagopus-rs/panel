@@ -1,15 +1,32 @@
+interface PaginatedResult<T> {
+  total: number;
+  per_page: number;
+  page: number;
+  data: T[];
+}
+
 interface User {
   id: number;
   avatar?: string;
   username: string;
   email: string;
-  name_first: string;
-  name_last: string;
+  nameFirst: string;
+  nameLast: string;
   admin: boolean;
-  totp_enabled: boolean;
+  totpEnabled: boolean;
   created: Date;
 }
 
+interface UserActivity {
+  id: number;
+  event: string;
+  ip: string;
+  data: null;
+  isApi: boolean;
+  created: Date;
+}
+
+// Redo types below
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
 
 interface ServerBackup {

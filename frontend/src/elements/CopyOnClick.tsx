@@ -1,4 +1,4 @@
-import { useToast } from './Toast';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({ content, children }: { content: string; children: React.ReactNode }) => {
   const { addToast } = useToast();

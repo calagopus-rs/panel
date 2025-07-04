@@ -4,7 +4,7 @@ import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { TableRow } from '@/elements/table/Table';
-import { useToast } from '@/elements/Toast';
+import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faEllipsis, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

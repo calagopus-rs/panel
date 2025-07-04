@@ -37,24 +37,13 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
-import { useUserStore } from '@/stores/user';
 
 export default () => {
-  const navigate = useNavigate();
-  const { user } = useUserStore();
-
-  if (!user?.id) {
-    navigate('/auth/login');
-    return;
-  }
-
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
   const clearState = useServerStore(state => state.clear);
   const getServer = useServerStore(state => state.getServer);
-
-  const avatarURL = 'https://placehold.co/400x400/png';
 
   useEffect(() => {
     return () => {
@@ -125,19 +114,7 @@ export default () => {
               <span>Activity</span>
             </Sidebar.Link>
           </Sidebar.Section>
-          <Sidebar.User>
-            {avatarURL && (
-              <img src={`${avatarURL}?s=64`} alt="Profile Picture" className="h-10 w-10 rounded-full select-none" />
-            )}
-            <div className="flex flex-col ml-3">
-              <span className="font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight select-none">
-                Jelco
-              </span>
-              <span className="font-normal text-xs text-neutral-300 whitespace-nowrap leading-tight select-none">
-                Admin
-              </span>
-            </div>
-          </Sidebar.User>
+          <Sidebar.User />
         </Sidebar>
 
         {loading ? (

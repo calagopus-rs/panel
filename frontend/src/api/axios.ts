@@ -69,14 +69,7 @@ export interface FractalPaginatedResponse extends FractalResponseList {
   };
 }
 
-export interface PaginatedResult<T> {
-  total: number;
-  per_page: number;
-  page: number;
-  data: T[];
-}
-
-export function getPaginationSet(data: any) {
+export function getPaginationSet(data: PaginatedResult<unknown>) {
   return {
     total: data.total,
     per_page: data.per_page,
