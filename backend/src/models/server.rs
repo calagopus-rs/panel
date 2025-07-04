@@ -650,7 +650,7 @@ impl Server {
         self,
         database: &crate::database::Database,
     ) -> RemoteApiServer {
-        let (variables, backups, allocations) = tokio::join!(
+        let (variables, backups, mounts, allocations) = tokio::join!(
             sqlx::query!(
                 "SELECT nest_egg_variables.env_variable, server_variables.value
                 FROM server_variables
@@ -667,6 +667,14 @@ impl Server {
             )
             .fetch_all(database.read()),
             sqlx::query!(
+                "SELECT mounts.source, mounts.target, mounts.read_only
+                FROM server_mounts
+                JOIN mounts ON mounts.id = server_mounts.mount_id
+                WHERE server_mounts.server_id = $1",
+                self.id
+            )
+            .fetch_all(database.read()),
+            sqlx::query!(
                 "SELECT node_allocations.ip, node_allocations.port
                 FROM server_allocations
                 JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
@@ -678,6 +686,7 @@ impl Server {
 
         let variables = variables.unwrap();
         let backups = backups.unwrap();
+        let mounts = mounts.unwrap();
         let allocations = allocations.unwrap();
 
         RemoteApiServer {
@@ -740,7 +749,14 @@ impl Server {
                     },
                     oom_disabled: true,
                 },
-                mounts: Vec::new(),
+                mounts: mounts
+                    .into_iter()
+                    .map(|m| wings_api::Mount {
+                        source: m.source,
+                        target: m.target,
+                        read_only: m.read_only,
+                    })
+                    .collect(),
                 egg: wings_api::ServerConfigurationEgg {
                     id: uuid::Uuid::from_fields(
                         self.egg.id as u32,
