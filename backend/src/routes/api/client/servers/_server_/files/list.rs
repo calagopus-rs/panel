@@ -68,6 +68,13 @@ mod get {
             );
         }
 
+        if let Err(error) = server.has_permission("file.read") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
         let files = match server
             .node
             .api_client(&state.database)

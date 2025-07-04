@@ -83,6 +83,7 @@ mod patch {
         #[schema(min_length = 3, max_length = 31)]
         name: Option<String>,
 
+        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
         permissions: Option<Vec<String>>,
     }
 

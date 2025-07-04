@@ -92,6 +92,7 @@ mod post {
         #[schema(min_length = 3, max_length = 31)]
         name: String,
 
+        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
         permissions: Vec<String>,
     }
 

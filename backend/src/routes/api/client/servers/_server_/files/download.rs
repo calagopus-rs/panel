@@ -57,6 +57,13 @@ mod get {
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if let Err(error) = server.has_permission("file.download") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
         #[derive(Serialize)]
         struct FileDownloadJwt<'a> {
             #[serde(flatten)]

@@ -44,6 +44,13 @@ mod post {
             );
         }
 
+        if let Err(error) = server.has_permission("control.console") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
         let request_body = wings_api::servers_server_commands::post::RequestBody {
             commands: vec![data.command],
         };

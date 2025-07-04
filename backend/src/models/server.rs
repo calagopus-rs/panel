@@ -519,6 +519,21 @@ impl Server {
     }
 
     #[inline]
+    pub fn has_permission(&self, permission: &str) -> Result<(), String> {
+        if let Some(permissions) = &self.subuser_permissions {
+            if permissions.iter().any(|p| p == permission) {
+                Ok(())
+            } else {
+                Err(format!(
+                    "you do not have permission to perform this action: {permission}"
+                ))
+            }
+        } else {
+            Ok(())
+        }
+    }
+
+    #[inline]
     pub fn into_admin_api_object(self) -> AdminApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 

@@ -1,8 +1,251 @@
 use super::BaseModel;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
+use validator::ValidationError;
+
+pub static PERMISSIONS: LazyLock<
+    IndexMap<&'static str, (&'static str, IndexMap<&'static str, &'static str>)>,
+> = LazyLock::new(|| {
+    IndexMap::from([
+        (
+            "control",
+            (
+                "Permissions that control a user's ability to control the power state of a server, or send commands.",
+                IndexMap::from([
+                    (
+                        "console",
+                        "Allows a user to send commands to the server instance via the console.",
+                    ),
+                    (
+                        "start",
+                        "Allows a user to start the server if it is stopped.",
+                    ),
+                    ("stop", "Allows a user to stop a server if it is running."),
+                    (
+                        "restart",
+                        "Allows a user to perform a server restart. This allows them to start the server if it is offline, but not put the server in a completely stopped state.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "user",
+            (
+                "Permissions that allow a user to manage other subusers on a server. They will never be able to edit their own account, or assign permissions they do not have themselves.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create new subusers for the server.",
+                    ),
+                    (
+                        "read",
+                        "Allows the user to view subusers and their permissions for the server.",
+                    ),
+                    ("update", "Allows a user to modify other subusers."),
+                    (
+                        "delete",
+                        "Allows a user to delete a subuser from the server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "file",
+            (
+                "Permissions that control a user's ability to modify the filesystem for this server.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create additional files and folders via the Panel or direct upload.",
+                    ),
+                    (
+                        "read",
+                        "Allows a user to view the contents of a directory, but not view the contents of or download files.",
+                    ),
+                    (
+                        "read-content",
+                        "Allows a user to view the contents of a given file. This will also allow the user to download files.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to update the contents of an existing file or directory.",
+                    ),
+                    ("delete", "Allows a user to delete files or directories."),
+                    (
+                        "archive",
+                        "Allows a user to archive the contents of a directory.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "backup",
+            (
+                "Permissions that control a user's ability to manage server backups.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create a new backup for the server.",
+                    ),
+                    (
+                        "read",
+                        "Allows a user to view existing backups for the server.",
+                    ),
+                    ("delete", "Allows a user to delete a backup for the server."),
+                ]),
+            ),
+        ),
+        (
+            "allocation",
+            (
+                "Permissions that control a user's ability to modify the port allocations for this server.",
+                IndexMap::from([
+                    (
+                        "read",
+                        "Allows a user to view all allocations currently assigned to this server. Users with any level of access to this server can always view the primary allocation.",
+                    ),
+                    (
+                        "create",
+                        "Allows a user to assign additional allocations to the server.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to change the primary server allocation and attach notes to each allocation.",
+                    ),
+                    (
+                        "delete",
+                        "Allows a user to delete an allocation from the server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "startup",
+            (
+                "Permissions that control a user's ability to view this server's startup parameters.",
+                IndexMap::from([
+                    (
+                        "read",
+                        "Allows a user to view the startup variables for a server.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to modify the startup variables for the server.",
+                    ),
+                    (
+                        "docker-image",
+                        "Allows a user to modify the Docker image used when running the server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "database",
+            (
+                "Permissions that control a user's access to the database management for this server.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create a new database for this server.",
+                    ),
+                    (
+                        "read",
+                        "Allows a user to view the database associated with this server.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to rotate the password on a database instance. If the user does not have the view_password permission they will not see the updated password.",
+                    ),
+                    (
+                        "delete",
+                        "Allows a user to remove a database instance from this server.",
+                    ),
+                    (
+                        "view_password",
+                        "Allows a user to view the password associated with a database instance for this server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "schedule",
+            (
+                "Permissions that control a user's access to the schedule management for this server.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create new schedules for this server.",
+                    ), // task.create-schedule
+                    (
+                        "read",
+                        "Allows a user to view schedules and the tasks associated with them for this server.",
+                    ), // task.view-schedule, task.list-schedules
+                    (
+                        "update",
+                        "Allows a user to update schedules and schedule tasks for this server.",
+                    ), // task.edit-schedule, task.queue-schedule, task.toggle-schedule
+                    (
+                        "delete",
+                        "Allows a user to delete schedules for this server.",
+                    ), // task.delete-schedule
+                ]),
+            ),
+        ),
+        (
+            "settings",
+            (
+                "Permissions that control a user's access to the settings for this server.",
+                IndexMap::from([
+                    (
+                        "rename",
+                        "Allows a user to rename this server and change the description of it.",
+                    ),
+                    (
+                        "reinstall",
+                        "Allows a user to trigger a reinstall of this server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
+            "activity",
+            (
+                "Permissions that control a user's access to the server activity logs.",
+                IndexMap::from([(
+                    "read",
+                    "Allows a user to view the activity logs for the server.",
+                )]),
+            ),
+        ),
+    ])
+});
+
+pub static PERMISSIONS_LIST: LazyLock<Vec<String>> = LazyLock::new(|| {
+    PERMISSIONS
+        .iter()
+        .flat_map(|(key, (_, permissions))| {
+            permissions
+                .keys()
+                .map(|permission| format!("{key}.{permission}"))
+                .collect::<Vec<_>>()
+        })
+        .collect()
+});
+
+#[inline]
+pub fn validate_permissions(permissions: &[String]) -> Result<(), ValidationError> {
+    for permission in permissions {
+        if !PERMISSIONS_LIST.contains(permission) {
+            return Err(ValidationError::new("permissions")
+                .with_message(format!("invalid permission: {permission}").into()));
+        }
+    }
+
+    Ok(())
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct ServerSubuser {

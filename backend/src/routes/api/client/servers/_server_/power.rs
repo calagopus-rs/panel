@@ -34,6 +34,18 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if let Err(error) = server.has_permission(match data.signal {
+            wings_api::ServerPowerAction::Start => "control.start",
+            wings_api::ServerPowerAction::Stop => "control.stop",
+            wings_api::ServerPowerAction::Kill => "control.stop",
+            wings_api::ServerPowerAction::Restart => "control.restart",
+        }) {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
         let request_body = wings_api::servers_server_power::post::RequestBody {
             action: data.signal,
             wait_seconds: None,

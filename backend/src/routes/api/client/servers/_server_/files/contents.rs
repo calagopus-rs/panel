@@ -40,6 +40,17 @@ mod get {
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, HeaderMap, String) {
+        if let Err(error) = server.has_permission("file.read-content") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                HeaderMap::from_iter([(
+                    axum::http::header::CONTENT_TYPE,
+                    "application/json".parse().unwrap(),
+                )]),
+                ApiError::new_value(&[&error]).to_string(),
+            );
+        }
+
         let contents = match server
             .node
             .api_client(&state.database)
