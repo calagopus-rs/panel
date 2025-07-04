@@ -8,6 +8,7 @@ use utoipa_axum::router::OpenApiRouter;
 pub mod admin;
 pub mod auth;
 pub mod client;
+pub mod remote;
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
@@ -28,5 +29,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/auth", auth::router(state))
         .nest("/client", client::router(state))
         .nest("/admin", admin::router(state))
+        .nest("/remote", remote::router(state))
         .with_state(state.clone())
 }

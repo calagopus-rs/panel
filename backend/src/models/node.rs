@@ -192,14 +192,13 @@ impl Node {
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}
+            SELECT {}, {}
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             WHERE nodes.id = $1
             "#,
             Self::columns_sql(None, None),
             super::location::Location::columns_sql(Some("location_"), None),
-            super::database_host::DatabaseHost::columns_sql(Some("database_host_"), None)
         ))
         .bind(id)
         .fetch_optional(database.read())
@@ -207,6 +206,37 @@ impl Node {
         .unwrap();
 
         row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_token_id_token(
+        database: &crate::database::Database,
+        token_id: &str,
+        token: &str,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}
+            FROM nodes
+            JOIN locations ON locations.id = nodes.location_id
+            WHERE nodes.token_id = $1
+            "#,
+            Self::columns_sql(None, None),
+            super::location::Location::columns_sql(Some("location_"), None),
+        ))
+        .bind(token_id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        if let Some(node) = row.map(|row| Self::map(None, &row)) {
+            if database.decrypt(&node.token).unwrap() == token {
+                Some(node)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 
     pub async fn by_location_id_with_pagination(
@@ -219,7 +249,7 @@ impl Node {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             WHERE nodes.location_id = $1
@@ -227,7 +257,6 @@ impl Node {
             "#,
             Self::columns_sql(None, None),
             super::location::Location::columns_sql(Some("location_"), None),
-            super::database_host::DatabaseHost::columns_sql(Some("database_host_"), None)
         ))
         .bind(location_id)
         .bind(per_page)
@@ -253,14 +282,13 @@ impl Node {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None),
             super::location::Location::columns_sql(Some("location_"), None),
-            super::database_host::DatabaseHost::columns_sql(Some("database_host_"), None)
         ))
         .bind(per_page)
         .bind(offset)

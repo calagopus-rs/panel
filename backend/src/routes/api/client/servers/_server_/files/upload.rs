@@ -67,12 +67,7 @@ mod get {
                         jwt_id: user.id.to_string(),
                     },
                     server_uuid: server.uuid,
-                    user_uuid: uuid::Uuid::from_fields(
-                        user.id as u32,
-                        (user.id >> 16) as u16,
-                        user.id as u16,
-                        &[0; 8],
-                    ),
+                    user_uuid: user.to_uuid(),
                     unique_id: uuid::Uuid::new_v4(),
                 },
             )

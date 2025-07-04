@@ -49,11 +49,11 @@ mod get {
                 );
             }
             Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to pull server file: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to list server file pulls: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to pull server file"])),
+                    axum::Json(ApiError::new_value(&["failed to list server file pulls"])),
                 );
             }
         };
@@ -87,10 +87,10 @@ mod post {
         name: Option<String>,
 
         #[serde(default)]
-        #[schema(default = "false")]
+        #[schema(default = false)]
         use_header: bool,
         #[serde(default)]
-        #[schema(default = "false")]
+        #[schema(default = false)]
         foreground: bool,
     }
 

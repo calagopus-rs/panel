@@ -253,6 +253,33 @@ impl User {
         row.map(|row| Self::map(None, &row))
     }
 
+    pub async fn by_username_public_key(
+        database: &crate::database::Database,
+        username: &str,
+        public_key: russh::keys::PublicKey,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM users
+            JOIN user_ssh_keys ON user_ssh_keys.user_id = users.id
+            WHERE users.username = $1 AND user_ssh_keys.fingerprint = $2
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(username)
+        .bind(
+            public_key
+                .fingerprint(russh::keys::HashAlg::Sha256)
+                .to_string(),
+        )
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
     pub async fn by_email_password(
         database: &crate::database::Database,
         email: &str,
@@ -353,6 +380,21 @@ impl User {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub fn to_uuid(&self) -> uuid::Uuid {
+        uuid::Uuid::from_fields(
+            self.id as u32,
+            (self.id >> 16) as u16,
+            self.id as u16,
+            &[0; 8],
+        )
+    }
+
+    #[inline]
+    pub fn from_uuid(uuid: uuid::Uuid) -> i32 {
+        uuid.as_fields().0 as i32
     }
 
     #[inline]
