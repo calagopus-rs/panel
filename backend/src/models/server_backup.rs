@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -18,9 +18,9 @@ pub struct ServerBackup {
     pub bytes: i64,
     pub disk: String,
 
-    pub completed: Option<NaiveDateTime>,
-    pub deleted: Option<NaiveDateTime>,
-    pub created: NaiveDateTime,
+    pub completed: Option<chrono::NaiveDateTime>,
+    pub deleted: Option<chrono::NaiveDateTime>,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for ServerBackup {
@@ -184,7 +184,8 @@ impl ServerBackup {
             locked: self.locked,
             checksum: self.checksum,
             bytes: self.bytes,
-            created: self.created,
+            completed: self.completed.map(|dt| dt.and_utc()),
+            created: self.created.and_utc(),
         }
     }
 }
@@ -202,5 +203,6 @@ pub struct ApiServerBackup {
     pub checksum: String,
     pub bytes: i64,
 
-    pub created: NaiveDateTime,
+    pub completed: Option<chrono::DateTime<chrono::Utc>>,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -14,7 +14,7 @@ pub struct Location {
 
     pub nodes: i64,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for Location {
@@ -159,7 +159,7 @@ impl Location {
             name: self.name,
             description: self.description,
             nodes: self.nodes,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -175,5 +175,5 @@ pub struct AdminApiLocation {
 
     pub nodes: i64,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

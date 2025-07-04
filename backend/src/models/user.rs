@@ -2,7 +2,7 @@ use super::BaseModel;
 use crate::routes::api::client::{AuthMethod, GetAuthMethod};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
 
@@ -25,7 +25,7 @@ pub struct User {
     pub totp_enabled: bool,
     pub totp_secret: Option<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for User {
@@ -420,7 +420,7 @@ impl User {
             },
             admin: self.admin,
             totp_enabled: self.totp_enabled,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -440,5 +440,5 @@ pub struct ApiUser {
     pub admin: bool,
     pub totp_enabled: bool,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

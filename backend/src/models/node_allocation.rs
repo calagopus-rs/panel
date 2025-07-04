@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -12,7 +12,7 @@ pub struct NodeAllocation {
     pub ip_alias: Option<String>,
     pub port: i32,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for NodeAllocation {
@@ -134,7 +134,7 @@ impl NodeAllocation {
             ip: self.ip.ip().to_string(),
             ip_alias: self.ip_alias,
             port: self.port,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -148,5 +148,5 @@ pub struct AdminApiNodeAllocation {
     pub ip_alias: Option<String>,
     pub port: i32,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

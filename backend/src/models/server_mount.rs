@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 pub struct ServerMount {
     pub mount: super::mount::Mount,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for ServerMount {
@@ -87,7 +87,7 @@ impl ServerMount {
             description: self.mount.description,
             target: self.mount.target,
             read_only: self.mount.read_only,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -101,5 +101,5 @@ pub struct ApiServerMount {
     pub target: String,
     pub read_only: bool,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

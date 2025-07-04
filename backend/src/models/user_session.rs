@@ -1,7 +1,7 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -12,8 +12,8 @@ pub struct UserSession {
     pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub user_agent: String,
 
-    pub last_used: NaiveDateTime,
-    pub created: NaiveDateTime,
+    pub last_used: chrono::NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for UserSession {
@@ -107,8 +107,8 @@ impl UserSession {
             id: self.id,
             ip: self.ip.ip().to_string(),
             user_agent: self.user_agent,
-            last_used: self.last_used,
-            created: self.created,
+            last_used: self.last_used.and_utc(),
+            created: self.created.and_utc(),
         }
     }
 }
@@ -121,6 +121,6 @@ pub struct ApiUserSession {
     pub ip: String,
     pub user_agent: String,
 
-    pub last_used: NaiveDateTime,
-    pub created: NaiveDateTime,
+    pub last_used: chrono::DateTime<chrono::Utc>,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

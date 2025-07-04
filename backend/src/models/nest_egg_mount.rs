@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -8,7 +8,7 @@ use utoipa::ToSchema;
 pub struct NestEggMount {
     pub mount: super::mount::Mount,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for NestEggMount {
@@ -94,7 +94,7 @@ impl NestEggMount {
     pub fn into_admin_api_object(self) -> AdminApiNestEggMount {
         AdminApiNestEggMount {
             mount: self.mount.into_admin_api_object(),
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -104,5 +104,5 @@ impl NestEggMount {
 pub struct AdminApiNestEggMount {
     pub mount: super::mount::AdminApiMount,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

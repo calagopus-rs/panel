@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -11,7 +11,7 @@ pub struct ServerAllocation {
 
     pub notes: Option<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for ServerAllocation {
@@ -126,7 +126,7 @@ impl ServerAllocation {
             port: self.allocation.port,
             notes: self.notes,
             is_default: default.is_some_and(|d| d == self.id),
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -141,5 +141,5 @@ pub struct ApiServerAllocation {
     pub notes: Option<String>,
     pub is_default: bool,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

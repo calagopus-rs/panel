@@ -1,7 +1,7 @@
 use super::BaseModel;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -30,7 +30,7 @@ pub struct Node {
 
     pub servers: i64,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for Node {
@@ -361,7 +361,7 @@ impl Node {
             disk: self.disk,
             token_id: self.token_id,
             servers: self.servers,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -393,5 +393,5 @@ pub struct AdminApiNode {
 
     pub servers: i64,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

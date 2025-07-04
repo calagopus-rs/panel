@@ -1,7 +1,7 @@
 use super::BaseModel;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 
 #[derive(Serialize, Deserialize)]
@@ -10,7 +10,7 @@ pub struct UserRecoveryCode {
 
     pub code: String,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for UserRecoveryCode {

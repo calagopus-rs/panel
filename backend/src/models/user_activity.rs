@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -13,7 +13,7 @@ pub struct UserActivity {
     pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub data: serde_json::Value,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for UserActivity {
@@ -103,6 +103,7 @@ impl UserActivity {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_activities
             WHERE user_activities.user_id = $1
+            ORDER BY user_activities.created DESC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
@@ -130,7 +131,7 @@ impl UserActivity {
             ip: self.ip.ip().to_string(),
             data: self.data,
             is_api: self.api_key_id.is_some(),
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -146,5 +147,5 @@ pub struct ApiUserActivity {
 
     pub is_api: bool,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

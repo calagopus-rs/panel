@@ -1,7 +1,7 @@
 use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, prelude::Type, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -49,7 +49,7 @@ pub struct Server {
 
     pub subuser_permissions: Option<Vec<String>>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for Server {
@@ -812,7 +812,7 @@ impl Server {
             startup: self.startup,
             image: self.image,
 
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 
@@ -858,7 +858,7 @@ impl Server {
             },
             startup: self.startup,
             image: self.image,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -912,7 +912,7 @@ pub struct AdminApiServer {
     pub startup: String,
     pub image: String,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(ToSchema, Serialize)]
@@ -946,5 +946,5 @@ pub struct ApiServer {
     pub startup: String,
     pub image: String,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

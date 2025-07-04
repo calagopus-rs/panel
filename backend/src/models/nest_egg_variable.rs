@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -17,7 +17,7 @@ pub struct NestEggVariable {
     pub user_editable: bool,
     pub rules: Vec<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for NestEggVariable {
@@ -155,7 +155,7 @@ impl NestEggVariable {
             user_viewable: self.user_viewable,
             user_editable: self.user_editable,
             rules: self.rules,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -174,5 +174,5 @@ pub struct AdminApiNestEggVariable {
     pub user_editable: bool,
     pub rules: Vec<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

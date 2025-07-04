@@ -1,7 +1,7 @@
 use super::BaseModel;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -14,7 +14,7 @@ pub struct ServerDatabase {
     pub username: String,
     pub password: Vec<u8>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for ServerDatabase {
@@ -216,7 +216,7 @@ impl ServerDatabase {
             } else {
                 None
             },
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -233,5 +233,5 @@ pub struct ApiServerDatabase {
     pub username: String,
     pub password: Option<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

@@ -1,6 +1,6 @@
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, prelude::Type, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -28,7 +28,7 @@ pub struct DatabaseHost {
     pub username: String,
     pub password: Vec<u8>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for DatabaseHost {
@@ -203,7 +203,7 @@ impl DatabaseHost {
             public_port: self.public_port,
             port: self.port,
             username: self.username,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -223,5 +223,5 @@ pub struct AdminApiDatabaseHost {
 
     pub username: String,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

@@ -1,7 +1,7 @@
 use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -84,7 +84,7 @@ pub struct NestEgg {
 
     pub servers: i64,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for NestEgg {
@@ -279,7 +279,7 @@ impl NestEgg {
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 
@@ -292,7 +292,7 @@ impl NestEgg {
             startup: self.startup,
             features: self.features,
             docker_images: self.docker_images,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -322,7 +322,7 @@ pub struct AdminApiNestEgg {
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(ToSchema, Serialize)]
@@ -338,5 +338,5 @@ pub struct ApiNestEgg {
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

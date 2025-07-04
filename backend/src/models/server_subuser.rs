@@ -1,7 +1,7 @@
 use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::{
     collections::{BTreeMap, HashSet},
     sync::LazyLock,
@@ -256,7 +256,7 @@ pub struct ServerSubuser {
 
     pub permissions: Vec<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for ServerSubuser {
@@ -367,7 +367,7 @@ impl ServerSubuser {
         ApiServerSubuser {
             user: self.user.into_api_object(false),
             permissions: self.permissions,
-            created: self.created,
+            created: self.created.and_utc(),
         }
     }
 }
@@ -378,5 +378,5 @@ pub struct ApiServerSubuser {
     pub user: super::user::ApiUser,
     pub permissions: Vec<String>,
 
-    pub created: NaiveDateTime,
+    pub created: chrono::DateTime<chrono::Utc>,
 }

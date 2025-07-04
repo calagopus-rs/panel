@@ -1,7 +1,7 @@
 use super::BaseModel;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
+use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
@@ -13,8 +13,8 @@ pub struct UserApiKey {
     pub key_start: String,
     pub permissions: Vec<String>,
 
-    pub last_used: Option<NaiveDateTime>,
-    pub created: NaiveDateTime,
+    pub last_used: Option<chrono::NaiveDateTime>,
+    pub created: chrono::NaiveDateTime,
 }
 
 impl BaseModel for UserApiKey {
@@ -170,8 +170,8 @@ impl UserApiKey {
             name: self.name,
             key_start: self.key_start,
             permissions: self.permissions,
-            last_used: self.last_used,
-            created: self.created,
+            last_used: self.last_used.map(|dt| dt.and_utc()),
+            created: self.created.and_utc(),
         }
     }
 }
@@ -185,6 +185,6 @@ pub struct ApiUserApiKey {
     pub key_start: String,
     pub permissions: Vec<String>,
 
-    pub last_used: Option<NaiveDateTime>,
-    pub created: NaiveDateTime,
+    pub last_used: Option<chrono::DateTime<chrono::Utc>>,
+    pub created: chrono::DateTime<chrono::Utc>,
 }
