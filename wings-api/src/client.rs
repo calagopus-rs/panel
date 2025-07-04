@@ -21,7 +21,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     endpoint: String,
     body: Option<&serde_json::Value>,
 ) -> Result<T, (StatusCode, super::ApiError)> {
-    let url = format!("{}{}", client.base_url, endpoint);
+    let url = format!("{}{}", client.base_url.trim_end_matches('/'), endpoint);
     let mut request = CLIENT.request(method, &url);
 
     if !client.token.is_empty() {
