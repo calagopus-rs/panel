@@ -20,6 +20,7 @@ mod get {
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = String),
+        (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (

@@ -31,8 +31,8 @@ mod get {
     }
 
     #[utoipa::path(get, path = "/", responses(
-        (status = OK, body = String),
-        (status = NOT_FOUND, body = ApiError),
+        (status = OK, body = inline(Response)),
+        (status = UNAUTHORIZED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,

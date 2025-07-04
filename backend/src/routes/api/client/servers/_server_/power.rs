@@ -20,6 +20,7 @@ mod post {
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = UNAUTHORIZED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,
