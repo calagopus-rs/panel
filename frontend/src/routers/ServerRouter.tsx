@@ -1,6 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import { useEffect, useState } from 'react';
-import { Route, Routes, useParams } from 'react-router';
+import { Route, Routes, useNavigate, useParams } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
@@ -37,8 +37,17 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
+import { useUserStore } from '@/stores/user';
 
 export default () => {
+  const navigate = useNavigate();
+  const { user } = useUserStore();
+
+  if (!user?.id) {
+    navigate('/auth/login');
+    return;
+  }
+
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 

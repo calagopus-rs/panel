@@ -1,6 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/home/DashboardHome';
-import { Route, Routes } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
@@ -11,9 +11,18 @@ import DashboardAccount from '@/pages/dashboard/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
+import { useUserStore } from '@/stores/user';
 
 export default () => {
   const avatarURL = 'https://placehold.co/400x400/png';
+
+  const navigate = useNavigate();
+  const { user } = useUserStore();
+
+  if (!user?.id) {
+    navigate('/auth/login');
+    return;
+  }
 
   return (
     <>

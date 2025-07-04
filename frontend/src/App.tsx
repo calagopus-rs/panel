@@ -1,10 +1,19 @@
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Route, RouteProps, Routes, useNavigate } from 'react-router';
 import DashboardRouter from './routers/DashboardRouter';
 import AuthenticationRouter from './routers/AuthenticationRouter';
 import ServerRouter from './routers/ServerRouter';
 import { ToastProvider } from './elements/Toast';
+import { useUserStore } from './stores/user';
+import { useEffect } from 'react';
+import getMe from './api/me/getMe';
 
-function App() {
+export default function App() {
+  const { setUser } = useUserStore();
+
+  useEffect(() => {
+    getMe().then(user => setUser(user));
+  }, []);
+
   return (
     <div>
       <ToastProvider>
@@ -19,5 +28,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
