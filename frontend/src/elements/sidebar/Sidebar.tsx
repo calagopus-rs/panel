@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 import logout from '@/api/me/logout';
 import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '../Toast';
+import { useToast } from '@/providers/ToastProvider';
 
 type SidebarProps = {
   collapsed?: boolean;

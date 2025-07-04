@@ -1,30 +1,40 @@
-import { BrowserRouter, Route, Routes, useLocation, useRoutes } from 'react-router';
+import { BrowserRouter, Route, Routes } from 'react-router';
 import DashboardRouter from './routers/DashboardRouter';
 import AuthenticationRouter from './routers/AuthenticationRouter';
 import ServerRouter from './routers/ServerRouter';
-import { useUserStore } from './stores/user';
-import { useEffect } from 'react';
-import getMe from './api/me/getMe';
 import { ToastProvider } from './providers/ToastProvider';
+import CheckingRouter from './routers/CheckingRouter';
 
 export default function App() {
-  const location = useLocation();
-  const { setUser } = useUserStore();
-
-  useEffect(() => {
-    if (location.pathname.toLowerCase().startsWith('/auth')) return;
-
-    getMe().then(user => setUser(user));
-  }, []);
-
   return (
     <div>
       <ToastProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/auth/*" element={<AuthenticationRouter />} />
-            <Route path="/server/:id/*" element={<ServerRouter />} />
-            <Route path="/*" element={<DashboardRouter />} />
+            <Route
+              path="/auth/*"
+              element={
+                <CheckingRouter requireUnauthenticated>
+                  <AuthenticationRouter />
+                </CheckingRouter>
+              }
+            />
+            <Route
+              path="/server/:id/*"
+              element={
+                <CheckingRouter requireAuthenticated>
+                  <ServerRouter />
+                </CheckingRouter>
+              }
+            />
+            <Route
+              path="/*"
+              element={
+                <CheckingRouter requireAuthenticated>
+                  <DashboardRouter />
+                </CheckingRouter>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ToastProvider>

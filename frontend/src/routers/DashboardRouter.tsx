@@ -11,17 +11,8 @@ import DashboardAccount from '@/pages/dashboard/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
-import { useUserStore } from '@/stores/user';
 
 export default () => {
-  const navigate = useNavigate();
-  const { user } = useUserStore();
-
-  if (!user?.id) {
-    navigate('/auth/login');
-    return;
-  }
-
   return (
     <>
       <div className="flex">

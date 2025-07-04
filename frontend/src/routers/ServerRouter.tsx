@@ -37,24 +37,13 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
-import { useUserStore } from '@/stores/user';
 
 export default () => {
-  const navigate = useNavigate();
-  const { user } = useUserStore();
-
-  if (!user?.id) {
-    navigate('/auth/login');
-    return;
-  }
-
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
   const clearState = useServerStore(state => state.clear);
   const getServer = useServerStore(state => state.getServer);
-
-  const avatarURL = 'https://placehold.co/400x400/png';
 
   useEffect(() => {
     return () => {
