@@ -21,7 +21,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        directory_entry: wings_api::DirectoryEntry,
+        entry: wings_api::DirectoryEntry,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -54,7 +54,7 @@ mod post {
             files: data.files,
         };
 
-        let directory_entry = match server
+        let entry = match server
             .node
             .api_client(&state.database)
             .post_servers_server_files_compress(server.uuid, &request_body)
@@ -95,7 +95,7 @@ mod post {
 
         (
             StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { directory_entry }).unwrap()),
+            axum::Json(serde_json::to_value(Response { entry }).unwrap()),
         )
     }
 }

@@ -1,12 +1,13 @@
 use super::BaseModel;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type, types::chrono::NaiveDateTime};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-#[schema(rename_all = "SCREAMING_SNAKE_CASE")]
+#[serde(rename_all = "snake_case")]
+#[schema(rename_all = "snake_case")]
 #[sqlx(type_name = "server_status", rename_all = "SCREAMING_SNAKE_CASE")]
 pub enum ServerStatus {
     Installing,
@@ -26,6 +27,8 @@ pub struct Server {
     pub node: super::node::Node,
     pub owner: super::user::User,
     pub egg: super::nest_egg::NestEgg,
+
+    pub status: Option<ServerStatus>,
 
     pub name: String,
     pub description: Option<String>,
@@ -86,6 +89,10 @@ impl BaseModel for Server {
             (
                 format!("{}.egg_id", table),
                 format!("{}egg_id", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.status", table),
+                format!("{}status", prefix.unwrap_or_default()),
             ),
             (
                 format!("{}.name", table),
@@ -183,6 +190,7 @@ impl BaseModel for Server {
             node: super::node::Node::map(Some("node_"), row),
             owner: super::user::User::map(Some("owner_"), row),
             egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
+            status: row.get(format!("{}status", prefix).as_str()),
             name: row.get(format!("{}name", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
             memory: row.get(format!("{}memory", prefix).as_str()),
@@ -332,6 +340,39 @@ impl Server {
         row.map(|row| Self::map(None, &row))
     }
 
+    pub async fn by_node_id_uuid(
+        database: &crate::database::Database,
+        node_id: i32,
+        uuid: uuid::Uuid,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}, {}, {}, {}
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            WHERE servers.node_id = $1 AND servers.uuid = $2
+            "#,
+            Self::columns_sql(None, None),
+            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
+            super::node::Node::columns_sql(Some("node_"), None),
+            super::user::User::columns_sql(Some("owner_"), None),
+            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+        ))
+        .bind(node_id)
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
     pub async fn by_user_id_identifier(
         database: &crate::database::Database,
         user_id: i32,
@@ -461,6 +502,49 @@ impl Server {
         }
     }
 
+    pub async fn by_node_id_with_pagination(
+        database: &crate::database::Database,
+        node_id: i32,
+        page: i64,
+        per_page: i64,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}, {}, {}, {}, COUNT(*) OVER() AS total_count
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            WHERE servers.node_id = $1
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None),
+            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
+            super::node::Node::columns_sql(Some("node_"), None),
+            super::user::User::columns_sql(Some("owner_"), None),
+            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+        ))
+        .bind(node_id)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
+    }
+
     pub async fn all_with_pagination(
         database: &crate::database::Database,
         page: i64,
@@ -478,6 +562,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None),
@@ -561,6 +646,121 @@ impl Server {
     }
 
     #[inline]
+    pub async fn into_remote_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> RemoteApiServer {
+        let (variables, backups, allocations) = tokio::join!(
+            sqlx::query!(
+                "SELECT nest_egg_variables.env_variable, server_variables.value
+                FROM server_variables
+                JOIN nest_egg_variables ON nest_egg_variables.id = server_variables.variable_id
+                WHERE server_variables.server_id = $1",
+                self.id
+            )
+            .fetch_all(database.read()),
+            sqlx::query!(
+                "SELECT server_backups.uuid
+                FROM server_backups
+                WHERE server_backups.server_id = $1",
+                self.id
+            )
+            .fetch_all(database.read()),
+            sqlx::query!(
+                "SELECT node_allocations.ip, node_allocations.port
+                FROM server_allocations
+                JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
+                WHERE server_allocations.server_id = $1",
+                self.id
+            )
+            .fetch_all(database.read()),
+        );
+
+        let variables = variables.unwrap();
+        let backups = backups.unwrap();
+        let allocations = allocations.unwrap();
+
+        RemoteApiServer {
+            configuration: wings_api::ServerConfiguration {
+                uuid: self.uuid,
+                start_on_completion: None,
+                meta: wings_api::ServerConfigurationMeta {
+                    name: self.name,
+                    description: self.description.unwrap_or_else(|| "".to_string()),
+                },
+                suspended: self.status == Some(ServerStatus::Suspended),
+                invocation: self.startup,
+                skip_egg_scripts: false,
+                environment: variables
+                    .into_iter()
+                    .map(|v| (v.env_variable, serde_json::Value::String(v.value)))
+                    .collect(),
+                labels: IndexMap::new(),
+                backups: backups.into_iter().map(|b| b.uuid).collect(),
+                allocations: wings_api::ServerConfigurationAllocations {
+                    force_outgoing_ip: self.egg.force_outgoing_ip,
+                    default: self.allocation.map(|a| {
+                        wings_api::ServerConfigurationServerConfigurationAllocationsDefault {
+                            ip: a.allocation.ip.ip().to_string(),
+                            port: a.allocation.port as u32,
+                        }
+                    }),
+                    mappings: {
+                        let mut mappings = IndexMap::new();
+                        for allocation in allocations {
+                            mappings
+                                .entry(allocation.ip.ip().to_string())
+                                .or_insert_with(Vec::new)
+                                .push(allocation.port as u32);
+                        }
+
+                        mappings
+                    },
+                },
+                build: wings_api::ServerConfigurationBuild {
+                    memory_limit: self.memory,
+                    swap: self.swap,
+                    io_weight: self.io as u32,
+                    cpu_limit: self.cpu as i64,
+                    disk_space: self.disk as u64,
+                    threads: {
+                        let mut threads = String::new();
+                        for cpu in &self.pinned_cpus {
+                            if !threads.is_empty() {
+                                threads.push(',');
+                            }
+                            threads.push_str(&cpu.to_string());
+                        }
+
+                        if threads.is_empty() {
+                            None
+                        } else {
+                            Some(threads)
+                        }
+                    },
+                    oom_disabled: true,
+                },
+                mounts: Vec::new(),
+                egg: wings_api::ServerConfigurationEgg {
+                    id: uuid::Uuid::from_fields(
+                        self.egg.id as u32,
+                        (self.egg.id >> 16) as u16,
+                        self.egg.id as u16,
+                        &[0; 8],
+                    ),
+                    file_denylist: self.egg.file_denylist,
+                },
+                container: wings_api::ServerConfigurationContainer { image: self.image },
+            },
+            process_configuration: super::nest_egg::ProcessConfiguration {
+                startup: self.egg.config_startup,
+                stop: self.egg.config_stop,
+                configs: self.egg.config_files,
+            },
+        }
+    }
+
+    #[inline]
     pub fn into_admin_api_object(self) -> AdminApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 
@@ -573,6 +773,8 @@ impl Server {
             node: self.node.into_admin_api_object(),
             owner: self.owner.into_api_object(true),
             egg: self.egg.into_admin_api_object(),
+
+            status: self.status,
 
             name: self.name,
             description: self.description,
@@ -608,6 +810,7 @@ impl Server {
             uuid_short: format!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
             egg: self.egg.into_api_object(),
+            status: self.status,
             is_owner: self.subuser_permissions.is_none(),
             permissions: self
                 .subuser_permissions
@@ -645,6 +848,13 @@ impl Server {
 }
 
 #[derive(ToSchema, Serialize)]
+#[schema(title = "RemoteServer")]
+pub struct RemoteApiServer {
+    configuration: wings_api::ServerConfiguration,
+    process_configuration: super::nest_egg::ProcessConfiguration,
+}
+
+#[derive(ToSchema, Serialize)]
 pub struct ApiServerLimits {
     pub cpu: i32,
     pub memory: i64,
@@ -672,6 +882,8 @@ pub struct AdminApiServer {
     pub owner: super::user::ApiUser,
     pub egg: super::nest_egg::AdminApiNestEgg,
 
+    pub status: Option<ServerStatus>,
+
     pub name: String,
     pub description: Option<String>,
 
@@ -695,6 +907,8 @@ pub struct ApiServer {
     pub uuid_short: String,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,
     pub egg: super::nest_egg::ApiNestEgg,
+
+    pub status: Option<ServerStatus>,
 
     pub is_owner: bool,
     pub permissions: Vec<String>,

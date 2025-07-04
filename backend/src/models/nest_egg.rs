@@ -5,6 +5,44 @@ use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
+#[derive(ToSchema, Serialize, Deserialize, Clone, Copy)]
+#[serde(rename_all = "lowercase")]
+#[schema(rename_all = "lowercase")]
+pub enum ServerConfigurationFileParser {
+    File,
+    Yaml,
+    Properties,
+    Ini,
+    Json,
+    Xml,
+}
+
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+pub struct ProcessConfigurationFileReplacement {
+    pub r#match: String,
+    pub if_value: Option<String>,
+    pub replace_with: serde_json::Value,
+}
+
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+pub struct ProcessConfigurationFile {
+    pub file: String,
+    #[schema(inline)]
+    pub parser: ServerConfigurationFileParser,
+    #[schema(inline)]
+    pub replace: Vec<ProcessConfigurationFileReplacement>,
+}
+
+#[derive(ToSchema, Serialize, Clone)]
+pub struct ProcessConfiguration {
+    #[schema(inline)]
+    pub startup: crate::models::nest_egg::NestEggConfigStartup,
+    #[schema(inline)]
+    pub stop: crate::models::nest_egg::NestEggConfigStop,
+    #[schema(inline)]
+    pub configs: Vec<ProcessConfigurationFile>,
+}
+
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct NestEggConfigStartup {
     pub done: Vec<String>,
@@ -24,7 +62,7 @@ pub struct NestEggConfigScript {
     pub content: String,
 }
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct NestEgg {
     pub id: i32,
 
@@ -32,12 +70,13 @@ pub struct NestEgg {
     pub name: String,
     pub description: Option<String>,
 
-    pub config_files: serde_json::Value,
+    pub config_files: Vec<ProcessConfigurationFile>,
     pub config_startup: NestEggConfigStartup,
     pub config_stop: NestEggConfigStop,
     pub config_script: NestEggConfigScript,
 
     pub startup: String,
+    pub force_outgoing_ip: bool,
 
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
@@ -91,6 +130,10 @@ impl BaseModel for NestEgg {
                 format!("{}startup", prefix.unwrap_or_default()),
             ),
             (
+                format!("{}.force_outgoing_ip", table),
+                format!("{}force_outgoing_ip", prefix.unwrap_or_default()),
+            ),
+            (
                 format!("{}.features", table),
                 format!("{}features", prefix.unwrap_or_default()),
             ),
@@ -129,7 +172,10 @@ impl BaseModel for NestEgg {
             author: row.get(format!("{}author", prefix).as_str()),
             name: row.get(format!("{}name", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
-            config_files: row.get(format!("{}config_files", prefix).as_str()),
+            config_files: serde_json::from_value(
+                row.get(format!("{}config_files", prefix).as_str()),
+            )
+            .unwrap(),
             config_startup: serde_json::from_value(
                 row.get(format!("{}config_startup", prefix).as_str()),
             )
@@ -141,6 +187,7 @@ impl BaseModel for NestEgg {
             )
             .unwrap(),
             startup: row.get(format!("{}startup", prefix).as_str()),
+            force_outgoing_ip: row.get(format!("{}force_outgoing_ip", prefix).as_str()),
             features: row.get(format!("{}features", prefix).as_str()),
             docker_images: serde_json::from_value(
                 row.get(format!("{}docker_images", prefix).as_str()),
@@ -228,6 +275,7 @@ impl NestEgg {
             config_stop: self.config_stop,
             config_script: self.config_script,
             startup: self.startup,
+            force_outgoing_ip: self.force_outgoing_ip,
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
@@ -258,12 +306,17 @@ pub struct AdminApiNestEgg {
     pub name: String,
     pub description: Option<String>,
 
-    pub config_files: serde_json::Value,
+    #[schema(inline)]
+    pub config_files: Vec<ProcessConfigurationFile>,
+    #[schema(inline)]
     pub config_startup: NestEggConfigStartup,
+    #[schema(inline)]
     pub config_stop: NestEggConfigStop,
+    #[schema(inline)]
     pub config_script: NestEggConfigScript,
 
     pub startup: String,
+    pub force_outgoing_ip: bool,
 
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,

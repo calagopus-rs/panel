@@ -252,6 +252,7 @@ export const nestEggs = pgTable('nest_eggs', {
 	config_script: jsonb('config_script').notNull(),
 
 	startup: varchar('startup', { length: 255 }).notNull(),
+	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
 
 	features: varchar('features', { length: 255 }).array().notNull(),
 	docker_images: jsonb('docker_images').$type<Record<string, string>>().notNull(),

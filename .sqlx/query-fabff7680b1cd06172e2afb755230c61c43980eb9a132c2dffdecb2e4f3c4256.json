@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nest_egg_variables.env_variable, server_variables.value\n                FROM server_variables\n                JOIN nest_egg_variables ON nest_egg_variables.id = server_variables.variable_id\n                WHERE server_variables.server_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "env_variable",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "value",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "fabff7680b1cd06172e2afb755230c61c43980eb9a132c2dffdecb2e4f3c4256"
+}

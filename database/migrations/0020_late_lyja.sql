@@ -1,0 +1,1 @@
+ALTER TABLE "nest_eggs" ADD COLUMN "force_outgoing_ip" boolean DEFAULT false NOT NULL;
