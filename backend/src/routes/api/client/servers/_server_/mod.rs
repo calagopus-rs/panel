@@ -1,7 +1,7 @@
 use super::State;
 use crate::{
     GetIp,
-    models::server::Server,
+    models::server::{Server, ServerStatus},
     routes::{
         ApiError, GetState,
         api::client::{GetAuthMethod, GetUser},
@@ -9,7 +9,7 @@ use crate::{
 };
 use axum::{
     body::Body,
-    extract::{Path, Request},
+    extract::{MatchedPath, Path, Request},
     http::StatusCode,
     middleware::Next,
     response::Response,
@@ -63,6 +63,7 @@ pub async fn auth(
     user: GetUser,
     auth: GetAuthMethod,
     ip: GetIp,
+    matched_path: MatchedPath,
     Path(server): Path<Vec<String>>,
     mut req: Request,
     next: Next,
@@ -80,6 +81,32 @@ pub async fn auth(
                 .unwrap());
         }
     };
+
+    const IGNORED_STATUS_PATHS: &[&str] = &[
+        "/api/client/servers/{server}/websocket",
+        "/api/client/servers/{server}",
+    ];
+
+    if !user.admin
+        && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str())
+        && let Some(status) = server.status
+    {
+        let message = match status {
+            ServerStatus::Installing => "server is currently installing",
+            ServerStatus::InstallFailed => "server install has failed",
+            ServerStatus::ReinstallFailed => "server reinstall has failed",
+            ServerStatus::Suspended => "server is suspended",
+            ServerStatus::RestoringBackup => "server is restoring from a backup",
+        };
+
+        return Ok(Response::builder()
+            .status(StatusCode::UNAUTHORIZED)
+            .header("Content-Type", "application/json")
+            .body(Body::from(
+                serde_json::to_string(&ApiError::new_value(&[message])).unwrap(),
+            ))
+            .unwrap());
+    }
 
     req.extensions_mut().insert(ServerActivityLogger {
         state: Arc::clone(&state),

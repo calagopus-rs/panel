@@ -77,7 +77,7 @@ pub type GetIp = axum::extract::Extension<std::net::IpAddr>;
 
 async fn handle_request(mut req: Request<Body>, next: Next) -> Result<Response<Body>, StatusCode> {
     let ip = crate::utils::extract_ip(req.headers())
-        .unwrap_or_else(|| std::net::IpAddr::V4(std::net::Ipv4Addr::new(0, 0, 0, 0)));
+        .unwrap_or_else(|| std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)));
 
     req.extensions_mut().insert(ip);
 
