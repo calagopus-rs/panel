@@ -4,6 +4,9 @@ import Spinner from '@/elements/Spinner';
 import classNames from 'classnames';
 import { Input } from '../inputs';
 import Checkbox from '../inputs/Checkbox';
+import { Button } from '../button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleDoubleLeft, faAngleDoubleRight, faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 export interface TableHooks<T> {
   page: number;
@@ -116,38 +119,6 @@ export const TableRow = ({
   );
 };
 
-interface PaginationButtonProps {
-  active?: boolean;
-}
-
-function PaginationButton({ active, children, ...props }: PaginationButtonProps & React.ComponentProps<'button'>) {
-  return (
-    <button
-      className={classNames(
-        'relative items-center px-3 py-1 -ml-px text-sm font-normal leading-5 transition duration-150 ease-in-out border border-gray-500 focus:z-10 focus:outline-none focus:border-primary-300 inline-flex',
-        [active ? 'bg-gray-500 text-gray-50' : 'bg-gray-600 text-gray-200 hover:text-gray-50'],
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
-function PaginationArrow({ children, ...props }: React.ComponentProps<'button'>) {
-  return (
-    <button
-      className={classNames(
-        'relative inline-flex items-center px-1 py-1 text-sm font-medium leading-5 transition duration-150 ease-in-out border border-gray-500 bg-gray-600 text-gray-400 hover:text-gray-50 focus:z-10 focus:outline-none focus:border-primary-300',
-        [props.disabled ? 'bg-gray-700 hover:text-gray-400 cursor-default' : 'cursor-pointer'],
-      )}
-      {...props}
-    >
-      {children}
-    </button>
-  );
-}
-
 interface PaginationProps<T> {
   data: PaginatedResult<T>;
   onPageSelect: (page: number) => void;
@@ -204,43 +175,60 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
         {isFirstPage && isLastPage ? null : (
           <div className="flex flex-row ml-auto">
             <nav className="relative z-0 inline-flex shadow-sm">
-              <PaginationArrow
-                type="button"
-                className="rounded-l-md"
-                aria-label="Previous"
+              <Button
+                onClick={() => setPage(1)}
+                size={Button.Sizes.Small}
+                shape={Button.Shapes.IconSquare}
+                variant={Button.Variants.Secondary}
+                style={Button.Styles.Gray}
                 disabled={data.page === 1}
-                onClick={() => setPage(data.page - 1)}
               >
-                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    clipRule="evenodd"
-                    fillRule="evenodd"
-                    d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  />
-                </svg>
-              </PaginationArrow>
+                <FontAwesomeIcon icon={faAngleDoubleLeft} />
+              </Button>
+              <Button
+                onClick={() => setPage(data.page - 1)}
+                size={Button.Sizes.Small}
+                shape={Button.Shapes.IconSquare}
+                variant={Button.Variants.Secondary}
+                style={Button.Styles.Gray}
+                disabled={data.page === 1}
+              >
+                <FontAwesomeIcon icon={faAngleLeft} />
+              </Button>
 
               {pages.map(page => (
-                <PaginationButton key={page} type="button" onClick={() => setPage(page)} active={data.page === page}>
+                <Button
+                  key={page}
+                  onClick={() => setPage(page)}
+                  size={Button.Sizes.Small}
+                  shape={Button.Shapes.IconSquare}
+                  variant={data.page === page ? Button.Variants.Primary : Button.Variants.Secondary}
+                  style={data.page === page ? Button.Styles.Blue : Button.Styles.Gray}
+                >
                   {page}
-                </PaginationButton>
+                </Button>
               ))}
 
-              <PaginationArrow
-                type="button"
-                className="-ml-px rounded-r-md"
-                aria-label="Next"
-                disabled={data.page === totalPages}
+              <Button
                 onClick={() => setPage(data.page + 1)}
+                size={Button.Sizes.Small}
+                shape={Button.Shapes.IconSquare}
+                variant={Button.Variants.Secondary}
+                style={Button.Styles.Gray}
+                disabled={data.page === totalPages}
               >
-                <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    clipRule="evenodd"
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  />
-                </svg>
-              </PaginationArrow>
+                <FontAwesomeIcon icon={faAngleRight} />
+              </Button>
+              <Button
+                onClick={() => setPage(totalPages)}
+                size={Button.Sizes.Small}
+                shape={Button.Shapes.IconSquare}
+                variant={Button.Variants.Secondary}
+                style={Button.Styles.Gray}
+                disabled={data.page === totalPages}
+              >
+                <FontAwesomeIcon icon={faAngleDoubleRight} />
+              </Button>
             </nav>
           </div>
         )}
@@ -248,14 +236,6 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
     </>
   );
 }
-
-export const Loading = () => {
-  return (
-    <div className="w-full flex flex-col items-center justify-center" style={{ height: '3rem' }}>
-      <Spinner />
-    </div>
-  );
-};
 
 export const NoItems = () => {
   return (

@@ -17,14 +17,15 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [activities, setActivities] = useState<PaginatedResult<UserActivity>>();
 
   useEffect(() => {
-    getUserActivity().then(data => {
+    getUserActivity(page).then(data => {
       setActivities(data);
       setLoading(false);
     });
-  }, []);
+  }, [page]);
 
   return (
     <Container>
@@ -33,7 +34,7 @@ export default () => {
       ) : (
         <Table>
           <ContentWrapper>
-            <Pagination data={activities} onPageSelect={() => {}}>
+            <Pagination data={activities} onPageSelect={setPage}>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <TableHead>

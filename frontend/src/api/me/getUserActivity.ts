@@ -1,10 +1,10 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
 import { transformKeysToCamelCase } from '../transformers';
 
-export default async (): Promise<PaginatedResult<UserActivity>> => {
+export default async (page: number): Promise<PaginatedResult<UserActivity>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get(`/api/client/account/activity`)
+      .get(`/api/client/account/activity?page=${page}`)
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.activities),
