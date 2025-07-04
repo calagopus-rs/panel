@@ -27,6 +27,8 @@ export default ({ requireAuthenticated, requireUnauthenticated, children }: Prop
   }, []);
 
   useEffect(() => {
+    if (user === undefined) return;
+
     if (requireAuthenticated && !user?.id) {
       navigate('/auth/login', { state: { from: location } });
       return;
@@ -39,5 +41,5 @@ export default ({ requireAuthenticated, requireUnauthenticated, children }: Prop
     setLoading(false);
   }, [user]);
 
-  return loading ? <Spinner.Centered /> : <>{children}</>;
+  return loading || (requireAuthenticated && !user) ? <Spinner.Centered /> : <>{children}</>;
 };

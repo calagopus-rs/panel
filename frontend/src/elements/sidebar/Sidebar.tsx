@@ -45,14 +45,14 @@ function Link({ to, end, children }: LinkProps) {
 }
 
 function User() {
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
   const { addToast } = useToast();
   const avatarURL = 'https://placehold.co/400x400/png';
 
   const doLogout = () => {
     logout()
       .then(() => {
-        useUserStore.getState().setUser(null);
+        setUser(null);
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
