@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import checkpointLogin from '@/api/auth/checkpointLogin';
 import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/elements/Toast';
+import { useToast } from '@/providers/ToastProvider';
 
 export default () => {
   const navigate = useNavigate();

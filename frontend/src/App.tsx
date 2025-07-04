@@ -2,10 +2,10 @@ import { BrowserRouter, Route, Routes, useLocation, useRoutes } from 'react-rout
 import DashboardRouter from './routers/DashboardRouter';
 import AuthenticationRouter from './routers/AuthenticationRouter';
 import ServerRouter from './routers/ServerRouter';
-import { ToastProvider } from './elements/Toast';
 import { useUserStore } from './stores/user';
 import { useEffect } from 'react';
 import getMe from './api/me/getMe';
+import { ToastProvider } from './providers/ToastProvider';
 
 export default function App() {
   const location = useLocation();
