@@ -17,7 +17,9 @@ mod post {
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {}
+    struct Response {
+        directory_entry: wings_api::DirectoryEntry,
+    }
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
@@ -49,13 +51,13 @@ mod post {
             name: data.destination,
         };
 
-        match server
+        let directory_entry = match server
             .node
             .api_client(&state.database)
             .post_servers_server_files_copy(server.uuid, &request_body)
             .await
         {
-            Ok(_) => {}
+            Ok(data) => data,
             Err((StatusCode::NOT_FOUND, _)) => {
                 return (
                     StatusCode::NOT_FOUND,
@@ -94,7 +96,7 @@ mod post {
 
         (
             StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
+            axum::Json(serde_json::to_value(Response { directory_entry }).unwrap()),
         )
     }
 }

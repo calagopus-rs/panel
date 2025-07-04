@@ -2,10 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
-    };
+    use crate::routes::{ApiError, GetState, api::client::servers::_server_::GetServer};
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -15,13 +12,16 @@ mod post {
         #[serde(default)]
         #[schema(default = "/")]
         root: String,
+        query: String,
 
-        files: Vec<String>,
+        #[serde(default)]
+        #[schema(default = false)]
+        content_search: bool,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        directory_entry: wings_api::DirectoryEntry,
+        entries: Vec<wings_api::DirectoryEntry>,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -39,63 +39,55 @@ mod post {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("file.archive") {
+        if let Err(error) = server.has_permission("file.create") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        let request_body = wings_api::servers_server_files_compress::post::RequestBody {
+        let request_body = wings_api::servers_server_files_search::post::RequestBody {
             root: data.root,
-            files: data.files,
+            query: data.query,
+            include_content: data.content_search,
+            max_size: None,
+            limit: Some(100),
         };
 
-        let directory_entry = match server
+        let entries = match server
             .node
             .api_client(&state.database)
-            .post_servers_server_files_compress(server.uuid, &request_body)
+            .post_servers_server_files_search(server.uuid, &request_body)
             .await
         {
-            Ok(data) => data,
+            Ok(data) => data.results,
             Err((StatusCode::NOT_FOUND, _)) => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["root directory not found"])),
+                    axum::Json(ApiError::new_value(&["file is not a file"])),
                 );
             }
             Err((StatusCode::EXPECTATION_FAILED, _)) => {
                 return (
                     StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["root is not a directory"])),
+                    axum::Json(ApiError::new_value(&["disk quota exceeded"])),
                 );
             }
             Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to compress server files: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to search server files: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to compress server files"])),
+                    axum::Json(ApiError::new_value(&["failed to search server files"])),
                 );
             }
         };
 
-        activity_logger
-            .log(
-                "server:file.compress",
-                serde_json::json!({
-                    "directory": request_body.root.trim_start_matches('/'),
-                    "files": request_body.files.iter().map(|f| f.trim_start_matches('/')).collect::<Vec<_>>(),
-                }),
-            )
-            .await;
-
         (
             StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { directory_entry }).unwrap()),
+            axum::Json(serde_json::to_value(Response { entries }).unwrap()),
         )
     }
 }

@@ -198,6 +198,12 @@ async fn main() {
                         .unwrap()
                         .get_file(path)
                         .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
+                } else if path.starts_with("fonts") {
+                    FRONTEND_ASSETS
+                        .get_dir("fonts")
+                        .unwrap()
+                        .get_file(path)
+                        .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
                 } else {
                     FRONTEND_ASSETS
                         .get_file(path)

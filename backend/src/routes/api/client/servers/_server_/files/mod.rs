@@ -12,6 +12,7 @@ mod download;
 mod list;
 mod pulls;
 mod rename;
+mod search;
 mod upload;
 mod write;
 
@@ -29,6 +30,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/delete", delete::router(state))
         .nest("/create-folder", create_folder::router(state))
         .nest("/chmod", chmod::router(state))
+        .nest("/search", search::router(state))
         .nest("/pulls", pulls::router(state))
         .with_state(state.clone())
 }

@@ -26,7 +26,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        files: Pagination<wings_api::DirectoryEntry>,
+        entries: Vec<wings_api::DirectoryEntry>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -75,7 +75,7 @@ mod get {
             );
         }
 
-        let files = match server
+        let entries = match server
             .node
             .api_client(&state.database)
             .get_servers_server_files_list_directory(
@@ -105,17 +105,7 @@ mod get {
 
         (
             StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    files: Pagination {
-                        total: 0,
-                        per_page: params.per_page,
-                        page: params.page,
-                        data: files,
-                    },
-                })
-                .unwrap(),
-            ),
+            axum::Json(serde_json::to_value(Response { entries }).unwrap()),
         )
     }
 }
