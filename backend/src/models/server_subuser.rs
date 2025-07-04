@@ -2,7 +2,10 @@ use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, types::chrono::NaiveDateTime};
-use std::{collections::BTreeMap, sync::LazyLock};
+use std::{
+    collections::{BTreeMap, HashSet},
+    sync::LazyLock,
+};
 use utoipa::ToSchema;
 use validator::ValidationError;
 
@@ -156,16 +159,16 @@ pub static PERMISSIONS: LazyLock<
                         "Allows a user to view the database associated with this server.",
                     ),
                     (
+                        "read-password",
+                        "Allows a user to view the password associated with a database instance for this server.",
+                    ),
+                    (
                         "update",
                         "Allows a user to rotate the password on a database instance. If the user does not have the view_password permission they will not see the updated password.",
                     ),
                     (
                         "delete",
                         "Allows a user to remove a database instance from this server.",
-                    ),
-                    (
-                        "view_password",
-                        "Allows a user to view the password associated with a database instance for this server.",
                     ),
                 ]),
             ),
@@ -178,19 +181,19 @@ pub static PERMISSIONS: LazyLock<
                     (
                         "create",
                         "Allows a user to create new schedules for this server.",
-                    ), // task.create-schedule
+                    ),
                     (
                         "read",
                         "Allows a user to view schedules and the tasks associated with them for this server.",
-                    ), // task.view-schedule, task.list-schedules
+                    ),
                     (
                         "update",
                         "Allows a user to update schedules and schedule tasks for this server.",
-                    ), // task.edit-schedule, task.queue-schedule, task.toggle-schedule
+                    ),
                     (
                         "delete",
                         "Allows a user to delete schedules for this server.",
-                    ), // task.delete-schedule
+                    ),
                 ]),
             ),
         ),
@@ -223,14 +226,14 @@ pub static PERMISSIONS: LazyLock<
     ])
 });
 
-pub static PERMISSIONS_LIST: LazyLock<Vec<String>> = LazyLock::new(|| {
+pub static PERMISSIONS_LIST: LazyLock<HashSet<String>> = LazyLock::new(|| {
     PERMISSIONS
         .iter()
         .flat_map(|(key, (_, permissions))| {
             permissions
                 .keys()
                 .map(|permission| format!("{key}.{permission}"))
-                .collect::<Vec<_>>()
+                .collect::<HashSet<_>>()
         })
         .collect()
 });
