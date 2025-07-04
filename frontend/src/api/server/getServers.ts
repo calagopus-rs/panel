@@ -7,8 +7,8 @@ export default async (): Promise<PaginatedResult<Server>> => {
       .get('/api/client/servers')
       .then(({ data }) =>
         resolve({
-          items: (data.data || []).map((datum: any) => rawDataToServerObject(datum)),
-          pagination: getPaginationSet(data.meta.pagination),
+          ...getPaginationSet(data.servers),
+          data: (data.servers.data || []).map((datum: any) => rawDataToServerObject(datum)),
         }),
       )
       .catch(reject);

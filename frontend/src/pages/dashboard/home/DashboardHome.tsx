@@ -1,30 +1,25 @@
-import { PaginatedResult } from '@/api/axios';
 import Container from '@/elements/Container';
-import Spinner from '@/elements/Spinner';
 import { useSettingsStore } from '@/stores/settings';
 import { faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import { use } from 'react';
+import { useEffect, useState } from 'react';
 import ServerItem from './ServerItem';
 import getServers from '@/api/server/getServers';
-
-function ServerItems({ serverListPromise }: { serverListPromise: Promise<PaginatedResult<Server>> }) {
-  const { serverListDesign } = useSettingsStore(state => state);
-  const serverList = use(serverListPromise);
-
-  return (
-    <div className={classNames('gap-4', [serverListDesign === 'grid' ? 'grid md:grid-cols-2' : 'flex flex-col'])}>
-      {serverList.items.map(server => (
-        <ServerItem key={server.id} server={server} />
-      ))}
-    </div>
-  );
-}
+import Spinner from '@/elements/Spinner';
 
 export default () => {
   const { serverListDesign, setServerListDesign } = useSettingsStore(state => state);
-  const serverListPromise = getServers();
+
+  const [loading, setLoading] = useState(true);
+  const [servers, setServers] = useState<Server[]>([]);
+
+  useEffect(() => {
+    getServers().then(response => {
+      setLoading(false);
+      setServers(response.data);
+    });
+  }, []);
 
   return (
     <Container>
@@ -49,9 +44,17 @@ export default () => {
           />
         </div>
       </div>
-      <Spinner.Suspense>
-        <ServerItems serverListPromise={serverListPromise} />
-      </Spinner.Suspense>
+      {loading ? (
+        <Spinner.Centered />
+      ) : servers.length === 0 ? (
+        <p className="text-gray-400">No servers found</p>
+      ) : (
+        <div className={classNames('gap-4', [serverListDesign === 'grid' ? 'grid md:grid-cols-2' : 'flex flex-col'])}>
+          {servers.map(server => (
+            <ServerItem key={server.id} server={server} />
+          ))}
+        </div>
+      )}
     </Container>
   );
 };

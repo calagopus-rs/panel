@@ -11,7 +11,7 @@ import register from '@/api/auth/register';
 export default () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { setUser, setAuthToken } = useUserStore();
+  const { setUser } = useUserStore();
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -87,7 +87,7 @@ export default () => {
           />
         </div>
         <Button type="submit" className="w-full">
-          Login
+          Register
         </Button>
       </form>
       <div className="mt-4">
