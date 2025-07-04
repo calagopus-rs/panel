@@ -19,19 +19,6 @@ export interface TableHooks<T> {
   setSortDirection: (direction: ((p: boolean) => boolean) | boolean) => void;
 }
 
-export interface PaginatedResult<T> {
-  items: T[];
-  pagination: PaginationDataSet;
-}
-
-export interface PaginationDataSet {
-  total: number;
-  count: number;
-  perPage: number;
-  currentPage: number;
-  totalPages: number;
-}
-
 export function useTableHooks<T>(initialState?: T | (() => T)): TableHooks<T> {
   const [page, setPage] = useState<number>(1);
   const [filters, setFilters] = useState<T | null>(initialState || null);
@@ -162,51 +149,37 @@ function PaginationArrow({ children, ...props }: React.ComponentProps<'button'>)
 }
 
 interface PaginationProps<T> {
-  data?: PaginatedResult<T>;
+  data: PaginatedResult<T>;
   onPageSelect: (page: number) => void;
 
   children: React.ReactNode;
 }
 
 export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<T>) {
-  let pagination: PaginationDataSet;
-  if (data === undefined) {
-    pagination = {
-      total: 0,
-      count: 0,
-      perPage: 0,
-      currentPage: 1,
-      totalPages: 1,
-    };
-  } else {
-    pagination = data.pagination;
-  }
+  const totalPages = Math.ceil(data.total / data.per_page);
 
   const setPage = (page: number) => {
-    if (page < 1 || page > pagination.totalPages) {
+    if (page < 1 || page > totalPages) {
       return;
     }
 
     onPageSelect(page);
   };
 
-  const isFirstPage = pagination.currentPage === 1;
-  const isLastPage = pagination.currentPage >= pagination.totalPages;
+  const isFirstPage = data.page === 1;
+  const isLastPage = data.page >= totalPages;
 
   const pages = [];
 
-  if (pagination.totalPages < 7) {
-    for (let i = 1; i <= pagination.totalPages; i++) {
+  if (totalPages < 7) {
+    for (let i = 1; i <= totalPages; i++) {
       pages.push(i);
     }
   } else {
     // Don't ask me how this works, all I know is that this code will always have 7 items in the pagination,
     // and keeps the current page centered if it is not too close to the start or end.
-    let start = Math.max(pagination.currentPage - 3, 1);
-    const end = Math.min(
-      pagination.totalPages,
-      pagination.currentPage + (pagination.currentPage < 4 ? 7 - pagination.currentPage : 3),
-    );
+    let start = Math.max(data.page - 3, 1);
+    const end = Math.min(totalPages, data.page + (data.page < 4 ? 7 - data.page : 3));
 
     while (start !== 1 && end - start !== 6) {
       start--;
@@ -223,13 +196,9 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
 
       <div className="h-12 flex flex-row items-center w-full px-6 py-3 border-t border-gray-500">
         <p className="text-sm leading-5 text-gray-400">
-          Showing{' '}
-          <span className="text-gray-300">
-            {(pagination.currentPage - 1) * pagination.perPage + (pagination.total > 0 ? 1 : 0)}
-          </span>{' '}
-          to{' '}
-          <span className="text-gray-300">{(pagination.currentPage - 1) * pagination.perPage + pagination.count}</span>{' '}
-          of <span className="text-gray-300">{pagination.total}</span> results
+          Showing <span className="text-gray-300">{(data.page - 1) * data.per_page + (data.total > 0 ? 1 : 0)}</span> to{' '}
+          <span className="text-gray-300">{(data.page - 1) * data.per_page + data.data.length}</span> of{' '}
+          <span className="text-gray-300">{data.total}</span> results
         </p>
 
         {isFirstPage && isLastPage ? null : (
@@ -239,8 +208,8 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
                 type="button"
                 className="rounded-l-md"
                 aria-label="Previous"
-                disabled={pagination.currentPage === 1}
-                onClick={() => setPage(pagination.currentPage - 1)}
+                disabled={data.page === 1}
+                onClick={() => setPage(data.page - 1)}
               >
                 <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path
@@ -252,12 +221,7 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
               </PaginationArrow>
 
               {pages.map(page => (
-                <PaginationButton
-                  key={page}
-                  type="button"
-                  onClick={() => setPage(page)}
-                  active={pagination.currentPage === page}
-                >
+                <PaginationButton key={page} type="button" onClick={() => setPage(page)} active={data.page === page}>
                   {page}
                 </PaginationButton>
               ))}
@@ -266,8 +230,8 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
                 type="button"
                 className="-ml-px rounded-r-md"
                 aria-label="Next"
-                disabled={pagination.currentPage === pagination.totalPages}
-                onClick={() => setPage(pagination.currentPage + 1)}
+                disabled={data.page === totalPages}
+                onClick={() => setPage(data.page + 1)}
               >
                 <svg className="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path

@@ -1,4 +1,4 @@
-import { axiosInstance, getPaginationSet, PaginatedResult } from '@/api/axios';
+import { axiosInstance, getPaginationSet } from '@/api/axios';
 import { rawDataToServerObject } from '@/api/transformers';
 
 export default async (): Promise<PaginatedResult<Server>> => {
