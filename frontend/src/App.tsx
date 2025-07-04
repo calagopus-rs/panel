@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, RouteProps, Routes, useNavigate } from 'react-router';
+import { BrowserRouter, Route, Routes, useLocation, useRoutes } from 'react-router';
 import DashboardRouter from './routers/DashboardRouter';
 import AuthenticationRouter from './routers/AuthenticationRouter';
 import ServerRouter from './routers/ServerRouter';
@@ -8,9 +8,12 @@ import { useEffect } from 'react';
 import getMe from './api/me/getMe';
 
 export default function App() {
+  const location = useLocation();
   const { setUser } = useUserStore();
 
   useEffect(() => {
+    if (location.pathname.toLowerCase().startsWith('/auth')) return;
+
     getMe().then(user => setUser(user));
   }, []);
 
