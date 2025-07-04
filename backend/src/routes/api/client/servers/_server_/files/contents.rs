@@ -96,7 +96,7 @@ mod get {
             .log(
                 "server:file.read",
                 serde_json::json!({
-                    "file": params.file,
+                    "file": params.file.trim_start_matches('/'),
                 }),
             )
             .await;

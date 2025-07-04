@@ -71,7 +71,7 @@ mod get {
 
             file_path: &'a str,
             server_uuid: uuid::Uuid,
-            unique_id: String,
+            unique_id: uuid::Uuid,
         }
 
         let token = server
@@ -91,7 +91,7 @@ mod get {
                     },
                     file_path: &params.file,
                     server_uuid: server.uuid,
-                    unique_id: uuid::Uuid::new_v4().to_string(),
+                    unique_id: uuid::Uuid::new_v4(),
                 },
             )
             .unwrap();
@@ -108,7 +108,7 @@ mod get {
             .log(
                 "server:file.download",
                 serde_json::json!({
-                    "file": params.file,
+                    "file": params.file.trim_start_matches('/'),
                     "directory": params.directory,
                 }),
             )

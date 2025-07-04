@@ -10,7 +10,6 @@ pub struct Node {
     pub id: i32,
     pub uuid: uuid::Uuid,
     pub location: super::location::Location,
-    pub database_host: Option<super::database_host::DatabaseHost>,
 
     pub name: String,
     pub public: bool,
@@ -130,16 +129,6 @@ impl BaseModel for Node {
             id: row.get(format!("{}id", prefix).as_str()),
             uuid: row.get(format!("{}uuid", prefix).as_str()),
             location: super::location::Location::map(Some("location_"), row),
-            database_host: if let Ok(_) =
-                row.try_get::<i32, _>(format!("{}database_host_id", prefix).as_str())
-            {
-                Some(super::database_host::DatabaseHost::map(
-                    Some("database_host_"),
-                    row,
-                ))
-            } else {
-                None
-            },
             name: row.get(format!("{}name", prefix).as_str()),
             public: row.get(format!("{}public", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
@@ -167,7 +156,6 @@ impl Node {
     pub async fn create(
         database: &crate::database::Database,
         location_id: i32,
-        database_host_id: Option<i32>,
         name: &str,
         public: bool,
         description: Option<&str>,
@@ -183,12 +171,11 @@ impl Node {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_id, database_host_id, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            INSERT INTO nodes (location_id, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
             "#
         )
         .bind(location_id)
-        .bind(database_host_id)
         .bind(name)
         .bind(public)
         .bind(description)
@@ -341,7 +328,6 @@ impl Node {
             id: self.id,
             uuid: self.uuid,
             location: self.location.into_admin_api_object(),
-            database_host: self.database_host.map(|host| host.into_admin_api_object()),
             name: self.name,
             public: self.public,
             description: self.description,
@@ -365,7 +351,6 @@ pub struct AdminApiNode {
     pub id: i32,
     pub uuid: uuid::Uuid,
     pub location: super::location::AdminApiLocation,
-    pub database_host: Option<super::database_host::AdminApiDatabaseHost>,
 
     pub name: String,
     pub public: bool,

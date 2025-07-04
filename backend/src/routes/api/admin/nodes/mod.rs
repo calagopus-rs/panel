@@ -68,7 +68,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::{database_host::DatabaseHost, location::Location, node::Node},
+        models::{location::Location, node::Node},
         routes::{
             ApiError, GetState,
             api::client::{GetAuthMethod, GetUser},
@@ -82,7 +82,6 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         location_id: i32,
-        database_host_id: Option<i32>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -142,24 +141,9 @@ mod post {
             }
         };
 
-        let database_host = if let Some(database_host_id) = data.database_host_id {
-            match DatabaseHost::by_id(&state.database, database_host_id).await {
-                Some(db_host) => Some(db_host),
-                None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["database host not found"])),
-                    );
-                }
-            }
-        } else {
-            None
-        };
-
         let node = match Node::create(
             &state.database,
             location.id,
-            database_host.map(|db_host| db_host.id),
             &data.name,
             data.public,
             data.description.as_deref(),
@@ -198,7 +182,6 @@ mod post {
                 "disk": node.disk,
 
                 "location_id": node.location.id,
-                "database_host_id": node.database_host.as_ref().map(|db_host| db_host.id),
             }),
         )
         .await;

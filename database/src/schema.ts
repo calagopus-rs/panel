@@ -174,7 +174,6 @@ export const nodes = pgTable('nodes', {
 	id: serial('id').primaryKey().notNull(),
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
 	locationId: integer('location_id').references(() => locations.id).notNull(),
-	databaseHostId: integer('database_host_id').references(() => databaseHosts.id, { onDelete: 'set null' }),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	public: boolean('public').notNull(),

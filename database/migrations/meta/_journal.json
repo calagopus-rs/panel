@@ -134,6 +134,13 @@
       "when": 1751619837084,
       "tag": "0018_parched_malice",
       "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1751628309278,
+      "tag": "0019_spooky_slayback",
+      "breakpoints": false
     }
   ]
 }

@@ -89,7 +89,6 @@ mod patch {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         location_id: Option<i32>,
-        database_host_id: Option<i32>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -171,27 +170,6 @@ mod patch {
 
             node.location = location;
         }
-        if let Some(database_host_id) = data.database_host_id {
-            if database_host_id > 0 {
-                let database_host = match crate::models::database_host::DatabaseHost::by_id(
-                    &state.database,
-                    database_host_id,
-                )
-                .await
-                {
-                    Some(db_host) => db_host,
-                    None => {
-                        return (
-                            StatusCode::NOT_FOUND,
-                            axum::Json(ApiError::new_value(&["database host not found"])),
-                        );
-                    }
-                };
-                node.database_host = Some(database_host);
-            } else {
-                node.database_host = None;
-            }
-        }
         if let Some(name) = data.name {
             node.name = name;
         }
@@ -241,11 +219,12 @@ mod patch {
 
         if sqlx::query!(
             "UPDATE nodes
-            SET name = $1, public = $2,
-                description = $3, public_url = $4,
-                url = $5, sftp_host = $6, sftp_port = $7,
-                memory = $8, disk = $9
-            WHERE id = $10",
+            SET location_id = $1, name = $2,
+                public = $3, description = $4, public_url = $5,
+                url = $6, sftp_host = $7, sftp_port = $8,
+                memory = $9, disk = $10
+            WHERE id = $11",
+            node.location.id,
             node.name,
             node.public,
             node.description,
@@ -284,7 +263,6 @@ mod patch {
                 "disk": node.disk,
 
                 "location_id": node.location.id,
-                "database_host_id": node.database_host.as_ref().map(|db| db.id),
             }),
         )
         .await;
