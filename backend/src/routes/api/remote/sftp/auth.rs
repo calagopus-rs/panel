@@ -25,11 +25,11 @@ mod post {
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {
+    struct Response<'a> {
         user: uuid::Uuid,
         server: uuid::Uuid,
 
-        permissions: Vec<String>,
+        permissions: Vec<&'a str>,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -110,9 +110,7 @@ mod post {
                 serde_json::to_value(Response {
                     user: user.to_uuid(),
                     server: server.uuid,
-                    permissions: server
-                        .subuser_permissions
-                        .unwrap_or_else(|| vec!["*".to_string()]),
+                    permissions: server.wings_permissions(&user),
                 })
                 .unwrap(),
             ),

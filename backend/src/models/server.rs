@@ -529,6 +529,39 @@ impl Server {
     }
 
     #[inline]
+    pub fn wings_permissions(&self, user: &super::user::User) -> Vec<&str> {
+        let mut permissions = Vec::new();
+        if user.admin {
+            permissions.reserve_exact(5);
+
+            permissions.push("*");
+            permissions.push("admin.websocket.errors");
+            permissions.push("admin.websocket.install");
+            permissions.push("admin.websocket.transfer");
+            permissions.push("websocket.connect");
+
+            return permissions;
+        }
+
+        if let Some(subuser_permissions) = &self.subuser_permissions {
+            permissions.reserve_exact(subuser_permissions.len() + 1);
+
+            permissions.push("websocket.connect");
+
+            for permission in subuser_permissions {
+                permissions.push(permission.as_str());
+            }
+        } else {
+            permissions.reserve_exact(2);
+
+            permissions.push("*");
+            permissions.push("websocket.connect");
+        }
+
+        permissions
+    }
+
+    #[inline]
     pub fn into_admin_api_object(self) -> AdminApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 

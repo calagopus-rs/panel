@@ -22,6 +22,7 @@ mod command;
 mod files;
 mod power;
 mod resources;
+mod websocket;
 
 pub type GetServer = crate::extract::ConsumingExtension<Server>;
 pub type GetServerActivityLogger = crate::extract::ConsumingExtension<ServerActivityLogger>;
@@ -134,6 +135,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .nest("/activity", activity::router(state))
         .nest("/resources", resources::router(state))
+        .nest("/websocket", websocket::router(state))
         .nest("/command", command::router(state))
         .nest("/power", power::router(state))
         .nest("/files", files::router(state))
