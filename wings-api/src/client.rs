@@ -231,7 +231,7 @@ impl WingsClient {
         max_size: u64,
     ) -> Result<super::servers_server_files_contents::get::Response200, (StatusCode, super::ApiError)>
     {
-        let file = urlencoding::encode(&file);
+        let file = urlencoding::encode(file);
         request_impl(self, Method::GET, format!("/api/servers/{server}/files/contents?file={file}&download={download}&max_size={max_size}"), None).await
     }
 
@@ -308,7 +308,7 @@ impl WingsClient {
         super::servers_server_files_fingerprints::get::Response200,
         (StatusCode, super::ApiError),
     > {
-        let files = urlencoding::encode(&files);
+        let files = urlencoding::encode(files);
         request_impl(
             self,
             Method::GET,
@@ -328,7 +328,7 @@ impl WingsClient {
         super::servers_server_files_list_directory::get::Response200,
         (StatusCode, super::ApiError),
     > {
-        let directory = urlencoding::encode(&directory);
+        let directory = urlencoding::encode(directory);
         request_impl(self, Method::GET, format!("/api/servers/{server}/files/list-directory?directory={directory}&per_page={per_page}&page={page}"), None).await
     }
 

@@ -60,6 +60,13 @@ export default function generateSchemaProperty(output: fs.WriteStream, _spaces: 
         output.write('>,\n')
 
         return
+    } else if (object.type === 'array' && (object.items as oas31.SchemaObject).type === 'object') {
+        output.write('Vec<')
+        generateSchemaObject(output, _spaces + 4, parent, pascalCase(parent) + pascalCase(name), object.items as any, true)
+        output.write('>,\n')
+
+        return
+
     }
 
     if (!Array.isArray(object.type)) {

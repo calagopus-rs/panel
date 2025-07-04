@@ -311,7 +311,6 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
@@ -344,7 +343,6 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
@@ -389,7 +387,6 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
@@ -434,7 +431,6 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
@@ -478,7 +474,6 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id

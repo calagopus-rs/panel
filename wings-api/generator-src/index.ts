@@ -173,8 +173,8 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             let query = ""
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {
                 if (param.in === 'query') {
-                    if (params.find((p) => p.startsWith(param.name))?.endsWith('String')) {
-                        clientOutput.write(`        let ${param.name} = urlencoding::encode(&${param.name});\n`)
+                    if (params.find((p) => p.startsWith(param.name))?.endsWith('&str')) {
+                        clientOutput.write(`        let ${param.name} = urlencoding::encode(${param.name});\n`)
                     }
 
                     query += `${param.name}={${param.name}}&`

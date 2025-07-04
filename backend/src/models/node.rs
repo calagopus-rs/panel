@@ -113,10 +113,6 @@ impl BaseModel for Node {
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_"), None));
-        columns.extend(super::database_host::DatabaseHost::columns(
-            Some("database_host_"),
-            None,
-        ));
 
         columns
     }
@@ -199,7 +195,6 @@ impl Node {
             SELECT {}, {}, {}
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             WHERE nodes.id = $1
             "#,
             Self::columns_sql(None, None),
@@ -227,7 +222,6 @@ impl Node {
             SELECT {}, {}, {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             WHERE nodes.location_id = $1
             LIMIT $2 OFFSET $3
             "#,
@@ -262,7 +256,6 @@ impl Node {
             SELECT {}, {}, {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN database_hosts ON database_hosts.id = nodes.database_host_id
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None),

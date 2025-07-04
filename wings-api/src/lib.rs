@@ -80,6 +80,8 @@ nestify::nest! {
         #[schema(inline)]
         pub identifier: uuid::Uuid,
         #[schema(inline)]
+        pub destination: String,
+        #[schema(inline)]
         pub progress: u64,
         #[schema(inline)]
         pub total: u64,
@@ -183,13 +185,12 @@ nestify::nest! {
             #[schema(inline)]
             pub force_outgoing_ip: bool,
             #[schema(inline)]
-            pub default: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationServerConfigurationAllocationsDefault {
+            pub default: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationServerConfigurationAllocationsDefault {
                 #[schema(inline)]
                 pub ip: String,
                 #[schema(inline)]
                 pub port: u32,
-            },
-
+            }>,
             #[schema(inline)]
             pub mappings: IndexMap<String, Vec<u32>>,
         },
@@ -412,7 +413,12 @@ pub mod servers_server_files_chmod {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
-                pub files: Vec<serde_json::Value>,
+                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyFiles {
+                    #[schema(inline)]
+                    pub file: String,
+                    #[schema(inline)]
+                    pub mode: String,
+                }>,
             }
         }
 
@@ -658,7 +664,12 @@ pub mod servers_server_files_rename {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
-                pub files: Vec<serde_json::Value>,
+                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyFiles {
+                    #[schema(inline)]
+                    pub to: String,
+                    #[schema(inline)]
+                    pub from: String,
+                }>,
             }
         }
 
