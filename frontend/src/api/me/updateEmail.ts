@@ -1,11 +1,11 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (password: string, newPassword: string): Promise<void> => {
+export default async (email: string, password: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put(`/api/client/account/password`, {
+      .put(`/api/client/account/email`, {
+        email,
         password,
-        new_password: newPassword,
       })
       .then(() => resolve())
       .catch(reject);

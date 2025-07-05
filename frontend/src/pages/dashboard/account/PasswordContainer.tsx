@@ -12,7 +12,7 @@ export default () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  const handleUpdatePassword = () => {
+  const handleUpdate = () => {
     updatePassword(currentPassword, newPassword)
       .then(() => {
         addToast('Password updated.', 'success');
@@ -57,7 +57,10 @@ export default () => {
       </div>
 
       <div className="mt-4 flex justify-end">
-        <Button disabled={newPassword !== confirmNewPassword} onClick={handleUpdatePassword}>
+        <Button
+          disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
+          onClick={handleUpdate}
+        >
           Update Password
         </Button>
       </div>
