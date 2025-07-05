@@ -108,6 +108,7 @@ impl BaseModel for Node {
 }
 
 impl Node {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         location_id: i32,

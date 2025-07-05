@@ -44,14 +44,17 @@ mod get {
         .await
         .unwrap();
 
+        let settings = state.settings.get().await;
+
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
                     otp_url: format!(
-                        "otpauth://totp/panel-rs:{}?secret={}&issuer=panel-rs",
+                        "otpauth://totp/{name}:{}?secret={}&issuer={name}",
                         urlencoding::encode(&user.email),
                         urlencoding::encode(&secret),
+                        name = urlencoding::encode(&settings.app.name)
                     ),
                     secret,
                 })

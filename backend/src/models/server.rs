@@ -168,6 +168,7 @@ impl BaseModel for Server {
 }
 
 impl Server {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         node_id: i32,

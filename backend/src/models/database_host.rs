@@ -77,6 +77,7 @@ impl BaseModel for DatabaseHost {
 }
 
 impl DatabaseHost {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         name: &str,
