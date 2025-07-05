@@ -1,5 +1,4 @@
 import Container from '@/elements/Container';
-import { Input } from '@/elements/inputs';
 import PasswordContainer from './PasswordContainer';
 import EmailContainer from './EmailContainer';
 

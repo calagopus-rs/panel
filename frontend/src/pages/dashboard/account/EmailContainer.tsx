@@ -3,12 +3,14 @@ import updateEmail from '@/api/me/updateEmail';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
+  const { user } = useUserStore();
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
 
   const handleUpdate = () => {
@@ -27,7 +29,13 @@ export default () => {
 
       <div className="mt-4">
         <Input.Label htmlFor={'newEmail'}>New Email</Input.Label>
-        <Input.Text id={'newEmail'} placeholder="New Email" type="email" onChange={e => setEmail(e.target.value)} />
+        <Input.Text
+          id={'newEmail'}
+          placeholder="New Email"
+          type="email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
       </div>
 
       <div className="mt-4">
