@@ -23,45 +23,34 @@ pub struct NestEggVariable {
 impl BaseModel for NestEggVariable {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("nest_egg_variables");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
             (
                 format!("{}.env_variable", table),
-                format!("{}env_variable", prefix.unwrap_or_default()),
+                format!("{}env_variable", prefix),
             ),
             (
                 format!("{}.default_value", table),
-                format!("{}default_value", prefix.unwrap_or_default()),
+                format!("{}default_value", prefix),
             ),
             (
                 format!("{}.user_viewable", table),
-                format!("{}user_viewable", prefix.unwrap_or_default()),
+                format!("{}user_viewable", prefix),
             ),
             (
                 format!("{}.user_editable", table),
-                format!("{}user_editable", prefix.unwrap_or_default()),
+                format!("{}user_editable", prefix),
             ),
-            (
-                format!("{}.rules", table),
-                format!("{}rules", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.rules", table), format!("{}rules", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

@@ -23,41 +23,27 @@ pub struct Mount {
 impl BaseModel for Mount {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("mounts");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
-            (
-                format!("{}.source", table),
-                format!("{}source", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.target", table),
-                format!("{}target", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.source", table), format!("{}source", prefix)),
+            (format!("{}.target", table), format!("{}target", prefix)),
             (
                 format!("{}.read_only", table),
-                format!("{}read_only", prefix.unwrap_or_default()),
+                format!("{}read_only", prefix),
             ),
             (
                 format!("{}.user_mountable", table),
-                format!("{}user_mountable", prefix.unwrap_or_default()),
+                format!("{}user_mountable", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

@@ -92,7 +92,7 @@ mod get {
                         data: servers
                             .data
                             .into_iter()
-                            .map(|server| server.into_api_object())
+                            .map(|server| server.into_api_object(&user))
                             .collect(),
                     },
                 })

@@ -20,36 +20,25 @@ pub struct Nest {
 impl BaseModel for Nest {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("nests");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.author", table),
-                format!("{}author", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.author", table), format!("{}author", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
             (
                 format!(
                     "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_id = {}.id)",
                     table
                 ),
-                format!("{}eggs", prefix.unwrap_or_default()),
+                format!("{}eggs", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

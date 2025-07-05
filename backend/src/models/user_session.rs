@@ -19,29 +19,21 @@ pub struct UserSession {
 impl BaseModel for UserSession {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("user_sessions");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.ip", table),
-                format!("{}ip", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.ip", table), format!("{}ip", prefix)),
             (
                 format!("{}.user_agent", table),
-                format!("{}user_agent", prefix.unwrap_or_default()),
+                format!("{}user_agent", prefix),
             ),
             (
                 format!("{}.last_used", table),
-                format!("{}last_used", prefix.unwrap_or_default()),
+                format!("{}last_used", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

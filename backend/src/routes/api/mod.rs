@@ -9,6 +9,7 @@ pub mod admin;
 pub mod auth;
 pub mod client;
 pub mod remote;
+mod settings;
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
@@ -26,6 +27,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                 )
             }),
         )
+        .nest("/settings", settings::router(state))
         .nest("/auth", auth::router(state))
         .nest("/client", client::router(state))
         .nest("/admin", admin::router(state))

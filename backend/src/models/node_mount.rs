@@ -14,17 +14,12 @@ pub struct NodeMount {
 impl BaseModel for NodeMount {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("node_mounts");
 
         let mut columns = BTreeMap::from([
-            (
-                format!("{}.mount_id", table),
-                format!("{}mount_id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.mount_id", table), format!("{}mount_id", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::mount::Mount::columns(Some("mount_"), None));

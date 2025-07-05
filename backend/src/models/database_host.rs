@@ -34,49 +34,26 @@ pub struct DatabaseHost {
 impl BaseModel for DatabaseHost {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("database_hosts");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.type", table),
-                format!("{}type", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{}.type", table), format!("{}type", prefix)),
             (
                 format!("{}.public_host", table),
-                format!("{}public_host", prefix.unwrap_or_default()),
+                format!("{}public_host", prefix),
             ),
-            (
-                format!("{}.host", table),
-                format!("{}host", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.host", table), format!("{}host", prefix)),
             (
                 format!("{}.public_port", table),
-                format!("{}public_port", prefix.unwrap_or_default()),
+                format!("{}public_port", prefix),
             ),
-            (
-                format!("{}.port", table),
-                format!("{}port", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.username", table),
-                format!("{}username", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.password", table),
-                format!("{}password", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.port", table), format!("{}port", prefix)),
+            (format!("{}.username", table), format!("{}username", prefix)),
+            (format!("{}.password", table), format!("{}password", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

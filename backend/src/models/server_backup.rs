@@ -26,57 +26,31 @@ pub struct ServerBackup {
 impl BaseModel for ServerBackup {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_backups");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.uuid", table),
-                format!("{}uuid", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.uuid", table), format!("{}uuid", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.successful", table),
-                format!("{}successful", prefix.unwrap_or_default()),
+                format!("{}successful", prefix),
             ),
-            (
-                format!("{}.locked", table),
-                format!("{}locked", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.locked", table), format!("{}locked", prefix)),
             (
                 format!("{}.ignored_files", table),
-                format!("{}ignored_files", prefix.unwrap_or_default()),
+                format!("{}ignored_files", prefix),
             ),
-            (
-                format!("{}.checksum", table),
-                format!("{}checksum", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.bytes", table),
-                format!("{}bytes", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.disk", table),
-                format!("{}disk", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.checksum", table), format!("{}checksum", prefix)),
+            (format!("{}.bytes", table), format!("{}bytes", prefix)),
+            (format!("{}.disk", table), format!("{}disk", prefix)),
             (
                 format!("{}.completed", table),
-                format!("{}completed", prefix.unwrap_or_default()),
+                format!("{}completed", prefix),
             ),
-            (
-                format!("{}.deleted", table),
-                format!("{}deleted", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.deleted", table), format!("{}deleted", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

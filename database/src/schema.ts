@@ -160,8 +160,9 @@ export const locations = pgTable('locations', {
 
 	shortName: varchar('short_name', { length: 31 }).notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
-
 	description: text('description'),
+
+	config_backups: jsonb('config_backups').default({ type: 'local' }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locations) => [

@@ -94,7 +94,7 @@ mod post {
                 }
             }
         };
-        let server = match Server::by_user_id_identifier(&state.database, user.id, server).await {
+        let server = match Server::by_user_identifier(&state.database, &user, server).await {
             Some(server) => server,
             None => {
                 return (

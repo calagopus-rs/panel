@@ -17,25 +17,17 @@ pub struct ServerAllocation {
 impl BaseModel for ServerAllocation {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_allocations");
 
         let mut columns = BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
             (
                 format!("{}.allocation_id", table),
-                format!("{}allocation_id", prefix.unwrap_or_default()),
+                format!("{}allocation_id", prefix),
             ),
-            (
-                format!("{}.notes", table),
-                format!("{}notes", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.notes", table), format!("{}notes", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::node_allocation::NodeAllocation::columns(

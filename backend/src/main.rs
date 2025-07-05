@@ -22,13 +22,16 @@ use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa_axum::router::OpenApiRouter;
 
 mod cache;
+mod captcha;
 mod database;
 mod deserialize;
 mod env;
 mod extract;
 mod jwt;
+mod mail;
 mod models;
 mod routes;
+mod settings;
 mod utils;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -173,14 +176,21 @@ async fn main() {
     let env = Arc::new(env);
     //let s3 = Arc::new(s3::S3::new(env.clone()).await);
     let jwt = Arc::new(jwt::Jwt::new(&env));
-    let database = Arc::new(database::Database::new(env.clone()).await);
-    let cache = Arc::new(cache::Cache::new(env.clone()).await);
+    let database = Arc::new(database::Database::new(&env).await);
+    let cache = Arc::new(cache::Cache::new(&env).await);
+
+    let settings = Arc::new(settings::Settings::new(database.clone()).await);
+    let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
+    let email = Arc::new(mail::Mail::new(settings.clone()));
 
     let state = Arc::new(routes::AppState {
         start_time: Instant::now(),
         version: format!("{VERSION}:{GIT_COMMIT}"),
 
+        settings,
         jwt,
+        captcha,
+        email,
         database: database.clone(),
         cache: cache.clone(),
         env,

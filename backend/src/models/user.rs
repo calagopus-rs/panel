@@ -31,57 +31,37 @@ pub struct User {
 impl BaseModel for User {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("users");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
             (
                 format!("{}.external_id", table),
-                format!("{}external_id", prefix.unwrap_or_default()),
+                format!("{}external_id", prefix),
             ),
-            (
-                format!("{}.avatar", table),
-                format!("{}avatar", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.username", table),
-                format!("{}username", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.email", table),
-                format!("{}email", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.avatar", table), format!("{}avatar", prefix)),
+            (format!("{}.username", table), format!("{}username", prefix)),
+            (format!("{}.email", table), format!("{}email", prefix)),
             (
                 format!("{}.name_first", table),
-                format!("{}name_first", prefix.unwrap_or_default()),
+                format!("{}name_first", prefix),
             ),
             (
                 format!("{}.name_last", table),
-                format!("{}name_last", prefix.unwrap_or_default()),
+                format!("{}name_last", prefix),
             ),
-            (
-                format!("{}.admin", table),
-                format!("{}admin", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.admin", table), format!("{}admin", prefix)),
             (
                 format!("{}.totp_enabled", table),
-                format!("{}totp_enabled", prefix.unwrap_or_default()),
+                format!("{}totp_enabled", prefix),
             ),
             (
                 format!("{}.totp_secret", table),
-                format!("{}totp_secret", prefix.unwrap_or_default()),
+                format!("{}totp_secret", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

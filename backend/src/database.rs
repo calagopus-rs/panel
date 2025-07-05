@@ -1,6 +1,5 @@
 use colored::Colorize;
 use sqlx::postgres::PgPoolOptions;
-use std::sync::Arc;
 
 pub struct Database {
     write: sqlx::PgPool,
@@ -10,7 +9,7 @@ pub struct Database {
 }
 
 impl Database {
-    pub async fn new(env: Arc<crate::env::Env>) -> Self {
+    pub async fn new(env: &crate::env::Env) -> Self {
         let start = std::time::Instant::now();
 
         let instance = Self {

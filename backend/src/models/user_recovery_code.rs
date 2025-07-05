@@ -16,21 +16,13 @@ pub struct UserRecoveryCode {
 impl BaseModel for UserRecoveryCode {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("user_recovery_codes");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.code", table),
-                format!("{}code", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.code", table), format!("{}code", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

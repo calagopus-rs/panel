@@ -17,25 +17,17 @@ pub struct UserSshKey {
 impl BaseModel for UserSshKey {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("user_ssh_keys");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.fingerprint", table),
-                format!("{}fingerprint", prefix.unwrap_or_default()),
+                format!("{}fingerprint", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

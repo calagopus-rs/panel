@@ -3,14 +3,12 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 #[derive(Clone)]
 pub enum RedisMode {
-    Redis,
-    Sentinel,
+    Redis { redis_url: String },
+    Sentinel { redis_sentinels: Vec<String> },
 }
 
 #[derive(Clone)]
 pub struct Env {
-    pub redis_url: Option<String>,
-    pub redis_sentinels: Option<Vec<String>>,
     pub redis_mode: RedisMode,
 
     pub sentry_url: Option<String>,
@@ -32,37 +30,27 @@ impl Env {
     pub fn parse() -> (tracing_appender::non_blocking::WorkerGuard, Env) {
         dotenv().ok();
 
-        let redis_mode = match std::env::var("REDIS_MODE")
-            .unwrap_or("redis".to_string())
-            .trim_matches('"')
-        {
-            "redis" => RedisMode::Redis,
-            "sentinel" => RedisMode::Sentinel,
-            _ => panic!("Invalid REDIS_MODE"),
-        };
-
         let env = Self {
-            redis_url: match redis_mode {
-                RedisMode::Redis => Some(
-                    std::env::var("REDIS_URL")
+            redis_mode: match std::env::var("REDIS_MODE")
+                .unwrap_or("redis".to_string())
+                .trim_matches('"')
+            {
+                "redis" => RedisMode::Redis {
+                    redis_url: std::env::var("REDIS_URL")
                         .expect("REDIS_URL is required")
                         .trim_matches('"')
                         .to_string(),
-                ),
-                RedisMode::Sentinel => None,
-            },
-            redis_sentinels: match redis_mode {
-                RedisMode::Redis => None,
-                RedisMode::Sentinel => Some(
-                    std::env::var("REDIS_SENTINELS")
+                },
+                "sentinel" => RedisMode::Sentinel {
+                    redis_sentinels: std::env::var("REDIS_SENTINELS")
                         .expect("REDIS_SENTINELS is required")
                         .trim_matches('"')
                         .split(',')
                         .map(|s| s.to_string())
                         .collect(),
-                ),
+                },
+                _ => panic!("Invalid REDIS_MODE"),
             },
-            redis_mode,
 
             sentry_url: std::env::var("SENTRY_URL")
                 .ok()

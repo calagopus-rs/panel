@@ -55,109 +55,65 @@ pub struct Server {
 impl BaseModel for Server {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("servers");
 
         let mut columns = BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.uuid", table),
-                format!("{}uuid", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.uuid", table), format!("{}uuid", prefix)),
             (
                 format!("{}.uuid_short", table),
-                format!("{}uuid_short", prefix.unwrap_or_default()),
+                format!("{}uuid_short", prefix),
             ),
             (
                 format!("{}.external_id", table),
-                format!("{}external_id", prefix.unwrap_or_default()),
+                format!("{}external_id", prefix),
             ),
             (
                 format!("{}.allocation_id", table),
-                format!("{}allocation_id", prefix.unwrap_or_default()),
+                format!("{}allocation_id", prefix),
             ),
-            (
-                format!("{}.node_id", table),
-                format!("{}node_id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.owner_id", table),
-                format!("{}owner_id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.egg_id", table),
-                format!("{}egg_id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.status", table),
-                format!("{}status", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.node_id", table), format!("{}node_id", prefix)),
+            (format!("{}.owner_id", table), format!("{}owner_id", prefix)),
+            (format!("{}.egg_id", table), format!("{}egg_id", prefix)),
+            (format!("{}.status", table), format!("{}status", prefix)),
             (
                 format!("{}.suspended", table),
-                format!("{}suspended", prefix.unwrap_or_default()),
+                format!("{}suspended", prefix),
             ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
-            (
-                format!("{}.memory", table),
-                format!("{}memory", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.swap", table),
-                format!("{}swap", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.disk", table),
-                format!("{}disk", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.io", table),
-                format!("{}io", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.cpu", table),
-                format!("{}cpu", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.memory", table), format!("{}memory", prefix)),
+            (format!("{}.swap", table), format!("{}swap", prefix)),
+            (format!("{}.disk", table), format!("{}disk", prefix)),
+            (format!("{}.io", table), format!("{}io", prefix)),
+            (format!("{}.cpu", table), format!("{}cpu", prefix)),
             (
                 format!("{}.pinned_cpus", table),
-                format!("{}pinned_cpus", prefix.unwrap_or_default()),
+                format!("{}pinned_cpus", prefix),
             ),
-            (
-                format!("{}.startup", table),
-                format!("{}startup", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.image", table),
-                format!("{}image", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.startup", table), format!("{}startup", prefix)),
+            (format!("{}.image", table), format!("{}image", prefix)),
             (
                 format!("{}.allocation_limit", table),
-                format!("{}allocation_limit", prefix.unwrap_or_default()),
+                format!("{}allocation_limit", prefix),
             ),
             (
                 format!("{}.database_limit", table),
-                format!("{}database_limit", prefix.unwrap_or_default()),
+                format!("{}database_limit", prefix),
             ),
             (
                 format!("{}.backup_limit", table),
-                format!("{}backup_limit", prefix.unwrap_or_default()),
+                format!("{}backup_limit", prefix),
             ),
             (
                 "server_subusers.permissions".to_string(),
-                format!("{}permissions", prefix.unwrap_or_default()),
+                format!("{}permissions", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::server_allocation::ServerAllocation::columns(
@@ -378,9 +334,9 @@ impl Server {
         row.map(|row| Self::map(None, &row))
     }
 
-    pub async fn by_user_id_identifier(
+    pub async fn by_user_identifier(
         database: &crate::database::Database,
-        user_id: i32,
+        user: &super::user::User,
         identifier: &str,
     ) -> Option<Self> {
         let query = format!(
@@ -394,7 +350,7 @@ impl Server {
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
-            WHERE servers.{} = $2 AND (servers.owner_id = $1 OR server_subusers.user_id = $1)
+            WHERE servers.{} = $3 AND (servers.owner_id = $1 OR server_subusers.user_id = $1 OR $2)
             "#,
             Self::columns_sql(None, None),
             super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
@@ -408,7 +364,7 @@ impl Server {
             }
         );
 
-        let mut row = sqlx::query(&query).bind(user_id);
+        let mut row = sqlx::query(&query).bind(user.id).bind(user.admin);
         row = match identifier.len() {
             8 => row.bind(u32::from_str_radix(identifier, 16).ok()? as i32),
             36 => row.bind(uuid::Uuid::parse_str(identifier).ok()?),
@@ -814,7 +770,7 @@ impl Server {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiServer {
+    pub fn into_api_object(self, user: &super::user::User) -> ApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 
         ApiServer {
@@ -823,10 +779,13 @@ impl Server {
             uuid_short: format!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
             egg: self.egg.into_api_object(),
-            is_owner: self.subuser_permissions.is_none(),
-            permissions: self
-                .subuser_permissions
-                .unwrap_or_else(|| vec!["*".to_string()]),
+            is_owner: self.owner.id == user.id,
+            permissions: if user.admin {
+                vec!["*".to_string()]
+            } else {
+                self.subuser_permissions
+                    .unwrap_or_else(|| vec!["*".to_string()])
+            },
             node_uuid: self.node.uuid,
             node_name: self.node.name,
             sftp_host: self.node.sftp_host.unwrap_or_else(|| {

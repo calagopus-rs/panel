@@ -41,3 +41,5 @@ validator = { version = "0.20.0", features = ["derive"] }
 regex = "1.11.1"
 russh = "0.52.1"
 urlencoding = { workspace = true }
+lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "tokio1-rustls-tls", "tokio1"] }
+base32 = "0.5.1"

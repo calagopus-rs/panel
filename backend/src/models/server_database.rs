@@ -20,32 +20,21 @@ pub struct ServerDatabase {
 impl BaseModel for ServerDatabase {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_databases");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
             (
                 format!("{}.database_host_id", table),
-                format!("{}database_host_id", prefix.unwrap_or_default()),
+                format!("{}database_host_id", prefix),
             ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.username", table),
-                format!("{}username", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.password", table),
-                format!("{}password", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{}.username", table), format!("{}username", prefix)),
+            (format!("{}.password", table), format!("{}password", prefix)),
             (
                 format!("{}.created_at", table),
-                format!("{}created", prefix.unwrap_or_default()),
+                format!("{}created", prefix),
             ),
         ])
         .into_iter()

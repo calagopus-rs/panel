@@ -16,21 +16,16 @@ pub struct ServerVariable {
 impl BaseModel for ServerVariable {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_variables");
 
         let mut columns = BTreeMap::from([
             (
                 format!("{}.variable_id", table),
-                format!("{}variable_id", prefix.unwrap_or_default()),
+                format!("{}variable_id", prefix),
             ),
-            (
-                format!("{}.value", table),
-                format!("{}value", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.value", table), format!("{}value", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::nest_egg_variable::NestEggVariable::columns(

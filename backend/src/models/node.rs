@@ -36,80 +36,51 @@ pub struct Node {
 impl BaseModel for Node {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("nodes");
 
         let mut columns = BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.uuid", table),
-                format!("{}uuid", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.uuid", table), format!("{}uuid", prefix)),
             (
                 format!("{}.location_id", table),
-                format!("{}location_id", prefix.unwrap_or_default()),
+                format!("{}location_id", prefix),
             ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.public", table),
-                format!("{}public", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{}.public", table), format!("{}public", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
             (
                 format!("{}.public_url", table),
-                format!("{}public_url", prefix.unwrap_or_default()),
+                format!("{}public_url", prefix),
             ),
-            (
-                format!("{}.url", table),
-                format!("{}url", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.url", table), format!("{}url", prefix)),
             (
                 format!("{}.sftp_host", table),
-                format!("{}sftp_host", prefix.unwrap_or_default()),
+                format!("{}sftp_host", prefix),
             ),
             (
                 format!("{}.sftp_port", table),
-                format!("{}sftp_port", prefix.unwrap_or_default()),
+                format!("{}sftp_port", prefix),
             ),
             (
                 format!("{}.maintenance_message", table),
-                format!("{}maintenance_message", prefix.unwrap_or_default()),
+                format!("{}maintenance_message", prefix),
             ),
-            (
-                format!("{}.memory", table),
-                format!("{}memory", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.disk", table),
-                format!("{}disk", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.token_id", table),
-                format!("{}token_id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.token", table),
-                format!("{}token", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.memory", table), format!("{}memory", prefix)),
+            (format!("{}.disk", table), format!("{}disk", prefix)),
+            (format!("{}.token_id", table), format!("{}token_id", prefix)),
+            (format!("{}.token", table), format!("{}token", prefix)),
             (
                 format!(
                     "(SELECT COUNT(*) FROM servers WHERE servers.node_id = {}.id)",
                     table
                 ),
-                format!("{}servers", prefix.unwrap_or_default()),
+                format!("{}servers", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_"), None));

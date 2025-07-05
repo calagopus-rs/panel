@@ -139,6 +139,10 @@ pub static PERMISSIONS: LazyLock<
                         "Allows a user to modify the startup variables for the server.",
                     ),
                     (
+                        "command",
+                        "Allows a user to modify the command used to start the server.",
+                    ),
+                    (
                         "docker-image",
                         "Allows a user to modify the Docker image used when running the server.",
                     ),
@@ -262,21 +266,16 @@ pub struct ServerSubuser {
 impl BaseModel for ServerSubuser {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_subusers");
 
         let mut columns = BTreeMap::from([
-            (
-                format!("{}.user_id", table),
-                format!("{}user_id", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.user_id", table), format!("{}user_id", prefix)),
             (
                 format!("{}.permissions", table),
-                format!("{}permissions", prefix.unwrap_or_default()),
+                format!("{}permissions", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ]);
 
         columns.extend(super::user::User::columns(Some("user_"), None));

@@ -37,7 +37,10 @@ pub struct AppState {
     pub start_time: Instant,
     pub version: String,
 
+    pub settings: Arc<crate::settings::Settings>,
     pub jwt: Arc<crate::jwt::Jwt>,
+    pub captcha: Arc<crate::captcha::Captcha>,
+    pub email: Arc<crate::mail::Mail>,
     pub database: Arc<crate::database::Database>,
     pub cache: Arc<crate::cache::Cache>,
     pub env: Arc<crate::env::Env>,

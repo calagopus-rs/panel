@@ -20,37 +20,20 @@ pub struct ServerActivity {
 impl BaseModel for ServerActivity {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_activities");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.user_id", table),
-                format!("{}user_id", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.user_id", table), format!("{}user_id", prefix)),
             (
                 format!("{}.api_key_id", table),
-                format!("{}api_key_id", prefix.unwrap_or_default()),
+                format!("{}api_key_id", prefix),
             ),
-            (
-                format!("{}.event", table),
-                format!("{}event", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.ip", table),
-                format!("{}ip", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.data", table),
-                format!("{}data", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.event", table), format!("{}event", prefix)),
+            (format!("{}.ip", table), format!("{}ip", prefix)),
+            (format!("{}.data", table), format!("{}data", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

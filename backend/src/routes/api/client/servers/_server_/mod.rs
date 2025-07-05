@@ -23,6 +23,7 @@ mod files;
 mod power;
 mod resources;
 mod settings;
+mod startup;
 mod websocket;
 
 pub type GetServer = crate::extract::ConsumingExtension<Server>;
@@ -69,12 +70,12 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let server = Server::by_user_id_identifier(&state.database, user.id, &server[0]).await;
+    let server = Server::by_user_identifier(&state.database, &user, &server[0]).await;
     let server = match server {
         Some(server) => server,
         None => {
             return Ok(Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
+                .status(StatusCode::CONFLICT)
                 .header("Content-Type", "application/json")
                 .body(Body::from(
                     serde_json::to_string(&ApiError::new_value(&["server not found"])).unwrap(),
@@ -89,7 +90,15 @@ pub async fn auth(
     ];
 
     if !user.admin && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
-        if let Some(status) = server.status {
+        if server.suspended {
+            return Ok(Response::builder()
+                .status(StatusCode::CONFLICT)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&["server is suspended"])).unwrap(),
+                ))
+                .unwrap());
+        } else if let Some(status) = server.status {
             let message = match status {
                 ServerStatus::Installing => "server is currently installing",
                 ServerStatus::InstallFailed => "server install has failed",
@@ -102,14 +111,6 @@ pub async fn auth(
                 .header("Content-Type", "application/json")
                 .body(Body::from(
                     serde_json::to_string(&ApiError::new_value(&[message])).unwrap(),
-                ))
-                .unwrap());
-        } else if server.suspended {
-            return Ok(Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["server is suspended"])).unwrap(),
                 ))
                 .unwrap());
         }
@@ -132,7 +133,7 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::api::client::servers::_server_::GetServer;
+    use crate::routes::api::client::{GetUser, servers::_server_::GetServer};
     use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -151,12 +152,15 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(server: GetServer) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(
+        user: GetUser,
+        server: GetServer,
+    ) -> (StatusCode, axum::Json<serde_json::Value>) {
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    server: server.0.into_api_object(),
+                    server: server.0.into_api_object(&user),
                 })
                 .unwrap(),
             ),
@@ -174,6 +178,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/power", power::router(state))
         .nest("/files", files::router(state))
         .nest("/settings", settings::router(state))
+        .nest("/startup", startup::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

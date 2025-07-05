@@ -54,6 +54,13 @@ mod post {
             );
         }
 
+        if let Err(error) = state.captcha.verify(ip, data.captcha).await {
+            return (
+                StatusCode::BAD_REQUEST,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
         let user =
             match User::by_username_password(&state.database, &data.user, &data.password).await {
                 Some(user) => user,

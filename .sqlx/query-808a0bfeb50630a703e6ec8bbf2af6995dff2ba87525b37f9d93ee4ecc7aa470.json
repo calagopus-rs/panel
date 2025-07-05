@@ -13,7 +13,6 @@
                 "INSTALLING",
                 "INSTALL_FAILED",
                 "REINSTALL_FAILED",
-                "SUSPENDED",
                 "RESTORING_BACKUP"
               ]
             }

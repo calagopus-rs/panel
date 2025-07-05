@@ -20,33 +20,25 @@ pub struct UserApiKey {
 impl BaseModel for UserApiKey {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("user_api_keys");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.key_start", table),
-                format!("{}key_start", prefix.unwrap_or_default()),
+                format!("{}key_start", prefix),
             ),
             (
                 format!("{}.permissions", table),
-                format!("{}permissions", prefix.unwrap_or_default()),
+                format!("{}permissions", prefix),
             ),
             (
                 format!("{}.last_used", table),
-                format!("{}last_used", prefix.unwrap_or_default()),
+                format!("{}last_used", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

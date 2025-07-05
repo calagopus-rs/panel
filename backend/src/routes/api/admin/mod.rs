@@ -6,6 +6,7 @@ use utoipa_axum::router::OpenApiRouter;
 mod locations;
 mod nests;
 mod nodes;
+mod settings;
 
 pub async fn auth(user: GetUser, mut req: Request, next: Next) -> Result<Response, StatusCode> {
     if !user.admin {
@@ -25,6 +26,7 @@ pub async fn auth(user: GetUser, mut req: Request, next: Next) -> Result<Respons
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .nest("/settings", settings::router(state))
         .nest("/locations", locations::router(state))
         .nest("/nodes", nodes::router(state))
         .nest("/nests", nests::router(state))

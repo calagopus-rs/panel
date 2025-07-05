@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE servers\n            SET image = $1\n            WHERE servers.id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c3ceb77bb4a29f52e3e31922dcedb060f15e92ba6d764ba9b3257588a0a7564b"
+}

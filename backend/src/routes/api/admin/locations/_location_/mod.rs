@@ -91,6 +91,8 @@ mod patch {
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
+
+        backups: Option<crate::models::location::LocationConfigBackups>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -146,14 +148,18 @@ mod patch {
                 location.description = Some(description);
             }
         }
+        if let Some(backups) = data.backups {
+            location.config_backups = backups;
+        }
 
         if sqlx::query!(
             "UPDATE locations
-            SET short_name = $1, name = $2, description = $3
-            WHERE id = $4",
+            SET short_name = $1, name = $2, description = $3, config_backups = $4
+            WHERE id = $5",
             location.short_name,
             location.name,
             location.description,
+            serde_json::to_value(&location.config_backups).unwrap(),
             location.id,
         )
         .execute(state.database.write())
@@ -166,6 +172,8 @@ mod patch {
             );
         }
 
+        let location = location.into_admin_api_object();
+
         user.log_activity(
             &state.database,
             "admin:location.update",
@@ -175,6 +183,7 @@ mod patch {
                 "short_name": location.short_name,
                 "name": location.name,
                 "description": location.description,
+                "backups": location.backups,
             }),
         )
         .await;

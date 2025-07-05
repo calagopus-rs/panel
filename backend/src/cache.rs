@@ -6,10 +6,7 @@ use rustis::{
     resp::cmd,
 };
 use serde::{Serialize, de::DeserializeOwned};
-use std::{
-    future::Future,
-    sync::{Arc, atomic::AtomicUsize},
-};
+use std::{future::Future, sync::atomic::AtomicUsize};
 
 pub struct Cache {
     pub client: Client,
@@ -19,20 +16,14 @@ pub struct Cache {
 }
 
 impl Cache {
-    pub async fn new(env: Arc<crate::env::Env>) -> Self {
+    pub async fn new(env: &crate::env::Env) -> Self {
         let start = std::time::Instant::now();
 
         let instance = Self {
-            client: match env.redis_mode {
-                RedisMode::Redis => Client::connect(env.redis_url.as_ref().unwrap().clone())
-                    .await
-                    .unwrap(),
-                RedisMode::Sentinel => Client::connect(
-                    format!(
-                        "redis-sentinel://{}/mymaster/0",
-                        env.redis_sentinels.as_ref().unwrap().clone().join(",")
-                    )
-                    .as_str(),
+            client: match &env.redis_mode {
+                RedisMode::Redis { redis_url } => Client::connect(redis_url.clone()).await.unwrap(),
+                RedisMode::Sentinel { redis_sentinels } => Client::connect(
+                    format!("redis-sentinel://{}/mymaster/0", redis_sentinels.join(",")).as_str(),
                 )
                 .await
                 .unwrap(),

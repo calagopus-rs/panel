@@ -51,10 +51,17 @@ mod get {
             );
         }
 
+        let settings = state.settings.get().await;
+
         let contents = match server
             .node
             .api_client(&state.database)
-            .get_servers_server_files_contents(server.uuid, &params.file, false, 15 * 1024 * 1024)
+            .get_servers_server_files_contents(
+                server.uuid,
+                &params.file,
+                false,
+                settings.server.max_file_manager_view_size,
+            )
             .await
         {
             Ok(data) => data,

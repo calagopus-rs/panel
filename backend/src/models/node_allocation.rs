@@ -18,29 +18,15 @@ pub struct NodeAllocation {
 impl BaseModel for NodeAllocation {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("node_allocations");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.ip", table),
-                format!("{}ip", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.ip_alias", table),
-                format!("{}ip_alias", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.port", table),
-                format!("{}port", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.ip", table), format!("{}ip", prefix)),
+            (format!("{}.ip_alias", table), format!("{}ip_alias", prefix)),
+            (format!("{}.port", table), format!("{}port", prefix)),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

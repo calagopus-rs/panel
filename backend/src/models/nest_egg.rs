@@ -90,76 +90,56 @@ pub struct NestEgg {
 impl BaseModel for NestEgg {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+        let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("nest_eggs");
 
         BTreeMap::from([
-            (
-                format!("{}.id", table),
-                format!("{}id", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.author", table),
-                format!("{}author", prefix.unwrap_or_default()),
-            ),
-            (
-                format!("{}.name", table),
-                format!("{}name", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{}.author", table), format!("{}author", prefix)),
+            (format!("{}.name", table), format!("{}name", prefix)),
             (
                 format!("{}.description", table),
-                format!("{}description", prefix.unwrap_or_default()),
+                format!("{}description", prefix),
             ),
             (
                 format!("{}.config_files", table),
-                format!("{}config_files", prefix.unwrap_or_default()),
+                format!("{}config_files", prefix),
             ),
             (
                 format!("{}.config_startup", table),
-                format!("{}config_startup", prefix.unwrap_or_default()),
+                format!("{}config_startup", prefix),
             ),
             (
                 format!("{}.config_stop", table),
-                format!("{}config_stop", prefix.unwrap_or_default()),
+                format!("{}config_stop", prefix),
             ),
             (
                 format!("{}.config_script", table),
-                format!("{}config_script", prefix.unwrap_or_default()),
+                format!("{}config_script", prefix),
             ),
-            (
-                format!("{}.startup", table),
-                format!("{}startup", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.startup", table), format!("{}startup", prefix)),
             (
                 format!("{}.force_outgoing_ip", table),
-                format!("{}force_outgoing_ip", prefix.unwrap_or_default()),
+                format!("{}force_outgoing_ip", prefix),
             ),
-            (
-                format!("{}.features", table),
-                format!("{}features", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.features", table), format!("{}features", prefix)),
             (
                 format!("{}.docker_images", table),
-                format!("{}docker_images", prefix.unwrap_or_default()),
+                format!("{}docker_images", prefix),
             ),
             (
                 format!("{}.file_denylist", table),
-                format!("{}file_denylist", prefix.unwrap_or_default()),
+                format!("{}file_denylist", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
             (
                 format!(
                     "(SELECT COUNT(*) FROM servers WHERE servers.egg_id = {}.id)",
                     table
                 ),
-                format!("{}servers", prefix.unwrap_or_default()),
+                format!("{}servers", prefix),
             ),
-            (
-                format!("{}.created", table),
-                format!("{}created", prefix.unwrap_or_default()),
-            ),
+            (format!("{}.created", table), format!("{}created", prefix)),
         ])
     }
 

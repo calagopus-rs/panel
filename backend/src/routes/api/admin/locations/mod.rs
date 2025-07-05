@@ -92,6 +92,8 @@ mod post {
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
+
+        backups: crate::models::location::LocationConfigBackups,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -123,6 +125,7 @@ mod post {
             &data.short_name,
             &data.name,
             data.description.as_deref(),
+            data.backups,
         )
         .await
         {
@@ -137,6 +140,8 @@ mod post {
             }
         };
 
+        let location = location.into_admin_api_object();
+
         user.log_activity(
             &state.database,
             "admin:location.create",
@@ -146,18 +151,14 @@ mod post {
                 "short_name": location.short_name,
                 "name": location.name,
                 "description": location.description,
+                "backups": location.backups,
             }),
         )
         .await;
 
         (
             StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    location: location.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
+            axum::Json(serde_json::to_value(Response { location }).unwrap()),
         )
     }
 }
