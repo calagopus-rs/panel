@@ -13,7 +13,6 @@ pub enum ServerStatus {
     Installing,
     InstallFailed,
     ReinstallFailed,
-    Suspended,
     RestoringBackup,
 }
 
@@ -29,6 +28,7 @@ pub struct Server {
     pub egg: super::nest_egg::NestEgg,
 
     pub status: Option<ServerStatus>,
+    pub suspended: bool,
 
     pub name: String,
     pub description: Option<String>,
@@ -93,6 +93,10 @@ impl BaseModel for Server {
             (
                 format!("{}.status", table),
                 format!("{}status", prefix.unwrap_or_default()),
+            ),
+            (
+                format!("{}.suspended", table),
+                format!("{}suspended", prefix.unwrap_or_default()),
             ),
             (
                 format!("{}.name", table),
@@ -191,6 +195,7 @@ impl BaseModel for Server {
             owner: super::user::User::map(Some("owner_"), row),
             egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
             status: row.get(format!("{}status", prefix).as_str()),
+            suspended: row.get(format!("{}suspended", prefix).as_str()),
             name: row.get(format!("{}name", prefix).as_str()),
             description: row.get(format!("{}description", prefix).as_str()),
             memory: row.get(format!("{}memory", prefix).as_str()),
@@ -693,7 +698,7 @@ impl Server {
                     name: self.name,
                     description: self.description.unwrap_or_else(|| "".to_string()),
                 },
-                suspended: self.status == Some(ServerStatus::Suspended),
+                suspended: self.suspended,
                 invocation: self.startup,
                 skip_egg_scripts: false,
                 environment: variables
@@ -785,12 +790,10 @@ impl Server {
             node: self.node.into_admin_api_object(),
             owner: self.owner.into_api_object(true),
             egg: self.egg.into_admin_api_object(),
-
             status: self.status,
-
+            suspended: self.suspended,
             name: self.name,
             description: self.description,
-
             limits: ApiServerLimits {
                 cpu: self.cpu,
                 memory: self.memory,
@@ -804,10 +807,8 @@ impl Server {
                 databases: self.database_limit,
                 backups: self.backup_limit,
             },
-
             startup: self.startup,
             image: self.image,
-
             created: self.created.and_utc(),
         }
     }
@@ -822,7 +823,6 @@ impl Server {
             uuid_short: format!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
             egg: self.egg.into_api_object(),
-            status: self.status,
             is_owner: self.subuser_permissions.is_none(),
             permissions: self
                 .subuser_permissions
@@ -838,6 +838,8 @@ impl Server {
                     .to_string()
             }),
             sftp_port: self.node.sftp_port,
+            status: self.status,
+            suspended: self.suspended,
             name: self.name,
             description: self.description,
             limits: ApiServerLimits {
@@ -895,6 +897,7 @@ pub struct AdminApiServer {
     pub egg: super::nest_egg::AdminApiNestEgg,
 
     pub status: Option<ServerStatus>,
+    pub suspended: bool,
 
     pub name: String,
     pub description: Option<String>,
@@ -921,6 +924,7 @@ pub struct ApiServer {
     pub egg: super::nest_egg::ApiNestEgg,
 
     pub status: Option<ServerStatus>,
+    pub suspended: bool,
 
     pub is_owner: bool,
     pub permissions: Vec<String>,

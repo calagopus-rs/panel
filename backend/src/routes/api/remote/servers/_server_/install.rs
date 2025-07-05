@@ -70,13 +70,6 @@ mod post {
         server: GetServer,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if server.status == Some(ServerStatus::Suspended) {
-            return (
-                StatusCode::OK,
-                axum::Json(serde_json::to_value(Response {}).unwrap()),
-            );
-        }
-
         let status = if !data.successful {
             if data.reinstall {
                 Some(ServerStatus::ReinstallFailed)

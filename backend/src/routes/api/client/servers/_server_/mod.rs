@@ -88,25 +88,31 @@ pub async fn auth(
         "/api/client/servers/{server}",
     ];
 
-    if !user.admin
-        && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str())
-        && let Some(status) = server.status
-    {
-        let message = match status {
-            ServerStatus::Installing => "server is currently installing",
-            ServerStatus::InstallFailed => "server install has failed",
-            ServerStatus::ReinstallFailed => "server reinstall has failed",
-            ServerStatus::Suspended => "server is suspended",
-            ServerStatus::RestoringBackup => "server is restoring from a backup",
-        };
+    if !user.admin && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
+        if let Some(status) = server.status {
+            let message = match status {
+                ServerStatus::Installing => "server is currently installing",
+                ServerStatus::InstallFailed => "server install has failed",
+                ServerStatus::ReinstallFailed => "server reinstall has failed",
+                ServerStatus::RestoringBackup => "server is restoring from a backup",
+            };
 
-        return Ok(Response::builder()
-            .status(StatusCode::UNAUTHORIZED)
-            .header("Content-Type", "application/json")
-            .body(Body::from(
-                serde_json::to_string(&ApiError::new_value(&[message])).unwrap(),
-            ))
-            .unwrap());
+            return Ok(Response::builder()
+                .status(StatusCode::UNAUTHORIZED)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&[message])).unwrap(),
+                ))
+                .unwrap());
+        } else if server.suspended {
+            return Ok(Response::builder()
+                .status(StatusCode::UNAUTHORIZED)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&["server is suspended"])).unwrap(),
+                ))
+                .unwrap());
+        }
     }
 
     req.extensions_mut().insert(ServerActivityLogger {

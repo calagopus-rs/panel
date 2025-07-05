@@ -29,7 +29,6 @@ export const serverStatusEnum = pgEnum('server_status', [
 	'INSTALLING',
 	'INSTALL_FAILED',
 	'REINSTALL_FAILED',
-	'SUSPENDED',
 	'RESTORING_BACKUP'
 ])
 
@@ -328,6 +327,7 @@ export const servers = pgTable('servers', {
 	description: text('description'),
 
 	status: serverStatusEnum('status'),
+	suspended: boolean('suspended').default(false).notNull(),
 
 	memory: bigint('memory', { mode: 'number' }).notNull(),
 	swap: bigint('swap', { mode: 'number' }).notNull(),
