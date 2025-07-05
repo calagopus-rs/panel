@@ -18,8 +18,8 @@ impl BaseModel for ServerMount {
         let table = table.unwrap_or("server_mounts");
 
         let mut columns = BTreeMap::from([
-            (format!("{}.mount_id", table), format!("{}mount_id", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.mount_id"), format!("{prefix}mount_id")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::mount::Mount::columns(Some("mount_"), None));
@@ -33,7 +33,7 @@ impl BaseModel for ServerMount {
 
         Self {
             mount: super::mount::Mount::map(Some("mount_"), row),
-            created: row.get(format!("{}created", prefix).as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

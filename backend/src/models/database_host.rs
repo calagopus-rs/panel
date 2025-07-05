@@ -38,22 +38,22 @@ impl BaseModel for DatabaseHost {
         let table = table.unwrap_or("database_hosts");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
-            (format!("{}.type", table), format!("{}type", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.type"), format!("{prefix}type")),
             (
-                format!("{}.public_host", table),
-                format!("{}public_host", prefix),
+                format!("{table}.public_host"),
+                format!("{prefix}public_host"),
             ),
-            (format!("{}.host", table), format!("{}host", prefix)),
+            (format!("{table}.host"), format!("{prefix}host")),
             (
-                format!("{}.public_port", table),
-                format!("{}public_port", prefix),
+                format!("{table}.public_port"),
+                format!("{prefix}public_port"),
             ),
-            (format!("{}.port", table), format!("{}port", prefix)),
-            (format!("{}.username", table), format!("{}username", prefix)),
-            (format!("{}.password", table), format!("{}password", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.port"), format!("{prefix}port")),
+            (format!("{table}.username"), format!("{prefix}username")),
+            (format!("{table}.password"), format!("{prefix}password")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -62,16 +62,16 @@ impl BaseModel for DatabaseHost {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            r#type: row.get(format!("{}type", prefix).as_str()),
-            public_host: row.get(format!("{}public_host", prefix).as_str()),
-            host: row.get(format!("{}host", prefix).as_str()),
-            public_port: row.get(format!("{}public_port", prefix).as_str()),
-            port: row.get(format!("{}port", prefix).as_str()),
-            username: row.get(format!("{}username", prefix).as_str()),
-            password: row.get(format!("{}password", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            r#type: row.get(format!("{prefix}type").as_str()),
+            public_host: row.get(format!("{prefix}public_host").as_str()),
+            host: row.get(format!("{prefix}host").as_str()),
+            public_port: row.get(format!("{prefix}public_port").as_str()),
+            port: row.get(format!("{prefix}port").as_str()),
+            username: row.get(format!("{prefix}username").as_str()),
+            password: row.get(format!("{prefix}password").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

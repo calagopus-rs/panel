@@ -24,18 +24,15 @@ impl BaseModel for ServerDatabase {
         let table = table.unwrap_or("server_databases");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
             (
-                format!("{}.database_host_id", table),
-                format!("{}database_host_id", prefix),
+                format!("{table}.database_host_id"),
+                format!("{prefix}database_host_id"),
             ),
-            (format!("{}.name", table), format!("{}name", prefix)),
-            (format!("{}.username", table), format!("{}username", prefix)),
-            (format!("{}.password", table), format!("{}password", prefix)),
-            (
-                format!("{}.created_at", table),
-                format!("{}created", prefix),
-            ),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.username"), format!("{prefix}username")),
+            (format!("{table}.password"), format!("{prefix}password")),
+            (format!("{table}.created_at"), format!("{prefix}created")),
         ])
         .into_iter()
         .chain(super::database_host::DatabaseHost::columns(
@@ -50,12 +47,12 @@ impl BaseModel for ServerDatabase {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
-            name: row.get(format!("{}name", prefix).as_str()),
-            username: row.get(format!("{}username", prefix).as_str()),
-            password: row.get(format!("{}password", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            username: row.get(format!("{prefix}username").as_str()),
+            password: row.get(format!("{prefix}password").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

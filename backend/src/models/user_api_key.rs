@@ -24,21 +24,15 @@ impl BaseModel for UserApiKey {
         let table = table.unwrap_or("user_api_keys");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.key_start"), format!("{prefix}key_start")),
             (
-                format!("{}.key_start", table),
-                format!("{}key_start", prefix),
+                format!("{table}.permissions"),
+                format!("{prefix}permissions"),
             ),
-            (
-                format!("{}.permissions", table),
-                format!("{}permissions", prefix),
-            ),
-            (
-                format!("{}.last_used", table),
-                format!("{}last_used", prefix),
-            ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.last_used"), format!("{prefix}last_used")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -47,12 +41,12 @@ impl BaseModel for UserApiKey {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            key_start: row.get(format!("{}key_start", prefix).as_str()),
-            permissions: row.get(format!("{}permissions", prefix).as_str()),
-            last_used: row.get(format!("{}last_used", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            key_start: row.get(format!("{prefix}key_start").as_str()),
+            permissions: row.get(format!("{prefix}permissions").as_str()),
+            last_used: row.get(format!("{prefix}last_used").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

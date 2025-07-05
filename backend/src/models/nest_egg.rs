@@ -94,52 +94,49 @@ impl BaseModel for NestEgg {
         let table = table.unwrap_or("nest_eggs");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.author", table), format!("{}author", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.author"), format!("{prefix}author")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
             (
-                format!("{}.config_files", table),
-                format!("{}config_files", prefix),
+                format!("{table}.config_files"),
+                format!("{prefix}config_files"),
             ),
             (
-                format!("{}.config_startup", table),
-                format!("{}config_startup", prefix),
+                format!("{table}.config_startup"),
+                format!("{prefix}config_startup"),
             ),
             (
-                format!("{}.config_stop", table),
-                format!("{}config_stop", prefix),
+                format!("{table}.config_stop"),
+                format!("{prefix}config_stop"),
             ),
             (
-                format!("{}.config_script", table),
-                format!("{}config_script", prefix),
+                format!("{table}.config_script"),
+                format!("{prefix}config_script"),
             ),
-            (format!("{}.startup", table), format!("{}startup", prefix)),
+            (format!("{table}.startup"), format!("{prefix}startup")),
             (
-                format!("{}.force_outgoing_ip", table),
-                format!("{}force_outgoing_ip", prefix),
+                format!("{table}.force_outgoing_ip"),
+                format!("{prefix}force_outgoing_ip"),
             ),
-            (format!("{}.features", table), format!("{}features", prefix)),
+            (format!("{table}.features"), format!("{prefix}features")),
             (
-                format!("{}.docker_images", table),
-                format!("{}docker_images", prefix),
+                format!("{table}.docker_images"),
+                format!("{prefix}docker_images"),
             ),
             (
-                format!("{}.file_denylist", table),
-                format!("{}file_denylist", prefix),
+                format!("{table}.file_denylist"),
+                format!("{prefix}file_denylist"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.egg_id = {}.id)",
-                    table
-                ),
-                format!("{}servers", prefix),
+                format!("(SELECT COUNT(*) FROM servers WHERE servers.egg_id = {table}.id)"),
+                format!("{prefix}servers"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -148,34 +145,32 @@ impl BaseModel for NestEgg {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            author: row.get(format!("{}author", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
-            config_files: serde_json::from_value(
-                row.get(format!("{}config_files", prefix).as_str()),
-            )
-            .unwrap(),
+            id: row.get(format!("{prefix}id").as_str()),
+            author: row.get(format!("{prefix}author").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            config_files: serde_json::from_value(row.get(format!("{prefix}config_files").as_str()))
+                .unwrap(),
             config_startup: serde_json::from_value(
-                row.get(format!("{}config_startup", prefix).as_str()),
+                row.get(format!("{prefix}config_startup").as_str()),
             )
             .unwrap(),
-            config_stop: serde_json::from_value(row.get(format!("{}config_stop", prefix).as_str()))
+            config_stop: serde_json::from_value(row.get(format!("{prefix}config_stop").as_str()))
                 .unwrap(),
             config_script: serde_json::from_value(
-                row.get(format!("{}config_script", prefix).as_str()),
+                row.get(format!("{prefix}config_script").as_str()),
             )
             .unwrap(),
-            startup: row.get(format!("{}startup", prefix).as_str()),
-            force_outgoing_ip: row.get(format!("{}force_outgoing_ip", prefix).as_str()),
-            features: row.get(format!("{}features", prefix).as_str()),
+            startup: row.get(format!("{prefix}startup").as_str()),
+            force_outgoing_ip: row.get(format!("{prefix}force_outgoing_ip").as_str()),
+            features: row.get(format!("{prefix}features").as_str()),
             docker_images: serde_json::from_value(
-                row.get(format!("{}docker_images", prefix).as_str()),
+                row.get(format!("{prefix}docker_images").as_str()),
             )
             .unwrap_or_default(),
-            file_denylist: row.get(format!("{}file_denylist", prefix).as_str()),
-            servers: row.get(format!("{}servers", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            file_denylist: row.get(format!("{prefix}file_denylist").as_str()),
+            servers: row.get(format!("{prefix}servers").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

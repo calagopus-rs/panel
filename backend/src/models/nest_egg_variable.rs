@@ -27,30 +27,30 @@ impl BaseModel for NestEggVariable {
         let table = table.unwrap_or("nest_egg_variables");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
             (
-                format!("{}.env_variable", table),
-                format!("{}env_variable", prefix),
+                format!("{table}.env_variable"),
+                format!("{prefix}env_variable"),
             ),
             (
-                format!("{}.default_value", table),
-                format!("{}default_value", prefix),
+                format!("{table}.default_value"),
+                format!("{prefix}default_value"),
             ),
             (
-                format!("{}.user_viewable", table),
-                format!("{}user_viewable", prefix),
+                format!("{table}.user_viewable"),
+                format!("{prefix}user_viewable"),
             ),
             (
-                format!("{}.user_editable", table),
-                format!("{}user_editable", prefix),
+                format!("{table}.user_editable"),
+                format!("{prefix}user_editable"),
             ),
-            (format!("{}.rules", table), format!("{}rules", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.rules"), format!("{prefix}rules")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -59,15 +59,15 @@ impl BaseModel for NestEggVariable {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
-            env_variable: row.get(format!("{}env_variable", prefix).as_str()),
-            default_value: row.get(format!("{}default_value", prefix).as_str()),
-            user_viewable: row.get(format!("{}user_viewable", prefix).as_str()),
-            user_editable: row.get(format!("{}user_editable", prefix).as_str()),
-            rules: row.get(format!("{}rules", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            env_variable: row.get(format!("{prefix}env_variable").as_str()),
+            default_value: row.get(format!("{prefix}default_value").as_str()),
+            user_viewable: row.get(format!("{prefix}user_viewable").as_str()),
+            user_editable: row.get(format!("{prefix}user_editable").as_str()),
+            rules: row.get(format!("{prefix}rules").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

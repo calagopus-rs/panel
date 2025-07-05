@@ -23,17 +23,11 @@ impl BaseModel for UserSession {
         let table = table.unwrap_or("user_sessions");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.ip", table), format!("{}ip", prefix)),
-            (
-                format!("{}.user_agent", table),
-                format!("{}user_agent", prefix),
-            ),
-            (
-                format!("{}.last_used", table),
-                format!("{}last_used", prefix),
-            ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.ip"), format!("{prefix}ip")),
+            (format!("{table}.user_agent"), format!("{prefix}user_agent")),
+            (format!("{table}.last_used"), format!("{prefix}last_used")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -42,11 +36,11 @@ impl BaseModel for UserSession {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            ip: row.get(format!("{}ip", prefix).as_str()),
-            user_agent: row.get(format!("{}user_agent", prefix).as_str()),
-            last_used: row.get(format!("{}last_used", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            ip: row.get(format!("{prefix}ip").as_str()),
+            user_agent: row.get(format!("{prefix}user_agent").as_str()),
+            last_used: row.get(format!("{prefix}last_used").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

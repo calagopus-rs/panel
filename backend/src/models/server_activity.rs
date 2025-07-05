@@ -24,16 +24,13 @@ impl BaseModel for ServerActivity {
         let table = table.unwrap_or("server_activities");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.user_id", table), format!("{}user_id", prefix)),
-            (
-                format!("{}.api_key_id", table),
-                format!("{}api_key_id", prefix),
-            ),
-            (format!("{}.event", table), format!("{}event", prefix)),
-            (format!("{}.ip", table), format!("{}ip", prefix)),
-            (format!("{}.data", table), format!("{}data", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.user_id"), format!("{prefix}user_id")),
+            (format!("{table}.api_key_id"), format!("{prefix}api_key_id")),
+            (format!("{table}.event"), format!("{prefix}event")),
+            (format!("{table}.ip"), format!("{prefix}ip")),
+            (format!("{table}.data"), format!("{prefix}data")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -42,13 +39,13 @@ impl BaseModel for ServerActivity {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
             user: super::user::User::map(Some("user_"), row),
-            api_key_id: row.get(format!("{}api_key_id", prefix).as_str()),
-            event: row.get(format!("{}event", prefix).as_str()),
-            ip: row.get(format!("{}ip", prefix).as_str()),
-            data: row.get(format!("{}data", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            api_key_id: row.get(format!("{prefix}api_key_id").as_str()),
+            event: row.get(format!("{prefix}event").as_str()),
+            ip: row.get(format!("{prefix}ip").as_str()),
+            data: row.get(format!("{prefix}data").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

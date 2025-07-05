@@ -21,11 +21,11 @@ impl BaseModel for ServerVariable {
 
         let mut columns = BTreeMap::from([
             (
-                format!("{}.variable_id", table),
-                format!("{}variable_id", prefix),
+                format!("{table}.variable_id"),
+                format!("{prefix}variable_id"),
             ),
-            (format!("{}.value", table), format!("{}value", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.value"), format!("{prefix}value")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::nest_egg_variable::NestEggVariable::columns(
@@ -42,8 +42,8 @@ impl BaseModel for ServerVariable {
 
         Self {
             variable: super::nest_egg_variable::NestEggVariable::map(Some("variable_"), row),
-            value: row.get(format!("{}value", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            value: row.get(format!("{prefix}value").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

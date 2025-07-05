@@ -21,13 +21,13 @@ impl BaseModel for UserSshKey {
         let table = table.unwrap_or("user_ssh_keys");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.fingerprint", table),
-                format!("{}fingerprint", prefix),
+                format!("{table}.fingerprint"),
+                format!("{prefix}fingerprint"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -36,10 +36,10 @@ impl BaseModel for UserSshKey {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            fingerprint: row.get(format!("{}fingerprint", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            fingerprint: row.get(format!("{prefix}fingerprint").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

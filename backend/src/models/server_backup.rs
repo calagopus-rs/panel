@@ -30,27 +30,21 @@ impl BaseModel for ServerBackup {
         let table = table.unwrap_or("server_backups");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.uuid", table), format!("{}uuid", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.successful"), format!("{prefix}successful")),
+            (format!("{table}.locked"), format!("{prefix}locked")),
             (
-                format!("{}.successful", table),
-                format!("{}successful", prefix),
+                format!("{table}.ignored_files"),
+                format!("{prefix}ignored_files"),
             ),
-            (format!("{}.locked", table), format!("{}locked", prefix)),
-            (
-                format!("{}.ignored_files", table),
-                format!("{}ignored_files", prefix),
-            ),
-            (format!("{}.checksum", table), format!("{}checksum", prefix)),
-            (format!("{}.bytes", table), format!("{}bytes", prefix)),
-            (format!("{}.disk", table), format!("{}disk", prefix)),
-            (
-                format!("{}.completed", table),
-                format!("{}completed", prefix),
-            ),
-            (format!("{}.deleted", table), format!("{}deleted", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.checksum"), format!("{prefix}checksum")),
+            (format!("{table}.bytes"), format!("{prefix}bytes")),
+            (format!("{table}.disk"), format!("{prefix}disk")),
+            (format!("{table}.completed"), format!("{prefix}completed")),
+            (format!("{table}.deleted"), format!("{prefix}deleted")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -59,18 +53,18 @@ impl BaseModel for ServerBackup {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            uuid: row.get(format!("{}uuid", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            successful: row.get(format!("{}successful", prefix).as_str()),
-            locked: row.get(format!("{}locked", prefix).as_str()),
-            ignored_files: row.get(format!("{}ignored_files", prefix).as_str()),
-            checksum: row.get(format!("{}checksum", prefix).as_str()),
-            bytes: row.get(format!("{}bytes", prefix).as_str()),
-            disk: row.get(format!("{}disk", prefix).as_str()),
-            completed: row.get(format!("{}completed_at", prefix).as_str()),
-            deleted: row.get(format!("{}deleted_at", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            successful: row.get(format!("{prefix}successful").as_str()),
+            locked: row.get(format!("{prefix}locked").as_str()),
+            ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
+            checksum: row.get(format!("{prefix}checksum").as_str()),
+            bytes: row.get(format!("{prefix}bytes").as_str()),
+            disk: row.get(format!("{prefix}disk").as_str()),
+            completed: row.get(format!("{prefix}completed_at").as_str()),
+            deleted: row.get(format!("{prefix}deleted_at").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

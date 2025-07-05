@@ -85,11 +85,7 @@ mod post {
                 "server:file.copy",
                 serde_json::json!({
                     "file": request_body.location.trim_start_matches('/'),
-                    "name": if let Some(name) = &request_body.name {
-                        Some(name.trim_start_matches('/'))
-                    } else {
-                        None
-                    },
+                    "name": request_body.name.as_ref().map(|name| name.trim_start_matches('/')),
                 }),
             )
             .await;

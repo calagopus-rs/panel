@@ -12,8 +12,7 @@ pub async fn auth(state: GetState, mut req: Request, next: Next) -> Result<Respo
     let authorization = match req
         .headers()
         .get("Authorization")
-        .map(|h| h.to_str().ok())
-        .flatten()
+        .and_then(|h| h.to_str().ok())
     {
         Some(value) => value,
         None => {

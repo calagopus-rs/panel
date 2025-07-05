@@ -46,28 +46,22 @@ impl BaseModel for Location {
         let table = table.unwrap_or("locations");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.short_name"), format!("{prefix}short_name")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.short_name", table),
-                format!("{}short_name", prefix),
-            ),
-            (format!("{}.name", table), format!("{}name", prefix)),
-            (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
             (
-                format!("{}.config_backups", table),
-                format!("{}config_backups", prefix),
+                format!("{table}.config_backups"),
+                format!("{prefix}config_backups"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM nodes WHERE nodes.location_id = {}.id)",
-                    table
-                ),
-                format!("{}nodes", prefix),
+                format!("(SELECT COUNT(*) FROM nodes WHERE nodes.location_id = {table}.id)"),
+                format!("{prefix}nodes"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -76,16 +70,16 @@ impl BaseModel for Location {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            short_name: row.get(format!("{}short_name", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            short_name: row.get(format!("{prefix}short_name").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
             config_backups: serde_json::from_value(
-                row.get(format!("{}config_backups", prefix).as_str()),
+                row.get(format!("{prefix}config_backups").as_str()),
             )
             .unwrap_or(LocationConfigBackups::Local),
-            nodes: row.get(format!("{}nodes", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            nodes: row.get(format!("{prefix}nodes").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }
@@ -98,14 +92,11 @@ impl Location {
         description: Option<&str>,
         mut config_backups: LocationConfigBackups,
     ) -> Result<Self, sqlx::Error> {
-        match &mut config_backups {
-            LocationConfigBackups::S3 { secret_key, .. } => {
-                *secret_key = base32::encode(
-                    base32::Alphabet::Z,
-                    &database.encrypt(secret_key.as_bytes()).unwrap(),
-                );
-            }
-            _ => {}
+        if let LocationConfigBackups::S3 { secret_key, .. } = &mut config_backups {
+            *secret_key = base32::encode(
+                base32::Alphabet::Z,
+                &database.encrypt(secret_key.as_bytes()).unwrap(),
+            );
         }
 
         let row = sqlx::query(&format!(

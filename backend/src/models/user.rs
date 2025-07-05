@@ -35,33 +35,27 @@ impl BaseModel for User {
         let table = table.unwrap_or("users");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
             (
-                format!("{}.external_id", table),
-                format!("{}external_id", prefix),
+                format!("{table}.external_id"),
+                format!("{prefix}external_id"),
             ),
-            (format!("{}.avatar", table), format!("{}avatar", prefix)),
-            (format!("{}.username", table), format!("{}username", prefix)),
-            (format!("{}.email", table), format!("{}email", prefix)),
+            (format!("{table}.avatar"), format!("{prefix}avatar")),
+            (format!("{table}.username"), format!("{prefix}username")),
+            (format!("{table}.email"), format!("{prefix}email")),
+            (format!("{table}.name_first"), format!("{prefix}name_first")),
+            (format!("{table}.name_last"), format!("{prefix}name_last")),
+            (format!("{table}.admin"), format!("{prefix}admin")),
             (
-                format!("{}.name_first", table),
-                format!("{}name_first", prefix),
-            ),
-            (
-                format!("{}.name_last", table),
-                format!("{}name_last", prefix),
-            ),
-            (format!("{}.admin", table), format!("{}admin", prefix)),
-            (
-                format!("{}.totp_enabled", table),
-                format!("{}totp_enabled", prefix),
+                format!("{table}.totp_enabled"),
+                format!("{prefix}totp_enabled"),
             ),
             (
-                format!("{}.totp_secret", table),
-                format!("{}totp_secret", prefix),
+                format!("{table}.totp_secret"),
+                format!("{prefix}totp_secret"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -70,17 +64,17 @@ impl BaseModel for User {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            external_id: row.get(format!("{}external_id", prefix).as_str()),
-            avatar: row.get(format!("{}avatar", prefix).as_str()),
-            username: row.get(format!("{}username", prefix).as_str()),
-            email: row.get(format!("{}email", prefix).as_str()),
-            name_first: row.get(format!("{}name_first", prefix).as_str()),
-            name_last: row.get(format!("{}name_last", prefix).as_str()),
-            admin: row.get(format!("{}admin", prefix).as_str()),
-            totp_enabled: row.get(format!("{}totp_enabled", prefix).as_str()),
-            totp_secret: row.get(format!("{}totp_secret", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            external_id: row.get(format!("{prefix}external_id").as_str()),
+            avatar: row.get(format!("{prefix}avatar").as_str()),
+            username: row.get(format!("{prefix}username").as_str()),
+            email: row.get(format!("{prefix}email").as_str()),
+            name_first: row.get(format!("{prefix}name_first").as_str()),
+            name_last: row.get(format!("{prefix}name_last").as_str()),
+            admin: row.get(format!("{prefix}admin").as_str()),
+            totp_enabled: row.get(format!("{prefix}totp_enabled").as_str()),
+            totp_secret: row.get(format!("{prefix}totp_secret").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }
@@ -192,7 +186,7 @@ impl User {
         username: &str,
     ) -> Option<Self> {
         cache
-            .cached(&format!("user::{}", username), 3600, || async {
+            .cached(&format!("user::{username}"), 3600, || async {
                 let row = sqlx::query(&format!(
                     r#"
                     SELECT {}

@@ -111,7 +111,7 @@ impl Cache {
     pub async fn clear_organization(&self, organization: i32) {
         let keys: Vec<String> = self
             .client
-            .keys(format!("organization::{}*", organization))
+            .keys(format!("organization::{organization}*"))
             .await
             .unwrap();
 

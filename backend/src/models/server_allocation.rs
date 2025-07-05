@@ -21,13 +21,13 @@ impl BaseModel for ServerAllocation {
         let table = table.unwrap_or("server_allocations");
 
         let mut columns = BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
             (
-                format!("{}.allocation_id", table),
-                format!("{}allocation_id", prefix),
+                format!("{table}.allocation_id"),
+                format!("{prefix}allocation_id"),
             ),
-            (format!("{}.notes", table), format!("{}notes", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.notes"), format!("{prefix}notes")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::node_allocation::NodeAllocation::columns(
@@ -43,10 +43,10 @@ impl BaseModel for ServerAllocation {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
             allocation: super::node_allocation::NodeAllocation::map(Some("allocation_"), row),
-            notes: row.get(format!("{}notes", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            notes: row.get(format!("{prefix}notes").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

@@ -259,30 +259,22 @@ impl AppSettings {
                         .remove("mail_smtp_port")
                         .and_then(|s| s.parse().ok())
                         .unwrap_or(587),
-                    username: map
-                        .remove("mail_smtp_username")
-                        .map(|s| {
-                            if s.is_empty() {
-                                None
-                            } else {
-                                base32::decode(base32::Alphabet::Z, &s)
-                                    .map(|b| database.decrypt(&b))
-                                    .flatten()
-                            }
-                        })
-                        .flatten(),
-                    password: map
-                        .remove("mail_smtp_password")
-                        .map(|s| {
-                            if s.is_empty() {
-                                None
-                            } else {
-                                base32::decode(base32::Alphabet::Z, &s)
-                                    .map(|b| database.decrypt(&b))
-                                    .flatten()
-                            }
-                        })
-                        .flatten(),
+                    username: map.remove("mail_smtp_username").and_then(|s| {
+                        if s.is_empty() {
+                            None
+                        } else {
+                            base32::decode(base32::Alphabet::Z, &s)
+                                .and_then(|b| database.decrypt(&b))
+                        }
+                    }),
+                    password: map.remove("mail_smtp_password").and_then(|s| {
+                        if s.is_empty() {
+                            None
+                        } else {
+                            base32::decode(base32::Alphabet::Z, &s)
+                                .and_then(|b| database.decrypt(&b))
+                        }
+                    }),
                     use_tls: map
                         .remove("mail_smtp_use_tls")
                         .map(|s| s == "true")

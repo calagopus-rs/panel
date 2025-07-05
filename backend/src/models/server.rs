@@ -59,61 +59,55 @@ impl BaseModel for Server {
         let table = table.unwrap_or("servers");
 
         let mut columns = BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.uuid", table), format!("{}uuid", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
+            (format!("{table}.uuid_short"), format!("{prefix}uuid_short")),
             (
-                format!("{}.uuid_short", table),
-                format!("{}uuid_short", prefix),
+                format!("{table}.external_id"),
+                format!("{prefix}external_id"),
             ),
             (
-                format!("{}.external_id", table),
-                format!("{}external_id", prefix),
+                format!("{table}.allocation_id"),
+                format!("{prefix}allocation_id"),
+            ),
+            (format!("{table}.node_id"), format!("{prefix}node_id")),
+            (format!("{table}.owner_id"), format!("{prefix}owner_id")),
+            (format!("{table}.egg_id"), format!("{prefix}egg_id")),
+            (format!("{table}.status"), format!("{prefix}status")),
+            (format!("{table}.suspended"), format!("{prefix}suspended")),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (
+                format!("{table}.description"),
+                format!("{prefix}description"),
+            ),
+            (format!("{table}.memory"), format!("{prefix}memory")),
+            (format!("{table}.swap"), format!("{prefix}swap")),
+            (format!("{table}.disk"), format!("{prefix}disk")),
+            (format!("{table}.io"), format!("{prefix}io")),
+            (format!("{table}.cpu"), format!("{prefix}cpu")),
+            (
+                format!("{table}.pinned_cpus"),
+                format!("{prefix}pinned_cpus"),
+            ),
+            (format!("{table}.startup"), format!("{prefix}startup")),
+            (format!("{table}.image"), format!("{prefix}image")),
+            (
+                format!("{table}.allocation_limit"),
+                format!("{prefix}allocation_limit"),
             ),
             (
-                format!("{}.allocation_id", table),
-                format!("{}allocation_id", prefix),
-            ),
-            (format!("{}.node_id", table), format!("{}node_id", prefix)),
-            (format!("{}.owner_id", table), format!("{}owner_id", prefix)),
-            (format!("{}.egg_id", table), format!("{}egg_id", prefix)),
-            (format!("{}.status", table), format!("{}status", prefix)),
-            (
-                format!("{}.suspended", table),
-                format!("{}suspended", prefix),
-            ),
-            (format!("{}.name", table), format!("{}name", prefix)),
-            (
-                format!("{}.description", table),
-                format!("{}description", prefix),
-            ),
-            (format!("{}.memory", table), format!("{}memory", prefix)),
-            (format!("{}.swap", table), format!("{}swap", prefix)),
-            (format!("{}.disk", table), format!("{}disk", prefix)),
-            (format!("{}.io", table), format!("{}io", prefix)),
-            (format!("{}.cpu", table), format!("{}cpu", prefix)),
-            (
-                format!("{}.pinned_cpus", table),
-                format!("{}pinned_cpus", prefix),
-            ),
-            (format!("{}.startup", table), format!("{}startup", prefix)),
-            (format!("{}.image", table), format!("{}image", prefix)),
-            (
-                format!("{}.allocation_limit", table),
-                format!("{}allocation_limit", prefix),
+                format!("{table}.database_limit"),
+                format!("{prefix}database_limit"),
             ),
             (
-                format!("{}.database_limit", table),
-                format!("{}database_limit", prefix),
-            ),
-            (
-                format!("{}.backup_limit", table),
-                format!("{}backup_limit", prefix),
+                format!("{table}.backup_limit"),
+                format!("{prefix}backup_limit"),
             ),
             (
                 "server_subusers.permissions".to_string(),
-                format!("{}permissions", prefix),
+                format!("{prefix}permissions"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::server_allocation::ServerAllocation::columns(
@@ -132,12 +126,12 @@ impl BaseModel for Server {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            uuid: row.get(format!("{}uuid", prefix).as_str()),
-            uuid_short: row.get(format!("{}uuid_short", prefix).as_str()),
-            external_id: row.get(format!("{}external_id", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
+            uuid_short: row.get(format!("{prefix}uuid_short").as_str()),
+            external_id: row.get(format!("{prefix}external_id").as_str()),
             allocation: if row
-                .try_get::<i32, _>(format!("{}allocation_id", prefix).as_str())
+                .try_get::<i32, _>(format!("{prefix}allocation_id").as_str())
                 .is_ok()
             {
                 Some(super::server_allocation::ServerAllocation::map(
@@ -150,25 +144,25 @@ impl BaseModel for Server {
             node: super::node::Node::map(Some("node_"), row),
             owner: super::user::User::map(Some("owner_"), row),
             egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
-            status: row.get(format!("{}status", prefix).as_str()),
-            suspended: row.get(format!("{}suspended", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
-            memory: row.get(format!("{}memory", prefix).as_str()),
-            swap: row.get(format!("{}swap", prefix).as_str()),
-            disk: row.get(format!("{}disk", prefix).as_str()),
-            io: row.get(format!("{}io", prefix).as_str()),
-            cpu: row.get(format!("{}cpu", prefix).as_str()),
-            pinned_cpus: row.get(format!("{}pinned_cpus", prefix).as_str()),
-            startup: row.get(format!("{}startup", prefix).as_str()),
-            image: row.get(format!("{}image", prefix).as_str()),
-            allocation_limit: row.get(format!("{}allocation_limit", prefix).as_str()),
-            database_limit: row.get(format!("{}database_limit", prefix).as_str()),
-            backup_limit: row.get(format!("{}backup_limit", prefix).as_str()),
+            status: row.get(format!("{prefix}status").as_str()),
+            suspended: row.get(format!("{prefix}suspended").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            memory: row.get(format!("{prefix}memory").as_str()),
+            swap: row.get(format!("{prefix}swap").as_str()),
+            disk: row.get(format!("{prefix}disk").as_str()),
+            io: row.get(format!("{prefix}io").as_str()),
+            cpu: row.get(format!("{prefix}cpu").as_str()),
+            pinned_cpus: row.get(format!("{prefix}pinned_cpus").as_str()),
+            startup: row.get(format!("{prefix}startup").as_str()),
+            image: row.get(format!("{prefix}image").as_str()),
+            allocation_limit: row.get(format!("{prefix}allocation_limit").as_str()),
+            database_limit: row.get(format!("{prefix}database_limit").as_str()),
+            backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
             subuser_permissions: row
-                .try_get::<Vec<String>, _>(format!("{}permissions", prefix).as_str())
+                .try_get::<Vec<String>, _>(format!("{prefix}permissions").as_str())
                 .ok(),
-            created: row.get(format!("{}created", prefix).as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }
@@ -241,7 +235,7 @@ impl Server {
             .bind(disk)
             .bind(io)
             .bind(cpu)
-            .bind(&pinned_cpus)
+            .bind(pinned_cpus)
             .bind(startup)
             .bind(image)
             .bind(allocation_limit)
@@ -652,7 +646,7 @@ impl Server {
                 start_on_completion: None,
                 meta: wings_api::ServerConfigurationMeta {
                     name: self.name,
-                    description: self.description.unwrap_or_else(|| "".to_string()),
+                    description: self.description.unwrap_or_default(),
                 },
                 suspended: self.suspended,
                 invocation: self.startup,

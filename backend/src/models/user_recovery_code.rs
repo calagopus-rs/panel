@@ -20,9 +20,9 @@ impl BaseModel for UserRecoveryCode {
         let table = table.unwrap_or("user_recovery_codes");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.code", table), format!("{}code", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.code"), format!("{prefix}code")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -31,9 +31,9 @@ impl BaseModel for UserRecoveryCode {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            code: row.get(format!("{}code", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            code: row.get(format!("{prefix}code").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

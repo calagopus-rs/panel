@@ -35,12 +35,12 @@ where
     type Rejection = ConsumingExtensionError;
 
     async fn from_request_parts(req: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
-        Ok(Self::from_extensions(&mut req.extensions).ok_or_else(|| {
+        Self::from_extensions(&mut req.extensions).ok_or_else(|| {
             ConsumingExtensionError(format!(
                 "Extension of type `{}` was not found. Perhaps you forgot to add it? See `axum::Extension`.",
                 std::any::type_name::<T>()
             ))
-        })?)
+        })
     }
 }
 

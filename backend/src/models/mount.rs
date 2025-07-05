@@ -27,23 +27,20 @@ impl BaseModel for Mount {
         let table = table.unwrap_or("mounts");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
-            (format!("{}.source", table), format!("{}source", prefix)),
-            (format!("{}.target", table), format!("{}target", prefix)),
+            (format!("{table}.source"), format!("{prefix}source")),
+            (format!("{table}.target"), format!("{prefix}target")),
+            (format!("{table}.read_only"), format!("{prefix}read_only")),
             (
-                format!("{}.read_only", table),
-                format!("{}read_only", prefix),
+                format!("{table}.user_mountable"),
+                format!("{prefix}user_mountable"),
             ),
-            (
-                format!("{}.user_mountable", table),
-                format!("{}user_mountable", prefix),
-            ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -52,14 +49,14 @@ impl BaseModel for Mount {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
-            source: row.get(format!("{}source", prefix).as_str()),
-            target: row.get(format!("{}target", prefix).as_str()),
-            read_only: row.get(format!("{}read_only", prefix).as_str()),
-            user_mountable: row.get(format!("{}user_mountable", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            source: row.get(format!("{prefix}source").as_str()),
+            target: row.get(format!("{prefix}target").as_str()),
+            read_only: row.get(format!("{prefix}read_only").as_str()),
+            user_mountable: row.get(format!("{prefix}user_mountable").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

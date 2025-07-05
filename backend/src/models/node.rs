@@ -40,47 +40,35 @@ impl BaseModel for Node {
         let table = table.unwrap_or("nodes");
 
         let mut columns = BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.uuid", table), format!("{}uuid", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (
-                format!("{}.location_id", table),
-                format!("{}location_id", prefix),
+                format!("{table}.location_id"),
+                format!("{prefix}location_id"),
             ),
-            (format!("{}.name", table), format!("{}name", prefix)),
-            (format!("{}.public", table), format!("{}public", prefix)),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.public"), format!("{prefix}public")),
             (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
+            (format!("{table}.public_url"), format!("{prefix}public_url")),
+            (format!("{table}.url"), format!("{prefix}url")),
+            (format!("{table}.sftp_host"), format!("{prefix}sftp_host")),
+            (format!("{table}.sftp_port"), format!("{prefix}sftp_port")),
             (
-                format!("{}.public_url", table),
-                format!("{}public_url", prefix),
+                format!("{table}.maintenance_message"),
+                format!("{prefix}maintenance_message"),
             ),
-            (format!("{}.url", table), format!("{}url", prefix)),
+            (format!("{table}.memory"), format!("{prefix}memory")),
+            (format!("{table}.disk"), format!("{prefix}disk")),
+            (format!("{table}.token_id"), format!("{prefix}token_id")),
+            (format!("{table}.token"), format!("{prefix}token")),
             (
-                format!("{}.sftp_host", table),
-                format!("{}sftp_host", prefix),
+                format!("(SELECT COUNT(*) FROM servers WHERE servers.node_id = {table}.id)"),
+                format!("{prefix}servers"),
             ),
-            (
-                format!("{}.sftp_port", table),
-                format!("{}sftp_port", prefix),
-            ),
-            (
-                format!("{}.maintenance_message", table),
-                format!("{}maintenance_message", prefix),
-            ),
-            (format!("{}.memory", table), format!("{}memory", prefix)),
-            (format!("{}.disk", table), format!("{}disk", prefix)),
-            (format!("{}.token_id", table), format!("{}token_id", prefix)),
-            (format!("{}.token", table), format!("{}token", prefix)),
-            (
-                format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.node_id = {}.id)",
-                    table
-                ),
-                format!("{}servers", prefix),
-            ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_"), None));
@@ -93,28 +81,28 @@ impl BaseModel for Node {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            uuid: row.get(format!("{}uuid", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             location: super::location::Location::map(Some("location_"), row),
-            name: row.get(format!("{}name", prefix).as_str()),
-            public: row.get(format!("{}public", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            public: row.get(format!("{prefix}public").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
             public_url: row
-                .get::<Option<String>, _>(format!("{}public_url", prefix).as_str())
+                .get::<Option<String>, _>(format!("{prefix}public_url").as_str())
                 .map(|url| url.parse().unwrap()),
             url: row
-                .get::<String, _>(format!("{}url", prefix).as_str())
+                .get::<String, _>(format!("{prefix}url").as_str())
                 .parse()
                 .unwrap(),
-            sftp_host: row.get(format!("{}sftp_host", prefix).as_str()),
-            sftp_port: row.get(format!("{}sftp_port", prefix).as_str()),
-            maintenance_message: row.get(format!("{}maintenance_message", prefix).as_str()),
-            memory: row.get(format!("{}memory", prefix).as_str()),
-            disk: row.get(format!("{}disk", prefix).as_str()),
-            token_id: row.get(format!("{}token_id", prefix).as_str()),
-            token: row.get(format!("{}token", prefix).as_str()),
-            servers: row.get(format!("{}servers", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            sftp_host: row.get(format!("{prefix}sftp_host").as_str()),
+            sftp_port: row.get(format!("{prefix}sftp_port").as_str()),
+            maintenance_message: row.get(format!("{prefix}maintenance_message").as_str()),
+            memory: row.get(format!("{prefix}memory").as_str()),
+            disk: row.get(format!("{prefix}disk").as_str()),
+            token_id: row.get(format!("{prefix}token_id").as_str()),
+            token: row.get(format!("{prefix}token").as_str()),
+            servers: row.get(format!("{prefix}servers").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

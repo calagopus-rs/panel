@@ -22,11 +22,11 @@ impl BaseModel for NodeAllocation {
         let table = table.unwrap_or("node_allocations");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.ip", table), format!("{}ip", prefix)),
-            (format!("{}.ip_alias", table), format!("{}ip_alias", prefix)),
-            (format!("{}.port", table), format!("{}port", prefix)),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.ip"), format!("{prefix}ip")),
+            (format!("{table}.ip_alias"), format!("{prefix}ip_alias")),
+            (format!("{table}.port"), format!("{prefix}port")),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -35,11 +35,11 @@ impl BaseModel for NodeAllocation {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            ip: row.get(format!("{}ip", prefix).as_str()),
-            ip_alias: row.get(format!("{}ip_alias", prefix).as_str()),
-            port: row.get(format!("{}port", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            ip: row.get(format!("{prefix}ip").as_str()),
+            ip_alias: row.get(format!("{prefix}ip_alias").as_str()),
+            port: row.get(format!("{prefix}port").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

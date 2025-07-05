@@ -270,12 +270,12 @@ impl BaseModel for ServerSubuser {
         let table = table.unwrap_or("server_subusers");
 
         let mut columns = BTreeMap::from([
-            (format!("{}.user_id", table), format!("{}user_id", prefix)),
+            (format!("{table}.user_id"), format!("{prefix}user_id")),
             (
-                format!("{}.permissions", table),
-                format!("{}permissions", prefix),
+                format!("{table}.permissions"),
+                format!("{prefix}permissions"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
         columns.extend(super::user::User::columns(Some("user_"), None));
@@ -289,8 +289,8 @@ impl BaseModel for ServerSubuser {
 
         Self {
             user: super::user::User::map(Some("user_"), row),
-            permissions: row.get(format!("{}permissions", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            permissions: row.get(format!("{prefix}permissions").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }

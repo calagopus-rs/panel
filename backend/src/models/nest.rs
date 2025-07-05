@@ -24,21 +24,18 @@ impl BaseModel for Nest {
         let table = table.unwrap_or("nests");
 
         BTreeMap::from([
-            (format!("{}.id", table), format!("{}id", prefix)),
-            (format!("{}.author", table), format!("{}author", prefix)),
-            (format!("{}.name", table), format!("{}name", prefix)),
+            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.author"), format!("{prefix}author")),
+            (format!("{table}.name"), format!("{prefix}name")),
             (
-                format!("{}.description", table),
-                format!("{}description", prefix),
+                format!("{table}.description"),
+                format!("{prefix}description"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_id = {}.id)",
-                    table
-                ),
-                format!("{}eggs", prefix),
+                format!("(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_id = {table}.id)"),
+                format!("{prefix}eggs"),
             ),
-            (format!("{}.created", table), format!("{}created", prefix)),
+            (format!("{table}.created"), format!("{prefix}created")),
         ])
     }
 
@@ -47,12 +44,12 @@ impl BaseModel for Nest {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{}id", prefix).as_str()),
-            author: row.get(format!("{}author", prefix).as_str()),
-            name: row.get(format!("{}name", prefix).as_str()),
-            description: row.get(format!("{}description", prefix).as_str()),
-            eggs: row.get(format!("{}eggs", prefix).as_str()),
-            created: row.get(format!("{}created", prefix).as_str()),
+            id: row.get(format!("{prefix}id").as_str()),
+            author: row.get(format!("{prefix}author").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            eggs: row.get(format!("{prefix}eggs").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }
