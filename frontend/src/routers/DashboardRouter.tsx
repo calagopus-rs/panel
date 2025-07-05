@@ -7,7 +7,7 @@ import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBriefcase, faCloud, faKey, faMagnifyingGlass, faServer, faUser } from '@fortawesome/free-solid-svg-icons';
-import DashboardAccount from '@/pages/dashboard/DashboardAccount';
+import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
