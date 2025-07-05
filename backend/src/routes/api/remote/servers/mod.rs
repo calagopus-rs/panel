@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _server_;
+mod reset;
 
 mod get {
     use crate::{
@@ -89,5 +90,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .nest("/{server}", _server_::router(state))
+        .nest("/reset", reset::router(state))
         .with_state(state.clone())
 }

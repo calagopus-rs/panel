@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE servers\n            SET status = 'INSTALLING'\n            WHERE servers.id = $1 AND servers.status IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "db80c4a6ac673cefe9762f2a6794ddba6a93cff8cc258ddd01717c95877bce26"
+}

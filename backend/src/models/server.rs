@@ -650,7 +650,7 @@ impl Server {
         self,
         database: &crate::database::Database,
     ) -> RemoteApiServer {
-        let (variables, backups, mounts, allocations) = tokio::join!(
+        let (variables, backups, mounts, allocations) = tokio::try_join!(
             sqlx::query!(
                 "SELECT nest_egg_variables.env_variable, server_variables.value
                 FROM server_variables
@@ -682,15 +682,11 @@ impl Server {
                 self.id
             )
             .fetch_all(database.read()),
-        );
-
-        let variables = variables.unwrap();
-        let backups = backups.unwrap();
-        let mounts = mounts.unwrap();
-        let allocations = allocations.unwrap();
+        )
+        .unwrap();
 
         RemoteApiServer {
-            configuration: wings_api::ServerConfiguration {
+            settings: wings_api::ServerConfiguration {
                 uuid: self.uuid,
                 start_on_completion: None,
                 meta: wings_api::ServerConfigurationMeta {
@@ -866,7 +862,7 @@ impl Server {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "RemoteServer")]
 pub struct RemoteApiServer {
-    configuration: wings_api::ServerConfiguration,
+    settings: wings_api::ServerConfiguration,
     process_configuration: super::nest_egg::ProcessConfiguration,
 }
 

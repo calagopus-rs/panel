@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT mounts.source, mounts.target, mounts.read_only\n                FROM server_mounts\n                JOIN mounts ON mounts.id = server_mounts.mount_id\n                WHERE server_mounts.server_id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "target",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "read_only",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "89efa89e5695b9814a7951b498e31926ff97b71b53a2856dcd46acc0be83a3a9"
+}

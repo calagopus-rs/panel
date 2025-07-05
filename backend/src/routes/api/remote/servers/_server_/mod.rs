@@ -12,6 +12,8 @@ use axum::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod install;
+
 pub type GetServer = crate::extract::ConsumingExtension<Server>;
 
 pub async fn auth(
@@ -49,6 +51,12 @@ mod get {
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
+    ), params(
+        (
+            "server" = uuid::Uuid,
+            description = "The server ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
     ))]
     pub async fn route(
         state: GetState,
@@ -67,6 +75,7 @@ mod get {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
+        .nest("/install", install::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }
