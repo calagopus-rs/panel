@@ -2,12 +2,12 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import isEqual from 'react-fast-compare';
 import getServer from '@/api/server/getServer';
-import { createWebsocketSlice, WebsocketSlice } from './slices/websocket';
-import { createStatusSlice, StatusSlice } from './slices/status';
-import { createStatsSlice, StatsSlice } from './slices/stats';
-import { createFilesSlice, FilesSlice } from './slices/files';
-import { createDatabasesSlice, DatabasesSlice } from './slices/databases';
-import { createSchedulesSlice, SchedulesSlice } from './slices/schedules';
+import { createWebsocketSlice, WebsocketSlice } from './slices/server/websocket';
+import { createStatusSlice, StatusSlice } from './slices/server/status';
+import { createStatsSlice, StatsSlice } from './slices/server/stats';
+import { createFilesSlice, FilesSlice } from './slices/server/files';
+import { createDatabasesSlice, DatabasesSlice } from './slices/server/databases';
+import { createSchedulesSlice, SchedulesSlice } from './slices/server/schedules';
 
 interface ServerStore {
   data?: Server;
