@@ -16,6 +16,7 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
 import ApiKeyCreateButton from './actions/ApiKeyCreateButton';
 import { useUserStore } from '@/stores/user';
+import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 
 export default () => {
   const [loading, setLoading] = useState(true);
@@ -49,6 +50,7 @@ export default () => {
                     <TableHeader name={'Permissions'} />
                     <TableHeader name={'Last Used'} />
                     <TableHeader name={'Created'} />
+                    <TableHeader />
                   </TableHead>
 
                   <TableBody>
@@ -74,6 +76,10 @@ export default () => {
 
                         <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
                           <Tooltip content={formatDateTime(key.created)}>{formatTimestamp(key.created)}</Tooltip>
+                        </td>
+
+                        <td className="relative">
+                          <ApiKeyDeleteButton apiKey={key} />
                         </td>
                       </TableRow>
                     ))}
