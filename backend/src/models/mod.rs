@@ -34,9 +34,11 @@ pub mod user_ssh_key;
 pub struct PaginationParams {
     #[validate(range(min = 1))]
     #[serde(default = "Pagination::default_page")]
+    #[schema(minimum = 1, default = 1)]
     pub page: i64,
     #[validate(range(min = 1, max = 100))]
     #[serde(default = "Pagination::default_per_page")]
+    #[schema(minimum = 1, maximum = 100, default = 25)]
     pub per_page: i64,
 }
 
