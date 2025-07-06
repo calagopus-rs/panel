@@ -194,11 +194,6 @@ async fn main() {
                         .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
                 };
 
-                let mut content = file.contents_utf8().unwrap().to_string();
-                if file.path().extension() == Some("html".as_ref()) {
-                    content = content.replace("{{VERSION}}", &state.version);
-                }
-
                 return Response::builder()
                     .header(
                         "Content-Type",
@@ -209,14 +204,16 @@ async fn main() {
                             _ => "text/plain",
                         },
                     )
-                    .body(content)
+                    .body(Body::from(file.contents()))
                     .unwrap();
             }
 
             Response::builder()
                 .status(StatusCode::NOT_FOUND)
                 .header("Content-Type", "application/json")
-                .body(ApiError::new_value(&["route not found"]).to_string())
+                .body(Body::from(
+                    ApiError::new_value(&["route not found"]).to_string(),
+                ))
                 .unwrap()
         })
         .layer(CatchPanicLayer::custom(handle_panic))
