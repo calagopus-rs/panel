@@ -2,6 +2,7 @@ use lettre::AsyncTransport;
 use std::sync::Arc;
 
 pub const MAIL_PASSWORD_RESET: &str = include_str!("../static/mails/password_reset.html");
+pub const MAIL_ACCOUNT_CREATED: &str = include_str!("../static/mails/account_created.html");
 
 #[derive(Debug)]
 enum Transport {
@@ -9,7 +10,7 @@ enum Transport {
     Smtp {
         transport: lettre::AsyncSmtpTransport<lettre::Tokio1Executor>,
         from_address: String,
-        from_name: String,
+        from_name: Option<String>,
     },
 }
 
@@ -96,8 +97,8 @@ impl Mail {
                         .subject(subject)
                         .to(lettre::message::Mailbox::new(None, destination.parse()?))
                         .from(lettre::message::Mailbox::new(
-                            Some(from_name.clone()),
-                            from_address.clone().parse()?,
+                            from_name,
+                            from_address.parse()?,
                         ))
                         .header(lettre::message::header::ContentType::TEXT_HTML)
                         .body(body)?,

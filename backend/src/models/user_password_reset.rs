@@ -54,7 +54,7 @@ impl UserPasswordReset {
             r#"
             SELECT COUNT(*)
             FROM user_password_resets
-            WHERE user_password_resets.user_id = $1 AND user_password_resets.created > NOW() - INTERVAL '10 minutes'
+            WHERE user_password_resets.user_id = $1 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
             "#,
         )
         .bind(user_id)
@@ -92,7 +92,7 @@ impl UserPasswordReset {
             JOIN users ON users.id = user_password_resets.user_id
             WHERE
                 user_password_resets.token = crypt($1, user_password_resets.token)
-                AND user_password_resets.created > NOW() - INTERVAL '10 minutes'
+                AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
             "#,
             Self::columns_sql(None, None),
             super::user::User::columns_sql(Some("user_"), None)

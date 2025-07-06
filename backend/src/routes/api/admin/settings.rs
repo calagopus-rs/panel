@@ -43,6 +43,8 @@ mod put {
     #[derive(ToSchema, Deserialize)]
     pub struct PayloadApp {
         name: Option<String>,
+        icon: Option<String>,
+        url: Option<String>,
         telemetry_enabled: Option<bool>,
     }
 
@@ -89,6 +91,16 @@ mod put {
         if let Some(app) = data.app {
             if let Some(name) = app.name {
                 settings.app.name = name;
+            }
+            if let Some(icon) = app.icon {
+                if icon.is_empty() {
+                    settings.app.icon = None;
+                } else {
+                    settings.app.icon = Some(icon);
+                }
+            }
+            if let Some(url) = app.url {
+                settings.app.url = url;
             }
             if let Some(telemetry_enabled) = app.telemetry_enabled {
                 settings.app.telemetry_enabled = telemetry_enabled;

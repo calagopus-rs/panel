@@ -8,6 +8,12 @@ mod get {
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
+    struct ResponseApp<'a> {
+        name: &'a str,
+        icon: Option<&'a str>,
+    }
+
+    #[derive(ToSchema, Serialize)]
     struct ResponseServer {
         allow_overwriting_custom_docker_image: bool,
         allow_editing_startup_command: bool,
@@ -17,6 +23,8 @@ mod get {
     struct Response<'a> {
         captcha_provider: crate::settings::PublicCaptchaProvider<'a>,
 
+        #[schema(inline)]
+        app: ResponseApp<'a>,
         #[schema(inline)]
         server: ResponseServer,
     }
@@ -32,6 +40,10 @@ mod get {
             axum::Json(
                 serde_json::to_value(Response {
                     captcha_provider: settings.captcha_provider.to_public_provider(),
+                    app: ResponseApp {
+                        name: &settings.app.name,
+                        icon: settings.app.icon.as_deref(),
+                    },
                     server: ResponseServer {
                         allow_overwriting_custom_docker_image: settings
                             .server

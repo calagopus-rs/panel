@@ -19,7 +19,7 @@ pub enum MailMode {
         use_tls: bool,
 
         from_address: String,
-        from_name: String,
+        from_name: Option<String>,
     },
 }
 
@@ -64,6 +64,7 @@ pub enum PublicCaptchaProvider<'a> {
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsApp {
     pub name: String,
+    pub icon: Option<String>,
     pub url: String,
 
     pub telemetry_enabled: bool,
@@ -76,6 +77,8 @@ impl AppSettingsApp {
 
         keys.push("app::name");
         values.push(self.name.clone());
+        keys.push("app::icon");
+        values.push(self.icon.clone().unwrap_or_else(|| "".to_string()));
         keys.push("app::url");
         values.push(self.url.clone());
         keys.push("app::telemetry_enabled");
@@ -89,6 +92,7 @@ impl AppSettingsApp {
             name: map
                 .remove("app::name")
                 .unwrap_or_else(|| "pterodactyl-rs".to_string()),
+            icon: map.remove("app::icon").filter(|s| !s.is_empty()),
             url: map
                 .remove("app::url")
                 .unwrap_or_else(|| "https://example.com".to_string()),
@@ -204,7 +208,7 @@ impl AppSettings {
                 keys.push("::mail_smtp_from_address");
                 values.push(from_address.clone());
                 keys.push("::mail_smtp_from_name");
-                values.push(from_name.clone());
+                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
             }
         }
 
@@ -290,7 +294,7 @@ impl AppSettings {
                         .unwrap_or_else(|| "noreply@example.com".to_string()),
                     from_name: map
                         .remove("::mail_smtp_from_name")
-                        .unwrap_or_else(|| "Example".to_string()),
+                        .filter(|s| !s.is_empty()),
                 },
                 _ => MailMode::None,
             },
