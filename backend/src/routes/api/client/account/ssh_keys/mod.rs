@@ -15,7 +15,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        api_keys: Pagination<crate::models::user_ssh_key::ApiUserSshKey>,
+        ssh_keys: Pagination<crate::models::user_ssh_key::ApiUserSshKey>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -56,7 +56,7 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    api_keys: Pagination {
+                    ssh_keys: Pagination {
                         total: ssh_keys.total,
                         per_page: ssh_keys.per_page,
                         page: ssh_keys.page,

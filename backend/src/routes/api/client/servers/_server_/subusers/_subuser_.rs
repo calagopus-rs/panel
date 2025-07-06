@@ -136,13 +136,6 @@ mod patch {
             );
         }
 
-        if let Err(error) = server.has_permission("subusers.update") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
-        }
-
         if !user.admin
             && let Some(subuser_permissions) = &server.subuser_permissions
         {
@@ -158,6 +151,13 @@ mod patch {
                     ])),
                 );
             }
+        }
+
+        if let Err(error) = server.has_permission("subusers.update") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
         }
 
         let subuser = match ServerSubuser::by_server_id_username(

@@ -145,20 +145,6 @@ mod post {
             );
         }
 
-        if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
-        }
-
-        if let Err(error) = server.has_permission("subusers.create") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
-        }
-
         if !user.admin
             && let Some(subuser_permissions) = &server.subuser_permissions
         {
@@ -174,6 +160,20 @@ mod post {
                     ])),
                 );
             }
+        }
+
+        if let Err(error) = state.captcha.verify(ip, data.captcha).await {
+            return (
+                StatusCode::BAD_REQUEST,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
+        if let Err(error) = server.has_permission("subusers.create") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
         }
 
         let username = match ServerSubuser::create(
