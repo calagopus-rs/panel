@@ -1,8 +1,117 @@
-interface PaginatedResult<T> {
-  total: number;
-  per_page: number;
-  page: number;
-  data: T[];
+interface Location {
+  id: number;
+  short_name: string;
+  name: string;
+  description: string | null;
+  backups: LocationConfigBackup;
+  nodes: number;
+  created: Date;
+}
+
+interface Nest {
+  id: number;
+  author: string;
+  name: string;
+  description: string | null;
+  eggs: number;
+  created: Date;
+}
+
+interface Node {
+  id: number;
+  uuid: string;
+  location: Location;
+  name: string;
+  public: boolean;
+  description: string | null;
+  publicUrl: string | null;
+  url: string;
+  sftpHost: string | null;
+  sftpPort: number;
+  maintenanceMessage: string | null;
+  memory: number;
+  disk: number;
+  tokenId: string;
+  servers: number;
+  created: Date;
+}
+
+interface NodeAllocation {
+  id: number;
+  ip: string;
+  ipAlias: string | null;
+  port: number;
+  created: Date;
+}
+
+interface NestEgg {
+  id: number;
+  name: string;
+  description: string | null;
+  startup: string;
+  features: string[];
+  dockerImages: string[];
+  created: Date;
+}
+
+type ApiServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
+
+interface ApiServer {
+  id: number;
+  uuid: string;
+  uuidShort: string;
+  allocation: ServerAllocation | null;
+  egg: NestEgg;
+  status: ApiServerStatus | null;
+  suspended: boolean;
+  isOwner: boolean;
+  permissions: string[];
+  nodeUuid: string;
+  nodeName: string;
+  sftpHost: string;
+  sftpPort: number;
+  name: string;
+  description: string | null;
+  limits: {
+    cpu: number;
+    memory: number;
+    swap: number;
+    disk: number;
+    io: number;
+  };
+  feature_limits: {
+    allocations: number;
+    databases: number;
+    backups: number;
+  };
+  startup: string;
+  image: string;
+  created: Date;
+}
+
+interface ServerActivity {
+  id: number;
+  user: User;
+  event: string;
+  ip: string;
+  data: any;
+  isApi: boolean;
+  created: Date;
+}
+
+interface ServerAllocation {
+  ip: string;
+  ipAlias: string | null;
+  port: number;
+  notes: string | null;
+  isDefault: boolean;
+  created: Date;
+}
+
+interface ServerSubuser {
+  user: User;
+  permissions: string[];
+  created: Date;
 }
 
 interface User {
@@ -42,145 +151,135 @@ interface UserSshKey {
   created: Date;
 }
 
-// Redo types below
-type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
+type AuthenticationType = 'password' | 'public_key';
 
-interface ServerBackup {
-  uuid: string;
-  isSuccessful: boolean;
-  isLocked: boolean;
-  name: string;
-  ignoredFiles: string;
-  checksum: string;
-  bytes: number;
-  createdAt: Date;
-  completedAt: Date | null;
+type CaptchaProviderType = 'none' | 'turnstile' | 'recaptcha';
+
+interface CaptchaProviderBase {
+  type: Exclude<CaptchaProviderType, 'turnstile' | 'recaptcha'>;
 }
 
-interface ServerEggVariable {
-  name: string;
-  description: string;
-  envVariable: string;
-  defaultValue: string;
-  serverValue: string | null;
-  isEditable: boolean;
-  rules: string[];
+interface CaptchaProviderTurnstile {
+  type: 'turnstile';
+  siteKey: string;
+  secretKey: string;
 }
 
-interface Allocation {
-  id: number;
-  ip: string;
-  alias: string | null;
-  port: number;
-  notes: string | null;
-  isDefault: boolean;
+interface CaptchaProviderRecaptcha {
+  type: 'turnstile';
+  siteKey: string;
+  secretKey: string;
+  v3: boolean;
 }
 
-interface Server {
-  id: string;
-  internalId: number | string;
-  uuid: string;
-  name: string;
-  node: string;
-  isNodeUnderMaintenance: boolean;
-  status: ServerStatus;
-  sftpDetails: {
-    ip: string;
-    port: number;
-  };
-  invocation: string;
-  dockerImage: string;
-  description: string | null;
-  limits: {
-    memory: number;
-    swap: number;
-    disk: number;
-    io: number;
-    cpu: number;
-    threads: string;
-  };
-  eggFeatures: string[];
-  featureLimits: {
-    databases: number;
-    allocations: number;
-    backups: number;
-  };
-  isTransferring: boolean;
-  variables: ServerEggVariable[];
-  allocations: Allocation[];
-}
+type CaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
 
-interface FileObject {
-  key: string;
+interface DirectoryEntry {
   name: string;
+  created: Date;
+  modified: Date;
   mode: string;
   modeBits: string;
   size: number;
-  isFile: boolean;
-  isSymlink: boolean;
-  mimetype: string;
-  createdAt: Date;
-  modifiedAt: Date;
-  isArchiveType: () => boolean;
-  isDirectory: () => boolean;
-  isEditable: () => boolean;
+  directory: boolean;
+  file: boolean;
+  symlink: boolean;
+  mime: string;
 }
 
-type ServerPowerState = 'offline' | 'starting' | 'running' | 'stopping';
-
-interface ServerStats {
-  status: ServerPowerState;
-  isSuspended: boolean;
-  memoryUsageInBytes: number;
-  cpuUsagePercent: number;
-  diskUsageInBytes: number;
-  networkRxInBytes: number;
-  networkTxInBytes: number;
-  uptime: number;
+interface Download {
+  identifier: string;
+  destination: string;
+  progress: number;
+  total: number;
 }
 
-type PowerAction = 'start' | 'stop' | 'restart' | 'kill';
+type LocationConfigBackupType = 'local' | 's3' | 'ddup-bak' | 'btrfs' | 'zfs' | 'restic';
 
-interface ServerDatabase {
-  id: string;
-  name: string;
-  username: string;
-  connectionString: string;
-  allowConnectionsFrom: string;
-  password?: string;
+interface LocationConfigBackupBase {
+  type: Exclude<LocationConfigBackupType, 's3'>;
 }
 
-interface CronObject {
-  minute: string;
-  hour: string;
-  dayOfMonth: string;
-  month: string;
-  dayOfWeek: string;
+interface LocationConfigBackupS3 {
+  type: 's3';
+  accessKey: string;
+  secretKey: string;
+  bucket: string;
+  region: string;
+  endpoint: string;
+  pathStyle: boolean;
+  partSize: number;
 }
 
-interface Schedule {
-  id: number;
-  name: string;
-  cron: CronObject;
-  isActive: boolean;
-  isProcessing: boolean;
-  onlyWhenOnline: boolean;
-  lastRunAt: Date | null;
-  nextRunAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+type LocationConfigBackup = LocationConfigBackupBase | LocationConfigBackupS3;
 
-  tasks: Task[];
+type MailModeType = 'none' | 'smtp';
+
+interface MailModeBase {
+  type: Exclude<MailModeType, 'smtp'>;
 }
 
-interface Task {
-  id: number;
-  sequenceId: number;
-  action: string;
-  payload: string;
-  timeOffset: number;
-  isQueued: boolean;
-  continueOnFailure: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+interface MailModeSmtp {
+  type: 'smtp';
+  host: string;
+  port: number;
+  username: string | null;
+  password: string | null;
+  useTls: boolean;
+  fromAddress: string;
+  fromName: string | null;
 }
+
+type MailMode = MailModeBase | MailModeSmtp;
+
+type ProcessConfigurationConfigParser = 'file' | 'yaml' | 'properties' | 'ini' | 'json' | 'xml';
+
+interface ProcessConfiguration {
+  startup: {
+    done: string[];
+    stripAnsi: boolean;
+  };
+  stop: {
+    type: string;
+    value: string | null;
+  };
+  configs: {
+    file: string;
+    parser: ProcessConfigurationConfigParser;
+    replace: {
+      match: string;
+      ifValue: string | null;
+      replaceWith: string;
+    }[];
+  }[];
+}
+
+type PublicCaptchaProviderType = 'none' | 'turnstile' | 'recaptcha';
+
+interface PublicCaptchaProviderBase {
+  type: Exclude<CaptchaProviderType, 'turnstile' | 'recaptcha'>;
+}
+
+interface PublicCaptchaProviderTurnstile {
+  type: 'turnstile';
+  siteKey: string;
+}
+
+interface PublicCaptchaProviderRecaptcha {
+  type: 'turnstile';
+  siteKey: string;
+  v3: boolean;
+}
+
+type PublicCaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
+
+interface ResponseMeta<T> {
+  total: number;
+  per_page: number;
+  page: number;
+  data: T[];
+}
+
+type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
+
+type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
