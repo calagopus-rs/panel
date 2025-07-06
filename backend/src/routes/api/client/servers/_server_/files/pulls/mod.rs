@@ -28,7 +28,7 @@ mod get {
         state: GetState,
         server: GetServer,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("file.read") {
+        if let Err(error) = server.has_permission("files.read") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
@@ -116,7 +116,7 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("file.create") {
+        if let Err(error) = server.has_permission("files.create") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),

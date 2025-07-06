@@ -70,13 +70,14 @@ impl Mail {
         }
     }
 
-    pub async fn send(
-        &self,
-        destination: &str,
-        subject: &str,
-        body: String,
-    ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        let transport = self.get_transport().await?;
+    pub async fn send(&self, destination: String, subject: String, body: String) {
+        let transport = match self.get_transport().await {
+            Ok(transport) => transport,
+            Err(e) => {
+                tracing::error!("failed to get mail transport: {:#?}", e);
+                return;
+            }
+        };
 
         tracing::debug!(
             transport = ?transport,
@@ -85,27 +86,36 @@ impl Mail {
             "sending email"
         );
 
-        match transport {
-            Transport::None => Ok(()),
-            Transport::Smtp {
-                transport,
-                from_address,
-                from_name,
-            } => transport
-                .send(
-                    lettre::message::Message::builder()
-                        .subject(subject)
-                        .to(lettre::message::Mailbox::new(None, destination.parse()?))
-                        .from(lettre::message::Mailbox::new(
-                            from_name,
-                            from_address.parse()?,
-                        ))
-                        .header(lettre::message::header::ContentType::TEXT_HTML)
-                        .body(body)?,
-                )
-                .await
-                .map(|_| ())
-                .map_err(|e| e.into()),
-        }
+        tokio::spawn(async move {
+            let run = async || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+                match transport {
+                    Transport::None => Ok(()),
+                    Transport::Smtp {
+                        transport,
+                        from_address,
+                        from_name,
+                    } => transport
+                        .send(
+                            lettre::message::Message::builder()
+                                .subject(subject)
+                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                .from(lettre::message::Mailbox::new(
+                                    from_name,
+                                    from_address.parse()?,
+                                ))
+                                .header(lettre::message::header::ContentType::TEXT_HTML)
+                                .body(body)?,
+                        )
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| e.into()),
+                }
+            };
+
+            match run().await {
+                Ok(_) => tracing::debug!("email sent successfully"),
+                Err(err) => tracing::error!("failed to send email: {:#?}", err),
+            }
+        });
     }
 }

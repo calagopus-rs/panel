@@ -40,7 +40,7 @@ mod get {
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, HeaderMap, String) {
-        if let Err(error) = server.has_permission("file.read-content") {
+        if let Err(error) = server.has_permission("files.read-content") {
             return (
                 StatusCode::UNAUTHORIZED,
                 HeaderMap::from_iter([(

@@ -54,7 +54,9 @@ impl UserPasswordReset {
             r#"
             SELECT COUNT(*)
             FROM user_password_resets
-            WHERE user_password_resets.user_id = $1 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
+            WHERE
+                user_password_resets.user_id = $1
+                AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
             "#,
         )
         .bind(user_id)

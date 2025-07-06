@@ -37,7 +37,7 @@ mod post {
         Query(params): Query<Params>,
         body: String,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("file.create") {
+        if let Err(error) = server.has_permission("files.create") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),

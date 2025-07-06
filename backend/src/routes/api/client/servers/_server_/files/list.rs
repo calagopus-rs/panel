@@ -68,7 +68,7 @@ mod get {
             );
         }
 
-        if let Err(error) = server.has_permission("file.read") {
+        if let Err(error) = server.has_permission("files.read") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),

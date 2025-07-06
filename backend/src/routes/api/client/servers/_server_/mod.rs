@@ -24,6 +24,7 @@ mod power;
 mod resources;
 mod settings;
 mod startup;
+mod subusers;
 mod websocket;
 
 pub type GetServer = crate::extract::ConsumingExtension<Server>;
@@ -180,6 +181,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/files", files::router(state))
         .nest("/settings", settings::router(state))
         .nest("/startup", startup::router(state))
+        .nest("/subusers", subusers::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

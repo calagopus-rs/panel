@@ -61,7 +61,17 @@ mod post {
             );
         }
 
-        let user =
+        let user = if data.user.contains('@') {
+            match User::by_email_password(&state.database, &data.user, &data.password).await {
+                Some(user) => user,
+                None => {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        axum::Json(ApiError::new_value(&["invalid username or password"])),
+                    );
+                }
+            }
+        } else {
             match User::by_username_password(&state.database, &data.user, &data.password).await {
                 Some(user) => user,
                 None => {
@@ -70,7 +80,8 @@ mod post {
                         axum::Json(ApiError::new_value(&["invalid username or password"])),
                     );
                 }
-            };
+            }
+        };
 
         if user.totp_enabled
             && let Some(secret) = &user.totp_secret

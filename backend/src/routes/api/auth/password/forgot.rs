@@ -83,21 +83,14 @@ mod post {
                     ),
                 );
 
-            if let Err(err) = state
+            state
                 .mail
                 .send(
-                    &user.email,
-                    &format!("{} - Password Reset", settings.app.name),
+                    user.email,
+                    format!("{} - Password Reset", settings.app.name),
                     mail,
                 )
-                .await
-            {
-                tracing::error!(
-                    user = user.id,
-                    "failed to send password reset email: {:#?}",
-                    err
-                );
-            }
+                .await;
         });
 
         (

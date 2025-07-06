@@ -1,10 +1,12 @@
 use super::BaseModel;
+use crate::models::{user::User, user_password_reset::UserPasswordReset};
 use indexmap::IndexMap;
+use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::{
     collections::{BTreeMap, HashSet},
-    sync::LazyLock,
+    sync::{Arc, LazyLock},
 };
 use utoipa::ToSchema;
 use validator::ValidationError;
@@ -35,7 +37,7 @@ pub static PERMISSIONS: LazyLock<
             ),
         ),
         (
-            "user",
+            "subusers",
             (
                 "Permissions that allow a user to manage other subusers on a server. They will never be able to edit their own account, or assign permissions they do not have themselves.",
                 IndexMap::from([
@@ -56,7 +58,7 @@ pub static PERMISSIONS: LazyLock<
             ),
         ),
         (
-            "file",
+            "files",
             (
                 "Permissions that control a user's ability to modify the filesystem for this server.",
                 IndexMap::from([
@@ -85,7 +87,7 @@ pub static PERMISSIONS: LazyLock<
             ),
         ),
         (
-            "backup",
+            "backups",
             (
                 "Permissions that control a user's ability to manage server backups.",
                 IndexMap::from([
@@ -102,7 +104,7 @@ pub static PERMISSIONS: LazyLock<
             ),
         ),
         (
-            "allocation",
+            "allocations",
             (
                 "Permissions that control a user's ability to modify the port allocations for this server.",
                 IndexMap::from([
@@ -150,7 +152,7 @@ pub static PERMISSIONS: LazyLock<
             ),
         ),
         (
-            "database",
+            "databases",
             (
                 "Permissions that control a user's access to the database management for this server.",
                 IndexMap::from([
@@ -173,30 +175,6 @@ pub static PERMISSIONS: LazyLock<
                     (
                         "delete",
                         "Allows a user to remove a database instance from this server.",
-                    ),
-                ]),
-            ),
-        ),
-        (
-            "schedule",
-            (
-                "Permissions that control a user's access to the schedule management for this server.",
-                IndexMap::from([
-                    (
-                        "create",
-                        "Allows a user to create new schedules for this server.",
-                    ),
-                    (
-                        "read",
-                        "Allows a user to view schedules and the tasks associated with them for this server.",
-                    ),
-                    (
-                        "update",
-                        "Allows a user to update schedules and schedule tasks for this server.",
-                    ),
-                    (
-                        "delete",
-                        "Allows a user to delete schedules for this server.",
                     ),
                 ]),
             ),
@@ -296,37 +274,138 @@ impl BaseModel for ServerSubuser {
 }
 
 impl ServerSubuser {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
-        server_id: i32,
-        user_id: i32,
+        settings: &crate::settings::Settings,
+        mail: &Arc<crate::mail::Mail>,
+        server: &super::server::Server,
+        email: &str,
         permissions: &[String],
-    ) -> bool {
+    ) -> Result<String, sqlx::Error> {
+        let user = match super::user::User::by_email(database, email).await {
+            Some(user) => user,
+            None => {
+                let username = email
+                    .split('@')
+                    .next()
+                    .unwrap_or("unknown")
+                    .chars()
+                    .filter(|c| c.is_alphanumeric() || *c == '.' || *c == '-')
+                    .take(10)
+                    .collect::<String>();
+                let username = format!(
+                    "{username}-{}",
+                    rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 4)
+                );
+                let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);
+
+                let user = match User::create(
+                    database, &username, email, "Server", "Subuser", &password, false,
+                )
+                .await
+                {
+                    Ok(user) => user,
+                    Err(err) => {
+                        tracing::error!(username = %username, email = %email, "failed to create subuser user: {:#?}", err);
+
+                        return Err(err);
+                    }
+                };
+
+                match UserPasswordReset::create(database, user.id).await {
+                    Ok(token) => {
+                        let settings = settings.get().await;
+
+                        let mail_content = crate::mail::MAIL_ACCOUNT_CREATED
+                            .replace("{{app_name}}", &settings.app.name)
+                            .replace("{{user_username}}", &user.username)
+                            .replace(
+                                "{{reset_link}}",
+                                &format!(
+                                    "{}/auth/reset-password?token={}",
+                                    settings.app.url,
+                                    urlencoding::encode(&token),
+                                ),
+                            );
+
+                        mail.send(
+                            user.email.clone(),
+                            format!("{} - Account Created", settings.app.name),
+                            mail_content,
+                        )
+                        .await;
+
+                        user
+                    }
+                    Err(err) => {
+                        tracing::warn!(
+                            user = user.id,
+                            "failed to create subuser password reset token: {:#?}",
+                            err
+                        );
+
+                        user
+                    }
+                }
+            }
+        };
+
+        if server.owner.id == user.id {
+            return Err(sqlx::Error::InvalidArgument(
+                "cannot create subuser for server owner".into(),
+            ));
+        }
+
         sqlx::query(
             r#"
             INSERT INTO server_subusers (server_id, user_id, permissions)
             VALUES ($1, $2, $3)
             "#,
         )
-        .bind(server_id)
-        .bind(user_id)
+        .bind(server.id)
+        .bind(user.id)
         .bind(permissions)
-        .fetch_one(database.write())
-        .await
-        .is_ok()
+        .execute(database.write())
+        .await?;
+
+        Ok(user.username)
     }
 
-    pub async fn all_by_server_id_with_pagination(
+    pub async fn by_server_id_username(
+        database: &crate::database::Database,
+        server_id: i32,
+        username: &str,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}
+            FROM server_subusers
+            JOIN users ON users.id = server_subusers.user_id
+            WHERE server_subusers.server_id = $1 AND users.username = $2
+            "#,
+            Self::columns_sql(None, None),
+            super::user::User::columns_sql(Some("user_"), None)
+        ))
+        .bind(server_id)
+        .bind(username)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_server_id_with_pagination(
         database: &crate::database::Database,
         server_id: i32,
         page: i64,
         per_page: i64,
-    ) -> Vec<Self> {
+    ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}, {}, COUNT(*) OVER() AS total_count
             FROM server_subusers
             JOIN users ON users.id = server_subusers.user_id
             WHERE server_subusers.server_id = $1
@@ -342,20 +421,25 @@ impl ServerSubuser {
         .await
         .unwrap();
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
     }
 
-    pub async fn delete_by_ids(database: &crate::database::Database, server_id: i32, ids: &[i32]) {
+    pub async fn delete_by_ids(database: &crate::database::Database, server_id: i32, user_id: i32) {
         sqlx::query(
             r#"
             DELETE FROM server_subusers
             WHERE
                 server_subusers.server_id = $1
-                AND server_subusers.user_id = ANY($2)
+                AND server_subusers.user_id = $2
             "#,
         )
         .bind(server_id)
-        .bind(ids)
+        .bind(user_id)
         .execute(database.write())
         .await
         .unwrap();
