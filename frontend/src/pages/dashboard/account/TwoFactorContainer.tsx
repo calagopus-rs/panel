@@ -1,5 +1,6 @@
 import { useUserStore } from '@/stores/user';
 import SetupTwoFactorButton from './actions/SetupTwoFactorButton';
+import DisableTwoFactorButton from './actions/DisableTwoFactorButton';
 
 export default () => {
   const { user } = useUserStore();
@@ -20,7 +21,7 @@ export default () => {
       </div>
 
       <div className="mt-4 flex justify-end">
-        <SetupTwoFactorButton />
+        {user.totpEnabled ? <DisableTwoFactorButton /> : <SetupTwoFactorButton />}
       </div>
     </div>
   );
