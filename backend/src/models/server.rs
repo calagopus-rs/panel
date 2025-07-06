@@ -103,10 +103,6 @@ impl BaseModel for Server {
                 format!("{table}.backup_limit"),
                 format!("{prefix}backup_limit"),
             ),
-            (
-                "COALESCE(server_subusers.permissions, NULL)".to_string(),
-                format!("{prefix}permissions"),
-            ),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
@@ -159,9 +155,7 @@ impl BaseModel for Server {
             allocation_limit: row.get(format!("{prefix}allocation_limit").as_str()),
             database_limit: row.get(format!("{prefix}database_limit").as_str()),
             backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
-            subuser_permissions: row
-                .try_get::<Vec<String>, _>(format!("{prefix}permissions").as_str())
-                .ok(),
+            subuser_permissions: row.try_get::<Vec<String>, _>("permissions").ok(),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -279,7 +273,6 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.id = $1
             "#,
             Self::columns_sql(None, None),
@@ -311,7 +304,6 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.node_id = $1 AND servers.uuid = $2
             "#,
             Self::columns_sql(None, None),
