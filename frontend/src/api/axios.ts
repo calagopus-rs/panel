@@ -76,3 +76,12 @@ export function getPaginationSet(data: PaginatedResult<unknown>) {
     page: data.page,
   };
 }
+
+export function getEmptyPaginationSet<T>(): PaginatedResult<T> {
+  return {
+    total: 0,
+    per_page: 0,
+    page: 0,
+    data: [],
+  };
+}

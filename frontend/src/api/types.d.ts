@@ -26,6 +26,15 @@ interface UserActivity {
   created: Date;
 }
 
+interface UserApiKey {
+  id: number;
+  name: string;
+  keyStart: string;
+  permissions: string[];
+  lastUsed: Date;
+  created: Date;
+}
+
 // Redo types below
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
 

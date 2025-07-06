@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import disableTwoFactor from '@/api/me/disableTwoFactor';
+import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
