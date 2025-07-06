@@ -4,6 +4,7 @@ import AuthenticationRouter from './routers/AuthenticationRouter';
 import ServerRouter from './routers/ServerRouter';
 import { ToastProvider } from './providers/ToastProvider';
 import CheckingRouter from './routers/CheckingRouter';
+import AdminRouter from './routers/AdminRouter';
 
 export default function App() {
   return (
@@ -24,6 +25,14 @@ export default function App() {
               element={
                 <CheckingRouter requireAuthenticated>
                   <ServerRouter />
+                </CheckingRouter>
+              }
+            />
+            <Route
+              path="/admin/*"
+              element={
+                <CheckingRouter requireAuthenticated>
+                  <AdminRouter />
                 </CheckingRouter>
               }
             />
