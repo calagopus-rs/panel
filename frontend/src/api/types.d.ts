@@ -35,6 +35,13 @@ interface UserApiKey {
   created: Date;
 }
 
+interface UserSshKey {
+  id: number;
+  name: string;
+  fingerprint: string;
+  created: Date;
+}
+
 // Redo types below
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'suspended' | 'restoring_backup' | null;
 
