@@ -29,6 +29,9 @@ export default () => {
 
   return (
     <Container>
+      <div className="justify-between flex items-center mb-2">
+        <h1 className="text-4xl font-bold text-white">Activity</h1>
+      </div>
       {loading ? (
         <Spinner.Centered />
       ) : (
