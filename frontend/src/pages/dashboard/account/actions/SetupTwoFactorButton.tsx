@@ -8,6 +8,7 @@ import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -18,6 +19,7 @@ export interface TwoFactorSetupResponse {
 
 export default () => {
   const { addToast } = useToast();
+  const { user, setUser } = useUserStore();
 
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<'setup' | 'recovery'>('setup');
@@ -51,6 +53,7 @@ export default () => {
         setRecoveryCodes(recoveryCodes.recovery_codes);
         addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
         setStage('recovery');
+        setUser({ ...user!, totpEnabled: true });
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -118,8 +121,10 @@ export default () => {
             <p>Recovery codes:</p>
             <CopyOnClick content={recoveryCodes.join('\n')}>
               <Code>
-                {recoveryCodes.map(code => (
-                  <span>{code}</span>
+                {recoveryCodes.map((code, index) => (
+                  <span key={index} className="block">
+                    {code}
+                  </span>
                 ))}
               </Code>
             </CopyOnClick>

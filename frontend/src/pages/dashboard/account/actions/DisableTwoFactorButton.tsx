@@ -4,10 +4,12 @@ import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
+  const { user, setUser } = useUserStore();
 
   const [open, setOpen] = useState(false);
 
@@ -26,6 +28,8 @@ export default () => {
     disableTwoFactor(code, password)
       .then(() => {
         addToast('Two-factor authentication disabled.', 'success');
+        setOpen(false);
+        setUser({ ...user!, totpEnabled: false });
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
