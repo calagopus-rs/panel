@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 export default ({ apiKey }: { apiKey: UserApiKey }) => {
   const { addToast } = useToast();
-  const { removeKey } = useUserStore(state => state.keys);
+  const { removeKey } = useUserStore(state => state.apiKeys);
 
   const [open, setOpen] = useState(false);
 

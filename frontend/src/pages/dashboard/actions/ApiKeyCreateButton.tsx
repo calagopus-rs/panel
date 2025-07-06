@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { addKey } = useUserStore(state => state.keys);
+  const { addKey } = useUserStore(state => state.apiKeys);
 
   const [open, setOpen] = useState(false);
 

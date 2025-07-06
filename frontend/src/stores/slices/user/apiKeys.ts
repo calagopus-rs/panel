@@ -1,6 +1,6 @@
 import { getEmptyPaginationSet } from '@/api/axios';
 
-export interface KeySlice {
+export interface ApiKeySlice {
   keys: PaginatedResult<UserApiKey>;
 
   setKeys: (keys: PaginatedResult<UserApiKey>) => void;
@@ -8,23 +8,23 @@ export interface KeySlice {
   removeKey: (key: UserApiKey) => void;
 }
 
-export const createKeysSlice = (set): KeySlice => ({
+export const createApiKeysSlice = (set): ApiKeySlice => ({
   keys: getEmptyPaginationSet<UserApiKey>(),
 
   setKeys: value =>
     set(state => {
-      state.keys.keys = value;
+      state.apiKeys.keys = value;
     }),
 
   addKey: value =>
     set(state => {
-      state.keys.keys.data = [...state.keys.keys.data, value];
-      state.keys.keys.total += 1;
+      state.apiKeys.keys.data = [...state.apiKeys.keys.data, value];
+      state.apiKeys.keys.total += 1;
     }),
 
   removeKey: value =>
     set(state => {
-      state.keys.keys.data = state.keys.keys.data.filter(schedule => schedule.id !== value.id);
-      state.keys.keys.total -= 1;
+      state.apiKeys.keys.data = state.apiKeys.keys.data.filter(schedule => schedule.id !== value.id);
+      state.apiKeys.keys.total -= 1;
     }),
 });

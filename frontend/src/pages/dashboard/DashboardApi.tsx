@@ -21,7 +21,7 @@ import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 export default () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const { keys, setKeys } = useUserStore(state => state.keys);
+  const { keys, setKeys } = useUserStore(state => state.apiKeys);
 
   useEffect(() => {
     getApiKeys(page).then(data => {
