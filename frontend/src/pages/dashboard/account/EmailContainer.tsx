@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import updateEmail from '@/api/me/updateEmail';
+import updateEmail from '@/api/me/account/updateEmail';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';

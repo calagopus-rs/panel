@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
-import enableTwoFactor from '@/api/me/enableTwoFactor';
-import getTwoFactor from '@/api/me/getTwoFactor';
+import enableTwoFactor from '@/api/me/account/enableTwoFactor';
+import getTwoFactor from '@/api/me/account/getTwoFactor';
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
