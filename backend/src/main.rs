@@ -2,7 +2,7 @@ use axum::{
     ServiceExt,
     body::Body,
     extract::Request,
-    http::{HeaderMap, Method, StatusCode},
+    http::{Method, StatusCode},
     middleware::Next,
     response::Response,
     routing::get,
@@ -12,7 +12,7 @@ use include_dir::{Dir, include_dir};
 use routes::{ApiError, GetState};
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
-use std::{collections::HashMap, sync::Arc, time::Instant};
+use std::{sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
 use tower_http::{
@@ -37,32 +37,6 @@ mod utils;
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
 const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
-
-#[inline]
-fn render_index(meta: HashMap<&str, String>, state: GetState) -> (StatusCode, HeaderMap, String) {
-    let index = FRONTEND_ASSETS
-        .get_file("index.html")
-        .unwrap()
-        .contents_utf8()
-        .unwrap()
-        .to_string();
-    let mut metadata = String::new();
-
-    for (key, value) in meta {
-        metadata.push_str(&format!("<meta name=\"{key}\" content=\"{value}\">"));
-    }
-
-    let mut headers = HeaderMap::new();
-    headers.insert("Content-Type", "text/html".parse().unwrap());
-
-    (
-        StatusCode::OK,
-        headers,
-        index
-            .replace("<!-- META -->", &metadata)
-            .replace("{{VERSION}}", &state.version),
-    )
-}
 
 fn handle_panic(_err: Box<dyn std::any::Any + Send + 'static>) -> Response<Body> {
     tracing::error!("a request panic has occurred");
@@ -181,7 +155,7 @@ async fn main() {
 
     let settings = Arc::new(settings::Settings::new(database.clone()).await);
     let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
-    let email = Arc::new(mail::Mail::new(settings.clone()));
+    let mail = Arc::new(mail::Mail::new(settings.clone()));
 
     let state = Arc::new(routes::AppState {
         start_time: Instant::now(),
@@ -190,7 +164,7 @@ async fn main() {
         settings,
         jwt,
         captcha,
-        email,
+        mail,
         database: database.clone(),
         cache: cache.clone(),
         env,
@@ -275,9 +249,6 @@ async fn main() {
     openapi.info.title = "Panel API".to_string();
     openapi.info.contact = None;
     openapi.info.license = None;
-    openapi.servers = Some(vec![utoipa::openapi::Server::new(
-        state.env.app_url.clone(),
-    )]);
     openapi.components.as_mut().unwrap().add_security_scheme(
         "api_key",
         SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("Authorization"))),

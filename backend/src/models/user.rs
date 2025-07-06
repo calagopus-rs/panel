@@ -205,6 +205,23 @@ impl User {
             .await
     }
 
+    pub async fn by_email(database: &crate::database::Database, email: &str) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM users
+            WHERE users.email = $1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(email)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
     pub async fn by_username_password(
         database: &crate::database::Database,
         username: &str,

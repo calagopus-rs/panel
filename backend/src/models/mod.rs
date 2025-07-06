@@ -25,6 +25,7 @@ pub mod server_variable;
 pub mod user;
 pub mod user_activity;
 pub mod user_api_key;
+pub mod user_password_reset;
 pub mod user_recovery_code;
 pub mod user_session;
 pub mod user_ssh_key;

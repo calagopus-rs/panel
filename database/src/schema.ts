@@ -97,11 +97,24 @@ export const userRecoveryCodes = pgTable('user_recovery_codes', {
 	id: serial('id').primaryKey().notNull(),
 	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
 
-	code: char('code', { length: 10 }).notNull(),
+	code: text('code').notNull(),
+
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userRecoveryCodes) => [
 	index('user_recovery_codes_user_id_idx').on(userRecoveryCodes.userId),
 	uniqueIndex('user_recovery_codes_user_id_code_idx').on(userRecoveryCodes.userId, userRecoveryCodes.code)
+])
+
+export const userPasswordResets = pgTable('user_password_resets', {
+	id: serial('id').primaryKey().notNull(),
+	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+
+	token: text('token').notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (userPasswordResets) => [
+	index('user_password_resets_user_id_idx').on(userPasswordResets.userId),
+	uniqueIndex('user_password_resets_token_idx').on(userPasswordResets.token)
 ])
 
 export const userSshKeys = pgTable('user_ssh_keys', {

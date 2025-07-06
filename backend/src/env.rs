@@ -19,7 +19,6 @@ pub struct Env {
     pub bind: String,
     pub port: u16,
 
-    pub app_url: String,
     pub app_debug: bool,
     pub app_log_directory: String,
     pub app_encryption_key: String,
@@ -77,10 +76,6 @@ impl Env {
                 .parse()
                 .unwrap(),
 
-            app_url: std::env::var("APP_URL")
-                .expect("APP_URL is required")
-                .trim_matches('"')
-                .to_string(),
             app_debug: std::env::var("APP_DEBUG")
                 .unwrap_or("false".to_string())
                 .trim_matches('"')

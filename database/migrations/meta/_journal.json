@@ -162,6 +162,13 @@
       "when": 1751739920677,
       "tag": "0022_workable_ghost_rider",
       "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1751795461130,
+      "tag": "0023_quick_silhouette",
+      "breakpoints": false
     }
   ]
 }

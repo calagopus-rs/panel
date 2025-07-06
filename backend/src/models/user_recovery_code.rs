@@ -86,7 +86,7 @@ impl UserRecoveryCode {
         ))
         .bind(user_id)
         .bind(code)
-        .fetch_optional(database.read())
+        .fetch_optional(database.write())
         .await
         .unwrap()?;
 

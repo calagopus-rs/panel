@@ -64,6 +64,7 @@ pub enum PublicCaptchaProvider<'a> {
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsApp {
     pub name: String,
+    pub url: String,
 
     pub telemetry_enabled: bool,
 }
@@ -73,9 +74,11 @@ impl AppSettingsApp {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
-        keys.push("name");
+        keys.push("app::name");
         values.push(self.name.clone());
-        keys.push("telemetry_enabled");
+        keys.push("app::url");
+        values.push(self.url.clone());
+        keys.push("app::telemetry_enabled");
         values.push(self.telemetry_enabled.to_string());
 
         (keys, values)
@@ -84,10 +87,13 @@ impl AppSettingsApp {
     pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
         AppSettingsApp {
             name: map
-                .remove("name")
+                .remove("app::name")
                 .unwrap_or_else(|| "pterodactyl-rs".to_string()),
+            url: map
+                .remove("app::url")
+                .unwrap_or_else(|| "https://example.com".to_string()),
             telemetry_enabled: map
-                .remove("telemetry_enabled")
+                .remove("app::telemetry_enabled")
                 .map(|s| s == "true")
                 .unwrap_or(true),
         }
@@ -107,11 +113,11 @@ impl AppSettingsServer {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
-        keys.push("max_file_manager_view_size");
+        keys.push("server::max_file_manager_view_size");
         values.push(self.max_file_manager_view_size.to_string());
-        keys.push("allow_overwriting_custom_docker_image");
+        keys.push("server::allow_overwriting_custom_docker_image");
         values.push(self.allow_overwriting_custom_docker_image.to_string());
-        keys.push("allow_editing_startup_command");
+        keys.push("server::allow_editing_startup_command");
         values.push(self.allow_editing_startup_command.to_string());
 
         (keys, values)
@@ -120,16 +126,16 @@ impl AppSettingsServer {
     pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
         AppSettingsServer {
             max_file_manager_view_size: map
-                .remove("max_file_manager_view_size")
+                .remove("server::max_file_manager_view_size")
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(10 * 1024 * 1024),
 
             allow_overwriting_custom_docker_image: map
-                .remove("allow_overwriting_custom_docker_image")
+                .remove("server::allow_overwriting_custom_docker_image")
                 .map(|s| s == "true")
                 .unwrap_or(true),
             allow_editing_startup_command: map
-                .remove("allow_editing_startup_command")
+                .remove("server::allow_editing_startup_command")
                 .map(|s| s == "true")
                 .unwrap_or(false),
         }
@@ -157,7 +163,7 @@ impl AppSettings {
 
         match &self.mail_mode {
             MailMode::None => {
-                keys.push("mail_mode");
+                keys.push("::mail_mode");
                 values.push("none".to_string());
             }
             MailMode::Smtp {
@@ -169,13 +175,13 @@ impl AppSettings {
                 from_address,
                 from_name,
             } => {
-                keys.push("mail_mode");
+                keys.push("::mail_mode");
                 values.push("smtp".to_string());
-                keys.push("mail_smtp_host");
+                keys.push("::mail_smtp_host");
                 values.push(host.clone());
-                keys.push("mail_smtp_port");
+                keys.push("::mail_smtp_port");
                 values.push(port.to_string());
-                keys.push("mail_smtp_username");
+                keys.push("::mail_smtp_username");
                 values.push(if let Some(username) = username {
                     database
                         .encrypt(username)
@@ -184,7 +190,7 @@ impl AppSettings {
                 } else {
                     String::new()
                 });
-                keys.push("mail_smtp_password");
+                keys.push("::mail_smtp_password");
                 values.push(if let Some(password) = password {
                     database
                         .encrypt(password)
@@ -193,29 +199,29 @@ impl AppSettings {
                 } else {
                     String::new()
                 });
-                keys.push("mail_smtp_use_tls");
+                keys.push("::mail_smtp_use_tls");
                 values.push(use_tls.to_string());
-                keys.push("mail_smtp_from_address");
+                keys.push("::mail_smtp_from_address");
                 values.push(from_address.clone());
-                keys.push("mail_smtp_from_name");
+                keys.push("::mail_smtp_from_name");
                 values.push(from_name.clone());
             }
         }
 
         match &self.captcha_provider {
             CaptchaProvider::None => {
-                keys.push("captcha_provider");
+                keys.push("::captcha_provider");
                 values.push("none".to_string());
             }
             CaptchaProvider::Turnstile {
                 site_key,
                 secret_key,
             } => {
-                keys.push("captcha_provider");
+                keys.push("::captcha_provider");
                 values.push("turnstile".to_string());
-                keys.push("turnstile_site_key");
+                keys.push("::turnstile_site_key");
                 values.push(site_key.clone());
-                keys.push("turnstile_secret_key");
+                keys.push("::turnstile_secret_key");
                 values.push(secret_key.clone());
             }
             CaptchaProvider::Recaptcha {
@@ -223,13 +229,13 @@ impl AppSettings {
                 site_key,
                 secret_key,
             } => {
-                keys.push("captcha_provider");
+                keys.push("::captcha_provider");
                 values.push("recaptcha".to_string());
-                keys.push("recaptcha_v3");
+                keys.push("::recaptcha_v3");
                 values.push(if *v3 { "true" } else { "false" }.to_string());
-                keys.push("recaptcha_site_key");
+                keys.push("::recaptcha_site_key");
                 values.push(site_key.clone());
-                keys.push("recaptcha_secret_key");
+                keys.push("::recaptcha_secret_key");
                 values.push(secret_key.clone());
             }
         }
@@ -249,17 +255,17 @@ impl AppSettings {
         database: &crate::database::Database,
     ) -> Self {
         AppSettings {
-            mail_mode: match map.remove("mail_mode").as_deref() {
+            mail_mode: match map.remove("::mail_mode").as_deref() {
                 Some("none") => MailMode::None,
                 Some("smtp") => MailMode::Smtp {
                     host: map
-                        .remove("mail_smtp_host")
+                        .remove("::mail_smtp_host")
                         .unwrap_or_else(|| "smtp.example.com".to_string()),
                     port: map
-                        .remove("mail_smtp_port")
+                        .remove("::mail_smtp_port")
                         .and_then(|s| s.parse().ok())
                         .unwrap_or(587),
-                    username: map.remove("mail_smtp_username").and_then(|s| {
+                    username: map.remove("::mail_smtp_username").and_then(|s| {
                         if s.is_empty() {
                             None
                         } else {
@@ -267,7 +273,7 @@ impl AppSettings {
                                 .and_then(|b| database.decrypt(&b))
                         }
                     }),
-                    password: map.remove("mail_smtp_password").and_then(|s| {
+                    password: map.remove("::mail_smtp_password").and_then(|s| {
                         if s.is_empty() {
                             None
                         } else {
@@ -276,38 +282,38 @@ impl AppSettings {
                         }
                     }),
                     use_tls: map
-                        .remove("mail_smtp_use_tls")
+                        .remove("::mail_smtp_use_tls")
                         .map(|s| s == "true")
                         .unwrap_or(true),
                     from_address: map
-                        .remove("mail_smtp_from_address")
+                        .remove("::mail_smtp_from_address")
                         .unwrap_or_else(|| "noreply@example.com".to_string()),
                     from_name: map
-                        .remove("mail_smtp_from_name")
+                        .remove("::mail_smtp_from_name")
                         .unwrap_or_else(|| "Example".to_string()),
                 },
                 _ => MailMode::None,
             },
-            captcha_provider: match map.remove("captcha_provider").as_deref() {
+            captcha_provider: match map.remove("::captcha_provider").as_deref() {
                 Some("none") => CaptchaProvider::None,
                 Some("turnstile") => CaptchaProvider::Turnstile {
                     site_key: map
-                        .remove("turnstile_site_key")
+                        .remove("::turnstile_site_key")
                         .unwrap_or_else(|| "your-turnstile-site-key".to_string()),
                     secret_key: map
-                        .remove("turnstile_secret_key")
+                        .remove("::turnstile_secret_key")
                         .unwrap_or_else(|| "your-turnstile-secret-key".to_string()),
                 },
                 Some("recaptcha") => CaptchaProvider::Recaptcha {
                     v3: map
-                        .remove("recaptcha_v3")
+                        .remove("::recaptcha_v3")
                         .map(|s| s == "true")
                         .unwrap_or(false),
                     site_key: map
-                        .remove("recaptcha_site_key")
+                        .remove("::recaptcha_site_key")
                         .unwrap_or_else(|| "your-recaptcha-site-key".to_string()),
                     secret_key: map
-                        .remove("recaptcha_secret_key")
+                        .remove("::recaptcha_secret_key")
                         .unwrap_or_else(|| "your-recaptcha-secret-key".to_string()),
                 },
                 _ => CaptchaProvider::None,
@@ -331,8 +337,8 @@ impl<'a> SettingsGuard<'a> {
 
         sqlx::query!(
             "INSERT INTO settings (key, value)
-            SELECT *
-            FROM UNNEST($1::text[], $2::text[])",
+            SELECT * FROM UNNEST($1::text[], $2::text[])
+            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
             &keys as &[&str],
             &values
         )

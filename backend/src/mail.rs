@@ -1,6 +1,9 @@
 use lettre::AsyncTransport;
 use std::sync::Arc;
 
+pub const MAIL_PASSWORD_RESET: &str = include_str!("../static/mails/password_reset.html");
+
+#[derive(Debug)]
 enum Transport {
     None,
     Smtp {
@@ -72,7 +75,16 @@ impl Mail {
         subject: &str,
         body: String,
     ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-        match self.get_transport().await? {
+        let transport = self.get_transport().await?;
+
+        tracing::debug!(
+            transport = ?transport,
+            destination = destination,
+            subject = subject,
+            "sending email"
+        );
+
+        match transport {
             Transport::None => Ok(()),
             Transport::Smtp {
                 transport,
@@ -87,6 +99,7 @@ impl Mail {
                             Some(from_name.clone()),
                             from_address.clone().parse()?,
                         ))
+                        .header(lettre::message::header::ContentType::TEXT_HTML)
                         .body(body)?,
                 )
                 .await
