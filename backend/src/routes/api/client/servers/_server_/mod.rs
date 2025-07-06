@@ -77,7 +77,7 @@ pub async fn auth(
         Some(server) => server,
         None => {
             return Ok(Response::builder()
-                .status(StatusCode::CONFLICT)
+                .status(StatusCode::NOT_FOUND)
                 .header("Content-Type", "application/json")
                 .body(Body::from(
                     serde_json::to_string(&ApiError::new_value(&["server not found"])).unwrap(),

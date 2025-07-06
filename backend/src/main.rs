@@ -9,7 +9,7 @@ use axum::{
 };
 use colored::Colorize;
 use include_dir::{Dir, include_dir};
-use routes::{ApiError, GetState};
+use routes::ApiError;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
 use std::{sync::Arc, time::Instant};
@@ -172,7 +172,7 @@ async fn main() {
 
     let app = OpenApiRouter::new()
         .merge(routes::router(&state))
-        .fallback(|state: GetState, req: Request<Body>| async move {
+        .fallback(|req: Request<Body>| async move {
             if !req.uri().path().starts_with("/api") {
                 let path = &req.uri().path()[1..];
 

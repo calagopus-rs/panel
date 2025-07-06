@@ -104,7 +104,7 @@ impl BaseModel for Server {
                 format!("{prefix}backup_limit"),
             ),
             (
-                "server_subusers.permissions".to_string(),
+                "COALESCE(server_subusers.permissions, NULL)".to_string(),
                 format!("{prefix}permissions"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -344,7 +344,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
             WHERE servers.{} = $3 AND (servers.owner_id = $1 OR server_subusers.user_id = $1 OR $2)
             "#,
             Self::columns_sql(None, None),
@@ -388,7 +388,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
             WHERE servers.owner_id = $1 OR server_subusers.user_id = $1
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
@@ -432,7 +432,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
+            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
             WHERE servers.owner_id != $1 AND server_subusers.user_id != $1
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
@@ -476,7 +476,6 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             WHERE servers.node_id = $1
             LIMIT $2 OFFSET $3
             "#,
@@ -518,7 +517,6 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None),

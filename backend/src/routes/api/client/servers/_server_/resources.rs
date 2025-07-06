@@ -9,7 +9,6 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        #[schema(inline)]
         resources: wings_api::ResourceUsage,
     }
 
