@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
 import classNames from 'classnames';
 
-type ToastType = 'success' | 'error' | 'loading' | 'info';
+type ToastType = 'success' | 'error' | 'warning' | 'loading' | 'info';
 
 type Toast = {
   id: number;
@@ -70,6 +70,8 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         return 'bg-red-700';
       case 'loading':
         return 'bg-blue-600';
+      case 'warning':
+        return 'bg-yellow-600';
       default:
         return 'bg-gray-600';
     }

@@ -1,6 +1,7 @@
 import Container from '@/elements/Container';
 import PasswordContainer from './PasswordContainer';
 import EmailContainer from './EmailContainer';
+import TwoFactorContainer from './TwoFactorContainer';
 
 export default () => {
   return (
@@ -8,9 +9,7 @@ export default () => {
       <div className="grid grid-cols-3 gap-4">
         <PasswordContainer />
         <EmailContainer />
-        <div className="bg-gray-700/50 rounded-md p-4">
-          <h1 className="text-4xl font-bold text-white">Two-Step Verification</h1>
-        </div>
+        <TwoFactorContainer />
       </div>
     </Container>
   );

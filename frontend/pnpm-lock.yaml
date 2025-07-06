@@ -86,6 +86,9 @@ importers:
       react-fast-compare:
         specifier: ^3.2.2
         version: 3.2.2
+      react-qr-code:
+        specifier: ^2.0.17
+        version: 2.0.17(react@19.1.0)
       react-router:
         specifier: ^7.6.2
         version: 7.6.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -1973,6 +1976,9 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  qr.js@0.0.0:
+    resolution: {integrity: sha512-c4iYnWb+k2E+vYpRimHqSu575b1/wKl4XFeJGpFmrJQz5I88v9aY2czh7s0w36srfCM1sXgC/xpoJz5dJfq+OQ==}
+
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
 
@@ -1992,6 +1998,11 @@ packages:
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
+
+  react-qr-code@2.0.17:
+    resolution: {integrity: sha512-3ufx+4kKtdaipw09lwrawRtfvoYUPpOljvwMvsMvTBBCa21zqugwaxfSi9J1GLLKJGNpPlYhd1LOmDHAivsiaQ==}
+    peerDependencies:
+      react: '*'
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -4245,6 +4256,8 @@ snapshots:
 
   punycode@2.3.1: {}
 
+  qr.js@0.0.0: {}
+
   queue-microtask@1.2.3: {}
 
   react-chartjs-2@5.3.0(chart.js@4.5.0)(react@19.1.0):
@@ -4260,6 +4273,12 @@ snapshots:
   react-fast-compare@3.2.2: {}
 
   react-is@16.13.1: {}
+
+  react-qr-code@2.0.17(react@19.1.0):
+    dependencies:
+      prop-types: 15.8.1
+      qr.js: 0.0.0
+      react: 19.1.0
 
   react-refresh@0.17.0: {}
 

@@ -23,7 +23,7 @@ export default () => {
   };
 
   return (
-    <div className="bg-gray-700/50 rounded-md p-4">
+    <div className="bg-gray-700/50 rounded-md p-4 h-fit">
       <h1 className="text-4xl font-bold text-white">Update Password</h1>
 
       <div className="mt-4">
