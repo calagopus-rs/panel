@@ -43,12 +43,12 @@ export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
-  const clearState = useServerStore(state => state.clear);
+  const resetState = useServerStore(state => state.reset);
   const setServer = useServerStore(state => state.setServer);
 
   useEffect(() => {
     return () => {
-      clearState();
+      resetState();
     };
   }, []);
 

@@ -32,5 +32,5 @@ export default ({ requireAuthenticated, requireUnauthenticated, children }: Prop
     setLoading(false);
   }, [user]);
 
-  return loading || (requireAuthenticated && !user) ? <Spinner.Centered /> : <>{children}</>;
+  return loading || !user ? <Spinner.Centered /> : <>{children}</>;
 };

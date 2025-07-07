@@ -14,14 +14,21 @@ export interface ServerStore
     ServerSlice,
     StatsSlice,
     StateSlice,
-    WebsocketSlice {}
+    WebsocketSlice {
+  reset: () => void;
+}
 
-export const useServerStore = create<ServerStore>()((...a) => ({
-  ...createDatabasesSlice(...a),
-  ...createFilesSlice(...a),
-  ...createSchedulesSlice(...a),
-  ...createServerSlice(...a),
-  ...createStateSlice(...a),
-  ...createStatsSlice(...a),
-  ...createWebsocketSlice(...a),
-}));
+export const useServerStore = create<ServerStore>()((...a) => {
+  const initialState = {} as ServerStore;
+  Object.assign(initialState, {
+    ...createDatabasesSlice(...a),
+    ...createFilesSlice(...a),
+    ...createSchedulesSlice(...a),
+    ...createServerSlice(...a),
+    ...createStateSlice(...a),
+    ...createStatsSlice(...a),
+    ...createWebsocketSlice(...a),
+  });
+  initialState.reset = () => useServerStore.setState(state => ({ ...initialState, reset: state.reset }), true);
+  return initialState;
+});
