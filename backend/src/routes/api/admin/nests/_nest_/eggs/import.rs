@@ -38,7 +38,6 @@ mod post {
 
         user_viewable: bool,
         user_editable: bool,
-
         rules: Option<String>,
     }
 
@@ -55,7 +54,6 @@ mod post {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         name: String,
-
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
@@ -173,6 +171,7 @@ mod post {
                 egg.id,
                 &variable.name,
                 variable.description.as_deref(),
+                0,
                 &variable.env_variable,
                 variable.default_value.as_deref(),
                 variable.user_viewable,
@@ -182,7 +181,8 @@ mod post {
                     .map(|v| v.split('|').map(String::from).collect::<Vec<String>>())
                     .unwrap_or_default(),
             )
-            .await;
+            .await
+            .ok();
         }
 
         user.log_activity(

@@ -14,7 +14,6 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        #[schema(inline)]
         nests: Pagination<crate::models::nest::AdminApiNest>,
     }
 
@@ -87,7 +86,6 @@ mod post {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         name: String,
-
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,

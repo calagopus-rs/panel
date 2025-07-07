@@ -1,0 +1,1 @@
+ALTER TABLE "nest_egg_variables" RENAME COLUMN "order" TO "order_";

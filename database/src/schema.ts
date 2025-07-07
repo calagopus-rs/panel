@@ -295,6 +295,7 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
+	order: smallint('order_').default(0).notNull(),
 
 	envVariable: varchar('env_variable', { length: 255 }).notNull(),
 	defaultValue: text('default_value'),
@@ -305,7 +306,8 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggVariables) => [
 	index('egg_variables_egg_id_idx').on(eggVariables.eggId),
-	uniqueIndex('egg_variables_egg_id_name_idx').on(eggVariables.eggId, eggVariables.name)
+	uniqueIndex('egg_variables_egg_id_name_idx').on(eggVariables.eggId, eggVariables.name),
+	uniqueIndex('egg_variables_egg_id_env_variable_idx').on(eggVariables.eggId, eggVariables.envVariable)
 ])
 
 export const databaseHosts = pgTable('database_hosts', {
