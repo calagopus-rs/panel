@@ -1,7 +1,9 @@
 [workspace]
 resolver = "3"
-members = ["backend", "wings-api"]
+members = ["backend", "rule-validator", "wings-api"]
 default-members = ["backend"]
+package.version = "0.1.0"
+package.edition = "2024"
 
 [profile.dev.package."*"]
 opt-level = 3
@@ -15,10 +17,12 @@ lto = true
 
 [workspace.dependencies]
 utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid"] }
+validator = { version = "0.20.0", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
 chrono = { version = "0.4.40", features = ["serde"] }
 uuid = { version = "1.17.0", features = ["v4", "serde"] }
 indexmap = { version = "2.7.1", features = ["serde"] }
+regex = "1.11.1"
 urlencoding = "2.1.3"

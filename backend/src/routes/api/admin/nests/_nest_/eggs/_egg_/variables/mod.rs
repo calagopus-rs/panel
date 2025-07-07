@@ -104,6 +104,7 @@ mod post {
 
         user_viewable: bool,
         user_editable: bool,
+        #[validate(custom(function = "rule_validator::validate_rules"))]
         rules: Vec<String>,
     }
 

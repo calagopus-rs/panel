@@ -310,6 +310,53 @@ dependencies = [
 ]
 
 [[package]]
+name = "backend"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base32",
+ "chrono",
+ "colored",
+ "constant_time_eq 0.4.2",
+ "dotenvy",
+ "futures-util",
+ "hmac",
+ "image",
+ "include_dir",
+ "indexmap",
+ "jwt",
+ "lettre",
+ "rand 0.9.1",
+ "regex",
+ "reqwest",
+ "rule-validator",
+ "russh",
+ "rust-s3",
+ "rustis",
+ "sentry",
+ "sentry-tower",
+ "serde",
+ "serde_json",
+ "sha2",
+ "simple_crypt",
+ "sqlx",
+ "tokio",
+ "totp-rs",
+ "tower",
+ "tower-cookies",
+ "tower-http",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "urlencoding",
+ "utoipa",
+ "utoipa-axum",
+ "uuid",
+ "validator",
+ "wings-api",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2471,52 +2518,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "panel"
-version = "0.1.0"
-dependencies = [
- "axum",
- "base32",
- "chrono",
- "colored",
- "constant_time_eq 0.4.2",
- "dotenvy",
- "futures-util",
- "hmac",
- "image",
- "include_dir",
- "indexmap",
- "jwt",
- "lettre",
- "rand 0.9.1",
- "regex",
- "reqwest",
- "russh",
- "rust-s3",
- "rustis",
- "sentry",
- "sentry-tower",
- "serde",
- "serde_json",
- "sha2",
- "simple_crypt",
- "sqlx",
- "tokio",
- "totp-rs",
- "tower",
- "tower-cookies",
- "tower-http",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "urlencoding",
- "utoipa",
- "utoipa-axum",
- "uuid",
- "validator",
- "wings-api",
-]
-
-[[package]]
 name = "parking"
 version = "2.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3194,6 +3195,19 @@ dependencies = [
  "spki",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "rule-validator"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "uuid",
+ "validator",
 ]
 
 [[package]]
@@ -5374,7 +5388,7 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "wings-api"
-version = "1.0.0"
+version = "0.1.0"
 dependencies = [
  "chrono",
  "indexmap",

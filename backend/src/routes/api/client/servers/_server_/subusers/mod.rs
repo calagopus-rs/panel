@@ -147,19 +147,17 @@ mod post {
 
         if !user.admin
             && let Some(subuser_permissions) = &server.subuser_permissions
-        {
-            if !data
+            && !data
                 .permissions
                 .iter()
                 .all(|p| subuser_permissions.contains(p))
-            {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[
-                        "permissions: more permissions than self",
-                    ])),
-                );
-            }
+        {
+            return (
+                StatusCode::BAD_REQUEST,
+                axum::Json(ApiError::new_value(&[
+                    "permissions: more permissions than self",
+                ])),
+            );
         }
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {

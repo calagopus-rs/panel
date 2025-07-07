@@ -104,12 +104,12 @@ impl UserPasswordReset {
         .await
         .unwrap()?;
 
-        sqlx::query(&format!(
+        sqlx::query(
             r#"
             DELETE FROM user_password_resets
             WHERE user_password_resets.id = $1
-            "#
-        ))
+            "#,
+        )
         .bind(row.get::<i32, _>("id"))
         .execute(database.write())
         .await

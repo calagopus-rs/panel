@@ -121,13 +121,13 @@ mod post {
         };
 
         let config_files =
-            serde_json::from_str(&data.config.get("files").unwrap_or(&"[]".to_string()))
+            serde_json::from_str(data.config.get("files").unwrap_or(&"[]".to_string()))
                 .unwrap_or_default();
         let config_startup =
-            serde_json::from_str(&data.config.get("startup").unwrap_or(&"{}".to_string()))
+            serde_json::from_str(data.config.get("startup").unwrap_or(&"{}".to_string()))
                 .unwrap_or_default();
         let config_stop =
-            serde_json::from_str(&data.config.get("stop").unwrap_or(&"{}".to_string()))
+            serde_json::from_str(data.config.get("stop").unwrap_or(&"{}".to_string()))
                 .unwrap_or_default();
 
         let egg = match NestEgg::create(
@@ -166,6 +166,16 @@ mod post {
         };
 
         for variable in data.variables {
+            let rules = variable
+                .rules
+                .as_ref()
+                .map(|v| v.split('|').map(String::from).collect::<Vec<String>>())
+                .unwrap_or_default();
+
+            if rule_validator::validate_rules(&rules).is_err() {
+                continue;
+            }
+
             NestEggVariable::create(
                 &state.database,
                 egg.id,
@@ -176,10 +186,7 @@ mod post {
                 variable.default_value.as_deref(),
                 variable.user_viewable,
                 variable.user_editable,
-                &variable
-                    .rules
-                    .map(|v| v.split('|').map(String::from).collect::<Vec<String>>())
-                    .unwrap_or_default(),
+                &rules,
             )
             .await
             .ok();

@@ -130,6 +130,7 @@ mod patch {
 
         user_viewable: Option<bool>,
         user_editable: Option<bool>,
+        #[validate(custom(function = "rule_validator::validate_rules"))]
         rules: Option<Vec<String>>,
     }
 

@@ -1,15 +1,13 @@
 [package]
-name = "wings-api"
+name = "rule-validator"
 version = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-utoipa = { workspace = true }
+validator = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 reqwest = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
-indexmap = { workspace = true }
-urlencoding = { workspace = true }
-nestify = "0.3.3"
+regex = { workspace = true }
