@@ -18,7 +18,6 @@ interface ServerStore {
   setServerFromState: (cb: (s: ApiServer) => ApiServer) => void;
   setPermissions: (perms: string[]) => void;
   getServer: (uuid: string) => Promise<void>;
-  clear: () => void;
 
   // Derived state
   inConflictState: () => boolean;
@@ -80,20 +79,5 @@ export const useServerStore = create<ServerStore>()(
     databases: createDatabasesSlice(set),
     files: createFilesSlice(set),
     schedules: createSchedulesSlice(set),
-
-    clear: () => {
-      set({
-        data: undefined,
-        permissions: [],
-
-        status: createStatusSlice(set),
-        socket: createWebsocketSlice(set),
-        stats: createStatsSlice(set),
-
-        databases: createDatabasesSlice(set),
-        files: createFilesSlice(set),
-        schedules: createSchedulesSlice(set),
-      });
-    },
   })),
 );

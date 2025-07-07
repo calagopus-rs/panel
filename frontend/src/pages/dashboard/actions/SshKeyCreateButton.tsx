@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { addKey } = useUserStore(state => state.sshKeys);
+  const { addSshKey } = useUserStore();
 
   const [open, setOpen] = useState(false);
 
@@ -29,7 +29,7 @@ export default () => {
       .then(key => {
         addToast('SSH key created.', 'success');
         setOpen(false);
-        addKey(key);
+        addSshKey(key);
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { addKey } = useUserStore(state => state.apiKeys);
+  const { addApiKey } = useUserStore();
 
   const [open, setOpen] = useState(false);
 
@@ -27,7 +27,7 @@ export default () => {
       .then(key => {
         addToast('API key created.', 'success');
         setOpen(false);
-        addKey({ ...key.api_key, keyStart: key.key });
+        addApiKey({ ...key.api_key, keyStart: key.key });
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');

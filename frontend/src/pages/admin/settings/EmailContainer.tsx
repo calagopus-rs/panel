@@ -1,10 +1,5 @@
-import { httpErrorToHuman } from '@/api/axios';
-import updateEmail from '@/api/me/account/updateEmail';
 import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
-import { useState } from 'react';
 import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 

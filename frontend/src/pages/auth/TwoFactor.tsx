@@ -8,14 +8,16 @@ import AuthWrapper from './AuthWrapper';
 import checkpointLogin from '@/api/auth/checkpointLogin';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { auth, setUser } = useUserStore();
+  const { setUser } = useUserStore();
+  const { twoFactorToken } = useGlobalStore();
 
   useEffect(() => {
-    if (!auth.token) {
+    if (!twoFactorToken) {
       navigate('/auth/login');
     }
   }, []);
@@ -25,7 +27,7 @@ export default () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    checkpointLogin({ code: faToken, confirmation_token: auth.token! })
+    checkpointLogin({ code: faToken, confirmation_token: twoFactorToken })
       .then(response => {
         setUser(response.user!);
         navigate('/');

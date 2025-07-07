@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 export default ({ sshKey }: { sshKey: UserSshKey }) => {
   const { addToast } = useToast();
-  const { removeKey } = useUserStore(state => state.sshKeys);
+  const { removeSshKey } = useUserStore();
 
   const [open, setOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
       .then(() => {
         addToast('SSH key deleted.', 'success');
         setOpen(false);
-        removeKey(sshKey);
+        removeSshKey(sshKey);
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');

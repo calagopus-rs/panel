@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 export default ({ apiKey }: { apiKey: UserApiKey }) => {
   const { addToast } = useToast();
-  const { removeKey } = useUserStore(state => state.apiKeys);
+  const { removeApiKey } = useUserStore();
 
   const [open, setOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
       .then(() => {
         addToast('API key deleted.', 'success');
         setOpen(false);
-        removeKey(apiKey);
+        removeApiKey(apiKey);
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');

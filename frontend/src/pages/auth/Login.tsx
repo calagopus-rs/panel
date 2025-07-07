@@ -7,11 +7,13 @@ import { NavLink, useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const { setUser, setAuthToken } = useUserStore();
+  const { setUser } = useUserStore();
+  const { setTwoFactorToken } = useGlobalStore();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +24,7 @@ export default () => {
     login({ user: username, password })
       .then(response => {
         if (response.type === 'two_factor_required') {
-          setAuthToken(response.token!);
+          setTwoFactorToken(response.token!);
           navigate('/auth/two-factor');
           return;
         }

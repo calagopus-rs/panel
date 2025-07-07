@@ -1,30 +1,31 @@
 import { getEmptyPaginationSet } from '@/api/axios';
+import { UserStore } from '@/stores/user';
+import { StateCreator } from 'zustand';
 
 export interface SshKeySlice {
-  keys: ResponseMeta<UserSshKey>;
+  sshKeys: ResponseMeta<UserSshKey>;
 
-  setKeys: (keys: ResponseMeta<UserSshKey>) => void;
-  addKey: (key: UserSshKey) => void;
-  removeKey: (key: UserSshKey) => void;
+  setSshKeys: (keys: ResponseMeta<UserSshKey>) => void;
+  addSshKey: (key: UserSshKey) => void;
+  removeSshKey: (key: UserSshKey) => void;
 }
 
-export const createSshKeysSlice = (set): SshKeySlice => ({
-  keys: getEmptyPaginationSet<UserSshKey>(),
+export const createSshKeysSlice: StateCreator<UserStore, [], [], SshKeySlice> = (set): SshKeySlice => ({
+  sshKeys: getEmptyPaginationSet<UserSshKey>(),
 
-  setKeys: value =>
+  setSshKeys: value => set(state => ({ ...state, sshKeys: value })),
+
+  addSshKey: value =>
     set(state => {
-      state.sshKeys.keys = value;
+      state.sshKeys.data = [...state.sshKeys.data, value];
+      state.sshKeys.total += 1;
+      return state;
     }),
 
-  addKey: value =>
+  removeSshKey: value =>
     set(state => {
-      state.sshKeys.keys.data = [...state.sshKeys.keys.data, value];
-      state.sshKeys.keys.total += 1;
-    }),
-
-  removeKey: value =>
-    set(state => {
-      state.sshKeys.keys.data = state.sshKeys.keys.data.filter(schedule => schedule.id !== value.id);
-      state.sshKeys.keys.total -= 1;
+      state.sshKeys.data = state.sshKeys.data.filter(key => key.id !== value.id);
+      state.sshKeys.total -= 1;
+      return state;
     }),
 });

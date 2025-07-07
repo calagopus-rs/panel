@@ -21,11 +21,11 @@ import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 export default () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const { keys, setKeys } = useUserStore(state => state.apiKeys);
+  const { apiKeys, setApiKeys } = useUserStore();
 
   useEffect(() => {
     getApiKeys(page).then(data => {
-      setKeys(data);
+      setApiKeys(data);
       setLoading(false);
     });
   }, [page]);
@@ -41,7 +41,7 @@ export default () => {
       ) : (
         <Table>
           <ContentWrapper>
-            <Pagination data={keys} onPageSelect={setPage}>
+            <Pagination data={apiKeys} onPageSelect={setPage}>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <TableHead>
@@ -54,7 +54,7 @@ export default () => {
                   </TableHead>
 
                   <TableBody>
-                    {keys.data.map(key => (
+                    {apiKeys.data.map(key => (
                       <TableRow key={key.id}>
                         <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{key.name}</td>
 
@@ -86,7 +86,7 @@ export default () => {
                   </TableBody>
                 </table>
 
-                {keys.data.length === 0 ? <NoItems /> : null}
+                {apiKeys.data.length === 0 ? <NoItems /> : null}
               </div>
             </Pagination>
           </ContentWrapper>

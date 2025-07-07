@@ -1,30 +1,31 @@
 import { getEmptyPaginationSet } from '@/api/axios';
+import { UserStore } from '@/stores/user';
+import { StateCreator } from 'zustand';
 
 export interface ApiKeySlice {
-  keys: ResponseMeta<UserApiKey>;
+  apiKeys: ResponseMeta<UserApiKey>;
 
-  setKeys: (keys: ResponseMeta<UserApiKey>) => void;
-  addKey: (key: UserApiKey) => void;
-  removeKey: (key: UserApiKey) => void;
+  setApiKeys: (keys: ResponseMeta<UserApiKey>) => void;
+  addApiKey: (key: UserApiKey) => void;
+  removeApiKey: (key: UserApiKey) => void;
 }
 
-export const createApiKeysSlice = (set): ApiKeySlice => ({
-  keys: getEmptyPaginationSet<UserApiKey>(),
+export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = (set): ApiKeySlice => ({
+  apiKeys: getEmptyPaginationSet<UserApiKey>(),
 
-  setKeys: value =>
+  setApiKeys: value => set(state => ({ ...state, apiKeys: value })),
+
+  addApiKey: value =>
     set(state => {
-      state.apiKeys.keys = value;
+      state.apiKeys.data = [...state.apiKeys.data, value];
+      state.apiKeys.total += 1;
+      return state;
     }),
 
-  addKey: value =>
+  removeApiKey: value =>
     set(state => {
-      state.apiKeys.keys.data = [...state.apiKeys.keys.data, value];
-      state.apiKeys.keys.total += 1;
-    }),
-
-  removeKey: value =>
-    set(state => {
-      state.apiKeys.keys.data = state.apiKeys.keys.data.filter(schedule => schedule.id !== value.id);
-      state.apiKeys.keys.total -= 1;
+      state.apiKeys.data = state.apiKeys.data.filter(key => key.id !== value.id);
+      state.apiKeys.total -= 1;
+      return state;
     }),
 });

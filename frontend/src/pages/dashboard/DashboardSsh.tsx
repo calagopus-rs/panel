@@ -13,9 +13,7 @@ import Table, {
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
-import ApiKeyCreateButton from './actions/ApiKeyCreateButton';
 import { useUserStore } from '@/stores/user';
-import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 import getSshKeys from '@/api/me/ssh/getSshKeys';
 import SshKeyDeleteButton from './actions/SshKeyDeleteButton';
 import SshKeyCreateButton from './actions/SshKeyCreateButton';
@@ -23,11 +21,11 @@ import SshKeyCreateButton from './actions/SshKeyCreateButton';
 export default () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const { keys, setKeys } = useUserStore(state => state.sshKeys);
+  const { sshKeys, setSshKeys } = useUserStore();
 
   useEffect(() => {
     getSshKeys(page).then(data => {
-      setKeys(data);
+      setSshKeys(data);
       setLoading(false);
     });
   }, [page]);
@@ -43,7 +41,7 @@ export default () => {
       ) : (
         <Table>
           <ContentWrapper>
-            <Pagination data={keys} onPageSelect={setPage}>
+            <Pagination data={sshKeys} onPageSelect={setPage}>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <TableHead>
@@ -54,7 +52,7 @@ export default () => {
                   </TableHead>
 
                   <TableBody>
-                    {keys.data.map(key => (
+                    {sshKeys.data.map(key => (
                       <TableRow key={key.id}>
                         <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{key.name}</td>
 
@@ -74,7 +72,7 @@ export default () => {
                   </TableBody>
                 </table>
 
-                {keys.data.length === 0 ? <NoItems /> : null}
+                {sshKeys.data.length === 0 ? <NoItems /> : null}
               </div>
             </Pagination>
           </ContentWrapper>

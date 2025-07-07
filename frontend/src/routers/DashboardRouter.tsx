@@ -1,6 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/home/DashboardHome';
-import { Route, Routes, useNavigate } from 'react-router';
+import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
@@ -11,8 +11,11 @@ import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
+import { useUserStore } from '@/stores/user';
 
 export default () => {
+  const { user } = useUserStore();
+
   return (
     <>
       <div className="flex">
@@ -29,6 +32,12 @@ export default () => {
               <FontAwesomeIcon icon={faServer} />
               <span>Servers</span>
             </Sidebar.Link>
+            {user.admin && (
+              <Sidebar.Link to={'/admin'} end>
+                <FontAwesomeIcon icon={faServer} />
+                <span>Admin</span>
+              </Sidebar.Link>
+            )}
           </Sidebar.Section>
           <Sidebar.Section>
             <Sidebar.Link to={'/account'} end>
