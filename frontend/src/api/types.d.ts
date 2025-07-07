@@ -274,6 +274,22 @@ interface PublicCaptchaProviderRecaptcha {
 
 type PublicCaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
 
+interface AdminSettings {
+  mail: MailMode;
+  captcha: CaptchaProvider;
+  app: {
+    name: string;
+    icon: string;
+    url: string;
+    telemetryEnabled: boolean;
+  };
+  server: {
+    maxFileManagerViewSize: number;
+    allowOverwritingCustomDockerImage: boolean;
+    allowEditingStartupCommand: boolean;
+  };
+}
+
 interface ResourceUsage {
   memoryBytes: number;
   memoryLimitBytes: number;
