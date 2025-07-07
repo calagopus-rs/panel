@@ -18,6 +18,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         eggs: Pagination<crate::models::nest_egg::AdminApiNestEgg>,
     }
 

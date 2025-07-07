@@ -26,6 +26,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
+        #[schema(inline)]
         entries: Pagination<wings_api::DirectoryEntry>,
     }
 
