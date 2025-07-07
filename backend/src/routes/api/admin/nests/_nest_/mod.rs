@@ -1,6 +1,8 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod eggs;
+
 mod delete {
     use crate::{
         models::nest::Nest,
@@ -188,6 +190,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
-        //.nest("/nodes", nodes::router(state))
+        .nest("/eggs", eggs::router(state))
         .with_state(state.clone())
 }

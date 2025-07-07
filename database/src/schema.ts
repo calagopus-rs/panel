@@ -267,13 +267,14 @@ export const nestEggs = pgTable('nest_eggs', {
 	startup: varchar('startup', { length: 255 }).notNull(),
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
 
-	features: varchar('features', { length: 255 }).array().notNull(),
+	features: text('features').array().notNull(),
 	docker_images: jsonb('docker_images').$type<Record<string, string>>().notNull(),
-	file_denylist: varchar('file_denylist', { length: 255 }).array().notNull(),
+	file_denylist: text('file_denylist').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggs) => [
-	index('eggs_nest_id_idx').on(eggs.nestId)
+	index('eggs_nest_id_idx').on(eggs.nestId),
+	uniqueIndex('eggs_nest_id_name_idx').on(eggs.nestId, eggs.name),
 ])
 
 export const nestEggMounts = pgTable('nest_egg_mounts', {
@@ -299,7 +300,7 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 	defaultValue: text('default_value'),
 	userViewable: boolean('user_viewable').default(true).notNull(),
 	userEditable: boolean('user_editable').default(false).notNull(),
-	rules: varchar('rules', { length: 255 }).array().notNull(),
+	rules: text('rules').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggVariables) => [

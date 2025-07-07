@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nest_eggs\n            SET\n                author = $1, name = $2, description = $3,\n                config_files = $4, config_startup = $5, config_stop = $6,\n                config_script = $7, startup = $8, force_outgoing_ip = $9,\n                features = $10, docker_images = $11, file_denylist = $12\n            WHERE nest_id = $13 AND id = $14",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Varchar",
+        "Bool",
+        "TextArray",
+        "Jsonb",
+        "TextArray",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97211c98af49bec9a1464bdb1e299e08c78ea570797b6cc92d1ec2960ff4d9b2"
+}

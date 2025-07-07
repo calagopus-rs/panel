@@ -189,7 +189,10 @@ impl Node {
         .unwrap();
 
         if let Some(node) = row.map(|row| Self::map(None, &row)) {
-            if database.decrypt(&node.token).unwrap() == token {
+            if constant_time_eq::constant_time_eq(
+                database.decrypt(&node.token).unwrap().as_bytes(),
+                token.as_bytes(),
+            ) {
                 Some(node)
             } else {
                 None

@@ -43,13 +43,14 @@ pub struct ProcessConfiguration {
     pub configs: Vec<ProcessConfigurationFile>,
 }
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[derive(ToSchema, Serialize, Deserialize, Clone, Default)]
 pub struct NestEggConfigStartup {
     pub done: Vec<String>,
+    #[serde(default)]
     pub strip_ansi: bool,
 }
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[derive(ToSchema, Serialize, Deserialize, Clone, Default)]
 pub struct NestEggConfigStop {
     pub r#type: String,
     pub value: Option<String>,
@@ -59,6 +60,7 @@ pub struct NestEggConfigStop {
 pub struct NestEggConfigScript {
     pub container: String,
     pub entrypoint: String,
+    #[serde(alias = "script")]
     pub content: String,
 }
 
@@ -176,6 +178,54 @@ impl BaseModel for NestEgg {
 }
 
 impl NestEgg {
+    #[allow(clippy::too_many_arguments)]
+    pub async fn create(
+        database: &crate::database::Database,
+        nest_id: i32,
+        author: &str,
+        name: &str,
+        description: Option<&str>,
+        config_files: Vec<ProcessConfigurationFile>,
+        config_startup: NestEggConfigStartup,
+        config_stop: NestEggConfigStop,
+        config_script: NestEggConfigScript,
+        startup: &str,
+        force_outgoing_ip: bool,
+        features: &[String],
+        docker_images: IndexMap<String, String>,
+        file_denylist: &[String],
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            INSERT INTO nest_eggs (
+                nest_id, author, name, description, config_files, config_startup,
+                config_stop, config_script, startup, force_outgoing_ip,
+                features, docker_images, file_denylist
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING {}
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(nest_id)
+        .bind(author)
+        .bind(name)
+        .bind(description)
+        .bind(serde_json::to_value(config_files).unwrap())
+        .bind(serde_json::to_value(config_startup).unwrap())
+        .bind(serde_json::to_value(config_stop).unwrap())
+        .bind(serde_json::to_value(config_script).unwrap())
+        .bind(startup)
+        .bind(force_outgoing_ip)
+        .bind(features)
+        .bind(serde_json::to_value(docker_images).unwrap())
+        .bind(file_denylist)
+        .fetch_one(database.write())
+        .await?;
+
+        Ok(Self::map(None, &row))
+    }
+
     pub async fn by_nest_id_with_pagination(
         database: &crate::database::Database,
         nest_id: i32,
@@ -208,15 +258,20 @@ impl NestEgg {
         }
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_nest_id_id(
+        database: &crate::database::Database,
+        nest_id: i32,
+        id: i32,
+    ) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_eggs
-            WHERE nest_eggs.id = $1
+            WHERE nest_eggs.nest_id = $1 AND nest_eggs.id = $2
             "#,
             Self::columns_sql(None, None)
         ))
+        .bind(nest_id)
         .bind(id)
         .fetch_optional(database.read())
         .await

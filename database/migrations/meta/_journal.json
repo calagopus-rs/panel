@@ -169,6 +169,13 @@
       "when": 1751795461130,
       "tag": "0023_quick_silhouette",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1751881521881,
+      "tag": "0024_adorable_lord_tyger",
+      "breakpoints": false
     }
   ]
 }

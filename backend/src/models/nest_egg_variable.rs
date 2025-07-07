@@ -73,8 +73,9 @@ impl BaseModel for NestEggVariable {
 }
 
 impl NestEggVariable {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
+        egg_id: i32,
         name: &str,
         description: Option<&str>,
         env_variable: &str,
@@ -85,12 +86,13 @@ impl NestEggVariable {
     ) -> bool {
         sqlx::query(&format!(
             r#"
-            INSERT INTO nest_egg_variables (name, description, env_variable, default_value, user_viewable, user_editable, rules)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
+            INSERT INTO nest_egg_variables (egg_id, name, description, env_variable, default_value, user_viewable, user_editable, rules)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
+        .bind(egg_id)
         .bind(name)
         .bind(description)
         .bind(env_variable)

@@ -78,7 +78,7 @@ impl AppSettingsApp {
         keys.push("app::name");
         values.push(self.name.clone());
         keys.push("app::icon");
-        values.push(self.icon.clone().unwrap_or_else(|| "".to_string()));
+        values.push(self.icon.clone().unwrap_or_default());
         keys.push("app::url");
         values.push(self.url.clone());
         keys.push("app::telemetry_enabled");
