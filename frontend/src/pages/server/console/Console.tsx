@@ -43,7 +43,7 @@ export default () => {
   const { connected, instance } = useServerStore(state => state.socket);
   // const [canSendCommands] = usePermissions(['control.console']);
   const server = useServerStore(state => state.data);
-  // const [history, setHistory] = usePersistedState<string[]>(`${server.id}:command_history`, []);
+  // const [history, setHistory] = usePersistedState<string[]>(`${server.uuid}:command_history`, []);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
   const handleConsoleOutput = (line: string, prelude = false) =>

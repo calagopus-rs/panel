@@ -19,7 +19,9 @@ function FileTableRow({ file, children }: { file: FileObject; children: React.Re
     <TableRow
       className="cursor-pointer"
       onClick={() => {
-        navigate(`/server/${server.id}/files/${file.isFile ? 'edit' : 'directory'}${join(directory, file.name)}`);
+        navigate(
+          `/server/${server.uuidShort}/files/${file.isFile ? 'edit' : 'directory'}${join(directory, file.name)}`,
+        );
       }}
     >
       {children}

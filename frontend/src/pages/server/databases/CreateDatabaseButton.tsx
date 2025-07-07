@@ -17,7 +17,7 @@ export default () => {
   const [connectionsFrom, setConnectionsFrom] = useState('');
 
   const submit = () => {
-    createDatabase(server.id, { databaseName: dbName, connectionsFrom: connectionsFrom || '%' })
+    createDatabase(server.uuid, { databaseName: dbName, connectionsFrom: connectionsFrom || '%' })
       .then(database => {
         addDatabase(database);
         setOpen(false);

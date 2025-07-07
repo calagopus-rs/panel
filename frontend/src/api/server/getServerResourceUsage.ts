@@ -5,7 +5,7 @@ export default async (uuid: string): Promise<ResourceUsage> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/resources`)
-      .then(({ data }) => resolve(transformKeysToCamelCase(data)))
+      .then(({ data }) => resolve(transformKeysToCamelCase(data.resources)))
       .catch(reject);
   });
 };

@@ -51,7 +51,7 @@ export default () => {
       ) : (
         <div className={classNames('gap-4', [serverListDesign === 'grid' ? 'grid md:grid-cols-2' : 'flex flex-col'])}>
           {servers.map(server => (
-            <ServerItem key={server.id} server={server} />
+            <ServerItem key={server.uuid} server={server} />
           ))}
         </div>
       )}

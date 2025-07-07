@@ -20,7 +20,7 @@ export default ({ database }: { database: ServerDatabase }) => {
   const [openDialog, setOpenDialog] = useState<'details' | 'delete'>(null);
 
   const doDeleteDatabase = () => {
-    deleteDatabase(server.id, database.id)
+    deleteDatabase(server.uuid, database.id)
       .then(() => {
         setOpenDialog(null);
         setTimeout(() => removeDatabase(database), 150);

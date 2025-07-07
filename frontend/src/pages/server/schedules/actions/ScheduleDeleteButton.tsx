@@ -12,8 +12,8 @@ export default ({ schedule }: { schedule?: Schedule }) => {
   const [open, setOpen] = useState(false);
 
   const submit = () => {
-    deleteSchedule(server.id, schedule.id).then(() => {
-      navigate(`/server/${server.id}/schedules`);
+    deleteSchedule(server.uuid, schedule.id).then(() => {
+      navigate(`/server/${server.uuidShort}/schedules`);
     });
   };
 

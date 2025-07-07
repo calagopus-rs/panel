@@ -48,11 +48,11 @@ export default () => {
   const [schedule, setSchedule] = useState<Schedule | null>(null);
 
   useEffect(() => {
-    getSchedule(server.id, Number(params.id)).then(setSchedule);
+    getSchedule(server.uuid, Number(params.id)).then(setSchedule);
   }, [params.id]);
 
   const doRunSchedule = () => {
-    runSchedule(server.id, Number(params.id)).then(() => {
+    runSchedule(server.uuid, Number(params.id)).then(() => {
       setSchedule(schedule => ({ ...schedule, isProcessing: true }));
     });
   };

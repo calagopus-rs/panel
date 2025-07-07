@@ -34,7 +34,7 @@ export default () => {
     if (action === 'new') return;
 
     setLoading(true);
-    getFileContent(server.id, directory).then(content => {
+    getFileContent(server.uuid, directory).then(content => {
       setContent(content);
       setLanguage(getLanguageFromExtension(directory.split('.').pop()));
       setLoading(false);
@@ -51,12 +51,12 @@ export default () => {
     const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.id, name ?? directory, currentContent).then(() => {
+    saveFileContent(server.uuid, name ?? directory, currentContent).then(() => {
       setLoading(false);
       setNameDialogOpen(false);
 
       if (name) {
-        navigate(`/server/${server.id}/files/edit/${name}`);
+        navigate(`/server/${server.uuidShort}/files/edit/${name}`);
       }
     });
   };

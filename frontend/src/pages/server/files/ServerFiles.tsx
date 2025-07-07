@@ -31,7 +31,7 @@ export default () => {
   useEffect(() => {
     if (!directory) return;
 
-    loadDirectory(server.id, directory).then(data => {
+    loadDirectory(server.uuid, directory).then(data => {
       setFileList(data);
       setLoading(false);
     });
@@ -53,9 +53,9 @@ export default () => {
   };
 
   const makeDirectory = (name: string) => {
-    createDirectory(server.id, directory, name).then(() => {
+    createDirectory(server.uuid, directory, name).then(() => {
       setOpenDialog(null);
-      navigate(`/server/${server.id}/files/directory${join(directory, name)}`);
+      navigate(`/server/${server.uuidShort}/files/directory${join(directory, name)}`);
     });
   };
 
@@ -74,7 +74,7 @@ export default () => {
             New directory
           </Button>
           <Button>Upload</Button>
-          <Button onClick={() => navigate(`/server/${server.id}/files/new${directory}`)}>New File</Button>
+          <Button onClick={() => navigate(`/server/${server.uuidShort}/files/new${directory}`)}>New File</Button>
         </div>
       </div>
       <Table>

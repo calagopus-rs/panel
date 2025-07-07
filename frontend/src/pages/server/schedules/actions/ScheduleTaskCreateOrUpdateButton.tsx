@@ -19,7 +19,7 @@ export default ({ schedule, task, onSubmit }: { schedule: Schedule; task?: Task;
   const [taskContinueOnFailure, setTaskContinueOnFailure] = useState(task?.continueOnFailure ?? false);
 
   const submit = () => {
-    createOrUpdateScheduleTask(server.id, schedule.id, task?.id, {
+    createOrUpdateScheduleTask(server.uuid, schedule.id, task?.id, {
       action: taskAction,
       payload: taskPayload,
       timeOffset: taskOffset,

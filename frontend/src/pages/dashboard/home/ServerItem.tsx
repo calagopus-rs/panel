@@ -50,7 +50,7 @@ export default ({ server }: { server: ApiServer }) => {
 
   return (
     <NavLink
-      to={`/server/${server.id}`}
+      to={`/server/${server.uuidShort}`}
       className={classNames(
         serverListDesign === 'grid' ? 'flex flex-col' : 'grid lg:grid-cols-2 xl:grid-cols-3 justify-between',
         'bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded',

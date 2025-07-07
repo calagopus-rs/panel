@@ -19,7 +19,10 @@ export default ({ schedule }: { schedule: Schedule }) => {
   const server = useServerStore(state => state.data);
 
   return (
-    <TableRow className="cursor-pointer" onClick={() => navigate(`/server/${server.id}/schedules/${schedule.id}`)}>
+    <TableRow
+      className="cursor-pointer"
+      onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.id}`)}
+    >
       <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={schedule.name}>
         {schedule.name}
       </td>

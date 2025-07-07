@@ -24,7 +24,7 @@ export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (sched
   const [enabled, setEnabled] = useState(schedule?.isActive ?? true);
 
   const submit = () => {
-    createOrUpdateSchedule(server.id, {
+    createOrUpdateSchedule(server.uuid, {
       id: schedule?.id,
       name: scheduleName,
       cron: { minute: cronMinutes, hour: cronHours, day: cronDayOfMonth, month: cronMonth, weekday: cronDayOfWeek },
