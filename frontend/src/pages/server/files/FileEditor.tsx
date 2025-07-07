@@ -5,13 +5,14 @@ import { urlPathToAction, urlPathToFilePath } from '@/lib/path';
 import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import saveFileContent from '@/api/server/files/saveFileContent';
 import FileNameDialog from './dialogs/FileNameDialog';
 
 export default () => {
+  const params = useParams<'path'>();
   const location = useLocation();
   const navigate = useNavigate();
   const action = urlPathToAction(location.pathname);
@@ -27,8 +28,8 @@ export default () => {
   const contentRef = useRef(content);
 
   useEffect(() => {
-    setDirectory(urlPathToFilePath(location.pathname));
-  }, [location]);
+    setDirectory(decodeURIComponent(params.path || '/'));
+  }, [params]);
 
   useEffect(() => {
     if (action === 'new') return;
@@ -56,7 +57,7 @@ export default () => {
       setNameDialogOpen(false);
 
       if (name) {
-        navigate(`/server/${server.uuidShort}/files/edit/${name}`);
+        navigate(`/server/${server.uuidShort}/files/edit/${encodeURIComponent(name)}`);
       }
     });
   };
@@ -74,7 +75,7 @@ export default () => {
       />
 
       <div className="flex justify-between w-full p-4">
-        <FileBreadcrumbs path={directory} />
+        <FileBreadcrumbs path={decodeURIComponent(directory)} />
         <div>
           {action === 'edit' ? (
             <Button style={Button.Styles.Green} onClick={() => saveFile()}>

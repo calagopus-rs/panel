@@ -17,7 +17,7 @@ export function FileBreadcrumbs({ path }: { path: string }) {
   return (
     <div className="ml-4 flex items-center text-gray-500">
       /<span className="px-1 text-gray-300">home</span>/
-      <NavLink to={`/server/${server?.id}/files`} className="px-1 text-gray-200 hover:text-gray-400">
+      <NavLink to={`/server/${server?.uuidShort}/files`} className="px-1 text-gray-200 hover:text-gray-400">
         container
       </NavLink>
       /
@@ -25,7 +25,7 @@ export function FileBreadcrumbs({ path }: { path: string }) {
         return (
           <Fragment key={index}>
             <NavLink
-              to={`/server/${server?.id}/files/directory/${item.path}`}
+              to={`/server/${server?.uuidShort}/files/directory/${encodeURIComponent(item.path)}`}
               className={classNames(
                 'px-1 text-gray-200 hover:text-gray-400',
                 index === pathItems.length - 1 && 'pointer-events-none',

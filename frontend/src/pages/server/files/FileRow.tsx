@@ -20,7 +20,11 @@ function FileTableRow({ file, children }: { file: DirectoryEntry; children: Reac
     <TableRow
       className="cursor-pointer"
       onClick={() => {
-        navigate(`/server/${server.uuidShort}/files/${file.file ? 'edit' : 'directory'}${join(directory, file.name)}`);
+        navigate(
+          `/server/${server.uuidShort}/files/${file.file ? 'edit' : 'directory'}/${encodeURIComponent(
+            join(directory, file.name),
+          )}`,
+        );
       }}
     >
       {children}

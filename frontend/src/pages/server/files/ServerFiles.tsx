@@ -1,9 +1,8 @@
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
-import { urlPathToFilePath } from '@/lib/path';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import loadDirectory from '@/api/server/files/loadDirectory';
@@ -14,7 +13,7 @@ import { join } from 'pathe';
 import Spinner from '@/elements/Spinner';
 
 export default () => {
-  const location = useLocation();
+  const params = useParams<'path'>();
   const navigate = useNavigate();
   const server = useServerStore(state => state.data);
   const { directory, setDirectory, selectedFiles, setSelectedFiles } = useServerStore(state => state.files);
@@ -25,13 +24,13 @@ export default () => {
 
   useEffect(() => {
     setSelectedFiles([]);
-    setDirectory(urlPathToFilePath(location.pathname));
-  }, [location]);
+    setDirectory(decodeURIComponent(params.path || '/'));
+  }, [params]);
 
   useEffect(() => {
     if (!directory) return;
 
-    loadDirectory(server.uuid, directory).then(data => {
+    loadDirectory(server.uuid, encodeURIComponent(directory)).then(data => {
       setFileList(data);
       setLoading(false);
     });
@@ -55,7 +54,7 @@ export default () => {
   const makeDirectory = (name: string) => {
     createDirectory(server.uuid, directory, name).then(() => {
       setOpenDialog(null);
-      navigate(`/server/${server.uuidShort}/files/directory${join(directory, name)}`);
+      navigate(`/server/${server.uuidShort}/files/directory/${encodeURIComponent(join(directory, name))}`);
     });
   };
 
@@ -74,12 +73,14 @@ export default () => {
             New directory
           </Button>
           <Button>Upload</Button>
-          <Button onClick={() => navigate(`/server/${server.uuidShort}/files/new${directory}`)}>New File</Button>
+          <Button onClick={() => navigate(`/server/${server.uuidShort}/files/new/${encodeURIComponent(directory)}`)}>
+            New File
+          </Button>
         </div>
       </div>
       <Table>
         <ContentWrapper
-          header={<FileBreadcrumbs path={directory} />}
+          header={<FileBreadcrumbs path={decodeURIComponent(directory)} />}
           checked={selectedFiles.length > 0}
           onSelectAllClick={onSelectAllClick}
         >
