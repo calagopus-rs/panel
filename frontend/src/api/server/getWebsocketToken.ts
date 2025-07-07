@@ -11,8 +11,8 @@ export default async (uuid: string): Promise<Response> => {
       .get(`/api/client/servers/${uuid}/websocket`)
       .then(({ data }) =>
         resolve({
-          token: data.data.token,
-          socket: data.data.socket,
+          token: data.token,
+          socket: data.url,
         }),
       )
       .catch(reject);

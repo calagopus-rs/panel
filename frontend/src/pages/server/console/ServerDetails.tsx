@@ -48,7 +48,11 @@ export default () => {
 
   return (
     <div className="col-span-1 grid gap-4">
-      <StatCard icon={faEthernet} label="Address" value={formatAllocation(getPrimaryAllocation(server.allocations))} />
+      <StatCard
+        icon={faEthernet}
+        label="Address"
+        value={server.allocation ? formatAllocation(server.allocation) : 'N/A'}
+      />
       <StatCard
         icon={faClock}
         label="Uptime"
