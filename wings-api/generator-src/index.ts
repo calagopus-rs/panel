@@ -37,6 +37,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     method: Method,
     endpoint: String,
     body: Option<&serde_json::Value>,
+    body_raw: Option<String>,
 ) -> Result<T, (StatusCode, super::ApiError)> {
     let url = format!("{}{}", client.base_url.trim_end_matches('/'), endpoint);
     let mut request = CLIENT.request(method, &url);
@@ -47,6 +48,10 @@ async fn request_impl<T: DeserializeOwned + 'static>(
 
     if let Some(body) = body {
         request = request.json(body);
+    }
+
+    if let Some(body_raw) = body_raw {
+        request = request.body(body_raw);
     }
 
     match request.send().await {
@@ -163,8 +168,18 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 params.push(`${param.name}: ${type === 'String' ? '&str' : type}`)
             }
 
+            const body = data.requestBody
+                ? (Object.values((data.requestBody as oas31.RequestBodyObject).content)[0].schema as oas31.SchemaObject).type === 'string'
+                    ? 'None, Some(data)'
+                    : 'serde_json::to_value(data).ok().as_ref(), None'
+                : 'None, None'
+
             if (data.requestBody) {
-                params.push(`data: &super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
+                if (body === 'None, Some(data)') {
+                    params.push(`data: super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
+                } else {
+                    params.push(`data: &super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
+                }
             }
 
             clientOutput.write(`    pub async fn ${method}_${snakeCase(path).slice(4)}(&self${params.length ? `, ${params.join(', ')}` : ''})`)
@@ -185,8 +200,7 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 query = '?' + query.slice(0, -1)
             }
 
-            clientOutput.write(`        request_impl(self, Method::${method.toUpperCase()}, format!("${path}${query}"), ${
-                data.requestBody ? 'serde_json::to_value(data).ok().as_ref()' : 'None'}).await\n`)
+            clientOutput.write(`        request_impl(self, Method::${method.toUpperCase()}, format!("${path}${query}"), ${body}).await\n`)
 
             clientOutput.write('    }\n\n')
         }

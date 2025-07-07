@@ -29,6 +29,11 @@ mod post {
             description = "The server ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
+        (
+            "file" = String, Query,
+            description = "The file to write contents to",
+            example = "/path/to/file.txt",
+        ),
     ), request_body = String)]
     pub async fn route(
         state: GetState,
@@ -47,7 +52,7 @@ mod post {
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_files_write(server.uuid, &body)
+            .post_servers_server_files_write(server.uuid, &params.file, body)
             .await
         {
             Ok(_) => {}

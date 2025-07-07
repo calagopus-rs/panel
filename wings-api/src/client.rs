@@ -20,6 +20,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     method: Method,
     endpoint: String,
     body: Option<&serde_json::Value>,
+    body_raw: Option<String>,
 ) -> Result<T, (StatusCode, super::ApiError)> {
     let url = format!("{}{}", client.base_url.trim_end_matches('/'), endpoint);
     let mut request = CLIENT.request(method, &url);
@@ -30,6 +31,10 @@ async fn request_impl<T: DeserializeOwned + 'static>(
 
     if let Some(body) = body {
         request = request.json(body);
+    }
+
+    if let Some(body_raw) = body_raw {
+        request = request.body(body_raw);
     }
 
     match request.send().await {
@@ -90,13 +95,13 @@ impl WingsClient {
     pub async fn get_extensions(
         &self,
     ) -> Result<super::extensions::get::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, format!("/api/extensions"), None).await
+        request_impl(self, Method::GET, format!("/api/extensions"), None, None).await
     }
 
     pub async fn get_servers(
         &self,
     ) -> Result<super::servers::get::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, format!("/api/servers"), None).await
+        request_impl(self, Method::GET, format!("/api/servers"), None, None).await
     }
 
     pub async fn post_servers(
@@ -108,6 +113,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -116,14 +122,28 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
     ) -> Result<super::servers_server::get::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, format!("/api/servers/{server}"), None).await
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}"),
+            None,
+            None,
+        )
+        .await
     }
 
     pub async fn delete_servers_server(
         &self,
         server: uuid::Uuid,
     ) -> Result<super::servers_server::delete::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::DELETE, format!("/api/servers/{server}"), None).await
+        request_impl(
+            self,
+            Method::DELETE,
+            format!("/api/servers/{server}"),
+            None,
+            None,
+        )
+        .await
     }
 
     pub async fn post_servers_server_backup(
@@ -137,6 +157,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/backup"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -153,6 +174,7 @@ impl WingsClient {
             self,
             Method::DELETE,
             format!("/api/servers/{server}/backup/{backup}"),
+            None,
             None,
         )
         .await
@@ -172,6 +194,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/backup/{backup}/restore"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -187,6 +210,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/commands"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -202,6 +226,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/chmod"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -219,6 +244,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/compress"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -232,7 +258,7 @@ impl WingsClient {
     ) -> Result<super::servers_server_files_contents::get::Response200, (StatusCode, super::ApiError)>
     {
         let file = urlencoding::encode(file);
-        request_impl(self, Method::GET, format!("/api/servers/{server}/files/contents?file={file}&download={download}&max_size={max_size}"), None).await
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/contents?file={file}&download={download}&max_size={max_size}"), None, None).await
     }
 
     pub async fn post_servers_server_files_copy(
@@ -246,6 +272,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/copy"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -263,6 +290,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/create-directory"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -280,6 +308,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/decompress"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -295,6 +324,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/delete"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -314,6 +344,7 @@ impl WingsClient {
             Method::GET,
             format!("/api/servers/{server}/files/fingerprints?algorithm={algorithm}&files={files}"),
             None,
+            None,
         )
         .await
     }
@@ -329,7 +360,7 @@ impl WingsClient {
         (StatusCode, super::ApiError),
     > {
         let directory = urlencoding::encode(directory);
-        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list-directory?directory={directory}&per_page={per_page}&page={page}"), None).await
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list-directory?directory={directory}&per_page={per_page}&page={page}"), None, None).await
     }
 
     pub async fn get_servers_server_files_pull(
@@ -341,6 +372,7 @@ impl WingsClient {
             self,
             Method::GET,
             format!("/api/servers/{server}/files/pull"),
+            None,
             None,
         )
         .await
@@ -357,6 +389,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/pull"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -374,6 +407,7 @@ impl WingsClient {
             Method::DELETE,
             format!("/api/servers/{server}/files/pull/{pull}"),
             None,
+            None,
         )
         .await
     }
@@ -389,6 +423,7 @@ impl WingsClient {
             Method::PUT,
             format!("/api/servers/{server}/files/rename"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -404,6 +439,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/files/search"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -411,14 +447,17 @@ impl WingsClient {
     pub async fn post_servers_server_files_write(
         &self,
         server: uuid::Uuid,
-        data: &super::servers_server_files_write::post::RequestBody,
+        file: &str,
+        data: super::servers_server_files_write::post::RequestBody,
     ) -> Result<super::servers_server_files_write::post::Response200, (StatusCode, super::ApiError)>
     {
+        let file = urlencoding::encode(file);
         request_impl(
             self,
             Method::POST,
-            format!("/api/servers/{server}/files/write"),
-            serde_json::to_value(data).ok().as_ref(),
+            format!("/api/servers/{server}/files/write?file={file}"),
+            None,
+            Some(data),
         )
         .await
     }
@@ -431,6 +470,7 @@ impl WingsClient {
             self,
             Method::GET,
             format!("/api/servers/{server}/logs"),
+            None,
             None,
         )
         .await
@@ -446,6 +486,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/power"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -460,6 +501,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/reinstall"),
             None,
+            None,
         )
         .await
     }
@@ -472,6 +514,7 @@ impl WingsClient {
             self,
             Method::POST,
             format!("/api/servers/{server}/sync"),
+            None,
             None,
         )
         .await
@@ -486,6 +529,7 @@ impl WingsClient {
             self,
             Method::DELETE,
             format!("/api/servers/{server}/transfer"),
+            None,
             None,
         )
         .await
@@ -502,6 +546,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/transfer"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -516,6 +561,7 @@ impl WingsClient {
             self,
             Method::GET,
             format!("/api/servers/{server}/version?game={game}"),
+            None,
             None,
         )
         .await
@@ -532,6 +578,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/servers/{server}/ws/deny"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
@@ -539,19 +586,19 @@ impl WingsClient {
     pub async fn get_stats(
         &self,
     ) -> Result<super::stats::get::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, format!("/api/stats"), None).await
+        request_impl(self, Method::GET, format!("/api/stats"), None, None).await
     }
 
     pub async fn get_system(
         &self,
     ) -> Result<super::system::get::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, format!("/api/system"), None).await
+        request_impl(self, Method::GET, format!("/api/system"), None, None).await
     }
 
     pub async fn post_transfers(
         &self,
     ) -> Result<super::transfers::post::Response200, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::POST, format!("/api/transfers"), None).await
+        request_impl(self, Method::POST, format!("/api/transfers"), None, None).await
     }
 
     pub async fn delete_transfers_server(
@@ -562,6 +609,7 @@ impl WingsClient {
             self,
             Method::DELETE,
             format!("/api/transfers/{server}"),
+            None,
             None,
         )
         .await
@@ -576,6 +624,7 @@ impl WingsClient {
             Method::POST,
             format!("/api/update"),
             serde_json::to_value(data).ok().as_ref(),
+            None,
         )
         .await
     }
