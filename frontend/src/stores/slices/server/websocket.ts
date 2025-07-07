@@ -1,23 +1,19 @@
-import type { Websocket } from '@/plugins/Websocket';
+import { Websocket } from '@/plugins/Websocket';
+import { ServerStore } from '@/stores/server';
+import { StateCreator } from 'zustand';
 
 export interface WebsocketSlice {
-  instance: Websocket | null;
-  connected: boolean;
-  setInstance: (instance: Websocket | null) => void;
-  setConnectionState: (connected: boolean) => void;
+  socketInstance: Websocket | null;
+  socketConnected: boolean;
+
+  setSocketInstance: (instance: Websocket | null) => void;
+  setSocketConnectionState: (connected: boolean) => void;
 }
 
-export const createWebsocketSlice = (set): WebsocketSlice => ({
-  instance: null as Websocket | null,
-  connected: false,
+export const createWebsocketSlice: StateCreator<ServerStore, [], [], WebsocketSlice> = (set): WebsocketSlice => ({
+  socketInstance: null as Websocket | null,
+  socketConnected: false,
 
-  setInstance: (instance: Websocket | null) =>
-    set(state => {
-      state.socket.instance = instance;
-    }),
-
-  setConnectionState: (connected: boolean) =>
-    set(state => {
-      state.socket.connected = connected;
-    }),
+  setSocketInstance: value => set(state => ({ ...state, socketInstance: value })),
+  setSocketConnectionState: value => set(state => ({ ...state, socketConnected: value })),
 });

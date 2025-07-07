@@ -4,15 +4,15 @@ import { useEffect } from 'react';
 
 export default () => {
   const stats = useServerStore(state => state.stats);
-  const { connected, instance } = useServerStore(state => state.socket);
+  const { socketConnected, socketInstance } = useServerStore();
 
   useEffect(() => {
-    if (!connected || !instance) {
+    if (!socketConnected || !socketInstance) {
       return;
     }
 
-    instance.send(SocketRequest.SEND_STATS);
-  }, [instance, connected]);
+    socketInstance.send(SocketRequest.SEND_STATS);
+  }, [socketInstance, socketConnected]);
 
   useWebsocketEvent(SocketEvent.STATS, data => {
     let wsStats: any = {};

@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { ApiKeySlice, createApiKeysSlice } from './slices/user/apiKeys';
-import { createSshKeysSlice, SshKeySlice } from './slices/user/sshKeys';
-import { createUserSlice, UserSlice } from './slices/user/user';
+import { SshKeySlice, createSshKeysSlice } from './slices/user/sshKeys';
+import { UserSlice, createUserSlice } from './slices/user/user';
 
-export interface UserStore extends ApiKeySlice, UserSlice, SshKeySlice {}
+export interface UserStore extends ApiKeySlice, SshKeySlice, UserSlice {}
 
 export const useUserStore = create<UserStore>()((...a) => ({
   ...createApiKeysSlice(...a),
-  ...createUserSlice(...a),
   ...createSshKeysSlice(...a),
+  ...createUserSlice(...a),
 }));

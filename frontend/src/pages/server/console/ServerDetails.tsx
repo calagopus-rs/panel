@@ -39,7 +39,7 @@ function StatCard({
 }
 
 export default () => {
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   const stats = useServerStore(state => state.stats);
 
   const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';

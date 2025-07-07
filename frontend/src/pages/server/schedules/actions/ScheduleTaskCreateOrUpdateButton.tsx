@@ -7,8 +7,8 @@ import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
-export default ({ schedule, task, onSubmit }: { schedule: Schedule; task?: Task; onSubmit: (task: Task) => void }) => {
-  const server = useServerStore(state => state.data);
+export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSubmit: (task: any) => void }) => {
+  const server = useServerStore(state => state.server);
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);

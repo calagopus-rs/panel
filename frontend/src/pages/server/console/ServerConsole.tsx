@@ -7,7 +7,7 @@ import ServerStats from './ServerStats';
 import { useServerStore } from '@/stores/server';
 
 export default () => {
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
 
   return (
     <Container>

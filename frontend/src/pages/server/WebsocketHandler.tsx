@@ -8,9 +8,9 @@ const reconnectErrors = ['jwt: exp claim is invalid', 'jwt: created too far in p
 export default () => {
   let updatingToken = false;
 
-  const { uuid } = useServerStore(state => state.data);
-  const { instance, setInstance, setConnectionState } = useServerStore(state => state.socket);
-  const { setServerStatus } = useServerStore(state => state.status);
+  const { uuid } = useServerStore(state => state.server);
+  const { socketInstance, setSocketInstance, setSocketConnectionState } = useServerStore();
+  const { setState } = useServerStore();
 
   const updateToken = (uuid: string, socket: Websocket) => {
     if (updatingToken) {
@@ -29,12 +29,12 @@ export default () => {
   const connect = (uuid: string) => {
     const socket = new Websocket();
 
-    socket.on('auth success', () => setConnectionState(true));
-    socket.on('SOCKET_CLOSE', () => setConnectionState(false));
+    socket.on('auth success', () => setSocketConnectionState(true));
+    socket.on('SOCKET_CLOSE', () => setSocketConnectionState(false));
     socket.on('SOCKET_ERROR', () => {
-      setConnectionState(false);
+      setSocketConnectionState(false);
     });
-    socket.on('status', status => setServerStatus(status));
+    socket.on('status', status => setState(status));
 
     socket.on('daemon error', message => {
       console.warn('Got error message from daemon socket:', message);
@@ -43,7 +43,7 @@ export default () => {
     socket.on('token expiring', () => updateToken(uuid, socket));
     socket.on('token expired', () => updateToken(uuid, socket));
     socket.on('jwt error', (error: string) => {
-      setConnectionState(false);
+      setSocketConnectionState(false);
       console.warn('JWT validation error from wings:', error);
 
       if (reconnectErrors.find(v => error.toLowerCase().indexOf(v) >= 0)) {
@@ -59,8 +59,8 @@ export default () => {
       // This code forces a reconnection to the websocket which will connect us to the target node instead of the source node
       // in order to be able to receive transfer logs from the target node.
       socket.close();
-      setConnectionState(false);
-      setInstance(null);
+      setSocketConnectionState(false);
+      setSocketInstance(null);
       connect(uuid);
     });
 
@@ -70,23 +70,23 @@ export default () => {
         socket.setToken(data.token).connect(data.socket);
 
         // Once that is done, set the instance.
-        setInstance(socket);
+        setSocketInstance(socket);
       })
       .catch(error => console.error(error));
   };
 
   useEffect(() => {
     return () => {
-      if (instance) {
-        instance.close();
+      if (socketInstance) {
+        socketInstance.close();
       }
     };
-  }, [instance]);
+  }, [socketInstance]);
 
   useEffect(() => {
     // If there is already an instance or there is no server, just exit out of this process
     // since we don't need to make a new connection.
-    if (instance || !uuid) {
+    if (socketInstance || !uuid) {
       return;
     }
 

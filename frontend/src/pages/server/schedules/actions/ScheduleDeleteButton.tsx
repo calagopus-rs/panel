@@ -5,8 +5,8 @@ import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-export default ({ schedule }: { schedule?: Schedule }) => {
-  const server = useServerStore(state => state.data);
+export default ({ schedule }: { schedule?: any }) => {
+  const server = useServerStore(state => state.server);
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);

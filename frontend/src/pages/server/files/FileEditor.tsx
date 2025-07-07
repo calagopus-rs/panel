@@ -16,7 +16,7 @@ export default () => {
   const location = useLocation();
   const navigate = useNavigate();
   const action = urlPathToAction(location.pathname);
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   const { directory, setDirectory } = useServerStore(state => state.files);
 
   const [loading, setLoading] = useState(false);

@@ -14,9 +14,9 @@ const InactiveBadge = () => (
   <div className="inline-block rounded bg-red-500 px-2 py-1 text-xs font-bold text-red-100">Inactive</div>
 );
 
-export default ({ schedule }: { schedule: Schedule }) => {
+export default ({ schedule }: { schedule: any }) => {
   const navigate = useNavigate();
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
 
   return (
     <TableRow

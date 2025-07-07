@@ -27,16 +27,7 @@ export default ({ requireAuthenticated, requireUnauthenticated, children }: Prop
   }, []);
 
   useEffect(() => {
-    if (user === undefined) return;
-
-    if (requireAuthenticated && !user?.id) {
-      navigate('/auth/login', { state: { from: location } });
-      return;
-    }
-    if (requireUnauthenticated && user?.id) {
-      navigate('/', { state: { from: location } });
-      return;
-    }
+    if (!user) return;
 
     setLoading(false);
   }, [user]);

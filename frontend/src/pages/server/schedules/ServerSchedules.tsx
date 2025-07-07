@@ -8,10 +8,10 @@ import ScheduleRow from './ScheduleRow';
 import ScheduleCreateOrUpdateButton from './actions/ScheduleCreateOrUpdateButton';
 
 export default () => {
-  const server = useServerStore(state => state.data);
-  const { schedules, setSchedules } = useServerStore(state => state.schedules);
+  const server = useServerStore(state => state.server);
+  const { schedules, setSchedules } = useServerStore();
 
-  const [loading, setLoading] = useState(schedules.length === 0);
+  const [loading, setLoading] = useState(schedules.data.length === 0);
 
   useEffect(() => {
     getSchedules(server.uuid).then(data => {
@@ -41,13 +41,13 @@ export default () => {
               </TableHead>
 
               <TableBody>
-                {schedules.map(schedule => (
+                {schedules.data.map(schedule => (
                   <ScheduleRow key={schedule.id} schedule={schedule} />
                 ))}
               </TableBody>
             </table>
 
-            {loading ? <Spinner.Centered /> : schedules.length === 0 ? <NoItems /> : null}
+            {loading ? <Spinner.Centered /> : schedules.data.length === 0 ? <NoItems /> : null}
           </div>
         </ContentWrapper>
       </Table>

@@ -7,9 +7,9 @@ import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
-export default ({ schedule, onUpdate }: { schedule?: Schedule; onUpdate?: (schedule: Schedule) => void }) => {
-  const server = useServerStore(state => state.data);
-  const { addSchedule } = useServerStore(state => state.schedules);
+export default ({ schedule, onUpdate }: { schedule?: any; onUpdate?: (schedule: any) => void }) => {
+  const server = useServerStore(state => state.server);
+  const { addSchedule } = useServerStore();
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);

@@ -20,14 +20,7 @@ export default function App() {
                 </CheckingRouter>
               }
             />
-            <Route
-              path="/server/:id/*"
-              element={
-                <CheckingRouter requireAuthenticated>
-                  <ServerRouter />
-                </CheckingRouter>
-              }
-            />
+            <Route path="/server/:id/*" element={<ServerRouter />} />
             <Route
               path="/admin/*"
               element={

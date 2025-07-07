@@ -43,9 +43,9 @@ function DetailCard({
 
 export default () => {
   const params = useParams<'id'>();
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
 
-  const [schedule, setSchedule] = useState<Schedule | null>(null);
+  const [schedule, setSchedule] = useState<any | null>(null);
 
   useEffect(() => {
     getSchedule(server.uuid, Number(params.id)).then(setSchedule);

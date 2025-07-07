@@ -1,9 +1,9 @@
 import getServerResourceUsage from '@/api/server/getServerResourceUsage';
 import CopyOnClick from '@/elements/CopyOnClick';
 import Spinner from '@/elements/Spinner';
-import { formatAllocation, getPrimaryAllocation } from '@/lib/server';
+import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
-import { useSettingsStore } from '@/stores/settings';
+import { useGlobalStore } from '@/stores/global';
 import { faMicrochip, faMemory, faHardDrive } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
 export default ({ server }: { server: ApiServer }) => {
-  const { serverListDesign } = useSettingsStore(state => state);
+  const { serverListDesign } = useGlobalStore();
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {

@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { createSettingsSlice, SettingsSlice } from './slices/global/settings';
 import { AuthSlice, createAuthSlice } from './slices/global/auth';
+import { SettingsSlice, createSettingsSlice } from './slices/global/settings';
 
-export interface GlobalStore extends SettingsSlice, AuthSlice {}
+export interface GlobalStore extends AuthSlice, SettingsSlice {}
 
 export const useGlobalStore = create<GlobalStore>()((...a) => ({
-  ...createSettingsSlice(...a),
   ...createAuthSlice(...a),
+  ...createSettingsSlice(...a),
 }));

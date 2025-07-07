@@ -37,13 +37,14 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
+import getServer from '@/api/server/getServer';
 
 export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
   const clearState = useServerStore(state => state.clear);
-  const getServer = useServerStore(state => state.getServer);
+  const setServer = useServerStore(state => state.setServer);
 
   useEffect(() => {
     return () => {
@@ -52,7 +53,10 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    getServer(params.id).then(() => setLoading(false));
+    getServer(params.id).then(data => {
+      setServer(data);
+      setLoading(false);
+    });
   }, [params.id]);
 
   return (

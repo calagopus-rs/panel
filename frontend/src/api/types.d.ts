@@ -54,15 +54,13 @@ interface NestEgg {
   created: Date;
 }
 
-type ApiServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
-
 interface ApiServer {
   id: number;
   uuid: string;
   uuidShort: string;
   allocation: ServerAllocation | null;
   egg: NestEgg;
-  status: ApiServerStatus | null;
+  status: ServerStatus | null;
   suspended: boolean;
   isOwner: boolean;
   permissions: string[];

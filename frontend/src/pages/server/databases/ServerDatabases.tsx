@@ -9,10 +9,10 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import DatabaseRow from './DatabaseRow';
 
 export default () => {
-  const server = useServerStore(state => state.data);
-  const { databases, setDatabases } = useServerStore(state => state.databases);
+  const server = useServerStore(state => state.server);
+  const { databases, setDatabases } = useServerStore();
 
-  const [loading, setLoading] = useState(databases.length === 0);
+  const [loading, setLoading] = useState(databases.data.length === 0);
 
   useEffect(() => {
     getDatabases(server.uuid).then(data => {
@@ -42,14 +42,14 @@ export default () => {
 
               <ContextMenuProvider>
                 <TableBody>
-                  {databases.map(database => (
+                  {databases.data.map(database => (
                     <DatabaseRow key={database.id} database={database} />
                   ))}
                 </TableBody>
               </ContextMenuProvider>
             </table>
 
-            {loading ? <Spinner.Centered /> : databases.length === 0 ? <NoItems /> : null}
+            {loading ? <Spinner.Centered /> : databases.data.length === 0 ? <NoItems /> : null}
           </div>
         </ContentWrapper>
       </Table>

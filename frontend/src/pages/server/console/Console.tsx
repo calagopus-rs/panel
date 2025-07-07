@@ -40,9 +40,9 @@ export default () => {
   const searchAddon = new SearchAddon();
   const webLinksAddon = new WebLinksAddon();
   // const scrollDownHelperAddon = new ScrollDownHelperAddon();
-  const { connected, instance } = useServerStore(state => state.socket);
+  const { socketConnected, socketInstance } = useServerStore();
   // const [canSendCommands] = usePermissions(['control.console']);
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   // const [history, setHistory] = usePersistedState<string[]>(`${server.uuid}:command_history`, []);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -88,15 +88,15 @@ export default () => {
       // setHistory(prevHistory => [command, ...prevHistory!].slice(0, 32));
       setHistoryIndex(-1);
 
-      if (instance) {
-        instance.send('send command', command);
+      if (socketInstance) {
+        socketInstance.send('send command', command);
       }
       e.currentTarget.value = '';
     }
   };
 
   useEffect(() => {
-    if (connected && ref.current && !terminal.element) {
+    if (socketConnected && ref.current && !terminal.element) {
       terminal.loadAddon(fitAddon);
       terminal.loadAddon(searchAddon);
       terminal.loadAddon(webLinksAddon);
@@ -114,7 +114,7 @@ export default () => {
         return true;
       });
     }
-  }, [terminal, connected]);
+  }, [terminal, socketConnected]);
 
   addEventListener(
     'resize',
@@ -136,11 +136,11 @@ export default () => {
       [SocketEvent.DAEMON_ERROR]: handleDaemonErrorOutput,
     };
 
-    if (connected && instance) {
-      // Do not clear the console if the server is being transferred.
-      if (!server.isTransferring) {
-        terminal.clear();
-      }
+    if (socketConnected && socketInstance) {
+      // TODO: Do not clear the console if the server is being transferred.
+      // if (!server.isTransferring) {
+      //   terminal.clear();
+      // }
 
       Object.keys(listeners).forEach((key: string) => {
         const listener = listeners[key];
@@ -148,28 +148,28 @@ export default () => {
           return;
         }
 
-        instance.addListener(key, listener);
+        socketInstance.addListener(key, listener);
       });
-      instance.send(SocketRequest.SEND_LOGS);
+      socketInstance.send(SocketRequest.SEND_LOGS);
     }
 
     return () => {
-      if (instance) {
+      if (socketInstance) {
         Object.keys(listeners).forEach((key: string) => {
           const listener = listeners[key];
           if (listener === undefined) {
             return;
           }
 
-          instance.removeListener(key, listener);
+          socketInstance.removeListener(key, listener);
         });
       }
     };
-  }, [connected, instance]);
+  }, [socketConnected, socketInstance]);
 
   return (
     <div className={classNames(styles.terminal, 'relative')}>
-      {!connected && <Spinner />}
+      {!socketConnected && <Spinner />}
       <div className={classNames(styles.container)}>
         <div className={'h-full'}>
           <div id={styles.terminal} ref={ref} />
@@ -182,7 +182,7 @@ export default () => {
           type={'text'}
           placeholder={'Type a command...'}
           aria-label={'Console command input.'}
-          disabled={!instance || !connected}
+          disabled={!socketInstance || !socketConnected}
           onKeyDown={handleCommandKeyDown}
           autoCorrect={'off'}
           autoCapitalize={'none'}

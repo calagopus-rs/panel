@@ -5,12 +5,12 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const [open, setOpen] = useState(false);
-  const status = useServerStore(state => state.status.value);
-  const instance = useServerStore(state => state.socket.instance);
+  const state = useServerStore(state => state.state);
+  const instance = useServerStore(state => state.socketInstance);
 
   const killable = status === 'stopping';
   const onButtonClick = (
-    action: PowerAction | 'kill-confirmed',
+    action: ServerPowerAction | 'kill-confirmed',
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): void => {
     e.preventDefault();

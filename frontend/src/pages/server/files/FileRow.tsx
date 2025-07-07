@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router';
 function FileTableRow({ file, children }: { file: DirectoryEntry; children: React.ReactNode }) {
   const navigate = useNavigate();
 
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   const { directory } = useServerStore(state => state.files);
 
   return isEditableFile(file.mime) || file.directory ? (

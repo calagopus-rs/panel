@@ -1,5 +1,4 @@
 import Container from '@/elements/Container';
-import { useSettingsStore } from '@/stores/settings';
 import { faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -7,9 +6,10 @@ import { useEffect, useState } from 'react';
 import ServerItem from './ServerItem';
 import getServers from '@/api/server/getServers';
 import Spinner from '@/elements/Spinner';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
-  const { serverListDesign, setServerListDesign } = useSettingsStore(state => state);
+  const { serverListDesign, setServerListDesign } = useGlobalStore();
 
   const [loading, setLoading] = useState(true);
   const [servers, setServers] = useState<ApiServer[]>([]);

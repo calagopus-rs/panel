@@ -8,8 +8,8 @@ import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
 export default () => {
-  const server = useServerStore(state => state.data);
-  const { addDatabase } = useServerStore(state => state.databases);
+  const server = useServerStore(state => state.server);
+  const { addDatabase } = useServerStore();
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);

@@ -1,26 +1,31 @@
-export interface SchedulesSlice {
-  schedules: any[];
+import { getEmptyPaginationSet } from '@/api/axios';
+import { ServerStore } from '@/stores/server';
+import { StateCreator } from 'zustand';
 
-  setSchedules: (schedules: any[]) => void;
-  addSchedule: (schedule: any) => void;
-  removeSchedule: (schedule: any) => void;
+export interface SchedulesSlice {
+  schedules: ResponseMeta<any>;
+
+  setSchedules: (schedules: ResponseMeta<any>) => void;
+  addSchedule: (schedules: any) => void;
+  removeSchedule: (schedules: any) => void;
 }
 
-export const createSchedulesSlice = (set): SchedulesSlice => ({
-  schedules: [],
+export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSlice> = (set): SchedulesSlice => ({
+  schedules: getEmptyPaginationSet<any>(),
 
-  setSchedules: value =>
-    set(state => {
-      state.schedules.schedules = value;
-    }),
+  setSchedules: value => set(state => ({ ...state, schedules: value })),
 
   addSchedule: value =>
     set(state => {
-      state.schedules.schedules = [...state.schedules.schedules, value];
+      state.schedules.data = [...state.schedules.data, value];
+      state.schedules.total += 1;
+      return state;
     }),
 
   removeSchedule: value =>
     set(state => {
-      state.schedules.schedules = state.schedules.schedules.filter(schedule => schedule.id !== value.id);
+      state.schedules.data = state.schedules.data.filter(key => key.id !== value.id);
+      state.schedules.total -= 1;
+      return state;
     }),
 });

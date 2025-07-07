@@ -31,7 +31,7 @@ function ChartBlock({
 }
 
 export default () => {
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   const stats = useServerStore(state => state.stats);
 
   const networkPrevious = useRef<Record<'tx' | 'rx', number>>({ tx: -1, rx: -1 });

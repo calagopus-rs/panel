@@ -12,10 +12,10 @@ import { useState } from 'react';
 import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
 import DatabaseDetailsDialog from './dialogs/DatabaseDetailsDialog';
 
-export default ({ database }: { database: ServerDatabase }) => {
+export default ({ database }: { database: any }) => {
   const { addToast } = useToast();
-  const server = useServerStore(state => state.data);
-  const { removeDatabase } = useServerStore(state => state.databases);
+  const server = useServerStore(state => state.server);
+  const { removeDatabase } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'details' | 'delete'>(null);
 

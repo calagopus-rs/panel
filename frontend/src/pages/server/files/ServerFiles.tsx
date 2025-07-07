@@ -15,7 +15,7 @@ import Spinner from '@/elements/Spinner';
 export default () => {
   const params = useParams<'path'>();
   const navigate = useNavigate();
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
   const { directory, setDirectory, selectedFiles, setSelectedFiles } = useServerStore(state => state.files);
 
   const [openDialog, setOpenDialog] = useState<'nameDirectory'>(null);

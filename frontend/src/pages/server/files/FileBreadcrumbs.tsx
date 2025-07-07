@@ -4,7 +4,7 @@ import { NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
 export function FileBreadcrumbs({ path }: { path: string }) {
-  const server = useServerStore(state => state.data);
+  const server = useServerStore(state => state.server);
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
