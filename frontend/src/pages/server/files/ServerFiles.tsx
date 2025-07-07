@@ -30,7 +30,7 @@ export default () => {
   useEffect(() => {
     if (!directory) return;
 
-    loadDirectory(server.uuid, encodeURIComponent(directory)).then(data => {
+    loadDirectory(server.uuid, directory).then(data => {
       setFileList(data);
       setLoading(false);
     });
