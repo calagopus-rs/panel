@@ -20,7 +20,7 @@ export default () => {
   const { directory, setDirectory, selectedFiles, setSelectedFiles } = useServerStore(state => state.files);
 
   const [openDialog, setOpenDialog] = useState<'nameDirectory'>(null);
-  const [fileList, setFileList] = useState<FileObject[]>([]);
+  const [fileList, setFileList] = useState<DirectoryEntry[]>([]);
   const [loading, setLoading] = useState(fileList.length === 0);
 
   useEffect(() => {
@@ -44,8 +44,8 @@ export default () => {
   const sortFiles = () => {
     return fileList.sort((a, b) => {
       // Prioritize directories
-      if (!a.isFile && b.isFile) return -1;
-      if (a.isFile && !b.isFile) return 1;
+      if (!a.file && b.file) return -1;
+      if (a.file && !b.file) return 1;
 
       // Sort alphabetically (case-insensitive)
       return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });

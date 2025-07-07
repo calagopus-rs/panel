@@ -7,7 +7,7 @@ export default async (uuid: string, directory?: string): Promise<DirectoryEntry[
       .get(`/api/client/servers/${uuid}/files/list`, {
         params: { directory: directory ?? '/' },
       })
-      .then(({ data }) => resolve((data.entries.data || []).map((datum: any) => transformKeysToCamelCase(datum))))
+      .then(({ data }) => resolve((data.entries || []).map((datum: any) => transformKeysToCamelCase(datum))))
       .catch(reject);
   });
 };
