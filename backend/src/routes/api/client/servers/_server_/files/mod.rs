@@ -5,7 +5,7 @@ mod chmod;
 mod compress;
 mod contents;
 mod copy;
-mod create_folder;
+mod create_directory;
 mod decompress;
 mod delete;
 mod download;
@@ -28,7 +28,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/compress", compress::router(state))
         .nest("/decompress", decompress::router(state))
         .nest("/delete", delete::router(state))
-        .nest("/create-folder", create_folder::router(state))
+        .nest("/create-directory", create_directory::router(state))
         .nest("/chmod", chmod::router(state))
         .nest("/search", search::router(state))
         .nest("/pulls", pulls::router(state))

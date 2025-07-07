@@ -584,6 +584,26 @@ pub mod servers_server_files_fingerprints {
         }
     }
 }
+pub mod servers_server_files_list {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+                #[schema(inline)]
+                pub total: u64,
+                #[schema(inline)]
+                pub entries: Vec<DirectoryEntry>,
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        pub type Response417 = ApiError;
+    }
+}
 pub mod servers_server_files_list_directory {
     use super::*;
 

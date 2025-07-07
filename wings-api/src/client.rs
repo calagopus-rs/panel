@@ -349,18 +349,35 @@ impl WingsClient {
         .await
     }
 
-    pub async fn get_servers_server_files_list_directory(
+    pub async fn get_servers_server_files_list(
         &self,
         server: uuid::Uuid,
         directory: &str,
         per_page: u64,
         page: u64,
+    ) -> Result<super::servers_server_files_list::get::Response200, (StatusCode, super::ApiError)>
+    {
+        let directory = urlencoding::encode(directory);
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list?directory={directory}&per_page={per_page}&page={page}"), None, None).await
+    }
+
+    pub async fn get_servers_server_files_list_directory(
+        &self,
+        server: uuid::Uuid,
+        directory: &str,
     ) -> Result<
         super::servers_server_files_list_directory::get::Response200,
         (StatusCode, super::ApiError),
     > {
         let directory = urlencoding::encode(directory);
-        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list-directory?directory={directory}&per_page={per_page}&page={page}"), None, None).await
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}/files/list-directory?directory={directory}"),
+            None,
+            None,
+        )
+        .await
     }
 
     pub async fn get_servers_server_files_pull(
