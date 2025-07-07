@@ -129,19 +129,31 @@ mod patch {
             ssh_key.name = name;
         }
 
-        if sqlx::query!(
+        match sqlx::query!(
             "UPDATE user_ssh_keys SET name = $1 WHERE id = $2",
             ssh_key.name,
             ssh_key.id,
         )
         .execute(state.database.write())
         .await
-        .is_err()
         {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&["ssh key with name already exists"])),
-            );
+            Ok(_) => {}
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&[
+                        "ssh key with name or fingerprint already exists",
+                    ])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to update ssh key: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to update ssh key"])),
+                );
+            }
         }
 
         user.log_activity(

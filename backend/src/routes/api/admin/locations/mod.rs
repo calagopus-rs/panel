@@ -130,12 +130,18 @@ mod post {
         .await
         {
             Ok(location) => location,
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "location with short name or name already exists",
-                    ])),
+                    axum::Json(ApiError::new_value(&["location with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create location: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create location"])),
                 );
             }
         };

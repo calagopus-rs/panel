@@ -179,10 +179,18 @@ mod post {
         .await
         {
             Ok(variable) => variable,
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["variable with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create variable: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create variable"])),
                 );
             }
         };

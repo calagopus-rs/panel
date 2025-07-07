@@ -132,12 +132,20 @@ mod post {
         let ssh_key =
             match UserSshKey::create(&state.database, user.id, &data.name, public_key).await {
                 Ok(ssh_key) => ssh_key,
-                Err(_) => {
+                Err(err) if err.to_string().contains("unique constraint") => {
                     return (
                         StatusCode::CONFLICT,
                         axum::Json(ApiError::new_value(&[
                             "ssh key with name or fingerprint already exists",
                         ])),
+                    );
+                }
+                Err(err) => {
+                    tracing::error!("failed to create ssh key: {:#?}", err);
+
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        axum::Json(ApiError::new_value(&["failed to create ssh key"])),
                     );
                 }
             };

@@ -134,7 +134,7 @@ mod patch {
             api_key.permissions = permissions;
         }
 
-        if sqlx::query!(
+        match sqlx::query!(
             "UPDATE user_api_keys
             SET name = $1, permissions = $2
             WHERE id = $3",
@@ -144,12 +144,22 @@ mod patch {
         )
         .execute(state.database.write())
         .await
-        .is_err()
         {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&["api key with name already exists"])),
-            );
+            Ok(_) => {}
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&["api key with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to update api key: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to update api key"])),
+                );
+            }
         }
 
         user.log_activity(

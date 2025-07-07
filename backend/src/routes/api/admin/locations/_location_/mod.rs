@@ -152,7 +152,7 @@ mod patch {
             location.config_backups = backups;
         }
 
-        if sqlx::query!(
+        match sqlx::query!(
             "UPDATE locations
             SET short_name = $1, name = $2, description = $3, config_backups = $4
             WHERE id = $5",
@@ -164,12 +164,22 @@ mod patch {
         )
         .execute(state.database.write())
         .await
-        .is_err()
         {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&["location with name already exists"])),
-            );
+            Ok(_) => {}
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&["location with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to update location: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to update location"])),
+                );
+            }
         }
 
         let location = location.into_admin_api_object();

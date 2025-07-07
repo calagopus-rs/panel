@@ -129,10 +129,18 @@ mod post {
         .await
         {
             Ok(api_key) => api_key,
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["api key with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create api key: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create api key"])),
                 );
             }
         };

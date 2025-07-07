@@ -147,7 +147,7 @@ mod patch {
             }
         }
 
-        if sqlx::query!(
+        match sqlx::query!(
             "UPDATE nests
             SET author = $1, name = $2, description = $3
             WHERE id = $4",
@@ -158,12 +158,22 @@ mod patch {
         )
         .execute(state.database.write())
         .await
-        .is_err()
         {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&["nest with name already exists"])),
-            );
+            Ok(_) => {}
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&["nest with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to update nest: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to update nest"])),
+                );
+            }
         }
 
         user.log_activity(

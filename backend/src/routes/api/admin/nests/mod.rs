@@ -124,10 +124,18 @@ mod post {
         .await
         {
             Ok(nest) => nest,
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["nest with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create nest: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create nest"])),
                 );
             }
         };

@@ -157,10 +157,18 @@ mod post {
         .await
         {
             Ok(node_id) => Node::by_id(&state.database, node_id).await.unwrap(),
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["node with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create node: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create node"])),
                 );
             }
         };

@@ -217,7 +217,7 @@ mod patch {
             node.disk = disk;
         }
 
-        if sqlx::query!(
+        match sqlx::query!(
             "UPDATE nodes
             SET location_id = $1, name = $2,
                 public = $3, description = $4, public_url = $5,
@@ -238,12 +238,22 @@ mod patch {
         )
         .execute(state.database.write())
         .await
-        .is_err()
         {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&["node with name already exists"])),
-            );
+            Ok(_) => {}
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&["node with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to update node: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to update node"])),
+                );
+            }
         }
 
         user.log_activity(

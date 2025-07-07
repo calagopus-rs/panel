@@ -192,10 +192,18 @@ mod post {
         .await
         {
             Ok(egg) => egg,
-            Err(_) => {
+            Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
                     axum::Json(ApiError::new_value(&["egg with name already exists"])),
+                );
+            }
+            Err(err) => {
+                tracing::error!("failed to create egg: {:#?}", err);
+
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to create egg"])),
                 );
             }
         };
