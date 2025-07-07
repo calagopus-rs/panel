@@ -44,7 +44,7 @@ impl ServerActivityLogger {
         if let Err(err) = crate::models::server_activity::ServerActivity::log(
             &self.state.database,
             self.server_id,
-            self.user_id,
+            Some(self.user_id),
             self.api_key_id,
             event,
             self.ip.into(),

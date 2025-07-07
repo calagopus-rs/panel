@@ -3,6 +3,7 @@ use crate::models::node::Node;
 use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
 use utoipa_axum::router::OpenApiRouter;
 
+mod activity;
 mod servers;
 mod sftp;
 
@@ -80,6 +81,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .nest("/sftp", sftp::router(state))
         .nest("/servers", servers::router(state))
+        .nest("/activity", activity::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

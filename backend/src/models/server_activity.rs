@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize)]
 pub struct ServerActivity {
     pub id: i32,
-    pub user: super::user::User,
+    pub user: Option<super::user::User>,
     pub api_key_id: Option<i32>,
 
     pub event: String,
@@ -40,7 +40,11 @@ impl BaseModel for ServerActivity {
 
         Self {
             id: row.get(format!("{prefix}id").as_str()),
-            user: super::user::User::map(Some("user_"), row),
+            user: if row.try_get::<i32, _>(format!("user_id").as_str()).is_ok() {
+                Some(super::user::User::map(Some("user_"), row))
+            } else {
+                None
+            },
             api_key_id: row.get(format!("{prefix}api_key_id").as_str()),
             event: row.get(format!("{prefix}event").as_str()),
             ip: row.get(format!("{prefix}ip").as_str()),
@@ -54,7 +58,7 @@ impl ServerActivity {
     pub async fn log(
         database: &crate::database::Database,
         server_id: i32,
-        user_id: i32,
+        user_id: Option<i32>,
         api_key_id: Option<i32>,
         event: &str,
         ip: sqlx::types::ipnetwork::IpNetwork,
@@ -72,6 +76,35 @@ impl ServerActivity {
         .bind(event)
         .bind(ip)
         .bind(data)
+        .execute(database.write())
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn log_remote(
+        database: &crate::database::Database,
+        server_uuid: uuid::Uuid,
+        user_id: Option<i32>,
+        api_key_id: Option<i32>,
+        event: &str,
+        ip: sqlx::types::ipnetwork::IpNetwork,
+        data: serde_json::Value,
+        timestamp: chrono::DateTime<chrono::Utc>,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            r#"
+            INSERT INTO server_activities (server_id, user_id, api_key_id, event, ip, data, created)
+            VALUES ((SELECT servers.id FROM servers WHERE servers.uuid = $1), $2, $3, $4, $5, $6, $7)
+            "#,
+        )
+        .bind(server_uuid)
+        .bind(user_id)
+        .bind(api_key_id)
+        .bind(event)
+        .bind(ip)
+        .bind(data)
+        .bind(timestamp.naive_utc())
         .execute(database.write())
         .await?;
 
@@ -117,7 +150,7 @@ impl ServerActivity {
     pub fn into_api_object(self) -> ApiServerActivity {
         ApiServerActivity {
             id: self.id,
-            user: self.user.into_api_object(false),
+            user: self.user.map(|user| user.into_api_object(false)),
             event: self.event,
             ip: self.ip.ip().to_string(),
             data: self.data,
@@ -131,7 +164,7 @@ impl ServerActivity {
 #[schema(title = "ServerActivity")]
 pub struct ApiServerActivity {
     pub id: i32,
-    pub user: super::user::ApiUser,
+    pub user: Option<super::user::ApiUser>,
 
     pub event: String,
     pub ip: String,
