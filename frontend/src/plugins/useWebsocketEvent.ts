@@ -23,7 +23,7 @@ export enum SocketRequest {
 }
 
 const useWebsocketEvent = (event: SocketEvent, callback: (...data: string[]) => void) => {
-  const { connected, instance } = useServerStore(state => state.socket);
+  const { socketConnected, socketInstance } = useServerStore();
   const savedCallback = useRef<any>(null);
 
   useEffect(() => {
@@ -32,16 +32,16 @@ const useWebsocketEvent = (event: SocketEvent, callback: (...data: string[]) => 
 
   return useEffect(() => {
     const eventListener = (...data: string[]) => savedCallback.current(...data);
-    if (connected && instance) {
-      instance.addListener(event, eventListener);
+    if (socketConnected && socketInstance) {
+      socketInstance.addListener(event, eventListener);
     }
 
     return () => {
-      if (instance) {
-        instance.removeListener(event, eventListener);
+      if (socketInstance) {
+        socketInstance.removeListener(event, eventListener);
       }
     };
-  }, [event, connected, instance]);
+  }, [event, socketConnected, socketInstance]);
 };
 
 export default useWebsocketEvent;
