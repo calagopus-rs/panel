@@ -1,9 +1,9 @@
 export interface DatabasesSlice {
-  databases: ServerDatabase[];
+  databases: any[];
 
-  setDatabases: (databases: ServerDatabase[]) => void;
-  addDatabase: (database: ServerDatabase) => void;
-  removeDatabase: (database: ServerDatabase) => void;
+  setDatabases: (databases: any[]) => void;
+  addDatabase: (database: any) => void;
+  removeDatabase: (database: any) => void;
 }
 
 export const createDatabasesSlice = (set): DatabasesSlice => ({

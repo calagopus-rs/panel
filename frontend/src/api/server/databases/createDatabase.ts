@@ -1,12 +1,11 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerDatabase } from '@/api/transformers';
 
 interface Data {
   databaseName: string;
   connectionsFrom: string;
 }
 
-export default async (uuid: string, data: Data): Promise<ServerDatabase> => {
+export default async (uuid: string, data: Data): Promise<any> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(
@@ -19,7 +18,7 @@ export default async (uuid: string, data: Data): Promise<ServerDatabase> => {
           params: { include: 'password' },
         },
       )
-      .then(({ data }) => resolve(rawDataToServerDatabase(data.attributes)))
+      .then(({ data }) => resolve(null))
       .catch(reject);
   });
 };

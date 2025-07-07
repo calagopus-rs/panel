@@ -1,11 +1,10 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerSchedule } from '@/api/transformers';
 
-export default async (uuid: string): Promise<Schedule[]> => {
+export default async (uuid: string): Promise<any> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/schedules`)
-      .then(({ data }) => resolve((data.data || []).map((item: any) => rawDataToServerSchedule(item.attributes))))
+      .then(({ data }) => resolve(null))
       .catch(reject);
   });
 };

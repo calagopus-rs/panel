@@ -1,5 +1,4 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerSchedule } from '@/api/transformers';
 
 interface Data {
   id?: number;
@@ -15,7 +14,7 @@ interface Data {
   isActive: boolean;
 }
 
-export default async (uuid: string, data: Data): Promise<Schedule> => {
+export default async (uuid: string, data: Data): Promise<any> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/schedules${data.id ? `/${data.id}` : ''}`, {
@@ -28,7 +27,7 @@ export default async (uuid: string, data: Data): Promise<Schedule> => {
         only_when_online: data.onlyWhenOnline,
         is_active: data.isActive,
       })
-      .then(({ data }) => resolve(rawDataToServerSchedule(data.attributes)))
+      .then(({ data }) => resolve(null))
       .catch(reject);
   });
 };

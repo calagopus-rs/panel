@@ -10,12 +10,12 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
-export default ({ server }: { server: Server }) => {
+export default ({ server }: { server: ApiServer }) => {
   const { serverListDesign } = useSettingsStore(state => state);
-  const [stats, setStats] = useState<ServerStats | null>(null);
+  const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {
-    getServerResourceUsage(server.id).then(setStats);
+    getServerResourceUsage(server.uuid).then(setStats);
   }, []);
 
   const statusToColor = (status: ServerPowerState) => {
@@ -64,15 +64,18 @@ export default ({ server }: { server: Server }) => {
           <div
             className={classNames(
               'rounded-full px-2 py-1 text-xs flex items-center gap-1',
-              statusToColor(stats?.status)[0],
+              statusToColor(stats?.state)[0],
             )}
           >
-            <div className={classNames('size-2 rounded-full', statusToColor(stats?.status)[1])}></div>
-            <span>{statusToText(stats?.status)}</span>
+            <div className={classNames('size-2 rounded-full', statusToColor(stats?.state)[1])}></div>
+            <span>{statusToText(stats?.state)}</span>
           </div>
         </div>
-        <CopyOnClick content={formatAllocation(getPrimaryAllocation(server.allocations))}>
+        {/* <CopyOnClick content={formatAllocation(getPrimaryAllocation(server.allocation))}>
           <p className="text-sm text-gray-400">{formatAllocation(getPrimaryAllocation(server.allocations))}</p>
+        </CopyOnClick> */}
+        <CopyOnClick content={formatAllocation(server.allocation)}>
+          <p className="text-sm text-gray-400">{formatAllocation(server.allocation)}</p>
         </CopyOnClick>
       </div>
       <div
@@ -89,21 +92,21 @@ export default ({ server }: { server: Server }) => {
             <div className="flex gap-2 text-sm justify-center items-center">
               <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
               <div>
-                <span className="mr-1">{stats.cpuUsagePercent.toFixed(2)}%</span>
+                <span className="mr-1">{stats.cpuAbsolute.toFixed(2)}%</span>
                 <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
               </div>
             </div>
             <div className="flex gap-2 text-sm justify-center items-center">
               <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
               <div>
-                <span className="mr-1">{bytesToString(stats.memoryUsageInBytes)}</span>
+                <span className="mr-1">{bytesToString(stats.memoryBytes)}</span>
                 <span className="inline-block text-xs text-gray-400">/ {memoryLimit}</span>
               </div>
             </div>
             <div className="flex gap-2 text-sm justify-center items-center">
               <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
               <div>
-                <span className="mr-1">{bytesToString(stats.diskUsageInBytes)}</span>
+                <span className="mr-1">{bytesToString(stats.diskBytes)}</span>
                 <span className="inline-block text-xs text-gray-400">/ {diskLimit}</span>
               </div>
             </div>

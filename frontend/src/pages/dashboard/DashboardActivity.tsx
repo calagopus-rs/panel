@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react';
 export default () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [activities, setActivities] = useState<PaginatedResult<UserActivity>>();
+  const [activities, setActivities] = useState<ResponseMeta<UserActivity>>();
 
   useEffect(() => {
     getUserActivity(page).then(data => {

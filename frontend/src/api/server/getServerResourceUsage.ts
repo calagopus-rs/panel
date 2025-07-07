@@ -1,11 +1,11 @@
-import { axiosInstance, FractalResponseData } from '@/api/axios';
-import { rawDataToServerStats } from '@/api/transformers';
+import { axiosInstance } from '@/api/axios';
+import { transformKeysToCamelCase } from '../transformers';
 
-export default async (uuid: string): Promise<ServerStats> => {
+export default async (uuid: string): Promise<ResourceUsage> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get<FractalResponseData>(`/api/client/servers/${uuid}/resources`)
-      .then(({ data }) => resolve(rawDataToServerStats(data)))
+      .get(`/api/client/servers/${uuid}/resources`)
+      .then(({ data }) => resolve(transformKeysToCamelCase(data)))
       .catch(reject);
   });
 };

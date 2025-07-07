@@ -1,7 +1,7 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
 import { transformKeysToCamelCase } from '@/api/transformers';
 
-export default async (page: number): Promise<PaginatedResult<UserSshKey>> => {
+export default async (page: number): Promise<ResponseMeta<UserSshKey>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/account/ssh-keys?page=${page}`)

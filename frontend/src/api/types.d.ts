@@ -68,6 +68,7 @@ interface ApiServer {
   permissions: string[];
   nodeUuid: string;
   nodeName: string;
+  nodeMaintenanceMessage: string | null;
   sftpHost: string;
   sftpPort: number;
   name: string;
@@ -273,12 +274,27 @@ interface PublicCaptchaProviderRecaptcha {
 
 type PublicCaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
 
+interface ResourceUsage {
+  memoryBytes: number;
+  memoryLimitBytes: number;
+  diskBytes: number;
+  state: ServerPowerState;
+  network: {
+    rxBytes: number;
+    txBytes: number;
+  };
+  cpuAbsolute: number;
+  uptime: number;
+}
+
 interface ResponseMeta<T> {
   total: number;
   per_page: number;
   page: number;
   data: T[];
 }
+
+type ServerPowerState = 'offline' | 'starting' | 'stopping' | 'running';
 
 type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
 

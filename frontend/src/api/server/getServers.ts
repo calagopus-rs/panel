@@ -1,14 +1,14 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
-import { rawDataToServerObject } from '@/api/transformers';
+import { transformKeysToCamelCase } from '../transformers';
 
-export default async (): Promise<PaginatedResult<Server>> => {
+export default async (): Promise<ResponseMeta<ApiServer>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/client/servers')
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.servers),
-          data: (data.servers.data || []).map((datum: any) => rawDataToServerObject(datum)),
+          data: (data.servers.data || []).map((datum: any) => transformKeysToCamelCase(datum)),
         }),
       )
       .catch(reject);

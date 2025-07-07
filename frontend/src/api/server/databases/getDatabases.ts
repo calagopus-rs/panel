@@ -1,13 +1,12 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerDatabase } from '@/api/transformers';
 
-export default async (uuid: string): Promise<ServerDatabase[]> => {
+export default async (uuid: string): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/databases`, {
         params: { include: 'password' },
       })
-      .then(({ data }) => resolve((data.data || []).map((item: any) => rawDataToServerDatabase(item.attributes))))
+      .then(({ data }) => resolve(null))
       .catch(reject);
   });
 };

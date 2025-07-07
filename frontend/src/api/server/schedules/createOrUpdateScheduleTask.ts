@@ -1,5 +1,4 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerTask } from '@/api/transformers';
 
 interface Data {
   action: string;
@@ -8,7 +7,7 @@ interface Data {
   continueOnFailure: boolean;
 }
 
-export default async (uuid: string, schedule: number, task: number | undefined, data: Data): Promise<Task> => {
+export default async (uuid: string, schedule: number, task: number | undefined, data: Data): Promise<any> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/schedules/${schedule}/tasks${task ? `/${task}` : ''}`, {
@@ -17,7 +16,7 @@ export default async (uuid: string, schedule: number, task: number | undefined, 
         continue_on_failure: data.continueOnFailure,
         time_offset: data.timeOffset,
       })
-      .then(({ data }) => resolve(rawDataToServerTask(data.attributes)))
+      .then(({ data }) => resolve(null))
       .catch(reject);
   });
 };

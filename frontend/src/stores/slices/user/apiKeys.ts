@@ -1,9 +1,9 @@
 import { getEmptyPaginationSet } from '@/api/axios';
 
 export interface ApiKeySlice {
-  keys: PaginatedResult<UserApiKey>;
+  keys: ResponseMeta<UserApiKey>;
 
-  setKeys: (keys: PaginatedResult<UserApiKey>) => void;
+  setKeys: (keys: ResponseMeta<UserApiKey>) => void;
   addKey: (key: UserApiKey) => void;
   removeKey: (key: UserApiKey) => void;
 }

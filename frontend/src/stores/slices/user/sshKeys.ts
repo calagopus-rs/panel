@@ -1,9 +1,9 @@
 import { getEmptyPaginationSet } from '@/api/axios';
 
 export interface SshKeySlice {
-  keys: PaginatedResult<UserSshKey>;
+  keys: ResponseMeta<UserSshKey>;
 
-  setKeys: (keys: PaginatedResult<UserSshKey>) => void;
+  setKeys: (keys: ResponseMeta<UserSshKey>) => void;
   addKey: (key: UserSshKey) => void;
   removeKey: (key: UserSshKey) => void;
 }

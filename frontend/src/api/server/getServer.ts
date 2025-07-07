@@ -1,13 +1,11 @@
 import { axiosInstance } from '@/api/axios';
-import { rawDataToServerObject } from '@/api/transformers';
+import { transformKeysToCamelCase } from '../transformers';
 
-export default async (uuid: string): Promise<[Server, string[]]> => {
+export default async (uuid: string): Promise<ApiServer> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}`)
-      .then(({ data }) =>
-        resolve([rawDataToServerObject(data), data.meta?.is_server_owner ? ['*'] : data.meta?.user_permissions || []]),
-      )
+      .then(({ data }) => resolve(transformKeysToCamelCase(data.server)))
       .catch(reject);
   });
 };

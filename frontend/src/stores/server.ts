@@ -10,12 +10,12 @@ import { createDatabasesSlice, DatabasesSlice } from './slices/server/databases'
 import { createSchedulesSlice, SchedulesSlice } from './slices/server/schedules';
 
 interface ServerStore {
-  data?: Server;
+  data?: ApiServer;
   permissions: string[];
 
   // Actions
-  setServer: (server: Server) => void;
-  setServerFromState: (cb: (s: Server) => Server) => void;
+  setServer: (server: ApiServer) => void;
+  setServerFromState: (cb: (s: ApiServer) => ApiServer) => void;
   setPermissions: (perms: string[]) => void;
   getServer: (uuid: string) => Promise<void>;
   clear: () => void;
@@ -59,14 +59,13 @@ export const useServerStore = create<ServerStore>()(
     },
 
     getServer: async uuid => {
-      const [server, permissions] = await getServer(uuid);
+      const server = await getServer(uuid);
       get().setServer(server);
-      get().setPermissions(permissions);
     },
 
     inConflictState: () => {
       const data = get().data;
-      return !!(data && (data.status !== null || data.isTransferring || data.isNodeUnderMaintenance));
+      return !!(data && (data.status !== null || data.nodeMaintenanceMessage));
     },
 
     isInstalling: () => {

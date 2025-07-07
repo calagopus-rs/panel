@@ -1,9 +1,9 @@
 export interface SchedulesSlice {
-  schedules: Schedule[];
+  schedules: any[];
 
-  setSchedules: (schedules: Schedule[]) => void;
-  addSchedule: (schedule: Schedule) => void;
-  removeSchedule: (schedule: Schedule) => void;
+  setSchedules: (schedules: any[]) => void;
+  addSchedule: (schedule: any) => void;
+  removeSchedule: (schedule: any) => void;
 }
 
 export const createSchedulesSlice = (set): SchedulesSlice => ({

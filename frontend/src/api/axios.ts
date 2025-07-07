@@ -43,33 +43,7 @@ export function httpErrorToHuman(error: any): string {
   return error.message;
 }
 
-export interface FractalResponseData {
-  object: string;
-  attributes: {
-    [k: string]: any;
-    relationships?: Record<string, FractalResponseData | FractalResponseList | null | undefined>;
-  };
-}
-
-export interface FractalResponseList {
-  object: 'list';
-  data: FractalResponseData[];
-}
-
-export interface FractalPaginatedResponse extends FractalResponseList {
-  meta: {
-    pagination: {
-      total: number;
-      count: number;
-
-      per_page: number;
-      current_page: number;
-      total_pages: number;
-    };
-  };
-}
-
-export function getPaginationSet(data: PaginatedResult<unknown>) {
+export function getPaginationSet(data: ResponseMeta<unknown>) {
   return {
     total: data.total,
     per_page: data.per_page,
@@ -77,7 +51,7 @@ export function getPaginationSet(data: PaginatedResult<unknown>) {
   };
 }
 
-export function getEmptyPaginationSet<T>(): PaginatedResult<T> {
+export function getEmptyPaginationSet<T>(): ResponseMeta<T> {
   return {
     total: 0,
     per_page: 0,
