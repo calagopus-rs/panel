@@ -28,13 +28,7 @@ export function formatTimestamp(timestamp) {
 
   // Threshold: switch to date formatting after 7 days
   if (diffDays >= 7) {
-    return target.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-    });
+    return formatDateTime(timestamp);
   }
 
   const format = (value, unit) =>
