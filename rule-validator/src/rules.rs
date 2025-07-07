@@ -76,9 +76,9 @@ impl ParseValidationRule for Accepted {
 }
 
 impl ValidateRule for Accepted {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         match data.data.get(key).map(String::as_str) {
-            Some("true") | Some("1") | Some("yes") | Some("on") => Ok(()),
+            Some("true") | Some("1") | Some("yes") | Some("on") => Ok(false),
             _ => Err("value must be 'true', '1', 'yes', or 'on'".to_string()),
         }
     }
@@ -108,12 +108,12 @@ impl ParseValidationRule for AcceptedIf {
 }
 
 impl ValidateRule for AcceptedIf {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key) {
                 if value == check_value {
                     match data.data.get(key).map(String::as_str) {
-                        Some("true") | Some("1") | Some("yes") | Some("on") => return Ok(()),
+                        Some("true") | Some("1") | Some("yes") | Some("on") => return Ok(false),
                         _ => {
                             return Err("must be 'true', '1', 'yes', or 'on'".to_string());
                         }
@@ -122,7 +122,7 @@ impl ValidateRule for AcceptedIf {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -139,14 +139,14 @@ impl ParseValidationRule for Alpha {
 }
 
 impl ValidateRule for Alpha {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value.chars().all(|c| c.is_ascii_alphabetic()) {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.chars().all(|c| c.is_alphabetic()) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -167,20 +167,20 @@ impl ParseValidationRule for AlphaDash {
 }
 
 impl ValidateRule for AlphaDash {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value
                     .chars()
                     .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
                 {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value
                 .chars()
                 .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
             {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -201,14 +201,14 @@ impl ParseValidationRule for AlphaNum {
 }
 
 impl ValidateRule for AlphaNum {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value.chars().all(|c| c.is_ascii_alphanumeric()) {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.chars().all(|c| c.is_alphanumeric()) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -225,10 +225,10 @@ impl ParseValidationRule for Ascii {
 }
 
 impl ValidateRule for Ascii {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.is_ascii() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -259,14 +259,14 @@ impl ParseValidationRule for Between {
 }
 
 impl ValidateRule for Between {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num >= self.min && num <= self.max {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() >= self.min as usize && value.len() <= self.max as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -283,10 +283,10 @@ impl ParseValidationRule for Boolean {
 }
 
 impl ValidateRule for Boolean {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         match data.data.get(key).map(String::as_str) {
             Some("true") | Some("1") | Some("yes") | Some("on") | Some("false") | Some("0")
-            | Some("no") | Some("off") => Ok(()),
+            | Some("no") | Some("off") => Ok(false),
             _ => Err("must be a boolean (true/false, 1/0, yes/no, on/off)".to_string()),
         }
     }
@@ -301,12 +301,12 @@ impl ParseValidationRule for Confirmed {
 }
 
 impl ValidateRule for Confirmed {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         let confirm_key = format!("{}{}", key, "_confirmation");
         if let Some(value) = data.data.get(key) {
             if let Some(confirm_value) = data.data.get(&confirm_key) {
                 if value == confirm_value {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -324,10 +324,10 @@ impl ParseValidationRule for Date {
 }
 
 impl ValidateRule for Date {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.parse::<chrono::NaiveDate>().is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -351,10 +351,10 @@ impl ParseValidationRule for DateFormat {
 }
 
 impl ValidateRule for DateFormat {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if chrono::NaiveDate::parse_from_str(value, &self.format).is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -371,9 +371,9 @@ impl ParseValidationRule for Declined {
 }
 
 impl ValidateRule for Declined {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         match data.data.get(key).map(String::as_str) {
-            Some("false") | Some("0") | Some("no") | Some("off") => Ok(()),
+            Some("false") | Some("0") | Some("no") | Some("off") => Ok(false),
             _ => Err("value must be 'false', '0', 'no', or 'off'".to_string()),
         }
     }
@@ -403,12 +403,12 @@ impl ParseValidationRule for DeclinedIf {
 }
 
 impl ValidateRule for DeclinedIf {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key) {
                 if value == check_value {
                     match data.data.get(key).map(String::as_str) {
-                        Some("false") | Some("0") | Some("no") | Some("off") => return Ok(()),
+                        Some("false") | Some("0") | Some("no") | Some("off") => return Ok(false),
                         _ => {
                             return Err("must be 'false', '0', 'no', or 'off'".to_string());
                         }
@@ -417,7 +417,7 @@ impl ValidateRule for DeclinedIf {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -438,11 +438,11 @@ impl ParseValidationRule for Different {
 }
 
 impl ValidateRule for Different {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Some(other_value) = data.data.get(&self.other_key) {
                 if value != other_value {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -470,10 +470,10 @@ impl ParseValidationRule for Digits {
 }
 
 impl ValidateRule for Digits {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_ascii_digit()) && value.len() == self.length {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -504,12 +504,12 @@ impl ParseValidationRule for DigitsBetween {
 }
 
 impl ValidateRule for DigitsBetween {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_ascii_digit()) {
                 let len = value.len();
                 if len >= self.minimum && len <= self.maximum {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -538,7 +538,7 @@ impl ParseValidationRule for DoesntStartWith {
 }
 
 impl ValidateRule for DoesntStartWith {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             for prefix in &self.prefixes {
                 if value.starts_with(prefix) {
@@ -547,7 +547,7 @@ impl ValidateRule for DoesntStartWith {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -568,7 +568,7 @@ impl ParseValidationRule for DoesntEndWith {
 }
 
 impl ValidateRule for DoesntEndWith {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             for suffix in &self.suffixes {
                 if value.ends_with(suffix) {
@@ -577,7 +577,7 @@ impl ValidateRule for DoesntEndWith {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -598,7 +598,7 @@ impl ParseValidationRule for EndsWith {
 }
 
 impl ValidateRule for EndsWith {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             for suffix in &self.suffixes {
                 if value.ends_with(suffix) {
@@ -607,7 +607,7 @@ impl ValidateRule for EndsWith {
             }
         }
 
-        Ok(())
+        Ok(false)
     }
 }
 
@@ -630,14 +630,14 @@ impl ParseValidationRule for Gt {
 }
 
 impl ValidateRule for Gt {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num > self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() > self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -664,14 +664,14 @@ impl ParseValidationRule for Gte {
 }
 
 impl ValidateRule for Gte {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num >= self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() >= self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -688,13 +688,13 @@ impl ParseValidationRule for HexColor {
 }
 
 impl ValidateRule for HexColor {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.starts_with('#')
                 && value.len() == 7
                 && value[1..].chars().all(|c| c.is_ascii_hexdigit())
             {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -719,10 +719,10 @@ impl ParseValidationRule for In {
 }
 
 impl ValidateRule for In {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if self.options.contains(value) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -739,10 +739,10 @@ impl ParseValidationRule for Integer {
 }
 
 impl ValidateRule for Integer {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_ascii_digit()) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -759,10 +759,10 @@ impl ParseValidationRule for Ip {
 }
 
 impl ValidateRule for Ip {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.parse::<std::net::IpAddr>().is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -779,10 +779,10 @@ impl ParseValidationRule for Ipv4 {
 }
 
 impl ValidateRule for Ipv4 {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.parse::<std::net::Ipv4Addr>().is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -799,10 +799,10 @@ impl ParseValidationRule for Ipv6 {
 }
 
 impl ValidateRule for Ipv6 {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.parse::<std::net::Ipv6Addr>().is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -819,10 +819,10 @@ impl ParseValidationRule for Json {
 }
 
 impl ValidateRule for Json {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if serde_json::from_str::<serde_json::Value>(value).is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -849,14 +849,14 @@ impl ParseValidationRule for Lt {
 }
 
 impl ValidateRule for Lt {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num < self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() < self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -883,14 +883,14 @@ impl ParseValidationRule for Lte {
 }
 
 impl ValidateRule for Lte {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num <= self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() <= self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -907,10 +907,10 @@ impl ParseValidationRule for Lowercase {
 }
 
 impl ValidateRule for Lowercase {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_lowercase()) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -927,7 +927,7 @@ impl ParseValidationRule for MacAddress {
 }
 
 impl ValidateRule for MacAddress {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             let parts: Vec<&str> = value.split(':').collect();
             if parts.len() == 6
@@ -935,7 +935,7 @@ impl ValidateRule for MacAddress {
                     .iter()
                     .all(|part| part.len() == 2 && part.chars().all(|c| c.is_ascii_hexdigit()))
             {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -962,14 +962,14 @@ impl ParseValidationRule for Max {
 }
 
 impl ValidateRule for Max {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num <= self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() <= self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -996,10 +996,10 @@ impl ParseValidationRule for MaxDigits {
 }
 
 impl ValidateRule for MaxDigits {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_ascii_digit()) && value.len() <= self.value {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1026,14 +1026,14 @@ impl ParseValidationRule for Min {
 }
 
 impl ValidateRule for Min {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num >= self.value {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() >= self.value as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1060,10 +1060,10 @@ impl ParseValidationRule for MinDigits {
 }
 
 impl ValidateRule for MinDigits {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_ascii_digit()) && value.len() >= self.value {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1090,11 +1090,11 @@ impl ParseValidationRule for MultipleOf {
 }
 
 impl ValidateRule for MultipleOf {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num % self.value == 0.0 {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -1120,10 +1120,10 @@ impl ParseValidationRule for NotIn {
 }
 
 impl ValidateRule for NotIn {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if !self.options.contains(value) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1141,7 +1141,7 @@ impl ParseValidationRule for NotRegex {
             return Err("not_regex requires a regex pattern".to_string());
         }
 
-        let pattern = rule[0].clone();
+        let pattern = rule[0].trim_matches('/').to_string();
         let regex = regex::Regex::new(&pattern).map_err(|_| "invalid regex pattern".to_string())?;
 
         Ok(Box::new(NotRegex { pattern: regex }))
@@ -1149,10 +1149,10 @@ impl ParseValidationRule for NotRegex {
 }
 
 impl ValidateRule for NotRegex {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if !self.pattern.is_match(value) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1172,12 +1172,14 @@ impl ParseValidationRule for Nullable {
 }
 
 impl ValidateRule for Nullable {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
-        if !data.data.contains_key(key) || data.data.get(key).unwrap().is_empty() {
-            return Ok(());
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+        if let Some(value) = data.data.get(key) {
+            if value.is_empty() || value == "null" {
+                return Ok(true);
+            }
         }
 
-        Err("must be null or empty".to_string())
+        Ok(false)
     }
 }
 
@@ -1190,13 +1192,13 @@ impl ParseValidationRule for Numeric {
 }
 
 impl ValidateRule for Numeric {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value
                 .chars()
                 .all(|c| c.is_ascii_digit() || c == '.' || c == '-' || c == '+')
             {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1214,7 +1216,7 @@ impl ParseValidationRule for Regex {
             return Err("regex requires a regex pattern".to_string());
         }
 
-        let pattern = rule[0].clone();
+        let pattern = rule[0].trim_matches('/').to_string();
         let regex = regex::Regex::new(&pattern).map_err(|_| "invalid regex pattern".to_string())?;
 
         Ok(Box::new(Regex { pattern: regex }))
@@ -1222,10 +1224,10 @@ impl ParseValidationRule for Regex {
 }
 
 impl ValidateRule for Regex {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if self.pattern.is_match(value) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1242,10 +1244,10 @@ impl ParseValidationRule for Required {
 }
 
 impl ValidateRule for Required {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if !value.is_empty() {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1277,21 +1279,22 @@ impl ParseValidationRule for RequiredIf {
 }
 
 impl ValidateRule for RequiredIf {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key) {
                 if value == check_value {
                     if let Some(field_value) = data.data.get(key) {
                         if !field_value.is_empty() {
-                            return Ok(());
+                            return Ok(false);
                         }
                     }
+
                     return Err(format!("is required when '{check_key}' is '{check_value}'"));
                 }
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 
@@ -1312,12 +1315,12 @@ impl ParseValidationRule for RequiredIfAccepted {
 }
 
 impl ValidateRule for RequiredIfAccepted {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(&self.other_key) {
             if value == "true" || value == "1" || value == "yes" || value == "on" {
                 if let Some(field_value) = data.data.get(key) {
                     if !field_value.is_empty() {
-                        return Ok(());
+                        return Ok(false);
                     }
                 }
 
@@ -1325,7 +1328,7 @@ impl ValidateRule for RequiredIfAccepted {
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 
@@ -1346,12 +1349,12 @@ impl ParseValidationRule for RequiredIfDeclined {
 }
 
 impl ValidateRule for RequiredIfDeclined {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(&self.other_key) {
             if value == "false" || value == "0" || value == "no" || value == "off" {
                 if let Some(field_value) = data.data.get(key) {
                     if !field_value.is_empty() {
-                        return Ok(());
+                        return Ok(false);
                     }
                 }
 
@@ -1359,7 +1362,7 @@ impl ValidateRule for RequiredIfDeclined {
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 }
 
@@ -1380,11 +1383,11 @@ impl ParseValidationRule for Same {
 }
 
 impl ValidateRule for Same {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Some(other_value) = data.data.get(&self.other_key) {
                 if value == other_value {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -1412,14 +1415,14 @@ impl ParseValidationRule for Size {
 }
 
 impl ValidateRule for Size {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num == self.size {
-                    return Ok(());
+                    return Ok(false);
                 }
             } else if value.len() == self.size as usize {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1444,11 +1447,11 @@ impl ParseValidationRule for StartsWith {
 }
 
 impl ValidateRule for StartsWith {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             for prefix in &self.prefixes {
                 if value.starts_with(prefix) {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -1469,14 +1472,8 @@ impl ParseValidationRule for StringRule {
 }
 
 impl ValidateRule for StringRule {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
-        if let Some(value) = data.data.get(key) {
-            if !value.is_empty() {
-                return Ok(());
-            }
-        }
-
-        Err("must be a non-empty string".to_string())
+    fn validate(&self, _key: &str, _data: &Validator) -> Result<bool, String> {
+        Ok(false)
     }
 }
 
@@ -1489,10 +1486,10 @@ impl ParseValidationRule for Timezone {
 }
 
 impl ValidateRule for Timezone {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.parse::<chrono::FixedOffset>().is_ok() || value == "UTC" {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1509,10 +1506,10 @@ impl ParseValidationRule for Uppercase {
 }
 
 impl ValidateRule for Uppercase {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if value.chars().all(|c| c.is_uppercase()) {
-                return Ok(());
+                return Ok(false);
             }
         }
 
@@ -1533,11 +1530,11 @@ impl ParseValidationRule for Url {
 }
 
 impl ValidateRule for Url {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if let Ok(url) = reqwest::Url::parse(value) {
                 if self.protocols.contains(&url.scheme().to_string()) {
-                    return Ok(());
+                    return Ok(false);
                 }
             }
         }
@@ -1558,10 +1555,10 @@ impl ParseValidationRule for Uuid {
 }
 
 impl ValidateRule for Uuid {
-    fn validate(&self, key: &str, data: &Validator) -> Result<(), String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key) {
             if uuid::Uuid::parse_str(value).is_ok() {
-                return Ok(());
+                return Ok(false);
             }
         }
 

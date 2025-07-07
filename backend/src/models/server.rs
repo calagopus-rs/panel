@@ -598,11 +598,12 @@ impl Server {
     ) -> RemoteApiServer {
         let (variables, backups, mounts, allocations) = tokio::try_join!(
             sqlx::query!(
-                "SELECT nest_egg_variables.env_variable, server_variables.value
-                FROM server_variables
-                JOIN nest_egg_variables ON nest_egg_variables.id = server_variables.variable_id
-                WHERE server_variables.server_id = $1",
-                self.id
+                "SELECT nest_egg_variables.env_variable, COALESCE(server_variables.value, nest_egg_variables.default_value) AS value
+                FROM nest_egg_variables
+                LEFT JOIN server_variables ON server_variables.variable_id = nest_egg_variables.id AND server_variables.server_id = $1
+                WHERE nest_egg_variables.egg_id = $2",
+                self.id,
+                self.egg.id
             )
             .fetch_all(database.read()),
             sqlx::query!(
@@ -644,7 +645,12 @@ impl Server {
                 skip_egg_scripts: false,
                 environment: variables
                     .into_iter()
-                    .map(|v| (v.env_variable, serde_json::Value::String(v.value)))
+                    .map(|v| {
+                        (
+                            v.env_variable,
+                            serde_json::Value::String(v.value.unwrap_or_default()),
+                        )
+                    })
                     .collect(),
                 labels: IndexMap::new(),
                 backups: backups.into_iter().map(|b| b.uuid).collect(),
