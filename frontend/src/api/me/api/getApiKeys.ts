@@ -7,7 +7,7 @@ export default async (page: number): Promise<ResponseMeta<UserApiKey>> => {
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.apiKeys),
-          data: (data.apiKeys.data || []).map((datum: any) => datum),
+          data: data.apiKeys.data || [],
         }),
       )
       .catch(reject);

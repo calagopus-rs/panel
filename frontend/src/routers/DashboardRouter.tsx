@@ -14,12 +14,14 @@ import {
   faMagnifyingGlass,
   faServer,
   faUser,
+  faUserSecret,
 } from '@fortawesome/free-solid-svg-icons';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import { useAuth } from '@/providers/AuthProvider';
+import DashboardSessions from '@/pages/dashboard/DashboardSessions';
 
 export default () => {
   const { user } = useAuth();
@@ -64,6 +66,10 @@ export default () => {
               <FontAwesomeIcon icon={faBriefcase} />
               <span>Activity</span>
             </Sidebar.Link>
+            <Sidebar.Link to="/account/sessions" end>
+              <FontAwesomeIcon icon={faUserSecret} />
+              <span>Sessions</span>
+            </Sidebar.Link>
           </Sidebar.Section>
           <Sidebar.User />
         </Sidebar>
@@ -73,6 +79,7 @@ export default () => {
           <Route path="/account/api" element={<DashboardApi />} />
           <Route path="/account/ssh" element={<DashboardSsh />} />
           <Route path="/account/activity" element={<DashboardActivity />} />
+          <Route path="/account/sessions" element={<DashboardSessions />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>

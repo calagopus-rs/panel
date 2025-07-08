@@ -7,7 +7,7 @@ export default async (page: number): Promise<ResponseMeta<UserSshKey>> => {
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.sshKeys),
-          data: (data.sshKeys.data || []).map((datum: any) => datum),
+          data: data.sshKeys.data || [],
         }),
       )
       .catch(reject);

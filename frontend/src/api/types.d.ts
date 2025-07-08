@@ -143,6 +143,15 @@ interface UserApiKey {
   created: Date;
 }
 
+interface UserSession {
+  id: number;
+  ip: string;
+  userAgent: string;
+  isUsing: boolean;
+  lastUsed: Date;
+  created: Date;
+}
+
 interface UserSshKey {
   id: number;
   name: string;
