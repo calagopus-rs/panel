@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE locations\n            SET short_name = $1, name = $2, description = $3, backup_disk = $4, backup_configs = $5\n            WHERE id = $6",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        {
+          "Custom": {
+            "name": "backup_disk",
+            "kind": {
+              "Enum": [
+                "LOCAL",
+                "S3",
+                "DDUP_BAK",
+                "BTRFS",
+                "ZFS",
+                "RESTIC"
+              ]
+            }
+          }
+        },
+        "Jsonb",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dd85681aa16f809938fdcd5a92d990a277a2819d15d72e4482f55b0dd3be55dd"
+}

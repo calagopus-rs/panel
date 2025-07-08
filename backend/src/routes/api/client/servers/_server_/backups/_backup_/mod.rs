@@ -67,9 +67,9 @@ mod delete {
             );
         }
 
-        if let Err(err) = ServerBackup::delete_by_uuid(&state.database, &server, backup.uuid).await
-        {
-            tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+        let uuid = server.uuid;
+        if let Err(err) = backup.delete(&state.database, server.0).await {
+            tracing::error!(server = %uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
 
             return (
                 StatusCode::INTERNAL_SERVER_ERROR,

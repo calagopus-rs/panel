@@ -292,29 +292,49 @@ impl ServerBackup {
         Ok(())
     }
 
-    pub async fn delete_by_uuid(
+    pub async fn delete(
+        &self,
         database: &crate::database::Database,
-        server: &super::server::Server,
-        uuid: uuid::Uuid,
+        server: super::server::Server,
     ) -> Result<(), sqlx::Error> {
-        if let Err((status, error)) = server
-            .node
-            .api_client(database)
-            .delete_servers_server_backup_backup(server.uuid, uuid)
-            .await
-        {
-            if status != StatusCode::NOT_FOUND {
-                return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
+        match self.disk {
+            BackupDisk::S3 => {
+                if let Some(mut s3_configuration) = server.node.location.backup_configs.s3 {
+                    s3_configuration.decrypt(database);
+
+                    let client = s3_configuration
+                        .into_client()
+                        .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
+                    let file_path = Self::s3_path(server.uuid, self.uuid);
+
+                    if let Err(err) = client.delete_object(file_path).await {
+                        tracing::error!(server = %server.uuid, backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
+                    }
+                } else {
+                    tracing::warn!(server = %server.uuid, backup = %self.uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");
+                }
+            }
+            _ => {
+                if let Err((status, error)) = server
+                    .node
+                    .api_client(database)
+                    .delete_servers_server_backup_backup(server.uuid, self.uuid)
+                    .await
+                {
+                    if status != StatusCode::NOT_FOUND {
+                        return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
+                    }
+                }
             }
         }
 
         sqlx::query(
             r#"
             DELETE FROM server_backups
-            WHERE server_backups.uuid = $1
+            WHERE server_backups.id = $1
             "#,
         )
-        .bind(uuid)
+        .bind(self.id)
         .execute(database.write())
         .await?;
 
