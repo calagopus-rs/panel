@@ -1,4 +1,5 @@
 use super::BaseModel;
+use crate::routes::api::client::{AuthMethod, GetAuthMethod};
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
@@ -145,11 +146,15 @@ impl UserSession {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiUserSession {
+    pub fn into_api_object(self, auth: &GetAuthMethod) -> ApiUserSession {
         ApiUserSession {
             id: self.id,
             ip: self.ip.ip().to_string(),
             user_agent: self.user_agent,
+            is_using: match &**auth {
+                AuthMethod::Session(session) => session.id == self.id,
+                _ => false,
+            },
             last_used: self.last_used.and_utc(),
             created: self.created.and_utc(),
         }
@@ -163,6 +168,8 @@ pub struct ApiUserSession {
 
     pub ip: String,
     pub user_agent: String,
+
+    pub is_using: bool,
 
     pub last_used: chrono::DateTime<chrono::Utc>,
     pub created: chrono::DateTime<chrono::Utc>,

@@ -6,7 +6,10 @@ mod _session_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParams, user_session::UserSession},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetAuthMethod, GetUser},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -34,6 +37,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        auth: GetAuthMethod,
         user: GetUser,
         Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -63,7 +67,7 @@ mod get {
                         data: sessions
                             .data
                             .into_iter()
-                            .map(|session| session.into_api_object())
+                            .map(|session| session.into_api_object(&auth))
                             .collect(),
                     },
                 })

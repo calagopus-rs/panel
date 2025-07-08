@@ -365,8 +365,8 @@ impl ServerBackup {
             uuid: self.uuid,
             name: self.name,
             ignored_files: self.ignored_files,
-            successful: self.successful,
-            locked: self.locked,
+            is_successful: self.successful,
+            is_locked: self.locked,
             checksum: self.checksum,
             bytes: self.bytes,
             completed: self.completed.map(|dt| dt.and_utc()),
@@ -383,8 +383,8 @@ pub struct ApiServerBackup {
     pub name: String,
     pub ignored_files: Vec<String>,
 
-    pub successful: bool,
-    pub locked: bool,
+    pub is_successful: bool,
+    pub is_locked: bool,
     pub checksum: Option<String>,
     pub bytes: i64,
 
