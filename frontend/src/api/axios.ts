@@ -1,12 +1,25 @@
 import axios, { AxiosInstance } from 'axios';
+import { transformKeysToCamelCase } from './transformers';
 
 export const axiosInstance: AxiosInstance = axios.create({
-  // baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
     'Content-Type': 'application/json',
   },
 });
+
+// Auto transform all data to camel case keys
+axiosInstance.interceptors.response.use(
+  response => {
+    response.data = transformKeysToCamelCase(response.data);
+    return response;
+  },
+  error => {
+    if (error.response && error.response.data) {
+      error.response.data = transformKeysToCamelCase(error.response.data);
+    }
+    return Promise.reject(error);
+  },
+);
 
 /**
  * Converts an error into a human readable response. Mostly just a generic helper to

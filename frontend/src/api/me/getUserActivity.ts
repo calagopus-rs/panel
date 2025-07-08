@@ -1,5 +1,4 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
-import { transformKeysToCamelCase } from '../transformers';
 
 export default async (page: number): Promise<ResponseMeta<UserActivity>> => {
   return new Promise((resolve, reject) => {
@@ -8,7 +7,7 @@ export default async (page: number): Promise<ResponseMeta<UserActivity>> => {
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.activities),
-          data: (data.activities.data || []).map((datum: any) => transformKeysToCamelCase(datum)),
+          data: (data.activities.data || []).map((datum: any) => datum),
         }),
       )
       .catch(reject);

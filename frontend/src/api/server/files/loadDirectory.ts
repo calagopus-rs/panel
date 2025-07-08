@@ -1,5 +1,4 @@
 import { axiosInstance } from '@/api/axios';
-import { transformKeysToCamelCase } from '@/api/transformers';
 
 export default async (uuid: string, directory?: string): Promise<DirectoryEntry[]> => {
   return new Promise((resolve, reject) => {
@@ -7,7 +6,7 @@ export default async (uuid: string, directory?: string): Promise<DirectoryEntry[
       .get(`/api/client/servers/${uuid}/files/list`, {
         params: { directory: directory ?? '/' },
       })
-      .then(({ data }) => resolve((data.entries || []).map((datum: any) => transformKeysToCamelCase(datum))))
+      .then(({ data }) => resolve((data.entries || []).map((datum: any) => datum)))
       .catch(reject);
   });
 };
