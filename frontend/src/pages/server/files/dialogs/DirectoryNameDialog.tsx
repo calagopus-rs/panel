@@ -16,7 +16,7 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
   const [dirName, setDirName] = useState('');
 
   const submit = () => {
-    onDirectoryNamed(join(browsingDirectory, dirName));
+    onDirectoryNamed(dirName);
     onClose();
   };
 
