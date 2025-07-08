@@ -64,12 +64,12 @@ impl Captcha {
             }
             crate::settings::CaptchaProvider::Recaptcha { v3, secret_key, .. } => {
                 let response = CLIENT
-                    .post("https://www.google.com/recaptcha/api/siteverify")
-                    .json(&serde_json::json!({
-                        "secret": secret_key,
-                        "response": captcha,
-                        "remoteip": ip.to_string(),
-                    }))
+                    .get("https://www.google.com/recaptcha/api/siteverify")
+                    .query(&[
+                        ("secret", secret_key),
+                        ("response", &captcha),
+                        ("remoteip", &ip.to_string()),
+                    ])
                     .send()
                     .await
                     .map_err(|e| e.to_string())?;
