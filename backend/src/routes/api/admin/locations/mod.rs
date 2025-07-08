@@ -88,12 +88,12 @@ mod post {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         name: String,
-
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        backups: crate::models::location::LocationConfigBackups,
+        backup_disk: crate::models::server_backup::BackupDisk,
+        backup_configs: crate::models::location::LocationBackupConfigs,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -125,7 +125,8 @@ mod post {
             &data.short_name,
             &data.name,
             data.description.as_deref(),
-            data.backups,
+            data.backup_disk,
+            data.backup_configs,
         )
         .await
         {
@@ -157,7 +158,9 @@ mod post {
                 "short_name": location.short_name,
                 "name": location.name,
                 "description": location.description,
-                "backups": location.backups,
+
+                "backup_disk": location.backup_disk,
+                "backup_configs": location.backup_configs,
             }),
         )
         .await;

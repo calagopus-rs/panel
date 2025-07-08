@@ -45,10 +45,7 @@ mod post {
                 activity.user.map(|uuid| User::from_uuid(uuid)),
                 None,
                 &activity.event,
-                activity
-                    .ip
-                    .unwrap_or(std::net::IpAddr::from([127, 0, 0, 1]))
-                    .into(),
+                activity.ip.map(|ip| ip.into()),
                 activity.metadata.unwrap_or_else(|| serde_json::json!({})),
                 activity.timestamp,
             )

@@ -1,9 +1,12 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod download;
+mod restore;
+
 mod delete {
     use crate::{
-        models::server_subuser::ServerSubuser,
+        models::server_backup::ServerBackup,
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -20,6 +23,7 @@ mod delete {
         (status = OK, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
+        (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,
@@ -27,47 +31,58 @@ mod delete {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "subuser" = String,
-            description = "The username of the subuser",
-            example = "0x7d8",
+            "backup" = uuid::Uuid,
+            description = "The backup ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, subuser)): Path<(String, String)>,
+        Path((_server, backup)): Path<(String, uuid::Uuid)>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("subusers.delete") {
+        if let Err(error) = server.has_permission("backups.delete") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        let subuser = match ServerSubuser::by_server_id_username(
-            &state.database,
-            server.id,
-            &subuser,
-        )
-        .await
+        let backup = match ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await
         {
-            Some(subuser) => subuser,
+            Some(backup) => backup,
             None => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["subuser not found"])),
+                    axum::Json(ApiError::new_value(&["backup not found"])),
                 );
             }
         };
 
-        ServerSubuser::delete_by_ids(&state.database, server.id, subuser.user.id).await;
+        if backup.completed.is_none() {
+            return (
+                StatusCode::EXPECTATION_FAILED,
+                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
+            );
+        }
+
+        if let Err(err) = ServerBackup::delete_by_uuid(&state.database, &server, backup.uuid).await
+        {
+            tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                axum::Json(ApiError::new_value(&["failed to delete backup"])),
+            );
+        }
 
         activity_logger
             .log(
-                "server:subuser.delete",
+                "server:backup.delete",
                 serde_json::json!({
-                    "email": subuser.user.email,
+                    "backup": backup.uuid,
+                    "name": backup.name,
                 }),
             )
             .await;
@@ -81,13 +96,10 @@ mod delete {
 
 mod patch {
     use crate::{
-        models::server_subuser::ServerSubuser,
+        models::server_backup::ServerBackup,
         routes::{
             ApiError, GetState,
-            api::client::{
-                GetUser,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -97,8 +109,10 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Vec<String>,
+        #[validate(length(min = 1, max = 255))]
+        #[schema(min_length = 1, max_length = 255)]
+        name: Option<String>,
+        locked: Option<bool>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -116,17 +130,16 @@ mod patch {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "subuser" = String,
-            description = "The username of the subuser",
-            example = "0x7d8",
+            "backup" = uuid::Uuid,
+            description = "The backup ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        user: GetUser,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, subuser)): Path<(String, String)>,
+        Path((_server, backup)): Path<(String, uuid::Uuid)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -136,58 +149,45 @@ mod patch {
             );
         }
 
-        if !user.admin
-            && let Some(subuser_permissions) = &server.subuser_permissions
-            && !data
-                .permissions
-                .iter()
-                .all(|p| subuser_permissions.contains(p))
-        {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[
-                    "permissions: more permissions than self",
-                ])),
-            );
-        }
-
-        if let Err(error) = server.has_permission("subusers.update") {
+        if let Err(error) = server.has_permission("backups.update") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        let subuser = match ServerSubuser::by_server_id_username(
-            &state.database,
-            server.id,
-            &subuser,
-        )
-        .await
-        {
-            Some(subuser) => subuser,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["subuser not found"])),
-                );
-            }
-        };
+        let mut backup =
+            match ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await {
+                Some(backup) => backup,
+                None => {
+                    return (
+                        StatusCode::NOT_FOUND,
+                        axum::Json(ApiError::new_value(&["backup not found"])),
+                    );
+                }
+            };
 
-        if subuser.user.id == user.id {
+        if backup.completed.is_none() {
             return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["cannot update permissions for self"])),
+                StatusCode::EXPECTATION_FAILED,
+                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
             );
         }
 
+        if let Some(name) = data.name {
+            backup.name = name
+        }
+        if let Some(locked) = data.locked {
+            backup.locked = locked;
+        }
+
         sqlx::query!(
-            "UPDATE server_subusers
-            SET permissions = $1
-            WHERE server_id = $2 AND user_id = $3",
-            &data.permissions,
-            server.id,
-            subuser.user.id,
+            "UPDATE server_backups
+            SET name = $1, locked = $2
+            WHERE id = $3",
+            &backup.name,
+            backup.locked,
+            backup.id,
         )
         .execute(state.database.write())
         .await
@@ -195,10 +195,11 @@ mod patch {
 
         activity_logger
             .log(
-                "server:subuser.update",
+                "server:backup.update",
                 serde_json::json!({
-                    "email": subuser.user.email,
-                    "permissions": data.permissions,
+                    "backup": backup.uuid,
+                    "name": backup.name,
+                    "locked": backup.locked,
                 }),
             )
             .await;
@@ -214,5 +215,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/download", download::router(state))
+        .nest("/restore", restore::router(state))
         .with_state(state.clone())
 }

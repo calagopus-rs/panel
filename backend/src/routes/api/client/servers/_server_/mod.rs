@@ -18,6 +18,7 @@ use std::sync::Arc;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod activity;
+mod backups;
 mod command;
 mod files;
 mod power;
@@ -47,7 +48,7 @@ impl ServerActivityLogger {
             Some(self.user_id),
             self.api_key_id,
             event,
-            self.ip.into(),
+            Some(self.ip.into()),
             data,
         )
         .await
@@ -182,6 +183,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/settings", settings::router(state))
         .nest("/startup", startup::router(state))
         .nest("/subusers", subusers::router(state))
+        .nest("/backups", backups::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

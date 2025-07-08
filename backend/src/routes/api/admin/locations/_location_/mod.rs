@@ -87,12 +87,12 @@ mod patch {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         name: Option<String>,
-
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        backups: Option<crate::models::location::LocationConfigBackups>,
+        backup_disk: Option<crate::models::server_backup::BackupDisk>,
+        backup_configs: Option<crate::models::location::LocationBackupConfigs>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -148,18 +148,23 @@ mod patch {
                 location.description = Some(description);
             }
         }
-        if let Some(backups) = data.backups {
-            location.config_backups = backups;
+        if let Some(backup_disk) = data.backup_disk {
+            location.backup_disk = backup_disk;
+        }
+        if let Some(backup_configs) = data.backup_configs {
+            location.backup_configs = backup_configs;
+            location.backup_configs.encrypt(&state.database);
         }
 
         match sqlx::query!(
             "UPDATE locations
-            SET short_name = $1, name = $2, description = $3, config_backups = $4
-            WHERE id = $5",
+            SET short_name = $1, name = $2, description = $3, backup_disk = $4, backup_configs = $5
+            WHERE id = $6",
             location.short_name,
             location.name,
             location.description,
-            serde_json::to_value(&location.config_backups).unwrap(),
+            location.backup_disk as crate::models::server_backup::BackupDisk,
+            serde_json::to_value(&location.backup_configs).unwrap(),
             location.id,
         )
         .execute(state.database.write())
@@ -193,7 +198,9 @@ mod patch {
                 "short_name": location.short_name,
                 "name": location.name,
                 "description": location.description,
-                "backups": location.backups,
+
+                "backup_disk": location.backup_disk,
+                "backup_configs": location.backup_configs,
             }),
         )
         .await;

@@ -99,6 +99,18 @@ pub static PERMISSIONS: LazyLock<
                         "read",
                         "Allows a user to view existing backups for the server.",
                     ),
+                    (
+                        "download",
+                        "Allows a user to download a backup for the server.",
+                    ),
+                    (
+                        "restore",
+                        "Allows a user to restore a backup for the server.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to update an existing backup for the server.",
+                    ),
                     ("delete", "Allows a user to delete a backup for the server."),
                 ]),
             ),

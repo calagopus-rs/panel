@@ -5,23 +5,83 @@ use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum LocationConfigBackups {
-    Local,
-    S3 {
-        access_key: String,
-        secret_key: String,
-        bucket: String,
-        region: String,
-        endpoint: String,
-        path_style: bool,
-        part_size: u64,
-    },
-    #[serde(rename = "ddup-bak")]
-    DdupBak,
-    Btrfs,
-    Zfs,
-    Restic,
+pub struct LocationBackupConfigsS3 {
+    pub access_key: String,
+    pub secret_key: String,
+    pub bucket: String,
+    pub region: String,
+    pub endpoint: String,
+    pub path_style: bool,
+    pub part_size: u64,
+}
+
+impl LocationBackupConfigsS3 {
+    pub fn encrypt(&mut self, database: &crate::database::Database) {
+        self.secret_key = base32::encode(
+            base32::Alphabet::Z,
+            &database.encrypt(self.secret_key.as_bytes()).unwrap(),
+        );
+    }
+
+    pub fn decrypt(&mut self, database: &crate::database::Database) {
+        self.secret_key = database
+            .decrypt(&base32::decode(base32::Alphabet::Z, &self.secret_key).unwrap())
+            .unwrap();
+    }
+
+    pub fn censor(&mut self) {
+        self.secret_key = "".into();
+    }
+
+    pub fn into_client(self) -> Result<Box<s3::Bucket>, s3::error::S3Error> {
+        let mut bucket = s3::Bucket::new(
+            &self.bucket,
+            s3::Region::Custom {
+                region: self.region,
+                endpoint: self.endpoint,
+            },
+            s3::creds::Credentials::new(
+                Some(&self.access_key),
+                Some(&self.secret_key),
+                None,
+                None,
+                None,
+            )
+            .unwrap(),
+        )?;
+
+        if self.path_style {
+            bucket.set_path_style();
+        }
+
+        Ok(bucket)
+    }
+}
+
+#[derive(ToSchema, Serialize, Deserialize, Default, Clone)]
+pub struct LocationBackupConfigs {
+    #[serde(default)]
+    pub s3: Option<LocationBackupConfigsS3>,
+}
+
+impl LocationBackupConfigs {
+    pub fn encrypt(&mut self, database: &crate::database::Database) {
+        if let Some(s3) = &mut self.s3 {
+            s3.encrypt(database);
+        }
+    }
+
+    pub fn decrypt(&mut self, database: &crate::database::Database) {
+        if let Some(s3) = &mut self.s3 {
+            s3.decrypt(database);
+        }
+    }
+
+    pub fn censor(&mut self) {
+        if let Some(s3) = &mut self.s3 {
+            s3.censor();
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -32,7 +92,8 @@ pub struct Location {
     pub name: String,
     pub description: Option<String>,
 
-    pub config_backups: LocationConfigBackups,
+    pub backup_disk: super::server_backup::BackupDisk,
+    pub backup_configs: LocationBackupConfigs,
 
     pub nodes: i64,
 
@@ -54,8 +115,12 @@ impl BaseModel for Location {
                 format!("{prefix}description"),
             ),
             (
-                format!("{table}.config_backups"),
-                format!("{prefix}config_backups"),
+                format!("{table}.backup_disk"),
+                format!("{prefix}backup_disk"),
+            ),
+            (
+                format!("{table}.backup_configs"),
+                format!("{prefix}backup_configs"),
             ),
             (
                 format!("(SELECT COUNT(*) FROM nodes WHERE nodes.location_id = {table}.id)"),
@@ -74,10 +139,11 @@ impl BaseModel for Location {
             short_name: row.get(format!("{prefix}short_name").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
-            config_backups: serde_json::from_value(
-                row.get(format!("{prefix}config_backups").as_str()),
+            backup_disk: row.get(format!("{prefix}backup_disk").as_str()),
+            backup_configs: serde_json::from_value(
+                row.get(format!("{prefix}backup_configs").as_str()),
             )
-            .unwrap_or(LocationConfigBackups::Local),
+            .unwrap_or_default(),
             nodes: row.get(format!("{prefix}nodes").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
@@ -90,19 +156,15 @@ impl Location {
         short_name: &str,
         name: &str,
         description: Option<&str>,
-        mut config_backups: LocationConfigBackups,
+        backup_disk: super::server_backup::BackupDisk,
+        mut backup_configs: LocationBackupConfigs,
     ) -> Result<Self, sqlx::Error> {
-        if let LocationConfigBackups::S3 { secret_key, .. } = &mut config_backups {
-            *secret_key = base32::encode(
-                base32::Alphabet::Z,
-                &database.encrypt(secret_key.as_bytes()).unwrap(),
-            );
-        }
+        backup_configs.encrypt(database);
 
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO locations (short_name, name, description, config_backups)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO locations (short_name, name, description, backup_disk, backup_configs)
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
@@ -110,7 +172,8 @@ impl Location {
         .bind(short_name)
         .bind(name)
         .bind(description)
-        .bind(serde_json::to_value(config_backups).unwrap())
+        .bind(backup_disk)
+        .bind(serde_json::to_value(backup_configs).unwrap())
         .fetch_one(database.write())
         .await?;
 
@@ -177,61 +240,16 @@ impl Location {
     }
 
     #[inline]
-    pub fn into_decrypted_backups(
-        self,
-        database: &crate::database::Database,
-    ) -> LocationConfigBackups {
-        match self.config_backups {
-            LocationConfigBackups::S3 {
-                access_key,
-                secret_key,
-                bucket,
-                region,
-                endpoint,
-                path_style,
-                part_size,
-            } => LocationConfigBackups::S3 {
-                access_key,
-                secret_key: base32::decode(base32::Alphabet::Z, &secret_key)
-                    .map(|b| database.decrypt(&b).unwrap_or_default())
-                    .unwrap_or_default(),
-                bucket,
-                region,
-                endpoint,
-                path_style,
-                part_size,
-            },
-            _ => self.config_backups.clone(),
-        }
-    }
+    pub fn into_admin_api_object(mut self) -> AdminApiLocation {
+        self.backup_configs.censor();
 
-    #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiLocation {
         AdminApiLocation {
             id: self.id,
             short_name: self.short_name,
             name: self.name,
             description: self.description,
-            backups: match self.config_backups {
-                LocationConfigBackups::S3 {
-                    access_key,
-                    bucket,
-                    region,
-                    endpoint,
-                    path_style,
-                    part_size,
-                    ..
-                } => LocationConfigBackups::S3 {
-                    access_key,
-                    secret_key: "".to_string(),
-                    bucket,
-                    region,
-                    endpoint,
-                    path_style,
-                    part_size,
-                },
-                backups => backups,
-            },
+            backup_disk: self.backup_disk,
+            backup_configs: self.backup_configs,
             nodes: self.nodes,
             created: self.created.and_utc(),
         }
@@ -247,7 +265,8 @@ pub struct AdminApiLocation {
     pub name: String,
     pub description: Option<String>,
 
-    pub backups: LocationConfigBackups,
+    pub backup_disk: super::server_backup::BackupDisk,
+    pub backup_configs: LocationBackupConfigs,
 
     pub nodes: i64,
 

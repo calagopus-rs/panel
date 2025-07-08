@@ -33,7 +33,7 @@ mod delete {
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, pull)): Path<(uuid::Uuid, uuid::Uuid)>,
+        Path((_server, pull)): Path<(String, uuid::Uuid)>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(error) = server.has_permission("files.delete") {
             return (

@@ -47,10 +47,8 @@ mod get {
     use crate::routes::{GetState, api::remote::servers::_server_::GetServer};
     use axum::http::StatusCode;
 
-    type Response = crate::models::server::RemoteApiServer;
-
     #[utoipa::path(get, path = "/", responses(
-        (status = OK, body = inline(Response)),
+        (status = OK, body = crate::models::server::RemoteApiServer),
     ), params(
         (
             "server" = uuid::Uuid,

@@ -32,6 +32,15 @@ export const serverStatusEnum = pgEnum('server_status', [
 	'RESTORING_BACKUP'
 ])
 
+export const backupDiskEnum = pgEnum('backup_disk', [
+	'LOCAL',
+	'S3',
+	'DDUP_BAK',
+	'BTRFS',
+	'ZFS',
+	'RESTIC'
+])
+
 export const settings = pgTable('settings', {
 	key: varchar('key', { length: 255 }).primaryKey().notNull(),
 	value: text('value').notNull(),
@@ -176,7 +185,8 @@ export const locations = pgTable('locations', {
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 
-	config_backups: jsonb('config_backups').default({ type: 'local' }).notNull(),
+	backup_disk: backupDiskEnum('backup_disk').default('LOCAL').notNull(),
+	backup_configs: jsonb('backup_configs').default({}).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locations) => [
@@ -404,7 +414,7 @@ export const serverActivities = pgTable('server_activities', {
 	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
 
 	event: varchar('event', { length: 255 }).notNull(),
-	ip: inet('ip').notNull(),
+	ip: inet('ip'),
 	data: jsonb('data').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
@@ -450,10 +460,12 @@ export const serverBackups = pgTable('server_backups', {
 	successful: boolean('successful').default(false).notNull(),
 	locked: boolean('locked').default(false).notNull(),
 
-	ignoredFiles: varchar('ignored_files', { length: 255 }).array().notNull(),
-	checksum: varchar('checksum', { length: 255 }).notNull(),
+	ignoredFiles: text('ignored_files').array().notNull(),
+	checksum: varchar('checksum', { length: 255 }),
 	bytes: bigint('bytes', { mode: 'number' }).notNull(),
-	disk: varchar('disk', { length: 31 }).notNull(),
+	disk: backupDiskEnum('disk').notNull(),
+
+	uploadId: text('upload_id'),
 
 	completed: timestamp('completed'),
 	deleted: timestamp('deleted'),

@@ -4,6 +4,7 @@ use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, res
 use utoipa_axum::router::OpenApiRouter;
 
 mod activity;
+mod backups;
 mod servers;
 mod sftp;
 
@@ -80,8 +81,9 @@ pub async fn auth(state: GetState, mut req: Request, next: Next) -> Result<Respo
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .nest("/sftp", sftp::router(state))
-        .nest("/servers", servers::router(state))
         .nest("/activity", activity::router(state))
+        .nest("/servers", servers::router(state))
+        .nest("/backups", backups::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

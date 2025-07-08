@@ -11,7 +11,7 @@ pub struct ServerActivity {
     pub api_key_id: Option<i32>,
 
     pub event: String,
-    pub ip: sqlx::types::ipnetwork::IpNetwork,
+    pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
     pub data: serde_json::Value,
 
     pub created: chrono::NaiveDateTime,
@@ -61,7 +61,7 @@ impl ServerActivity {
         user_id: Option<i32>,
         api_key_id: Option<i32>,
         event: &str,
-        ip: sqlx::types::ipnetwork::IpNetwork,
+        ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
@@ -88,7 +88,7 @@ impl ServerActivity {
         user_id: Option<i32>,
         api_key_id: Option<i32>,
         event: &str,
-        ip: sqlx::types::ipnetwork::IpNetwork,
+        ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
         timestamp: chrono::DateTime<chrono::Utc>,
     ) -> Result<(), sqlx::Error> {
@@ -152,7 +152,7 @@ impl ServerActivity {
             id: self.id,
             user: self.user.map(|user| user.into_api_object(false)),
             event: self.event,
-            ip: self.ip.ip().to_string(),
+            ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,
             is_api: self.api_key_id.is_some(),
             created: self.created.and_utc(),
@@ -167,7 +167,7 @@ pub struct ApiServerActivity {
     pub user: Option<super::user::ApiUser>,
 
     pub event: String,
-    pub ip: String,
+    pub ip: Option<String>,
     pub data: serde_json::Value,
 
     pub is_api: bool,

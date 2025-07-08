@@ -1,11 +1,11 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _subuser_;
+mod _backup_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_subuser::ServerSubuser},
+        models::{Pagination, PaginationParams, server_backup::ServerBackup},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -15,7 +15,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        subusers: Pagination<crate::models::server_subuser::ApiServerSubuser>,
+        backups: Pagination<crate::models::server_backup::ApiServerBackup>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -50,14 +50,14 @@ mod get {
             );
         }
 
-        if let Err(error) = server.has_permission("subusers.read") {
+        if let Err(error) = server.has_permission("backups.read") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        let subusers = ServerSubuser::by_server_id_with_pagination(
+        let backups = ServerBackup::by_server_id_with_pagination(
             &state.database,
             server.id,
             params.page,
@@ -69,14 +69,14 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    subusers: Pagination {
-                        total: subusers.total,
-                        per_page: subusers.per_page,
-                        page: subusers.page,
-                        data: subusers
+                    backups: Pagination {
+                        total: backups.total,
+                        per_page: backups.per_page,
+                        page: backups.page,
+                        data: backups
                             .data
                             .into_iter()
-                            .map(|subuser| subuser.into_api_object())
+                            .map(|backup| backup.into_api_object())
                             .collect(),
                     },
                 })
@@ -88,13 +88,10 @@ mod get {
 
 mod post {
     use crate::{
-        models::server_subuser::ServerSubuser,
+        models::server_backup::ServerBackup,
         routes::{
             ApiError, GetState,
-            api::client::{
-                GetUser,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -104,25 +101,22 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(email)]
-        #[schema(format = "email")]
-        email: String,
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Vec<String>,
+        #[validate(length(min = 1, max = 255))]
+        #[schema(min_length = 1, max_length = 255)]
+        name: String,
 
-        captcha: Option<String>,
+        ignored_files: Vec<String>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        subuser: crate::models::server_subuser::ApiServerSubuser,
+        backup: crate::models::server_backup::ApiServerBackup,
     }
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
         (status = UNAUTHORIZED, body = ApiError),
-        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,
@@ -132,8 +126,6 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        user: GetUser,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -145,74 +137,35 @@ mod post {
             );
         }
 
-        if !user.admin
-            && let Some(subuser_permissions) = &server.subuser_permissions
-            && !data
-                .permissions
-                .iter()
-                .all(|p| subuser_permissions.contains(p))
-        {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[
-                    "permissions: more permissions than self",
-                ])),
-            );
-        }
-
-        if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
-        }
-
-        if let Err(error) = server.has_permission("subusers.create") {
+        if let Err(error) = server.has_permission("backups.create") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        let username = match ServerSubuser::create(
-            &state.database,
-            &state.settings,
-            &state.mail,
-            &server,
-            &data.email,
-            &data.permissions,
-        )
-        .await
-        {
-            Ok(username) => username,
-            Err(sqlx::Error::InvalidArgument(err)) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[&err])),
-                );
-            }
-            Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["subuser with email already exists"])),
-                );
-            }
-            Err(err) => {
-                tracing::error!(email = %data.email, "failed to create subuser: {:#?}", err);
+        let backup =
+            match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
+                .await
+            {
+                Ok(backup) => backup,
+                Err(err) => {
+                    tracing::error!(name = %data.name, "failed to create backup: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create subuser"])),
-                );
-            }
-        };
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        axum::Json(ApiError::new_value(&["failed to create backup"])),
+                    );
+                }
+            };
 
         activity_logger
             .log(
-                "server:subuser.create",
+                "server:backup.create",
                 serde_json::json!({
-                    "email": data.email,
-                    "permissions": data.permissions,
+                    "backup": backup.uuid,
+                    "name": backup.name,
+                    "ignored_files": backup.ignored_files,
                 }),
             )
             .await;
@@ -221,14 +174,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    subuser: ServerSubuser::by_server_id_username(
-                        &state.database,
-                        server.id,
-                        &username,
-                    )
-                    .await
-                    .unwrap()
-                    .into_api_object(),
+                    backup: backup.into_api_object(),
                 })
                 .unwrap(),
             ),
@@ -240,6 +186,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{subuser}", _subuser_::router(state))
+        .nest("/{backup}", _backup_::router(state))
         .with_state(state.clone())
 }
