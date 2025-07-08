@@ -9,6 +9,7 @@ import register from '@/api/auth/register';
 import checkpointLogin from '@/api/auth/checkpointLogin';
 import getMe from '@/api/me/getMe';
 import Spinner from '@/elements/Spinner';
+import { transformKeysToCamelCase } from '@/api/transformers';
 
 interface AuthContextType {
   user: User | null;
@@ -47,7 +48,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
 
-        setUser(response.user!);
+        setUser(transformKeysToCamelCase(response.user!));
         navigate('/');
       })
       .catch(msg => {
