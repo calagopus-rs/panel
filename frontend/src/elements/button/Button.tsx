@@ -3,7 +3,7 @@ import classNames from 'classnames';
 
 import type { ButtonProps } from '@/elements/button/types';
 import { Options } from '@/elements/button/types';
-import styles from './style.module.css';
+import styles from './button.module.css';
 import Spinner from '../Spinner';
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
