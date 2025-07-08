@@ -8,7 +8,7 @@ export default () => {
   const state = useServerStore(state => state.state);
   const instance = useServerStore(state => state.socketInstance);
 
-  const killable = status === 'stopping';
+  const killable = state === 'stopping';
   const onButtonClick = (
     action: ServerPowerAction | 'kill-confirmed',
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -25,10 +25,10 @@ export default () => {
   };
 
   useEffect(() => {
-    if (status === 'offline') {
+    if (state === 'offline') {
       setOpen(false);
     }
-  }, [status]);
+  }, [state]);
 
   return (
     <div className="flex gap-2">
@@ -43,15 +43,15 @@ export default () => {
         Forcibly stopping a server can lead to data corruption.
       </Dialog.Confirm>
 
-      <Button style={Button.Styles.Green} disabled={status !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
+      <Button style={Button.Styles.Green} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
         Start
       </Button>
-      <Button style={Button.Styles.Gray} disabled={!status} onClick={onButtonClick.bind(this, 'restart')}>
+      <Button style={Button.Styles.Gray} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
         Restart
       </Button>
       <Button
         style={Button.Styles.Red}
-        disabled={status === 'offline'}
+        disabled={state === 'offline'}
         onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
       >
         {killable ? 'Kill' : 'Stop'}

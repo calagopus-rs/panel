@@ -62,18 +62,18 @@ export default () => {
   });
 
   useEffect(() => {
-    if (!stats.state || stats.state === 'offline') {
+    if (!stats?.state || stats?.state === 'offline') {
       return;
     }
 
-    cpu.push(stats.cpu);
-    memory.push(Math.floor(stats.memory / 1024 / 1024));
+    cpu.push(stats.cpuAbsolute);
+    memory.push(Math.floor(stats.memoryBytes / 1024 / 1024));
     network.push([
-      networkPrevious.current.tx < 0 ? 0 : Math.max(0, stats.tx - networkPrevious.current.tx),
-      networkPrevious.current.rx < 0 ? 0 : Math.max(0, stats.rx - networkPrevious.current.rx),
+      networkPrevious.current.tx < 0 ? 0 : Math.max(0, stats.network.txBytes - networkPrevious.current.tx),
+      networkPrevious.current.rx < 0 ? 0 : Math.max(0, stats.network.rxBytes - networkPrevious.current.rx),
     ]);
 
-    networkPrevious.current = { tx: stats.tx, rx: stats.rx };
+    networkPrevious.current = { tx: stats.network.txBytes, rx: stats.network.rxBytes };
   }, [stats]);
 
   return (
