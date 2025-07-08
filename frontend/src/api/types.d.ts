@@ -303,7 +303,7 @@ interface ResourceUsage {
 
 interface ResponseMeta<T> {
   total: number;
-  per_page: number;
+  perPage: number;
   page: number;
   data: T[];
 }

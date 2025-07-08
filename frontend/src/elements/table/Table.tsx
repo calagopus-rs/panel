@@ -120,14 +120,14 @@ export const TableRow = ({
 };
 
 interface PaginationProps<T> {
-  data: PaginatedResult<T>;
+  data: ResponseMeta<T>;
   onPageSelect: (page: number) => void;
 
   children: React.ReactNode;
 }
 
 export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<T>) {
-  const totalPages = Math.ceil(data.total / data.per_page);
+  const totalPages = Math.ceil(data.total / data.perPage);
 
   const setPage = (page: number) => {
     if (page < 1 || page > totalPages) {
@@ -167,8 +167,8 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
 
       <div className="h-12 flex flex-row items-center w-full px-6 py-3 border-t border-gray-500">
         <p className="text-sm leading-5 text-gray-400">
-          Showing <span className="text-gray-300">{(data.page - 1) * data.per_page + (data.total > 0 ? 1 : 0)}</span> to{' '}
-          <span className="text-gray-300">{(data.page - 1) * data.per_page + data.data.length}</span> of{' '}
+          Showing <span className="text-gray-300">{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span> to{' '}
+          <span className="text-gray-300">{(data.page - 1) * data.perPage + data.data.length}</span> of{' '}
           <span className="text-gray-300">{data.total}</span> results
         </p>
 
