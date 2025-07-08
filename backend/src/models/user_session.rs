@@ -63,7 +63,7 @@ impl UserSession {
         sqlx::query(
             r#"
             INSERT INTO user_sessions (user_id, key_id, key, ip, user_agent, last_used, created)
-            VALUES ($1, $2, crypt($3, gen_salt('bf')), $4, $5, NOW(), NOW())
+            VALUES ($1, $2, crypt($3, gen_salt('xdes', 321)), $4, $5, NOW(), NOW())
             "#,
         )
         .bind(user_id)

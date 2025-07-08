@@ -66,7 +66,7 @@ impl UserApiKey {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO user_api_keys (user_id, name, key_start, key, permissions, created)
-            VALUES ($1, $2, $3, crypt($4, gen_salt('bf')), $5, NOW())
+            VALUES ($1, $2, $3, crypt($4, gen_salt('xdes', 321)), $5, NOW())
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
