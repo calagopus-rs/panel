@@ -15,7 +15,7 @@ export default () => {
             <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
-            <Sidebar.Link to={'/admin/settings'} end>
+            <Sidebar.Link to={'/admin/settings'}>
               <FontAwesomeIcon icon={faWrench} />
               <span>Settings</span>
             </Sidebar.Link>
@@ -24,7 +24,7 @@ export default () => {
         </Sidebar>
         <Routes>
           <Route path="" element={<div></div>} />
-          <Route path="/settings" element={<AdminSettings />} />
+          <Route path="/settings/*" element={<AdminSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
