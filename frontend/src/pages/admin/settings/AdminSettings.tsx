@@ -9,6 +9,7 @@ import { faAt, faLayerGroup, faRobot, faServer } from '@fortawesome/free-solid-s
 import { Route, Routes } from 'react-router';
 import EmailContainer from './EmailContainer';
 import Spinner from '@/elements/Spinner';
+import ApplicationContainer from './ApplicationContainer';
 
 export const SettingContainer = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
@@ -52,7 +53,7 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <Routes>
-          <Route path="/" element={<p>General</p>} />
+          <Route path="/" element={<ApplicationContainer />} />
           <Route path="/mail" element={<EmailContainer />} />
           <Route path="/captcha" element={<p>Captcha</p>} />
           <Route path="/server" element={<p>Server</p>} />
