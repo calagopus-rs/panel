@@ -59,7 +59,7 @@ export default () => {
       </div>
 
       <div className="mt-4 flex justify-end">
-        <Button onClick={handleUpdate}>Update Application Settings</Button>
+        <Button onClick={handleUpdate}>Update Server Settings</Button>
       </div>
     </SettingContainer>
   );
