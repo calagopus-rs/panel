@@ -3,8 +3,9 @@ import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faBuilding, faWrench } from '@fortawesome/free-solid-svg-icons';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
+import AdminHome from '@/pages/admin/AdminHome';
 
 export default () => {
   return (
@@ -15,6 +16,10 @@ export default () => {
             <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
+            <Sidebar.Link to={'/admin'} end>
+              <FontAwesomeIcon icon={faBuilding} />
+              <span>Overview</span>
+            </Sidebar.Link>
             <Sidebar.Link to={'/admin/settings'}>
               <FontAwesomeIcon icon={faWrench} />
               <span>Settings</span>
@@ -23,7 +28,7 @@ export default () => {
           <Sidebar.User />
         </Sidebar>
         <Routes>
-          <Route path="" element={<div></div>} />
+          <Route path="" element={<AdminHome />} />
           <Route path="/settings/*" element={<AdminSettings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
