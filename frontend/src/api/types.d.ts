@@ -256,7 +256,7 @@ interface ProcessConfiguration {
 type PublicCaptchaProviderType = 'none' | 'turnstile' | 'recaptcha';
 
 interface PublicCaptchaProviderBase {
-  type: Exclude<CaptchaProviderType, 'turnstile' | 'recaptcha'>;
+  type: Exclude<PublicCaptchaProviderType, 'turnstile' | 'recaptcha'>;
 }
 
 interface PublicCaptchaProviderTurnstile {
@@ -265,12 +265,15 @@ interface PublicCaptchaProviderTurnstile {
 }
 
 interface PublicCaptchaProviderRecaptcha {
-  type: 'turnstile';
+  type: 'recaptcha';
   siteKey: string;
   v3: boolean;
 }
 
-type PublicCaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
+type PublicCaptchaProvider =
+  | PublicCaptchaProviderBase
+  | PublicCaptchaProviderTurnstile
+  | PublicCaptchaProviderRecaptcha;
 
 interface AdminSettings {
   mailMode: MailMode;
