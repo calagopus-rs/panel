@@ -273,8 +273,8 @@ interface PublicCaptchaProviderRecaptcha {
 type PublicCaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
 
 interface AdminSettings {
-  mail: MailMode;
-  captcha: CaptchaProvider;
+  mailMode: MailMode;
+  captchaProvider: CaptchaProvider;
   app: {
     name: string;
     icon: string;

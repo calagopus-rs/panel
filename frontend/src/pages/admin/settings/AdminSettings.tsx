@@ -1,13 +1,14 @@
 import Container from '@/elements/Container';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/stores/admin';
 import getSettings from '@/api/admin/settings/getSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { SubNavigation, SubNavigationLink } from '@/elements/subnavigation/SubNavigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { SubNavigation, SubNavigationLink } from '@/elements/SubNavigation';
 import { faAt, faLayerGroup, faRobot, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Route, Routes } from 'react-router';
+import EmailContainer from './EmailContainer';
+import Spinner from '@/elements/Spinner';
 
 export const SettingContainer = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
@@ -21,14 +22,17 @@ export const SettingContainer = ({ title, children }: { title: string; children:
 
 export default () => {
   const { addToast } = useToast();
-  const { setSettings } = useAdminStore(state => state.settings);
+  const { setSettings } = useAdminStore();
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     getSettings()
       .then(setSettings)
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   });
 
   return (
@@ -38,26 +42,22 @@ export default () => {
       </div>
 
       <SubNavigation>
-        <SubNavigationLink to="/admin/settings" name="Application">
-          <FontAwesomeIcon icon={faLayerGroup} />
-        </SubNavigationLink>
-        <SubNavigationLink to="/admin/settings/mail" name="Mail">
-          <FontAwesomeIcon icon={faAt} />
-        </SubNavigationLink>
-        <SubNavigationLink to="/admin/settings/captcha" name="Captcha">
-          <FontAwesomeIcon icon={faRobot} />
-        </SubNavigationLink>
-        <SubNavigationLink to="/admin/settings/server" name="Server">
-          <FontAwesomeIcon icon={faServer} />
-        </SubNavigationLink>
+        <SubNavigationLink to="/admin/settings" name="Application" icon={faLayerGroup} />
+        <SubNavigationLink to="/admin/settings/mail" name="Mail" icon={faAt} />
+        <SubNavigationLink to="/admin/settings/captcha" name="Captcha" icon={faRobot} />
+        <SubNavigationLink to="/admin/settings/server" name="Server" icon={faServer} />
       </SubNavigation>
 
-      <Routes>
-        <Route path="/" element={<p>General</p>} />
-        <Route path="/mail" element={<p>Mail</p>} />
-        <Route path="/captcha" element={<p>Captcha</p>} />
-        <Route path="/server" element={<p>Server</p>} />
-      </Routes>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <Routes>
+          <Route path="/" element={<p>General</p>} />
+          <Route path="/mail" element={<EmailContainer />} />
+          <Route path="/captcha" element={<p>Captcha</p>} />
+          <Route path="/server" element={<p>Server</p>} />
+        </Routes>
+      )}
     </Container>
   );
 };

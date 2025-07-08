@@ -1,14 +1,13 @@
+import { AdminStore } from '@/stores/admin';
+import { StateCreator } from 'zustand';
+
 export interface SettingsSlice extends AdminSettings {
   setSettings: (settings: any) => void;
 }
 
-export const createSettingsSlice = (set): SettingsSlice => ({
-  mail: {
-    type: 'none',
-  },
-  captcha: {
-    type: 'none',
-  },
+export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice> = (set): SettingsSlice => ({
+  mailMode: null,
+  captchaProvider: null,
   app: {
     name: '',
     icon: '',
@@ -23,9 +22,10 @@ export const createSettingsSlice = (set): SettingsSlice => ({
 
   setSettings: value =>
     set(state => {
-      state.settings.mail = value.mail;
-      state.settings.captcha = value.captcha;
-      state.settings.app = value.app;
-      state.settings.server = value.server;
+      state.mailMode = value.mailMode;
+      state.captchaProvider = value.captchaProvider;
+      state.app = value.app;
+      state.server = value.server;
+      return state;
     }),
 });

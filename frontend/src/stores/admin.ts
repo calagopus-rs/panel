@@ -1,14 +1,8 @@
 import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
 import { createSettingsSlice, SettingsSlice } from './slices/admin/settings';
 
-interface AdminStore {
-  // Slices
-  settings: SettingsSlice;
-}
+export interface AdminStore extends SettingsSlice {}
 
-export const useAdminStore = create<AdminStore>()(
-  immer((set, get) => ({
-    settings: createSettingsSlice(set),
-  })),
-);
+export const useAdminStore = create<AdminStore>()((...a) => ({
+  ...createSettingsSlice(...a),
+}));
