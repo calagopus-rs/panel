@@ -10,6 +10,8 @@ import { Route, Routes } from 'react-router';
 import EmailContainer from './EmailContainer';
 import Spinner from '@/elements/Spinner';
 import ApplicationContainer from './ApplicationContainer';
+import ServerContainer from './ServerContainer';
+import CaptchaContainer from './CaptchaContainer';
 
 export const SettingContainer = ({ title, children }: { title: string; children: React.ReactNode }) => {
   return (
@@ -34,7 +36,7 @@ export default () => {
         addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => setLoading(false));
-  });
+  }, []);
 
   return (
     <Container>
@@ -55,8 +57,8 @@ export default () => {
         <Routes>
           <Route path="/" element={<ApplicationContainer />} />
           <Route path="/mail" element={<EmailContainer />} />
-          <Route path="/captcha" element={<p>Captcha</p>} />
-          <Route path="/server" element={<p>Server</p>} />
+          <Route path="/captcha" element={<CaptchaContainer />} />
+          <Route path="/server" element={<ServerContainer />} />
         </Routes>
       )}
     </Container>

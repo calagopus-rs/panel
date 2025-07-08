@@ -165,7 +165,7 @@ interface CaptchaProviderTurnstile {
 }
 
 interface CaptchaProviderRecaptcha {
-  type: 'turnstile';
+  type: 'recaptcha';
   siteKey: string;
   secretKey: string;
   v3: boolean;

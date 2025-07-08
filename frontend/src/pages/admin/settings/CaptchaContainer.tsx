@@ -4,21 +4,22 @@ import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { Input } from '@/elements/inputs';
-import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
-import EmailSmtp from './forms/EmailSmtp';
+import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
+import CaptchaTurnstile from './forms/CaptchaTurnstile';
+import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
 
 export default () => {
   const { addToast } = useToast();
-  const { mailMode } = useAdminStore();
+  const { captchaProvider } = useAdminStore();
 
-  const [settings, setSettings] = useState<MailMode>(mailMode);
+  const [settings, setSettings] = useState<CaptchaProvider>(captchaProvider);
 
   const handleUpdate = () => {
-    updateEmailSettings(transformKeysToSnakeCase({ ...settings } as MailMode))
+    updateCaptchaSettings(transformKeysToSnakeCase({ ...settings } as CaptchaProvider))
       .then(() => {
-        addToast('Email settings updated.', 'success');
+        addToast('Captcha settings updated.', 'success');
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -26,24 +27,29 @@ export default () => {
   };
 
   return (
-    <SettingContainer title="Email Settings">
+    <SettingContainer title="Captcha Settings">
       <div className="mt-4">
         <Input.Label htmlFor="type">Type</Input.Label>
         <Input.Dropdown
           id="type"
           options={[
             { label: 'None', value: 'none' },
-            { label: 'SMTP', value: 'smtp' },
+            { label: 'Turnstile', value: 'turnstile' },
+            { label: 'reCAPTCHA', value: 'recaptcha' },
           ]}
           selected={settings.type}
           onChange={e => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
         />
       </div>
 
-      {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
+      {settings.type === 'turnstile' ? (
+        <CaptchaTurnstile settings={settings as CaptchaProviderTurnstile} setSettings={setSettings} />
+      ) : settings.type === 'recaptcha' ? (
+        <CaptchaRecaptcha settings={settings as CaptchaProviderRecaptcha} setSettings={setSettings} />
+      ) : null}
 
       <div className="mt-4 flex justify-end">
-        <Button onClick={handleUpdate}>Update Email Settings</Button>
+        <Button onClick={handleUpdate}>Update Captcha Settings</Button>
       </div>
     </SettingContainer>
   );

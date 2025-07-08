@@ -1,13 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-interface Data {
-  name: string;
-  icon: string;
-  url: string;
-  telemetryEnabled: boolean;
-}
-
-export default async (data: any): Promise<void> => {
+export default async (data: AdminSettings['app']): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .put(`/api/admin/settings`, {
