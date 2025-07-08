@@ -1,17 +1,19 @@
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import forgotPassword from '@/api/auth/forgotPassword';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
+import Captcha from '@/elements/Captcha';
 
 export default () => {
   const { addToast } = useToast();
 
   const [email, setEmail] = useState('');
   const [requested, setRequested] = useState(false);
+  const captchaRef = useRef(null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +41,9 @@ export default () => {
             value={email}
             onChange={e => setEmail(e.target.value)}
           />
+        </div>
+        <div className="mb-4">
+          <Captcha ref={captchaRef} />
         </div>
         <Button type="submit" className="w-full" disabled={requested}>
           Request Password Reset

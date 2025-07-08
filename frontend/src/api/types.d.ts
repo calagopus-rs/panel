@@ -275,6 +275,18 @@ type PublicCaptchaProvider =
   | PublicCaptchaProviderTurnstile
   | PublicCaptchaProviderRecaptcha;
 
+interface PublicSettings {
+  captchaProvider: PublicCaptchaProvider;
+  app: {
+    name: string;
+    icon: string;
+  };
+  server: {
+    allowOverwritingCustomDockerImage: boolean;
+    allowEditingStartupCommand: boolean;
+  };
+}
+
 interface AdminSettings {
   mailMode: MailMode;
   captchaProvider: CaptchaProvider;

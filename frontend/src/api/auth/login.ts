@@ -3,7 +3,7 @@ import { axiosInstance } from '@/api/axios';
 interface Data {
   user: string;
   password: string;
-  captcha?: string;
+  captcha: string | null;
 }
 
 interface Response {

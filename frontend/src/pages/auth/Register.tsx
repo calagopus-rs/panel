@@ -1,9 +1,10 @@
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useAuth } from '@/providers/AuthProvider';
+import Captcha from '@/elements/Captcha';
 
 export default () => {
   const { doRegister } = useAuth();
@@ -13,6 +14,7 @@ export default () => {
   const [nameFirst, setNameFirst] = useState('');
   const [nameLast, setNameLast] = useState('');
   const [password, setPassword] = useState('');
+  const captchaRef = useRef(null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +75,9 @@ export default () => {
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
+        </div>
+        <div className="mb-4">
+          <Captcha ref={captchaRef} />
         </div>
         <Button type="submit" className="w-full">
           Register

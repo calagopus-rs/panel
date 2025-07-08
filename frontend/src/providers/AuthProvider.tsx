@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
 
   setUser: (user: User | null) => void;
-  doLogin: (username: string, password: string) => void;
+  doLogin: (username: string, password: string, token: string | null) => void;
   doCheckpointLogin: (faToken: string, twoFactorToken: string) => void;
   doRegister: (username: string, email: string, nameFirst: string, nameLast: string, password: string) => void;
   doLogout: () => void;
@@ -38,8 +38,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const doLogin = (username: string, password: string) => {
-    login({ user: username, password })
+  const doLogin = (username: string, password: string, token: string | null) => {
+    login({ user: username, password, captcha: token })
       .then(response => {
         if (response.type === 'two_factor_required') {
           setTwoFactorToken(response.token!);
