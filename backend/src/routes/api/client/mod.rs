@@ -50,24 +50,33 @@ pub async fn auth(
             }
         };
 
-        sqlx::query!(
-            "UPDATE user_sessions
-            SET ip = $1, user_agent = $2, last_used = $3
-            WHERE id = $4",
-            sqlx::types::ipnetwork::IpNetwork::from(ip.0),
-            crate::utils::slice_up_to(
+        tokio::spawn({
+            let state = state.clone();
+            let user_agent = crate::utils::slice_up_to(
                 req.headers()
                     .get("User-Agent")
-                    .map(|ua| ua.to_str().unwrap_or("unknown"))
+                    .and_then(|ua| ua.to_str().ok())
                     .unwrap_or("unknown"),
                 255,
-            ),
-            chrono::Utc::now().naive_utc(),
-            session.id,
-        )
-        .execute(state.database.write())
-        .await
-        .unwrap();
+            )
+            .to_string();
+
+            async move {
+                if let Err(err) = sqlx::query!(
+                    "UPDATE user_sessions
+                    SET ip = $1, user_agent = $2, last_used = NOW()
+                    WHERE id = $3",
+                    sqlx::types::ipnetwork::IpNetwork::from(ip.0),
+                    user_agent,
+                    session.id,
+                )
+                .execute(state.database.write())
+                .await
+                {
+                    tracing::warn!(user = user.id, "failed to update user session: {:#?}", err);
+                }
+            }
+        });
 
         cookies.add(
             Cookie::build(("session", session_id.value().to_string()))
@@ -117,16 +126,23 @@ pub async fn auth(
             }
         };
 
-        sqlx::query!(
-            "UPDATE user_api_keys
-            SET last_used = $1
-            WHERE id = $2",
-            chrono::Utc::now().naive_utc(),
-            api_key.id,
-        )
-        .execute(state.database.write())
-        .await
-        .unwrap();
+        tokio::spawn({
+            let state = state.clone();
+
+            async move {
+                if let Err(err) = sqlx::query!(
+                    "UPDATE user_api_keys
+                    SET last_used = NOW()
+                    WHERE id = $1",
+                    api_key.id,
+                )
+                .execute(state.database.write())
+                .await
+                {
+                    tracing::warn!(user = user.id, "failed to update api key: {:#?}", err);
+                }
+            }
+        });
 
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::ApiKey(api_key));
