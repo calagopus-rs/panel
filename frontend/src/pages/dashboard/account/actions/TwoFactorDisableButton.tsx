@@ -38,24 +38,24 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Disable Two-Step Verification'} onClose={() => setOpen(false)} open={open}>
+      <Dialog title="Disable Two-Step Verification" onClose={() => setOpen(false)} open={open}>
         <p>Disabling two-step verification will make your account less secure.</p>
 
-        <Input.Label htmlFor={'totpCode'}>Code</Input.Label>
+        <Input.Label htmlFor="totpCode">Code</Input.Label>
         <Input.Text
-          id={'code'}
-          name={'code'}
-          type={'number'}
-          placeholder={'000000'}
+          id="code"
+          name="code"
+          type="number"
+          placeholder="000000"
           value={code}
           onChange={e => setCode(e.target.value)}
         />
 
-        <Input.Label htmlFor={'password'}>Password</Input.Label>
+        <Input.Label htmlFor="password">Password</Input.Label>
         <Input.Text
-          id={'password'}
-          name={'password'}
-          type={'password'}
+          id="password"
+          name="password"
+          type="password"
           value={password}
           onChange={e => setPassword(e.target.value)}
         />

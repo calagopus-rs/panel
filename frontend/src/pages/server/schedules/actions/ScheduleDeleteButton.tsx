@@ -19,7 +19,7 @@ export default ({ schedule }: { schedule?: any }) => {
 
   return (
     <>
-      <Dialog title={'Confirm Schedule Deletion'} onClose={() => setOpen(false)} open={open}>
+      <Dialog title="Confirm Schedule Deletion" onClose={() => setOpen(false)} open={open}>
         <p>All tasks will be removed and any running processes will be terminated.</p>
         <Dialog.Footer>
           <Button style={Button.Styles.Red} onClick={submit}>

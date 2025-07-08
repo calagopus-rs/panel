@@ -25,7 +25,7 @@ export default () => {
       <form onSubmit={submit}>
         <div className="mb-4">
           <Input.Text
-            id={'username'}
+            id="username"
             variant={Input.Text.Variants.Loose}
             placeholder="Username"
             type="text"
@@ -81,7 +81,7 @@ export default () => {
       <div className="mt-4">
         <p className="text-sm text-gray-400">
           Already have an account?{' '}
-          <NavLink to={'/auth/login'} className="text-cyan-200 hover:underline">
+          <NavLink to="/auth/login" className="text-cyan-200 hover:underline">
             Login
           </NavLink>
         </p>

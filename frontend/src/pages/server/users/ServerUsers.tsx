@@ -54,10 +54,10 @@ export default () => {
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
                 <TableHead>
-                  <TableHeader name={'Id'} />
-                  <TableHeader name={'Email'} />
-                  <TableHeader name={'2FA Enabled'} />
-                  <TableHeader name={'Permissions'} />
+                  <TableHeader name="Id" />
+                  <TableHeader name="Email" />
+                  <TableHeader name="2FA Enabled" />
+                  <TableHeader name="Permissions" />
                 </TableHead>
 
                 <TableBody>

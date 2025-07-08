@@ -64,14 +64,14 @@ export default () => {
       <div className="flex">
         <Sidebar collapsed={false}>
           <div className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer">
-            <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
+            <img src={CollapsedIcon} className="my-4 h-20" alt="Pterodactyl Icon" />
           </div>
           <Sidebar.Section>
             <a className={classNames(styles.navLink, 'cursor-pointer')}>
               <FontAwesomeIcon icon={faMagnifyingGlass} />
               <span>Search</span>
             </a>
-            <Sidebar.Link to={'/'} end>
+            <Sidebar.Link to="/" end>
               <FontAwesomeIcon icon={faServer} />
               <span>Servers</span>
             </Sidebar.Link>

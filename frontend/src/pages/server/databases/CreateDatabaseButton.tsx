@@ -30,21 +30,21 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Create Database'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'dbName'}>Database Name</Input.Label>
+      <Dialog title="Create Database" onClose={() => setOpen(false)} open={open}>
+        <Input.Label htmlFor="dbName">Database Name</Input.Label>
         <Input.Text
-          id={'dbName'}
-          name={'dbName'}
-          placeholder={'A descriptive name for your database.'}
+          id="dbName"
+          name="dbName"
+          placeholder="A descriptive name for your database."
           autoFocus
           onChange={e => setDbName(e.target.value)}
         />
 
-        <Input.Label htmlFor={'connectionsFrom'}>Connections From</Input.Label>
+        <Input.Label htmlFor="connectionsFrom">Connections From</Input.Label>
         <Input.Text
-          id={'connectionsFrom'}
-          name={'connectionsFrom'}
-          placeholder={'Where connections should be allowed from. Leave blank to allow connections from anywhere.'}
+          id="connectionsFrom"
+          name="connectionsFrom"
+          placeholder="Where connections should be allowed from. Leave blank to allow connections from anywhere."
           onChange={e => setConnectionsFrom(e.target.value)}
         />
         <Dialog.Footer>

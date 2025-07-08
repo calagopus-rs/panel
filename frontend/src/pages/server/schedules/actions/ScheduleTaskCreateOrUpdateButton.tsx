@@ -38,9 +38,9 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
   return (
     <>
       <Dialog title={task ? 'Update Task' : 'Create Task'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'taskAction'}>Action</Input.Label>
+        <Input.Label htmlFor="taskAction">Action</Input.Label>
         <Input.Dropdown
-          id={'taskAction'}
+          id="taskAction"
           options={[
             { label: 'Run Command', value: 'command' },
             { label: 'Power Action', value: 'power' },
@@ -50,29 +50,29 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
           onChange={e => setTaskAction(e.target.value)}
         />
 
-        <Input.Label htmlFor={'taskPayload'}>Payload</Input.Label>
+        <Input.Label htmlFor="taskPayload">Payload</Input.Label>
         <Input.Text
-          id={'taskPayload'}
-          name={'taskPayload'}
-          placeholder={'Payload'}
+          id="taskPayload"
+          name="taskPayload"
+          placeholder="Payload"
           value={taskPayload}
           onChange={e => setTaskPayload(e.target.value)}
         />
 
-        <Input.Label htmlFor={'taskOffset'}>Time Offset</Input.Label>
+        <Input.Label htmlFor="taskOffset">Time Offset</Input.Label>
         <Input.Text
-          id={'taskOffset'}
-          name={'taskOffset'}
-          type={'number'}
-          placeholder={'Time Offset'}
+          id="taskOffset"
+          name="taskOffset"
+          type="number"
+          placeholder="Time Offset"
           value={taskOffset}
           onChange={e => setTaskOffset(parseInt(e.target.value))}
         />
 
-        <Input.Label htmlFor={'taskContinueOnFailure'}>Continue On Failure</Input.Label>
+        <Input.Label htmlFor="taskContinueOnFailure">Continue On Failure</Input.Label>
         <Input.Switch
-          description={'Future tasks will be run when this task fails.'}
-          name={'taskContinueOnFailure'}
+          description="Future tasks will be run when this task fails."
+          name="taskContinueOnFailure"
           defaultChecked={taskContinueOnFailure}
           onChange={e => setTaskContinueOnFailure(e.target.checked)}
         />

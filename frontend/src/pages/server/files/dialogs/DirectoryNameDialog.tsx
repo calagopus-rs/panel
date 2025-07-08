@@ -21,11 +21,11 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
   };
 
   return (
-    <Dialog title={'Create Directory'} onClose={onClose} open={open}>
+    <Dialog title="Create Directory" onClose={onClose} open={open}>
       <Input.Text
-        id={'dirName'}
-        name={'dirName'}
-        placeholder={'Enter the name that this directory should be saved as.'}
+        id="dirName"
+        name="dirName"
+        placeholder="Enter the name that this directory should be saved as."
         autoFocus
         onChange={e => setDirName(e.target.value)}
       />

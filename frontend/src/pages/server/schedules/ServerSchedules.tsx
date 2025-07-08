@@ -33,11 +33,11 @@ export default () => {
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <TableHead>
-                <TableHeader name={'Name'} />
-                <TableHeader name={'Frequency'} />
-                <TableHeader name={'Last Run'} />
-                <TableHeader name={'Next Run'} />
-                <TableHeader name={'Status'} />
+                <TableHeader name="Name" />
+                <TableHeader name="Frequency" />
+                <TableHeader name="Last Run" />
+                <TableHeader name="Next Run" />
+                <TableHeader name="Status" />
               </TableHead>
 
               <TableBody>

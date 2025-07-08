@@ -41,10 +41,10 @@ export default () => {
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <TableHead>
-                    <TableHeader name={'Actor'} />
-                    <TableHeader name={'Event'} />
-                    <TableHeader name={'IP'} />
-                    <TableHeader name={'When'} />
+                    <TableHeader name="Actor" />
+                    <TableHeader name="Event" />
+                    <TableHeader name="IP" />
+                    <TableHeader name="When" />
                   </TableHead>
 
                   <TableBody>

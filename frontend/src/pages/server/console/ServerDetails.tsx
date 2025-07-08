@@ -28,7 +28,7 @@ function StatCard({
 }) {
   return (
     <div className="bg-gray-700 p-4 rounded flex gap-4">
-      <FontAwesomeIcon className="text-gray-100 bg-gray-600 p-4 rounded-lg" size={'xl'} icon={icon} />
+      <FontAwesomeIcon className="text-gray-100 bg-gray-600 p-4 rounded-lg" size="xl" icon={icon} />
       <div className="flex flex-col">
         <span className="text-sm text-gray-400 font-bold">{label}</span>
         <span className="text-lg font-bold">

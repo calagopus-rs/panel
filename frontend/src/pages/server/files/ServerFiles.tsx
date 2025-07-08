@@ -93,9 +93,9 @@ export default () => {
               <table className="w-full table-auto">
                 <TableHead>
                   <TableHeader />
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Size'} />
-                  <TableHeader name={'Modified'} />
+                  <TableHeader name="Name" />
+                  <TableHeader name="Size" />
+                  <TableHeader name="Modified" />
                 </TableHead>
 
                 <TableBody>

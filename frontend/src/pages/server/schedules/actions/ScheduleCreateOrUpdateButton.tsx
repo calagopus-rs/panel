@@ -48,75 +48,75 @@ export default ({ schedule, onUpdate }: { schedule?: any; onUpdate?: (schedule: 
   return (
     <>
       <Dialog title={schedule ? 'Update Schedule' : 'Create Schedule'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'scheduleName'}>Schedule Name</Input.Label>
+        <Input.Label htmlFor="scheduleName">Schedule Name</Input.Label>
         <Input.Text
-          id={'scheduleName'}
-          name={'scheduleName'}
-          placeholder={'A descriptive name for your schedule.'}
+          id="scheduleName"
+          name="scheduleName"
+          placeholder="A descriptive name for your schedule."
           autoFocus
           value={scheduleName}
           onChange={e => setScheduleName(e.target.value)}
         />
 
-        <div className={'grid grid-cols-2 gap-2 mt-2 p-2 border-2 border-gray-500 rounded'}>
-          <Input.Label htmlFor={'cronMinutes'}>Cron Minutes</Input.Label>
+        <div className="grid grid-cols-2 gap-2 mt-2 p-2 border-2 border-gray-500 rounded">
+          <Input.Label htmlFor="cronMinutes">Cron Minutes</Input.Label>
           <Input.Text
-            id={'cronMinutes'}
-            name={'cronMinutes'}
-            placeholder={'*/5'}
+            id="cronMinutes"
+            name="cronMinutes"
+            placeholder="*/5"
             value={cronMinutes}
             onChange={e => setCronMinutes(e.target.value)}
           />
 
-          <Input.Label htmlFor={'cronHours'}>Cron Hours</Input.Label>
+          <Input.Label htmlFor="cronHours">Cron Hours</Input.Label>
           <Input.Text
-            id={'cronHours'}
-            name={'cronHours'}
-            placeholder={'*'}
+            id="cronHours"
+            name="cronHours"
+            placeholder="*"
             value={cronHours}
             onChange={e => setCronHours(e.target.value)}
           />
 
-          <Input.Label htmlFor={'cronDayOfMonth'}>Cron Day of Month</Input.Label>
+          <Input.Label htmlFor="cronDayOfMonth">Cron Day of Month</Input.Label>
           <Input.Text
-            id={'cronDayOfMonth'}
-            name={'cronDayOfMonth'}
-            placeholder={'*'}
+            id="cronDayOfMonth"
+            name="cronDayOfMonth"
+            placeholder="*"
             value={cronDayOfMonth}
             onChange={e => setCronDayOfMonth(e.target.value)}
           />
 
-          <Input.Label htmlFor={'cronMonth'}>Cron Month</Input.Label>
+          <Input.Label htmlFor="cronMonth">Cron Month</Input.Label>
           <Input.Text
-            id={'cronMonth'}
-            name={'cronMonth'}
-            placeholder={'*'}
+            id="cronMonth"
+            name="cronMonth"
+            placeholder="*"
             value={cronMonth}
             onChange={e => setCronMonth(e.target.value)}
           />
 
-          <Input.Label htmlFor={'cronDayOfWeek'}>Cron Day of Week</Input.Label>
+          <Input.Label htmlFor="cronDayOfWeek">Cron Day of Week</Input.Label>
           <Input.Text
-            id={'cronDayOfWeek'}
-            name={'cronDayOfWeek'}
-            placeholder={'*'}
+            id="cronDayOfWeek"
+            name="cronDayOfWeek"
+            placeholder="*"
             value={cronDayOfWeek}
             onChange={e => setCronDayOfWeek(e.target.value)}
           />
         </div>
 
-        <Input.Label htmlFor={'runOnline'}>Run Online</Input.Label>
+        <Input.Label htmlFor="runOnline">Run Online</Input.Label>
         <Input.Switch
-          description={'Only execute this schedule when the server is in a running state.'}
-          name={'runOnline'}
+          description="Only execute this schedule when the server is in a running state."
+          name="runOnline"
           defaultChecked={runOnline}
           onChange={e => setRunOnline(e.target.checked)}
         />
 
-        <Input.Label htmlFor={'enabled'}>Enabled</Input.Label>
+        <Input.Label htmlFor="enabled">Enabled</Input.Label>
         <Input.Switch
-          description={'Enable or disable this schedule.'}
-          name={'enabled'}
+          description="Enable or disable this schedule."
+          name="enabled"
           defaultChecked={enabled}
           onChange={e => setEnabled(e.target.checked)}
         />

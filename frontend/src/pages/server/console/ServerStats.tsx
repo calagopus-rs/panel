@@ -21,11 +21,11 @@ function ChartBlock({
 }) {
   return (
     <div className={styles.chart_container}>
-      <div className={'flex items-center justify-between px-4 py-2'}>
-        <h3 className={'transition-colors duration-100'}>{title}</h3>
-        {legend && <p className={'text-sm flex items-center'}>{legend}</p>}
+      <div className="flex items-center justify-between px-4 py-2">
+        <h3 className="transition-colors duration-100">{title}</h3>
+        {legend && <p className="text-sm flex items-center">{legend}</p>}
       </div>
-      <div className={'z-10 ml-2'}>{children}</div>
+      <div className="z-10 ml-2">{children}</div>
     </div>
   );
 }
@@ -78,21 +78,21 @@ export default () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <ChartBlock title={'CPU Load'}>
+      <ChartBlock title="CPU Load">
         <Line {...cpu.props} />
       </ChartBlock>
-      <ChartBlock title={'Memory'}>
+      <ChartBlock title="Memory">
         <Line {...memory.props} />
       </ChartBlock>
       <ChartBlock
-        title={'Network'}
+        title="Network"
         legend={
           <>
-            <Tooltip content={'Inbound'}>
-              <FontAwesomeIcon icon={faCloudArrowDown} className={'mr-2 h-4 w-4 text-yellow-400'} />
+            <Tooltip content="Inbound">
+              <FontAwesomeIcon icon={faCloudArrowDown} className="mr-2 h-4 w-4 text-yellow-400" />
             </Tooltip>
-            <Tooltip content={'Outbound'}>
-              <FontAwesomeIcon icon={faCloudArrowUp} className={'h-4 w-4 text-cyan-400'} />
+            <Tooltip content="Outbound">
+              <FontAwesomeIcon icon={faCloudArrowUp} className="h-4 w-4 text-cyan-400" />
             </Tooltip>
           </>
         }

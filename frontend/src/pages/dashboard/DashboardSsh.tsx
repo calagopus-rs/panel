@@ -45,9 +45,9 @@ export default () => {
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
                   <TableHead>
-                    <TableHeader name={'Name'} />
-                    <TableHeader name={'Fingerprint'} />
-                    <TableHeader name={'Created'} />
+                    <TableHeader name="Name" />
+                    <TableHeader name="Fingerprint" />
+                    <TableHeader name="Created" />
                     <TableHeader />
                   </TableHead>
 

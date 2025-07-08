@@ -31,7 +31,7 @@ export default () => {
         <div className="mb-4">
           <Input.Text
             autoFocus
-            id={'token'}
+            id="token"
             variant={Input.Text.Variants.Loose}
             placeholder="Token"
             type="text"

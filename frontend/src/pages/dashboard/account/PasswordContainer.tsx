@@ -27,9 +27,9 @@ export default () => {
       <h1 className="text-4xl font-bold text-white">Update Password</h1>
 
       <div className="mt-4">
-        <Input.Label htmlFor={'currentPassword'}>Current Password</Input.Label>
+        <Input.Label htmlFor="currentPassword">Current Password</Input.Label>
         <Input.Text
-          id={'currentPassword'}
+          id="currentPassword"
           placeholder="Current Password"
           type="password"
           onChange={e => setCurrentPassword(e.target.value)}
@@ -37,9 +37,9 @@ export default () => {
       </div>
 
       <div className="mt-4">
-        <Input.Label htmlFor={'newPassword'}>New Password</Input.Label>
+        <Input.Label htmlFor="newPassword">New Password</Input.Label>
         <Input.Text
-          id={'newPassword'}
+          id="newPassword"
           placeholder="New Password"
           type="password"
           onChange={e => setNewPassword(e.target.value)}
@@ -47,9 +47,9 @@ export default () => {
       </div>
 
       <div className="mt-4">
-        <Input.Label htmlFor={'confirmNewPassword'}>Confirm New Password</Input.Label>
+        <Input.Label htmlFor="confirmNewPassword">Confirm New Password</Input.Label>
         <Input.Text
-          id={'confirmNewPassword'}
+          id="confirmNewPassword"
           placeholder="Confirm New Password"
           type="password"
           onChange={e => setConfirmNewPassword(e.target.value)}

@@ -36,9 +36,9 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Create API Key'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'name'}>Name</Input.Label>
-        <Input.Text id={'name'} name={'name'} value={name} onChange={e => setName(e.target.value)} />
+      <Dialog title="Create API Key" onClose={() => setOpen(false)} open={open}>
+        <Input.Label htmlFor="name">Name</Input.Label>
+        <Input.Text id="name" name="name" value={name} onChange={e => setName(e.target.value)} />
 
         <Dialog.Footer>
           <Button onClick={submit} disabled={!name}>

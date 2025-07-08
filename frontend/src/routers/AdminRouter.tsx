@@ -13,14 +13,14 @@ export default () => {
       <div className="flex">
         <Sidebar collapsed={false}>
           <div className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer">
-            <img src={CollapsedIcon} className="my-4 h-20" alt={'Pterodactyl Icon'} />
+            <img src={CollapsedIcon} className="my-4 h-20" alt="Pterodactyl Icon" />
           </div>
           <Sidebar.Section>
-            <Sidebar.Link to={'/admin'} end>
+            <Sidebar.Link to="/admin" end>
               <FontAwesomeIcon icon={faBuilding} />
               <span>Overview</span>
             </Sidebar.Link>
-            <Sidebar.Link to={'/admin/settings'}>
+            <Sidebar.Link to="/admin/settings">
               <FontAwesomeIcon icon={faWrench} />
               <span>Settings</span>
             </Sidebar.Link>

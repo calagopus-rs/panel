@@ -85,22 +85,22 @@ export default () => {
             schedule.isProcessing ? (
               <AnimatedHourglass />
             ) : schedule.isActive ? (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className="text-green-500" />
+              <FontAwesomeIcon size="xl" icon={faHourglass} className="text-green-500" />
             ) : (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className="text-red-500" />
+              <FontAwesomeIcon size="xl" icon={faHourglass} className="text-red-500" />
             )
           }
           label="Status"
           value={schedule.isProcessing ? 'Processing' : schedule.isActive ? 'Active' : 'Inactive'}
         />
         <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClockRotateLeft} />}
+          icon={<FontAwesomeIcon size="xl" icon={faClockRotateLeft} />}
           label="Last Run"
           value={schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : 'N/A'}
           subtext={schedule.lastRunAt ? formatTimestamp(schedule.lastRunAt).trim() : 'N/A'}
         />
         <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClock} />}
+          icon={<FontAwesomeIcon size="xl" icon={faClock} />}
           label="Next Run"
           value={formatDateTime(getNextCronRun(schedule.cron))}
           subtext={formatTimestamp(getNextCronRun(schedule.cron))}
@@ -117,12 +117,12 @@ export default () => {
         <div className="overflow-x-auto">
           <table className="w-full table-auto">
             <TableHead>
-              <TableHeader name={'Sequence #'} />
-              <TableHeader name={'Action'} />
-              <TableHeader name={'Payload'} />
-              <TableHeader name={'Offset'} />
-              <TableHeader name={'Queued'} />
-              <TableHeader name={'Continue on Failure'} />
+              <TableHeader name="Sequence #" />
+              <TableHeader name="Action" />
+              <TableHeader name="Payload" />
+              <TableHeader name="Offset" />
+              <TableHeader name="Queued" />
+              <TableHeader name="Continue on Failure" />
             </TableHead>
 
             <TableBody>

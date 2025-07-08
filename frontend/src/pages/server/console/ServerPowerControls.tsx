@@ -36,8 +36,8 @@ export default () => {
         open={open}
         hideCloseIcon
         onClose={() => setOpen(false)}
-        title={'Forcibly Stop Process'}
-        confirm={'Continue'}
+        title="Forcibly Stop Process"
+        confirm="Continue"
         onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
       >
         Forcibly stopping a server can lead to data corruption.

@@ -28,11 +28,11 @@ export default () => {
   };
 
   return (
-    <SettingContainer title={'Email Settings'}>
+    <SettingContainer title="Email Settings">
       <div className="mt-4">
-        <Input.Label htmlFor={'type'}>Type</Input.Label>
+        <Input.Label htmlFor="type">Type</Input.Label>
         <Input.Dropdown
-          id={'type'}
+          id="type"
           options={[
             { label: 'None', value: 'none' },
             { label: 'SMTP', value: 'smtp' },

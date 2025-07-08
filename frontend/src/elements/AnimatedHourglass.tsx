@@ -51,7 +51,7 @@ export default () => {
 
   return (
     <div className="transition-transform duration-700 ease-in-out" style={{ transform: `rotate(${rotation}deg)` }}>
-      <FontAwesomeIcon icon={getIcon()} size={'xl'} className="animate-pulse" />
+      <FontAwesomeIcon icon={getIcon()} size="xl" className="animate-pulse" />
     </div>
   );
 };

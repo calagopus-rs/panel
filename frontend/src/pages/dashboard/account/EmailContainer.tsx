@@ -28,9 +28,9 @@ export default () => {
       <h1 className="text-4xl font-bold text-white">Update Email</h1>
 
       <div className="mt-4">
-        <Input.Label htmlFor={'newEmail'}>New Email</Input.Label>
+        <Input.Label htmlFor="newEmail">New Email</Input.Label>
         <Input.Text
-          id={'newEmail'}
+          id="newEmail"
           placeholder="New Email"
           type="email"
           value={email}
@@ -39,9 +39,9 @@ export default () => {
       </div>
 
       <div className="mt-4">
-        <Input.Label htmlFor={'currentPassword'}>Current Password</Input.Label>
+        <Input.Label htmlFor="currentPassword">Current Password</Input.Label>
         <Input.Text
-          id={'currentPassword'}
+          id="currentPassword"
           placeholder="Current Password"
           type="password"
           onChange={e => setPassword(e.target.value)}

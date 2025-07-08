@@ -38,12 +38,12 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Create SSH Key'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'name'}>Name</Input.Label>
-        <Input.Text id={'name'} name={'name'} value={name} onChange={e => setName(e.target.value)} />
+      <Dialog title="Create SSH Key" onClose={() => setOpen(false)} open={open}>
+        <Input.Label htmlFor="name">Name</Input.Label>
+        <Input.Text id="name" name="name" value={name} onChange={e => setName(e.target.value)} />
 
-        <Input.Label htmlFor={'pubKey'}>Public Key</Input.Label>
-        <Input.Text id={'pubKey'} name={'pubKey'} value={pubKey} onChange={e => setPubKey(e.target.value)} />
+        <Input.Label htmlFor="pubKey">Public Key</Input.Label>
+        <Input.Text id="pubKey" name="pubKey" value={pubKey} onChange={e => setPubKey(e.target.value)} />
 
         <Dialog.Footer>
           <Button onClick={submit} disabled={!name}>

@@ -89,7 +89,7 @@ export default () => {
         </div>
       </div>
       <Editor
-        height={'100%'}
+        height="100%"
         theme="vs-dark"
         defaultLanguage={language}
         defaultValue={content}

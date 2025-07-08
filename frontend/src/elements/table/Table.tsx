@@ -277,7 +277,7 @@ export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, ch
       <div className="flex flex-row items-center h-12 px-6">
         {typeof onSelectAllClick === 'function' && (
           <div className="flex flex-row items-center">
-            <Checkbox name={'selectAll'} checked={checked} onChange={onSelectAllClick} />
+            <Checkbox name="selectAll" checked={checked} onChange={onSelectAllClick} />
 
             <svg
               xmlns="http://www.w3.org/2000/svg"

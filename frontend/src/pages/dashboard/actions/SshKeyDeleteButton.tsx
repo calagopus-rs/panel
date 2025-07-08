@@ -29,7 +29,7 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
 
   return (
     <>
-      <Dialog title={'Delete API Key'} onClose={() => setOpen(false)} open={open}>
+      <Dialog title="Delete API Key" onClose={() => setOpen(false)} open={open}>
         <p>
           Removing the <Code>{sshKey.name}</Code> SSH key will invalidate its usage across the Panel.
         </p>
