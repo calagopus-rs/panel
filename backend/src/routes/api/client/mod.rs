@@ -25,7 +25,7 @@ pub async fn auth(
     next: Next,
 ) -> Result<Response, StatusCode> {
     if let Some(session_id) = cookies.get("session") {
-        if session_id.value().len() != 64 {
+        if session_id.value().len() != 81 {
             return Ok(Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
                 .header("Content-Type", "application/json")
@@ -85,7 +85,7 @@ pub async fn auth(
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::Session(session));
     } else if let Some(api_token) = req.headers().get("Authorization") {
-        if api_token.len() != 48 + 7 {
+        if api_token.len() != 55 {
             return Ok(Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
                 .header("Content-Type", "application/json")

@@ -1,4 +1,5 @@
 use super::BaseModel;
+use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;
 use sqlx::{Row, postgres::PgRow};
@@ -52,6 +53,8 @@ impl UserSession {
         ip: sqlx::types::ipnetwork::IpNetwork,
         user_agent: &str,
     ) -> String {
+        let key_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
+
         let mut hash = sha2::Sha256::new();
         hash.update(chrono::Utc::now().timestamp().to_be_bytes());
         hash.update(user_id.to_be_bytes());
@@ -59,11 +62,12 @@ impl UserSession {
 
         sqlx::query(
             r#"
-            INSERT INTO user_sessions (user_id, key, ip, user_agent, last_used, created)
-            VALUES ($1, crypt($2, gen_salt('bf')), $3, $4, NOW(), NOW())
+            INSERT INTO user_sessions (user_id, key_id, key, ip, user_agent, last_used, created)
+            VALUES ($1, $2, crypt($3, gen_salt('bf')), $4, $5, NOW(), NOW())
             "#,
         )
         .bind(user_id)
+        .bind(&key_id)
         .bind(&hash)
         .bind(ip)
         .bind(user_agent)
@@ -71,7 +75,7 @@ impl UserSession {
         .await
         .unwrap();
 
-        hash
+        format!("{key_id}:{hash}")
     }
 
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {

@@ -82,6 +82,7 @@ export const userSessions = pgTable('user_sessions', {
 	id: serial('id').primaryKey().notNull(),
 	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
 
+	key_id: char('key_id', { length: 16 }).notNull(),
 	key: text('key').notNull(),
 	ip: inet('ip').notNull(),
 	userAgent: varchar('user_agent', { length: 255 }).notNull(),

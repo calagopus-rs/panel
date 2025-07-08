@@ -197,6 +197,13 @@
       "when": 1751886836609,
       "tag": "0027_spooky_red_skull",
       "breakpoints": false
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1751956970596,
+      "tag": "0028_numerous_blackheart",
+      "breakpoints": false
     }
   ]
 }

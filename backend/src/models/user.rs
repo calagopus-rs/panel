@@ -130,17 +130,22 @@ impl User {
         database: &crate::database::Database,
         session: &str,
     ) -> Option<(Self, super::user_session::UserSession)> {
+        let mut parts = session.splitn(2, ':');
+        let key_id = parts.next()?;
+        let key = parts.next()?;
+
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {}
             FROM users
             JOIN user_sessions ON user_sessions.user_id = users.id
-            WHERE user_sessions.key = crypt($1, user_sessions.key)
+            WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
             "#,
             Self::columns_sql(None, None),
             super::user_session::UserSession::columns_sql(Some("session_"), None)
         ))
-        .bind(session)
+        .bind(key_id)
+        .bind(key)
         .fetch_optional(database.read())
         .await
         .unwrap();
@@ -162,11 +167,12 @@ impl User {
             SELECT {}, {}
             FROM users
             JOIN user_api_keys ON user_api_keys.user_id = users.id
-            WHERE user_api_keys.key = crypt($1, user_api_keys.key)
+            WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
             "#,
             Self::columns_sql(None, None),
             super::user_api_key::UserApiKey::columns_sql(Some("api_key_"), None)
         ))
+        .bind(&key[0..16])
         .bind(key)
         .fetch_optional(database.read())
         .await
