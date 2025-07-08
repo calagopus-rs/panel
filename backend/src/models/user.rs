@@ -186,31 +186,6 @@ impl User {
         })
     }
 
-    pub async fn by_username(
-        database: &crate::database::Database,
-        cache: &crate::cache::Cache,
-        username: &str,
-    ) -> Option<Self> {
-        cache
-            .cached(&format!("user::{username}"), 3600, || async {
-                let row = sqlx::query(&format!(
-                    r#"
-                    SELECT {}
-                    FROM users
-                    WHERE users.username = $1
-                    "#,
-                    Self::columns_sql(None, None)
-                ))
-                .bind(username)
-                .fetch_optional(database.read())
-                .await
-                .unwrap();
-
-                row.map(|row| Self::map(None, &row))
-            })
-            .await
-    }
-
     pub async fn by_email(database: &crate::database::Database, email: &str) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"

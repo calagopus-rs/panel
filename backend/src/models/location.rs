@@ -71,12 +71,6 @@ impl LocationBackupConfigs {
         }
     }
 
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
-        if let Some(s3) = &mut self.s3 {
-            s3.decrypt(database);
-        }
-    }
-
     pub fn censor(&mut self) {
         if let Some(s3) = &mut self.s3 {
             s3.censor();

@@ -78,6 +78,59 @@ impl UserSession {
         format!("{key_id}:{hash}")
     }
 
+    pub async fn by_user_id_id(
+        database: &crate::database::Database,
+        user_id: i32,
+        id: i32,
+    ) -> Option<Self> {
+        sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM user_sessions
+            WHERE user_sessions.user_id = $1 AND user_sessions.id = $2
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(user_id)
+        .bind(id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap()
+        .map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_user_id_with_pagination(
+        database: &crate::database::Database,
+        user_id: i32,
+        page: i64,
+        per_page: i64,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM user_sessions
+            WHERE user_sessions.user_id = $1
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(user_id)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
+    }
+
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
         sqlx::query(
             r#"

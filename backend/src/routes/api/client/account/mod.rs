@@ -6,6 +6,7 @@ mod api_keys;
 mod email;
 mod logout;
 mod password;
+mod sessions;
 mod ssh_keys;
 mod two_factor;
 
@@ -46,5 +47,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/activity", activity::router(state))
         .nest("/api-keys", api_keys::router(state))
         .nest("/ssh-keys", ssh_keys::router(state))
+        .nest("/sessions", sessions::router(state))
         .with_state(state.clone())
 }
