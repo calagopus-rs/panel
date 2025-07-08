@@ -17,7 +17,7 @@ export default () => {
   const navigate = useNavigate();
   const action = urlPathToAction(location.pathname);
   const server = useServerStore(state => state.server);
-  const { directory, setDirectory } = useServerStore(state => state.files);
+  const { browsingDirectory, setBrowsingDirectory } = useServerStore();
 
   const [loading, setLoading] = useState(false);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
@@ -28,19 +28,19 @@ export default () => {
   const contentRef = useRef(content);
 
   useEffect(() => {
-    setDirectory(decodeURIComponent(params.path || '/'));
+    setBrowsingDirectory(decodeURIComponent(params.path || '/'));
   }, [params]);
 
   useEffect(() => {
     if (action === 'new') return;
 
     setLoading(true);
-    getFileContent(server.uuid, directory).then(content => {
+    getFileContent(server.uuid, browsingDirectory).then(content => {
       setContent(content);
-      setLanguage(getLanguageFromExtension(directory.split('.').pop()));
+      setLanguage(getLanguageFromExtension(browsingDirectory.split('.').pop()));
       setLoading(false);
     });
-  }, [directory]);
+  }, [browsingDirectory]);
 
   useEffect(() => {
     contentRef.current = content;
@@ -52,7 +52,7 @@ export default () => {
     const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.uuid, name ?? directory, currentContent).then(() => {
+    saveFileContent(server.uuid, name ?? browsingDirectory, currentContent).then(() => {
       setLoading(false);
       setNameDialogOpen(false);
 
@@ -75,7 +75,7 @@ export default () => {
       />
 
       <div className="flex justify-between w-full p-4">
-        <FileBreadcrumbs path={decodeURIComponent(directory)} />
+        <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} />
         <div>
           {action === 'edit' ? (
             <Button style={Button.Styles.Green} onClick={() => saveFile()}>

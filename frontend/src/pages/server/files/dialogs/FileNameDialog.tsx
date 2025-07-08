@@ -10,12 +10,12 @@ type Props = DialogProps & {
 };
 
 export default ({ onFileNamed, open, onClose }: Props) => {
-  const { directory } = useServerStore(state => state.files);
+  const { browsingDirectory } = useServerStore();
 
   const [fileName, setFileName] = useState('');
 
   const submit = () => {
-    onFileNamed(join(directory, fileName));
+    onFileNamed(join(browsingDirectory, fileName));
     onClose();
   };
 

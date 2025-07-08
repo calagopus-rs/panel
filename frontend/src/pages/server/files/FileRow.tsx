@@ -14,7 +14,7 @@ function FileTableRow({ file, children }: { file: DirectoryEntry; children: Reac
   const navigate = useNavigate();
 
   const server = useServerStore(state => state.server);
-  const { directory } = useServerStore(state => state.files);
+  const { browsingDirectory } = useServerStore();
 
   return isEditableFile(file.mime) || file.directory ? (
     <TableRow
@@ -22,7 +22,7 @@ function FileTableRow({ file, children }: { file: DirectoryEntry; children: Reac
       onClick={() => {
         navigate(
           `/server/${server.uuidShort}/files/${file.file ? 'edit' : 'directory'}/${encodeURIComponent(
-            join(directory, file.name),
+            join(browsingDirectory, file.name),
           )}`,
         );
       }}
@@ -35,7 +35,7 @@ function FileTableRow({ file, children }: { file: DirectoryEntry; children: Reac
 }
 
 export default ({ file }: { file: DirectoryEntry }) => {
-  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore(state => state.files);
+  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore();
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (

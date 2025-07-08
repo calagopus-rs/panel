@@ -11,12 +11,12 @@ type Props = DialogProps & {
 };
 
 export default ({ onDirectoryNamed, open, onClose }: Props) => {
-  const { directory } = useServerStore(state => state.files);
+  const { browsingDirectory } = useServerStore();
 
   const [dirName, setDirName] = useState('');
 
   const submit = () => {
-    onDirectoryNamed(join(directory, dirName));
+    onDirectoryNamed(join(browsingDirectory, dirName));
     onClose();
   };
 
@@ -33,7 +33,7 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
         <span className="text-neutral-200">This directory will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className="text-cyan-200">{join(directory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className="text-cyan-200">{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
       <Dialog.Footer>
