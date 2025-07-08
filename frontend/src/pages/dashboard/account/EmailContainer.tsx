@@ -2,13 +2,13 @@ import { httpErrorToHuman } from '@/api/axios';
 import updateEmail from '@/api/me/account/updateEmail';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { user } = useUserStore();
+  const { user } = useAuth();
 
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');

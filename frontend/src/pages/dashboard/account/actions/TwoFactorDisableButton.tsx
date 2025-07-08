@@ -3,13 +3,13 @@ import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
 import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { user, setUser } = useUserStore();
+  const { user, setUser } = useAuth();
 
   const [open, setOpen] = useState(false);
 

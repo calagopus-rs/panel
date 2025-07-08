@@ -1,17 +1,12 @@
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
-import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
-import register from '@/api/auth/register';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
-  const navigate = useNavigate();
-  const { addToast } = useToast();
-  const { setUser } = useUserStore();
+  const { doRegister } = useAuth();
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -22,14 +17,7 @@ export default () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    register({ username, email, name_first: nameFirst, name_last: nameLast, password })
-      .then(response => {
-        setUser(response.user!);
-        navigate('/');
-      })
-      .catch(msg => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+    doRegister(username, email, nameFirst, nameLast, password);
   };
 
   return (

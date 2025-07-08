@@ -7,8 +7,8 @@ import CopyOnClick from '@/elements/CopyOnClick';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import Spinner from '@/elements/Spinner';
+import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -19,7 +19,7 @@ export interface TwoFactorSetupResponse {
 
 export default () => {
   const { addToast } = useToast();
-  const { user, setUser } = useUserStore();
+  const { user, setUser } = useAuth();
 
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState<'setup' | 'recovery'>('setup');

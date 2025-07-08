@@ -1,19 +1,14 @@
-import login from '@/api/auth/login';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
-import { useUserStore } from '@/stores/user';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
-import checkpointLogin from '@/api/auth/checkpointLogin';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
   const navigate = useNavigate();
-  const { addToast } = useToast();
-  const { setUser } = useUserStore();
+  const { doCheckpointLogin } = useAuth();
   const { twoFactorToken } = useGlobalStore();
 
   useEffect(() => {
@@ -27,14 +22,7 @@ export default () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    checkpointLogin({ code: faToken, confirmation_token: twoFactorToken })
-      .then(response => {
-        setUser(response.user!);
-        navigate('/');
-      })
-      .catch(msg => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+    doCheckpointLogin(faToken, twoFactorToken!);
   };
 
   return (

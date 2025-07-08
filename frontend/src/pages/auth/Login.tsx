@@ -1,19 +1,12 @@
-import login from '@/api/auth/login';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
-import { useUserStore } from '@/stores/user';
 import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
-import { useGlobalStore } from '@/stores/global';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
-  const navigate = useNavigate();
-  const { addToast } = useToast();
-  const { setUser } = useUserStore();
-  const { setTwoFactorToken } = useGlobalStore();
+  const { doLogin } = useAuth();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -21,20 +14,7 @@ export default () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    login({ user: username, password })
-      .then(response => {
-        if (response.type === 'two_factor_required') {
-          setTwoFactorToken(response.token!);
-          navigate('/auth/two-factor');
-          return;
-        }
-
-        setUser(response.user!);
-        navigate('/');
-      })
-      .catch(msg => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+    doLogin(username, password);
   };
 
   return (

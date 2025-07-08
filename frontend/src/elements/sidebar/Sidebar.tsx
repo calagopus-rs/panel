@@ -1,13 +1,10 @@
 import classNames from 'classnames';
 import styles from './sidebar.module.css';
 import { NavLink } from 'react-router';
-import { useUserStore } from '@/stores/user';
 import { Button } from '../button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
-import logout from '@/api/me/logout';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { useAuth } from '@/providers/AuthProvider';
 
 type SidebarProps = {
   collapsed?: boolean;
@@ -45,19 +42,9 @@ function Link({ to, end, children }: LinkProps) {
 }
 
 function User() {
-  const { user, setUser } = useUserStore();
-  const { addToast } = useToast();
+  const { user } = useAuth();
+  const { doLogout } = useAuth();
   const avatarURL = 'https://placehold.co/400x400/png';
-
-  const doLogout = () => {
-    logout()
-      .then(() => {
-        setUser(null);
-      })
-      .catch(msg => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
 
   return (
     <div className={styles.user}>

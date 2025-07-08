@@ -11,10 +11,10 @@ import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApi from '@/pages/dashboard/DashboardApi';
 import DashboardSsh from '@/pages/dashboard/DashboardSsh';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
-import { useUserStore } from '@/stores/user';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
-  const { user } = useUserStore();
+  const { user } = useAuth();
 
   return (
     <>

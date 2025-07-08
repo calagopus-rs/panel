@@ -6,17 +6,17 @@ import classNames from 'classnames';
 
 type ToastType = 'success' | 'error' | 'warning' | 'loading' | 'info';
 
-type Toast = {
+interface Toast {
   id: number;
   message: string;
   type: ToastType;
-};
+}
 
-type ToastContextType = {
+interface ToastContextType {
   addToast: (message: string, type?: ToastType) => number;
   dismissToast: (id: number) => void;
   promise: <T>(promise: Promise<T>, messages: { loading: string; success: string; error: string }) => void;
-};
+}
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 

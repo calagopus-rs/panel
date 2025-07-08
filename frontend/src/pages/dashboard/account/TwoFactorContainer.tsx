@@ -1,9 +1,9 @@
-import { useUserStore } from '@/stores/user';
 import TwoFactorDisableButton from './actions/TwoFactorDisableButton';
 import TwoFactorSetupButton from './actions/TwoFactorSetupButton';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
-  const { user } = useUserStore();
+  const { user } = useAuth();
 
   return (
     <div className="bg-gray-700/50 rounded-md p-4 h-fit">
