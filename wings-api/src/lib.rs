@@ -891,6 +891,32 @@ pub mod servers_server_ws_deny {
         }
     }
 }
+pub mod servers_server_ws_permissions {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+                #[schema(inline)]
+                pub user_permissions: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyUserPermissions {
+                    #[schema(inline)]
+                    pub user: uuid::Uuid,
+                    #[schema(inline)]
+                    pub permissions: Vec<String>,
+                    #[schema(inline)]
+                    pub ignored_files: Vec<String>,
+                }>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            }
+        }
+    }
+}
 pub mod stats {
     use super::*;
 

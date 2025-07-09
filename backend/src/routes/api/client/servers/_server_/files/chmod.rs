@@ -39,7 +39,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -52,7 +52,11 @@ mod put {
 
         let request_body = wings_api::servers_server_files_chmod::post::RequestBody {
             root: data.root,
-            files: data.files,
+            files: data
+                .files
+                .into_iter()
+                .filter(|f| !server.is_ignored(&f.file, false))
+                .collect(),
         };
 
         let data = match server

@@ -25,7 +25,7 @@ impl LocationBackupConfigsS3 {
 
     pub fn decrypt(&mut self, database: &crate::database::Database) {
         self.secret_key = database
-            .decrypt(&base32::decode(base32::Alphabet::Z, &self.secret_key).unwrap())
+            .decrypt(base32::decode(base32::Alphabet::Z, &self.secret_key).unwrap())
             .unwrap();
     }
 

@@ -344,9 +344,7 @@ impl ServerBackup {
     #[inline]
     pub fn s3_path(server_uuid: uuid::Uuid, backup_uuid: uuid::Uuid) -> String {
         format!(
-            "{}/{}.tar.gz",
-            server_uuid.to_string(),
-            backup_uuid.to_string()
+            "{server_uuid}/{backup_uuid}.tar.gz"
         )
     }
 

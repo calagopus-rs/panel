@@ -130,9 +130,9 @@ impl User {
         database: &crate::database::Database,
         session: &str,
     ) -> Option<(Self, super::user_session::UserSession)> {
-        let mut parts = session.splitn(2, ':');
-        let key_id = parts.next()?;
-        let key = parts.next()?;
+        let (key_id, key) = session.split_once(':')?;
+        
+        
 
         let row = sqlx::query(&format!(
             r#"

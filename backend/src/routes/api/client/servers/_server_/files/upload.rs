@@ -42,13 +42,15 @@ mod get {
         }
 
         #[derive(Serialize)]
-        struct FileUploadJwt {
+        struct FileUploadJwt<'a> {
             #[serde(flatten)]
             base: BasePayload,
 
             server_uuid: uuid::Uuid,
             user_uuid: uuid::Uuid,
             unique_id: uuid::Uuid,
+
+            ignored_files: &'a [String],
         }
 
         let token = server
@@ -69,6 +71,10 @@ mod get {
                     server_uuid: server.uuid,
                     user_uuid: user.to_uuid(),
                     unique_id: uuid::Uuid::new_v4(),
+                    ignored_files: server
+                        .subuser_ignored_files
+                        .as_deref()
+                        .unwrap_or(&[]),
                 },
             )
             .unwrap();

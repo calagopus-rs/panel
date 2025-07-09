@@ -11,6 +11,7 @@ mod delete {
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
+    use std::sync::Arc;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -72,6 +73,46 @@ mod delete {
             )
             .await;
 
+        tokio::spawn({
+            let database = Arc::clone(&state.database);
+
+            async move {
+                tracing::debug!(server = %server.uuid, "removing subuser permissions in wings");
+
+                if let Err(err) = server
+                    .node
+                    .api_client(&database)
+                    .post_servers_server_ws_permissions(
+                        server.uuid,
+                        &wings_api::servers_server_ws_permissions::post::RequestBody {
+                            user_permissions: vec![wings_api::servers_server_ws_permissions::post::RequestBodyUserPermissions {
+                                user: subuser.user.to_uuid(),
+                                permissions: Vec::new(),
+                                ignored_files: Vec::new(),
+                            }]
+                        }
+                    )
+                    .await
+                {
+                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+                }
+
+                if let Err(err) = server
+                    .node
+                    .api_client(&database)
+                    .post_servers_server_ws_deny(
+                        server.uuid,
+                        &wings_api::servers_server_ws_deny::post::RequestBody {
+                            jtis: vec![subuser.user.id.to_string()],
+                        },
+                    )
+                    .await
+                {
+                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+                }
+            }
+        });
+
         (
             StatusCode::OK,
             axum::Json(serde_json::to_value(Response {}).unwrap()),
@@ -92,13 +133,15 @@ mod patch {
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use std::sync::Arc;
     use utoipa::ToSchema;
     use validator::Validate;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Vec<String>,
+        permissions: Option<Vec<String>>,
+        ignored_files: Option<Vec<String>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -136,19 +179,18 @@ mod patch {
             );
         }
 
-        if !user.admin
-            && let Some(subuser_permissions) = &server.subuser_permissions
-            && !data
-                .permissions
-                .iter()
-                .all(|p| subuser_permissions.contains(p))
-        {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[
-                    "permissions: more permissions than self",
-                ])),
-            );
+        if let Some(permissions) = &data.permissions {
+            if !user.admin
+                && let Some(subuser_permissions) = &server.subuser_permissions
+                && !permissions.iter().all(|p| subuser_permissions.contains(p))
+            {
+                return (
+                    StatusCode::BAD_REQUEST,
+                    axum::Json(ApiError::new_value(&[
+                        "permissions: more permissions than self",
+                    ])),
+                );
+            }
         }
 
         if let Err(error) = server.has_permission("subusers.update") {
@@ -158,7 +200,7 @@ mod patch {
             );
         }
 
-        let subuser = match ServerSubuser::by_server_id_username(
+        let mut subuser = match ServerSubuser::by_server_id_username(
             &state.database,
             server.id,
             &subuser,
@@ -181,11 +223,19 @@ mod patch {
             );
         }
 
+        if let Some(permissions) = data.permissions {
+            subuser.permissions = permissions;
+        }
+        if let Some(ignored_files) = data.ignored_files {
+            subuser.ignored_files = ignored_files;
+        }
+
         sqlx::query!(
             "UPDATE server_subusers
-            SET permissions = $1
-            WHERE server_id = $2 AND user_id = $3",
-            &data.permissions,
+            SET permissions = $1, ignored_files = $2
+            WHERE server_subusers.server_id = $3 AND server_subusers.user_id = $4",
+            &subuser.permissions,
+            &subuser.ignored_files,
             server.id,
             subuser.user.id,
         )
@@ -198,10 +248,37 @@ mod patch {
                 "server:subuser.update",
                 serde_json::json!({
                     "email": subuser.user.email,
-                    "permissions": data.permissions,
+                    "permissions": subuser.permissions,
+                    "ignored_files": subuser.ignored_files,
                 }),
             )
             .await;
+
+        tokio::spawn({
+            let database = Arc::clone(&state.database);
+
+            async move {
+                tracing::debug!(server = %server.uuid, "updating subuser permissions in wings");
+
+                if let Err(err) = server
+                    .node
+                    .api_client(&database)
+                    .post_servers_server_ws_permissions(
+                        server.uuid,
+                        &wings_api::servers_server_ws_permissions::post::RequestBody {
+                            user_permissions: vec![wings_api::servers_server_ws_permissions::post::RequestBodyUserPermissions {
+                                user: subuser.user.to_uuid(),
+                                permissions: server.wings_permissions(&subuser.user).into_iter().map(String::from).collect(),
+                                ignored_files: subuser.ignored_files,
+                            }]
+                        }
+                    )
+                    .await
+                {
+                    tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:#?}", err);
+                }
+            }
+        });
 
         (
             StatusCode::OK,

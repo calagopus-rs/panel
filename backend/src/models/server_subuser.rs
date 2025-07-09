@@ -11,9 +11,8 @@ use std::{
 use utoipa::ToSchema;
 use validator::ValidationError;
 
-pub static PERMISSIONS: LazyLock<
-    IndexMap<&'static str, (&'static str, IndexMap<&'static str, &'static str>)>,
-> = LazyLock::new(|| {
+type Permission = (&'static str, IndexMap<&'static str, &'static str>);
+pub static PERMISSIONS: LazyLock<IndexMap<&'static str, Permission>> = LazyLock::new(|| {
     IndexMap::from([
         (
             "control",
@@ -249,6 +248,7 @@ pub struct ServerSubuser {
     pub user: super::user::User,
 
     pub permissions: Vec<String>,
+    pub ignored_files: Vec<String>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -265,6 +265,10 @@ impl BaseModel for ServerSubuser {
                 format!("{table}.permissions"),
                 format!("{prefix}permissions"),
             ),
+            (
+                format!("{table}.ignored_files"),
+                format!("{prefix}ignored_files"),
+            ),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
@@ -280,6 +284,7 @@ impl BaseModel for ServerSubuser {
         Self {
             user: super::user::User::map(Some("user_"), row),
             permissions: row.get(format!("{prefix}permissions").as_str()),
+            ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -293,6 +298,7 @@ impl ServerSubuser {
         server: &super::server::Server,
         email: &str,
         permissions: &[String],
+        ignored_files: &[String],
     ) -> Result<String, sqlx::Error> {
         let user = match super::user::User::by_email(database, email).await {
             Some(user) => user,
@@ -370,13 +376,14 @@ impl ServerSubuser {
 
         sqlx::query(
             r#"
-            INSERT INTO server_subusers (server_id, user_id, permissions)
-            VALUES ($1, $2, $3)
+            INSERT INTO server_subusers (server_id, user_id, permissions, ignored_files)
+            VALUES ($1, $2, $3, $4)
             "#,
         )
         .bind(server.id)
         .bind(user.id)
         .bind(permissions)
+        .bind(ignored_files)
         .execute(database.write())
         .await?;
 
@@ -462,6 +469,7 @@ impl ServerSubuser {
         ApiServerSubuser {
             user: self.user.into_api_object(false),
             permissions: self.permissions,
+            ignored_files: self.ignored_files,
             created: self.created.and_utc(),
         }
     }
@@ -471,7 +479,9 @@ impl ServerSubuser {
 #[schema(title = "ServerSubuser")]
 pub struct ApiServerSubuser {
     pub user: super::user::ApiUser,
+
     pub permissions: Vec<String>,
+    pub ignored_files: Vec<String>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

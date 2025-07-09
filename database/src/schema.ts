@@ -398,6 +398,7 @@ export const serverSubusers = pgTable('server_subusers', {
 	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
 
 	permissions: varchar('permissions', { length: 32 }).array().notNull(),
+	ignored_files: text('ignored_files').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverSubusers) => [

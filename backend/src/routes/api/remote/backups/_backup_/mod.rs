@@ -145,7 +145,7 @@ mod get {
         let content_type = ServerBackup::s3_content_type(&file_path);
 
         let multipart = match client
-            .initiate_multipart_upload(&file_path, &content_type)
+            .initiate_multipart_upload(&file_path, content_type)
             .await
         {
             Ok(multipart) => multipart,
@@ -266,110 +266,107 @@ mod post {
         backup: GetBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        match backup.disk {
-            BackupDisk::S3 => {
-                let upload_id = match backup.0.upload_id {
-                    Some(id) => id,
-                    None => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["upload ID not found"])),
+        if backup.disk == BackupDisk::S3 {
+            let upload_id = match backup.0.upload_id {
+                Some(id) => id,
+                None => {
+                    return (
+                        StatusCode::EXPECTATION_FAILED,
+                        axum::Json(ApiError::new_value(&["upload ID not found"])),
+                    );
+                }
+            };
+
+            let mut s3_configuration = match node.0.location.backup_configs.s3 {
+                Some(config) => config,
+                None => {
+                    return (
+                        StatusCode::EXPECTATION_FAILED,
+                        axum::Json(ApiError::new_value(&["S3 configuration not found"])),
+                    );
+                }
+            };
+            s3_configuration.decrypt(&state.database);
+
+            let server = match Server::by_id(&state.database, backup.0.server_id).await {
+                Some(server) => server,
+                None => {
+                    return (
+                        StatusCode::EXPECTATION_FAILED,
+                        axum::Json(ApiError::new_value(&["server not found"])),
+                    );
+                }
+            };
+
+            let client = match s3_configuration.into_client() {
+                Ok(client) => client,
+                Err(err) => {
+                    tracing::error!(
+                        backup = %backup.0.uuid,
+                        location = %node.0.location.name,
+                        "failed to create S3 client: {:#?}",
+                        err
+                    );
+
+                    return (
+                        StatusCode::EXPECTATION_FAILED,
+                        axum::Json(ApiError::new_value(&["failed to create S3 client"])),
+                    );
+                }
+            };
+
+            let file_path = ServerBackup::s3_path(server.uuid, backup.0.uuid);
+
+            if data.successful {
+                match client
+                    .complete_multipart_upload(
+                        &file_path,
+                        &upload_id,
+                        data.parts
+                            .into_iter()
+                            .map(|p| s3::serde_types::Part {
+                                part_number: p.part_number,
+                                etag: p.etag,
+                            })
+                            .collect(),
+                    )
+                    .await
+                {
+                    Ok(_) => {
+                        tracing::info!(
+                            backup = %backup.0.uuid,
+                            location = %node.0.location.name,
+                            "completed multipart upload for backup"
                         );
                     }
-                };
-
-                let mut s3_configuration = match node.0.location.backup_configs.s3 {
-                    Some(config) => config,
-                    None => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["S3 configuration not found"])),
-                        );
-                    }
-                };
-                s3_configuration.decrypt(&state.database);
-
-                let server = match Server::by_id(&state.database, backup.0.server_id).await {
-                    Some(server) => server,
-                    None => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["server not found"])),
-                        );
-                    }
-                };
-
-                let client = match s3_configuration.into_client() {
-                    Ok(client) => client,
                     Err(err) => {
                         tracing::error!(
                             backup = %backup.0.uuid,
                             location = %node.0.location.name,
-                            "failed to create S3 client: {:#?}",
+                            "failed to complete multipart upload: {:#?}",
                             err
                         );
-
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["failed to create S3 client"])),
+                    }
+                }
+            } else {
+                match client.abort_upload(&file_path, &upload_id).await {
+                    Ok(_) => {
+                        tracing::info!(
+                            backup = %backup.0.uuid,
+                            location = %node.0.location.name,
+                            "aborted multipart upload for backup"
                         );
                     }
-                };
-
-                let file_path = ServerBackup::s3_path(server.uuid, backup.0.uuid);
-
-                if data.successful {
-                    match client
-                        .complete_multipart_upload(
-                            &file_path,
-                            &upload_id,
-                            data.parts
-                                .into_iter()
-                                .map(|p| s3::serde_types::Part {
-                                    part_number: p.part_number,
-                                    etag: p.etag,
-                                })
-                                .collect(),
-                        )
-                        .await
-                    {
-                        Ok(_) => {
-                            tracing::info!(
-                                backup = %backup.0.uuid,
-                                location = %node.0.location.name,
-                                "completed multipart upload for backup"
-                            );
-                        }
-                        Err(err) => {
-                            tracing::error!(
-                                backup = %backup.0.uuid,
-                                location = %node.0.location.name,
-                                "failed to complete multipart upload: {:#?}",
-                                err
-                            );
-                        }
-                    }
-                } else {
-                    match client.abort_upload(&file_path, &upload_id).await {
-                        Ok(_) => {
-                            tracing::info!(
-                                backup = %backup.0.uuid,
-                                location = %node.0.location.name,
-                                "aborted multipart upload for backup"
-                            );
-                        }
-                        Err(err) => {
-                            tracing::error!(
-                                backup = %backup.0.uuid,
-                                location = %node.0.location.name,
-                                "failed to abort multipart upload: {:#?}",
-                                err
-                            );
-                        }
+                    Err(err) => {
+                        tracing::error!(
+                            backup = %backup.0.uuid,
+                            location = %node.0.location.name,
+                            "failed to abort multipart upload: {:#?}",
+                            err
+                        );
                     }
                 }
             }
-            _ => {}
         }
 
         if data.successful {

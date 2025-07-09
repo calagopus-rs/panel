@@ -59,7 +59,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         Query(params): Query<Params>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -76,12 +76,20 @@ mod get {
             );
         }
 
+        if server.is_ignored(&params.directory, true) {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["directory not found"])),
+            );
+        }
+
         let entries = match server
             .node
             .api_client(&state.database)
             .get_servers_server_files_list(
                 server.uuid,
                 &params.directory,
+                server.0.subuser_ignored_files.unwrap_or_default(),
                 params.per_page as u64,
                 params.page as u64,
             )
@@ -95,7 +103,7 @@ mod get {
                 );
             }
             Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to get server files: {:#?}", err);
+                tracing::error!(server = %server.0.uuid, "failed to get server files: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,

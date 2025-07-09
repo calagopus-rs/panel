@@ -36,7 +36,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, HeaderMap, String) {
@@ -48,6 +48,17 @@ mod get {
                     "application/json".parse().unwrap(),
                 )]),
                 ApiError::new_value(&[&error]).to_string(),
+            );
+        }
+
+        if server.is_ignored(&params.file, false) {
+            return (
+                StatusCode::NOT_FOUND,
+                HeaderMap::from_iter([(
+                    axum::http::header::CONTENT_TYPE,
+                    "application/json".parse().unwrap(),
+                )]),
+                ApiError::new_value(&["file not found"]).to_string(),
             );
         }
 

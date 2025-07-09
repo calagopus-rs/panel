@@ -232,6 +232,13 @@
       "when": 1751971035734,
       "tag": "0032_loud_mordo",
       "breakpoints": false
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1752059197968,
+      "tag": "0033_giant_wolfsbane",
+      "breakpoints": false
     }
   ]
 }

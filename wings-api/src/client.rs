@@ -333,12 +333,16 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         algorithm: Algorithm,
-        files: &str,
+        files: Vec<String>,
     ) -> Result<
         super::servers_server_files_fingerprints::get::Response200,
         (StatusCode, super::ApiError),
     > {
-        let files = urlencoding::encode(files);
+        let files = files
+            .into_iter()
+            .map(|s| urlencoding::encode(&s).into_owned())
+            .collect::<Vec<_>>()
+            .join("&files=");
         request_impl(
             self,
             Method::GET,
@@ -353,12 +357,18 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         directory: &str,
+        ignored: Vec<String>,
         per_page: u64,
         page: u64,
     ) -> Result<super::servers_server_files_list::get::Response200, (StatusCode, super::ApiError)>
     {
         let directory = urlencoding::encode(directory);
-        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list?directory={directory}&per_page={per_page}&page={page}"), None, None).await
+        let ignored = ignored
+            .into_iter()
+            .map(|s| urlencoding::encode(&s).into_owned())
+            .collect::<Vec<_>>()
+            .join("&ignored=");
+        request_impl(self, Method::GET, format!("/api/servers/{server}/files/list?directory={directory}&ignored={ignored}&per_page={per_page}&page={page}"), None, None).await
     }
 
     pub async fn get_servers_server_files_list_directory(
@@ -594,6 +604,24 @@ impl WingsClient {
             self,
             Method::POST,
             format!("/api/servers/{server}/ws/deny"),
+            serde_json::to_value(data).ok().as_ref(),
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_ws_permissions(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_ws_permissions::post::RequestBody,
+    ) -> Result<
+        super::servers_server_ws_permissions::post::Response200,
+        (StatusCode, super::ApiError),
+    > {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/ws/permissions"),
             serde_json::to_value(data).ok().as_ref(),
             None,
         )

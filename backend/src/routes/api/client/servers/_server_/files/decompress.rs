@@ -36,7 +36,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -44,6 +44,13 @@ mod post {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
+        if server.is_ignored(&data.file, false) {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["file not found"])),
             );
         }
 

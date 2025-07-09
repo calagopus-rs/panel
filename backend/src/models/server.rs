@@ -48,6 +48,9 @@ pub struct Server {
     pub backup_limit: i32,
 
     pub subuser_permissions: Option<Vec<String>>,
+    pub subuser_ignored_files: Option<Vec<String>>,
+    #[serde(skip_serializing, skip_deserializing)]
+    subuser_ignored_files_overrides: Option<ignore::overrides::Override>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -156,6 +159,8 @@ impl BaseModel for Server {
             database_limit: row.get(format!("{prefix}database_limit").as_str()),
             backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
             subuser_permissions: row.try_get::<Vec<String>, _>("permissions").ok(),
+            subuser_ignored_files: row.try_get::<Vec<String>, _>("ignored_files").ok(),
+            subuser_ignored_files_overrides: None,
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -328,7 +333,7 @@ impl Server {
     ) -> Option<Self> {
         let query = format!(
             r#"
-            SELECT {}, {}, {}, {}, {}, server_subusers.permissions
+            SELECT {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -372,7 +377,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -416,7 +421,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -589,6 +594,27 @@ impl Server {
         }
 
         permissions
+    }
+
+    #[inline]
+    pub fn is_ignored(&mut self, path: &str, is_dir: bool) -> bool {
+        if let Some(ignored_files) = &self.subuser_ignored_files {
+            if let Some(overrides) = &mut self.subuser_ignored_files_overrides {
+                return overrides.matched(path, is_dir).is_whitelist();
+            }
+
+            let mut override_builder = ignore::overrides::OverrideBuilder::new("/");
+
+            for file in ignored_files {
+                override_builder.add(file).ok();
+            }
+
+            override_builder.build().is_ok_and(|overrides| {
+                overrides.matched(path, is_dir).is_whitelist()
+            })
+        } else {
+            false
+        }
     }
 
     #[inline]

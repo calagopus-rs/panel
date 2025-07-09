@@ -53,7 +53,7 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -61,6 +61,13 @@ mod get {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
+        if server.is_ignored(&params.file, false) {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["file not found"])),
             );
         }
 

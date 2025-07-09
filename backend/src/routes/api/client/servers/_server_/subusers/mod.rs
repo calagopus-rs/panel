@@ -109,6 +109,7 @@ mod post {
         email: String,
         #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
         permissions: Vec<String>,
+        ignored_files: Vec<String>,
 
         captcha: Option<String>,
     }
@@ -181,6 +182,7 @@ mod post {
             &server,
             &data.email,
             &data.permissions,
+            &data.ignored_files,
         )
         .await
         {

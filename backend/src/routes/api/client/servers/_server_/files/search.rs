@@ -38,13 +38,20 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(error) = server.has_permission("files.create") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
+        if server.is_ignored(&data.root, true) {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["root not found"])),
             );
         }
 
@@ -66,7 +73,7 @@ mod post {
             Err((StatusCode::NOT_FOUND, _)) => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["file is not a file"])),
+                    axum::Json(ApiError::new_value(&["root not found"])),
                 );
             }
             Err((StatusCode::EXPECTATION_FAILED, _)) => {

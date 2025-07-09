@@ -42,7 +42,7 @@ mod post {
             if let Err(err) = ServerActivity::log_remote(
                 &state.database,
                 activity.server,
-                activity.user.map(|uuid| User::from_uuid(uuid)),
+                activity.user.map(User::from_uuid),
                 None,
                 &activity.event,
                 activity.ip.map(|ip| ip.into()),

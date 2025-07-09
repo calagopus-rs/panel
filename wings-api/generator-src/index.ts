@@ -190,6 +190,8 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 if (param.in === 'query') {
                     if (params.find((p) => p.startsWith(param.name))?.endsWith('&str')) {
                         clientOutput.write(`        let ${param.name} = urlencoding::encode(${param.name});\n`)
+                    } else if (params.find((p) => p.startsWith(param.name))?.endsWith('Vec<String>')) {
+                        clientOutput.write(`        let ${param.name} = ${param.name}.into_iter().map(|s| urlencoding::encode(&s).into_owned()).collect::<Vec<_>>().join("&${param.name}=");\n`)
                     }
 
                     query += `${param.name}={${param.name}}&`

@@ -35,7 +35,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -44,6 +44,22 @@ mod post {
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
+        }
+
+        if server.is_ignored(&data.file, false) {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["file not found"])),
+            );
+        }
+
+        if let Some(destination) = &data.destination {
+            if server.is_ignored(destination, false) {
+                return (
+                    StatusCode::NOT_FOUND,
+                    axum::Json(ApiError::new_value(&["file not found"])),
+                );
+            }
         }
 
         let request_body = wings_api::servers_server_files_copy::post::RequestBody {
@@ -61,7 +77,7 @@ mod post {
             Err((StatusCode::NOT_FOUND, _)) => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["file is not a file"])),
+                    axum::Json(ApiError::new_value(&["file not found"])),
                 );
             }
             Err((StatusCode::EXPECTATION_FAILED, _)) => {

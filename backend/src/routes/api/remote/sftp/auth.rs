@@ -30,6 +30,7 @@ mod post {
         server: uuid::Uuid,
 
         permissions: Vec<&'a str>,
+        ignored_files: &'a [String],
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -111,6 +112,10 @@ mod post {
                     user: user.to_uuid(),
                     server: server.uuid,
                     permissions: server.wings_permissions(&user),
+                    ignored_files: server
+                        .subuser_ignored_files
+                        .as_deref()
+                        .unwrap_or(&[]),
                 })
                 .unwrap(),
             ),
