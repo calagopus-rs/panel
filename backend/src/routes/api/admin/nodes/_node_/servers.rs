@@ -3,8 +3,8 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, node::Node},
-        routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation},
+        models::{Pagination, PaginationParams, server::Server},
+        routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -13,7 +13,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        nodes: Pagination<crate::models::node::AdminApiNode>,
+        servers: Pagination<crate::models::server::AdminApiServer>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -21,8 +21,8 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
-            description = "The location ID",
+            "node" = i32,
+            description = "The node ID",
             example = "1",
         ),
         (
@@ -38,7 +38,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        location: GetLocation,
+        node: GetNode,
         Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -48,9 +48,9 @@ mod get {
             );
         }
 
-        let nodes = Node::by_location_id_with_pagination(
+        let servers = Server::by_node_id_with_pagination(
             &state.database,
-            location.id,
+            node.id,
             params.page,
             params.per_page,
         )
@@ -60,14 +60,14 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    nodes: Pagination {
-                        total: nodes.total,
-                        per_page: nodes.per_page,
-                        page: nodes.page,
-                        data: nodes
+                    servers: Pagination {
+                        total: servers.total,
+                        per_page: servers.per_page,
+                        page: servers.page,
+                        data: servers
                             .data
                             .into_iter()
-                            .map(|node| node.into_admin_api_object())
+                            .map(|server| server.into_admin_api_object())
                             .collect(),
                     },
                 })

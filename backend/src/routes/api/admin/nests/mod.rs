@@ -69,10 +69,7 @@ mod get {
 mod post {
     use crate::{
         models::nest::Nest,
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -104,9 +101,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -141,18 +136,16 @@ mod post {
             }
         };
 
-        user.log_activity(
-            &state.database,
-            "admin:nest.create",
-            ip,
-            auth,
-            serde_json::json!({
-                "author": nest.author,
-                "name": nest.name,
-                "description": nest.description,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:nest.create",
+                serde_json::json!({
+                    "author": nest.author,
+                    "name": nest.name,
+                    "description": nest.description,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

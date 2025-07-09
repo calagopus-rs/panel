@@ -1,17 +1,55 @@
 use super::State;
+use crate::{
+    models::location::Location,
+    routes::{ApiError, GetState},
+};
+use axum::{
+    body::Body,
+    extract::{Path, Request},
+    http::StatusCode,
+    middleware::Next,
+    response::Response,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod nodes;
+
+pub type GetLocation = crate::extract::ConsumingExtension<Location>;
+
+pub async fn auth(
+    state: GetState,
+    Path(location): Path<i32>,
+    mut req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    let location = Location::by_id(&state.database, location).await;
+    let location = match location {
+        Some(location) => location,
+        None => {
+            return Ok(Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&["location not found"])).unwrap(),
+                ))
+                .unwrap());
+        }
+    };
+
+    req.extensions_mut().insert(location);
+
+    Ok(next.run(req).await)
+}
 
 mod delete {
     use crate::{
         models::location::Location,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -30,34 +68,20 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(location): Path<i32>,
+        location: GetLocation,
+        activity_logger: GetUserActivityLogger,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let location = match Location::by_id(&state.database, location).await {
-            Some(location) => location,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["location not found"])),
-                );
-            }
-        };
-
         Location::delete_by_id(&state.database, location.id).await;
 
-        user.log_activity(
-            &state.database,
-            "admin:location.delete",
-            ip,
-            auth,
-            serde_json::json!({
-                "short_name": location.short_name,
-                "name": location.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:location.delete",
+                serde_json::json!({
+                    "short_name": location.short_name,
+                    "name": location.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -67,14 +91,11 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        models::location::Location,
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+    use crate::routes::{
+        ApiError, GetState,
+        api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
@@ -112,10 +133,8 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(location): Path<i32>,
+        mut location: GetLocation,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -124,16 +143,6 @@ mod patch {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let mut location = match Location::by_id(&state.database, location).await {
-            Some(location) => location,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["location not found"])),
-                );
-            }
-        };
 
         if let Some(name) = data.name {
             location.name = name;
@@ -187,23 +196,21 @@ mod patch {
             }
         }
 
-        let location = location.into_admin_api_object();
+        let location = location.0.into_admin_api_object();
 
-        user.log_activity(
-            &state.database,
-            "admin:location.update",
-            ip,
-            auth,
-            serde_json::json!({
-                "short_name": location.short_name,
-                "name": location.name,
-                "description": location.description,
+        activity_logger
+            .log(
+                "admin:location.update",
+                serde_json::json!({
+                    "short_name": location.short_name,
+                    "name": location.name,
+                    "description": location.description,
 
-                "backup_disk": location.backup_disk,
-                "backup_configs": location.backup_configs,
-            }),
-        )
-        .await;
+                    "backup_disk": location.backup_disk,
+                    "backup_configs": location.backup_configs,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -217,5 +224,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/nodes", nodes::router(state))
+        .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

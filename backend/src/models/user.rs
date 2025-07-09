@@ -1,5 +1,4 @@
 use super::BaseModel;
-use crate::routes::api::client::{AuthMethod, GetAuthMethod};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -131,8 +130,6 @@ impl User {
         session: &str,
     ) -> Option<(Self, super::user_session::UserSession)> {
         let (key_id, key) = session.split_once(':')?;
-        
-        
 
         let row = sqlx::query(&format!(
             r#"
@@ -285,31 +282,6 @@ impl User {
         .execute(database.write())
         .await
         .unwrap();
-    }
-
-    pub async fn log_activity(
-        &self,
-        database: &crate::database::Database,
-        event: &str,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        data: serde_json::Value,
-    ) {
-        if let Err(err) = super::user_activity::UserActivity::log(
-            database,
-            self.id,
-            match auth.0 {
-                AuthMethod::ApiKey(api_key) => Some(api_key.id),
-                _ => None,
-            },
-            event,
-            ip.0.into(),
-            data,
-        )
-        .await
-        {
-            tracing::warn!(user = self.id, "failed to log user activity: {:#?}", err);
-        }
     }
 
     pub async fn validate_password(

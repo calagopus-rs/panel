@@ -6,7 +6,7 @@ mod delete {
         models::user_api_key::UserApiKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -18,6 +18,7 @@ mod delete {
 
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = FORBIDDEN, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
@@ -28,11 +29,18 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
         auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         Path(api_key): Path<String>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if matches!(*auth, AuthMethod::ApiKey(_)) {
+            return (
+                StatusCode::FORBIDDEN,
+                axum::Json(ApiError::new_value(&["cannot delete api key with api key"])),
+            );
+        }
+
         let api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await {
             Some(api_key) => api_key,
             None => {
@@ -45,17 +53,15 @@ mod delete {
 
         UserApiKey::delete_by_id(&state.database, api_key.id).await;
 
-        user.log_activity(
-            &state.database,
-            "user:api-key.delete",
-            ip,
-            auth,
-            serde_json::json!({
-                "identifier": api_key.key_start,
-                "name": api_key.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:api-key.delete",
+                serde_json::json!({
+                    "identifier": api_key.key_start,
+                    "name": api_key.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -69,7 +75,7 @@ mod patch {
         models::user_api_key::UserApiKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -92,8 +98,9 @@ mod patch {
 
     #[utoipa::path(patch, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = ApiError),
         (status = BAD_REQUEST, body = ApiError),
+        (status = FORBIDDEN, body = ApiError),
+        (status = NOT_FOUND, body = ApiError),
         (status = CONFLICT, body = ApiError),
     ), params(
         (
@@ -104,9 +111,9 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
         auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         Path(api_key): Path<String>,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -114,6 +121,13 @@ mod patch {
             return (
                 StatusCode::BAD_REQUEST,
                 axum::Json(ApiError::new_strings_value(errors)),
+            );
+        }
+
+        if matches!(*auth, AuthMethod::ApiKey(_)) {
+            return (
+                StatusCode::FORBIDDEN,
+                axum::Json(ApiError::new_value(&["cannot update api key with api key"])),
             );
         }
 
@@ -162,18 +176,16 @@ mod patch {
             }
         }
 
-        user.log_activity(
-            &state.database,
-            "user:api-key.update",
-            ip,
-            auth,
-            serde_json::json!({
-                "identifier": api_key.key_start,
-                "name": api_key.name,
-                "permissions": api_key.permissions,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:api-key.update",
+                serde_json::json!({
+                    "identifier": api_key.key_start,
+                    "name": api_key.name,
+                    "permissions": api_key.permissions,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

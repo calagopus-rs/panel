@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod put {
     use crate::routes::{
         ApiError, GetState,
-        api::client::{GetAuthMethod, GetUser},
+        api::client::{GetUser, GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -30,9 +30,8 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -56,14 +55,9 @@ mod put {
             .await
             .unwrap();
 
-        user.log_activity(
-            &state.database,
-            "user:account.password-changed",
-            ip,
-            auth,
-            serde_json::json!({}),
-        )
-        .await;
+        activity_logger
+            .log("user:account.password-changed", serde_json::json!({}))
+            .await;
 
         (
             StatusCode::OK,

@@ -78,7 +78,7 @@ mod post {
         models::user_api_key::UserApiKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -104,19 +104,27 @@ mod post {
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
+        (status = FORBIDDEN, body = ApiError),
         (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
         auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
             return (
                 StatusCode::BAD_REQUEST,
                 axum::Json(ApiError::new_strings_value(errors)),
+            );
+        }
+
+        if matches!(*auth, AuthMethod::ApiKey(_)) {
+            return (
+                StatusCode::FORBIDDEN,
+                axum::Json(ApiError::new_value(&["cannot create api key with api key"])),
             );
         }
 
@@ -145,18 +153,16 @@ mod post {
             }
         };
 
-        user.log_activity(
-            &state.database,
-            "user:api-key.create",
-            ip,
-            auth,
-            serde_json::json!({
-                "identifier": api_key.key_start,
-                "name": api_key.name,
-                "permissions": api_key.permissions,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:api-key.create",
+                serde_json::json!({
+                    "identifier": api_key.key_start,
+                    "name": api_key.name,
+                    "permissions": api_key.permissions,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

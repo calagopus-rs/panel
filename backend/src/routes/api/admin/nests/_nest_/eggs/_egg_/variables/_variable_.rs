@@ -3,10 +3,13 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
     use crate::{
-        models::{nest::Nest, nest_egg::NestEgg, nest_egg_variable::NestEggVariable},
+        models::nest_egg_variable::NestEggVariable,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{
+                admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                client::GetUserActivityLogger,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -38,31 +41,11 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path((nest, egg, variable)): Path<(i32, i32, i32)>,
+        nest: GetNest,
+        egg: GetNestEgg,
+        activity_logger: GetUserActivityLogger,
+        Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let nest = match Nest::by_id(&state.database, nest).await {
-            Some(nest) => nest,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["nest not found"])),
-                );
-            }
-        };
-
-        let egg = match NestEgg::by_nest_id_id(&state.database, nest.id, egg).await {
-            Some(egg) => egg,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["egg not found"])),
-                );
-            }
-        };
-
         let egg_variable =
             match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await {
                 Some(variable) => variable,
@@ -76,20 +59,18 @@ mod delete {
 
         NestEggVariable::delete_by_id(&state.database, egg_variable.id).await;
 
-        user.log_activity(
-            &state.database,
-            "admin:egg.delete-variable",
-            ip,
-            auth,
-            serde_json::json!({
-                "nest": nest.name,
-                "egg": egg.name,
+        activity_logger
+            .log(
+                "admin:egg.delete-variable",
+                serde_json::json!({
+                    "nest": nest.name,
+                    "egg": egg.name,
 
-                "name": egg_variable.name,
-                "env_variable": egg_variable.env_variable,
-            }),
-        )
-        .await;
+                    "name": egg_variable.name,
+                    "env_variable": egg_variable.env_variable,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -100,10 +81,13 @@ mod delete {
 
 mod patch {
     use crate::{
-        models::{nest::Nest, nest_egg::NestEgg, nest_egg_variable::NestEggVariable},
+        models::nest_egg_variable::NestEggVariable,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{
+                admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                client::GetUserActivityLogger,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -161,10 +145,10 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path((nest, egg, variable)): Path<(i32, i32, i32)>,
+        nest: GetNest,
+        egg: GetNestEgg,
+        activity_logger: GetUserActivityLogger,
+        Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -173,26 +157,6 @@ mod patch {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let nest = match Nest::by_id(&state.database, nest).await {
-            Some(nest) => nest,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["nest not found"])),
-                );
-            }
-        };
-
-        let egg = match NestEgg::by_nest_id_id(&state.database, nest.id, egg).await {
-            Some(egg) => egg,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["egg not found"])),
-                );
-            }
-        };
 
         let mut egg_variable =
             match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await {
@@ -274,28 +238,26 @@ mod patch {
             }
         }
 
-        user.log_activity(
-            &state.database,
-            "admin:egg.update-variable",
-            ip,
-            auth,
-            serde_json::json!({
-                "nest": nest.name,
-                "egg": egg.name,
+        activity_logger
+            .log(
+                "admin:egg.update-variable",
+                serde_json::json!({
+                    "nest": nest.name,
+                    "egg": egg.name,
 
-                "name": egg_variable.name,
-                "description": egg_variable.description,
-                "order": egg_variable.order,
+                    "name": egg_variable.name,
+                    "description": egg_variable.description,
+                    "order": egg_variable.order,
 
-                "env_variable": egg_variable.env_variable,
-                "default_value": egg_variable.default_value,
+                    "env_variable": egg_variable.env_variable,
+                    "default_value": egg_variable.default_value,
 
-                "user_viewable": egg_variable.user_viewable,
-                "user_editable": egg_variable.user_editable,
-                "rules": egg_variable.rules,
-            }),
-        )
-        .await;
+                    "user_viewable": egg_variable.user_viewable,
+                    "user_editable": egg_variable.user_editable,
+                    "rules": egg_variable.rules,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

@@ -2,14 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::server_backup::ServerBackup,
-        routes::{
-            ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::routes::{
+        ApiError, GetState,
+        api::client::servers::_server_::{
+            GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -42,7 +41,7 @@ mod post {
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, backup)): Path<(String, uuid::Uuid)>,
+        backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(error) = server.has_permission("backups.restore") {
@@ -51,17 +50,6 @@ mod post {
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
-
-        let backup = match ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await
-        {
-            Some(backup) => backup,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["backup not found"])),
-                );
-            }
-        };
 
         if backup.completed.is_none() {
             return (

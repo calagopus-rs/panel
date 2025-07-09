@@ -6,7 +6,7 @@ mod delete {
         models::user_ssh_key::UserSshKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -28,9 +28,8 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<String>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         let ssh_key = match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await {
@@ -45,17 +44,15 @@ mod delete {
 
         UserSshKey::delete_by_id(&state.database, ssh_key.id).await;
 
-        user.log_activity(
-            &state.database,
-            "user:ssh-key.delete",
-            ip,
-            auth,
-            serde_json::json!({
-                "fingerprint": ssh_key.fingerprint,
-                "name": ssh_key.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:ssh-key.delete",
+                serde_json::json!({
+                    "fingerprint": ssh_key.fingerprint,
+                    "name": ssh_key.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -69,7 +66,7 @@ mod patch {
         models::user_ssh_key::UserSshKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -101,9 +98,8 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<String>,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -156,17 +152,15 @@ mod patch {
             }
         }
 
-        user.log_activity(
-            &state.database,
-            "user:ssh-key.update",
-            ip,
-            auth,
-            serde_json::json!({
-                "fingerprint": ssh_key.fingerprint,
-                "name": ssh_key.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:ssh-key.update",
+                serde_json::json!({
+                    "fingerprint": ssh_key.fingerprint,
+                    "name": ssh_key.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

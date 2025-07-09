@@ -4,16 +4,17 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         jwt::BasePayload,
-        models::server_backup::ServerBackup,
         routes::{
             ApiError, GetState,
             api::client::{
                 GetUser,
-                servers::_server_::{GetServer, GetServerActivityLogger},
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+                },
             },
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -44,7 +45,7 @@ mod get {
         user: GetUser,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, backup)): Path<(String, uuid::Uuid)>,
+        backup: GetServerBackup,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(error) = server.has_permission("backups.download") {
             return (
@@ -52,17 +53,6 @@ mod get {
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
-
-        let backup = match ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await
-        {
-            Some(backup) => backup,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["backup not found"])),
-                );
-            }
-        };
 
         if backup.completed.is_none() {
             return (

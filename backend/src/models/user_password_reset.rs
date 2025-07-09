@@ -62,6 +62,7 @@ impl UserPasswordReset {
         .bind(user_id)
         .fetch_optional(database.read())
         .await?;
+
         if let Some(row) = existing {
             if row.get::<i64, _>(0) > 0 {
                 return Err(sqlx::Error::RowNotFound);

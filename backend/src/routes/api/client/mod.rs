@@ -1,6 +1,7 @@
 use super::{ApiError, GetState, State};
 use crate::models::{user::User, user_api_key::UserApiKey, user_session::UserSession};
 use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
+use std::sync::Arc;
 use tower_cookies::{Cookie, Cookies};
 use utoipa_axum::router::OpenApiRouter;
 
@@ -16,6 +17,36 @@ pub enum AuthMethod {
 
 pub type GetUser = crate::extract::ConsumingExtension<User>;
 pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
+pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivityLogger>;
+
+#[derive(Clone)]
+pub struct UserActivityLogger {
+    state: State,
+    user_id: i32,
+    api_key_id: Option<i32>,
+    ip: std::net::IpAddr,
+}
+
+impl UserActivityLogger {
+    pub async fn log(&self, event: &str, data: serde_json::Value) {
+        if let Err(err) = crate::models::user_activity::UserActivity::log(
+            &self.state.database,
+            self.user_id,
+            self.api_key_id,
+            event,
+            self.ip.into(),
+            data,
+        )
+        .await
+        {
+            tracing::warn!(
+                user = self.user_id,
+                "failed to log user activity: {:#?}",
+                err
+            );
+        }
+    }
+}
 
 pub async fn auth(
     state: GetState,
@@ -91,6 +122,12 @@ pub async fn auth(
                 .build(),
         );
 
+        req.extensions_mut().insert(UserActivityLogger {
+            state: Arc::clone(&state),
+            user_id: user.id,
+            api_key_id: None,
+            ip: ip.0,
+        });
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::Session(session));
     } else if let Some(api_token) = req.headers().get("Authorization") {
@@ -144,6 +181,12 @@ pub async fn auth(
             }
         });
 
+        req.extensions_mut().insert(UserActivityLogger {
+            state: Arc::clone(&state),
+            user_id: user.id,
+            api_key_id: Some(api_key.id),
+            ip: ip.0,
+        });
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::ApiKey(api_key));
     } else {

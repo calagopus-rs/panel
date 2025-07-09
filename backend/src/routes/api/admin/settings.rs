@@ -32,10 +32,7 @@ mod get {
 }
 
 mod put {
-    use crate::routes::{
-        GetState,
-        api::client::{GetAuthMethod, GetUser},
-    };
+    use crate::routes::{GetState, api::client::GetUserActivityLogger};
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -75,9 +72,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         let mut settings = state.settings.get_mut().await;
@@ -124,14 +119,9 @@ mod put {
         let settings_json = serde_json::to_value(&*settings).unwrap();
         settings.save().await.unwrap();
 
-        user.log_activity(
-            &state.database,
-            "admin:settings.update",
-            ip,
-            auth,
-            settings_json,
-        )
-        .await;
+        activity_logger
+            .log("admin:settings.update", settings_json)
+            .await;
 
         (
             StatusCode::OK,

@@ -170,7 +170,11 @@ impl Server {
     #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
-        node_id: i32,
+        external_id: Option<String>,
+        allocation_id: Option<i32>,
+        allocation_ids: &[i32],
+        start_on_completion: bool,
+        node: &super::node::Node,
         owner_id: i32,
         egg_id: i32,
         name: &str,
@@ -187,6 +191,7 @@ impl Server {
         database_limit: i32,
         backup_limit: i32,
     ) -> Result<(i32, uuid::Uuid), sqlx::Error> {
+        let mut transaction = database.write().begin().await?;
         let mut attempts = 0;
 
         loop {
@@ -198,6 +203,8 @@ impl Server {
                 INSERT INTO servers (
                     uuid,
                     uuid_short,
+                    external_id,
+                    allocation_id,
                     node_id,
                     owner_id,
                     egg_id,
@@ -216,16 +223,18 @@ impl Server {
                     backup_limit
                 )
                 VALUES (
-                    $1, $2, $3, $4, $5, $6,
-                    $7, $8, $9, $10, $11, $12,
-                    $13, $14, $15, $16, $17, $18
+                    $1, $2, $3, $4, $5, $6, $7, $8,
+                    $9, $10, $11, $12, $13, $14,
+                    $15, $16, $17, $18, $19, $20
                 )
                 RETURNING id, uuid
                 "#,
             )
             .bind(uuid)
             .bind(uuid_short)
-            .bind(node_id)
+            .bind(external_id.as_deref())
+            .bind(allocation_id)
+            .bind(node.id)
             .bind(owner_id)
             .bind(egg_id)
             .bind(name)
@@ -241,16 +250,63 @@ impl Server {
             .bind(allocation_limit)
             .bind(database_limit)
             .bind(backup_limit)
-            .fetch_one(database.write())
+            .fetch_one(&mut *transaction)
             .await
             {
-                Ok(row) => return Ok((row.get("id"), row.get("uuid"))),
+                Ok(row) => {
+                    let id: i32 = row.get("id");
+
+                    if let Some(allocation_id) = allocation_id {
+                        sqlx::query(
+                            r#"
+                            INSERT INTO server_allocations (server_id, allocation_id)
+                            VALUES ($1, $2)
+                            "#,
+                        )
+                        .bind(id)
+                        .bind(allocation_id)
+                        .execute(&mut *transaction)
+                        .await?;
+                    }
+
+                    for allocation_id in allocation_ids {
+                        sqlx::query(
+                            r#"
+                            INSERT INTO server_allocations (server_id, allocation_id)
+                            VALUES ($1, $2)
+                            "#,
+                        )
+                        .bind(id)
+                        .bind(allocation_id)
+                        .execute(&mut *transaction)
+                        .await?;
+                    }
+
+                    if let Err(err) = node
+                        .api_client(database)
+                        .post_servers(&wings_api::servers::post::RequestBody {
+                            uuid,
+                            start_on_completion,
+                        })
+                        .await
+                    {
+                        tracing::error!(server = %uuid, node = %node.uuid, "failed to create server: {:#?}", err);
+                        transaction.rollback().await?;
+
+                        return Err(sqlx::Error::Io(std::io::Error::other(err.1.error)));
+                    }
+
+                    transaction.commit().await?;
+
+                    return Ok((id, row.get("uuid")));
+                }
                 Err(err) => {
                     if attempts >= 8 {
                         tracing::error!(
                             "failed to create server after 8 attempts, giving up: {:#?}",
                             err
                         );
+                        transaction.rollback().await?;
 
                         return Err(err);
                     }
@@ -322,6 +378,40 @@ impl Server {
         .fetch_optional(database.read())
         .await
         .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_identifier(
+        database: &crate::database::Database,
+        identifier: &str,
+    ) -> Option<Self> {
+        let query = format!(
+            r#"
+            SELECT {}, {}, {}, {}, {}
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
+            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            WHERE servers.id = $1 OR servers.uuid = $2
+            "#,
+            Self::columns_sql(None, None),
+            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
+            super::node::Node::columns_sql(Some("node_"), None),
+            super::user::User::columns_sql(Some("owner_"), None),
+            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+        );
+
+        let mut row = sqlx::query(&query).bind(identifier.parse::<i32>().ok()?);
+        row = match identifier.len() {
+            8 => row.bind(u32::from_str_radix(identifier, 16).ok()? as i32),
+            36 => row.bind(uuid::Uuid::parse_str(identifier).ok()?),
+            _ => row.bind(identifier.parse::<i32>().ok()?),
+        };
+        let row = row.fetch_optional(database.read()).await.unwrap();
 
         row.map(|row| Self::map(None, &row))
     }
@@ -609,9 +699,9 @@ impl Server {
                 override_builder.add(file).ok();
             }
 
-            override_builder.build().is_ok_and(|overrides| {
-                overrides.matched(path, is_dir).is_whitelist()
-            })
+            override_builder
+                .build()
+                .is_ok_and(|overrides| overrides.matched(path, is_dir).is_whitelist())
         } else {
             false
         }

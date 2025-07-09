@@ -69,7 +69,7 @@ mod post {
         models::user_recovery_code::UserRecoveryCode,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -100,9 +100,8 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if user.totp_enabled {
@@ -173,14 +172,9 @@ mod post {
         .await
         .unwrap();
 
-        user.log_activity(
-            &state.database,
-            "user:account.two-factor.enable",
-            ip,
-            auth,
-            serde_json::json!({}),
-        )
-        .await;
+        activity_logger
+            .log("user:account.two-factor.enable", serde_json::json!({}))
+            .await;
 
         (
             StatusCode::OK,
@@ -194,7 +188,7 @@ mod delete {
         models::user_recovery_code::UserRecoveryCode,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -223,9 +217,8 @@ mod delete {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         mut user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if !user.totp_enabled {
@@ -303,14 +296,9 @@ mod delete {
         .await
         .unwrap();
 
-        user.log_activity(
-            &state.database,
-            "user:account.two-factor.disable",
-            ip,
-            auth,
-            serde_json::json!({}),
-        )
-        .await;
+        activity_logger
+            .log("user:account.two-factor.disable", serde_json::json!({}))
+            .await;
 
         (
             StatusCode::OK,

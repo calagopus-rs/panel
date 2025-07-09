@@ -69,10 +69,7 @@ mod get {
 mod post {
     use crate::{
         models::{location::Location, node::Node},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -119,9 +116,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -173,26 +168,24 @@ mod post {
             }
         };
 
-        user.log_activity(
-            &state.database,
-            "admin:node.create",
-            ip,
-            auth,
-            serde_json::json!({
-                "name": node.name,
-                "public": node.public,
-                "description": node.description,
-                "public_url": node.public_url,
-                "url": node.url,
-                "sftp_host": node.sftp_host,
-                "sftp_port": node.sftp_port,
-                "memory": node.memory,
-                "disk": node.disk,
+        activity_logger
+            .log(
+                "admin:node.create",
+                serde_json::json!({
+                    "name": node.name,
+                    "public": node.public,
+                    "description": node.description,
+                    "public_url": node.public_url,
+                    "url": node.url,
+                    "sftp_host": node.sftp_host,
+                    "sftp_port": node.sftp_port,
+                    "memory": node.memory,
+                    "disk": node.disk,
 
-                "location_id": node.location.id,
-            }),
-        )
-        .await;
+                    "location_id": node.location.id,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

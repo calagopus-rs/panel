@@ -4,16 +4,15 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::{
-            nest::Nest,
             nest_egg::{NestEgg, NestEggConfigScript},
             nest_egg_variable::NestEggVariable,
         },
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use indexmap::IndexMap;
     use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
@@ -97,10 +96,8 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(nest): Path<i32>,
+        nest: GetNest,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -109,16 +106,6 @@ mod post {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let nest = match Nest::by_id(&state.database, nest).await {
-            Some(nest) => nest,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["nest not found"])),
-                );
-            }
-        };
 
         let config_files =
             serde_json::from_str(data.config.get("files").unwrap_or(&"[]".to_string()))
@@ -200,32 +187,30 @@ mod post {
             .ok();
         }
 
-        user.log_activity(
-            &state.database,
-            "admin:egg.import",
-            ip,
-            auth,
-            serde_json::json!({
-                "nest": nest.name,
+        activity_logger
+            .log(
+                "admin:egg.import",
+                serde_json::json!({
+                    "nest": nest.name,
 
-                "author": egg.author,
-                "name": egg.name,
-                "description": egg.description,
+                    "author": egg.author,
+                    "name": egg.name,
+                    "description": egg.description,
 
-                "config_files": egg.config_files,
-                "config_startup": egg.config_startup,
-                "config_stop": egg.config_stop,
-                "config_script": egg.config_script,
+                    "config_files": egg.config_files,
+                    "config_startup": egg.config_startup,
+                    "config_stop": egg.config_stop,
+                    "config_script": egg.config_script,
 
-                "startup": egg.startup,
-                "force_outgoing_ip": egg.force_outgoing_ip,
+                    "startup": egg.startup,
+                    "force_outgoing_ip": egg.force_outgoing_ip,
 
-                "features": egg.features,
-                "docker_images": egg.docker_images,
-                "file_denylist": egg.file_denylist,
-            }),
-        )
-        .await;
+                    "features": egg.features,
+                    "docker_images": egg.docker_images,
+                    "file_denylist": egg.file_denylist,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

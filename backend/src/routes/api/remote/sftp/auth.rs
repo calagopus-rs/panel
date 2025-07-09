@@ -112,10 +112,7 @@ mod post {
                     user: user.to_uuid(),
                     server: server.uuid,
                     permissions: server.wings_permissions(&user),
-                    ignored_files: server
-                        .subuser_ignored_files
-                        .as_deref()
-                        .unwrap_or(&[]),
+                    ignored_files: server.subuser_ignored_files.as_deref().unwrap_or(&[]),
                 })
                 .unwrap(),
             ),

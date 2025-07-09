@@ -70,10 +70,7 @@ mod get {
 mod post {
     use crate::{
         models::location::Location,
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -108,9 +105,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -149,21 +144,19 @@ mod post {
 
         let location = location.into_admin_api_object();
 
-        user.log_activity(
-            &state.database,
-            "admin:location.create",
-            ip,
-            auth,
-            serde_json::json!({
-                "short_name": location.short_name,
-                "name": location.name,
-                "description": location.description,
+        activity_logger
+            .log(
+                "admin:location.create",
+                serde_json::json!({
+                    "short_name": location.short_name,
+                    "name": location.name,
+                    "description": location.description,
 
-                "backup_disk": location.backup_disk,
-                "backup_configs": location.backup_configs,
-            }),
-        )
-        .await;
+                    "backup_disk": location.backup_disk,
+                    "backup_configs": location.backup_configs,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

@@ -1,17 +1,68 @@
 use super::State;
+use crate::{
+    models::nest::Nest,
+    routes::{ApiError, GetState},
+};
+use axum::{
+    body::Body,
+    extract::{Path, Request},
+    http::StatusCode,
+    middleware::Next,
+    response::Response,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod eggs;
+
+pub type GetNest = crate::extract::ConsumingExtension<Nest>;
+
+pub async fn auth(
+    state: GetState,
+    Path(nest): Path<Vec<String>>,
+    mut req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    let nest = match nest.first().map(|s| s.parse::<i32>()) {
+        Some(Ok(id)) => id,
+        _ => {
+            return Ok(Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&["invalid nest id"])).unwrap(),
+                ))
+                .unwrap());
+        }
+    };
+
+    let nest = Nest::by_id(&state.database, nest).await;
+    let nest = match nest {
+        Some(nest) => nest,
+        None => {
+            return Ok(Response::builder()
+                .status(StatusCode::NOT_FOUND)
+                .header("Content-Type", "application/json")
+                .body(Body::from(
+                    serde_json::to_string(&ApiError::new_value(&["nest not found"])).unwrap(),
+                ))
+                .unwrap());
+        }
+    };
+
+    req.extensions_mut().insert(nest);
+
+    Ok(next.run(req).await)
+}
 
 mod delete {
     use crate::{
         models::nest::Nest,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -30,34 +81,20 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(nest): Path<i32>,
+        nest: GetNest,
+        activity_logger: GetUserActivityLogger,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let nest = match Nest::by_id(&state.database, nest).await {
-            Some(nest) => nest,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["nest not found"])),
-                );
-            }
-        };
-
         Nest::delete_by_id(&state.database, nest.id).await;
 
-        user.log_activity(
-            &state.database,
-            "admin:nest.delete",
-            ip,
-            auth,
-            serde_json::json!({
-                "author": nest.author,
-                "name": nest.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:nest.delete",
+                serde_json::json!({
+                    "author": nest.author,
+                    "name": nest.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -67,14 +104,11 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        models::nest::Nest,
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+    use crate::routes::{
+        ApiError, GetState,
+        api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
@@ -110,10 +144,8 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(nest): Path<i32>,
+        mut nest: GetNest,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -122,16 +154,6 @@ mod patch {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let mut nest = match Nest::by_id(&state.database, nest).await {
-            Some(nest) => nest,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["nest not found"])),
-                );
-            }
-        };
 
         if let Some(name) = data.name {
             nest.name = name;
@@ -176,18 +198,16 @@ mod patch {
             }
         }
 
-        user.log_activity(
-            &state.database,
-            "admin:nest.update",
-            ip,
-            auth,
-            serde_json::json!({
-                "author": nest.author,
-                "name": nest.name,
-                "description": nest.description,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:nest.update",
+                serde_json::json!({
+                    "author": nest.author,
+                    "name": nest.name,
+                    "description": nest.description,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -201,5 +221,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/eggs", eggs::router(state))
+        .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

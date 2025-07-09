@@ -40,7 +40,10 @@ impl BaseModel for ServerActivity {
 
         Self {
             id: row.get(format!("{prefix}id").as_str()),
-            user: if row.try_get::<i32, _>("user_id".to_string().as_str()).is_ok() {
+            user: if row
+                .try_get::<i32, _>("user_id".to_string().as_str())
+                .is_ok()
+            {
                 Some(super::user::User::map(Some("user_"), row))
             } else {
                 None

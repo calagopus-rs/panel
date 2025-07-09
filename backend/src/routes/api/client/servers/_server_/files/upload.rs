@@ -71,10 +71,7 @@ mod get {
                     server_uuid: server.uuid,
                     user_uuid: user.to_uuid(),
                     unique_id: uuid::Uuid::new_v4(),
-                    ignored_files: server
-                        .subuser_ignored_files
-                        .as_deref()
-                        .unwrap_or(&[]),
+                    ignored_files: server.subuser_ignored_files.as_deref().unwrap_or(&[]),
                 },
             )
             .unwrap();

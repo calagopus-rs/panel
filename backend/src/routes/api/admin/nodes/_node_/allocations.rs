@@ -3,13 +3,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, node::Node, node_allocation::NodeAllocation},
-        routes::{ApiError, GetState},
+        models::{Pagination, PaginationParams, node_allocation::NodeAllocation},
+        routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
     };
-    use axum::{
-        extract::{Path, Query},
-        http::StatusCode,
-    };
+    use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -41,8 +38,8 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        node: GetNode,
         Query(params): Query<PaginationParams>,
-        Path(node): Path<i32>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (
@@ -50,16 +47,6 @@ mod get {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let node = match Node::by_id(&state.database, node).await {
-            Some(node) => node,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["node not found"])),
-                );
-            }
-        };
 
         let allocations = NodeAllocation::by_node_id_with_pagination(
             &state.database,
@@ -92,13 +79,13 @@ mod get {
 
 mod delete {
     use crate::{
-        models::{node::Node, node_allocation::NodeAllocation},
+        models::node_allocation::NodeAllocation,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -122,35 +109,21 @@ mod delete {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(node): Path<i32>,
+        node: GetNode,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let node = match Node::by_id(&state.database, node).await {
-            Some(node) => node,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["node not found"])),
-                );
-            }
-        };
-
         NodeAllocation::delete_by_ids(&state.database, &data.ids).await;
 
-        user.log_activity(
-            &state.database,
-            "admin:node.delete-allocations",
-            ip,
-            auth,
-            serde_json::json!({
-                "name": node.name,
-                "ids": data.ids
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:node.delete-allocations",
+                serde_json::json!({
+                    "name": node.name,
+                    "ids": data.ids
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
@@ -161,13 +134,13 @@ mod delete {
 
 mod put {
     use crate::{
-        models::{node::Node, node_allocation::NodeAllocation},
+        models::node_allocation::NodeAllocation,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
@@ -197,10 +170,8 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
-        user: GetUser,
-        Path(node): Path<i32>,
+        node: GetNode,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -209,16 +180,6 @@ mod put {
                 axum::Json(ApiError::new_strings_value(errors)),
             );
         }
-
-        let node = match Node::by_id(&state.database, node).await {
-            Some(node) => node,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["node not found"])),
-                );
-            }
-        };
 
         let allocation_ip = data.ip.into();
         let mut promises = Vec::new();
@@ -241,19 +202,17 @@ mod put {
         let results = futures_util::future::join_all(promises).await;
         let created = results.iter().filter(|r| **r).count();
 
-        user.log_activity(
-            &state.database,
-            "admin:node.create-allocations",
-            ip,
-            auth,
-            serde_json::json!({
-                "name": node.name,
-                "ip": allocation_ip,
-                "ip_alias": data.ip_alias,
-                "ports": data.ports,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "admin:node.create-allocations",
+                serde_json::json!({
+                    "name": node.name,
+                    "ip": allocation_ip,
+                    "ip_alias": data.ip_alias,
+                    "ports": data.ports,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,

@@ -78,7 +78,7 @@ mod post {
         models::user_ssh_key::UserSshKey,
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -107,9 +107,8 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
-        auth: GetAuthMethod,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -150,17 +149,15 @@ mod post {
                 }
             };
 
-        user.log_activity(
-            &state.database,
-            "user:ssh-key.create",
-            ip,
-            auth,
-            serde_json::json!({
-                "fingerprint": ssh_key.fingerprint,
-                "name": ssh_key.name,
-            }),
-        )
-        .await;
+        activity_logger
+            .log(
+                "user:ssh-key.create",
+                serde_json::json!({
+                    "fingerprint": ssh_key.fingerprint,
+                    "name": ssh_key.name,
+                }),
+            )
+            .await;
 
         (
             StatusCode::OK,
