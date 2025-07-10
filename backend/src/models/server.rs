@@ -50,7 +50,7 @@ pub struct Server {
     pub subuser_permissions: Option<Vec<String>>,
     pub subuser_ignored_files: Option<Vec<String>>,
     #[serde(skip_serializing, skip_deserializing)]
-    subuser_ignored_files_overrides: Option<ignore::overrides::Override>,
+    subuser_ignored_files_overrides: Option<Box<ignore::overrides::Override>>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -699,12 +699,15 @@ impl Server {
                 override_builder.add(file).ok();
             }
 
-            override_builder
-                .build()
-                .is_ok_and(|overrides| overrides.matched(path, is_dir).is_whitelist())
-        } else {
-            false
+            if let Ok(override_builder) = override_builder.build() {
+                let ignored = override_builder.matched(path, is_dir).is_whitelist();
+                self.subuser_ignored_files_overrides = Some(Box::new(override_builder));
+
+                return ignored;
+            }
         }
+
+        false
     }
 
     #[inline]
