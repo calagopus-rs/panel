@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
 export interface TwoFactorSetupResponse {
-  otp_url: string;
+  otpUrl: string;
   secret: string;
 }
 
@@ -74,7 +74,7 @@ export default () => {
             ) : (
               <div className="flex flex-col items-center justify-center my-4">
                 <div className="flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow">
-                  <QRCode title="QR Code" value={token.otp_url} />
+                  <QRCode title="QR Code" value={token.otpUrl} />
                 </div>
                 <div className="mt-2">
                   <CopyOnClick content={token.secret}>
