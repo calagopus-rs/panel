@@ -24,6 +24,7 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
+        #[schema(inline)]
         data: Vec<PayloadActivity>,
     }
 

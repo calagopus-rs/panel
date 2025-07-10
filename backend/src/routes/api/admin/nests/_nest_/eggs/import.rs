@@ -42,6 +42,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadScripts {
+        #[schema(inline)]
         installation: NestEggConfigScript,
     }
 

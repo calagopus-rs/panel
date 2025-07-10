@@ -23,6 +23,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         data: Vec<crate::models::server::RemoteApiServer>,
+        #[schema(inline)]
         meta: ResponseMeta,
     }
 

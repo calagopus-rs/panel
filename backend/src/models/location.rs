@@ -61,6 +61,7 @@ impl LocationBackupConfigsS3 {
 #[derive(ToSchema, Serialize, Deserialize, Default, Clone)]
 pub struct LocationBackupConfigs {
     #[serde(default)]
+    #[schema(inline)]
     pub s3: Option<LocationBackupConfigsS3>,
 }
 

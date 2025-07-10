@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_subusers\n            SET permissions = $1, ignored_files = $2\n            WHERE server_subusers.server_id = $3 AND server_subusers.user_id = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "VarcharArray",
+        "TextArray",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4bc6d9c5a1edcc1701af0f261e96daf91962f80dd8e104dd294d3c949b21ce1f"
+}

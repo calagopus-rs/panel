@@ -244,6 +244,7 @@ mod post {
         pub checksum_type: String,
         pub size: u64,
         pub successful: bool,
+        #[schema(inline)]
         pub parts: Vec<PayloadPart>,
     }
 
