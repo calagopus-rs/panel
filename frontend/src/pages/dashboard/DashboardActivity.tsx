@@ -1,4 +1,5 @@
 import getUserActivity from '@/api/me/getUserActivity';
+import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
@@ -45,6 +46,7 @@ export default () => {
                     <TableHeader name="Event" />
                     <TableHeader name="IP" />
                     <TableHeader name="When" />
+                    <TableHeader />
                   </TableHead>
 
                   <TableBody>
@@ -66,6 +68,10 @@ export default () => {
                           <Tooltip content={formatDateTime(activity.created)}>
                             {formatTimestamp(activity.created)}
                           </Tooltip>
+                        </td>
+
+                        <td className="relative">
+                          {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
                         </td>
                       </TableRow>
                     ))}

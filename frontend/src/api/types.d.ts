@@ -93,7 +93,7 @@ interface ServerActivity {
   user: User;
   event: string;
   ip: string;
-  data: any;
+  data: Object | null;
   isApi: boolean;
   created: Date;
 }
@@ -129,7 +129,7 @@ interface UserActivity {
   id: number;
   event: string;
   ip: string;
-  data: null;
+  data: Object | null;
   isApi: boolean;
   created: Date;
 }
