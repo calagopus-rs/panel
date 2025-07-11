@@ -351,6 +351,30 @@ impl<'a> SettingsGuard<'a> {
 
         Ok(())
     }
+
+    pub fn censored(&self) -> serde_json::Value {
+        let mut json = serde_json::to_value(&*self.settings).unwrap();
+
+        fn censor_values(key: &str, value: &mut serde_json::Value) {
+            match value {
+                serde_json::Value::Object(map) => {
+                    for (k, v) in map.iter_mut() {
+                        censor_values(k, v);
+                    }
+                }
+                serde_json::Value::String(s) => {
+                    if key.contains("password") {
+                        *s = "*".repeat(s.len());
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        censor_values("", &mut json);
+
+        json
+    }
 }
 
 impl Deref for SettingsGuard<'_> {

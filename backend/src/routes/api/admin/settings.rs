@@ -116,7 +116,7 @@ mod put {
             }
         }
 
-        let settings_json = serde_json::to_value(&*settings).unwrap();
+        let settings_json = settings.censored();
         settings.save().await.unwrap();
 
         activity_logger
