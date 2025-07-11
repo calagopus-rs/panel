@@ -12,6 +12,7 @@ import createDirectory from '@/api/server/files/createDirectory';
 import { join } from 'pathe';
 import Spinner from '@/elements/Spinner';
 import { getEmptyPaginationSet } from '@/api/axios';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const params = useParams<'path'>();
@@ -96,13 +97,16 @@ export default () => {
                   <TableHeader name="Name" />
                   <TableHeader name="Size" />
                   <TableHeader name="Modified" />
+                  <TableHeader />
                 </TableHead>
 
-                <TableBody>
-                  {sortFiles().map(file => (
-                    <FileRow key={file.name} file={file} />
-                  ))}
-                </TableBody>
+                <ContextMenuProvider>
+                  <TableBody>
+                    {sortFiles().map(file => (
+                      <FileRow key={file.name} file={file} />
+                    ))}
+                  </TableBody>
+                </ContextMenuProvider>
               </table>
 
               {loading ? <Spinner.Centered /> : fileList.data.length === 0 ? <NoItems /> : null}

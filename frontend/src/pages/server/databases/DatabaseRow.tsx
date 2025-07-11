@@ -43,7 +43,6 @@ export default ({ database }: { database: any }) => {
       />
 
       <ContextMenu
-        key={database.id}
         items={[
           { icon: faEye, label: 'Details', onClick: () => setOpenDialog('details'), color: 'gray' },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },

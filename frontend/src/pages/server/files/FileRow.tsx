@@ -1,3 +1,4 @@
+import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
 import Tooltip from '@/elements/Tooltip';
@@ -5,20 +6,38 @@ import { isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
-import { faFolder, faFile } from '@fortawesome/free-solid-svg-icons';
+import {
+  faFolder,
+  faFile,
+  faPencil,
+  faTrash,
+  faAnglesUp,
+  faArchive,
+  faFileShield,
+  faEllipsis,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
-function FileTableRow({ file, children }: { file: DirectoryEntry; children: React.ReactNode }) {
+function FileTableRow({
+  file,
+  onContextMenu,
+  children,
+}: {
+  file: DirectoryEntry;
+  onContextMenu: (e: any) => void;
+  children: React.ReactNode;
+}) {
   const navigate = useNavigate();
-
   const server = useServerStore(state => state.server);
   const { browsingDirectory } = useServerStore();
 
   return isEditableFile(file.mime) || file.directory ? (
     <TableRow
       className="cursor-pointer"
+      onContextMenu={onContextMenu}
       onClick={() => {
         navigate(
           `/server/${server.uuidShort}/files/${file.file ? 'edit' : 'directory'}/${encodeURIComponent(
@@ -36,6 +55,8 @@ function FileTableRow({ file, children }: { file: DirectoryEntry; children: Reac
 
 export default ({ file }: { file: DirectoryEntry }) => {
   const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore();
+
+  const [openDialog, setOpenDialog] = useState<'rename' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (
@@ -58,25 +79,57 @@ export default ({ file }: { file: DirectoryEntry }) => {
   };
 
   return (
-    <FileTableRow file={file}>
-      <td className="pl-6">
-        <RowCheckbox id={file.name} />
-      </td>
+    <>
+      <ContextMenu
+        items={[
+          { icon: faPencil, label: 'Rename', onClick: () => setOpenDialog('rename'), color: 'gray' },
+          { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
+          { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
+          { icon: faArchive, label: 'Archive', onClick: () => setOpenDialog('archive'), color: 'gray' },
+          { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
+        ]}
+      >
+        {({ openMenu }) => (
+          <FileTableRow
+            file={file}
+            onContextMenu={e => {
+              e.preventDefault();
+              openMenu(e.pageX, e.pageY);
+            }}
+          >
+            <td className="pl-6">
+              <RowCheckbox id={file.name} />
+            </td>
 
-      <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap" title={file.name}>
-        {file.file ? (
-          <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFile} />
-        ) : (
-          <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFolder} />
+            <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap" title={file.name}>
+              {file.file ? (
+                <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFile} />
+              ) : (
+                <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFolder} />
+              )}
+              {file.name}
+            </td>
+
+            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{bytesToString(file.size)}</td>
+
+            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+              <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
+            </td>
+
+            <td className="relative">
+              <FontAwesomeIcon
+                icon={faEllipsis}
+                className="cursor-pointer"
+                onClick={e => {
+                  e.stopPropagation();
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  openMenu(rect.left, rect.bottom);
+                }}
+              />
+            </td>
+          </FileTableRow>
         )}
-        {file.name}
-      </td>
-
-      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{bytesToString(file.size)}</td>
-
-      <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-        <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
-      </td>
-    </FileTableRow>
+      </ContextMenu>
+    </>
   );
 };

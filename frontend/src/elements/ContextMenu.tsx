@@ -63,7 +63,7 @@ export const ContextMenuProvider = ({ children }) => {
             {state.visible && (
               <motion.ul
                 ref={menuRef}
-                className="p-2 absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-40"
+                className="p-2 absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-fit"
                 style={{ top: state.y, left: state.x }}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
