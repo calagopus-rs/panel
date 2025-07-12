@@ -96,10 +96,10 @@ mod get {
             .await
         {
             Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, _)) => {
+            Err((StatusCode::NOT_FOUND, err)) => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["directory not found"])),
+                    axum::Json(ApiError::new_wings_value(err)),
                 );
             }
             Err((_, err)) => {

@@ -72,10 +72,10 @@ mod put {
                     axum::Json(ApiError::new_value(&["root directory not found"])),
                 );
             }
-            Err((StatusCode::EXPECTATION_FAILED, _)) => {
+            Err((StatusCode::EXPECTATION_FAILED, err)) => {
                 return (
                     StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["root is not a directory"])),
+                    axum::Json(ApiError::new_wings_value(err)),
                 );
             }
             Err((_, err)) => {

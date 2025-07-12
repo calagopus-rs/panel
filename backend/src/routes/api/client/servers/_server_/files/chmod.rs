@@ -66,16 +66,16 @@ mod put {
             .await
         {
             Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, _)) => {
+            Err((StatusCode::NOT_FOUND, err)) => {
                 return (
                     StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["root directory not found"])),
+                    axum::Json(ApiError::new_wings_value(err)),
                 );
             }
-            Err((StatusCode::EXPECTATION_FAILED, _)) => {
+            Err((StatusCode::EXPECTATION_FAILED, err)) => {
                 return (
                     StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["root is not a directory"])),
+                    axum::Json(ApiError::new_wings_value(err)),
                 );
             }
             Err((_, err)) => {

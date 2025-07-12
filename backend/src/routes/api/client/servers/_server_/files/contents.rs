@@ -76,14 +76,14 @@ mod get {
             .await
         {
             Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, _)) => {
+            Err((StatusCode::NOT_FOUND, err)) => {
                 return (
                     StatusCode::NOT_FOUND,
                     HeaderMap::from_iter([(
                         axum::http::header::CONTENT_TYPE,
                         "application/json".parse().unwrap(),
                     )]),
-                    ApiError::new_value(&["file not found"]).to_string(),
+                    ApiError::new_wings_value(err).to_string(),
                 );
             }
             Err((StatusCode::PAYLOAD_TOO_LARGE, _)) => {
