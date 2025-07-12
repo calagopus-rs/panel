@@ -37,11 +37,11 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
         </Code>
       </p>
       <Dialog.Footer>
-        <Button style={Button.Styles.Green} onClick={submit}>
-          Create
-        </Button>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
+        </Button>
+        <Button style={Button.Styles.Green} onClick={submit}>
+          Create
         </Button>
       </Dialog.Footer>
     </Dialog>

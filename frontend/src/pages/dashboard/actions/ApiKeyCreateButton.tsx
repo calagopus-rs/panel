@@ -41,11 +41,11 @@ export default () => {
         <Input.Text id="name" name="name" value={name} onChange={e => setName(e.target.value)} />
 
         <Dialog.Footer>
-          <Button onClick={submit} disabled={!name}>
-            Create
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button onClick={submit} disabled={!name}>
+            Create
           </Button>
         </Dialog.Footer>
       </Dialog>

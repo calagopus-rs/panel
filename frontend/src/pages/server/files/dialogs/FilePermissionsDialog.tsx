@@ -137,10 +137,10 @@ export default ({ file, onChange, open, onClose }: Props) => {
       </div>
 
       <Dialog.Footer>
-        <Button onClick={handleSave}>Save</Button>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
+        <Button onClick={handleSave}>Save</Button>
       </Dialog.Footer>
     </Dialog>
   );

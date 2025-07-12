@@ -29,11 +29,11 @@ export default ({ onFileNamed, open, onClose }: Props) => {
         onChange={e => setFileName(e.target.value)}
       />
       <Dialog.Footer>
-        <Button style={Button.Styles.Green} onClick={submit}>
-          Create
-        </Button>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
+        </Button>
+        <Button style={Button.Styles.Green} onClick={submit}>
+          Create
         </Button>
       </Dialog.Footer>
     </Dialog>

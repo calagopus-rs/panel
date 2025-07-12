@@ -33,11 +33,11 @@ export default ({ session }: { session: UserSession }) => {
         <p>Signing out will invalidate the session.</p>
 
         <Dialog.Footer>
-          <Button style={Button.Styles.Red} onClick={submit}>
-            Sign Out
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button style={Button.Styles.Red} onClick={submit}>
+            Sign Out
           </Button>
         </Dialog.Footer>
       </Dialog>

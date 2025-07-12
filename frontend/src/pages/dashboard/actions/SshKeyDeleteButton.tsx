@@ -35,11 +35,11 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
         </p>
 
         <Dialog.Footer>
-          <Button style={Button.Styles.Red} onClick={submit}>
-            Delete
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button style={Button.Styles.Red} onClick={submit}>
+            Delete
           </Button>
         </Dialog.Footer>
       </Dialog>

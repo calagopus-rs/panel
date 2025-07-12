@@ -32,11 +32,11 @@ export default ({ databaseName, onDeleted, open, onClose }: Props) => {
         onChange={e => setEnteredName(e.target.value)}
       />
       <Dialog.Footer>
-        <Button style={Button.Styles.Red} onClick={submit} disabled={databaseName !== enteredName}>
-          Delete
-        </Button>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
+        </Button>
+        <Button style={Button.Styles.Red} onClick={submit} disabled={databaseName !== enteredName}>
+          Delete
         </Button>
       </Dialog.Footer>
     </Dialog>

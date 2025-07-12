@@ -46,11 +46,11 @@ export default () => {
         <Input.Text id="pubKey" name="pubKey" value={pubKey} onChange={e => setPubKey(e.target.value)} />
 
         <Dialog.Footer>
-          <Button onClick={submit} disabled={!name}>
-            Create
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button onClick={submit} disabled={!name}>
+            Create
           </Button>
         </Dialog.Footer>
       </Dialog>

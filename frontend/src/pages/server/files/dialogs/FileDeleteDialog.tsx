@@ -15,11 +15,11 @@ export default ({ file, onDelete, open, onClose }: Props) => {
       </p>
 
       <Dialog.Footer>
-        <Button style={Button.Styles.Red} onClick={onDelete}>
-          Delete
-        </Button>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
+        </Button>
+        <Button style={Button.Styles.Red} onClick={onDelete}>
+          Delete
         </Button>
       </Dialog.Footer>
     </Dialog>

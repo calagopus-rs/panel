@@ -78,11 +78,11 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
         />
 
         <Dialog.Footer>
-          <Button style={Button.Styles.Green} onClick={submit}>
-            {task ? 'Update' : 'Create'}
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button style={Button.Styles.Green} onClick={submit}>
+            {task ? 'Update' : 'Create'}
           </Button>
         </Dialog.Footer>
       </Dialog>

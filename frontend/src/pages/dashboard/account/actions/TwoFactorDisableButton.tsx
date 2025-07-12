@@ -61,11 +61,11 @@ export default () => {
         />
 
         <Dialog.Footer>
-          <Button style={Button.Styles.Red} onClick={submit} disabled={!password}>
-            Disable
-          </Button>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
             Close
+          </Button>
+          <Button style={Button.Styles.Red} onClick={submit} disabled={!password}>
+            Disable
           </Button>
         </Dialog.Footer>
       </Dialog>
