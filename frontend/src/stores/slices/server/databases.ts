@@ -14,18 +14,20 @@ export const createDatabasesSlice: StateCreator<ServerStore, [], [], DatabasesSl
   databases: getEmptyPaginationSet<any>(),
 
   setDatabases: value => set(state => ({ ...state, databases: value })),
-
-  addDatabase: value =>
-    set(state => {
-      state.databases.data = [...state.databases.data, value];
-      state.databases.total += 1;
-      return state;
-    }),
-
-  removeDatabase: value =>
-    set(state => {
-      state.databases.data = state.databases.data.filter(key => key.id !== value.id);
-      state.databases.total -= 1;
-      return state;
-    }),
+  addDatabase: database =>
+    set(state => ({
+      databases: {
+        ...state.databases,
+        data: [...state.databases.data, database],
+        total: state.databases.total + 1,
+      },
+    })),
+  removeDatabase: database =>
+    set(state => ({
+      databases: {
+        ...state.databases,
+        data: state.databases.data.filter(d => d.id !== database.id),
+        total: state.databases.total - 1,
+      },
+    })),
 });

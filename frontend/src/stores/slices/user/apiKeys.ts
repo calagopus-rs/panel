@@ -14,18 +14,20 @@ export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = 
   apiKeys: getEmptyPaginationSet<UserApiKey>(),
 
   setApiKeys: value => set(state => ({ ...state, apiKeys: value })),
-
-  addApiKey: value =>
-    set(state => {
-      state.apiKeys.data = [...state.apiKeys.data, value];
-      state.apiKeys.total += 1;
-      return state;
-    }),
-
-  removeApiKey: value =>
-    set(state => {
-      state.apiKeys.data = state.apiKeys.data.filter(key => key.id !== value.id);
-      state.apiKeys.total -= 1;
-      return state;
-    }),
+  addApiKey: key =>
+    set(state => ({
+      apiKeys: {
+        ...state.apiKeys,
+        data: [...state.apiKeys.data, key],
+        total: state.apiKeys.total + 1,
+      },
+    })),
+  removeApiKey: key =>
+    set(state => ({
+      apiKeys: {
+        ...state.apiKeys,
+        data: state.apiKeys.data.filter(k => k.id !== key.id),
+        total: state.apiKeys.total - 1,
+      },
+    })),
 });

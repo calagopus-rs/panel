@@ -14,18 +14,20 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
   schedules: getEmptyPaginationSet<any>(),
 
   setSchedules: value => set(state => ({ ...state, schedules: value })),
-
-  addSchedule: value =>
-    set(state => {
-      state.schedules.data = [...state.schedules.data, value];
-      state.schedules.total += 1;
-      return state;
-    }),
-
-  removeSchedule: value =>
-    set(state => {
-      state.schedules.data = state.schedules.data.filter(key => key.id !== value.id);
-      state.schedules.total -= 1;
-      return state;
-    }),
+  addSchedule: schedule =>
+    set(state => ({
+      schedules: {
+        ...state.schedules,
+        data: [...state.schedules.data, schedule],
+        total: state.schedules.total + 1,
+      },
+    })),
+  removeSchedule: schedule =>
+    set(state => ({
+      schedules: {
+        ...state.schedules,
+        data: state.schedules.data.filter(s => s.id !== schedule.id),
+        total: state.schedules.total - 1,
+      },
+    })),
 });

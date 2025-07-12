@@ -23,19 +23,22 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
 
   browsingEntries: getEmptyPaginationSet<DirectoryEntry>(),
   setBrowsingEntries: value => set(state => ({ ...state, browsingEntries: value })),
-  addBrowsingEntry: value =>
-    set(state => {
-      state.browsingEntries.data = [...state.browsingEntries.data, value];
-      state.browsingEntries.total += 1;
-      console.log(state.browsingEntries);
-      return state;
-    }),
-  removeBrowsingEntry: value =>
-    set(state => {
-      state.browsingEntries.data = state.browsingEntries.data.filter(entry => entry.name !== value.name);
-      state.browsingEntries.total -= 1;
-      return state;
-    }),
+  addBrowsingEntry: entry =>
+    set(state => ({
+      browsingEntries: {
+        ...state.browsingEntries,
+        data: [...state.browsingEntries.data, entry],
+        total: state.browsingEntries.total + 1,
+      },
+    })),
+  removeBrowsingEntry: entry =>
+    set(state => ({
+      browsingEntries: {
+        ...state.browsingEntries,
+        data: state.browsingEntries.data.filter(e => e.name !== entry.name),
+        total: state.browsingEntries.total - 1,
+      },
+    })),
 
   selectedFiles: [],
   setSelectedFiles: value => set(state => ({ ...state, selectedFiles: value })),

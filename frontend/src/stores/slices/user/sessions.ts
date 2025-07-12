@@ -14,10 +14,12 @@ export const createSessionsSlice: StateCreator<UserStore, [], [], SessionSlice> 
 
   setSessions: value => set(state => ({ ...state, sessions: value })),
 
-  removeSession: value =>
-    set(state => {
-      state.sessions.data = state.sessions.data.filter(sess => sess.id !== value.id);
-      state.sessions.total -= 1;
-      return state;
-    }),
+  removeSession: sess =>
+    set(state => ({
+      sessions: {
+        ...state.sessions,
+        data: state.sessions.data.filter(s => s.id !== sess.id),
+        total: state.sessions.total - 1,
+      },
+    })),
 });

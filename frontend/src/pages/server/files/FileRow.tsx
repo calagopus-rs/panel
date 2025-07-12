@@ -128,7 +128,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
           { icon: faCopy, label: 'Copy', onClick: () => setOpenDialog('copy'), color: 'gray' },
           { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
           { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
-          { icon: faArchive, label: 'Archive', onClick: () => doArchive, color: 'gray' },
+          { icon: faArchive, label: 'Archive', onClick: doArchive, color: 'gray' },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
