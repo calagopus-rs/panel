@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Response {
-  api_key: UserApiKey;
+  apiKey: UserApiKey;
   key: string;
 }
 

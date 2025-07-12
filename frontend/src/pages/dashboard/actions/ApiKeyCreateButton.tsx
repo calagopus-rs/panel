@@ -27,7 +27,7 @@ export default () => {
       .then(key => {
         addToast('API key created.', 'success');
         setOpen(false);
-        addApiKey({ ...key.api_key, keyStart: key.key });
+        addApiKey({ ...key.apiKey, keyStart: key.key });
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
