@@ -1,5 +1,4 @@
 import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
-import createArchive from '@/api/server/files/createArchive';
 import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
@@ -23,6 +22,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
+import FileDeleteDialog from './dialogs/FileDeleteDialog';
+import archiveFiles from '@/api/server/files/archiveFiles';
+import deleteFiles from '@/api/server/files/deleteFiles';
 
 function FileTableRow({
   file,
@@ -61,9 +63,8 @@ export default ({ file }: { file: DirectoryEntry }) => {
   const {
     server,
     browsingDirectory,
-    browsingEntries,
-    setBrowsingEntries,
     addBrowsingEntry,
+    removeBrowsingEntry,
     selectedFiles,
     addSelectedFile,
     removeSelectedFile,
@@ -92,7 +93,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
   };
 
   const doArchive = () => {
-    createArchive(server.uuid, browsingDirectory, [file.name])
+    archiveFiles(server.uuid, browsingDirectory, [file.name])
       .then(entry => {
         addBrowsingEntry(entry);
       })
@@ -101,8 +102,27 @@ export default ({ file }: { file: DirectoryEntry }) => {
       });
   };
 
+  const doDelete = () => {
+    deleteFiles(server.uuid, browsingDirectory, [file.name])
+      .then(() => {
+        addToast(`File has been deleted.`, 'success');
+        setOpenDialog(null);
+        removeBrowsingEntry(file);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
   return (
     <>
+      <FileDeleteDialog
+        file={file}
+        onDelete={doDelete}
+        open={openDialog === 'delete'}
+        onClose={() => setOpenDialog(null)}
+      />
+
       <ContextMenu
         items={[
           { icon: faCopy, label: 'Copy', onClick: () => setOpenDialog('copy'), color: 'gray' },
