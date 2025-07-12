@@ -134,9 +134,7 @@ export default () => {
               <Routes>
                 <Route path="" element={<ServerConsole />} />
                 <Route path="/files" element={<ServerFiles />} />
-                <Route path="/files/new/:path" element={<FileEditor />} />
-                <Route path="/files/edit/:path" element={<FileEditor />} />
-                <Route path="/files/directory/:path" element={<ServerFiles />} />
+                <Route path="/files/:action" element={<FileEditor />} />
                 <Route path="/databases" element={<ServerDatabases />} />
                 <Route path="/schedules" element={<ServerSchedules />} />
                 <Route path="/schedules/:id" element={<ScheduleView />} />

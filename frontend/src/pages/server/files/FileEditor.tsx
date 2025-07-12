@@ -1,26 +1,31 @@
 import getFileContent from '@/api/server/files/getFileContent';
 import Spinner from '@/elements/Spinner';
 import { getLanguageFromExtension } from '@/lib/files';
-import { urlPathToAction, urlPathToFilePath } from '@/lib/path';
 import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { createSearchParams, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import saveFileContent from '@/api/server/files/saveFileContent';
 import FileNameDialog from './dialogs/FileNameDialog';
+import { join } from 'pathe';
+import NotFound from '@/pages/NotFound';
 
 export default () => {
-  const params = useParams<'path'>();
-  const location = useLocation();
+  const params = useParams<'action'>();
+  if (!['new', 'edit'].includes(params.action)) {
+    return <NotFound />;
+  }
+
+  const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
-  const action = urlPathToAction(location.pathname);
   const server = useServerStore(state => state.server);
   const { browsingDirectory, setBrowsingDirectory } = useServerStore();
 
   const [loading, setLoading] = useState(false);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
+  const [fileName, setFileName] = useState('');
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('plaintext');
 
@@ -28,19 +33,21 @@ export default () => {
   const contentRef = useRef(content);
 
   useEffect(() => {
-    setBrowsingDirectory(decodeURIComponent(params.path || '/'));
-  }, [params]);
+    setBrowsingDirectory(searchParams.get('directory') || '/');
+    setFileName(searchParams.get('file') || '');
+  }, [searchParams]);
 
   useEffect(() => {
-    if (action === 'new') return;
+    if (!browsingDirectory || !fileName) return;
+    if (params.action === 'new') return;
 
     setLoading(true);
-    getFileContent(server.uuid, browsingDirectory).then(content => {
+    getFileContent(server.uuid, join(browsingDirectory, fileName)).then(content => {
       setContent(content);
-      setLanguage(getLanguageFromExtension(browsingDirectory.split('.').pop()));
+      setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
       setLoading(false);
     });
-  }, [browsingDirectory]);
+  }, [fileName]);
 
   useEffect(() => {
     contentRef.current = content;
@@ -52,12 +59,17 @@ export default () => {
     const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.uuid, name ?? browsingDirectory, currentContent).then(() => {
+    saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
       setLoading(false);
       setNameDialogOpen(false);
 
       if (name) {
-        navigate(`/server/${server.uuidShort}/files/edit/${encodeURIComponent(name)}`);
+        navigate(
+          `/server/${server.uuidShort}/files/edit?${createSearchParams({
+            directory: browsingDirectory,
+            file: name,
+          })}`,
+        );
       }
     });
   };
@@ -75,9 +87,9 @@ export default () => {
       />
 
       <div className="flex justify-between w-full p-4">
-        <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} />
+        <FileBreadcrumbs path={join(decodeURIComponent(browsingDirectory), fileName)} />
         <div>
-          {action === 'edit' ? (
+          {params.action === 'edit' ? (
             <Button style={Button.Styles.Green} onClick={() => saveFile()}>
               Save
             </Button>
@@ -102,7 +114,7 @@ export default () => {
           });
 
           editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-            if (action === 'new') {
+            if (params.action === 'new') {
               setNameDialogOpen(true);
             } else {
               saveFile();

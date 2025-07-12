@@ -18,7 +18,7 @@ export interface FilesSlice {
 }
 
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set): FilesSlice => ({
-  browsingDirectory: '/',
+  browsingDirectory: null,
   setBrowsingDirectory: value => set(state => ({ ...state, browsingDirectory: value })),
 
   browsingEntries: getEmptyPaginationSet<DirectoryEntry>(),

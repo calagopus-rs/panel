@@ -2,7 +2,7 @@ import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import loadDirectory from '@/api/server/files/loadDirectory';
@@ -16,7 +16,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 
 export default () => {
-  const params = useParams<'path'>();
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const { addToast } = useToast();
   const {
@@ -35,8 +35,13 @@ export default () => {
 
   useEffect(() => {
     setSelectedFiles([]);
-    setBrowsingDirectory(params.path || '/');
-  }, [params]);
+    setBrowsingDirectory(searchParams.get('directory') || '/');
+    setPage(Number(searchParams.get('page')) || 1);
+  }, [searchParams]);
+
+  const onPageSelect = (page: number) => {
+    setSearchParams({ directory: browsingDirectory, page: page.toString() });
+  };
 
   const loadDirectoryData = () => {
     setLoading(true);
@@ -64,7 +69,7 @@ export default () => {
   const makeDirectory = (name: string) => {
     createDirectory(server.uuid, browsingDirectory, name).then(() => {
       setOpenDialog(null);
-      navigate(`/server/${server.uuidShort}/files/directory/${encodeURIComponent(join(browsingDirectory, name))}`);
+      setSearchParams({ directory: join(browsingDirectory, name) });
     });
   };
 
@@ -84,7 +89,9 @@ export default () => {
           </Button>
           <Button>Upload</Button>
           <Button
-            onClick={() => navigate(`/server/${server.uuidShort}/files/new/${encodeURIComponent(browsingDirectory)}`)}
+            onClick={() =>
+              navigate(`/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`)
+            }
           >
             New File
           </Button>
@@ -96,7 +103,7 @@ export default () => {
           checked={selectedFiles.length > 0}
           onSelectAllClick={onSelectAllClick}
         >
-          <Pagination data={browsingEntries} onPageSelect={setPage}>
+          <Pagination data={browsingEntries} onPageSelect={onPageSelect}>
             <div className="overflow-x-auto">
               {loading ? (
                 <Spinner.Centered />

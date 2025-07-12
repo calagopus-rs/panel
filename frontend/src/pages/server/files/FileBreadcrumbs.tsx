@@ -1,6 +1,6 @@
 import { useServerStore } from '@/stores/server';
 import classNames from 'classnames';
-import { NavLink } from 'react-router';
+import { createSearchParams, NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
 export function FileBreadcrumbs({ path }: { path: string }) {
@@ -25,7 +25,7 @@ export function FileBreadcrumbs({ path }: { path: string }) {
         return (
           <Fragment key={index}>
             <NavLink
-              to={`/server/${server?.uuidShort}/files/directory/${encodeURIComponent(item.path)}`}
+              to={`/server/${server?.uuidShort}/files?${createSearchParams({ directory: item.path })}`}
               className={classNames(
                 'px-1 text-gray-200 hover:text-gray-400',
                 index === pathItems.length - 1 && 'pointer-events-none',

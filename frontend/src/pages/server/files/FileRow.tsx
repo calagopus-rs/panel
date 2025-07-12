@@ -23,7 +23,7 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileDeleteDialog from './dialogs/FileDeleteDialog';
 import deleteFiles from '@/api/server/files/deleteFiles';
 import compressFiles from '@/api/server/files/compressFiles';
@@ -41,6 +41,7 @@ function FileTableRow({
   children: React.ReactNode;
 }) {
   const navigate = useNavigate();
+  const [_, setSearchParams] = useSearchParams();
   const server = useServerStore(state => state.server);
   const { browsingDirectory } = useServerStore();
 
@@ -49,11 +50,18 @@ function FileTableRow({
       className="cursor-pointer"
       onContextMenu={onContextMenu}
       onClick={() => {
-        navigate(
-          `/server/${server.uuidShort}/files/${file.file ? 'edit' : 'directory'}/${encodeURIComponent(
-            join(browsingDirectory, file.name),
-          )}`,
-        );
+        if (file.directory) {
+          setSearchParams({
+            directory: join(browsingDirectory, file.name),
+          });
+        } else {
+          navigate(
+            `/server/${server.uuidShort}/files/edit?${createSearchParams({
+              directory: browsingDirectory,
+              file: file.name,
+            })}`,
+          );
+        }
       }}
     >
       {children}
