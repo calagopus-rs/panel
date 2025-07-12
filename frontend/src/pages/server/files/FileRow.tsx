@@ -59,7 +59,7 @@ function FileTableRow({
       {children}
     </TableRow>
   ) : (
-    <TableRow>{children}</TableRow>
+    <TableRow onContextMenu={onContextMenu}>{children}</TableRow>
   );
 }
 
@@ -206,16 +206,15 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
               <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
             </td>
 
-            <td className="relative">
-              <FontAwesomeIcon
-                icon={faEllipsis}
-                className="cursor-pointer"
-                onClick={e => {
-                  e.stopPropagation();
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  openMenu(rect.left, rect.bottom);
-                }}
-              />
+            <td
+              className="relative"
+              onClick={e => {
+                e.stopPropagation();
+                const rect = e.currentTarget.getBoundingClientRect();
+                openMenu(rect.left, rect.bottom);
+              }}
+            >
+              <FontAwesomeIcon icon={faEllipsis} className="cursor-pointer" />
             </td>
           </FileTableRow>
         )}

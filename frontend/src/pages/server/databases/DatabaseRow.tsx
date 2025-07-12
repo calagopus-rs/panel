@@ -69,16 +69,15 @@ export default ({ database }: { database: any }) => {
               {database.username}
             </td>
 
-            <td className="relative">
-              <FontAwesomeIcon
-                icon={faEllipsis}
-                className="cursor-pointer"
-                onClick={e => {
-                  e.stopPropagation();
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  openMenu(rect.left, rect.bottom);
-                }}
-              />
+            <td
+              className="relative"
+              onClick={e => {
+                e.stopPropagation();
+                const rect = e.currentTarget.getBoundingClientRect();
+                openMenu(rect.left, rect.bottom);
+              }}
+            >
+              <FontAwesomeIcon icon={faEllipsis} className="cursor-pointer" />
             </td>
           </TableRow>
         )}
