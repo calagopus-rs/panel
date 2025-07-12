@@ -11,18 +11,26 @@ import DirectoryNameDialog from './dialogs/DirectoryNameDialog';
 import createDirectory from '@/api/server/files/createDirectory';
 import { join } from 'pathe';
 import Spinner from '@/elements/Spinner';
-import { getEmptyPaginationSet } from '@/api/axios';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
 
 export default () => {
   const params = useParams<'path'>();
   const navigate = useNavigate();
-  const server = useServerStore(state => state.server);
-  const { browsingDirectory, setBrowsingDirectory, selectedFiles, setSelectedFiles } = useServerStore();
+  const { addToast } = useToast();
+  const {
+    server,
+    browsingDirectory,
+    setBrowsingDirectory,
+    browsingEntries,
+    setBrowsingEntries,
+    selectedFiles,
+    setSelectedFiles,
+  } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'nameDirectory'>(null);
-  const [fileList, setFileList] = useState<ResponseMeta<DirectoryEntry>>(getEmptyPaginationSet());
-  const [loading, setLoading] = useState(fileList.data.length === 0);
+  const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -30,28 +38,25 @@ export default () => {
     setBrowsingDirectory(params.path || '/');
   }, [params]);
 
+  const loadDirectoryData = () => {
+    loadDirectory(server.uuid, browsingDirectory, page)
+      .then(data => {
+        setBrowsingEntries(data);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (!browsingDirectory) return;
 
-    loadDirectory(server.uuid, browsingDirectory, page).then(data => {
-      setFileList(data);
-      setLoading(false);
-    });
+    loadDirectoryData();
   }, [browsingDirectory, page]);
 
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(e.currentTarget.checked ? fileList.data.map(file => file.name) || [] : []);
-  };
-
-  const sortFiles = () => {
-    return fileList.data.sort((a, b) => {
-      // Prioritize directories
-      if (!a.file && b.file) return -1;
-      if (a.file && !b.file) return 1;
-
-      // Sort alphabetically (case-insensitive)
-      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
-    });
+    setSelectedFiles(e.currentTarget.checked ? browsingEntries.data.map(file => file.name) || [] : []);
   };
 
   const makeDirectory = (name: string) => {
@@ -89,7 +94,7 @@ export default () => {
           checked={selectedFiles.length > 0}
           onSelectAllClick={onSelectAllClick}
         >
-          <Pagination data={fileList} onPageSelect={setPage}>
+          <Pagination data={browsingEntries} onPageSelect={setPage}>
             <div className="overflow-x-auto">
               <table className="w-full table-auto">
                 <TableHead>
@@ -102,14 +107,14 @@ export default () => {
 
                 <ContextMenuProvider>
                   <TableBody>
-                    {sortFiles().map(file => (
+                    {browsingEntries.data.map(file => (
                       <FileRow key={file.name} file={file} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>
               </table>
 
-              {loading ? <Spinner.Centered /> : fileList.data.length === 0 ? <NoItems /> : null}
+              {loading ? <Spinner.Centered /> : browsingEntries.data.length === 0 ? <NoItems /> : null}
             </div>
           </Pagination>
         </ContentWrapper>

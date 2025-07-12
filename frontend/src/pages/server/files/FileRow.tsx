@@ -1,3 +1,5 @@
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
+import createArchive from '@/api/server/files/createArchive';
 import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
@@ -5,20 +7,21 @@ import Tooltip from '@/elements/Tooltip';
 import { isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import {
   faFolder,
   faFile,
-  faPencil,
   faTrash,
   faAnglesUp,
   faArchive,
   faFileShield,
   faEllipsis,
+  faCopy,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 
 function FileTableRow({
@@ -54,9 +57,19 @@ function FileTableRow({
 }
 
 export default ({ file }: { file: DirectoryEntry }) => {
-  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore();
+  const { addToast } = useToast();
+  const {
+    server,
+    browsingDirectory,
+    browsingEntries,
+    setBrowsingEntries,
+    addBrowsingEntry,
+    selectedFiles,
+    addSelectedFile,
+    removeSelectedFile,
+  } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'rename' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (
@@ -78,14 +91,24 @@ export default ({ file }: { file: DirectoryEntry }) => {
     );
   };
 
+  const doArchive = () => {
+    createArchive(server.uuid, browsingDirectory, [file.name])
+      .then(entry => {
+        addBrowsingEntry(entry);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
   return (
     <>
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Rename', onClick: () => setOpenDialog('rename'), color: 'gray' },
+          { icon: faCopy, label: 'Copy', onClick: () => setOpenDialog('copy'), color: 'gray' },
           { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
           { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
-          { icon: faArchive, label: 'Archive', onClick: () => setOpenDialog('archive'), color: 'gray' },
+          { icon: faArchive, label: 'Archive', onClick: () => doArchive, color: 'gray' },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >

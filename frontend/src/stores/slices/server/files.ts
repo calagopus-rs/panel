@@ -1,11 +1,17 @@
+import { getEmptyPaginationSet } from '@/api/axios';
 import { ServerStore } from '@/stores/server';
 import { StateCreator } from 'zustand';
 
 export interface FilesSlice {
   browsingDirectory: string;
-  selectedFiles: string[];
-
   setBrowsingDirectory: (dir: string) => void;
+
+  browsingEntries: ResponseMeta<DirectoryEntry>;
+  setBrowsingEntries: (entries: ResponseMeta<DirectoryEntry>) => void;
+  addBrowsingEntry: (entry: DirectoryEntry) => void;
+  removeBrowsingEntry: (entry: DirectoryEntry) => void;
+
+  selectedFiles: string[];
   setSelectedFiles: (files: string[]) => void;
   addSelectedFile: (file: string) => void;
   removeSelectedFile: (file: string) => void;
@@ -13,9 +19,25 @@ export interface FilesSlice {
 
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set): FilesSlice => ({
   browsingDirectory: '/',
-  selectedFiles: [],
-
   setBrowsingDirectory: value => set(state => ({ ...state, browsingDirectory: value })),
+
+  browsingEntries: getEmptyPaginationSet<DirectoryEntry>(),
+  setBrowsingEntries: value => set(state => ({ ...state, browsingEntries: value })),
+  addBrowsingEntry: value =>
+    set(state => {
+      state.browsingEntries.data = [...state.browsingEntries.data, value];
+      state.browsingEntries.total += 1;
+      console.log(state.browsingEntries);
+      return state;
+    }),
+  removeBrowsingEntry: value =>
+    set(state => {
+      state.browsingEntries.data = state.browsingEntries.data.filter(entry => entry.name !== value.name);
+      state.browsingEntries.total -= 1;
+      return state;
+    }),
+
+  selectedFiles: [],
   setSelectedFiles: value => set(state => ({ ...state, selectedFiles: value })),
   addSelectedFile: value => set(state => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
   removeSelectedFile: value =>
