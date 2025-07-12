@@ -70,14 +70,14 @@ export default ({ database }: { database: any }) => {
             </td>
 
             <td
-              className="relative"
+              className="relative cursor-pointer"
               onClick={e => {
                 e.stopPropagation();
                 const rect = e.currentTarget.getBoundingClientRect();
                 openMenu(rect.left, rect.bottom);
               }}
             >
-              <FontAwesomeIcon icon={faEllipsis} className="cursor-pointer" />
+              <FontAwesomeIcon icon={faEllipsis} />
             </td>
           </TableRow>
         )}
