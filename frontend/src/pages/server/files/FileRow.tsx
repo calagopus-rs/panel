@@ -1,9 +1,9 @@
-import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
+import { httpErrorToHuman } from '@/api/axios';
 import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/inputs/Checkbox';
 import { TableRow } from '@/elements/table/Table';
 import Tooltip from '@/elements/Tooltip';
-import { isEditableFile } from '@/lib/files';
+import { isArchiveType, isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
@@ -13,18 +13,23 @@ import {
   faFile,
   faTrash,
   faAnglesUp,
-  faArchive,
   faFileShield,
   faEllipsis,
   faCopy,
+  faFileZipper,
+  faEnvelopesBulk,
+  faFileArrowDown,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import FileDeleteDialog from './dialogs/FileDeleteDialog';
-import archiveFiles from '@/api/server/files/archiveFiles';
 import deleteFiles from '@/api/server/files/deleteFiles';
+import compressFiles from '@/api/server/files/compressFiles';
+import decompressFile from '@/api/server/files/decompressFile';
+import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
+import chmodFiles from '@/api/server/files/chmodFiles';
 
 function FileTableRow({
   file,
@@ -58,7 +63,7 @@ function FileTableRow({
   );
 }
 
-export default ({ file }: { file: DirectoryEntry }) => {
+export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirectory: () => void }) => {
   const { addToast } = useToast();
   const {
     server,
@@ -70,7 +75,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
     removeSelectedFile,
   } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'delete'>(null);
 
   const RowCheckbox = ({ id }: { id: string }) => {
     return (
@@ -92,8 +97,32 @@ export default ({ file }: { file: DirectoryEntry }) => {
     );
   };
 
-  const doArchive = () => {
-    archiveFiles(server.uuid, browsingDirectory, [file.name])
+  const doCopy = () => {};
+
+  const doMove = () => {};
+
+  const doChmod = (mode: number) => {
+    chmodFiles({
+      uuid: server.uuid,
+      root: browsingDirectory,
+      files: [{ file: file.name, mode: mode.toString() }],
+    }).catch(msg => {
+      addToast(httpErrorToHuman(msg), 'error');
+    });
+  };
+
+  const doDecompress = () => {
+    decompressFile(server.uuid, browsingDirectory, file.name)
+      .then(() => {
+        reloadDirectory();
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
+  const doCompress = () => {
+    compressFiles(server.uuid, browsingDirectory, [file.name])
       .then(entry => {
         addBrowsingEntry(entry);
       })
@@ -101,6 +130,8 @@ export default ({ file }: { file: DirectoryEntry }) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
+
+  const doDownload = () => {};
 
   const doDelete = () => {
     deleteFiles(server.uuid, browsingDirectory, [file.name])
@@ -116,6 +147,12 @@ export default ({ file }: { file: DirectoryEntry }) => {
 
   return (
     <>
+      <FilePermissionsDialog
+        file={file}
+        onChange={doChmod}
+        open={openDialog === 'permissions'}
+        onClose={() => setOpenDialog(null)}
+      />
       <FileDeleteDialog
         file={file}
         onDelete={doDelete}
@@ -128,7 +165,17 @@ export default ({ file }: { file: DirectoryEntry }) => {
           { icon: faCopy, label: 'Copy', onClick: () => setOpenDialog('copy'), color: 'gray' },
           { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
           { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
-          { icon: faArchive, label: 'Archive', onClick: doArchive, color: 'gray' },
+          isArchiveType(file.mime)
+            ? { icon: faEnvelopesBulk, label: 'Decompress', onClick: doDecompress, color: 'gray' }
+            : { icon: faFileZipper, label: 'Compress', onClick: doCompress, color: 'gray' },
+          file.file
+            ? {
+                icon: faFileArrowDown,
+                label: 'Download',
+                onClick: doDownload,
+                color: 'gray',
+              }
+            : null,
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >

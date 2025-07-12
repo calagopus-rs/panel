@@ -99,7 +99,11 @@ const ContextMenu = ({ items = [], children }: { items: Item[]; children: any })
   const { showMenu, hideMenu } = useContext(ContextMenuContext);
 
   const openMenu = (x, y) => {
-    showMenu(x, y, items);
+    showMenu(
+      x,
+      y,
+      items.filter(item => item), // Filter null values
+    );
   };
 
   return children({ openMenu, hideMenu });

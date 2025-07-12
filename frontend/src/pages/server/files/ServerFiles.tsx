@@ -39,6 +39,8 @@ export default () => {
   }, [params]);
 
   const loadDirectoryData = () => {
+    setLoading(true);
+
     loadDirectory(server.uuid, browsingDirectory, page)
       .then(data => {
         setBrowsingEntries(data);
@@ -96,25 +98,29 @@ export default () => {
         >
           <Pagination data={browsingEntries} onPageSelect={setPage}>
             <div className="overflow-x-auto">
-              <table className="w-full table-auto">
-                <TableHead>
-                  <TableHeader />
-                  <TableHeader name="Name" />
-                  <TableHeader name="Size" />
-                  <TableHeader name="Modified" />
-                  <TableHeader />
-                </TableHead>
+              {loading ? (
+                <Spinner.Centered />
+              ) : browsingEntries.data.length === 0 ? (
+                <NoItems />
+              ) : (
+                <table className="w-full table-auto">
+                  <TableHead>
+                    <TableHeader />
+                    <TableHeader name="Name" />
+                    <TableHeader name="Size" />
+                    <TableHeader name="Modified" />
+                    <TableHeader />
+                  </TableHead>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {browsingEntries.data.map(file => (
-                      <FileRow key={file.name} file={file} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : browsingEntries.data.length === 0 ? <NoItems /> : null}
+                  <ContextMenuProvider>
+                    <TableBody>
+                      {browsingEntries.data.map(file => (
+                        <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
+                      ))}
+                    </TableBody>
+                  </ContextMenuProvider>
+                </table>
+              )}
             </div>
           </Pagination>
         </ContentWrapper>

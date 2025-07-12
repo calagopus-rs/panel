@@ -323,3 +323,30 @@ export function isEditableFile(mimetype: string) {
 
   return matches.every(m => !mimetype.match(m));
 }
+
+export function permissionStringToNumber(mode: string) {
+  if (mode.length !== 10) {
+    throw new Error('Invalid permission string length.');
+  }
+
+  const perms = mode.slice(1); // Skip the first character
+
+  const mapping = {
+    r: 4,
+    w: 2,
+    x: 1,
+    '-': 0,
+  };
+
+  let result = '';
+
+  for (let i = 0; i < 9; i += 3) {
+    let value = 0;
+    for (let j = 0; j < 3; j++) {
+      value += mapping[perms[i + j]] || 0;
+    }
+    result += value.toString();
+  }
+
+  return parseInt(result, 10);
+}
