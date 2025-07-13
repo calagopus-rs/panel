@@ -200,7 +200,6 @@ impl Server {
                     uuid,
                     uuid_short,
                     external_id,
-                    allocation_id,
                     node_id,
                     owner_id,
                     egg_id,
@@ -221,7 +220,7 @@ impl Server {
                 VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8,
                     $9, $10, $11, $12, $13, $14,
-                    $15, $16, $17, $18, $19, $20
+                    $15, $16, $17, $18, $19
                 )
                 RETURNING id, uuid
                 "#,
@@ -229,7 +228,6 @@ impl Server {
             .bind(uuid)
             .bind(uuid_short)
             .bind(external_id)
-            .bind(allocation_id)
             .bind(node.id)
             .bind(owner_id)
             .bind(egg_id)
@@ -252,18 +250,23 @@ impl Server {
                 Ok(row) => {
                     let id: i32 = row.get("id");
 
-                    if let Some(allocation_id) = allocation_id {
-                        sqlx::query(
+                    let allocation_id: Option<i32> = if let Some(allocation_id) = allocation_id {
+                        let row = sqlx::query(
                             r#"
                             INSERT INTO server_allocations (server_id, allocation_id)
                             VALUES ($1, $2)
+                            RETURNING id
                             "#,
                         )
                         .bind(id)
                         .bind(allocation_id)
-                        .execute(&mut *transaction)
+                        .fetch_one(&mut *transaction)
                         .await?;
-                    }
+
+                        Some(row.get("id"))
+                    } else {
+                        None
+                    };
 
                     for allocation_id in allocation_ids {
                         sqlx::query(
@@ -277,6 +280,18 @@ impl Server {
                         .execute(&mut *transaction)
                         .await?;
                     }
+
+                    sqlx::query(
+                        r#"
+                        UPDATE servers
+                        SET allocation_id = $1
+                        WHERE id = $2
+                        "#,
+                    )
+                    .bind(allocation_id)
+                    .bind(id)
+                    .execute(&mut *transaction)
+                    .await?;
 
                     transaction.commit().await?;
 
