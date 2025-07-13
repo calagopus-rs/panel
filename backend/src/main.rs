@@ -240,19 +240,21 @@ async fn main() {
         .bright_black()
     );
 
+    let settings = settings.get().await;
+
     let (router, mut openapi) = app.split_for_parts();
     openapi.info.version = state.version.clone();
     openapi.info.description = None;
-    openapi.info.title = "Panel API".to_string();
+    openapi.info.title = format!("{} API", settings.app.name);
     openapi.info.contact = None;
     openapi.info.license = None;
-    openapi.servers = Some(vec![utoipa::openapi::Server::new(
-        settings.get().await.app.url.clone(),
-    )]);
+    openapi.servers = Some(vec![utoipa::openapi::Server::new(settings.app.url.clone())]);
     openapi.components.as_mut().unwrap().add_security_scheme(
         "api_key",
         SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("Authorization"))),
     );
+
+    drop(settings);
 
     let router = router.route("/openapi.json", get(|| async move { axum::Json(openapi) }));
 
