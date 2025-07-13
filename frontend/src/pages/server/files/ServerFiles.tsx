@@ -14,6 +14,7 @@ import Spinner from '@/elements/Spinner';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
+import FileActionBar from './FileActionBar';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,7 +64,7 @@ export default () => {
   }, [browsingDirectory, page]);
 
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(e.currentTarget.checked ? browsingEntries.data.map(file => file.name) || [] : []);
+    setSelectedFiles(e.currentTarget.checked ? browsingEntries.data || [] : []);
   };
 
   const makeDirectory = (name: string) => {
@@ -80,6 +81,8 @@ export default () => {
         open={openDialog === 'nameDirectory'}
         onClose={() => setOpenDialog(null)}
       />
+
+      <FileActionBar />
 
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Files</h1>

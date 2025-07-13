@@ -86,18 +86,18 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
 
   const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'delete'>(null);
 
-  const RowCheckbox = ({ id }: { id: string }) => {
+  const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
       <div className="flex items-center">
         <Checkbox
-          id={id}
-          checked={selectedFiles.includes(id)}
+          id={file.name}
+          checked={selectedFiles.includes(file)}
           onChange={e => {
             e.stopPropagation();
             if (e.currentTarget.checked) {
-              addSelectedFile(id);
+              addSelectedFile(file);
             } else {
-              removeSelectedFile(id);
+              removeSelectedFile(file);
             }
           }}
           onClick={e => e.stopPropagation()}
@@ -171,7 +171,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         onClose={() => setOpenDialog(null)}
       />
       <FileDeleteDialog
-        file={file}
+        files={[file]}
         onDelete={doDelete}
         open={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
@@ -203,7 +203,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
             }}
           >
             <td className="pl-6">
-              <RowCheckbox id={file.name} />
+              <RowCheckbox file={file} />
             </td>
 
             <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap" title={file.name}>

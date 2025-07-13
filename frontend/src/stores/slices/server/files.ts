@@ -11,10 +11,10 @@ export interface FilesSlice {
   addBrowsingEntry: (entry: DirectoryEntry) => void;
   removeBrowsingEntry: (entry: DirectoryEntry) => void;
 
-  selectedFiles: string[];
-  setSelectedFiles: (files: string[]) => void;
-  addSelectedFile: (file: string) => void;
-  removeSelectedFile: (file: string) => void;
+  selectedFiles: DirectoryEntry[];
+  setSelectedFiles: (files: DirectoryEntry[]) => void;
+  addSelectedFile: (file: DirectoryEntry) => void;
+  removeSelectedFile: (file: DirectoryEntry) => void;
 }
 
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set): FilesSlice => ({
@@ -44,5 +44,5 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
   setSelectedFiles: value => set(state => ({ ...state, selectedFiles: value })),
   addSelectedFile: value => set(state => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
   removeSelectedFile: value =>
-    set(state => ({ ...state, selectedFiles: state.selectedFiles.filter(file => file !== value) })),
+    set(state => ({ ...state, selectedFiles: state.selectedFiles.filter(file => file.name !== value.name) })),
 });
