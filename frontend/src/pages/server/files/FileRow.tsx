@@ -30,6 +30,7 @@ import compressFiles from '@/api/server/files/compressFiles';
 import decompressFile from '@/api/server/files/decompressFile';
 import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
 import chmodFiles from '@/api/server/files/chmodFiles';
+import downloadFile from '@/api/server/files/downloadFile';
 
 function FileTableRow({
   file,
@@ -139,7 +140,15 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       });
   };
 
-  const doDownload = () => {};
+  const doDownload = () => {
+    downloadFile(server.uuid, join(browsingDirectory, file.name), file.directory)
+      .then(({ url }) => {
+        window.open(url);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
 
   const doDelete = () => {
     deleteFiles(server.uuid, browsingDirectory, [file.name])
@@ -176,14 +185,12 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
           isArchiveType(file.mime)
             ? { icon: faEnvelopesBulk, label: 'Decompress', onClick: doDecompress, color: 'gray' }
             : { icon: faFileZipper, label: 'Compress', onClick: doCompress, color: 'gray' },
-          file.file
-            ? {
-                icon: faFileArrowDown,
-                label: 'Download',
-                onClick: doDownload,
-                color: 'gray',
-              }
-            : null,
+          {
+            icon: faFileArrowDown,
+            label: 'Download',
+            onClick: doDownload,
+            color: 'gray',
+          },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
