@@ -9,13 +9,37 @@ import FileDeleteDialog from './dialogs/FileDeleteDialog';
 import { useState } from 'react';
 import deleteFiles from '@/api/server/files/deleteFiles';
 import { httpErrorToHuman } from '@/api/axios';
+import compressFiles from '@/api/server/files/compressFiles';
 
 export default () => {
   const { addToast } = useToast();
-  const { server, browsingDirectory, browsingEntries, setBrowsingEntries, selectedFiles, setSelectedFiles } =
-    useServerStore();
+  const {
+    server,
+    browsingDirectory,
+    browsingEntries,
+    setBrowsingEntries,
+    addBrowsingEntry,
+    selectedFiles,
+    setSelectedFiles,
+  } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
+
+  const doArchive = () => {
+    compressFiles(
+      server.uuid,
+      browsingDirectory,
+      selectedFiles.map(f => f.name),
+    )
+      .then(entry => {
+        addToast(`Files have been archived.`, 'success');
+        setSelectedFiles([]);
+        addBrowsingEntry(entry);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
 
   const doDelete = () => {
     deleteFiles(
@@ -54,7 +78,7 @@ export default () => {
           transition={{ duration: 0.15 }}
         >
           <div className="flex items-center space-x-4 pointer-events-auto rounded p-4 bg-black/50">
-            <Button>
+            <Button onClick={doArchive}>
               <FontAwesomeIcon icon={faArchive} className="mr-2" /> Archive
             </Button>
             <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>

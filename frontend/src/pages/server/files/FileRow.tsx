@@ -115,14 +115,19 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       uuid: server.uuid,
       root: browsingDirectory,
       files: [{ file: file.name, mode: mode.toString() }],
-    }).catch(msg => {
-      addToast(httpErrorToHuman(msg), 'error');
-    });
+    })
+      .then(() => {
+        addToast(`Permissions have been updated.`, 'success');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   const doDecompress = () => {
     decompressFile(server.uuid, browsingDirectory, file.name)
       .then(() => {
+        addToast(`Archive has been decompressed.`, 'success');
         reloadDirectory();
       })
       .catch(msg => {
@@ -133,6 +138,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doCompress = () => {
     compressFiles(server.uuid, browsingDirectory, [file.name])
       .then(entry => {
+        addToast(`Archive has been created.`, 'success');
         addBrowsingEntry(entry);
       })
       .catch(msg => {
@@ -143,6 +149,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doDownload = () => {
     downloadFile(server.uuid, join(browsingDirectory, file.name), file.directory)
       .then(({ url }) => {
+        addToast(`Download started.`, 'success');
         window.open(url);
       })
       .catch(msg => {
