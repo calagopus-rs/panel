@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE servers\n            SET\n                owner_id = $1, egg_id = $2, external_id = $3,\n                name = $4, description = $5, cpu = $6, memory = $7,\n                swap = $8, disk = $9, io = $10, pinned_cpus = $11,\n                startup = $12, image = $13, allocation_limit = $14,\n                backup_limit = $15, database_limit = $16\n            WHERE id = $17",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4",
+        "Int8",
+        "Int8",
+        "Int8",
+        "Int4",
+        "Int2Array",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "34ac882ecbcbdbcc399457031fcedae5bc8dbfd070f4e3002a1a3c02b63296ce"
+}

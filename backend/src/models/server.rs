@@ -345,8 +345,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.id = $1
@@ -376,8 +376,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.node_id = $1 AND servers.uuid = $2
@@ -407,8 +407,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.id = $1 OR servers.uuid = $2
@@ -442,8 +442,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
@@ -486,8 +486,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
@@ -530,8 +530,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
@@ -574,8 +574,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.node_id = $1
@@ -615,8 +615,8 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.server_id = servers.id
-            LEFT JOIN node_allocations ON node_allocations.node_id = server_allocations.allocation_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LIMIT $1 OFFSET $2
