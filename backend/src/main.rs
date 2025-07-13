@@ -161,7 +161,7 @@ async fn main() {
         start_time: Instant::now(),
         version: format!("{VERSION}:{GIT_COMMIT}"),
 
-        settings,
+        settings: settings.clone(),
         jwt,
         captcha,
         mail,
@@ -246,6 +246,9 @@ async fn main() {
     openapi.info.title = "Panel API".to_string();
     openapi.info.contact = None;
     openapi.info.license = None;
+    openapi.servers = Some(vec![utoipa::openapi::Server::new(
+        settings.get().await.app.url.clone(),
+    )]);
     openapi.components.as_mut().unwrap().add_security_scheme(
         "api_key",
         SecurityScheme::ApiKey(ApiKey::Header(ApiKeyValue::new("Authorization"))),
