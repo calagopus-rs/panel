@@ -52,11 +52,11 @@ impl BaseModel for ServerAllocation {
 }
 
 impl ServerAllocation {
-    pub async fn new(
+    pub async fn create(
         database: &crate::database::Database,
         server_id: i32,
         allocation_id: i32,
-    ) -> bool {
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             INSERT INTO server_allocations (server_id, allocation_id)
@@ -65,59 +65,150 @@ impl ServerAllocation {
         )
         .bind(server_id)
         .bind(allocation_id)
-        .fetch_one(database.write())
-        .await
-        .is_ok()
+        .execute(database.write())
+        .await?;
+
+        Ok(())
     }
 
-    pub async fn all_by_server_id(
+    pub async fn create_random(
+        database: &crate::database::Database,
+        server: &super::server::Server,
+    ) -> Result<i32, sqlx::Error> {
+        let row = sqlx::query(
+            r#"
+            INSERT INTO server_allocations (server_id, allocation_id)
+            VALUES ($1, (
+                SELECT id FROM node_allocations
+                WHERE
+                    node_allocations.node_id = $2
+                    AND node_allocations.port BETWEEN $3 AND $4
+                ORDER BY RANDOM()
+                LIMIT 1
+            ))
+            RETURNING id
+            "#,
+        )
+        .bind(server.id)
+        .bind(server.node.id)
+        .bind(server.egg.config_allocations.user_self_assign.start_port as i32)
+        .bind(server.egg.config_allocations.user_self_assign.end_port as i32)
+        .fetch_one(database.write())
+        .await?;
+
+        Ok(row.get("id"))
+    }
+
+    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_allocations
+            JOIN node_allocations ON server_allocations.allocation_id = node_allocations.id
+            WHERE server_allocations.id = $1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_server_id_id(
         database: &crate::database::Database,
         server_id: i32,
-    ) -> Vec<Self> {
-        let rows = sqlx::query(&format!(
+        allocation_id: i32,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM server_allocations
-            JOIN mounts ON mounts.id = server_allocations.allocation_id
-            WHERE server_allocations.server_id = $1
+            JOIN node_allocations ON server_allocations.allocation_id = node_allocations.id
+            WHERE server_allocations.server_id = $1 AND server_allocations.id = $2
             "#,
-            Self::columns_sql(None, None),
-            super::node_allocation::NodeAllocation::columns_sql(Some("allocation_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(server_id)
+        .bind(allocation_id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_server_id_with_pagination(
+        database: &crate::database::Database,
+        server_id: i32,
+        page: i64,
+        per_page: i64,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_allocations
+            JOIN node_allocations ON server_allocations.allocation_id = node_allocations.id
+            WHERE server_allocations.server_id = $1
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(server_id)
+        .bind(per_page)
+        .bind(offset)
         .fetch_all(database.read())
         .await
         .unwrap();
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
     }
 
-    pub async fn delete_by_id(
-        database: &crate::database::Database,
-        server_id: i32,
-        allocation_id: i32,
-    ) {
-        sqlx::query(
+    pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
+        sqlx::query_scalar(
             r#"
-            DELETE FROM server_allocations
-            WHERE server_id = $1 AND allocation_id = $2
+            SELECT COUNT(*)
+            FROM server_allocations
+            WHERE server_allocations.server_id = $1
             "#,
         )
         .bind(server_id)
-        .bind(allocation_id)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
+    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+        sqlx::query(
+            r#"
+            DELETE FROM server_allocations
+            WHERE server_allocations.id = $1
+            "#,
+        )
+        .bind(id)
         .execute(database.write())
         .await
         .unwrap();
     }
 
     #[inline]
-    pub fn into_api_object(self, default: Option<i32>) -> ApiServerAllocation {
+    pub fn into_api_object(self, primary: Option<i32>) -> ApiServerAllocation {
         ApiServerAllocation {
+            id: self.id,
             ip: self.allocation.ip.ip().to_string(),
             ip_alias: self.allocation.ip_alias,
             port: self.allocation.port,
             notes: self.notes,
-            is_default: default.is_some_and(|d| d == self.id),
+            is_primary: primary.is_some_and(|p| p == self.id),
             created: self.created.and_utc(),
         }
     }
@@ -126,12 +217,14 @@ impl ServerAllocation {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "ServerAllocation")]
 pub struct ApiServerAllocation {
+    pub id: i32,
+
     pub ip: String,
     pub ip_alias: Option<String>,
     pub port: i32,
 
     pub notes: Option<String>,
-    pub is_default: bool,
+    pub is_primary: bool,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

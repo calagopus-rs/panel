@@ -136,6 +136,9 @@ mod post {
             config_startup,
             config_stop,
             data.scripts.installation,
+            crate::models::nest_egg::NestEggConfigAllocations {
+                user_self_assign: Default::default(),
+            },
             &data.startup,
             data.force_outgoing_ip,
             &data.features,
@@ -192,7 +195,7 @@ mod post {
             .log(
                 "admin:egg.import",
                 serde_json::json!({
-                    "nest": nest.name,
+                    "nest_id": nest.id,
 
                     "author": egg.author,
                     "name": egg.name,
@@ -202,6 +205,7 @@ mod post {
                     "config_startup": egg.config_startup,
                     "config_stop": egg.config_stop,
                     "config_script": egg.config_script,
+                    "config_allocations": egg.config_allocations,
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,

@@ -397,13 +397,12 @@ impl ServerSubuser {
     ) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM server_subusers
             JOIN users ON users.id = server_subusers.user_id
             WHERE server_subusers.server_id = $1 AND users.username = $2
             "#,
-            Self::columns_sql(None, None),
-            super::user::User::columns_sql(Some("user_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(server_id)
         .bind(username)
@@ -424,14 +423,13 @@ impl ServerSubuser {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_subusers
             JOIN users ON users.id = server_subusers.user_id
             WHERE server_subusers.server_id = $1
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
-            super::user::User::columns_sql(Some("user_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(server_id)
         .bind(per_page)

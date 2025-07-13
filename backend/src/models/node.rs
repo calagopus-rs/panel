@@ -175,13 +175,12 @@ impl Node {
     ) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             WHERE nodes.token_id = $1
             "#,
-            Self::columns_sql(None, None),
-            super::location::Location::columns_sql(Some("location_"), None),
+            Self::columns_sql(None, None)
         ))
         .bind(token_id)
         .fetch_optional(database.read())
@@ -212,14 +211,13 @@ impl Node {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             WHERE nodes.location_id = $1
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
-            super::location::Location::columns_sql(Some("location_"), None),
+            Self::columns_sql(None, None)
         ))
         .bind(location_id)
         .bind(per_page)
@@ -245,13 +243,12 @@ impl Node {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             LIMIT $1 OFFSET $2
             "#,
-            Self::columns_sql(None, None),
-            super::location::Location::columns_sql(Some("location_"), None),
+            Self::columns_sql(None, None)
         ))
         .bind(per_page)
         .bind(offset)

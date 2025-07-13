@@ -86,14 +86,13 @@ impl ServerVariable {
     ) -> Vec<Self> {
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM nest_egg_variables
             LEFT JOIN server_variables ON server_variables.variable_id = nest_egg_variables.id AND server_variables.server_id = $1
             WHERE nest_egg_variables.egg_id = $2
             ORDER BY nest_egg_variables.order_, nest_egg_variables.id
             "#,
-            Self::columns_sql(None, None),
-            super::nest_egg_variable::NestEggVariable::columns_sql(Some("variable_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(server_id)
         .bind(egg_id)

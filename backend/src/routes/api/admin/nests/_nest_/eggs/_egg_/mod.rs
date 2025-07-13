@@ -178,10 +178,16 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
+        #[schema(inline)]
         config_files: Option<Vec<crate::models::nest_egg::ProcessConfigurationFile>>,
+        #[schema(inline)]
         config_startup: Option<crate::models::nest_egg::NestEggConfigStartup>,
+        #[schema(inline)]
         config_stop: Option<crate::models::nest_egg::NestEggConfigStop>,
+        #[schema(inline)]
         config_script: Option<crate::models::nest_egg::NestEggConfigScript>,
+        #[schema(inline)]
+        config_allocations: Option<crate::models::nest_egg::NestEggConfigAllocations>,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
@@ -252,6 +258,9 @@ mod patch {
         if let Some(config_script) = data.config_script {
             egg.config_script = config_script;
         }
+        if let Some(config_allocations) = data.config_allocations {
+            egg.config_allocations = config_allocations;
+        }
         if let Some(startup) = data.startup {
             egg.startup = startup;
         }
@@ -273,9 +282,10 @@ mod patch {
             SET
                 author = $1, name = $2, description = $3,
                 config_files = $4, config_startup = $5, config_stop = $6,
-                config_script = $7, startup = $8, force_outgoing_ip = $9,
-                features = $10, docker_images = $11, file_denylist = $12
-            WHERE nest_id = $13 AND id = $14",
+                config_script = $7, config_allocations = $8, startup = $9,
+                force_outgoing_ip = $10, features = $11, docker_images = $12,
+                file_denylist = $13
+            WHERE nest_id = $14 AND id = $15",
             egg.author,
             egg.name,
             egg.description,
@@ -283,6 +293,7 @@ mod patch {
             serde_json::to_value(&egg.config_startup).unwrap(),
             serde_json::to_value(&egg.config_stop).unwrap(),
             serde_json::to_value(&egg.config_script).unwrap(),
+            serde_json::to_value(&egg.config_allocations).unwrap(),
             egg.startup,
             egg.force_outgoing_ip,
             &egg.features,
@@ -325,6 +336,7 @@ mod patch {
                     "config_startup": egg.config_startup,
                     "config_stop": egg.config_stop,
                     "config_script": egg.config_script,
+                    "config_allocations": egg.config_allocations,
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,

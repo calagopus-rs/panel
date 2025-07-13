@@ -347,7 +347,7 @@ impl Server {
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, {}, {}
+            SELECT {}
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -357,11 +357,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.id = $1
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(id)
         .fetch_optional(database.read())
@@ -378,7 +374,7 @@ impl Server {
     ) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, {}, {}
+            SELECT {}
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -388,11 +384,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.node_id = $1 AND servers.uuid = $2
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(node_id)
         .bind(uuid)
@@ -409,7 +401,7 @@ impl Server {
     ) -> Option<Self> {
         let query = format!(
             r#"
-            SELECT {}, {}, {}, {}, {}
+            SELECT {}
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -419,11 +411,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.id = $1 OR servers.uuid = $2
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         );
 
         let mut row = sqlx::query(&query).bind(identifier.parse::<i32>().ok()?);
@@ -444,7 +432,7 @@ impl Server {
     ) -> Option<Self> {
         let query = format!(
             r#"
-            SELECT {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files
+            SELECT {}, server_subusers.permissions, server_subusers.ignored_files
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -456,10 +444,6 @@ impl Server {
             WHERE servers.{} = $3 AND (servers.owner_id = $1 OR server_subusers.user_id = $1 OR $2)
             "#,
             Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None),
             match identifier.len() {
                 8 => "uuid_short",
                 36 => "uuid",
@@ -488,7 +472,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.id) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -501,11 +485,7 @@ impl Server {
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(user_id)
         .bind(per_page)
@@ -532,7 +512,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, {}, {}, {}, {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.id) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -545,11 +525,7 @@ impl Server {
             ORDER BY servers.id
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(user_id)
         .bind(per_page)
@@ -576,7 +552,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -587,11 +563,7 @@ impl Server {
             WHERE servers.node_id = $1
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(node_id)
         .bind(per_page)
@@ -617,7 +589,7 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, {}, {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM servers
             JOIN nodes ON nodes.id = servers.node_id
             JOIN locations ON locations.id = nodes.location_id
@@ -627,11 +599,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LIMIT $1 OFFSET $2
             "#,
-            Self::columns_sql(None, None),
-            super::server_allocation::ServerAllocation::columns_sql(Some("allocation_"), None),
-            super::node::Node::columns_sql(Some("node_"), None),
-            super::user::User::columns_sql(Some("owner_"), None),
-            super::nest_egg::NestEgg::columns_sql(Some("egg_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(per_page)
         .bind(offset)

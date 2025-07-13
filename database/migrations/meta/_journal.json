@@ -253,6 +253,13 @@
       "when": 1752422597524,
       "tag": "0035_damp_sleepwalker",
       "breakpoints": false
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1752440414443,
+      "tag": "0036_ancient_ultimates",
+      "breakpoints": false
     }
   ]
 }

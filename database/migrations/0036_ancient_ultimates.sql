@@ -1,0 +1,1 @@
+ALTER TABLE "nest_eggs" ADD COLUMN "config_allocations" jsonb DEFAULT '{}'::jsonb NOT NULL;

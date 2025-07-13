@@ -105,10 +105,16 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
+        #[schema(inline)]
         config_files: Vec<crate::models::nest_egg::ProcessConfigurationFile>,
+        #[schema(inline)]
         config_startup: crate::models::nest_egg::NestEggConfigStartup,
+        #[schema(inline)]
         config_stop: crate::models::nest_egg::NestEggConfigStop,
+        #[schema(inline)]
         config_script: crate::models::nest_egg::NestEggConfigScript,
+        #[schema(inline)]
+        config_allocations: crate::models::nest_egg::NestEggConfigAllocations,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
@@ -159,6 +165,7 @@ mod post {
             data.config_startup,
             data.config_stop,
             data.config_script,
+            data.config_allocations,
             &data.startup,
             data.force_outgoing_ip,
             &data.features,
@@ -198,6 +205,7 @@ mod post {
                     "config_startup": egg.config_startup,
                     "config_stop": egg.config_stop,
                     "config_script": egg.config_script,
+                    "config_allocations": egg.config_allocations,
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,

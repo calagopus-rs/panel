@@ -274,6 +274,7 @@ export const nestEggs = pgTable('nest_eggs', {
 	config_startup: jsonb('config_startup').notNull(),
 	config_stop: jsonb('config_stop').notNull(),
 	config_script: jsonb('config_script').notNull(),
+	config_allocations: jsonb('config_allocations').default({}).notNull(),
 
 	startup: varchar('startup', { length: 255 }).notNull(),
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),

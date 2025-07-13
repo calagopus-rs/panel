@@ -64,6 +64,33 @@ pub struct NestEggConfigScript {
     pub content: String,
 }
 
+#[derive(ToSchema, Serialize, Deserialize, Clone, Copy)]
+pub struct NestEggConfigAllocationsUserSelfAssign {
+    pub enabled: bool,
+    pub require_primary_allocation: bool,
+
+    pub start_port: u16,
+    pub end_port: u16,
+}
+
+impl Default for NestEggConfigAllocationsUserSelfAssign {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            require_primary_allocation: true,
+            start_port: 49152,
+            end_port: 65535,
+        }
+    }
+}
+
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+pub struct NestEggConfigAllocations {
+    #[schema(inline)]
+    #[serde(default)]
+    pub user_self_assign: NestEggConfigAllocationsUserSelfAssign,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NestEgg {
     pub id: i32,
@@ -76,6 +103,7 @@ pub struct NestEgg {
     pub config_startup: NestEggConfigStartup,
     pub config_stop: NestEggConfigStop,
     pub config_script: NestEggConfigScript,
+    pub config_allocations: NestEggConfigAllocations,
 
     pub startup: String,
     pub force_outgoing_ip: bool,
@@ -118,6 +146,10 @@ impl BaseModel for NestEgg {
             (
                 format!("{table}.config_script"),
                 format!("{prefix}config_script"),
+            ),
+            (
+                format!("{table}.config_allocations"),
+                format!("{prefix}config_allocations"),
             ),
             (format!("{table}.startup"), format!("{prefix}startup")),
             (
@@ -163,6 +195,10 @@ impl BaseModel for NestEgg {
                 row.get(format!("{prefix}config_script").as_str()),
             )
             .unwrap(),
+            config_allocations: serde_json::from_value(
+                row.get(format!("{prefix}config_allocations").as_str()),
+            )
+            .unwrap(),
             startup: row.get(format!("{prefix}startup").as_str()),
             force_outgoing_ip: row.get(format!("{prefix}force_outgoing_ip").as_str()),
             features: row.get(format!("{prefix}features").as_str()),
@@ -189,6 +225,7 @@ impl NestEgg {
         config_startup: NestEggConfigStartup,
         config_stop: NestEggConfigStop,
         config_script: NestEggConfigScript,
+        config_allocations: NestEggConfigAllocations,
         startup: &str,
         force_outgoing_ip: bool,
         features: &[String],
@@ -199,10 +236,10 @@ impl NestEgg {
             r#"
             INSERT INTO nest_eggs (
                 nest_id, author, name, description, config_files, config_startup,
-                config_stop, config_script, startup, force_outgoing_ip,
-                features, docker_images, file_denylist
+                config_stop, config_script, config_allocations, startup,
+                force_outgoing_ip, features, docker_images, file_denylist
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
@@ -215,6 +252,7 @@ impl NestEgg {
         .bind(serde_json::to_value(config_startup).unwrap())
         .bind(serde_json::to_value(config_stop).unwrap())
         .bind(serde_json::to_value(config_script).unwrap())
+        .bind(serde_json::to_value(config_allocations).unwrap())
         .bind(startup)
         .bind(force_outgoing_ip)
         .bind(features)
@@ -321,6 +359,7 @@ impl NestEgg {
             config_startup: self.config_startup,
             config_stop: self.config_stop,
             config_script: self.config_script,
+            config_allocations: self.config_allocations,
             startup: self.startup,
             force_outgoing_ip: self.force_outgoing_ip,
             features: self.features,
@@ -361,6 +400,8 @@ pub struct AdminApiNestEgg {
     pub config_stop: NestEggConfigStop,
     #[schema(inline)]
     pub config_script: NestEggConfigScript,
+    #[schema(inline)]
+    pub config_allocations: NestEggConfigAllocations,
 
     pub startup: String,
     pub force_outgoing_ip: bool,

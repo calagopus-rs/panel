@@ -18,6 +18,7 @@ use std::sync::Arc;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod activity;
+mod allocations;
 mod backups;
 mod command;
 mod files;
@@ -184,6 +185,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/startup", startup::router(state))
         .nest("/subusers", subusers::router(state))
         .nest("/backups", backups::router(state))
+        .nest("/allocations", allocations::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }
