@@ -42,6 +42,41 @@ pub async fn auth(
     Ok(next.run(req).await)
 }
 
+mod get {
+    use crate::routes::{ApiError, api::admin::nodes::_node_::GetNode};
+    use axum::http::StatusCode;
+    use serde::Serialize;
+    use utoipa::ToSchema;
+
+    #[derive(ToSchema, Serialize)]
+    struct Response {
+        node: crate::models::node::AdminApiNode,
+    }
+
+    #[utoipa::path(get, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
+        (status = BAD_REQUEST, body = ApiError),
+    ), params(
+        (
+            "node" = i32,
+            description = "The node ID",
+            example = "1",
+        ),
+    ))]
+    pub async fn route(node: GetNode) -> (StatusCode, axum::Json<serde_json::Value>) {
+        (
+            StatusCode::OK,
+            axum::Json(
+                serde_json::to_value(Response {
+                    node: node.0.into_admin_api_object(),
+                })
+                .unwrap(),
+            ),
+        )
+    }
+}
+
 mod delete {
     use crate::{
         models::node::Node,
@@ -86,8 +121,8 @@ mod delete {
             .log(
                 "admin:node.delete",
                 serde_json::json!({
-                    "location": node.location.name,
-                    "node": node.uuid,
+                    "location_id": node.location.id,
+                    "node_id": node.id,
 
                     "name": node.name,
                 }),
@@ -276,8 +311,7 @@ mod patch {
             .log(
                 "admin:node.update",
                 serde_json::json!({
-                    "location": node.location.name,
-                    "node": node.uuid,
+                    "node_id": node.id,
 
                     "name": node.name,
                     "public": node.public,
@@ -301,6 +335,7 @@ mod patch {
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/allocations", allocations::router(state))

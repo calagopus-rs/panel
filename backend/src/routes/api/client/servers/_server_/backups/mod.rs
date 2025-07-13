@@ -144,6 +144,14 @@ mod post {
             );
         }
 
+        let backups = ServerBackup::count_by_server_id(&state.database, server.id).await;
+        if backups >= server.backup_limit as i64 {
+            return (
+                StatusCode::EXPECTATION_FAILED,
+                axum::Json(ApiError::new_value(&["maximum number of backups reached"])),
+            );
+        }
+
         let backup =
             match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
                 .await

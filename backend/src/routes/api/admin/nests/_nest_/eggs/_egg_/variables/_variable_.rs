@@ -6,10 +6,7 @@ mod delete {
         models::nest_egg_variable::NestEggVariable,
         routes::{
             ApiError, GetState,
-            api::{
-                admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                client::GetUserActivityLogger,
-            },
+            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -41,7 +38,6 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetUserActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
@@ -63,8 +59,7 @@ mod delete {
             .log(
                 "admin:egg.delete-variable",
                 serde_json::json!({
-                    "nest": nest.name,
-                    "egg": egg.name,
+                    "egg_id": egg.id,
 
                     "name": egg_variable.name,
                     "env_variable": egg_variable.env_variable,
@@ -84,10 +79,7 @@ mod patch {
         models::nest_egg_variable::NestEggVariable,
         routes::{
             ApiError, GetState,
-            api::{
-                admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                client::GetUserActivityLogger,
-            },
+            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -145,7 +137,6 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetUserActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
@@ -242,8 +233,7 @@ mod patch {
             .log(
                 "admin:egg.update-variable",
                 serde_json::json!({
-                    "nest": nest.name,
-                    "egg": egg.name,
+                    "egg_id": egg.id,
 
                     "name": egg_variable.name,
                     "description": egg_variable.description,

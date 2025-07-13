@@ -240,6 +240,20 @@ impl ServerBackup {
         }
     }
 
+    pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM server_backups
+            WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            "#,
+        )
+        .bind(server_id)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
     pub async fn restore(
         &self,
         database: &crate::database::Database,

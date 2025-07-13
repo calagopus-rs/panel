@@ -119,7 +119,8 @@ mod delete {
             .log(
                 "admin:node.delete-allocations",
                 serde_json::json!({
-                    "name": node.name,
+                    "node_id": node.id,
+
                     "ids": data.ids
                 }),
             )
@@ -206,7 +207,8 @@ mod put {
             .log(
                 "admin:node.create-allocations",
                 serde_json::json!({
-                    "name": node.name,
+                    "node_id": node.id,
+
                     "ip": allocation_ip,
                     "ip_alias": data.ip_alias,
                     "ports": data.ports,

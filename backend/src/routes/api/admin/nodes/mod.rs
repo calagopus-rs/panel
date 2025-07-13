@@ -172,6 +172,8 @@ mod post {
             .log(
                 "admin:node.create",
                 serde_json::json!({
+                    "location_id": location.id,
+
                     "name": node.name,
                     "public": node.public,
                     "description": node.description,
@@ -181,8 +183,6 @@ mod post {
                     "sftp_port": node.sftp_port,
                     "memory": node.memory,
                     "disk": node.disk,
-
-                    "location_id": node.location.id,
                 }),
             )
             .await;

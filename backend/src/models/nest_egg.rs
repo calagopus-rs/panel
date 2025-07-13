@@ -258,6 +258,23 @@ impl NestEgg {
         }
     }
 
+    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM nest_eggs
+            WHERE nest_eggs.id = $1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
     pub async fn by_nest_id_id(
         database: &crate::database::Database,
         nest_id: i32,

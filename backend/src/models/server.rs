@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
+use validator::Validate;
 
 #[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
@@ -170,26 +171,21 @@ impl Server {
     #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
-        external_id: Option<String>,
-        allocation_id: Option<i32>,
-        allocation_ids: &[i32],
-        start_on_completion: bool,
         node: &super::node::Node,
         owner_id: i32,
         egg_id: i32,
+        allocation_id: Option<i32>,
+        allocation_ids: &[i32],
+        external_id: Option<&str>,
+        start_on_completion: bool,
+        skip_scripts: bool,
         name: &str,
         description: Option<&str>,
-        memory: i64,
-        swap: i64,
-        disk: i64,
-        io: i32,
-        cpu: i32,
+        limits: &ApiServerLimits,
         pinned_cpus: &[i16],
         startup: &str,
         image: &str,
-        allocation_limit: i32,
-        database_limit: i32,
-        backup_limit: i32,
+        feature_limits: &ApiServerFeatureLimits,
     ) -> Result<(i32, uuid::Uuid), sqlx::Error> {
         let mut transaction = database.write().begin().await?;
         let mut attempts = 0;
@@ -232,24 +228,24 @@ impl Server {
             )
             .bind(uuid)
             .bind(uuid_short)
-            .bind(external_id.as_deref())
+            .bind(external_id)
             .bind(allocation_id)
             .bind(node.id)
             .bind(owner_id)
             .bind(egg_id)
             .bind(name)
             .bind(description)
-            .bind(memory)
-            .bind(swap)
-            .bind(disk)
-            .bind(io)
-            .bind(cpu)
+            .bind(limits.memory)
+            .bind(limits.swap)
+            .bind(limits.disk)
+            .bind(limits.io)
+            .bind(limits.cpu)
             .bind(pinned_cpus)
             .bind(startup)
             .bind(image)
-            .bind(allocation_limit)
-            .bind(database_limit)
-            .bind(backup_limit)
+            .bind(feature_limits.allocations)
+            .bind(feature_limits.databases)
+            .bind(feature_limits.backups)
             .fetch_one(&mut *transaction)
             .await
             {
@@ -282,21 +278,25 @@ impl Server {
                         .await?;
                     }
 
+                    transaction.commit().await?;
+
                     if let Err(err) = node
                         .api_client(database)
                         .post_servers(&wings_api::servers::post::RequestBody {
                             uuid,
                             start_on_completion,
+                            skip_scripts,
                         })
                         .await
                     {
                         tracing::error!(server = %uuid, node = %node.uuid, "failed to create server: {:#?}", err);
-                        transaction.rollback().await?;
+
+                        sqlx::query!("DELETE FROM servers WHERE id = $1", id,)
+                            .execute(database.write())
+                            .await?;
 
                         return Err(sqlx::Error::Io(std::io::Error::other(err.1.error)));
                     }
-
-                    transaction.commit().await?;
 
                     return Ok((id, row.get("uuid")));
                 }
@@ -626,17 +626,39 @@ impl Server {
         }
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
-        sqlx::query(
-            r#"
-            DELETE FROM servers
-            WHERE servers.id = $1
-            "#,
-        )
-        .bind(id)
-        .execute(database.write())
-        .await
-        .unwrap();
+    pub async fn delete(
+        &self,
+        database: &crate::database::Database,
+        force: bool,
+    ) -> Result<(), sqlx::Error> {
+        let mut transaction = database.write().begin().await.unwrap();
+
+        sqlx::query!("DELETE FROM servers WHERE servers.id = $1", self.id)
+            .execute(&mut *transaction)
+            .await?;
+
+        match self
+            .node
+            .api_client(database)
+            .delete_servers_server(self.uuid)
+            .await
+        {
+            Ok(_) => {
+                transaction.commit().await?;
+                Ok(())
+            }
+            Err(err) => {
+                tracing::error!(server = %self.uuid, node = %self.node.uuid, "failed to delete server: {:#?}", err);
+
+                if force {
+                    transaction.commit().await?;
+                    return Ok(());
+                }
+
+                transaction.rollback().await?;
+                Err(sqlx::Error::Io(std::io::Error::other(err.1.error)))
+            }
+        }
     }
 
     #[inline]
@@ -938,19 +960,35 @@ pub struct RemoteApiServer {
     process_configuration: super::nest_egg::ProcessConfiguration,
 }
 
-#[derive(ToSchema, Serialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
 pub struct ApiServerLimits {
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub cpu: i32,
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub memory: i64,
+    #[validate(range(min = -1))]
+    #[schema(minimum = -1)]
     pub swap: i64,
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub disk: i64,
+    #[validate(range(min = 0, max = 1000))]
+    #[schema(minimum = 0, maximum = 1000)]
     pub io: i32,
 }
 
-#[derive(ToSchema, Serialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
 pub struct ApiServerFeatureLimits {
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub allocations: i32,
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub databases: i32,
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
     pub backups: i32,
 }
 

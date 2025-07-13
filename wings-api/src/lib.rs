@@ -288,6 +288,8 @@ pub mod servers {
                 pub uuid: uuid::Uuid,
                 #[schema(inline)]
                 pub start_on_completion: bool,
+                #[schema(inline)]
+                pub skip_scripts: bool,
             }
         }
 

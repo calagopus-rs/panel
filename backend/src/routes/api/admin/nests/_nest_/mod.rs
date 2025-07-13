@@ -54,6 +54,40 @@ pub async fn auth(
     Ok(next.run(req).await)
 }
 
+mod get {
+    use crate::routes::{ApiError, api::admin::nests::_nest_::GetNest};
+    use axum::http::StatusCode;
+    use serde::Serialize;
+    use utoipa::ToSchema;
+
+    #[derive(ToSchema, Serialize)]
+    struct Response {
+        nest: crate::models::nest::AdminApiNest,
+    }
+
+    #[utoipa::path(get, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
+    ), params(
+        (
+            "nest" = i32,
+            description = "The nest ID",
+            example = "1",
+        ),
+    ))]
+    pub async fn route(nest: GetNest) -> (StatusCode, axum::Json<serde_json::Value>) {
+        (
+            StatusCode::OK,
+            axum::Json(
+                serde_json::to_value(Response {
+                    nest: nest.0.into_admin_api_object(),
+                })
+                .unwrap(),
+            ),
+        )
+    }
+}
+
 mod delete {
     use crate::{
         models::nest::Nest,
@@ -218,6 +252,7 @@ mod patch {
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/eggs", eggs::router(state))

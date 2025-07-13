@@ -188,7 +188,7 @@ mod post {
             .log(
                 "admin:egg.create",
                 serde_json::json!({
-                    "nest": nest.name,
+                    "nest_id": nest.id,
 
                     "author": egg.author,
                     "name": egg.name,

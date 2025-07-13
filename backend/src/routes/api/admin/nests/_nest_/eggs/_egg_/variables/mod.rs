@@ -55,10 +55,7 @@ mod get {
 mod post {
     use crate::routes::{
         ApiError, GetState,
-        api::{
-            admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-            client::GetUserActivityLogger,
-        },
+        api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -111,7 +108,6 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -158,8 +154,7 @@ mod post {
             .log(
                 "admin:egg.create-variable",
                 serde_json::json!({
-                    "nest": nest.name,
-                    "egg": egg.name,
+                    "egg_id": egg.id,
 
                     "name": egg_variable.name,
                     "description": egg_variable.description,
