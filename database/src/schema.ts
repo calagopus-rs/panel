@@ -360,7 +360,7 @@ export const servers = pgTable('servers', {
 	memory: bigint('memory', { mode: 'number' }).notNull(),
 	swap: bigint('swap', { mode: 'number' }).notNull(),
 	disk: bigint('disk', { mode: 'number' }).notNull(),
-	io: integer('io').notNull(),
+	io_weight: smallint('io_weight'),
 	cpu: integer('cpu').notNull(),
 	pinned_cpus: smallint('pinned_cpus').array().notNull(),
 

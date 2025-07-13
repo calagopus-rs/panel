@@ -1,0 +1,1 @@
+ALTER TABLE "servers" RENAME COLUMN "io" TO "io_weight";

@@ -202,7 +202,7 @@ nestify::nest! {
             #[schema(inline)]
             pub swap: i64,
             #[schema(inline)]
-            pub io_weight: u32,
+            pub io_weight: Option<u32>,
             #[schema(inline)]
             pub cpu_limit: i64,
             #[schema(inline)]

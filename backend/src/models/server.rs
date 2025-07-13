@@ -37,7 +37,7 @@ pub struct Server {
     pub memory: i64,
     pub swap: i64,
     pub disk: i64,
-    pub io: i32,
+    pub io_weight: Option<i16>,
     pub cpu: i32,
     pub pinned_cpus: Vec<i16>,
 
@@ -87,7 +87,7 @@ impl BaseModel for Server {
             (format!("{table}.memory"), format!("{prefix}memory")),
             (format!("{table}.swap"), format!("{prefix}swap")),
             (format!("{table}.disk"), format!("{prefix}disk")),
-            (format!("{table}.io"), format!("{prefix}io")),
+            (format!("{table}.io_weight"), format!("{prefix}io_weight")),
             (format!("{table}.cpu"), format!("{prefix}cpu")),
             (
                 format!("{table}.pinned_cpus"),
@@ -151,7 +151,7 @@ impl BaseModel for Server {
             memory: row.get(format!("{prefix}memory").as_str()),
             swap: row.get(format!("{prefix}swap").as_str()),
             disk: row.get(format!("{prefix}disk").as_str()),
-            io: row.get(format!("{prefix}io").as_str()),
+            io_weight: row.get(format!("{prefix}io_weight").as_str()),
             cpu: row.get(format!("{prefix}cpu").as_str()),
             pinned_cpus: row.get(format!("{prefix}pinned_cpus").as_str()),
             startup: row.get(format!("{prefix}startup").as_str()),
@@ -205,10 +205,11 @@ impl Server {
                     egg_id,
                     name,
                     description,
+                    status,
                     memory,
                     swap,
                     disk,
-                    io,
+                    io_weight,
                     cpu,
                     pinned_cpus,
                     startup,
@@ -233,10 +234,15 @@ impl Server {
             .bind(egg_id)
             .bind(name)
             .bind(description)
+            .bind(if skip_scripts {
+                None
+            } else {
+                Some(ServerStatus::Installing)
+            })
             .bind(limits.memory)
             .bind(limits.swap)
             .bind(limits.disk)
-            .bind(limits.io)
+            .bind(limits.io_weight)
             .bind(limits.cpu)
             .bind(pinned_cpus)
             .bind(startup)
@@ -833,7 +839,7 @@ impl Server {
                 build: wings_api::ServerConfigurationBuild {
                     memory_limit: self.memory,
                     swap: self.swap,
-                    io_weight: self.io as u32,
+                    io_weight: self.io_weight.map(|w| w as u32),
                     cpu_limit: self.cpu as i64,
                     disk_space: self.disk as u64,
                     threads: {
@@ -902,7 +908,7 @@ impl Server {
                 memory: self.memory,
                 swap: self.swap,
                 disk: self.disk,
-                io: self.io,
+                io_weight: self.io_weight,
             },
             pinned_cpus: self.pinned_cpus,
             feature_limits: ApiServerFeatureLimits {
@@ -954,7 +960,7 @@ impl Server {
                 memory: self.memory,
                 swap: self.swap,
                 disk: self.disk,
-                io: self.io,
+                io_weight: self.io_weight,
             },
             feature_limits: ApiServerFeatureLimits {
                 allocations: self.allocation_limit,
@@ -991,7 +997,7 @@ pub struct ApiServerLimits {
     pub disk: i64,
     #[validate(range(min = 0, max = 1000))]
     #[schema(minimum = 0, maximum = 1000)]
-    pub io: i32,
+    pub io_weight: Option<i16>,
 }
 
 #[derive(ToSchema, Validate, Serialize, Deserialize)]

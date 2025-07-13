@@ -1,0 +1,1 @@
+ALTER TABLE "servers" ALTER COLUMN "io" SET DATA TYPE smallint;

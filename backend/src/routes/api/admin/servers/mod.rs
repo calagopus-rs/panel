@@ -121,6 +121,7 @@ mod post {
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
@@ -185,6 +186,14 @@ mod post {
         .await
         {
             Ok((server_id, _)) => Server::by_id(&state.database, server_id).await.unwrap(),
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return (
+                    StatusCode::CONFLICT,
+                    axum::Json(ApiError::new_value(&[
+                        "server with allocation(s) already exists",
+                    ])),
+                );
+            }
             Err(err) => {
                 tracing::error!("failed to create server: {:#?}", err);
 

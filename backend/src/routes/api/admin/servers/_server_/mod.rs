@@ -253,7 +253,7 @@ mod patch {
             server.memory = limits.memory;
             server.swap = limits.swap;
             server.disk = limits.disk;
-            server.io = limits.io;
+            server.io_weight = limits.io_weight;
         }
         if let Some(pinned_cpus) = data.pinned_cpus {
             server.pinned_cpus = pinned_cpus;
@@ -275,7 +275,7 @@ mod patch {
             SET
                 owner_id = $1, egg_id = $2, external_id = $3,
                 name = $4, description = $5, cpu = $6, memory = $7,
-                swap = $8, disk = $9, io = $10, pinned_cpus = $11,
+                swap = $8, disk = $9, io_weight = $10, pinned_cpus = $11,
                 startup = $12, image = $13, allocation_limit = $14,
                 backup_limit = $15, database_limit = $16
             WHERE id = $17",
@@ -288,7 +288,7 @@ mod patch {
             server.memory,
             server.swap,
             server.disk,
-            server.io,
+            server.io_weight,
             &server.pinned_cpus,
             server.startup,
             server.image,
