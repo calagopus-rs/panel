@@ -91,7 +91,7 @@ mod post {
             .log(
                 "server:file.write",
                 serde_json::json!({
-                    "file": params.file.trim_start_matches('/'),
+                    "file": params.file,
                 }),
             )
             .await;

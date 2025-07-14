@@ -174,7 +174,7 @@ mod post {
                 "server:file.pull",
                 serde_json::json!({
                     "identifier": data.identifier,
-                    "directory": request_body.root.trim_start_matches('/'),
+                    "directory": request_body.root,
                     "url": request_body.url,
                 }),
             )

@@ -94,7 +94,7 @@ mod put {
             .log(
                 "server:file.rename",
                 serde_json::json!({
-                    "directory": request_body.root.trim_start_matches('/'),
+                    "directory": request_body.root,
                     "files": request_body.files,
                 }),
             )

@@ -90,10 +90,10 @@ mod post {
 
         activity_logger
             .log(
-                "server:file.compress",
+                "server:file.decompress",
                 serde_json::json!({
-                    "directory": request_body.root.trim_start_matches('/'),
-                    "file": request_body.file.trim_start_matches('/'),
+                    "directory": request_body.root,
+                    "file": request_body.file,
                 }),
             )
             .await;

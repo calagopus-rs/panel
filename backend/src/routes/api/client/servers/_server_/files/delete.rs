@@ -91,8 +91,8 @@ mod post {
             .log(
                 "server:file.delete",
                 serde_json::json!({
-                    "directory": request_body.root.trim_start_matches('/'),
-                    "files": request_body.files.iter().map(|f| f.trim_start_matches('/')).collect::<Vec<_>>(),
+                    "directory": request_body.root,
+                    "files": request_body.files.iter().map(|f| f).collect::<Vec<_>>(),
                 }),
             )
             .await;

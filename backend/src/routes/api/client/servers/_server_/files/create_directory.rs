@@ -99,8 +99,8 @@ mod post {
             .log(
                 "server:file.create-directory",
                 serde_json::json!({
-                    "directory": request_body.path.trim_start_matches('/'),
-                    "name": request_body.name.trim_start_matches('/'),
+                    "directory": request_body.path,
+                    "name": request_body.name,
                 }),
             )
             .await;

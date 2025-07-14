@@ -10,7 +10,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response<'a> {
-        permissions:
+        subuser_permissions:
             &'a IndexMap<&'static str, (&'static str, IndexMap<&'static str, &'static str>)>,
     }
 
@@ -22,7 +22,7 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    permissions: &PERMISSIONS,
+                    subuser_permissions: &PERMISSIONS,
                 })
                 .unwrap(),
             ),

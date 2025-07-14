@@ -115,7 +115,7 @@ mod get {
             .log(
                 "server:file.download",
                 serde_json::json!({
-                    "file": params.file.trim_start_matches('/'),
+                    "file": params.file,
                     "directory": params.directory,
                 }),
             )
