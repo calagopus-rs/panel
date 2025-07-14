@@ -1,6 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import { useEffect, useState } from 'react';
-import { Route, Routes, useNavigate, useParams } from 'react-router';
+import { Route, Routes, useParams } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
@@ -24,7 +24,6 @@ import ServerConsole from '@/pages/server/console/ServerConsole';
 import ServerFiles from '@/pages/server/files/ServerFiles';
 import ServerDatabases from '@/pages/server/databases/ServerDatabases';
 import ServerSchedules from '@/pages/server/schedules/ServerSchedules';
-import ServerUsers from '@/pages/server/users/ServerUsers';
 import ServerBackups from '@/pages/server/backups/ServerBackups';
 import ServerNetwork from '@/pages/server/network/ServerNetwork';
 import ServerStartup from '@/pages/server/startup/ServerStartup';
@@ -38,6 +37,7 @@ import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
 import getServer from '@/api/server/getServer';
+import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 
 export default () => {
   const params = useParams<'id'>();
@@ -93,9 +93,9 @@ export default () => {
               <FontAwesomeIcon icon={faStopwatch} />
               <span>Schedules</span>
             </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/users`} end>
+            <Sidebar.Link to={`/server/${params.id}/subusers`} end>
               <FontAwesomeIcon icon={faUsers} />
-              <span>Users</span>
+              <span>Subusers</span>
             </Sidebar.Link>
             <Sidebar.Link to={`/server/${params.id}/backups`} end>
               <FontAwesomeIcon icon={faBoxArchive} />
@@ -138,7 +138,7 @@ export default () => {
                 <Route path="/databases" element={<ServerDatabases />} />
                 <Route path="/schedules" element={<ServerSchedules />} />
                 <Route path="/schedules/:id" element={<ScheduleView />} />
-                <Route path="/users" element={<ServerUsers />} />
+                <Route path="/subusers" element={<ServerSubusers />} />
                 <Route path="/backups" element={<ServerBackups />} />
                 <Route path="/network" element={<ServerNetwork />} />
                 <Route path="/startup" element={<ServerStartup />} />
