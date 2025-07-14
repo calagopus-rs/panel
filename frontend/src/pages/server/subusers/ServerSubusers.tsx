@@ -6,11 +6,12 @@ import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import SubuserRow from './SubuserRow';
-import SubuserCreateDialog from './dialogs/SubuserCreateDialog';
+import SubuserCreateOrUpdateDialog from './dialogs/SubuserCreateOrUpdateDialog';
 import createSubuser from '@/api/server/subusers/createSubuser';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,7 +50,11 @@ export default () => {
 
   return (
     <Container>
-      <SubuserCreateDialog onCreated={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
+      <SubuserCreateOrUpdateDialog
+        onCreated={doCreate}
+        open={openDialog === 'create'}
+        onClose={() => setOpenDialog(null)}
+      />
 
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Users</h1>
@@ -66,13 +71,16 @@ export default () => {
                 <TableHeader name="Username" />
                 <TableHeader name="2FA Enabled" />
                 <TableHeader name="Permissions" />
+                <TableHeader />
               </TableHead>
 
-              <TableBody>
-                {subusers.data.map(su => (
-                  <SubuserRow subuser={su} key={su.user.id} />
-                ))}
-              </TableBody>
+              <ContextMenuProvider>
+                <TableBody>
+                  {subusers.data.map(su => (
+                    <SubuserRow subuser={su} key={su.user.id} />
+                  ))}
+                </TableBody>
+              </ContextMenuProvider>
             </table>
 
             {loading ? <Spinner.Centered /> : subusers.data.length === 0 ? <NoItems /> : null}
