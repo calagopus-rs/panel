@@ -310,54 +310,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend"
-version = "0.1.0"
-dependencies = [
- "axum",
- "base32",
- "chrono",
- "colored",
- "constant_time_eq 0.4.2",
- "dotenvy",
- "futures-util",
- "hmac",
- "ignore",
- "image",
- "include_dir",
- "indexmap",
- "jwt",
- "lettre",
- "rand 0.9.1",
- "regex",
- "reqwest",
- "rule-validator",
- "russh",
- "rust-s3",
- "rustis",
- "sentry",
- "sentry-tower",
- "serde",
- "serde_json",
- "sha2",
- "simple_crypt",
- "sqlx",
- "tokio",
- "totp-rs",
- "tower",
- "tower-cookies",
- "tower-http",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "urlencoding",
- "utoipa",
- "utoipa-axum",
- "uuid",
- "validator",
- "wings-api",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2555,6 +2507,54 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "windows",
+]
+
+[[package]]
+name = "panel-rs"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base32",
+ "chrono",
+ "colored",
+ "constant_time_eq 0.4.2",
+ "dotenvy",
+ "futures-util",
+ "hmac",
+ "ignore",
+ "image",
+ "include_dir",
+ "indexmap",
+ "jwt",
+ "lettre",
+ "rand 0.9.1",
+ "regex",
+ "reqwest",
+ "rule-validator",
+ "russh",
+ "rust-s3",
+ "rustis",
+ "sentry",
+ "sentry-tower",
+ "serde",
+ "serde_json",
+ "sha2",
+ "simple_crypt",
+ "sqlx",
+ "tokio",
+ "totp-rs",
+ "tower",
+ "tower-cookies",
+ "tower-http",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "urlencoding",
+ "utoipa",
+ "utoipa-axum",
+ "uuid",
+ "validator",
+ "wings-api",
 ]
 
 [[package]]

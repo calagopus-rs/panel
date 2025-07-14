@@ -1,0 +1,203 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+
+env:
+  BIN_NAME: panel-rs
+  PROJECT_NAME: panel-rs
+  REPO_NAME: pterodactyl-rs/panel
+
+jobs:
+  dist:
+    name: Dist
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [x86_64-linux, x86_64-linux-musl, aarch64-linux, aarch64-linux-musl]
+        include:
+        - build: x86_64-linux
+          os: ubuntu-22.04
+          rust: stable
+          target: x86_64-unknown-linux-gnu
+          cross: false
+        - build: x86_64-linux-musl
+          os: ubuntu-22.04
+          rust: stable
+          target: x86_64-unknown-linux-musl
+          cross: true
+        - build: aarch64-linux
+          os: ubuntu-22.04-arm
+          rust: stable
+          target: aarch64-unknown-linux-gnu
+          cross: false
+        - build: aarch64-linux-musl
+          os: ubuntu-22.04
+          rust: stable
+          target: aarch64-unknown-linux-musl
+          cross: true
+
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install frontend dependencies
+        run: |
+          cd ./frontend
+          pnpm install
+          
+      - name: Build frontend
+        run: |
+          cd ./frontend
+          pnpm build
+
+      - name: Install ${{ matrix.rust }} toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          target: ${{ matrix.target }}
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: ${{ runner.os }}-${{ matrix.rust }}-${{ matrix.target }}
+
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.cross }}
+          command: test
+          args: --release --target ${{ matrix.target }}
+
+      - name: Build release binary
+        uses: actions-rs/cargo@v1
+        with:
+          use-cross: ${{ matrix.cross }}
+          command: build
+          args: --release --target ${{ matrix.target }}
+
+      - name: Strip release binary (linux and macos)
+        if: matrix.build == 'x86_64-linux'
+        run: strip "target/${{ matrix.target }}/release/$BIN_NAME"
+
+      - name: Prepare binary with platform name
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target }}/release/$BIN_NAME" "dist/$BIN_NAME-${{ matrix.build }}"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.PROJECT_NAME }}-${{ matrix.build }}
+          path: dist/${{ env.BIN_NAME }}-${{ matrix.build }}
+
+  publish:
+    name: Publish
+    needs: [dist]
+    runs-on: ubuntu-latest
+    permissions: 
+      contents: write
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Get cli version from Cargo.toml
+        id: version
+        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' -r)" >> $GITHUB_OUTPUT
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: artifacts/*/*
+          file_glob: true
+          tag: ${{ steps.version.outputs.val }}
+          overwrite: true
+
+  create-multiarch-image:
+    name: Create multi-arch Docker image
+    needs: [dist]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Prepare binaries
+        run: |
+          chmod +x dist/${{ env.PROJECT_NAME }}-x86_64-linux/${{ env.BIN_NAME }}-x86_64-linux
+          chmod +x dist/${{ env.PROJECT_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux
+
+          mkdir -p .docker/amd64 .docker/arm64
+          cp dist/${{ env.BIN_NAME }}-x86_64-linux/${{ env.BIN_NAME }}-x86_64-linux .docker/amd64/panel-rs
+          cp dist/${{ env.BIN_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux .docker/arm64/panel-rs
+
+      - name: Get cli version from Cargo.toml
+        id: version
+        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' -r)" >> $GITHUB_OUTPUT
+
+      - name: Build and push multi-arch Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ghcr.io/${{ env.REPO_NAME }}:latest,ghcr.io/${{ env.REPO_NAME }}:${{ steps.version.outputs.val }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
