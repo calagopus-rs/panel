@@ -17,7 +17,6 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
 
   const submit = () => {
     onDirectoryNamed(dirName);
-    onClose();
   };
 
   return (

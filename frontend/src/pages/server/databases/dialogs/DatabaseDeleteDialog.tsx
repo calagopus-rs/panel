@@ -14,7 +14,6 @@ export default ({ databaseName, onDeleted, open, onClose }: Props) => {
 
   const submit = () => {
     onDeleted();
-    onClose();
   };
 
   return (

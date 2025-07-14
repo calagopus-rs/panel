@@ -80,7 +80,6 @@ export default ({ file, onChange, open, onClose }: Props) => {
   const handleSave = () => {
     const newPermissions = getOctalValue();
     onChange(newPermissions);
-    onClose();
   };
 
   const PermissionGroup = ({ title, category, perms }) => (

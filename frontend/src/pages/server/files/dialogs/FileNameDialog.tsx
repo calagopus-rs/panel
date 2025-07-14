@@ -12,7 +12,6 @@ export default ({ onFileNamed, open, onClose }: Props) => {
 
   const submit = () => {
     onFileNamed(fileName);
-    onClose();
   };
 
   return (

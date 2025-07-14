@@ -117,6 +117,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       files: [{ file: file.name, mode: mode.toString() }],
     })
       .then(() => {
+        setOpenDialog(null);
         addToast(`Permissions have been updated.`, 'success');
       })
       .catch(msg => {

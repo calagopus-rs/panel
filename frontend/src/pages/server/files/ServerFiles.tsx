@@ -68,10 +68,14 @@ export default () => {
   };
 
   const makeDirectory = (name: string) => {
-    createDirectory(server.uuid, browsingDirectory, name).then(() => {
-      setOpenDialog(null);
-      setSearchParams({ directory: join(browsingDirectory, name) });
-    });
+    createDirectory(server.uuid, browsingDirectory, name)
+      .then(() => {
+        setOpenDialog(null);
+        setSearchParams({ directory: join(browsingDirectory, name) });
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (
