@@ -1,9 +1,10 @@
 interface Location {
   id: number;
-  short_name: string;
+  shortName: string;
   name: string;
   description: string | null;
-  backups: LocationConfigBackup;
+  backupDisk: LocationConfigBackupType;
+  backupConfigs: LocationConfigBackup;
   nodes: number;
   created: Date;
 }
@@ -14,6 +15,64 @@ interface Nest {
   name: string;
   description: string | null;
   eggs: number;
+  created: Date;
+}
+
+interface AdminNestEgg {
+  id: number;
+  author: string;
+  name: string;
+  description: string;
+  configFiles: {
+    file: string;
+    parser: ProcessConfigurationConfigParser;
+    replace: {
+      match: string;
+      ifValue: string | null;
+      replaceWith: string;
+    }[];
+  };
+  configStartup: {
+    done: string[];
+    stripAnsi: boolean;
+  };
+  configStop: {
+    type: string;
+    value: string | null;
+  };
+  configScript: {
+    container: string;
+    entrypoint: string;
+    content: string;
+  };
+  configAllocations: {
+    userSelfAssign: {
+      enabled: boolean;
+      requirePrimaryAllocation: boolean;
+      startPort: number;
+      endPort: number;
+    };
+  };
+  startup: string;
+  forceOutgoingIp: boolean;
+  features: string[];
+  dockerImages: {
+    [key: string]: string;
+  }[];
+  fileDenylist: string[];
+  created: Date;
+}
+
+interface NestEggVariable {
+  id: number;
+  name: string;
+  description: string | null;
+  order: number;
+  envVariable: string;
+  defaultValue: string | null;
+  userViewable: boolean;
+  userEditable: boolean;
+  rules: string[];
   created: Date;
 }
 
@@ -44,13 +103,46 @@ interface NodeAllocation {
   created: Date;
 }
 
+interface AdminServer {
+  id: number;
+  uuid: string;
+  uuidShort: string;
+  externalId: string | null;
+  allocation: ServerAllocation | null;
+  node: Node;
+  ower: User;
+  egg: AdminNestEgg;
+  status: ServerStatus | null;
+  suspended: boolean;
+  name: string;
+  description: string | null;
+  limits: {
+    cpu: number;
+    memory: number;
+    swap: number;
+    disk: number;
+    ioWeight: number;
+  };
+  pinnedCpus: number[];
+  feature_limits: {
+    allocations: number;
+    databases: number;
+    backups: number;
+  };
+  startup: string;
+  image: string;
+  created: Date;
+}
+
 interface NestEgg {
   id: number;
   name: string;
   description: string | null;
   startup: string;
   features: string[];
-  dockerImages: string[];
+  dockerImages: {
+    [key: string]: string;
+  }[];
   created: Date;
 }
 
@@ -71,18 +163,8 @@ interface ApiServer {
   sftpPort: number;
   name: string;
   description: string | null;
-  limits: {
-    cpu: number;
-    memory: number;
-    swap: number;
-    disk: number;
-    io: number;
-  };
-  feature_limits: {
-    allocations: number;
-    databases: number;
-    backups: number;
-  };
+  limits: ApiServerLimits;
+  feature_limits: ApiServerFeatureLimits;
   startup: string;
   image: string;
   created: Date;
@@ -92,24 +174,63 @@ interface ServerActivity {
   id: number;
   user: User;
   event: string;
-  ip: string;
+  ip: string | null;
   data: Object | null;
   isApi: boolean;
   created: Date;
 }
 
 interface ServerAllocation {
+  id: number;
   ip: string;
   ipAlias: string | null;
   port: number;
   notes: string | null;
-  isDefault: boolean;
+  isPrimary: boolean;
   created: Date;
+}
+
+interface ServerBackup {
+  uuid: string;
+  name: string;
+  ignoredFiles: string[];
+  isSuccessful: boolean;
+  isLocked: boolean;
+  checksum: string | null;
+  bytes: number;
+  completed: Date | null;
+  created: Date;
+}
+
+interface ApiServerFeatureLimits {
+  allocations: number;
+  databases: number;
+  backups: number;
+}
+
+interface ApiServerLimits {
+  cpu: number;
+  memory: number;
+  swap: number;
+  disk: number;
+  ioWeight: number;
 }
 
 interface ServerSubuser {
   user: User;
   permissions: string[];
+  ignoredFiles: string[];
+  created: Date;
+}
+
+interface ServerVariable {
+  name: string;
+  description: string | null;
+  envVariable: string;
+  defaultValue: string | null;
+  value: string;
+  isEditable: boolean;
+  rules: string[];
   created: Date;
 }
 
