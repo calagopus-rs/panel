@@ -8,11 +8,13 @@ export interface SubusersSlice {
   setSubusers: (subusers: ResponseMeta<ServerSubuser>) => void;
   addSubuser: (subusers: ServerSubuser) => void;
   removeSubuser: (subusers: ServerSubuser) => void;
+
+  availablePermissions: PermissionData;
+  setAvailablePermissions: (permissions: PermissionData) => void;
 }
 
 export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlice> = (set): SubusersSlice => ({
   subusers: getEmptyPaginationSet<ServerSubuser>(),
-
   setSubusers: value => set(state => ({ ...state, subusers: value })),
   addSubuser: subuser =>
     set(state => ({
@@ -30,4 +32,7 @@ export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlic
         total: state.subusers.total - 1,
       },
     })),
+
+  availablePermissions: null,
+  setAvailablePermissions: value => set(state => ({ ...state, availablePermissions: value })),
 });

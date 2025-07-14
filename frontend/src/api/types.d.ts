@@ -458,3 +458,12 @@ type ServerPowerState = 'offline' | 'starting' | 'stopping' | 'running';
 type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
 
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
+
+interface PermissionData {
+  [category: string]: [
+    string,
+    {
+      [permission: string]: string;
+    },
+  ];
+}

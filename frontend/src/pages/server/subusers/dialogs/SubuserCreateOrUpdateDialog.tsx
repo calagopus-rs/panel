@@ -3,6 +3,7 @@ import Captcha from '@/elements/Captcha';
 import { Dialog, DialogProps } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import { useRef, useState } from 'react';
+import PermissionSelector from '../PermissionSelector';
 
 type Props = DialogProps & {
   subuser?: ServerSubuser;
@@ -26,28 +27,34 @@ export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
   };
 
   return (
-    <Dialog title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} open={open}>
+    <Dialog title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} open={open} hideCloseIcon>
       {subuser ? (
         <div className="mt-4">
           <Input.Label htmlFor="username">Username</Input.Label>
           <Input.Text id="username" name="username" disabled value={subuser.user.username} />
         </div>
       ) : (
-        <>
-          <div className="mt-4">
-            <Input.Label htmlFor="email">Email</Input.Label>
-            <Input.Text
-              id="email"
-              name="email"
-              placeholder="Enter the email that this subuser should be saved as."
-              autoFocus
-              onChange={e => setEmail(e.target.value)}
-            />
-          </div>
-          <div className="mt-4">
-            <Captcha ref={captchaRef} />
-          </div>
-        </>
+        <div className="mt-4">
+          <Input.Label htmlFor="email">Email</Input.Label>
+          <Input.Text
+            id="email"
+            name="email"
+            placeholder="Enter the email that this subuser should be saved as."
+            autoFocus
+            onChange={e => setEmail(e.target.value)}
+          />
+        </div>
+      )}
+
+      <div className="mt-4">
+        <Input.Label htmlFor="permissions">Permissions</Input.Label>
+        <PermissionSelector />
+      </div>
+
+      {!subuser && (
+        <div className="mt-4">
+          <Captcha ref={captchaRef} />
+        </div>
       )}
 
       <Dialog.Footer>

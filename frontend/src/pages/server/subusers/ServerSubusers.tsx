@@ -12,11 +12,12 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import getPermissions from '@/api/getPermissions';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
-  const { server, subusers, setSubusers, addSubuser } = useServerStore();
+  const { server, subusers, setSubusers, addSubuser, setAvailablePermissions } = useServerStore();
 
   const [loading, setLoading] = useState(subusers.data.length === 0);
   const [openDialog, setOpenDialog] = useState<'create'>(null);
@@ -24,6 +25,10 @@ export default () => {
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
+
+    getPermissions().then(permissions => {
+      setAvailablePermissions(permissions);
+    });
   }, []);
 
   const onPageSelect = (page: number) => {
