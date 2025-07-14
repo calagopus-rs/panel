@@ -10,20 +10,31 @@ import SubuserCreateDialog from './dialogs/SubuserCreateDialog';
 import createSubuser from '@/api/server/subusers/createSubuser';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
+import { useSearchParams } from 'react-router';
 
 export default () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
   const { server, subusers, setSubusers, addSubuser } = useServerStore();
 
   const [loading, setLoading] = useState(subusers.data.length === 0);
   const [openDialog, setOpenDialog] = useState<'create'>(null);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    getSubusers(server.uuid).then(data => {
+    setPage(Number(searchParams.get('page')) || 1);
+  }, []);
+
+  const onPageSelect = (page: number) => {
+    setSearchParams({ page: page.toString() });
+  };
+
+  useEffect(() => {
+    getSubusers(server.uuid, page).then(data => {
       setSubusers(data);
       setLoading(false);
     });
-  }, []);
+  }, [page]);
 
   const doCreate = (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => {
     createSubuser(server.uuid, { email, permissions, ignoredFiles, captcha })
@@ -47,7 +58,7 @@ export default () => {
         </div>
       </div>
       <Table>
-        <Pagination data={subusers} onPageSelect={() => {}}>
+        <Pagination data={subusers} onPageSelect={onPageSelect}>
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <TableHead>
