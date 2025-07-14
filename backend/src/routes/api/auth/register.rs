@@ -63,6 +63,16 @@ mod post {
             );
         }
 
+        let settings = state.settings.get().await;
+        if !settings.app.registration_enabled {
+            return (
+                StatusCode::BAD_REQUEST,
+                axum::Json(ApiError::new_value(&["registration is disabled"])),
+            );
+        }
+
+        drop(settings);
+
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
             return (
                 StatusCode::BAD_REQUEST,

@@ -68,6 +68,7 @@ pub struct AppSettingsApp {
     pub url: String,
 
     pub telemetry_enabled: bool,
+    pub registration_enabled: bool,
 }
 
 impl AppSettingsApp {
@@ -83,6 +84,8 @@ impl AppSettingsApp {
         values.push(self.url.clone());
         keys.push("app::telemetry_enabled");
         values.push(self.telemetry_enabled.to_string());
+        keys.push("app::registration_enabled");
+        values.push(self.registration_enabled.to_string());
 
         (keys, values)
     }
@@ -98,6 +101,10 @@ impl AppSettingsApp {
                 .unwrap_or_else(|| "https://example.com".to_string()),
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
+                .map(|s| s == "true")
+                .unwrap_or(true),
+            registration_enabled: map
+                .remove("app::registration_enabled")
                 .map(|s| s == "true")
                 .unwrap_or(true),
         }

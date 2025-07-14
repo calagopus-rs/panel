@@ -43,6 +43,7 @@ mod put {
         icon: Option<String>,
         url: Option<String>,
         telemetry_enabled: Option<bool>,
+        registration_enabled: Option<bool>,
     }
 
     #[derive(ToSchema, Deserialize)]
@@ -99,6 +100,9 @@ mod put {
             }
             if let Some(telemetry_enabled) = app.telemetry_enabled {
                 settings.app.telemetry_enabled = telemetry_enabled;
+            }
+            if let Some(registration_enabled) = app.registration_enabled {
+                settings.app.registration_enabled = registration_enabled;
             }
         }
         if let Some(server) = data.server {

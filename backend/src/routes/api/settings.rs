@@ -11,6 +11,7 @@ mod get {
     struct ResponseApp<'a> {
         name: &'a str,
         icon: Option<&'a str>,
+        registration_enabled: bool,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -43,6 +44,7 @@ mod get {
                     app: ResponseApp {
                         name: &settings.app.name,
                         icon: settings.app.icon.as_deref(),
+                        registration_enabled: settings.app.registration_enabled,
                     },
                     server: ResponseServer {
                         allow_overwriting_custom_docker_image: settings
