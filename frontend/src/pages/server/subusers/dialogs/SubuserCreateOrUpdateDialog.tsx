@@ -7,24 +7,24 @@ import PermissionSelector from '../PermissionSelector';
 
 type Props = DialogProps & {
   subuser?: ServerSubuser;
-  onCreated?: (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => void;
-  onUpdated?: (permissions: string[], ignoredFiles: string[]) => void;
+  onCreate?: (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => void;
+  onUpdate?: (permissions: string[], ignoredFiles: string[]) => void;
 };
 
-export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
+export default ({ subuser, onCreate, onUpdate, open, onClose }: Props) => {
   const [email, setEmail] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set(subuser?.permissions ?? []));
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
   const captchaRef = useRef(null);
 
   const submit = () => {
-    if (subuser && onUpdated) {
-      onUpdated(Array.from(selectedPermissions), ignoredFiles);
+    if (subuser && onUpdate) {
+      onUpdate(Array.from(selectedPermissions), ignoredFiles);
       return;
     }
 
     captchaRef.current?.getToken().then(token => {
-      onCreated(email, Array.from(selectedPermissions), ignoredFiles, token);
+      onCreate(email, Array.from(selectedPermissions), ignoredFiles, token);
     });
   };
 

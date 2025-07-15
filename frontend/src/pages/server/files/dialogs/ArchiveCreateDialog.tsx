@@ -2,10 +2,10 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import { Dialog, DialogProps } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
-import { archiveFormatExtensionMapping } from '@/lib/files';
+import { archiveFormatExtensionMapping, generateArchiveName } from '@/lib/files';
 import { useServerStore } from '@/stores/server';
 import { join } from 'pathe';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Props = DialogProps & {
   onCreate: (name: string, format: ArchiveFormat) => void;
@@ -14,12 +14,12 @@ type Props = DialogProps & {
 export default ({ onCreate, open, onClose }: Props) => {
   const { browsingDirectory } = useServerStore();
 
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState(generateArchiveName(archiveFormatExtensionMapping['tar_gz']));
   const [format, setFormat] = useState<ArchiveFormat>('tar_gz');
 
-  const submit = () => {
-    onCreate(fileName + archiveFormatExtensionMapping[format], format);
-  };
+  useEffect(() => {
+    setFileName(generateArchiveName(archiveFormatExtensionMapping[format]));
+  }, [format]);
 
   return (
     <Dialog title="Create Archive" onClose={onClose} open={open}>
@@ -29,9 +29,8 @@ export default ({ onCreate, open, onClose }: Props) => {
           id="fileName"
           name="fileName"
           placeholder="Enter the name that this archive should be saved as."
-          autoFocus
+          disabled
           value={fileName}
-          onChange={e => setFileName(e.target.value)}
         />
       </div>
 
@@ -52,19 +51,14 @@ export default ({ onCreate, open, onClose }: Props) => {
         <span className="text-neutral-200">This archive will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className="text-cyan-200">
-            {join(browsingDirectory, `${fileName}${archiveFormatExtensionMapping[format]}`).replace(
-              /^(\.\.\/|\/)+/,
-              '',
-            )}
-          </span>
+          <span className="text-cyan-200">{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
       <Dialog.Footer>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={submit} disabled={!fileName}>
+        <Button style={Button.Styles.Green} onClick={() => onCreate(fileName, format)} disabled={!fileName}>
           Create
         </Button>
       </Dialog.Footer>

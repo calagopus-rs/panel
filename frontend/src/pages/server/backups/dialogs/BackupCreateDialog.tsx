@@ -4,16 +4,12 @@ import { Input } from '@/elements/inputs';
 import { useState } from 'react';
 
 type Props = DialogProps & {
-  onCreated: (name: string, ignoredFiles: string[]) => void;
+  onCreate: (name: string, ignoredFiles: string[]) => void;
 };
 
-export default ({ onCreated, open, onClose }: Props) => {
+export default ({ onCreate, open, onClose }: Props) => {
   const [name, setName] = useState('');
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>([]);
-
-  const submit = () => {
-    onCreated(name, ignoredFiles);
-  };
 
   return (
     <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
@@ -31,7 +27,7 @@ export default ({ onCreated, open, onClose }: Props) => {
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={submit} disabled={!name}>
+        <Button style={Button.Styles.Green} onClick={() => onCreate(name, ignoredFiles)} disabled={!name}>
           Create
         </Button>
       </Dialog.Footer>

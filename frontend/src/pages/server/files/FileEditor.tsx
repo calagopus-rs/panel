@@ -81,7 +81,7 @@ export default () => {
   ) : (
     <div className="flex flex-col w-full">
       <FileNameDialog
-        onFileNamed={(name: string) => saveFile(name)}
+        onFileName={(name: string) => saveFile(name)}
         open={nameDialogOpen}
         onClose={() => setNameDialogOpen(false)}
       />

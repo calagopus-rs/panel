@@ -7,17 +7,13 @@ import { join } from 'pathe';
 import { useState } from 'react';
 
 type Props = DialogProps & {
-  onDirectoryNamed: (name: string) => void;
+  onDirectoryName: (name: string) => void;
 };
 
-export default ({ onDirectoryNamed, open, onClose }: Props) => {
+export default ({ onDirectoryName, open, onClose }: Props) => {
   const { browsingDirectory } = useServerStore();
 
   const [dirName, setDirName] = useState('');
-
-  const submit = () => {
-    onDirectoryNamed(dirName);
-  };
 
   return (
     <Dialog title="Create Directory" onClose={onClose} open={open}>
@@ -39,7 +35,7 @@ export default ({ onDirectoryNamed, open, onClose }: Props) => {
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={submit}>
+        <Button style={Button.Styles.Green} onClick={() => onDirectoryName(dirName)}>
           Create
         </Button>
       </Dialog.Footer>

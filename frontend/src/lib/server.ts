@@ -1,7 +1,7 @@
 import CronExpressionParser, { CronDate } from 'cron-parser';
 
 export function getPrimaryAllocation(allocations: ServerAllocation[]) {
-  return allocations.find(allocation => allocation.isDefault);
+  return allocations.find(allocation => allocation.isPrimary);
 }
 
 export function formatAllocation(allocation?: ServerAllocation) {

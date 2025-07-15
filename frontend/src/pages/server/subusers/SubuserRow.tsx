@@ -46,7 +46,7 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
     <>
       <SubuserCreateOrUpdateDialog
         subuser={subuser}
-        onUpdated={doUpdate}
+        onUpdate={doUpdate}
         open={openDialog === 'update'}
         onClose={() => setOpenDialog(null)}
       />

@@ -6,15 +6,11 @@ import { useState } from 'react';
 
 type Props = DialogProps & {
   databaseName: string;
-  onDeleted: () => void;
+  onDelete: () => void;
 };
 
-export default ({ databaseName, onDeleted, open, onClose }: Props) => {
+export default ({ databaseName, onDelete, open, onClose }: Props) => {
   const [enteredName, setEnteredName] = useState('');
-
-  const submit = () => {
-    onDeleted();
-  };
 
   return (
     <Dialog title="Confirm Database Deletion" onClose={onClose} open={open}>
@@ -34,7 +30,7 @@ export default ({ databaseName, onDeleted, open, onClose }: Props) => {
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Red} onClick={submit} disabled={databaseName !== enteredName}>
+        <Button style={Button.Styles.Red} onClick={() => onDelete()} disabled={databaseName !== enteredName}>
           Delete
         </Button>
       </Dialog.Footer>

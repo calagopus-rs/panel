@@ -57,7 +57,7 @@ export default () => {
   return (
     <Container>
       <SubuserCreateOrUpdateDialog
-        onCreated={doCreate}
+        onCreate={doCreate}
         open={openDialog === 'create'}
         onClose={() => setOpenDialog(null)}
       />

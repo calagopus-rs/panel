@@ -4,15 +4,11 @@ import { Input } from '@/elements/inputs';
 import { useState } from 'react';
 
 type Props = DialogProps & {
-  onFileNamed: (name: string) => void;
+  onFileName: (name: string) => void;
 };
 
-export default ({ onFileNamed, open, onClose }: Props) => {
+export default ({ onFileName, open, onClose }: Props) => {
   const [fileName, setFileName] = useState('');
-
-  const submit = () => {
-    onFileNamed(fileName);
-  };
 
   return (
     <Dialog title="Create File" onClose={onClose} open={open}>
@@ -27,7 +23,7 @@ export default ({ onFileNamed, open, onClose }: Props) => {
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={submit}>
+        <Button style={Button.Styles.Green} onClick={() => onFileName(fileName)}>
           Create
         </Button>
       </Dialog.Footer>
