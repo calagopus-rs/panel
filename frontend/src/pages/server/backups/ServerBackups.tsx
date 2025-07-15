@@ -1,20 +1,18 @@
-import getSubusers from '@/api/server/subusers/getSubusers';
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import createSubuser from '@/api/server/subusers/createSubuser';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import getPermissions from '@/api/getPermissions';
 import getBackups from '@/api/server/backups/getBackups';
 import BackupRow from './BackupRow';
 import BackupCreateDialog from './dialogs/BackupCreateDialog';
 import createBackup from '@/api/server/backups/createBackup';
+import useWebsocketEvent, { SocketEvent } from '@/plugins/useWebsocketEvent';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,6 +26,28 @@ export default () => {
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
   }, []);
+
+  useWebsocketEvent(SocketEvent.BACKUP_COMPLETED, (uuid, data) => {
+    let backup = backups.data.find(b => b.uuid === uuid);
+
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    console.log(backup, wsData);
+    if (backup && wsData) {
+      backup.isSuccessful = wsData.isSuccessful;
+      if (wsData.isSuccessful) {
+        backup.checksum = `${wsData.checksum_type}:${wsData.checksum}`;
+        backup.bytes = wsData.size;
+        backup.completed = new Date();
+      }
+      setBackups({ ...backups, data: backups.data.map(b => (b.uuid === uuid ? backup : b)) });
+    }
+  });
 
   const onPageSelect = (page: number) => {
     setSearchParams({ page: page.toString() });

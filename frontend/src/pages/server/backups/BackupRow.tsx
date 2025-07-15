@@ -7,18 +7,37 @@ import { useServerStore } from '@/stores/server';
 import { faEllipsis, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import updateSubuser from '@/api/server/subusers/updateSubuser';
 import { Dialog } from '@/elements/dialog';
-import deleteSubuser from '@/api/server/subusers/deleteSubuser';
 import deleteBackup from '@/api/server/backups/deleteBackup';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
+import useWebsocketEvent, { SocketEvent } from '@/plugins/useWebsocketEvent';
 
 export default ({ backup }: { backup: ServerBackup }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'update' | 'unlock' | 'lock' | 'delete'>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+
+  if (!backup.completed) {
+    useWebsocketEvent(SocketEvent.BACKUP_PROGRESS, (uuid, data) => {
+      if (uuid !== backup.uuid) {
+        return;
+      }
+
+      let wsData: any = null;
+      try {
+        wsData = JSON.parse(data);
+      } catch {
+        return;
+      }
+
+      setProgress(wsData.progress);
+      setTotal(wsData.total);
+    });
+  }
 
   const doUpdate = (permissions: string[], ignoredFiles: string[]) => {
     // updateSubuser(server.uuid, subuser.user.username, { permissions, ignoredFiles })
@@ -66,6 +85,9 @@ export default ({ backup }: { backup: ServerBackup }) => {
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
+          backup.isLocked
+            ? { icon: faLock, label: 'Unlock', onClick: () => setOpenDialog('unlock'), color: 'gray' }
+            : { icon: faLockOpen, label: 'Lock', onClick: () => setOpenDialog('lock'), color: 'gray' },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
@@ -80,7 +102,9 @@ export default ({ backup }: { backup: ServerBackup }) => {
               {backup.name}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{bytesToString(backup.bytes)}</td>
+            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+              {backup.completed ? bytesToString(backup.bytes) : `${bytesToString(progress)} / ${bytesToString(total)}`}
+            </td>
 
             <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
               {formatTimestamp(backup.created)}
