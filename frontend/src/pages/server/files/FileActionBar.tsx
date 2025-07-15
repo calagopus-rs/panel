@@ -66,8 +66,14 @@ export default () => {
 
   return createPortal(
     <AnimatePresence>
-      <ArchiveCreateDialog open={openDialog === 'archive'} onClose={() => setOpenDialog(null)} onCreate={doArchive} />
+      <ArchiveCreateDialog
+        key="ArchiveCreateDialog"
+        open={openDialog === 'archive'}
+        onClose={() => setOpenDialog(null)}
+        onCreate={doArchive}
+      />
       <FileDeleteDialog
+        key="FileDeleteDialog"
         files={selectedFiles}
         onDelete={doDelete}
         open={openDialog === 'delete'}
