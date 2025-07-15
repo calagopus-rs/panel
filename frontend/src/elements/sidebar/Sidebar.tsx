@@ -56,9 +56,11 @@ function User() {
           <span className="font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight select-none">
             {user.nameFirst}
           </span>
-          <span className="font-normal text-xs text-neutral-300 whitespace-nowrap leading-tight select-none">
-            Admin
-          </span>
+          {user.admin && (
+            <span className="font-normal text-xs text-neutral-300 whitespace-nowrap leading-tight select-none">
+              Admin
+            </span>
+          )}
         </div>
       </div>
       <Button
