@@ -18,14 +18,16 @@ export default () => {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    forgotPassword(email)
-      .then(() => {
-        addToast('An email has been sent to you with instructions on how to reset your password.', 'success');
-        setRequested(true);
-      })
-      .catch(msg => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+    captchaRef.current?.getToken().then(token => {
+      forgotPassword(email, token)
+        .then(() => {
+          addToast('An email has been sent to you with instructions on how to reset your password.', 'success');
+          setRequested(true);
+        })
+        .catch(msg => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    });
   };
 
   return (
