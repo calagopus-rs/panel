@@ -2,6 +2,7 @@ import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import { Dialog, DialogProps } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
+import { archiveFormatExtensionMapping } from '@/lib/files';
 import { useServerStore } from '@/stores/server';
 import { join } from 'pathe';
 import { useState } from 'react';
@@ -17,7 +18,7 @@ export default ({ onCreate, open, onClose }: Props) => {
   const [format, setFormat] = useState<ArchiveFormat>('tar_gz');
 
   const submit = () => {
-    onCreate(fileName, format);
+    onCreate(fileName + archiveFormatExtensionMapping[format], format);
   };
 
   return (
@@ -38,15 +39,10 @@ export default ({ onCreate, open, onClose }: Props) => {
         <Input.Label htmlFor="format">Format</Input.Label>
         <Input.Dropdown
           id="format"
-          options={[
-            { value: 'tar', label: 'tar' },
-            { value: 'tar_gz', label: 'tar.gz' },
-            { value: 'tar_xz', label: 'tar.xz' },
-            { value: 'tar_bz2', label: 'tar.bz2' },
-            { value: 'tar_lz4', label: 'tar.lz4' },
-            { value: 'tar_zstd', label: 'tar.zstd' },
-            { value: 'zip', label: 'zip' },
-          ]}
+          options={Object.entries(archiveFormatExtensionMapping).map(([format, extension]) => ({
+            label: extension,
+            value: format,
+          }))}
           selected={format}
           onChange={e => setFormat(e.target.value as ArchiveFormat)}
         />
@@ -56,14 +52,19 @@ export default ({ onCreate, open, onClose }: Props) => {
         <span className="text-neutral-200">This archive will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className="text-cyan-200">{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className="text-cyan-200">
+            {join(browsingDirectory, `${fileName}${archiveFormatExtensionMapping[format]}`).replace(
+              /^(\.\.\/|\/)+/,
+              '',
+            )}
+          </span>
         </Code>
       </p>
       <Dialog.Footer>
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={submit}>
+        <Button style={Button.Styles.Green} onClick={submit} disabled={!fileName}>
           Create
         </Button>
       </Dialog.Footer>
