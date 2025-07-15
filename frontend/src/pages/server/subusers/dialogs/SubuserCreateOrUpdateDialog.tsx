@@ -55,7 +55,7 @@ export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
 
       <div className="mt-4">
         <Input.Label htmlFor="ignoredFiles">Ignored Files</Input.Label>
-        <Input.MultiInput options={ignoredFiles} onChange={setIgnoredFiles} />
+        <Input.MultiInput placeholder="Path or file" options={ignoredFiles} onChange={setIgnoredFiles} />
       </div>
 
       {!subuser && (

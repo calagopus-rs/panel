@@ -1,10 +1,14 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (): Promise<PermissionData> => {
+interface Response {
+  subuserPermissions: PermissionData;
+}
+
+export default async (): Promise<Response> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/permissions`)
-      .then(({ data }) => resolve(data.permissions))
+      .then(({ data }) => resolve(data))
       .catch(reject);
   });
 };

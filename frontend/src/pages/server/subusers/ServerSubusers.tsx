@@ -26,8 +26,8 @@ export default () => {
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
 
-    getPermissions().then(permissions => {
-      setAvailablePermissions(permissions);
+    getPermissions().then(res => {
+      setAvailablePermissions(res.subuserPermissions);
     });
   }, []);
 
