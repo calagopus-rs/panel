@@ -31,6 +31,7 @@ import decompressFile from '@/api/server/files/decompressFile';
 import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
 import chmodFiles from '@/api/server/files/chmodFiles';
 import downloadFile from '@/api/server/files/downloadFile';
+import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 
 function FileTableRow({
   file,
@@ -84,7 +85,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
     removeSelectedFile,
   } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
 
   const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
@@ -125,7 +126,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       });
   };
 
-  const doDecompress = () => {
+  const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name)
       .then(() => {
         addToast(`Archive has been decompressed.`, 'success');
@@ -136,8 +137,13 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       });
   };
 
-  const doCompress = () => {
-    compressFiles(server.uuid, browsingDirectory, [file.name])
+  const doArchive = (name: string, format: ArchiveFormat) => {
+    compressFiles(server.uuid, {
+      name,
+      format,
+      root: browsingDirectory,
+      files: [file.name],
+    })
       .then(entry => {
         addToast(`Archive has been created.`, 'success');
         addBrowsingEntry(entry);
@@ -178,6 +184,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         open={openDialog === 'permissions'}
         onClose={() => setOpenDialog(null)}
       />
+      <ArchiveCreateDialog open={openDialog === 'archive'} onClose={() => setOpenDialog(null)} onCreate={doArchive} />
       <FileDeleteDialog
         files={[file]}
         onDelete={doDelete}
@@ -191,8 +198,8 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
           { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
           { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
           isArchiveType(file.mime)
-            ? { icon: faEnvelopesBulk, label: 'Decompress', onClick: doDecompress, color: 'gray' }
-            : { icon: faFileZipper, label: 'Compress', onClick: doCompress, color: 'gray' },
+            ? { icon: faEnvelopesBulk, label: 'Unarchive', onClick: doUnarchive, color: 'gray' }
+            : { icon: faFileZipper, label: 'Archive', onClick: () => setOpenDialog('archive'), color: 'gray' },
           {
             icon: faFileArrowDown,
             label: 'Download',
