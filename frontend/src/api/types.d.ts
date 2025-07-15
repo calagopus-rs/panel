@@ -467,3 +467,5 @@ interface PermissionData {
     },
   ];
 }
+
+type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip';

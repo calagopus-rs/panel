@@ -10,6 +10,7 @@ import { useState } from 'react';
 import deleteFiles from '@/api/server/files/deleteFiles';
 import { httpErrorToHuman } from '@/api/axios';
 import compressFiles from '@/api/server/files/compressFiles';
+import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 
 export default () => {
   const { addToast } = useToast();
@@ -23,16 +24,18 @@ export default () => {
     setSelectedFiles,
   } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'archive' | 'delete'>(null);
 
-  const doArchive = () => {
-    compressFiles(
-      server.uuid,
-      browsingDirectory,
-      selectedFiles.map(f => f.name),
-    )
+  const doArchive = (name: string, format: ArchiveFormat) => {
+    compressFiles(server.uuid, {
+      name,
+      format,
+      root: browsingDirectory,
+      files: selectedFiles.map(f => f.name),
+    })
       .then(entry => {
         addToast(`Files have been archived.`, 'success');
+        setOpenDialog(null);
         setSelectedFiles([]);
         addBrowsingEntry(entry);
       })
@@ -63,6 +66,7 @@ export default () => {
 
   return createPortal(
     <AnimatePresence>
+      <ArchiveCreateDialog open={openDialog === 'archive'} onClose={() => setOpenDialog(null)} onCreate={doArchive} />
       <FileDeleteDialog
         files={selectedFiles}
         onDelete={doDelete}
@@ -78,7 +82,7 @@ export default () => {
           transition={{ duration: 0.15 }}
         >
           <div className="flex items-center space-x-4 pointer-events-auto rounded p-4 bg-black/50">
-            <Button onClick={doArchive}>
+            <Button onClick={() => setOpenDialog('archive')}>
               <FontAwesomeIcon icon={faArchive} className="mr-2" /> Archive
             </Button>
             <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
