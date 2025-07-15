@@ -81,7 +81,7 @@ export default () => {
   return (
     <Container>
       <DirectoryNameDialog
-        onDirectoryNamed={(name: string) => makeDirectory(name)}
+        onDirectoryName={(name: string) => makeDirectory(name)}
         open={openDialog === 'nameDirectory'}
         onClose={() => setOpenDialog(null)}
       />

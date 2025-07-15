@@ -37,7 +37,6 @@ export default () => {
       return;
     }
 
-    console.log(backup, wsData);
     if (backup && wsData) {
       backup.isSuccessful = wsData.isSuccessful;
       if (wsData.isSuccessful) {
@@ -45,6 +44,7 @@ export default () => {
         backup.bytes = wsData.size;
         backup.completed = new Date();
       }
+      console.log(backup, wsData);
       setBackups({ ...backups, data: backups.data.map(b => (b.uuid === uuid ? backup : b)) });
     }
   });
@@ -74,7 +74,7 @@ export default () => {
 
   return (
     <Container>
-      <BackupCreateDialog onCreated={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
+      <BackupCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
 
       <div className="mb-4 flex justify-between">
         <h1 className="text-4xl font-bold text-white">Backups</h1>
@@ -88,8 +88,10 @@ export default () => {
             <table className="w-full table-auto">
               <TableHead>
                 <TableHeader name="Name" />
+                <TableHeader name="Checksum" />
                 <TableHeader name="Size" />
                 <TableHeader name="Created At" />
+                <TableHeader name="Locked?" />
                 <TableHeader />
               </TableHead>
 

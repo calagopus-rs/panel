@@ -1,6 +1,7 @@
 import { Button } from '@/elements/button';
 import { Dialog, DialogProps } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
+import { generateBackupName } from '@/lib/server';
 import { useState } from 'react';
 
 type Props = DialogProps & {
@@ -8,7 +9,7 @@ type Props = DialogProps & {
 };
 
 export default ({ onCreate, open, onClose }: Props) => {
-  const [name, setName] = useState('');
+  const [name, setName] = useState(generateBackupName());
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>([]);
 
   return (

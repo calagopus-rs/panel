@@ -4,7 +4,7 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsis, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -102,11 +102,23 @@ export default ({ backup }: { backup: ServerBackup }) => {
             </td>
 
             <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+              {backup.checksum && <Code>{backup.checksum}</Code>}
+            </td>
+
+            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
               {backup.completed ? bytesToString(backup.bytes) : `${bytesToString(progress)} / ${bytesToString(total)}`}
             </td>
 
             <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
               {formatTimestamp(backup.created)}
+            </td>
+
+            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+              {backup.isLocked ? (
+                <FontAwesomeIcon className="text-green-500" icon={faLock} />
+              ) : (
+                <FontAwesomeIcon className="text-red-500" icon={faLockOpen} />
+              )}
             </td>
 
             <td
