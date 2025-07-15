@@ -46,6 +46,7 @@ export default () => {
     createSubuser(server.uuid, { email, permissions, ignoredFiles, captcha })
       .then(subuser => {
         addSubuser(subuser);
+        addToast('Subuser created.', 'success');
         setOpenDialog(null);
       })
       .catch(msg => {

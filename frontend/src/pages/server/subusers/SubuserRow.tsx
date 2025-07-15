@@ -9,12 +9,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import SubuserCreateOrUpdateDialog from './dialogs/SubuserCreateOrUpdateDialog';
 import updateSubuser from '@/api/server/subusers/updateSubuser';
+import { Dialog } from '@/elements/dialog';
+import deleteSubuser from '@/api/server/subusers/deleteSubuser';
 
 export default ({ subuser }: { subuser: ServerSubuser }) => {
   const { addToast } = useToast();
-  const server = useServerStore(state => state.server);
+  const { server, removeSubuser } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'update' | 'remove'>(null);
 
   const doUpdate = (permissions: string[], ignoredFiles: string[]) => {
     updateSubuser(server.uuid, subuser.user.username, { permissions, ignoredFiles })
@@ -29,6 +31,17 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
       });
   };
 
+  const doRemove = () => {
+    deleteSubuser(server.uuid, subuser.user.username)
+      .then(() => {
+        addToast('Subuser removed.', 'success');
+        removeSubuser(subuser);
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
   return (
     <>
       <SubuserCreateOrUpdateDialog
@@ -37,11 +50,21 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
         open={openDialog === 'update'}
         onClose={() => setOpenDialog(null)}
       />
+      <Dialog.Confirm
+        open={openDialog === 'remove'}
+        hideCloseIcon
+        onClose={() => setOpenDialog(null)}
+        title="Confirm Subuser Removal"
+        confirm="Remove"
+        onConfirmed={doRemove}
+      >
+        Are you sure you want to remove <Code>{subuser.user.username}</Code> from this server?
+      </Dialog.Confirm>
 
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
+          { icon: faTrash, label: 'Remove', onClick: () => setOpenDialog('remove'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
