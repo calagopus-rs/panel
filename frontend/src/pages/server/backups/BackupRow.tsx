@@ -4,7 +4,7 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsis, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -12,6 +12,8 @@ import deleteBackup from '@/api/server/backups/deleteBackup';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
 import useWebsocketEvent, { SocketEvent } from '@/plugins/useWebsocketEvent';
+import BackupEditDialog from './dialogs/BackupEditDialog';
+import updateBackup from '@/api/server/backups/updateBackup';
 
 export default ({ backup }: { backup: ServerBackup }) => {
   const { addToast } = useToast();
@@ -39,17 +41,17 @@ export default ({ backup }: { backup: ServerBackup }) => {
     });
   }
 
-  const doUpdate = (permissions: string[], ignoredFiles: string[]) => {
-    // updateSubuser(server.uuid, subuser.user.username, { permissions, ignoredFiles })
-    //   .then(() => {
-    //     subuser.permissions = permissions;
-    //     subuser.ignoredFiles = ignoredFiles;
-    //     setOpenDialog(null);
-    //     addToast('Subuser updated.', 'success');
-    //   })
-    //   .catch(msg => {
-    //     addToast(httpErrorToHuman(msg), 'error');
-    //   });
+  const doUpdate = (name: string, locked: boolean) => {
+    updateBackup(server.uuid, backup.uuid, { name, locked })
+      .then(() => {
+        backup.name = name;
+        backup.isLocked = locked;
+        setOpenDialog(null);
+        addToast('Backup updated.', 'success');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   const doRemove = () => {
@@ -65,12 +67,12 @@ export default ({ backup }: { backup: ServerBackup }) => {
 
   return (
     <>
-      {/* <SubuserCreateOrUpdateDialog
-        subuser={subuser}
-        onUpdated={doUpdate}
+      <BackupEditDialog
+        backup={backup}
+        onUpdate={doUpdate}
         open={openDialog === 'update'}
         onClose={() => setOpenDialog(null)}
-      /> */}
+      />
       <Dialog.Confirm
         open={openDialog === 'delete'}
         hideCloseIcon
@@ -85,9 +87,6 @@ export default ({ backup }: { backup: ServerBackup }) => {
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
-          backup.isLocked
-            ? { icon: faLock, label: 'Unlock', onClick: () => setOpenDialog('unlock'), color: 'gray' }
-            : { icon: faLockOpen, label: 'Lock', onClick: () => setOpenDialog('lock'), color: 'gray' },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
