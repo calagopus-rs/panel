@@ -30,9 +30,14 @@ const categoryIcons: { [key: string]: IconDefinition } = {
   activity: faBriefcase,
 };
 
-export default () => {
+export default ({
+  selectedPermissions,
+  setSelectedPermissions,
+}: {
+  selectedPermissions: Set<string>;
+  setSelectedPermissions: Function;
+}) => {
   const { availablePermissions } = useServerStore();
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set());
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const toggleCategory = (category: string) => {
@@ -108,7 +113,7 @@ export default () => {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleAllInCategory(category)}
-                      className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                      className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
                         selectionState === 'all'
                           ? 'bg-blue-600 text-white'
                           : selectionState === 'partial'

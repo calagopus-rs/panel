@@ -76,6 +76,7 @@ export default () => {
                 <TableHeader name="Username" />
                 <TableHeader name="2FA Enabled" />
                 <TableHeader name="Permissions" />
+                <TableHeader name="Ignored Files" />
                 <TableHeader />
               </TableHead>
 

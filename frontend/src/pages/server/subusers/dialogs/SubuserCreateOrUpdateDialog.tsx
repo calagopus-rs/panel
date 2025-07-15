@@ -13,16 +13,17 @@ type Props = DialogProps & {
 
 export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
   const [email, setEmail] = useState('');
+  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set(subuser?.permissions ?? []));
   const captchaRef = useRef(null);
 
   const submit = () => {
     if (subuser && onUpdated) {
-      onUpdated([], []);
+      onUpdated(Array.from(selectedPermissions), []);
       return;
     }
 
     captchaRef.current?.getToken().then(token => {
-      onCreated(email, [], [], token);
+      onCreated(email, Array.from(selectedPermissions), [], token);
     });
   };
 
@@ -48,7 +49,7 @@ export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
 
       <div className="mt-4">
         <Input.Label htmlFor="permissions">Permissions</Input.Label>
-        <PermissionSelector />
+        <PermissionSelector selectedPermissions={selectedPermissions} setSelectedPermissions={setSelectedPermissions} />
       </div>
 
       {!subuser && (
