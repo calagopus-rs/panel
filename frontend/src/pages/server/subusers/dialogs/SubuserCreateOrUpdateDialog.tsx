@@ -14,16 +14,17 @@ type Props = DialogProps & {
 export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
   const [email, setEmail] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set(subuser?.permissions ?? []));
+  const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
   const captchaRef = useRef(null);
 
   const submit = () => {
     if (subuser && onUpdated) {
-      onUpdated(Array.from(selectedPermissions), []);
+      onUpdated(Array.from(selectedPermissions), ignoredFiles);
       return;
     }
 
     captchaRef.current?.getToken().then(token => {
-      onCreated(email, Array.from(selectedPermissions), [], token);
+      onCreated(email, Array.from(selectedPermissions), ignoredFiles, token);
     });
   };
 
@@ -50,6 +51,11 @@ export default ({ subuser, onCreated, onUpdated, open, onClose }: Props) => {
       <div className="mt-4">
         <Input.Label htmlFor="permissions">Permissions</Input.Label>
         <PermissionSelector selectedPermissions={selectedPermissions} setSelectedPermissions={setSelectedPermissions} />
+      </div>
+
+      <div className="mt-4">
+        <Input.Label htmlFor="ignoredFiles">Ignored Files</Input.Label>
+        <Input.MultiInput options={ignoredFiles} onChange={setIgnoredFiles} />
       </div>
 
       {!subuser && (

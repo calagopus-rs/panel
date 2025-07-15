@@ -3,15 +3,17 @@ import InputField from '@/elements/inputs/InputField';
 import Switch from './Switch';
 import Dropdown from './Dropdown';
 import Label from './Label';
+import { MultiInput } from './MultiInput';
 
 const Input = Object.assign(
   {},
   {
-    Label: Label,
+    Label,
     Text: InputField,
-    Checkbox: Checkbox,
-    Switch: Switch,
-    Dropdown: Dropdown,
+    Checkbox,
+    Switch,
+    Dropdown,
+    MultiInput,
   },
 );
 
