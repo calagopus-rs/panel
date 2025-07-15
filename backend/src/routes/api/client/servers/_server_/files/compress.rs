@@ -12,6 +12,9 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
+        name: Option<String>,
+        format: wings_api::ArchiveFormat,
+
         #[serde(default)]
         #[schema(default = "/")]
         root: String,
@@ -50,6 +53,8 @@ mod post {
         }
 
         let request_body = wings_api::servers_server_files_compress::post::RequestBody {
+            name: data.name,
+            format: data.format,
             root: data.root,
             files: data
                 .files
@@ -58,50 +63,54 @@ mod post {
                 .collect(),
         };
 
-        let entry = match server
-            .node
-            .api_client(&state.database)
-            .post_servers_server_files_compress(server.uuid, &request_body)
-            .await
-        {
-            Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, err)) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
-            }
-            Err((StatusCode::EXPECTATION_FAILED, err)) => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
-            }
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to compress server files: {:#?}", err);
+        tokio::spawn(async move {
+            let entry = match server
+                .node
+                .api_client(&state.database)
+                .post_servers_server_files_compress(server.uuid, &request_body)
+                .await
+            {
+                Ok(data) => data,
+                Err((StatusCode::NOT_FOUND, err)) => {
+                    return (
+                        StatusCode::NOT_FOUND,
+                        axum::Json(ApiError::new_wings_value(err)),
+                    );
+                }
+                Err((StatusCode::EXPECTATION_FAILED, err)) => {
+                    return (
+                        StatusCode::EXPECTATION_FAILED,
+                        axum::Json(ApiError::new_wings_value(err)),
+                    );
+                }
+                Err((_, err)) => {
+                    tracing::error!(server = %server.uuid, "failed to compress server files: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to compress server files"])),
-                );
-            }
-        };
+                    return (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        axum::Json(ApiError::new_value(&["failed to compress server files"])),
+                    );
+                }
+            };
 
-        activity_logger
-            .log(
-                "server:file.compress",
-                serde_json::json!({
-                    "files": request_body.files.iter().map(|f| f).collect::<Vec<_>>(),
-                    "directory": request_body.root,
-                    "name": entry.name,
-                }),
+            activity_logger
+                .log(
+                    "server:file.compress",
+                    serde_json::json!({
+                        "files": request_body.files.iter().map(|f| f).collect::<Vec<_>>(),
+                        "directory": request_body.root,
+                        "name": entry.name,
+                    }),
+                )
+                .await;
+
+            (
+                StatusCode::OK,
+                axum::Json(serde_json::to_value(Response { entry }).unwrap()),
             )
-            .await;
-
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { entry }).unwrap()),
-        )
+        })
+        .await
+        .unwrap()
     }
 }
 

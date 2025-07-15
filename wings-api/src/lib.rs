@@ -18,8 +18,16 @@ pub enum ArchiveFormat {
     Tar,
     #[serde(rename = "tar_gz")]
     TarGz,
+    #[serde(rename = "tar_xz")]
+    TarXz,
+    #[serde(rename = "tar_bz2")]
+    TarBz2,
+    #[serde(rename = "tar_lz4")]
+    TarLz4,
     #[serde(rename = "tar_zstd")]
     TarZstd,
+    #[serde(rename = "zip")]
+    Zip,
 }
 
 #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
@@ -256,6 +264,16 @@ pub enum ServerState {
     Running,
 }
 
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
+pub enum TransferArchiveFormat {
+    #[serde(rename = "tar")]
+    Tar,
+    #[serde(rename = "tar_gz")]
+    TarGz,
+    #[serde(rename = "tar_zstd")]
+    TarZstd,
+}
+
 pub mod extensions {
     use super::*;
 
@@ -444,6 +462,10 @@ pub mod servers_server_files_compress {
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+                #[schema(inline)]
+                pub format: ArchiveFormat,
+                #[schema(inline)]
+                pub name: Option<String>,
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
@@ -839,7 +861,7 @@ pub mod servers_server_transfer {
                 #[schema(inline)]
                 pub token: String,
                 #[schema(inline)]
-                pub archive_format: ArchiveFormat,
+                pub archive_format: TransferArchiveFormat,
                 #[schema(inline)]
                 pub compression_level: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyCompressionLevel {
                 }>,
