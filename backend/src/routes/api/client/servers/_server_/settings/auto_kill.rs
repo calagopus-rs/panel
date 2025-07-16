@@ -1,7 +1,7 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod post {
+mod put {
     use crate::routes::{
         ApiError, GetState,
         api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -13,18 +13,17 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        description: Option<String>,
+        enabled: bool,
+
+        #[validate(range(min = 1, max = 3600))]
+        #[schema(minimum = 1, maximum = 3600)]
+        seconds: Option<u64>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
 
-    #[utoipa::path(post, path = "/", responses(
+    #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
         (status = UNAUTHORIZED, body = ApiError),
@@ -48,30 +47,23 @@ mod post {
             );
         }
 
-        if let Err(error) = server.has_permission("settings.rename") {
+        if let Err(error) = server.has_permission("settings.auto-kill") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
             );
         }
 
-        if let Some(name) = data.name {
-            server.name = name;
-        }
-        if let Some(description) = data.description {
-            if description.is_empty() {
-                server.description = None;
-            } else {
-                server.description = Some(description);
-            }
+        server.auto_kill.enabled = data.enabled;
+        if let Some(seconds) = data.seconds {
+            server.auto_kill.seconds = seconds;
         }
 
         sqlx::query!(
             "UPDATE servers
-            SET name = $1, description = $2
-            WHERE id = $3",
-            server.name,
-            server.description,
+            SET auto_kill = $1
+            WHERE id = $2",
+            serde_json::to_value(&server.auto_kill).unwrap(),
             server.id
         )
         .execute(state.database.write())
@@ -80,10 +72,10 @@ mod post {
 
         activity_logger
             .log(
-                "server:settings.rename",
+                "server:settings.auto-kill",
                 serde_json::json!({
-                    "name": server.name,
-                    "description": server.description,
+                    "enabled": server.auto_kill.enabled,
+                    "seconds": server.auto_kill.seconds,
                 }),
             )
             .await;
@@ -97,6 +89,6 @@ mod post {
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
-        .routes(routes!(post::route))
+        .routes(routes!(put::route))
         .with_state(state.clone())
 }

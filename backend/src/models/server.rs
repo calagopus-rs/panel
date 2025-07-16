@@ -43,6 +43,8 @@ pub struct Server {
 
     pub startup: String,
     pub image: String,
+    pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub timezone: Option<String>,
 
     pub allocation_limit: i32,
     pub database_limit: i32,
@@ -95,6 +97,8 @@ impl BaseModel for Server {
             ),
             (format!("{table}.startup"), format!("{prefix}startup")),
             (format!("{table}.image"), format!("{prefix}image")),
+            (format!("{table}.auto_kill"), format!("{prefix}auto_kill")),
+            (format!("{table}.timezone"), format!("{prefix}timezone")),
             (
                 format!("{table}.allocation_limit"),
                 format!("{prefix}allocation_limit"),
@@ -156,6 +160,11 @@ impl BaseModel for Server {
             pinned_cpus: row.get(format!("{prefix}pinned_cpus").as_str()),
             startup: row.get(format!("{prefix}startup").as_str()),
             image: row.get(format!("{prefix}image").as_str()),
+            auto_kill: serde_json::from_value(
+                row.get::<serde_json::Value, _>(format!("{prefix}auto_kill").as_str()),
+            )
+            .unwrap(),
+            timezone: row.get(format!("{prefix}timezone").as_str()),
             allocation_limit: row.get(format!("{prefix}allocation_limit").as_str()),
             database_limit: row.get(format!("{prefix}database_limit").as_str()),
             backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
@@ -185,6 +194,7 @@ impl Server {
         pinned_cpus: &[i16],
         startup: &str,
         image: &str,
+        timezone: Option<&str>,
         feature_limits: &ApiServerFeatureLimits,
     ) -> Result<(i32, uuid::Uuid), sqlx::Error> {
         let mut transaction = database.write().begin().await?;
@@ -214,6 +224,7 @@ impl Server {
                     pinned_cpus,
                     startup,
                     image,
+                    timezone,
                     allocation_limit,
                     database_limit,
                     backup_limit
@@ -221,7 +232,7 @@ impl Server {
                 VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8,
                     $9, $10, $11, $12, $13, $14,
-                    $15, $16, $17, $18, $19
+                    $15, $16, $17, $18, $19, $20
                 )
                 RETURNING id, uuid
                 "#,
@@ -247,6 +258,7 @@ impl Server {
             .bind(pinned_cpus)
             .bind(startup)
             .bind(image)
+            .bind(timezone)
             .bind(feature_limits.allocations)
             .bind(feature_limits.databases)
             .bind(feature_limits.backups)
@@ -844,7 +856,11 @@ impl Server {
                     ),
                     file_denylist: self.egg.file_denylist,
                 },
-                container: wings_api::ServerConfigurationContainer { image: self.image },
+                container: wings_api::ServerConfigurationContainer {
+                    image: self.image,
+                    timezone: self.timezone,
+                },
+                auto_kill: self.auto_kill,
             },
             process_configuration: super::nest_egg::ProcessConfiguration {
                 startup: self.egg.config_startup,
@@ -886,6 +902,8 @@ impl Server {
             },
             startup: self.startup,
             image: self.image,
+            auto_kill: self.auto_kill,
+            timezone: self.timezone,
             created: self.created.and_utc(),
         }
     }
@@ -937,6 +955,8 @@ impl Server {
             },
             startup: self.startup,
             image: self.image,
+            auto_kill: self.auto_kill,
+            timezone: self.timezone,
             created: self.created.and_utc(),
         }
     }
@@ -1007,6 +1027,8 @@ pub struct AdminApiServer {
 
     pub startup: String,
     pub image: String,
+    pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub timezone: Option<String>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -1043,6 +1065,8 @@ pub struct ApiServer {
 
     pub startup: String,
     pub image: String,
+    pub auto_kill: wings_api::ServerConfigurationAutoKill,
+    pub timezone: Option<String>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

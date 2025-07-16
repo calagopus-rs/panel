@@ -260,6 +260,13 @@
       "when": 1752440414443,
       "tag": "0036_ancient_ultimates",
       "breakpoints": false
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1752664820994,
+      "tag": "0037_burly_omega_sentinel",
+      "breakpoints": false
     }
   ]
 }

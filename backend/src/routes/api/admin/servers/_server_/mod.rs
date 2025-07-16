@@ -173,6 +173,9 @@ mod patch {
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         image: Option<String>,
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
+        timezone: Option<String>,
 
         feature_limits: Option<crate::models::server::ApiServerFeatureLimits>,
     }
@@ -264,6 +267,13 @@ mod patch {
         if let Some(image) = data.image {
             server.image = image;
         }
+        if let Some(timezone) = data.timezone {
+            if timezone.is_empty() {
+                server.timezone = None;
+            } else {
+                server.timezone = Some(timezone);
+            }
+        }
         if let Some(feature_limits) = &data.feature_limits {
             server.allocation_limit = feature_limits.allocations;
             server.backup_limit = feature_limits.backups;
@@ -276,9 +286,9 @@ mod patch {
                 owner_id = $1, egg_id = $2, external_id = $3,
                 name = $4, description = $5, cpu = $6, memory = $7,
                 swap = $8, disk = $9, io_weight = $10, pinned_cpus = $11,
-                startup = $12, image = $13, allocation_limit = $14,
-                backup_limit = $15, database_limit = $16
-            WHERE id = $17",
+                startup = $12, image = $13, timezone = $14, allocation_limit = $15,
+                backup_limit = $16, database_limit = $17
+            WHERE id = $18",
             server.owner.id,
             server.egg.id,
             server.external_id,
@@ -292,6 +302,7 @@ mod patch {
             &server.pinned_cpus,
             server.startup,
             server.image,
+            server.timezone,
             server.allocation_limit,
             server.backup_limit,
             server.database_limit,
@@ -328,6 +339,7 @@ mod patch {
                     "pinned_cpus": server.pinned_cpus,
                     "startup": server.startup,
                     "image": server.image,
+                    "timezone": server.timezone,
                     "feature_limits": data.feature_limits,
                 }),
             )

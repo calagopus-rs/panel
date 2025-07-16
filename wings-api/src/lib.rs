@@ -235,6 +235,16 @@ nestify::nest! {
         pub container: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationContainer {
             #[schema(inline)]
             pub image: String,
+            #[schema(inline)]
+            pub timezone: Option<String>,
+        },
+
+        #[schema(inline)]
+        pub auto_kill: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)] pub struct ServerConfigurationAutoKill {
+            #[schema(inline)]
+            pub enabled: bool,
+            #[schema(inline)]
+            pub seconds: u64,
         },
 
     }
@@ -823,6 +833,33 @@ pub mod servers_server_reinstall {
         }
 
         pub type Response409 = ApiError;
+    }
+}
+pub mod servers_server_script {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+                #[schema(inline)]
+                pub container_image: String,
+                #[schema(inline)]
+                pub entrypoint: String,
+                #[schema(inline)]
+                pub script: String,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+                #[schema(inline)]
+                pub stdout: String,
+                #[schema(inline)]
+                pub stderr: String,
+            }
+        }
     }
 }
 pub mod servers_server_sync {

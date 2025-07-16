@@ -361,12 +361,14 @@ export const servers = pgTable('servers', {
 	memory: bigint('memory', { mode: 'number' }).notNull(),
 	swap: bigint('swap', { mode: 'number' }).notNull(),
 	disk: bigint('disk', { mode: 'number' }).notNull(),
-	io_weight: smallint('io_weight'),
+	ioWeight: smallint('io_weight'),
 	cpu: integer('cpu').notNull(),
-	pinned_cpus: smallint('pinned_cpus').array().notNull(),
+	pinnedCpus: smallint('pinned_cpus').array().notNull(),
 
 	startup: varchar('startup', { length: 255 }).notNull(),
 	image: varchar('image', { length: 255 }).notNull(),
+	autoKill: jsonb('auto_kill').default({ enabled: false, seconds: 30 }).notNull(),
+	timezone: varchar('timezone', { length: 255 }),
 
 	allocationLimit: integer('allocation_limit').notNull(),
 	databaseLimit: integer('database_limit').notNull(),

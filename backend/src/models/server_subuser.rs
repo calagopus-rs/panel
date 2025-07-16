@@ -200,6 +200,14 @@ pub static PERMISSIONS: LazyLock<IndexMap<&'static str, Permission>> = LazyLock:
                         "Allows a user to rename this server and change the description of it.",
                     ),
                     (
+                        "timezone",
+                        "Allows a user to change the timezone for this server.",
+                    ),
+                    (
+                        "auto-kill",
+                        "Allows a user to change the auto-kill settings for this server.",
+                    ),
+                    (
                         "reinstall",
                         "Allows a user to trigger a reinstall of this server.",
                     ),

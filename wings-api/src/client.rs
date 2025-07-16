@@ -533,6 +533,22 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_servers_server_script(
+        &self,
+        server: uuid::Uuid,
+        data: &super::servers_server_script::post::RequestBody,
+    ) -> Result<super::servers_server_script::post::Response200, (StatusCode, super::ApiError)>
+    {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/script"),
+            serde_json::to_value(data).ok().as_ref(),
+            None,
+        )
+        .await
+    }
+
     pub async fn post_servers_server_sync(
         &self,
         server: uuid::Uuid,

@@ -27,7 +27,7 @@ export default function generateSchemaObject(output: fs.WriteStream, _spaces: nu
         }
 
         if (!parent) output.write(`${spaces}nestify::nest! {\n`)
-        output.write(`${parent ? '' : spaces + '    '}#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ${pascalCase(name)} {\n`)
+        output.write(`${parent ? '' : spaces + '    '}#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ${pascalCase(name)} {\n`)
 
         if (object.properties) {
             for (const [propertyName, property] of Object.entries(object.properties)) {

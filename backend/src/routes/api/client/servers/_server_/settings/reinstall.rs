@@ -81,7 +81,7 @@ mod post {
         transaction.commit().await.unwrap();
 
         activity_logger
-            .log("server:file.reinstall", serde_json::json!({}))
+            .log("server:settings.reinstall", serde_json::json!({}))
             .await;
 
         (
