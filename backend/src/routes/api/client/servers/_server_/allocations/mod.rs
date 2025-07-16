@@ -142,6 +142,12 @@ mod post {
             Ok(allocation_id) => ServerAllocation::by_id(&state.database, allocation_id)
                 .await
                 .unwrap(),
+            Err(err) if err.to_string().contains("null value in column") => {
+                return (
+                    StatusCode::EXPECTATION_FAILED,
+                    axum::Json(ApiError::new_value(&["no node allocations are available"])),
+                );
+            }
             Err(err) => {
                 tracing::error!(server = %server.uuid, "failed to create allocation: {:#?}", err);
 
