@@ -121,16 +121,7 @@ export default ({ backup }: { backup: ServerBackup }) => {
               )}
             </td>
 
-            <td
-              className="relative cursor-pointer"
-              onClick={e => {
-                e.stopPropagation();
-                const rect = e.currentTarget.getBoundingClientRect();
-                openMenu(rect.left, rect.bottom);
-              }}
-            >
-              <FontAwesomeIcon icon={faEllipsis} />
-            </td>
+            <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>
         )}
       </ContextMenu>

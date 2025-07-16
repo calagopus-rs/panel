@@ -236,16 +236,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
               <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
             </td>
 
-            <td
-              className="relative cursor-pointer"
-              onClick={e => {
-                e.stopPropagation();
-                const rect = e.currentTarget.getBoundingClientRect();
-                openMenu(rect.left, rect.bottom);
-              }}
-            >
-              <FontAwesomeIcon icon={faEllipsis} />
-            </td>
+            <ContextMenu.Toggle openMenu={openMenu} />
           </FileTableRow>
         )}
       </ContextMenu>

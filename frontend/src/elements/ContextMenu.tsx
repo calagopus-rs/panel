@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import classNames from 'classnames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
 const ContextMenuContext = createContext(null);
 
@@ -107,6 +107,21 @@ const ContextMenu = ({ items = [], children }: { items: Item[]; children: any })
   };
 
   return children({ openMenu, hideMenu });
+};
+
+ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }) => {
+  return (
+    <td
+      className="relative cursor-pointer w-10 text-center"
+      onClick={e => {
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        openMenu(rect.left, rect.bottom);
+      }}
+    >
+      <FontAwesomeIcon icon={faEllipsis} />
+    </td>
+  );
 };
 
 export default ContextMenu;
