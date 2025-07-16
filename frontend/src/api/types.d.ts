@@ -131,6 +131,11 @@ interface AdminServer {
   };
   startup: string;
   image: string;
+  autoKill: {
+    enabled: boolean;
+    seconds: number;
+  };
+  timezone: string | null;
   created: Date;
 }
 
@@ -167,6 +172,11 @@ interface ApiServer {
   feature_limits: ApiServerFeatureLimits;
   startup: string;
   image: string;
+  autoKill: {
+    enabled: boolean;
+    seconds: number;
+  };
+  timezone: string | null;
   created: Date;
 }
 
