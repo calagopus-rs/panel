@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         jwt::BasePayload,
+        models::server_backup::{BackupDisk, ServerBackup},
         routes::{
             ApiError, GetState,
             api::client::{
@@ -43,7 +44,7 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        server: GetServer,
+        mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -59,6 +60,42 @@ mod get {
                 StatusCode::EXPECTATION_FAILED,
                 axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
             );
+        }
+
+        if matches!(backup.disk, BackupDisk::S3) {
+            if let Some(s3_configuration) = &mut server.node.location.backup_configs.s3 {
+                s3_configuration.decrypt(&state.database);
+
+                let client = match s3_configuration.clone().into_client() {
+                    Ok(client) => client,
+                    Err(err) => {
+                        tracing::error!("Failed to create S3 client: {:#?}", err);
+
+                        return (
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            axum::Json(ApiError::new_value(&["failed to download s3 backup"])),
+                        );
+                    }
+                };
+                let file_path = ServerBackup::s3_path(server.uuid, backup.uuid);
+
+                let url = client.presign_get(file_path, 15 * 60, None).await.unwrap();
+
+                activity_logger
+                    .log(
+                        "server:backup.download",
+                        serde_json::json!({
+                            "backup": backup.uuid,
+                            "name": backup.name,
+                        }),
+                    )
+                    .await;
+
+                return (
+                    StatusCode::OK,
+                    axum::Json(serde_json::to_value(Response { url }).unwrap()),
+                );
+            }
         }
 
         #[derive(Serialize)]

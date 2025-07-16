@@ -47,7 +47,7 @@ mod put {
             "UPDATE servers
             SET timezone = $1
             WHERE id = $2",
-            data.timezone.map(|tz| tz.name().to_string()),
+            data.timezone.map(|tz| tz.name()),
             server.id
         )
         .execute(state.database.write())

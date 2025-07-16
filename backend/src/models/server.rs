@@ -1027,6 +1027,7 @@ pub struct AdminApiServer {
 
     pub startup: String,
     pub image: String,
+    #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
     pub timezone: Option<String>,
 
@@ -1065,6 +1066,7 @@ pub struct ApiServer {
 
     pub startup: String,
     pub image: String,
+    #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
     pub timezone: Option<String>,
 
