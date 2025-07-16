@@ -4,42 +4,21 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
 import deleteBackup from '@/api/server/backups/deleteBackup';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
-import useWebsocketEvent, { SocketEvent } from '@/plugins/useWebsocketEvent';
 import BackupEditDialog from './dialogs/BackupEditDialog';
 import updateBackup from '@/api/server/backups/updateBackup';
 
-export default ({ backup }: { backup: ServerBackup }) => {
+export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'update' | 'unlock' | 'lock' | 'delete'>(null);
-  const [progress, setProgress] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0);
-
-  if (!backup.completed) {
-    useWebsocketEvent(SocketEvent.BACKUP_PROGRESS, (uuid, data) => {
-      if (uuid !== backup.uuid) {
-        return;
-      }
-
-      let wsData: any = null;
-      try {
-        wsData = JSON.parse(data);
-      } catch {
-        return;
-      }
-
-      setProgress(wsData.progress);
-      setTotal(wsData.total);
-    });
-  }
 
   const doUpdate = (name: string, locked: boolean) => {
     updateBackup(server.uuid, backup.uuid, { name, locked })
@@ -106,7 +85,11 @@ export default ({ backup }: { backup: ServerBackup }) => {
             </td>
 
             <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-              {backup.completed ? bytesToString(backup.bytes) : `${bytesToString(progress)} / ${bytesToString(total)}`}
+              {backup.completed
+                ? bytesToString(backup.bytes)
+                : backup.progress
+                ? `${bytesToString(backup.progress.progress)} / ${bytesToString(backup.progress.total)}`
+                : null}
             </td>
 
             <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">

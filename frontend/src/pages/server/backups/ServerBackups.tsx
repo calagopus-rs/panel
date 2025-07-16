@@ -27,28 +27,6 @@ export default () => {
     setPage(Number(searchParams.get('page')) || 1);
   }, []);
 
-  useWebsocketEvent(SocketEvent.BACKUP_COMPLETED, (uuid, data) => {
-    let backup = backups.data.find(b => b.uuid === uuid);
-
-    let wsData: any = null;
-    try {
-      wsData = JSON.parse(data);
-    } catch {
-      return;
-    }
-
-    if (backup && wsData) {
-      backup.isSuccessful = wsData.isSuccessful;
-      if (wsData.isSuccessful) {
-        backup.checksum = `${wsData.checksum_type}:${wsData.checksum}`;
-        backup.bytes = wsData.size;
-        backup.completed = new Date();
-      }
-      console.log(backup, wsData);
-      setBackups({ ...backups, data: backups.data.map(b => (b.uuid === uuid ? backup : b)) });
-    }
-  });
-
   const onPageSelect = (page: number) => {
     setSearchParams({ page: page.toString() });
   };

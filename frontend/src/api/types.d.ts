@@ -212,6 +212,13 @@ interface ServerBackup {
   created: Date;
 }
 
+interface ServerBackupWithProgress extends ServerBackup {
+  progress?: {
+    progress: number;
+    total: number;
+  };
+}
+
 interface ApiServerFeatureLimits {
   allocations: number;
   databases: number;

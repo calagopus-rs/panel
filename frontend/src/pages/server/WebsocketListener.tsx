@@ -4,8 +4,7 @@ import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
 
 export default () => {
-  const { setStats } = useServerStore();
-  const { socketConnected, socketInstance } = useServerStore();
+  const { socketConnected, socketInstance, setStats, setBackupProgress, updateBackup } = useServerStore();
 
   useEffect(() => {
     if (!socketConnected || !socketInstance) {
@@ -24,6 +23,33 @@ export default () => {
     }
 
     setStats(transformKeysToCamelCase(wsStats));
+  });
+
+  useWebsocketEvent(SocketEvent.BACKUP_PROGRESS, (uuid, data) => {
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    setBackupProgress(uuid, wsData.progress, wsData.total);
+  });
+
+  useWebsocketEvent(SocketEvent.BACKUP_COMPLETED, (uuid, data) => {
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    updateBackup(uuid, {
+      isSuccessful: wsData.isSuccessful,
+      checksum: `${wsData.checksum_type}:${wsData.checksum}`,
+      bytes: wsData.size,
+      completed: new Date(),
+    });
   });
 
   return null;
