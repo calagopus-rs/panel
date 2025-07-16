@@ -4,7 +4,7 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faFileArrowDown, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -13,6 +13,7 @@ import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
 import BackupEditDialog from './dialogs/BackupEditDialog';
 import updateBackup from '@/api/server/backups/updateBackup';
+import downloadBackup from '@/api/server/backups/downloadBackup';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
@@ -27,6 +28,17 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         backup.isLocked = locked;
         setOpenDialog(null);
         addToast('Backup updated.', 'success');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
+  const doDownload = () => {
+    downloadBackup(server.uuid, backup.uuid)
+      .then(({ url }) => {
+        addToast(`Download started.`, 'success');
+        window.open(url);
       })
       .catch(msg => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -66,6 +78,12 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
+          {
+            icon: faFileArrowDown,
+            label: 'Download',
+            onClick: doDownload,
+            color: 'gray',
+          },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
         ]}
       >
