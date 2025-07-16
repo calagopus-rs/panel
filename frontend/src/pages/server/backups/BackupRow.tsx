@@ -4,7 +4,7 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faFileArrowDown, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faBackward, faFileArrowDown, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -14,12 +14,14 @@ import { formatTimestamp } from '@/lib/time';
 import BackupEditDialog from './dialogs/BackupEditDialog';
 import updateBackup from '@/api/server/backups/updateBackup';
 import downloadBackup from '@/api/server/backups/downloadBackup';
+import restoreBackup from '@/api/server/backups/restoreBackup';
+import BackupRestoreDialog from './dialogs/BackupRestoreDialog';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'unlock' | 'lock' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'update' | 'restore' | 'delete'>(null);
 
   const doUpdate = (name: string, locked: boolean) => {
     updateBackup(server.uuid, backup.uuid, { name, locked })
@@ -45,10 +47,22 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       });
   };
 
+  const doRestore = (truncateDirectory: boolean) => {
+    restoreBackup(server.uuid, backup.uuid, { truncateDirectory })
+      .then(() => {
+        setOpenDialog(null);
+        addToast('Restoring backup...', 'success');
+      })
+      .catch(msg => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
   const doRemove = () => {
     deleteBackup(server.uuid, backup.uuid)
       .then(() => {
         addToast('Backup deleted.', 'success');
+        setOpenDialog(null);
         removeBackup(backup);
       })
       .catch(msg => {
@@ -64,6 +78,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         open={openDialog === 'update'}
         onClose={() => setOpenDialog(null)}
       />
+      <BackupRestoreDialog onRestore={doRestore} open={openDialog === 'restore'} onClose={() => setOpenDialog(null)} />
       <Dialog.Confirm
         open={openDialog === 'delete'}
         hideCloseIcon
@@ -82,6 +97,12 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             icon: faFileArrowDown,
             label: 'Download',
             onClick: doDownload,
+            color: 'gray',
+          },
+          {
+            icon: faBackward,
+            label: 'Restore',
+            onClick: () => setOpenDialog('restore'),
             color: 'gray',
           },
           { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
