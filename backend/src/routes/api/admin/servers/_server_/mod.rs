@@ -146,6 +146,7 @@ mod patch {
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use std::str::FromStr;
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -271,6 +272,13 @@ mod patch {
             if timezone.is_empty() {
                 server.timezone = None;
             } else {
+                if chrono_tz::Tz::from_str(&timezone).is_err() {
+                    return (
+                        StatusCode::BAD_REQUEST,
+                        axum::Json(ApiError::new_value(&["invalid timezone"])),
+                    );
+                }
+
                 server.timezone = Some(timezone);
             }
         }

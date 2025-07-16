@@ -8,15 +8,12 @@ mod put {
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
-    use std::str::FromStr;
     use utoipa::ToSchema;
-    use validator::Validate;
 
-    #[derive(ToSchema, Validate, Deserialize)]
+    #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        timezone: Option<String>,
+        #[schema(min_length = 3, max_length = 255, value_type = String)]
+        timezone: Option<chrono_tz::Tz>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -39,13 +36,6 @@ mod put {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
-        }
-
         if let Err(error) = server.has_permission("settings.timezone") {
             return (
                 StatusCode::UNAUTHORIZED,
@@ -53,20 +43,11 @@ mod put {
             );
         }
 
-        if let Some(timezone) = &data.timezone {
-            if chrono_tz::Tz::from_str(timezone).is_err() {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid timezone"])),
-                );
-            }
-        }
-
         sqlx::query!(
             "UPDATE servers
             SET timezone = $1
             WHERE id = $2",
-            data.timezone,
+            data.timezone.map(|tz| tz.name().to_string()),
             server.id
         )
         .execute(state.database.write())

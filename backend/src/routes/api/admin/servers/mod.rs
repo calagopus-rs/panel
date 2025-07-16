@@ -108,9 +108,8 @@ mod post {
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         image: String,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        timezone: Option<String>,
+        #[schema(min_length = 3, max_length = 255, value_type = String)]
+        timezone: Option<chrono_tz::Tz>,
 
         feature_limits: crate::models::server::ApiServerFeatureLimits,
     }
@@ -184,7 +183,7 @@ mod post {
             &data.pinned_cpus,
             &data.startup,
             &data.image,
-            data.timezone.as_deref(),
+            data.timezone.as_ref().map(|tz| tz.name()),
             &data.feature_limits,
         )
         .await
