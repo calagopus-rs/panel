@@ -1,6 +1,5 @@
 import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
-import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { Input } from '@/elements/inputs';
@@ -8,6 +7,7 @@ import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
 import EmailSmtp from './forms/EmailSmtp';
+import AdminSettingContainer from '@/elements/AdminSettingContainer';
 
 export default () => {
   const { addToast } = useToast();
@@ -26,7 +26,7 @@ export default () => {
   };
 
   return (
-    <SettingContainer title="Email Settings">
+    <AdminSettingContainer title="Email Settings">
       <div className="mt-4">
         <Input.Label htmlFor="type">Type</Input.Label>
         <Input.Dropdown
@@ -45,6 +45,6 @@ export default () => {
       <div className="mt-4 flex justify-end">
         <Button onClick={handleUpdate}>Update Email Settings</Button>
       </div>
-    </SettingContainer>
+    </AdminSettingContainer>
   );
 };

@@ -1,11 +1,11 @@
 import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
-import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { Input } from '@/elements/inputs';
 import { httpErrorToHuman } from '@/api/axios';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
+import AdminSettingContainer from '@/elements/AdminSettingContainer';
 
 export default () => {
   const { addToast } = useToast();
@@ -27,7 +27,7 @@ export default () => {
   };
 
   return (
-    <SettingContainer title="Application Settings">
+    <AdminSettingContainer title="Application Settings">
       <div className="mt-4">
         <Input.Label htmlFor="type">Name</Input.Label>
         <Input.Text id="name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
@@ -55,6 +55,6 @@ export default () => {
       <div className="mt-4 flex justify-end">
         <Button onClick={handleUpdate}>Update Application Settings</Button>
       </div>
-    </SettingContainer>
+    </AdminSettingContainer>
   );
 };

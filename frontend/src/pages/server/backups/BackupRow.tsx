@@ -4,7 +4,15 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faBackward, faFileArrowDown, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBackward,
+  faFileArrowDown,
+  faLock,
+  faLockOpen,
+  faPencil,
+  faRotateLeft,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -100,7 +108,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             color: 'gray',
           },
           {
-            icon: faBackward,
+            icon: faRotateLeft,
             label: 'Restore',
             onClick: () => setOpenDialog('restore'),
             color: 'gray',

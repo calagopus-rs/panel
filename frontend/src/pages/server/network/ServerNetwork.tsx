@@ -1,21 +1,10 @@
 import { httpErrorToHuman } from '@/api/axios';
 import createAllocation from '@/api/server/allocations/createAllocation';
 import getAllocations from '@/api/server/allocations/getAllocations';
-import createBackup from '@/api/server/backups/createBackup';
-import getBackups from '@/api/server/backups/getBackups';
 import { Button } from '@/elements/button';
-import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, {
-  ContentWrapper,
-  NoItems,
-  Pagination,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/elements/table/Table';
+import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState, useEffect } from 'react';
