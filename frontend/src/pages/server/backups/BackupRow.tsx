@@ -21,7 +21,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'restore' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'edit' | 'restore' | 'delete'>(null);
 
   const doUpdate = (name: string, locked: boolean) => {
     updateBackup(server.uuid, backup.uuid, { name, locked })
@@ -58,7 +58,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       });
   };
 
-  const doRemove = () => {
+  const doDelete = () => {
     deleteBackup(server.uuid, backup.uuid)
       .then(() => {
         addToast('Backup deleted.', 'success');
@@ -75,7 +75,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       <BackupEditDialog
         backup={backup}
         onUpdate={doUpdate}
-        open={openDialog === 'update'}
+        open={openDialog === 'edit'}
         onClose={() => setOpenDialog(null)}
       />
       <BackupRestoreDialog onRestore={doRestore} open={openDialog === 'restore'} onClose={() => setOpenDialog(null)} />
@@ -84,15 +84,15 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
         title="Confirm Backup Deletion"
-        confirm="Remove"
-        onConfirmed={doRemove}
+        confirm="Delete"
+        onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{backup.name}</Code> from this server?
       </Dialog.Confirm>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
+          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('edit'), color: 'gray' },
           {
             icon: faFileArrowDown,
             label: 'Download',

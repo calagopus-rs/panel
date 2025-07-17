@@ -20,6 +20,8 @@ import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
+import AllocationRow from './AllocationRow';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -68,38 +70,20 @@ export default () => {
           <div className="overflow-x-auto">
             <table className="w-full table-auto">
               <TableHead>
-                <TableHeader name="ID" />
                 <TableHeader name="Hostname" />
                 <TableHeader name="Port" />
                 <TableHeader name="Note" />
                 <TableHeader />
+                <TableHeader />
               </TableHead>
 
-              <TableBody>
-                {allocations.data.map(allocation => (
-                  <TableRow key={allocation.id}>
-                    <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
-                      <Code>{allocation.id}</Code>
-                    </td>
-
-                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                      <Code>{allocation.ipAlias ?? allocation.ip}</Code>
-                    </td>
-
-                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                      <Code>{allocation.port}</Code>
-                    </td>
-
-                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={allocation.notes}>
-                      {allocation.notes}
-                    </td>
-
-                    <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
-                      {allocation.isPrimary ? 'Default' : 'Custom'}
-                    </td>
-                  </TableRow>
-                ))}
-              </TableBody>
+              <ContextMenuProvider>
+                <TableBody>
+                  {allocations.data.map(allocation => (
+                    <AllocationRow key={allocation.id} allocation={allocation} />
+                  ))}
+                </TableBody>
+              </ContextMenuProvider>
             </table>
 
             {loading ? <Spinner.Centered /> : allocations.data.length === 0 ? <NoItems /> : null}
