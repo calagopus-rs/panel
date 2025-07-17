@@ -127,7 +127,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
               {backup.completed
                 ? bytesToString(backup.bytes)
                 : backup.progress
-                ? `${bytesToString(backup.progress.progress)} / ${bytesToString(backup.progress.total)}`
+                ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
                 : null}
             </td>
 
