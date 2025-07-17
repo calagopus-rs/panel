@@ -14,7 +14,7 @@ export default ({
         <Input.Text
           id="accessKey"
           placeholder="Access Key"
-          value={backupConfigs.accessKey}
+          value={backupConfigs.accessKey || ''}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, accessKey: e.target.value }))}
         />
       </div>
@@ -25,7 +25,7 @@ export default ({
           id="secretKey"
           placeholder="Secret Key"
           type="password"
-          value={backupConfigs.secretKey}
+          value={backupConfigs.secretKey || ''}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, secretKey: e.target.value }))}
         />
       </div>
@@ -35,7 +35,7 @@ export default ({
         <Input.Text
           id="bucket"
           placeholder="Bucket"
-          value={backupConfigs.bucket}
+          value={backupConfigs.bucket || ''}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, bucket: e.target.value }))}
         />
       </div>
@@ -45,7 +45,7 @@ export default ({
         <Input.Text
           id="region"
           placeholder="Region"
-          value={backupConfigs.region}
+          value={backupConfigs.region || ''}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, region: e.target.value }))}
         />
       </div>
@@ -55,7 +55,7 @@ export default ({
         <Input.Text
           id="endpoint"
           placeholder="Endpoint"
-          value={backupConfigs.endpoint}
+          value={backupConfigs.endpoint || ''}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, endpoint: e.target.value }))}
         />
       </div>
@@ -65,7 +65,7 @@ export default ({
         <Input.Switch
           name="pathStyle"
           description={backupConfigs.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
-          defaultChecked={backupConfigs.pathStyle}
+          defaultChecked={backupConfigs.pathStyle || false}
           onChange={e => setBackupConfigs((config: any) => ({ ...config, pathStyle: e.target.checked }))}
         />
       </div>
@@ -76,8 +76,8 @@ export default ({
           id="pathSize"
           placeholder="Path Size"
           type="number"
-          value={backupConfigs.partSize}
-          onChange={e => setBackupConfigs((config: any) => ({ ...config, partSize: e.target.value }))}
+          value={backupConfigs.partSize || 0}
+          onChange={e => setBackupConfigs((config: any) => ({ ...config, partSize: Number(e.target.value) }))}
         />
       </div>
     </>

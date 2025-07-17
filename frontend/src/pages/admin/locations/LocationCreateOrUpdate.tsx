@@ -5,30 +5,37 @@ import AdminSettingContainer from '@/elements/AdminSettingContainer';
 import { Button } from '@/elements/button';
 import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import BackupS3 from './forms/BackupS3';
+import getLocation from '@/api/admin/locations/getLocation';
 
 export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
-  const { locations } = useAdminStore();
   const navigate = useNavigate();
 
   const [location, setLocation] = useState<Location | null>(null);
-  const [shortName, setShortName] = useState<string>(location?.shortName ?? '');
-  const [name, setName] = useState<string>(location?.name ?? '');
-  const [description, setDescription] = useState<string>(location?.description ?? '');
-  const [backupDisk, setBackupDisk] = useState<LocationConfigBackupType>(location?.backupDisk ?? 'local');
-  const [backupConfigs, setBackupConfigs] = useState<LocationConfigBackup>(location?.backupConfigs ?? null);
+  const [shortName, setShortName] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
+  const [backupDisk, setBackupDisk] = useState<LocationConfigBackupType>('local');
+  const [backupConfigs, setBackupConfigs] = useState<LocationConfigBackup>(null);
 
   useEffect(() => {
     if (params.id) {
-      const location = locations.data.find(l => l.id === Number(params.id));
-      if (location) {
-        setLocation(location);
-      }
+      getLocation(Number(params.id))
+        .then(location => {
+          setLocation(location);
+          setShortName(location.shortName);
+          setName(location.name);
+          setDescription(location.description || '');
+          setBackupDisk(location.backupDisk);
+          setBackupConfigs(location.backupConfigs[location.backupDisk]);
+        })
+        .catch(msg => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
     }
   }, [params.id]);
 
@@ -38,8 +45,10 @@ export default () => {
         shortName,
         name,
         description,
-        backupDisk: null,
-        backupConfigs: null,
+        backupDisk,
+        backupConfigs: {
+          [backupDisk]: backupConfigs,
+        },
       })
         .then(() => {
           addToast('Location updated.', 'success');
@@ -52,8 +61,10 @@ export default () => {
         shortName,
         name,
         description,
-        backupDisk: null,
-        backupConfigs: null,
+        backupDisk,
+        backupConfigs: {
+          [backupDisk]: backupConfigs,
+        },
       })
         .then(location => {
           addToast('Location created.', 'success');

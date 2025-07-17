@@ -1,23 +1,20 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 
 interface Data {
   shortName: string;
   name: string;
   description: string;
   backupDisk: LocationConfigBackupType;
-  backupConfigs: LocationConfigBackup;
+  backupConfigs: {
+    [x: string]: LocationConfigBackup;
+  };
 }
 
 export default async (data: Data): Promise<Location> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/admin/locations`, {
-        short_name: data.shortName,
-        name: data.name,
-        description: data.description,
-        backup_disk: data.backupDisk,
-        backup_configs: data.backupConfigs,
-      })
+      .post(`/api/admin/locations`, transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.location))
       .catch(reject);
   });
