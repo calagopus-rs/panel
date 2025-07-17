@@ -1,25 +1,21 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod rotate_password;
-mod size;
-
-mod delete {
+mod get {
     use crate::{
         models::server_database::ServerDatabase,
-        routes::{
-            ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
-        },
+        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
-    struct Response {}
+    struct Response {
+        size: i64,
+    }
 
-    #[utoipa::path(delete, path = "/", responses(
+    #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
@@ -38,10 +34,9 @@ mod delete {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetServerActivityLogger,
         Path((_server, database)): Path<(String, i32)>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("databases.delete") {
+        if let Err(error) = server.has_permission("databases.read") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
@@ -59,36 +54,27 @@ mod delete {
                 }
             };
 
-        if let Err(err) = database.delete(&state.database).await {
-            tracing::error!(server = %server.uuid, "failed to delete database: {:#?}", err);
+        let size = match database.get_size(&state.database).await {
+            Ok(size) => size,
+            Err(err) => {
+                tracing::error!(server = %server.uuid, "failed to get database size: {:#?}", err);
 
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(ApiError::new_value(&["failed to delete database"])),
-            );
-        }
-
-        activity_logger
-            .log(
-                "server:database.delete",
-                serde_json::json!({
-                    "database_host": database.database_host.name,
-                    "name": database.name,
-                }),
-            )
-            .await;
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    axum::Json(ApiError::new_value(&["failed to get database size"])),
+                );
+            }
+        };
 
         (
             StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
+            axum::Json(serde_json::to_value(Response { size }).unwrap()),
         )
     }
 }
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
-        .routes(routes!(delete::route))
-        .nest("/size", size::router(state))
-        .nest("/rotate-password", rotate_password::router(state))
+        .routes(routes!(get::route))
         .with_state(state.clone())
 }

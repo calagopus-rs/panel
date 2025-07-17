@@ -270,6 +270,28 @@ impl ServerDatabase {
         Ok(new_password)
     }
 
+    pub async fn get_size(&self, database: &crate::database::Database) -> Result<i64, sqlx::Error> {
+        match self.database_host.get_connection(database).await? {
+            crate::models::database_host::DatabasePool::Mysql(pool) => {
+                let row = sqlx::query(&format!(
+                    "SELECT CAST(SUM(data_length + index_length) AS INTEGER) FROM information_schema.tables WHERE table_schema = '{}'",
+                    self.name
+                ))
+                .fetch_one(pool.as_ref())
+                .await?;
+
+                Ok(row.get::<Option<i64>, _>(0).unwrap_or(0))
+            }
+            crate::models::database_host::DatabasePool::Postgres(pool) => {
+                let row = sqlx::query(&format!("SELECT pg_database_size('{}')", self.name))
+                    .fetch_one(pool.as_ref())
+                    .await?;
+
+                Ok(row.get::<Option<i64>, _>(0).unwrap_or(0))
+            }
+        }
+    }
+
     pub async fn by_server_id_with_pagination(
         database: &crate::database::Database,
         server_id: i32,
