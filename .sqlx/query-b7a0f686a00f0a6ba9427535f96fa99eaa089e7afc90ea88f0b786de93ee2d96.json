@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_backups\n            SET successful = false, completed = NOW()\n            WHERE server_backups.id = ANY($1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b7a0f686a00f0a6ba9427535f96fa99eaa089e7afc90ea88f0b786de93ee2d96"
+}

@@ -1035,7 +1035,7 @@ pub struct AdminApiServer {
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "ApiServer")]
+#[schema(title = "Server")]
 pub struct ApiServer {
     pub id: i32,
     pub uuid: uuid::Uuid,

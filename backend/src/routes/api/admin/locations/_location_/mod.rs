@@ -12,6 +12,7 @@ use axum::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod database_hosts;
 mod nodes;
 
 pub type GetLocation = crate::extract::ConsumingExtension<Location>;
@@ -39,6 +40,40 @@ pub async fn auth(
     req.extensions_mut().insert(location);
 
     Ok(next.run(req).await)
+}
+
+mod get {
+    use crate::routes::{ApiError, api::admin::locations::_location_::GetLocation};
+    use axum::http::StatusCode;
+    use serde::Serialize;
+    use utoipa::ToSchema;
+
+    #[derive(ToSchema, Serialize)]
+    struct Response {
+        location: crate::models::location::AdminApiLocation,
+    }
+
+    #[utoipa::path(get, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
+    ), params(
+        (
+            "location" = i32,
+            description = "The location ID",
+            example = "1",
+        ),
+    ))]
+    pub async fn route(location: GetLocation) -> (StatusCode, axum::Json<serde_json::Value>) {
+        (
+            StatusCode::OK,
+            axum::Json(
+                serde_json::to_value(Response {
+                    location: location.0.into_admin_api_object(),
+                })
+                .unwrap(),
+            ),
+        )
+    }
 }
 
 mod delete {
@@ -221,9 +256,11 @@ mod patch {
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/nodes", nodes::router(state))
+        .nest("/database_hosts", database_hosts::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

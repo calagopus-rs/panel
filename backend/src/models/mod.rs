@@ -6,6 +6,7 @@ use validator::Validate;
 
 pub mod database_host;
 pub mod location;
+pub mod location_database_host;
 pub mod mount;
 pub mod nest;
 pub mod nest_egg;

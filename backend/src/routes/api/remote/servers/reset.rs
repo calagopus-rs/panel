@@ -17,11 +17,29 @@ mod post {
         state: GetState,
         node: GetNode,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        let (_, backups) = tokio::try_join!(
+            sqlx::query!(
+                "UPDATE servers
+                SET status = NULL
+                WHERE servers.node_id = $1 AND servers.status = 'RESTORING_BACKUP'",
+                node.id
+            )
+            .execute(state.database.write()),
+            sqlx::query!(
+                "SELECT server_backups.id FROM server_backups
+                JOIN servers ON servers.id = server_backups.server_id
+                WHERE servers.node_id = $1 AND server_backups.completed IS NULL",
+                node.id
+            )
+            .fetch_all(state.database.read()),
+        )
+        .unwrap();
+
         sqlx::query!(
-            "UPDATE servers
-            SET status = NULL
-            WHERE servers.node_id = $1 AND servers.status = 'RESTORING_BACKUP'",
-            node.id
+            "UPDATE server_backups
+            SET successful = false, completed = NOW()
+            WHERE server_backups.id = ANY($1)",
+            &backups.into_iter().map(|b| b.id).collect::<Vec<_>>()
         )
         .execute(state.database.write())
         .await

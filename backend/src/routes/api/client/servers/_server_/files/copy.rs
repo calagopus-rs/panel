@@ -101,7 +101,7 @@ mod post {
                 "server:file.copy",
                 serde_json::json!({
                     "file": request_body.location,
-                    "name": request_body.name.as_ref().map(|name| name),
+                    "name": request_body.name.as_ref(),
                 }),
             )
             .await;

@@ -21,8 +21,8 @@ export const bytea = customType<{ data: string; notNull: false; default: false }
 })
 
 export const databaseTypeEnum = pgEnum('database_type', [
-	'MARIADB',
-	'POSTGRESQL'
+	'MYSQL',
+	'POSTGRES'
 ])
 
 export const serverStatusEnum = pgEnum('server_status', [
@@ -194,6 +194,15 @@ export const locations = pgTable('locations', {
 	uniqueIndex('locations_name_idx').on(locations.name)
 ])
 
+export const locationDatabaseHosts = pgTable('location_database_hosts', {
+	locationId: integer('location_id').references(() => locations.id, { onDelete: 'cascade' }).notNull(),
+	databaseHostId: integer('database_host_id').references(() => databaseHosts.id, { onDelete: 'cascade' }).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (locationDatabaseHosts) => [
+	primaryKey({ name: 'location_database_hosts_pk', columns: [locationDatabaseHosts.locationId, locationDatabaseHosts.databaseHostId] }),
+])
+
 export const nodes = pgTable('nodes', {
 	id: serial('id').primaryKey().notNull(),
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
@@ -326,6 +335,7 @@ export const databaseHosts = pgTable('database_hosts', {
 	id: serial('id').primaryKey().notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
+	public: boolean('public').default(false).notNull(),
 	type: databaseTypeEnum('type').notNull(),
 
 	publicHost: varchar('public_host', { length: 255 }),
@@ -458,7 +468,7 @@ export const serverMounts = pgTable('server_mounts', {
 export const serverBackups = pgTable('server_backups', {
 	id: serial('id').primaryKey().notNull(),
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
+	serverId: integer('server_id').references(() => servers.id).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	successful: boolean('successful').default(false).notNull(),

@@ -1,9 +1,15 @@
 use super::BaseModel;
+use crate::models::database_host::DatabaseTransaction;
 use rand::distr::SampleString;
+use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
+
+pub static DB_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^[a-zA-Z0-9_]+$").expect("Failed to compile database name regex")
+});
 
 #[derive(Serialize, Deserialize)]
 pub struct ServerDatabase {
@@ -23,23 +29,20 @@ impl BaseModel for ServerDatabase {
         let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("server_databases");
 
-        BTreeMap::from([
+        let mut columns = BTreeMap::from([
             (format!("{table}.id"), format!("{prefix}id")),
-            (
-                format!("{table}.database_host_id"),
-                format!("{prefix}database_host_id"),
-            ),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.username"), format!("{prefix}username")),
             (format!("{table}.password"), format!("{prefix}password")),
-            (format!("{table}.created_at"), format!("{prefix}created")),
-        ])
-        .into_iter()
-        .chain(super::database_host::DatabaseHost::columns(
+            (format!("{table}.created"), format!("{prefix}created")),
+        ]);
+
+        columns.extend(super::database_host::DatabaseHost::columns(
             Some("database_host_"),
             None,
-        ))
-        .collect()
+        ));
+
+        columns
     }
 
     #[inline]
@@ -61,19 +64,56 @@ impl ServerDatabase {
     pub async fn create(
         database: &crate::database::Database,
         server_id: i32,
-        database_host_id: i32,
+        database_host: &super::database_host::DatabaseHost,
         name: &str,
     ) -> Result<i32, sqlx::Error> {
-        let mut rng = rand::rng();
-
+        let name = format!("s{server_id}_{name}");
         let username = format!(
             "u{}_{}",
             server_id,
-            rand::distr::Alphanumeric.sample_string(&mut rng, 10)
+            rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 10)
         );
-        let password = rand::distr::Alphanumeric.sample_string(&mut rng, 24);
+        let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 24);
 
-        let row = sqlx::query(
+        let transaction: DatabaseTransaction = match database_host.get_connection(database).await? {
+            crate::models::database_host::DatabasePool::Mysql(pool) => {
+                let mut transaction = pool.begin().await?;
+
+                sqlx::query(&format!(
+                    "CREATE USER IF NOT EXISTS '{username}'@'%' IDENTIFIED BY '{password}'"
+                ))
+                .execute(&mut *transaction)
+                .await?;
+                sqlx::query(&format!("CREATE DATABASE IF NOT EXISTS `{name}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"))
+                    .execute(&mut *transaction)
+                    .await?;
+                sqlx::query(&format!(
+                    "GRANT ALL PRIVILEGES ON `{name}`.* TO '{username}'@'%' WITH GRANT OPTION"
+                ))
+                .execute(&mut *transaction)
+                .await?;
+
+                DatabaseTransaction::Mysql(transaction)
+            }
+            crate::models::database_host::DatabasePool::Postgres(pool) => {
+                let transaction = pool.begin().await?;
+
+                sqlx::query(&format!(
+                    "CREATE USER \"{username}\" WITH PASSWORD '{password}'"
+                ))
+                .execute(pool.as_ref())
+                .await?;
+                sqlx::query(&format!(
+                    "CREATE DATABASE \"{name}\" WITH OWNER \"{username}\" ENCODING 'UTF8'"
+                ))
+                .execute(pool.as_ref())
+                .await?;
+
+                DatabaseTransaction::Postgres(transaction, pool)
+            }
+        };
+
+        let row = match sqlx::query(
             r#"
             INSERT INTO server_databases (server_id, database_host_id, name, username, password)
             VALUES ($1, $2, $3, $4, $5)
@@ -81,12 +121,56 @@ impl ServerDatabase {
             "#,
         )
         .bind(server_id)
-        .bind(database_host_id)
-        .bind(name)
-        .bind(username)
+        .bind(database_host.id)
+        .bind(&name)
+        .bind(&username)
         .bind(database.encrypt(&password).unwrap())
         .fetch_one(database.write())
-        .await?;
+        .await
+        {
+            Ok(row) => row,
+            Err(err) => {
+                match transaction {
+                    DatabaseTransaction::Mysql(transaction) => {
+                        transaction.rollback().await?;
+                    }
+                    DatabaseTransaction::Postgres(transaction, pool) => {
+                        transaction.rollback().await?;
+
+                        let drop_database = format!("DROP DATABASE IF EXISTS \"{name}\"");
+                        let drop_user = format!("DROP USER IF EXISTS \"{username}\"");
+
+                        let (_, _) = tokio::join!(
+                            sqlx::query(&drop_database).execute(pool.as_ref()),
+                            sqlx::query(&drop_user).execute(pool.as_ref())
+                        );
+                    }
+                }
+
+                return Err(err);
+            }
+        };
+
+        match match transaction {
+            DatabaseTransaction::Mysql(transaction) => transaction.commit().await,
+            DatabaseTransaction::Postgres(transaction, _) => transaction.commit().await,
+        } {
+            Ok(_) => {}
+            Err(err) => {
+                sqlx::query(
+                    r#"
+                    DELETE FROM server_databases
+                    WHERE id = $1
+                    "#,
+                )
+                .bind(row.get::<i32, _>("id"))
+                .execute(database.write())
+                .await
+                .ok();
+
+                return Err(err);
+            }
+        }
 
         Ok(row.get("id"))
     }
@@ -94,13 +178,12 @@ impl ServerDatabase {
     pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
         let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM server_databases
             JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
             WHERE server_databases.id = $1
             "#,
             Self::columns_sql(None, None),
-            super::database_host::DatabaseHost::columns_sql(Some("database_host_"), None)
         ))
         .bind(id)
         .fetch_optional(database.read())
@@ -110,22 +193,77 @@ impl ServerDatabase {
         row.map(|row| Self::map(None, &row))
     }
 
-    pub async fn rotate_password(
+    pub async fn by_server_id_id(
         database: &crate::database::Database,
+        server_id: i32,
         id: i32,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_databases
+            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
+            WHERE server_databases.server_id = $1 AND server_databases.id = $2
+            "#,
+            Self::columns_sql(None, None),
+        ))
+        .bind(server_id)
+        .bind(id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM server_databases
+            WHERE server_databases.server_id = $1
+            "#,
+        )
+        .bind(server_id)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
+    pub async fn rotate_password(
+        &self,
+        database: &crate::database::Database,
     ) -> Result<String, sqlx::Error> {
-        let mut rng = rand::rng();
-        let new_password = rand::distr::Alphanumeric.sample_string(&mut rng, 24);
+        let new_password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 24);
+
+        match self.database_host.get_connection(database).await? {
+            crate::models::database_host::DatabasePool::Mysql(pool) => {
+                sqlx::query(&format!(
+                    "ALTER USER '{}'@'%' IDENTIFIED BY '{}'",
+                    self.username, new_password
+                ))
+                .execute(pool.as_ref())
+                .await?;
+            }
+            crate::models::database_host::DatabasePool::Postgres(pool) => {
+                sqlx::query(&format!(
+                    "ALTER USER \"{}\" WITH PASSWORD '{}'",
+                    self.username, new_password
+                ))
+                .execute(pool.as_ref())
+                .await?;
+            }
+        }
 
         sqlx::query(
             r#"
             UPDATE server_databases
-            SET server_databases.password = $1
+            SET password = $1
             WHERE server_databases.id = $2
             "#,
         )
         .bind(database.encrypt(&new_password).unwrap())
-        .bind(id)
+        .bind(self.id)
         .execute(database.write())
         .await?;
 
@@ -142,14 +280,13 @@ impl ServerDatabase {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, {}, COUNT(*) OVER() AS total_count
+            SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_databases
             JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
             WHERE server_databases.server_id = $1
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
-            super::database_host::DatabaseHost::columns_sql(Some("database_host_"), None)
         ))
         .bind(server_id)
         .bind(per_page)
@@ -166,17 +303,37 @@ impl ServerDatabase {
         }
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
+        match self.database_host.get_connection(database).await? {
+            crate::models::database_host::DatabasePool::Mysql(pool) => {
+                sqlx::query(&format!("DROP USER IF EXISTS '{}'@'%'", self.username))
+                    .execute(pool.as_ref())
+                    .await?;
+                sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", self.name))
+                    .execute(pool.as_ref())
+                    .await?;
+            }
+            crate::models::database_host::DatabasePool::Postgres(pool) => {
+                sqlx::query(&format!("DROP USER IF EXISTS \"{}\"", self.username))
+                    .execute(pool.as_ref())
+                    .await?;
+                sqlx::query(&format!("DROP DATABASE IF EXISTS \"{}\"", self.name))
+                    .execute(pool.as_ref())
+                    .await?;
+            }
+        }
+
         sqlx::query(
             r#"
             DELETE FROM server_databases
             WHERE server_databases.id = $1
             "#,
         )
-        .bind(id)
+        .bind(self.id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

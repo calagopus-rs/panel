@@ -1,7 +1,7 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _sshkey_;
+mod _ssh_key_;
 
 mod get {
     use crate::{
@@ -175,6 +175,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{sshkey}", _sshkey_::router(state))
+        .nest("/{ssh_key}", _ssh_key_::router(state))
         .with_state(state.clone())
 }

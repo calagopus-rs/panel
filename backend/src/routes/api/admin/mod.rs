@@ -3,6 +3,7 @@ use crate::routes::api::client::GetUser;
 use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
 use utoipa_axum::router::OpenApiRouter;
 
+mod database_hosts;
 mod locations;
 mod nests;
 mod nodes;
@@ -32,6 +33,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/servers", servers::router(state))
         .nest("/nodes", nodes::router(state))
         .nest("/nests", nests::router(state))
+        .nest("/database-hosts", database_hosts::router(state))
         .route_layer(axum::middleware::from_fn(auth))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),

@@ -1,12 +1,12 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _api_key_;
+mod _database_host_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, user_api_key::UserApiKey},
-        routes::{ApiError, GetState, api::client::GetUser},
+        models::{Pagination, PaginationParams, database_host::DatabaseHost},
+        routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -15,7 +15,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        api_keys: Pagination<crate::models::user_api_key::ApiUserApiKey>,
+        database_hosts: Pagination<crate::models::database_host::AdminApiDatabaseHost>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -34,7 +34,6 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        user: GetUser,
         Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -44,26 +43,21 @@ mod get {
             );
         }
 
-        let api_keys = UserApiKey::by_user_id_with_pagination(
-            &state.database,
-            user.id,
-            params.page,
-            params.per_page,
-        )
-        .await;
+        let database_hosts =
+            DatabaseHost::all_with_pagination(&state.database, params.page, params.per_page).await;
 
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    api_keys: Pagination {
-                        total: api_keys.total,
-                        per_page: api_keys.per_page,
-                        page: api_keys.page,
-                        data: api_keys
+                    database_hosts: Pagination {
+                        total: database_hosts.total,
+                        per_page: database_hosts.per_page,
+                        page: database_hosts.page,
+                        data: database_hosts
                             .data
                             .into_iter()
-                            .map(|api_key| api_key.into_api_object())
+                            .map(|database_host| database_host.into_admin_api_object())
                             .collect(),
                     },
                 })
@@ -75,11 +69,8 @@ mod get {
 
 mod post {
     use crate::{
-        models::user_api_key::UserApiKey,
-        routes::{
-            ApiError, GetState,
-            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
-        },
+        models::database_host::{DatabaseHost, DatabaseType},
+        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -88,29 +79,41 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 3, max = 31))]
-        #[schema(min_length = 3, max_length = 31)]
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
         name: String,
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Vec<String>,
+        public: bool,
+        r#type: DatabaseType,
+
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
+        public_host: Option<String>,
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
+        host: String,
+        public_port: Option<u16>,
+        port: u16,
+
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
+        username: String,
+        #[validate(length(min = 1, max = 512))]
+        #[schema(min_length = 1, max_length = 512)]
+        password: String,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        api_key: crate::models::user_api_key::ApiUserApiKey,
-        key: String,
+        database_host: crate::models::database_host::AdminApiDatabaseHost,
     }
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
-        (status = FORBIDDEN, body = ApiError),
         (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        auth: GetAuthMethod,
-        user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
@@ -121,45 +124,53 @@ mod post {
             );
         }
 
-        if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return (
-                StatusCode::FORBIDDEN,
-                axum::Json(ApiError::new_value(&["cannot create api key with api key"])),
-            );
-        }
-
-        let (key, api_key) = match UserApiKey::create(
+        let database_host = match DatabaseHost::create(
             &state.database,
-            user.id,
             &data.name,
-            data.permissions,
+            data.public,
+            data.r#type,
+            data.public_host.as_deref(),
+            &data.host,
+            data.public_port.map(|port| port as i32),
+            data.port as i32,
+            &data.username,
+            &data.password,
         )
         .await
         {
-            Ok(api_key) => api_key,
+            Ok(database_host) => database_host,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["api key with name already exists"])),
+                    axum::Json(ApiError::new_value(&[
+                        "database host with name already exists",
+                    ])),
                 );
             }
             Err(err) => {
-                tracing::error!("failed to create api key: {:#?}", err);
+                tracing::error!("failed to create database host: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create api key"])),
+                    axum::Json(ApiError::new_value(&["failed to create database host"])),
                 );
             }
         };
 
         activity_logger
             .log(
-                "user:api-key.create",
+                "admin:database_host.create",
                 serde_json::json!({
-                    "identifier": api_key.key_start,
-                    "name": api_key.name,
-                    "permissions": api_key.permissions,
+                    "name": database_host.name,
+                    "public": database_host.public,
+                    "type": database_host.r#type,
+
+                    "public_host": database_host.public_host,
+                    "host": database_host.host,
+                    "public_port": database_host.public_port,
+                    "port": database_host.port,
+
+                    "username": database_host.username,
                 }),
             )
             .await;
@@ -168,8 +179,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    api_key: api_key.into_api_object(),
-                    key,
+                    database_host: database_host.into_admin_api_object(),
                 })
                 .unwrap(),
             ),
@@ -181,6 +191,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{api_key}", _api_key_::router(state))
+        .nest("/{database_host}", _database_host_::router(state))
         .with_state(state.clone())
 }
