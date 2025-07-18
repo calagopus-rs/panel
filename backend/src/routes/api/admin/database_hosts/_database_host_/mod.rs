@@ -115,7 +115,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:database_host.delete",
+                "admin:database-host.delete",
                 serde_json::json!({
                     "id": database_host.id,
                     "name": database_host.name,
@@ -263,7 +263,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:database_host.update",
+                "admin:database-host.update",
                 serde_json::json!({
                     "name": database_host.name,
                     "public": database_host.public,

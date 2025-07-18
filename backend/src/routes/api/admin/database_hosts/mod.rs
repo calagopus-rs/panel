@@ -159,7 +159,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:database_host.create",
+                "admin:database-host.create",
                 serde_json::json!({
                     "name": database_host.name,
                     "public": database_host.public,
