@@ -1,5 +1,5 @@
 use super::BaseModel;
-use crate::models::database_host::DatabaseTransaction;
+use crate::models::database_host::{DatabaseTransaction, DatabaseType};
 use rand::distr::SampleString;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -367,6 +367,7 @@ impl ServerDatabase {
     ) -> ApiServerDatabase {
         ApiServerDatabase {
             id: self.id,
+            r#type: self.database_host.r#type,
             host: self
                 .database_host
                 .public_host
@@ -392,6 +393,7 @@ impl ServerDatabase {
 pub struct ApiServerDatabase {
     pub id: i32,
 
+    pub r#type: DatabaseType,
     pub host: String,
     pub port: i32,
 
