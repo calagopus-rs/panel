@@ -12,7 +12,6 @@ import getBackups from '@/api/server/backups/getBackups';
 import BackupRow from './BackupRow';
 import BackupCreateDialog from './dialogs/BackupCreateDialog';
 import createBackup from '@/api/server/backups/createBackup';
-import useWebsocketEvent, { SocketEvent } from '@/plugins/useWebsocketEvent';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();

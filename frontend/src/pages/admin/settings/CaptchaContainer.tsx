@@ -1,6 +1,5 @@
 import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
-import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { Input } from '@/elements/inputs';
@@ -9,6 +8,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
 import CaptchaTurnstile from './forms/CaptchaTurnstile';
 import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
+import AdminSettingContainer from '@/elements/AdminSettingContainer';
 
 export default () => {
   const { addToast } = useToast();
@@ -27,7 +27,7 @@ export default () => {
   };
 
   return (
-    <SettingContainer title="Captcha Settings">
+    <AdminSettingContainer title="Captcha Settings">
       <div className="mt-4">
         <Input.Label htmlFor="type">Type</Input.Label>
         <Input.Dropdown
@@ -51,6 +51,6 @@ export default () => {
       <div className="mt-4 flex justify-end">
         <Button onClick={handleUpdate}>Update Captcha Settings</Button>
       </div>
-    </SettingContainer>
+    </AdminSettingContainer>
   );
 };

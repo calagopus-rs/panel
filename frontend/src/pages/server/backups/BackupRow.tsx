@@ -4,7 +4,15 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faBackward, faFileArrowDown, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBackward,
+  faFileArrowDown,
+  faLock,
+  faLockOpen,
+  faPencil,
+  faRotateLeft,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { Dialog } from '@/elements/dialog';
@@ -21,7 +29,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'restore' | 'delete'>(null);
+  const [openDialog, setOpenDialog] = useState<'edit' | 'restore' | 'delete'>(null);
 
   const doUpdate = (name: string, locked: boolean) => {
     updateBackup(server.uuid, backup.uuid, { name, locked })
@@ -58,7 +66,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       });
   };
 
-  const doRemove = () => {
+  const doDelete = () => {
     deleteBackup(server.uuid, backup.uuid)
       .then(() => {
         addToast('Backup deleted.', 'success');
@@ -75,7 +83,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       <BackupEditDialog
         backup={backup}
         onUpdate={doUpdate}
-        open={openDialog === 'update'}
+        open={openDialog === 'edit'}
         onClose={() => setOpenDialog(null)}
       />
       <BackupRestoreDialog onRestore={doRestore} open={openDialog === 'restore'} onClose={() => setOpenDialog(null)} />
@@ -84,15 +92,15 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
         title="Confirm Backup Deletion"
-        confirm="Remove"
-        onConfirmed={doRemove}
+        confirm="Delete"
+        onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{backup.name}</Code> from this server?
       </Dialog.Confirm>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
+          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('edit'), color: 'gray' },
           {
             icon: faFileArrowDown,
             label: 'Download',
@@ -100,7 +108,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             color: 'gray',
           },
           {
-            icon: faBackward,
+            icon: faRotateLeft,
             label: 'Restore',
             onClick: () => setOpenDialog('restore'),
             color: 'gray',
@@ -127,7 +135,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
               {backup.completed
                 ? bytesToString(backup.bytes)
                 : backup.progress
-                ? `${bytesToString(backup.progress.progress)} / ${bytesToString(backup.progress.total)}`
+                ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
                 : null}
             </td>
 

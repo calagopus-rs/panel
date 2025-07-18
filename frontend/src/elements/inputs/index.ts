@@ -4,6 +4,7 @@ import Switch from './Switch';
 import Dropdown from './Dropdown';
 import Label from './Label';
 import { MultiInput } from './MultiInput';
+import Textarea from './Textarea';
 
 const Input = Object.assign(
   {},
@@ -14,6 +15,7 @@ const Input = Object.assign(
     Switch,
     Dropdown,
     MultiInput,
+    Textarea,
   },
 );
 

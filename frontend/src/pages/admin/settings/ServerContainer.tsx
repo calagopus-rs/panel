@@ -1,11 +1,11 @@
 import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
-import { SettingContainer } from './AdminSettings';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { Input } from '@/elements/inputs';
 import { httpErrorToHuman } from '@/api/axios';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings';
+import AdminSettingContainer from '@/elements/AdminSettingContainer';
 
 export default () => {
   const { addToast } = useToast();
@@ -28,7 +28,7 @@ export default () => {
   };
 
   return (
-    <SettingContainer title="Server Settings">
+    <AdminSettingContainer title="Server Settings">
       <div className="mt-4">
         <Input.Label htmlFor="max-file-manager-view-size">Max File Manager View Size</Input.Label>
         <Input.Text
@@ -61,6 +61,6 @@ export default () => {
       <div className="mt-4 flex justify-end">
         <Button onClick={handleUpdate}>Update Server Settings</Button>
       </div>
-    </SettingContainer>
+    </AdminSettingContainer>
   );
 };

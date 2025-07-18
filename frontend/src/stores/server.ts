@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { AllocationsSlice, createAllocationsSlice } from './slices/server/allocations';
 import { BackupsSlice, createBackupsSlice } from './slices/server/backups';
 import { DatabasesSlice, createDatabasesSlice } from './slices/server/databases';
 import { FilesSlice, createFilesSlice } from './slices/server/files';
@@ -10,7 +11,8 @@ import { SubusersSlice, createSubusersSlice } from './slices/server/subusers';
 import { WebsocketSlice, createWebsocketSlice } from './slices/server/websocket';
 
 export interface ServerStore
-  extends BackupsSlice,
+  extends AllocationsSlice,
+    BackupsSlice,
     DatabasesSlice,
     FilesSlice,
     SchedulesSlice,
@@ -25,6 +27,7 @@ export interface ServerStore
 export const useServerStore = create<ServerStore>()((...a) => {
   const initialState = {} as ServerStore;
   Object.assign(initialState, {
+    ...createAllocationsSlice(...a),
     ...createBackupsSlice(...a),
     ...createDatabasesSlice(...a),
     ...createFilesSlice(...a),
