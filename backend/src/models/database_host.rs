@@ -224,6 +224,7 @@ impl DatabaseHost {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM database_hosts
+            ORDER BY database_hosts.id ASC
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None)

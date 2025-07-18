@@ -60,6 +60,7 @@ impl NestEggMount {
             FROM nest_egg_mounts
             JOIN mounts ON nest_egg_mounts.mount_id = mounts.id
             WHERE nest_egg_mounts.egg_id = $1
+            ORDER BY nest_egg_mounts.id ASC
             "#,
             Self::columns_sql(None, None),
             super::mount::Mount::columns_sql(Some("mount_"), None)

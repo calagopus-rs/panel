@@ -215,6 +215,7 @@ impl Node {
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
             WHERE nodes.location_id = $1
+            ORDER BY nodes.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -246,6 +247,7 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
+            ORDER BY nodes.id ASC
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None)

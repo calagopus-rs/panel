@@ -113,6 +113,7 @@ impl UserSession {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_sessions
             WHERE user_sessions.user_id = $1
+            ORDER BY user_sessions.id DESC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)

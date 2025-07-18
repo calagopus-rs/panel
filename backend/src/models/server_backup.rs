@@ -221,6 +221,7 @@ impl ServerBackup {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
             WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            ORDER BY server_backups.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)

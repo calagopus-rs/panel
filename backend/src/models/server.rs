@@ -494,7 +494,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
             WHERE servers.owner_id = $1 OR server_subusers.user_id = $1
-            ORDER BY servers.id
+            ORDER BY servers.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -534,7 +534,7 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
             WHERE servers.owner_id != $1 AND server_subusers.user_id != $1
-            ORDER BY servers.id
+            ORDER BY servers.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -573,6 +573,7 @@ impl Server {
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             WHERE servers.node_id = $1
+            ORDER BY servers.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -609,6 +610,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            ORDER BY servers.id ASC
             LIMIT $1 OFFSET $2
             "#,
             Self::columns_sql(None, None)

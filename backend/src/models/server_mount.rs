@@ -62,6 +62,7 @@ impl ServerMount {
             SELECT {}, {}
             FROM server_mounts
             JOIN mounts ON mounts.id = server_mounts.mount_id
+            ORDER BY server_mounts.mount_id ASC
             WHERE server_mounts.server_id = $1
             "#,
             Self::columns_sql(None, None),

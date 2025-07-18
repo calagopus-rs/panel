@@ -113,6 +113,7 @@ impl UserSshKey {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_ssh_keys
             WHERE user_ssh_keys.user_id = $1
+            ORDER BY user_ssh_keys.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)

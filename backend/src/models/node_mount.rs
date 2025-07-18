@@ -62,6 +62,7 @@ impl NodeMount {
             FROM node_mounts
             JOIN mounts ON mounts.id = node_mounts.mount_id
             WHERE node_mounts.node_id = $1
+            ORDER BY node_mounts.mount_id ASC
             "#,
             Self::columns_sql(None, None),
             super::mount::Mount::columns_sql(Some("mount_"), None)

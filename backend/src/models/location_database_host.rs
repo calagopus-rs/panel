@@ -103,6 +103,7 @@ impl LocationDatabaseHost {
             FROM location_database_hosts
             JOIN database_hosts ON location_database_hosts.database_host_id = database_hosts.id
             WHERE location_database_hosts.location_id = $1
+            ORDER BY location_database_hosts.database_host_id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
@@ -132,6 +133,7 @@ impl LocationDatabaseHost {
             FROM location_database_hosts
             JOIN database_hosts ON location_database_hosts.database_host_id = database_hosts.id
             WHERE location_database_hosts.location_id = $1 AND database_hosts.public
+            ORDER BY location_database_hosts.database_host_id ASC
             "#,
             Self::columns_sql(None, None),
         ))

@@ -117,6 +117,7 @@ impl UserApiKey {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_api_keys
             WHERE user_api_keys.user_id = $1
+            ORDER BY user_api_keys.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)

@@ -277,6 +277,7 @@ impl NestEgg {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nest_eggs
             WHERE nest_eggs.nest_id = $1
+            ORDER BY nest_eggs.mount_id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)

@@ -156,6 +156,7 @@ impl ServerAllocation {
             FROM server_allocations
             JOIN node_allocations ON server_allocations.allocation_id = node_allocations.id
             WHERE server_allocations.server_id = $1
+            ORDER BY server_allocations.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
