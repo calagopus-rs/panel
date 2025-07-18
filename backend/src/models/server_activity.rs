@@ -129,7 +129,7 @@ impl ServerActivity {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_activities
-            JOIN users ON users.id = server_activities.user_id
+            LEFT JOIN users ON users.id = server_activities.user_id
             WHERE server_activities.server_id = $1
             ORDER BY server_activities.created DESC
             LIMIT $2 OFFSET $3

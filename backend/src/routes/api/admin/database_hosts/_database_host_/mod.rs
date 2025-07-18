@@ -111,6 +111,15 @@ mod delete {
         database_host: GetDatabaseHost,
         activity_logger: GetUserActivityLogger,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if database_host.databases > 0 {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[
+                    "database host has databases, cannot delete",
+                ])),
+            );
+        }
+
         DatabaseHost::delete_by_id(&state.database, database_host.id).await;
 
         activity_logger

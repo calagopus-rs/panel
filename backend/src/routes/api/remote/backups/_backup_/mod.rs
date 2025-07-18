@@ -265,7 +265,7 @@ mod post {
         state: GetState,
         node: GetNode,
         backup: GetBackup,
-        axum::Json(data): axum::Json<Payload>,
+        axum::Json(mut data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if backup.disk == BackupDisk::S3 {
             let upload_id = match backup.0.upload_id {
@@ -347,6 +347,8 @@ mod post {
                             "failed to complete multipart upload: {:#?}",
                             err
                         );
+
+                        data.successful = false;
                     }
                 }
             } else {

@@ -1,7 +1,7 @@
 use axum::{
     ServiceExt,
     body::Body,
-    extract::Request,
+    extract::{ConnectInfo, Request},
     http::{Method, StatusCode},
     middleware::Next,
     response::Response,
@@ -12,7 +12,7 @@ use include_dir::{Dir, include_dir};
 use routes::ApiError;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
-use std::{sync::Arc, time::Instant};
+use std::{net::SocketAddr, sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
 use tower_http::{
@@ -52,9 +52,12 @@ fn handle_panic(_err: Box<dyn std::any::Any + Send + 'static>) -> Response<Body>
 
 pub type GetIp = axum::extract::Extension<std::net::IpAddr>;
 
-async fn handle_request(mut req: Request<Body>, next: Next) -> Result<Response<Body>, StatusCode> {
-    let ip = crate::utils::extract_ip(req.headers())
-        .unwrap_or_else(|| std::net::IpAddr::V4(std::net::Ipv4Addr::new(127, 0, 0, 1)));
+async fn handle_request(
+    connect_info: ConnectInfo<SocketAddr>,
+    mut req: Request<Body>,
+    next: Next,
+) -> Result<Response<Body>, StatusCode> {
+    let ip = crate::utils::extract_ip(req.headers()).unwrap_or_else(|| connect_info.ip());
 
     req.extensions_mut().insert(ip);
 
@@ -260,7 +263,7 @@ async fn main() {
 
     axum::serve(
         listener,
-        ServiceExt::<Request>::into_make_service(
+        ServiceExt::<Request>::into_make_service_with_connect_info::<SocketAddr>(
             NormalizePathLayer::trim_trailing_slash().layer(router),
         ),
     )
