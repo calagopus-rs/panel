@@ -106,6 +106,13 @@ mod delete {
         location: GetLocation,
         activity_logger: GetUserActivityLogger,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if location.nodes > 0 {
+            return (
+                StatusCode::BAD_REQUEST,
+                axum::Json(ApiError::new_value(&["location has nodes, cannot delete"])),
+            );
+        }
+
         Location::delete_by_id(&state.database, location.id).await;
 
         activity_logger
