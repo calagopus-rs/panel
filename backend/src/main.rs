@@ -140,6 +140,19 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
 async fn main() {
     let (_tracing_guard, env) = env::Env::parse();
 
+    tracing::info!("                         _");
+    tracing::info!("  _ __   __ _ _ __   ___| |");
+    tracing::info!(" | '_ \\ / _` | '_ \\ / _ \\ |");
+    tracing::info!(" | |_) | (_| | | | |  __/ |");
+    tracing::info!(" | .__/ \\__,_|_| |_|\\___|_|____");
+    tracing::info!(" | |                  | '__/ __|");
+    tracing::info!(" |_|                  | |  \\__ \\");
+    tracing::info!(
+        "{: >21} |_|  |___/",
+        format!("{VERSION} (git-{GIT_COMMIT})")
+    );
+    tracing::info!("github.com/pterodactyl-rs/panel\n");
+
     let _guard = sentry::init((
         env.sentry_url.clone(),
         sentry::ClientOptions {

@@ -79,7 +79,7 @@ impl ServerAllocation {
             r#"
             INSERT INTO server_allocations (server_id, allocation_id)
             VALUES ($1, (
-                SELECT id FROM node_allocations
+                SELECT node_allocations.id FROM node_allocations
                 LEFT JOIN server_allocations ON server_allocations.allocation_id = node_allocations.id
                 WHERE
                     node_allocations.node_id = $2

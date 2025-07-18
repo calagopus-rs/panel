@@ -23,7 +23,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let egg = match egg.first().map(|s| s.parse::<i32>()) {
+    let egg = match egg.get(1).map(|s| s.parse::<i32>()) {
         Some(Ok(id)) => id,
         _ => {
             return Ok(Response::builder()
