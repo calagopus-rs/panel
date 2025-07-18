@@ -109,6 +109,7 @@ mod post {
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
         (status = UNAUTHORIZED, body = ApiError),
+        (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,
@@ -134,6 +135,15 @@ mod post {
                 StatusCode::EXPECTATION_FAILED,
                 axum::Json(ApiError::new_value(&[
                     "maximum number of allocations reached",
+                ])),
+            );
+        }
+
+        if !server.egg.config_allocations.user_self_assign.enabled {
+            return (
+                StatusCode::EXPECTATION_FAILED,
+                axum::Json(ApiError::new_value(&[
+                    "self-assigning allocations is not enabled for this server",
                 ])),
             );
         }
