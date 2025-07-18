@@ -435,7 +435,7 @@ impl ServerSubuser {
             FROM server_subusers
             JOIN users ON users.id = server_subusers.user_id
             WHERE server_subusers.server_id = $1
-            ORDER BY server_subusers.created DESC
+            ORDER BY server_subusers.id ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
