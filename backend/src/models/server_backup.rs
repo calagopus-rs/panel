@@ -128,6 +128,15 @@ impl ServerBackup {
                     BackupDisk::Restic => wings_api::BackupAdapter::Restic,
                 };
 
+                if server.node.location.backup_disk == BackupDisk::Restic {
+                    server
+                        .node
+                        .api_client(&database)
+                        .post_servers_server_sync(server.uuid)
+                        .await
+                        .ok();
+                }
+
                 if let Err(err) = server
                     .node
                     .api_client(&database)
@@ -261,6 +270,15 @@ impl ServerBackup {
         server: super::server::Server,
         truncate_directory: bool,
     ) -> Result<(), s3::error::S3Error> {
+        if self.disk == BackupDisk::Restic {
+            server
+                .node
+                .api_client(&database)
+                .post_servers_server_sync(server.uuid)
+                .await
+                .ok();
+        }
+
         if let Err((status, error)) = server
             .node
             .api_client(database)
@@ -329,7 +347,16 @@ impl ServerBackup {
                     tracing::warn!(server = %server.uuid, backup = %self.uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");
                 }
             }
-            _ => {
+            disk => {
+                if disk == BackupDisk::Restic {
+                    server
+                        .node
+                        .api_client(&database)
+                        .post_servers_server_sync(server.uuid)
+                        .await
+                        .ok();
+                }
+
                 if let Err((status, error)) = server
                     .node
                     .api_client(database)
