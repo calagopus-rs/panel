@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE servers SET allocation_id = NULL WHERE id = $1",
+  "query": "UPDATE servers SET allocation_id = NULL WHERE servers.id = $1",
   "describe": {
     "columns": [],
     "parameters": {
@@ -10,5 +10,5 @@
     },
     "nullable": []
   },
-  "hash": "7a0510411997a19e797420d6ac35caf61aa3f0b484f3ff12fbed5736f0f25aa3"
+  "hash": "de7161a5ba5c36446f220949c69509c0bc70aaa4273f53d30e8b9ac124a14835"
 }
