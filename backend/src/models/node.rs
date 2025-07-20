@@ -306,11 +306,11 @@ impl Node {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiNode {
+    pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiNode {
         AdminApiNode {
             id: self.id,
             uuid: self.uuid,
-            location: self.location.into_admin_api_object(),
+            location: self.location.into_admin_api_object(database),
             name: self.name,
             public: self.public,
             description: self.description,

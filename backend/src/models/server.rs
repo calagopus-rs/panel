@@ -887,7 +887,7 @@ impl Server {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiServer {
+    pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiServer {
         let allocation_id = self.allocation.as_ref().map(|a| a.id);
 
         AdminApiServer {
@@ -896,7 +896,7 @@ impl Server {
             uuid_short: format!("{:08x}", self.uuid_short),
             external_id: self.external_id,
             allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
-            node: self.node.into_admin_api_object(),
+            node: self.node.into_admin_api_object(database),
             owner: self.owner.into_api_object(true),
             egg: self.egg.into_admin_api_object(),
             status: self.status,

@@ -114,6 +114,15 @@ impl LocationBackupConfigs {
         }
     }
 
+    pub fn decrypt(&mut self, database: &crate::database::Database) {
+        if let Some(s3) = &mut self.s3 {
+            s3.decrypt(database);
+        }
+        if let Some(restic) = &mut self.restic {
+            restic.decrypt(database);
+        }
+    }
+
     pub fn censor(&mut self) {
         if let Some(s3) = &mut self.s3 {
             s3.censor();
@@ -281,7 +290,12 @@ impl Location {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiLocation {
+    pub fn into_admin_api_object(
+        mut self,
+        database: &crate::database::Database,
+    ) -> AdminApiLocation {
+        self.backup_configs.decrypt(database);
+
         AdminApiLocation {
             id: self.id,
             short_name: self.short_name,

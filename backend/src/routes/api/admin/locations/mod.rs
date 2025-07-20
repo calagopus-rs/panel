@@ -57,7 +57,7 @@ mod get {
                         data: locations
                             .data
                             .into_iter()
-                            .map(|location| location.into_admin_api_object())
+                            .map(|location| location.into_admin_api_object(&state.database))
                             .collect(),
                     },
                 })
@@ -163,7 +163,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    location: location.into_admin_api_object(),
+                    location: location.into_admin_api_object(&state.database),
                 })
                 .unwrap(),
             ),

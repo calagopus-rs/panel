@@ -43,7 +43,7 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, api::admin::nodes::_node_::GetNode};
+    use crate::routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode};
     use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -64,12 +64,15 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(node: GetNode) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(
+        state: GetState,
+        node: GetNode,
+    ) -> (StatusCode, axum::Json<serde_json::Value>) {
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    node: node.0.into_admin_api_object(),
+                    node: node.0.into_admin_api_object(&state.database),
                 })
                 .unwrap(),
             ),

@@ -67,7 +67,7 @@ mod get {
                         data: servers
                             .data
                             .into_iter()
-                            .map(|server| server.into_admin_api_object())
+                            .map(|server| server.into_admin_api_object(&state.database))
                             .collect(),
                     },
                 })

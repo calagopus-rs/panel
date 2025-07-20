@@ -57,7 +57,7 @@ mod get {
                         data: servers
                             .data
                             .into_iter()
-                            .map(|server| server.into_admin_api_object())
+                            .map(|server| server.into_admin_api_object(&state.database))
                             .collect(),
                     },
                 })
@@ -240,7 +240,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    server: server.into_admin_api_object(),
+                    server: server.into_admin_api_object(&state.database),
                 })
                 .unwrap(),
             ),
