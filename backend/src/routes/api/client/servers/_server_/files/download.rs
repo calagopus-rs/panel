@@ -57,7 +57,7 @@ mod get {
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        if let Err(error) = server.has_permission("files.download") {
+        if let Err(error) = server.has_permission("files.read-content") {
             return (
                 StatusCode::UNAUTHORIZED,
                 axum::Json(ApiError::new_value(&[&error])),
@@ -113,7 +113,7 @@ mod get {
 
         activity_logger
             .log(
-                "server:file.download",
+                "server:file.read-content",
                 serde_json::json!({
                     "file": params.file,
                     "directory": params.directory,
