@@ -238,7 +238,7 @@ mod patch {
             }
         }
 
-        let location = location.0.into_admin_api_object();
+        location.backup_configs.censor();
 
         activity_logger
             .log(

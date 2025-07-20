@@ -142,7 +142,8 @@ mod post {
             }
         };
 
-        let location = location.into_admin_api_object();
+        let mut backup_configs = location.backup_configs.clone();
+        backup_configs.censor();
 
         activity_logger
             .log(
@@ -153,14 +154,19 @@ mod post {
                     "description": location.description,
 
                     "backup_disk": location.backup_disk,
-                    "backup_configs": location.backup_configs,
+                    "backup_configs": backup_configs,
                 }),
             )
             .await;
 
         (
             StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { location }).unwrap()),
+            axum::Json(
+                serde_json::to_value(Response {
+                    location: location.into_admin_api_object(),
+                })
+                .unwrap(),
+            ),
         )
     }
 }

@@ -31,7 +31,7 @@ impl LocationBackupConfigsS3 {
     }
 
     pub fn censor(&mut self) {
-        self.secret_key = "".into();
+        self.secret_key = "*".repeat(self.secret_key.len());
     }
 
     pub fn into_client(self) -> Result<Box<s3::Bucket>, s3::error::S3Error> {
@@ -88,7 +88,7 @@ impl LocationBackupConfigsRestic {
     pub fn censor(&mut self) {
         for (key, value) in self.environment.iter_mut() {
             if key == "RESTIC_PASSWORD" || key == "AWS_SECRET_ACCESS_KEY" {
-                *value = "".into();
+                *value = "*".repeat(value.len());
             }
         }
     }
@@ -281,9 +281,7 @@ impl Location {
     }
 
     #[inline]
-    pub fn into_admin_api_object(mut self) -> AdminApiLocation {
-        self.backup_configs.censor();
-
+    pub fn into_admin_api_object(self) -> AdminApiLocation {
         AdminApiLocation {
             id: self.id,
             short_name: self.short_name,
