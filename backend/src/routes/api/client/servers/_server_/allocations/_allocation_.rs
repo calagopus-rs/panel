@@ -181,39 +181,43 @@ mod patch {
             if server
                 .allocation
                 .as_ref()
-                .is_none_or(|a| a.id == allocation.id)
-                && !primary
-                && server
-                    .egg
-                    .config_allocations
-                    .user_self_assign
-                    .require_primary_allocation
+                .is_some_and(|a| a.id == allocation.id)
             {
-                transaction.rollback().await.unwrap();
+                if !primary {
+                    if server
+                        .egg
+                        .config_allocations
+                        .user_self_assign
+                        .require_primary_allocation
+                    {
+                        transaction.rollback().await.unwrap();
 
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["cannot unset primary allocation"])),
-                );
-            }
+                        return (
+                            StatusCode::BAD_REQUEST,
+                            axum::Json(ApiError::new_value(&["cannot unset primary allocation"])),
+                        );
+                    }
 
-            if server
-                .egg
-                .config_allocations
-                .user_self_assign
-                .require_primary_allocation
-                && !primary
-            {
+                    sqlx::query!(
+                        "UPDATE servers SET allocation_id = NULL WHERE servers.id = $1",
+                        server.id,
+                    )
+                    .execute(&mut *transaction)
+                    .await
+                    .unwrap();
+                } else {
+                    sqlx::query!(
+                        "UPDATE servers SET allocation_id = $1 WHERE servers.id = $2",
+                        allocation.id,
+                        server.id,
+                    )
+                    .execute(&mut *transaction)
+                    .await
+                    .unwrap();
+                }
+            } else if server.allocation.is_none() && primary {
                 sqlx::query!(
-                    "UPDATE servers SET allocation_id = NULL WHERE id = $1",
-                    server.id,
-                )
-                .execute(&mut *transaction)
-                .await
-                .unwrap();
-            } else {
-                sqlx::query!(
-                    "UPDATE servers SET allocation_id = $1 WHERE id = $2",
+                    "UPDATE servers SET allocation_id = $1 WHERE servers.id = $2",
                     allocation.id,
                     server.id,
                 )
