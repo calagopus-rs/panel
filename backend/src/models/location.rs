@@ -1,4 +1,5 @@
 use super::BaseModel;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -58,11 +59,49 @@ impl LocationBackupConfigsS3 {
     }
 }
 
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+pub struct LocationBackupConfigsRestic {
+    pub repository: String,
+    pub retry_lock_seconds: u64,
+
+    pub environment: IndexMap<String, String>,
+}
+
+impl LocationBackupConfigsRestic {
+    pub fn encrypt(&mut self, database: &crate::database::Database) {
+        for value in self.environment.values_mut() {
+            *value = base32::encode(
+                base32::Alphabet::Z,
+                &database.encrypt(value.as_bytes()).unwrap(),
+            );
+        }
+    }
+
+    pub fn decrypt(&mut self, database: &crate::database::Database) {
+        for value in self.environment.values_mut() {
+            *value = database
+                .decrypt(base32::decode(base32::Alphabet::Z, value).unwrap())
+                .unwrap();
+        }
+    }
+
+    pub fn censor(&mut self) {
+        for (key, value) in self.environment.iter_mut() {
+            if key == "RESTIC_PASSWORD" || key == "AWS_SECRET_ACCESS_KEY" {
+                *value = "".into();
+            }
+        }
+    }
+}
+
 #[derive(ToSchema, Serialize, Deserialize, Default, Clone)]
 pub struct LocationBackupConfigs {
     #[serde(default)]
     #[schema(inline)]
     pub s3: Option<LocationBackupConfigsS3>,
+    #[serde(default)]
+    #[schema(inline)]
+    pub restic: Option<LocationBackupConfigsRestic>,
 }
 
 impl LocationBackupConfigs {
@@ -70,11 +109,17 @@ impl LocationBackupConfigs {
         if let Some(s3) = &mut self.s3 {
             s3.encrypt(database);
         }
+        if let Some(restic) = &mut self.restic {
+            restic.encrypt(database);
+        }
     }
 
     pub fn censor(&mut self) {
         if let Some(s3) = &mut self.s3 {
             s3.censor();
+        }
+        if let Some(restic) = &mut self.restic {
+            restic.censor();
         }
     }
 }

@@ -31,7 +31,8 @@ export default function generateSchemaObject(output: fs.WriteStream, _spaces: nu
 
         if (object.properties) {
             for (const [propertyName, property] of Object.entries(object.properties)) {
-                generateSchemaProperty(output, _spaces + (parent ? 0 : 8), parent ? (pascalCase(parent) + pascalCase(name)) : pascalCase(name), propertyName, property)
+                const p = parent?.startsWith(pascalCase(name)) ? parent?.replace(pascalCase(name), '') ?? '' : pascalCase(name)
+                generateSchemaProperty(output, _spaces + (parent ? 0 : 8), p, propertyName, property)
             }
         }
 

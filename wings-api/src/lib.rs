@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 pub mod client;
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ApiError {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ApiError {
         #[schema(inline)]
         pub error: String,
     }
@@ -59,7 +59,7 @@ pub enum CompressionLevel {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct DirectoryEntry {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct DirectoryEntry {
         #[schema(inline)]
         pub name: String,
         #[schema(inline)]
@@ -84,7 +84,7 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Download {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Download {
         #[schema(inline)]
         pub identifier: uuid::Uuid,
         #[schema(inline)]
@@ -97,7 +97,7 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ExtensionInfo {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ExtensionInfo {
         #[schema(inline)]
         pub name: String,
         #[schema(inline)]
@@ -114,7 +114,7 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Mount {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Mount {
         #[schema(inline)]
         pub target: String,
         #[schema(inline)]
@@ -125,7 +125,7 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ResourceUsage {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ResourceUsage {
         #[schema(inline)]
         pub memory_bytes: u64,
         #[schema(inline)]
@@ -135,7 +135,7 @@ nestify::nest! {
         #[schema(inline)]
         pub state: ServerState,
         #[schema(inline)]
-        pub network: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ResourceUsageNetwork {
+        pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ResourceUsageNetwork {
             #[schema(inline)]
             pub rx_bytes: u64,
             #[schema(inline)]
@@ -150,7 +150,7 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Server {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Server {
         #[schema(inline)]
         pub state: ServerState,
         #[schema(inline)]
@@ -163,13 +163,13 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfiguration {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfiguration {
         #[schema(inline)]
         pub uuid: uuid::Uuid,
         #[schema(inline)]
         pub start_on_completion: Option<bool>,
         #[schema(inline)]
-        pub meta: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationMeta {
+        pub meta: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationMeta {
             #[schema(inline)]
             pub name: String,
             #[schema(inline)]
@@ -187,13 +187,26 @@ nestify::nest! {
         #[schema(inline)]
         pub labels: IndexMap<String, String>,
         #[schema(inline)]
+        pub backup_configurations: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationBackupConfigurations {
+            #[schema(inline)]
+            pub restic: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationBackupConfigurationsRestic {
+                #[schema(inline)]
+                pub repository: String,
+                #[schema(inline)]
+                pub retry_lock_seconds: u64,
+                #[schema(inline)]
+                pub environment: IndexMap<String, String>,
+            }>,
+        },
+
+        #[schema(inline)]
         pub backups: Vec<uuid::Uuid>,
         #[schema(inline)]
-        pub allocations: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationAllocations {
+        pub allocations: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAllocations {
             #[schema(inline)]
             pub force_outgoing_ip: bool,
             #[schema(inline)]
-            pub default: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationServerConfigurationAllocationsDefault {
+            pub default: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAllocationsDefault {
                 #[schema(inline)]
                 pub ip: String,
                 #[schema(inline)]
@@ -204,7 +217,7 @@ nestify::nest! {
         },
 
         #[schema(inline)]
-        pub build: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationBuild {
+        pub build: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationBuild {
             #[schema(inline)]
             pub memory_limit: i64,
             #[schema(inline)]
@@ -224,7 +237,7 @@ nestify::nest! {
         #[schema(inline)]
         pub mounts: Vec<Mount>,
         #[schema(inline)]
-        pub egg: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationEgg {
+        pub egg: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationEgg {
             #[schema(inline)]
             pub id: uuid::Uuid,
             #[schema(inline)]
@@ -232,7 +245,7 @@ nestify::nest! {
         },
 
         #[schema(inline)]
-        pub container: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct ServerConfigurationContainer {
+        pub container: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationContainer {
             #[schema(inline)]
             pub image: String,
             #[schema(inline)]
@@ -240,7 +253,7 @@ nestify::nest! {
         },
 
         #[schema(inline)]
-        pub auto_kill: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)] pub struct ServerConfigurationAutoKill {
+        pub auto_kill: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAutoKill {
             #[schema(inline)]
             pub enabled: bool,
             #[schema(inline)]
@@ -291,7 +304,7 @@ pub mod extensions {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub extensions: Vec<ExtensionInfo>,
             }
@@ -311,7 +324,7 @@ pub mod servers {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub uuid: uuid::Uuid,
                 #[schema(inline)]
@@ -322,7 +335,7 @@ pub mod servers {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -342,7 +355,7 @@ pub mod servers_server {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
     }
@@ -354,7 +367,7 @@ pub mod servers_server_backup {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub adapter: BackupAdapter,
                 #[schema(inline)]
@@ -365,7 +378,7 @@ pub mod servers_server_backup {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -379,7 +392,7 @@ pub mod servers_server_backup_backup {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -393,7 +406,7 @@ pub mod servers_server_backup_backup_restore {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub adapter: BackupAdapter,
                 #[schema(inline)]
@@ -404,7 +417,7 @@ pub mod servers_server_backup_backup_restore {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -418,14 +431,14 @@ pub mod servers_server_commands {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub commands: Vec<String>,
             }
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -439,11 +452,11 @@ pub mod servers_server_files_chmod {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
-                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyFiles {
+                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyFiles {
                     #[schema(inline)]
                     pub file: String,
                     #[schema(inline)]
@@ -453,7 +466,7 @@ pub mod servers_server_files_chmod {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub updated: u64,
             }
@@ -471,7 +484,7 @@ pub mod servers_server_files_compress {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub format: ArchiveFormat,
                 #[schema(inline)]
@@ -512,7 +525,7 @@ pub mod servers_server_files_copy {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub location: String,
                 #[schema(inline)]
@@ -534,7 +547,7 @@ pub mod servers_server_files_create_directory {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub name: String,
                 #[schema(inline)]
@@ -543,7 +556,7 @@ pub mod servers_server_files_create_directory {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -559,7 +572,7 @@ pub mod servers_server_files_decompress {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
@@ -568,7 +581,7 @@ pub mod servers_server_files_decompress {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -584,7 +597,7 @@ pub mod servers_server_files_delete {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
@@ -593,7 +606,7 @@ pub mod servers_server_files_delete {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub deleted: u64,
             }
@@ -611,7 +624,7 @@ pub mod servers_server_files_fingerprints {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub fingerprints: IndexMap<String, String>,
             }
@@ -625,7 +638,7 @@ pub mod servers_server_files_list {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub total: u64,
                 #[schema(inline)]
@@ -658,7 +671,7 @@ pub mod servers_server_files_pull {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub downloads: Vec<Download>,
             }
@@ -669,7 +682,7 @@ pub mod servers_server_files_pull {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
@@ -684,7 +697,7 @@ pub mod servers_server_files_pull {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub identifier: uuid::Uuid,
             }
@@ -700,7 +713,7 @@ pub mod servers_server_files_pull_pull {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -714,11 +727,11 @@ pub mod servers_server_files_rename {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
-                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyFiles {
+                pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyFiles {
                     #[schema(inline)]
                     pub to: String,
                     #[schema(inline)]
@@ -728,7 +741,7 @@ pub mod servers_server_files_rename {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub renamed: u64,
             }
@@ -744,7 +757,7 @@ pub mod servers_server_files_search {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub root: String,
                 #[schema(inline)]
@@ -759,7 +772,7 @@ pub mod servers_server_files_search {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub results: Vec<DirectoryEntry>,
             }
@@ -777,7 +790,7 @@ pub mod servers_server_files_write {
         pub type RequestBody = String;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -793,7 +806,7 @@ pub mod servers_server_logs {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub data: String,
             }
@@ -807,7 +820,7 @@ pub mod servers_server_power {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub action: ServerPowerAction,
                 #[schema(inline)]
@@ -816,7 +829,7 @@ pub mod servers_server_power {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response202 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
     }
@@ -828,7 +841,7 @@ pub mod servers_server_reinstall {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -842,7 +855,7 @@ pub mod servers_server_script {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub container_image: String,
                 #[schema(inline)]
@@ -853,7 +866,7 @@ pub mod servers_server_script {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub stdout: String,
                 #[schema(inline)]
@@ -869,7 +882,7 @@ pub mod servers_server_sync {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
     }
@@ -881,7 +894,7 @@ pub mod servers_server_transfer {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -892,7 +905,7 @@ pub mod servers_server_transfer {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub url: String,
                 #[schema(inline)]
@@ -900,7 +913,7 @@ pub mod servers_server_transfer {
                 #[schema(inline)]
                 pub archive_format: TransferArchiveFormat,
                 #[schema(inline)]
-                pub compression_level: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyCompressionLevel {
+                pub compression_level: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyCompressionLevel {
                 }>,
                 #[schema(inline)]
                 pub backups: Vec<uuid::Uuid>,
@@ -910,7 +923,7 @@ pub mod servers_server_transfer {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response202 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
 
@@ -924,7 +937,7 @@ pub mod servers_server_version {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub hash: String,
             }
@@ -940,14 +953,14 @@ pub mod servers_server_ws_deny {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub jtis: Vec<String>,
             }
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
     }
@@ -959,9 +972,9 @@ pub mod servers_server_ws_permissions {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub user_permissions: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyUserPermissions {
+                pub user_permissions: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyUserPermissions {
                     #[schema(inline)]
                     pub user: uuid::Uuid,
                     #[schema(inline)]
@@ -973,7 +986,7 @@ pub mod servers_server_ws_permissions {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
     }
@@ -985,9 +998,9 @@ pub mod stats {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub cpu: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200Cpu {
+                pub cpu: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Cpu {
                     #[schema(inline)]
                     pub used: f64,
                     #[schema(inline)]
@@ -997,7 +1010,7 @@ pub mod stats {
                 },
 
                 #[schema(inline)]
-                pub network: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200Network {
+                pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Network {
                     #[schema(inline)]
                     pub received: u64,
                     #[schema(inline)]
@@ -1009,7 +1022,7 @@ pub mod stats {
                 },
 
                 #[schema(inline)]
-                pub memory: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200Memory {
+                pub memory: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Memory {
                     #[schema(inline)]
                     pub used: u64,
                     #[schema(inline)]
@@ -1017,7 +1030,7 @@ pub mod stats {
                 },
 
                 #[schema(inline)]
-                pub disk: #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200Disk {
+                pub disk: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Disk {
                     #[schema(inline)]
                     pub used: u64,
                     #[schema(inline)]
@@ -1043,7 +1056,7 @@ pub mod system {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub architecture: String,
                 #[schema(inline)]
@@ -1065,7 +1078,7 @@ pub mod transfers {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -1081,7 +1094,7 @@ pub mod transfers_server {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
         }
 
@@ -1095,19 +1108,19 @@ pub mod update {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBody {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub debug: Option<bool>,
                 #[schema(inline)]
                 pub app_name: Option<String>,
                 #[schema(inline)]
-                pub api: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyApi {
+                pub api: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyApi {
                     #[schema(inline)]
                     pub host: Option<String>,
                     #[schema(inline)]
                     pub port: Option<u32>,
                     #[schema(inline)]
-                    pub ssl: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyRequestBodyApiSsl {
+                    pub ssl: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyApiSsl {
                         #[schema(inline)]
                         pub enabled: Option<bool>,
                         #[schema(inline)]
@@ -1119,9 +1132,9 @@ pub mod update {
                     pub upload_limit: Option<u64>,
                 }>,
                 #[schema(inline)]
-                pub system: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodySystem {
+                pub system: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodySystem {
                     #[schema(inline)]
-                    pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct RequestBodyRequestBodySystemSftp {
+                    pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodySystemSftp {
                         #[schema(inline)]
                         pub bind_address: Option<String>,
                         #[schema(inline)]
@@ -1138,7 +1151,7 @@ pub mod update {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
                 pub applied: bool,
             }
