@@ -178,7 +178,10 @@ mod patch {
             .unwrap();
         }
         if let Some(primary) = data.primary {
-            if server.allocation.as_ref().map(|a| a.id) == Some(allocation.id)
+            if server
+                .allocation
+                .as_ref()
+                .is_none_or(|a| a.id == allocation.id)
                 && !primary
                 && server
                     .egg
