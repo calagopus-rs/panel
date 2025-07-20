@@ -53,10 +53,10 @@ impl Captcha {
                 if response.status().is_success() {
                     let body: serde_json::Value =
                         response.json().await.map_err(|e| e.to_string())?;
-                    if let Some(success) = body.get("success") {
-                        if success.as_bool().unwrap_or(false) {
-                            return Ok(());
-                        }
+                    if let Some(success) = body.get("success")
+                        && success.as_bool().unwrap_or(false)
+                    {
+                        return Ok(());
                     }
                 }
 
@@ -77,17 +77,17 @@ impl Captcha {
                 if response.status().is_success() {
                     let body: serde_json::Value =
                         response.json().await.map_err(|e| e.to_string())?;
-                    if let Some(success) = body.get("success") {
-                        if success.as_bool().unwrap_or(false) {
-                            if *v3 {
-                                if let Some(score) = body.get("score") {
-                                    if score.as_f64().unwrap_or(0.0) >= 0.5 {
-                                        return Ok(());
-                                    }
-                                }
-                            } else {
+                    if let Some(success) = body.get("success")
+                        && success.as_bool().unwrap_or(false)
+                    {
+                        if *v3 {
+                            if let Some(score) = body.get("score")
+                                && score.as_f64().unwrap_or(0.0) >= 0.5
+                            {
                                 return Ok(());
                             }
+                        } else {
+                            return Ok(());
                         }
                     }
                 }

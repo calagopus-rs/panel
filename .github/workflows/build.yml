@@ -105,10 +105,6 @@ jobs:
           command: build
           args: --release --target ${{ matrix.target }}
 
-      - name: Strip release binary (linux and macos)
-        if: matrix.build == 'x86_64-linux'
-        run: strip "target/${{ matrix.target }}/release/$BIN_NAME"
-
       - name: Prepare binary with platform name
         shell: bash
         run: |
