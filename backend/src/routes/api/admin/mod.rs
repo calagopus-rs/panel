@@ -5,6 +5,7 @@ use utoipa_axum::router::OpenApiRouter;
 
 mod database_hosts;
 mod locations;
+mod mounts;
 mod nests;
 mod nodes;
 mod servers;
@@ -34,6 +35,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/nodes", nodes::router(state))
         .nest("/nests", nests::router(state))
         .nest("/database-hosts", database_hosts::router(state))
+        .nest("/mounts", mounts::router(state))
         .route_layer(axum::middleware::from_fn(auth))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),

@@ -57,7 +57,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:egg.delete-variable",
+                "admin:egg.variable.delete",
                 serde_json::json!({
                     "egg_id": egg.id,
 
@@ -231,7 +231,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:egg.update-variable",
+                "admin:egg.variable.update",
                 serde_json::json!({
                     "egg_id": egg.id,
 

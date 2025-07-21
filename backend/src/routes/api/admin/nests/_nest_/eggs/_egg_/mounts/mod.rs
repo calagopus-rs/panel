@@ -1,20 +1,21 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _variable_;
+mod _mount_;
 
 mod get {
     use crate::{
-        models::nest_egg_variable::NestEggVariable,
-        routes::{GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
+        models::{Pagination, PaginationParams, nest_egg_mount::NestEggMount},
+        routes::{ApiError, GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
     };
-    use axum::http::StatusCode;
+    use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        variables: Vec<crate::models::nest_egg_variable::AdminApiNestEggVariable>,
+        #[schema(inline)]
+        mounts: Pagination<crate::models::nest_egg_mount::AdminApiNestEggMount>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -30,21 +31,51 @@ mod get {
             description = "The egg ID",
             example = "1",
         ),
+        (
+            "page" = i64, Query,
+            description = "The page number",
+            example = "1",
+        ),
+        (
+            "per_page" = i64, Query,
+            description = "The number of items per page",
+            example = "10",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         egg: GetNestEgg,
+        Query(params): Query<PaginationParams>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let variables = NestEggVariable::all_by_egg_id(&state.database, egg.id).await;
+        if let Err(errors) = crate::utils::validate_data(&params) {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_strings_value(errors)),
+            );
+        }
+
+        let mounts = NestEggMount::by_egg_id_with_pagination(
+            &state.database,
+            egg.id,
+            params.page,
+            params.per_page,
+        )
+        .await;
 
         (
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    variables: variables
-                        .into_iter()
-                        .map(|variable| variable.into_admin_api_object())
-                        .collect(),
+                    mounts: Pagination {
+                        total: mounts.total,
+                        per_page: mounts.per_page,
+                        page: mounts.page,
+                        data: mounts
+                            .data
+                            .into_iter()
+                            .map(|mount| mount.into_admin_api_object())
+                            .collect(),
+                    },
                 })
                 .unwrap(),
             ),
@@ -54,7 +85,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::nest_egg_variable::NestEggVariable,
+        models::{mount::Mount, nest_egg_mount::NestEggMount},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
@@ -67,34 +98,15 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        name: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        description: Option<String>,
-        order: i16,
-
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
-        env_variable: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        default_value: Option<String>,
-
-        user_viewable: bool,
-        user_editable: bool,
-        #[validate(custom(function = "rule_validator::validate_rules"))]
-        rules: Vec<String>,
+        mount_id: i32,
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {
-        variable: crate::models::nest_egg_variable::AdminApiNestEggVariable,
-    }
+    struct Response {}
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
         (status = BAD_REQUEST, body = ApiError),
         (status = CONFLICT, body = ApiError),
     ), params(
@@ -115,6 +127,16 @@ mod post {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        let mount = match Mount::by_id(&state.database, data.mount_id).await {
+            Some(mount) => mount,
+            None => {
+                return (
+                    StatusCode::NOT_FOUND,
+                    axum::Json(ApiError::new_value(&["mount not found"])),
+                );
+            }
+        };
+
         if let Err(errors) = crate::utils::validate_data(&data) {
             return (
                 StatusCode::BAD_REQUEST,
@@ -122,65 +144,37 @@ mod post {
             );
         }
 
-        let egg_variable = match NestEggVariable::create(
-            &state.database,
-            egg.id,
-            &data.name,
-            data.description.as_deref(),
-            data.order,
-            &data.env_variable,
-            data.default_value.as_deref(),
-            data.user_viewable,
-            data.user_editable,
-            &data.rules,
-        )
-        .await
-        {
-            Ok(variable) => variable,
+        match NestEggMount::create(&state.database, egg.id, mount.id).await {
+            Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["variable with name already exists"])),
+                    axum::Json(ApiError::new_value(&["mount already exists"])),
                 );
             }
             Err(err) => {
-                tracing::error!("failed to create variable: {:#?}", err);
+                tracing::error!("failed to create egg mount: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create variable"])),
+                    axum::Json(ApiError::new_value(&["failed to create egg mount"])),
                 );
             }
         };
 
         activity_logger
             .log(
-                "admin:egg.variable.create",
+                "admin:egg.mount.create",
                 serde_json::json!({
                     "egg_id": egg.id,
-
-                    "name": egg_variable.name,
-                    "description": egg_variable.description,
-                    "order": egg_variable.order,
-
-                    "env_variable": egg_variable.env_variable,
-                    "default_value": egg_variable.default_value,
-
-                    "user_viewable": egg_variable.user_viewable,
-                    "user_editable": egg_variable.user_editable,
-                    "rules": egg_variable.rules,
+                    "mount_id": mount.id,
                 }),
             )
             .await;
 
         (
             StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    variable: egg_variable.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
+            axum::Json(serde_json::to_value(Response {}).unwrap()),
         )
     }
 }
@@ -189,6 +183,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{variable}", _variable_::router(state))
+        .nest("/{mount}", _mount_::router(state))
         .with_state(state.clone())
 }

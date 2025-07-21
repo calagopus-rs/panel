@@ -175,6 +175,7 @@ export const mounts = pgTable('mounts', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (mounts) => [
+	uniqueIndex('mounts_name_idx').on(mounts.name),
 	uniqueIndex('mounts_source_target_idx').on(mounts.source, mounts.target)
 ])
 

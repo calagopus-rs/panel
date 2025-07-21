@@ -100,28 +100,6 @@ impl NodeAllocation {
         }
     }
 
-    pub async fn by_node_id_id(
-        database: &crate::database::Database,
-        node_id: i32,
-        id: i32,
-    ) -> Option<Self> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM node_allocations
-            WHERE node_allocations.node_id = $1 AND node_allocations.id = $2
-            "#,
-            Self::columns_sql(None, None)
-        ))
-        .bind(node_id)
-        .bind(id)
-        .fetch_optional(database.read())
-        .await
-        .unwrap();
-
-        row.map(|row| Self::map(None, &row))
-    }
-
     pub async fn delete_by_ids(database: &crate::database::Database, ids: &[i32]) {
         sqlx::query(
             r#"

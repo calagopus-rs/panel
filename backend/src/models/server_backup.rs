@@ -405,6 +405,14 @@ impl ServerBackup {
             ignored_files: self.ignored_files,
             is_successful: self.successful,
             is_locked: self.locked,
+            is_browsable: matches!(
+                self.disk,
+                BackupDisk::Local
+                    | BackupDisk::DdupBak
+                    | BackupDisk::Btrfs
+                    | BackupDisk::Zfs
+                    | BackupDisk::Restic
+            ),
             checksum: self.checksum,
             bytes: self.bytes,
             completed: self.completed.map(|dt| dt.and_utc()),
@@ -423,6 +431,7 @@ pub struct ApiServerBackup {
 
     pub is_successful: bool,
     pub is_locked: bool,
+    pub is_browsable: bool,
     pub checksum: Option<String>,
     pub bytes: i64,
 

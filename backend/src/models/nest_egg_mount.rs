@@ -39,7 +39,11 @@ impl BaseModel for NestEggMount {
 }
 
 impl NestEggMount {
-    pub async fn new(database: &crate::database::Database, egg_id: i32, mount_id: i32) -> bool {
+    pub async fn create(
+        database: &crate::database::Database,
+        egg_id: i32,
+        mount_id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             INSERT INTO nest_egg_mounts (egg_id, mount_id)
@@ -48,39 +52,78 @@ impl NestEggMount {
         )
         .bind(egg_id)
         .bind(mount_id)
-        .fetch_one(database.write())
-        .await
-        .is_ok()
+        .execute(database.write())
+        .await?;
+
+        Ok(())
     }
 
-    pub async fn all_by_egg_id(database: &crate::database::Database, egg_id: i32) -> Vec<Self> {
-        let rows = sqlx::query(&format!(
+    pub async fn by_egg_id_mount_id(
+        database: &crate::database::Database,
+        egg_id: i32,
+        mount_id: i32,
+    ) -> Option<Self> {
+        let row = sqlx::query(&format!(
             r#"
-            SELECT {}, {}
+            SELECT {}
             FROM nest_egg_mounts
-            JOIN mounts ON nest_egg_mounts.mount_id = mounts.id
-            WHERE nest_egg_mounts.egg_id = $1
-            ORDER BY nest_egg_mounts.id ASC
+            JOIN mounts ON mounts.id = nest_egg_mounts.mount_id
+            WHERE nest_egg_mounts.egg_id = $1 AND nest_egg_mounts.mount_id = $2
             "#,
-            Self::columns_sql(None, None),
-            super::mount::Mount::columns_sql(Some("mount_"), None)
+            Self::columns_sql(None, None)
         ))
         .bind(egg_id)
+        .bind(mount_id)
+        .fetch_optional(database.read())
+        .await
+        .unwrap();
+
+        row.map(|row| Self::map(None, &row))
+    }
+
+    pub async fn by_egg_id_with_pagination(
+        database: &crate::database::Database,
+        egg_id: i32,
+        page: i64,
+        per_page: i64,
+    ) -> crate::models::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM nest_egg_mounts
+            JOIN mounts ON mounts.id = nest_egg_mounts.mount_id
+            WHERE nest_egg_mounts.egg_id = $1
+            ORDER BY nest_egg_mounts.mount_id ASC
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(egg_id)
+        .bind(per_page)
+        .bind(offset)
         .fetch_all(database.read())
         .await
         .unwrap();
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_ids(database: &crate::database::Database, egg_id: i32, mount_id: i32) {
         sqlx::query(
             r#"
             DELETE FROM nest_egg_mounts
-            WHERE nest_egg_mounts.id = $1
+            WHERE nest_egg_mounts.egg_id = $1 AND nest_egg_mounts.mount_id = $2
             "#,
         )
-        .bind(id)
+        .bind(egg_id)
+        .bind(mount_id)
         .execute(database.write())
         .await
         .unwrap();
