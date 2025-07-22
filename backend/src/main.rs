@@ -192,31 +192,24 @@ async fn main() {
             if !req.uri().path().starts_with("/api") {
                 let path = &req.uri().path()[1..];
 
-                let file = if path.starts_with("assets") {
-                    FRONTEND_ASSETS
-                        .get_dir("assets")
-                        .unwrap()
-                        .get_file(path)
-                        .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
-                } else if path.starts_with("fonts") {
-                    FRONTEND_ASSETS
-                        .get_dir("fonts")
-                        .unwrap()
-                        .get_file(path)
-                        .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
-                } else {
-                    FRONTEND_ASSETS
-                        .get_file(path)
-                        .unwrap_or_else(|| FRONTEND_ASSETS.get_file("index.html").unwrap())
+                let entry = match FRONTEND_ASSETS.get_entry(path) {
+                    Some(entry) => entry,
+                    None => FRONTEND_ASSETS.get_entry("index.html").unwrap(),
+                };
+
+                let file = match entry {
+                    include_dir::DirEntry::File(file) => file,
+                    include_dir::DirEntry::Dir(dir) => match dir.get_file("index.html") {
+                        Some(index_file) => index_file,
+                        None => FRONTEND_ASSETS.get_file("index.html").unwrap(),
+                    },
                 };
 
                 return Response::builder()
                     .header(
                         "Content-Type",
-                        match file.path().extension() {
-                            Some(ext) if ext == "js" => "application/javascript",
-                            Some(ext) if ext == "css" => "text/css",
-                            Some(ext) if ext == "html" => "text/html",
+                        match infer::get(file.contents()) {
+                            Some(kind) => kind.mime_type(),
                             _ => "text/plain",
                         },
                     )
