@@ -210,7 +210,16 @@ async fn main() {
                         "Content-Type",
                         match infer::get(file.contents()) {
                             Some(kind) => kind.mime_type(),
-                            _ => "text/plain",
+                            _ => match file.path().extension() {
+                                Some(ext) => match ext.to_str() {
+                                    Some("html") => "text/html",
+                                    Some("js") => "application/javascript",
+                                    Some("css") => "text/css",
+                                    Some("json") => "application/json",
+                                    _ => "application/octet-stream",
+                                },
+                                None => "application/octet-stream",
+                            },
                         },
                     )
                     .body(Body::from(file.contents()))
