@@ -8,7 +8,7 @@ export const toSnakeCase = (str: string): string => {
 
 export const transformKeysToCamelCase = <T>(obj: any): T => {
   if (Array.isArray(obj)) {
-    return obj.map(item => transformKeysToCamelCase(item)) as unknown as T;
+    return obj.map((item) => transformKeysToCamelCase(item)) as unknown as T;
   } else if (obj !== null && typeof obj === 'object') {
     const newObj: Record<string, any> = {};
     for (const key in obj) {
@@ -24,7 +24,7 @@ export const transformKeysToCamelCase = <T>(obj: any): T => {
 
 export const transformKeysToSnakeCase = <T>(obj: any): T => {
   if (Array.isArray(obj)) {
-    return obj.map(item => transformKeysToSnakeCase(item)) as unknown as T;
+    return obj.map((item) => transformKeysToSnakeCase(item)) as unknown as T;
   } else if (obj !== null && typeof obj === 'object') {
     const newObj: Record<string, any> = {};
     for (const key in obj) {

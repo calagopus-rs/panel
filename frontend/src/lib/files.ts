@@ -321,7 +321,7 @@ export function isEditableFile(mimetype: string) {
 
   if (isArchiveType(mimetype)) return false;
 
-  return matches.every(m => !mimetype.match(m));
+  return matches.every((m) => !mimetype.match(m));
 }
 
 export function permissionStringToNumber(mode: string) {

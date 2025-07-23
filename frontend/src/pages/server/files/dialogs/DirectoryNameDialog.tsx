@@ -16,19 +16,19 @@ export default ({ onDirectoryName, open, onClose }: Props) => {
   const [dirName, setDirName] = useState('');
 
   return (
-    <Dialog title="Create Directory" onClose={onClose} open={open}>
+    <Dialog title={'Create Directory'} onClose={onClose} open={open}>
       <Input.Text
-        id="dirName"
-        name="dirName"
-        placeholder="Enter the name that this directory should be saved as."
+        id={'dirName'}
+        name={'dirName'}
+        placeholder={'Enter the name that this directory should be saved as.'}
         autoFocus
-        onChange={e => setDirName(e.target.value)}
+        onChange={(e) => setDirName(e.target.value)}
       />
-      <p className="mt-2 text-sm md:text-base break-all">
-        <span className="text-neutral-200">This directory will be created as&nbsp;</span>
+      <p className={'mt-2 text-sm md:text-base break-all'}>
+        <span className={'text-neutral-200'}>This directory will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className="text-cyan-200">{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className={'text-cyan-200'}>{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
       <Dialog.Footer>

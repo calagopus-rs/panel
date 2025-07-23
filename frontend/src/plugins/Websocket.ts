@@ -26,7 +26,7 @@ export class Websocket extends EventEmitter {
     this.url = url;
 
     this.socket = new Sockette(`${this.url}`, {
-      onmessage: e => {
+      onmessage: (e) => {
         try {
           const { event, args } = JSON.parse(e.data);
           if (args) {
@@ -53,7 +53,7 @@ export class Websocket extends EventEmitter {
         this.authenticate();
       },
       onclose: () => this.emit('SOCKET_CLOSE'),
-      onerror: error => this.emit('SOCKET_ERROR', error),
+      onerror: (error) => this.emit('SOCKET_ERROR', error),
     });
 
     this.timer = setTimeout(() => {

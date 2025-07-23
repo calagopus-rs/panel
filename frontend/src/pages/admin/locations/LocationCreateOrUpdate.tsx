@@ -30,7 +30,7 @@ export default () => {
   useEffect(() => {
     if (params.id) {
       getLocation(Number(params.id))
-        .then(location => {
+        .then((location) => {
           setLocation(location);
           setShortName(location.shortName);
           setName(location.name);
@@ -38,7 +38,7 @@ export default () => {
           setBackupDisk(location.backupDisk);
           setBackupConfigs(location.backupConfigs[location.backupDisk]);
         })
-        .catch(msg => {
+        .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     }
@@ -58,7 +58,7 @@ export default () => {
         .then(() => {
           addToast('Location updated.', 'success');
         })
-        .catch(msg => {
+        .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     } else {
@@ -71,11 +71,11 @@ export default () => {
           [backupDisk]: backupConfigs,
         },
       })
-        .then(location => {
+        .then((location) => {
           addToast('Location created.', 'success');
           navigate(`/admin/locations/${location.id}`);
         })
-        .catch(msg => {
+        .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     }
@@ -87,7 +87,7 @@ export default () => {
         addToast('Location deleted.', 'success');
         navigate('/admin/locations');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -98,43 +98,43 @@ export default () => {
         open={openDialog === 'delete'}
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
-        title="Confirm Location Deletion"
-        confirm="Delete"
+        title={'Confirm Location Deletion'}
+        confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{location?.name}</Code>?
       </Dialog.Confirm>
 
-      <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white">{params.id ? 'Update' : 'Create'} Location</h1>
+      <div className={'mb-4'}>
+        <h1 className={'text-4xl font-bold text-white'}>{params.id ? 'Update' : 'Create'} Location</h1>
       </div>
-      <AdminSettingContainer title="Location Settings">
-        <div className="mt-4">
-          <Input.Label htmlFor="shortName">Short Name</Input.Label>
+      <AdminSettingContainer title={'Location Settings'}>
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'shortName'}>Short Name</Input.Label>
           <Input.Text
-            id="shortName"
-            placeholder="Short Name"
+            id={'shortName'}
+            placeholder={'Short Name'}
             value={shortName}
-            onChange={e => setShortName(e.target.value)}
+            onChange={(e) => setShortName(e.target.value)}
           />
         </div>
-        <div className="mt-4">
-          <Input.Label htmlFor="name">Name</Input.Label>
-          <Input.Text id="name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'name'}>Name</Input.Label>
+          <Input.Text id={'name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-        <div className="mt-4">
-          <Input.Label htmlFor="description">Description</Input.Label>
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'description'}>Description</Input.Label>
           <Input.Text
-            id="description"
-            placeholder="Description"
+            id={'description'}
+            placeholder={'Description'}
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-        <div className="mt-4">
-          <Input.Label htmlFor="type">Type</Input.Label>
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'type'}>Type</Input.Label>
           <Input.Dropdown
-            id="type"
+            id={'type'}
             options={[
               { label: 'Local', value: 'local' },
               { label: 'S3', value: 's3' },
@@ -144,7 +144,7 @@ export default () => {
               { label: 'Restic', value: 'restic' },
             ]}
             selected={backupDisk}
-            onChange={e => setBackupDisk(e.target.value as LocationConfigBackupType)}
+            onChange={(e) => setBackupDisk(e.target.value as LocationConfigBackupType)}
           />
         </div>
 

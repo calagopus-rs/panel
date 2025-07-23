@@ -22,7 +22,7 @@ export default () => {
   useEffect(() => {
     getSettings()
       .then(setSettings)
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => setLoading(false));
@@ -30,25 +30,25 @@ export default () => {
 
   return (
     <Container>
-      <div className="mb-4">
-        <h1 className="text-4xl font-bold text-white">Settings</h1>
+      <div className={'mb-4'}>
+        <h1 className={'text-4xl font-bold text-white'}>Settings</h1>
       </div>
 
       <SubNavigation>
-        <SubNavigationLink to="/admin/settings" name="Application" icon={faLayerGroup} />
-        <SubNavigationLink to="/admin/settings/mail" name="Mail" icon={faAt} />
-        <SubNavigationLink to="/admin/settings/captcha" name="Captcha" icon={faRobot} />
-        <SubNavigationLink to="/admin/settings/server" name="Server" icon={faServer} />
+        <SubNavigationLink to={'/admin/settings'} name={'Application'} icon={faLayerGroup} />
+        <SubNavigationLink to={'/admin/settings/mail'} name={'Mail'} icon={faAt} />
+        <SubNavigationLink to={'/admin/settings/captcha'} name={'Captcha'} icon={faRobot} />
+        <SubNavigationLink to={'/admin/settings/server'} name={'Server'} icon={faServer} />
       </SubNavigation>
 
       {loading ? (
         <Spinner.Centered />
       ) : (
         <Routes>
-          <Route path="/" element={<ApplicationContainer />} />
-          <Route path="/mail" element={<EmailContainer />} />
-          <Route path="/captcha" element={<CaptchaContainer />} />
-          <Route path="/server" element={<ServerContainer />} />
+          <Route path={'/'} element={<ApplicationContainer />} />
+          <Route path={'/mail'} element={<EmailContainer />} />
+          <Route path={'/captcha'} element={<CaptchaContainer />} />
+          <Route path={'/server'} element={<ServerContainer />} />
         </Routes>
       )}
     </Container>

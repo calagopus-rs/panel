@@ -4,7 +4,7 @@ import { Navigate, Outlet } from 'react-router';
 export default () => {
   const { user } = useAuth();
 
-  if (user) return <Navigate to="/" />;
+  if (user) return <Navigate to={'/'} />;
 
   return <Outlet />;
 };

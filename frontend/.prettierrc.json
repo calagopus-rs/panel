@@ -4,10 +4,10 @@
   "useTabs": false,
   "semi": true,
   "singleQuote": true,
-  "jsxSingleQuote": false,
+  "jsxSingleQuote": true,
   "trailingComma": "all",
   "bracketSpacing": true,
-  "arrowParens": "avoid",
+  "arrowParens": "always",
   "endOfLine": "lf",
   "overrides": [
     {

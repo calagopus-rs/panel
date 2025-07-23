@@ -20,8 +20,8 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
     allowEditingStartupCommand: false,
   },
 
-  setSettings: value =>
-    set(state => {
+  setSettings: (value) =>
+    set((state) => {
       state.mailMode = value.mailMode;
       state.captchaProvider = value.captchaProvider;
       state.app = value.app;

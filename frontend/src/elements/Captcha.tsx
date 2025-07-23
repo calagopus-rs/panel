@@ -4,7 +4,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const Captcha = forwardRef((_, ref) => {
-  const { captchaProvider } = useGlobalStore(state => state.settings);
+  const { captchaProvider } = useGlobalStore((state) => state.settings);
   const turnstileRef = useRef(null);
   const recaptchaRef = useRef(null);
 
@@ -64,7 +64,7 @@ const Captcha = forwardRef((_, ref) => {
       return null; // reCAPTCHA v3 is loaded dynamically
     }
 
-    return <ReCAPTCHA sitekey={captchaProvider.siteKey} ref={recaptchaRef} size="normal" />;
+    return <ReCAPTCHA sitekey={captchaProvider.siteKey} ref={recaptchaRef} size={'normal'} />;
   }
 
   return null;

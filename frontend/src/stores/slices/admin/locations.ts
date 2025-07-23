@@ -13,20 +13,20 @@ export interface LocationsSlice {
 export const createLocationsSlice: StateCreator<AdminStore, [], [], LocationsSlice> = (set): LocationsSlice => ({
   locations: getEmptyPaginationSet<Location>(),
 
-  setLocations: value => set(state => ({ ...state, locations: value })),
-  addLocation: location =>
-    set(state => ({
+  setLocations: (value) => set((state) => ({ ...state, locations: value })),
+  addLocation: (location) =>
+    set((state) => ({
       locations: {
         ...state.locations,
         data: [...state.locations.data, location],
         total: state.locations.total + 1,
       },
     })),
-  removeLocation: location =>
-    set(state => ({
+  removeLocation: (location) =>
+    set((state) => ({
       locations: {
         ...state.locations,
-        data: state.locations.data.filter(l => l.id !== location.id),
+        data: state.locations.data.filter((l) => l.id !== location.id),
         total: state.locations.total - 1,
       },
     })),

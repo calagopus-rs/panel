@@ -20,7 +20,7 @@ export default () => {
 
   const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { browsingDirectory, setBrowsingDirectory } = useServerStore();
 
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export default () => {
     if (params.action === 'new') return;
 
     setLoading(true);
-    getFileContent(server.uuid, join(browsingDirectory, fileName)).then(content => {
+    getFileContent(server.uuid, join(browsingDirectory, fileName)).then((content) => {
       setContent(content);
       setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
       setLoading(false);
@@ -75,18 +75,18 @@ export default () => {
   };
 
   return loading ? (
-    <div className="w-full h-screen flex items-center justify-center">
+    <div className={'w-full h-screen flex items-center justify-center'}>
       <Spinner size={75} />
     </div>
   ) : (
-    <div className="flex flex-col w-full">
+    <div className={'flex flex-col w-full'}>
       <FileNameDialog
         onFileName={(name: string) => saveFile(name)}
         open={nameDialogOpen}
         onClose={() => setNameDialogOpen(false)}
       />
 
-      <div className="flex justify-between w-full p-4">
+      <div className={'flex justify-between w-full p-4'}>
         <FileBreadcrumbs path={join(decodeURIComponent(browsingDirectory), fileName)} />
         <div>
           {params.action === 'edit' ? (
@@ -101,8 +101,8 @@ export default () => {
         </div>
       </div>
       <Editor
-        height="100%"
-        theme="vs-dark"
+        height={'100%'}
+        theme={'vs-dark'}
         defaultLanguage={language}
         defaultValue={content}
         onChange={setContent}

@@ -43,12 +43,12 @@ function FileTableRow({
 }) {
   const navigate = useNavigate();
   const [_, setSearchParams] = useSearchParams();
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { browsingDirectory } = useServerStore();
 
   return isEditableFile(file.mime) || file.directory ? (
     <TableRow
-      className="cursor-pointer"
+      className={'cursor-pointer'}
       onContextMenu={onContextMenu}
       onClick={() => {
         if (file.directory) {
@@ -88,11 +88,11 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
 
   const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
-      <div className="flex items-center">
+      <div className={'flex items-center'}>
         <Checkbox
           id={file.name}
           checked={selectedFiles.includes(file)}
-          onChange={e => {
+          onChange={(e) => {
             e.stopPropagation();
             if (e.currentTarget.checked) {
               addSelectedFile(file);
@@ -100,7 +100,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
               removeSelectedFile(file);
             }
           }}
-          onClick={e => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         />
       </div>
     );
@@ -120,7 +120,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         setOpenDialog(null);
         addToast(`Permissions have been updated.`, 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -131,7 +131,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         addToast(`Archive has been decompressed.`, 'success');
         reloadDirectory();
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -143,11 +143,11 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       root: browsingDirectory,
       files: [file.name],
     })
-      .then(entry => {
+      .then((entry) => {
         addToast(`Archive has been created.`, 'success');
         addBrowsingEntry(entry);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -158,7 +158,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         addToast(`Download started.`, 'success');
         window.open(url);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -170,7 +170,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         setOpenDialog(null);
         removeBrowsingEntry(file);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -211,27 +211,27 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
         {({ openMenu }) => (
           <FileTableRow
             file={file}
-            onContextMenu={e => {
+            onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className="pl-6">
+            <td className={'pl-6'}>
               <RowCheckbox file={file} />
             </td>
 
-            <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap" title={file.name}>
+            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'} title={file.name}>
               {file.file ? (
-                <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFile} />
+                <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFile} />
               ) : (
-                <FontAwesomeIcon className="mr-4 text-gray-400" icon={faFolder} />
+                <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFolder} />
               )}
               {file.name}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{bytesToString(file.size)}</td>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{bytesToString(file.size)}</td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
             </td>
 

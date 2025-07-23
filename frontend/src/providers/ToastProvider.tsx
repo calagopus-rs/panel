@@ -28,12 +28,12 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const dismissToast = useCallback((id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
   const addToast = useCallback((message: string, type: ToastType = 'info') => {
     const id = toastId++;
-    setToasts(prev => [...prev, { id, message, type }]);
+    setToasts((prev) => [...prev, { id, message, type }]);
 
     if (type !== 'loading') {
       setTimeout(() => {
@@ -50,11 +50,11 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       try {
         const result = await promise;
-        setToasts(prev => prev.map(t => (t.id === id ? { ...t, message: messages.success, type: 'success' } : t)));
+        setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, message: messages.success, type: 'success' } : t)));
         setTimeout(() => dismissToast(id), toastTimeout);
         return result;
       } catch (error) {
-        setToasts(prev => prev.map(t => (t.id === id ? { ...t, message: messages.error, type: 'error' } : t)));
+        setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, message: messages.error, type: 'error' } : t)));
         setTimeout(() => dismissToast(id), toastTimeout);
         throw error;
       }
@@ -80,9 +80,9 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   return (
     <ToastContext.Provider value={{ addToast, dismissToast, promise }}>
       {children}
-      <div className="fixed top-4 right-4 z-50 space-y-2">
+      <div className={'fixed top-4 right-4 z-50 space-y-2'}>
         <AnimatePresence>
-          {toasts.map(toast => (
+          {toasts.map((toast) => (
             <motion.div
               key={toast.id}
               initial={{ opacity: 0, x: 50 }}
@@ -96,7 +96,7 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               )}
             >
               <span>{toast.message}</span>
-              <FontAwesomeIcon icon={faX} className="w-4 h-4 text-white/60" />
+              <FontAwesomeIcon icon={faX} className={'w-4 h-4 text-white/60'} />
             </motion.div>
           ))}
         </AnimatePresence>

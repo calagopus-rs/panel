@@ -24,7 +24,7 @@ export default () => {
   const { apiKeys, setApiKeys } = useUserStore();
 
   useEffect(() => {
-    getApiKeys(page).then(data => {
+    getApiKeys(page).then((data) => {
       setApiKeys(data);
       setLoading(false);
     });
@@ -32,8 +32,8 @@ export default () => {
 
   return (
     <Container>
-      <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-bold text-white">API Keys</h1>
+      <div className={'justify-between flex items-center mb-2'}>
+        <h1 className={'text-4xl font-bold text-white'}>API Keys</h1>
         <ApiKeyCreateButton />
       </div>
       {loading ? (
@@ -42,31 +42,31 @@ export default () => {
         <Table>
           <ContentWrapper>
             <Pagination data={apiKeys} onPageSelect={setPage}>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+              <div className={'overflow-x-auto'}>
+                <table className={'w-full table-auto'}>
                   <TableHead>
-                    <TableHeader name="Name" />
-                    <TableHeader name="Key" />
-                    <TableHeader name="Permissions" />
-                    <TableHeader name="Last Used" />
-                    <TableHeader name="Created" />
+                    <TableHeader name={'Name'} />
+                    <TableHeader name={'Key'} />
+                    <TableHeader name={'Permissions'} />
+                    <TableHeader name={'Last Used'} />
+                    <TableHeader name={'Created'} />
                     <TableHeader />
                   </TableHead>
 
                   <TableBody>
-                    {apiKeys.data.map(key => (
+                    {apiKeys.data.map((key) => (
                       <TableRow key={key.id}>
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{key.name}</td>
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{key.name}</td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{key.keyStart}</Code>
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {key.permissions.length}
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {!key.lastUsed ? (
                             'N/A'
                           ) : (
@@ -74,11 +74,11 @@ export default () => {
                           )}
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Tooltip content={formatDateTime(key.created)}>{formatTimestamp(key.created)}</Tooltip>
                         </td>
 
-                        <td className="relative">
+                        <td className={'relative'}>
                           <ApiKeyDeleteButton apiKey={key} />
                         </td>
                       </TableRow>

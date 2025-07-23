@@ -31,7 +31,7 @@ export default () => {
   };
 
   useEffect(() => {
-    getBackups(server.uuid, page).then(data => {
+    getBackups(server.uuid, page).then((data) => {
       setBackups(data);
       setLoading(false);
     });
@@ -39,12 +39,12 @@ export default () => {
 
   const doCreate = (name: string, ignoredFiles: string[]) => {
     createBackup(server.uuid, { name, ignoredFiles })
-      .then(backup => {
+      .then((backup) => {
         addBackup(backup);
         addToast('Backup created.', 'success');
         setOpenDialog(null);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -53,28 +53,28 @@ export default () => {
     <Container>
       <BackupCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
 
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Backups</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Backups</h1>
+        <div className={'flex gap-2'}>
           <Button onClick={() => setOpenDialog('create')}>Create</Button>
         </div>
       </div>
       <Table>
         <Pagination data={backups} onPageSelect={onPageSelect}>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="Name" />
-                <TableHeader name="Checksum" />
-                <TableHeader name="Size" />
-                <TableHeader name="Created At" />
-                <TableHeader name="Locked?" />
+                <TableHeader name={'Name'} />
+                <TableHeader name={'Checksum'} />
+                <TableHeader name={'Size'} />
+                <TableHeader name={'Created At'} />
+                <TableHeader name={'Locked?'} />
                 <TableHeader />
               </TableHead>
 
               <ContextMenuProvider>
                 <TableBody>
-                  {backups.data.map(backup => (
+                  {backups.data.map((backup) => (
                     <BackupRow backup={backup} key={backup.uuid} />
                   ))}
                 </TableBody>

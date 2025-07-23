@@ -185,7 +185,7 @@ interface ServerActivity {
   user: User;
   event: string;
   ip: string | null;
-  data: Object | null;
+  data: object | null;
   isApi: boolean;
   created: Date;
 }
@@ -206,6 +206,7 @@ interface ServerBackup {
   ignoredFiles: string[];
   isSuccessful: boolean;
   isLocked: boolean;
+  isBrowsable: boolean;
   checksum: string | null;
   bytes: number;
   completed: Date | null;
@@ -267,7 +268,7 @@ interface UserActivity {
   id: number;
   event: string;
   ip: string;
-  data: Object | null;
+  data: object | null;
   isApi: boolean;
   created: Date;
 }

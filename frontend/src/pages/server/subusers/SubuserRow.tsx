@@ -26,7 +26,7 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
         setOpenDialog(null);
         addToast('Subuser updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -37,7 +37,7 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
         addToast('Subuser removed.', 'success');
         removeSubuser(subuser);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -54,8 +54,8 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
         open={openDialog === 'remove'}
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
-        title="Confirm Subuser Removal"
-        confirm="Remove"
+        title={'Confirm Subuser Removal'}
+        confirm={'Remove'}
         onConfirmed={doRemove}
       >
         Are you sure you want to remove <Code>{subuser.user.username}</Code> from this server?
@@ -69,30 +69,34 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
       >
         {({ openMenu }) => (
           <TableRow
-            onContextMenu={e => {
+            onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'}>
               <Code>{subuser.user.id}</Code>
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={subuser.user.username}>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={subuser.user.username}>
               {subuser.user.username}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {subuser.user.totpEnabled ? (
-                <FontAwesomeIcon className="text-green-500" icon={faLock} />
+                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
               ) : (
-                <FontAwesomeIcon className="text-red-500" icon={faLockOpen} />
+                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
               )}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{subuser.permissions.length}</td>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+              {subuser.permissions.length}
+            </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{subuser.ignoredFiles.length}</td>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+              {subuser.ignoredFiles.length}
+            </td>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

@@ -9,13 +9,13 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import DatabaseRow from './DatabaseRow';
 
 export default () => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { databases, setDatabases } = useServerStore();
 
   const [loading, setLoading] = useState(databases.data.length === 0);
 
   useEffect(() => {
-    getDatabases(server.uuid).then(data => {
+    getDatabases(server.uuid).then((data) => {
       setDatabases(data);
       setLoading(false);
     });
@@ -23,26 +23,26 @@ export default () => {
 
   return (
     <Container>
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Databases</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Databases</h1>
+        <div className={'flex gap-2'}>
           <CreateDatabaseButton />
         </div>
       </div>
       <Table>
         <ContentWrapper>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="Name" />
-                <TableHeader name="Address" />
-                <TableHeader name="Username" />
+                <TableHeader name={'Name'} />
+                <TableHeader name={'Address'} />
+                <TableHeader name={'Username'} />
                 <TableHeader />
               </TableHead>
 
               <ContextMenuProvider>
                 <TableBody>
-                  {databases.data.map(database => (
+                  {databases.data.map((database) => (
                     <DatabaseRow key={database.id} database={database} />
                   ))}
                 </TableBody>

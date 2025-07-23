@@ -23,7 +23,7 @@ export default ({ type, position, className }: DialogIconProps) => {
 
     setIcon(
       <div className={classNames(styles.dialog_icon, styles[type], className)}>
-        <Icon className="w-6 h-6" />
+        <Icon className={'w-6 h-6'} />
       </div>,
     );
   }, [type, className]);

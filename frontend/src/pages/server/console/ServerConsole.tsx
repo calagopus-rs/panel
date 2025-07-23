@@ -7,16 +7,16 @@ import ServerStats from './ServerStats';
 import { useServerStore } from '@/stores/server';
 
 export default () => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
 
   return (
     <Container>
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">{server.name}</h1>
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>{server.name}</h1>
         <ServerPowerControls />
       </div>
-      <div className="grid grid-cols-4 gap-4 mb-4">
-        <div className="col-span-3 h-full">
+      <div className={'grid grid-cols-4 gap-4 mb-4'}>
+        <div className={'col-span-3 h-full'}>
           <Spinner.Suspense>
             <Console />
           </Spinner.Suspense>
@@ -26,7 +26,7 @@ export default () => {
           <ServerDetails />
         </Spinner.Suspense>
       </div>
-      <div className="h-48">
+      <div className={'h-48'}>
         <ServerStats />
       </div>
     </Container>

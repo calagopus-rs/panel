@@ -407,11 +407,7 @@ impl ServerBackup {
             is_locked: self.locked,
             is_browsable: matches!(
                 self.disk,
-                BackupDisk::Local
-                    | BackupDisk::DdupBak
-                    | BackupDisk::Btrfs
-                    | BackupDisk::Zfs
-                    | BackupDisk::Restic
+                BackupDisk::DdupBak | BackupDisk::Btrfs | BackupDisk::Zfs | BackupDisk::Restic
             ),
             checksum: self.checksum,
             bytes: self.bytes,

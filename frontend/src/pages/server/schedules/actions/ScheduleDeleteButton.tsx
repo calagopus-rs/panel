@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 export default ({ schedule }: { schedule?: any }) => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
@@ -19,7 +19,7 @@ export default ({ schedule }: { schedule?: any }) => {
 
   return (
     <>
-      <Dialog title="Confirm Schedule Deletion" onClose={() => setOpen(false)} open={open}>
+      <Dialog title={'Confirm Schedule Deletion'} onClose={() => setOpen(false)} open={open}>
         <p>All tasks will be removed and any running processes will be terminated.</p>
         <Dialog.Footer>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>

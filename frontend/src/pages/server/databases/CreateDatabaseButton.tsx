@@ -8,7 +8,7 @@ import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
 export default () => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { addDatabase } = useServerStore();
   const { addToast } = useToast();
 
@@ -18,34 +18,34 @@ export default () => {
 
   const submit = () => {
     createDatabase(server.uuid, { databaseName: dbName, connectionsFrom: connectionsFrom || '%' })
-      .then(database => {
+      .then((database) => {
         addDatabase(database);
         setOpen(false);
         addToast('Database created.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Create Database" onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor="dbName">Database Name</Input.Label>
+      <Dialog title={'Create Database'} onClose={() => setOpen(false)} open={open}>
+        <Input.Label htmlFor={'dbName'}>Database Name</Input.Label>
         <Input.Text
-          id="dbName"
-          name="dbName"
-          placeholder="A descriptive name for your database."
+          id={'dbName'}
+          name={'dbName'}
+          placeholder={'A descriptive name for your database.'}
           autoFocus
-          onChange={e => setDbName(e.target.value)}
+          onChange={(e) => setDbName(e.target.value)}
         />
 
-        <Input.Label htmlFor="connectionsFrom">Connections From</Input.Label>
+        <Input.Label htmlFor={'connectionsFrom'}>Connections From</Input.Label>
         <Input.Text
-          id="connectionsFrom"
-          name="connectionsFrom"
-          placeholder="Where connections should be allowed from. Leave blank to allow connections from anywhere."
-          onChange={e => setConnectionsFrom(e.target.value)}
+          id={'connectionsFrom'}
+          name={'connectionsFrom'}
+          placeholder={'Where connections should be allowed from. Leave blank to allow connections from anywhere.'}
+          onChange={(e) => setConnectionsFrom(e.target.value)}
         />
         <Dialog.Footer>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>

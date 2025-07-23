@@ -26,15 +26,15 @@ export default function App() {
         <AuthProvider>
           <Routes>
             <Route element={<UnauthenticatedRoute />}>
-              <Route path="/auth/*" element={<AuthenticationRouter />} />
+              <Route path={'/auth/*'} element={<AuthenticationRouter />} />
             </Route>
 
             <Route element={<AuthenticatedRoute />}>
-              <Route path="/server/:id/*" element={<ServerRouter />} />
-              <Route path="/*" element={<DashboardRouter />} />
+              <Route path={'/server/:id/*'} element={<ServerRouter />} />
+              <Route path={'/*'} element={<DashboardRouter />} />
 
               <Route element={<AdminRoute />}>
-                <Route path="/admin/*" element={<AdminRouter />} />
+                <Route path={'/admin/*'} element={<AdminRouter />} />
               </Route>
             </Route>
           </Routes>

@@ -15,24 +15,24 @@ export interface SubusersSlice {
 
 export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlice> = (set): SubusersSlice => ({
   subusers: getEmptyPaginationSet<ServerSubuser>(),
-  setSubusers: value => set(state => ({ ...state, subusers: value })),
-  addSubuser: subuser =>
-    set(state => ({
+  setSubusers: (value) => set((state) => ({ ...state, subusers: value })),
+  addSubuser: (subuser) =>
+    set((state) => ({
       subusers: {
         ...state.subusers,
         data: [...state.subusers.data, subuser],
         total: state.subusers.total + 1,
       },
     })),
-  removeSubuser: subuser =>
-    set(state => ({
+  removeSubuser: (subuser) =>
+    set((state) => ({
       subusers: {
         ...state.subusers,
-        data: state.subusers.data.filter(s => s.user.id !== subuser.user.id),
+        data: state.subusers.data.filter((s) => s.user.id !== subuser.user.id),
         total: state.subusers.total - 1,
       },
     })),
 
   availablePermissions: null,
-  setAvailablePermissions: value => set(state => ({ ...state, availablePermissions: value })),
+  setAvailablePermissions: (value) => set((state) => ({ ...state, availablePermissions: value })),
 });

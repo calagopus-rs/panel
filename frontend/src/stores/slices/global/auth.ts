@@ -10,5 +10,5 @@ export interface AuthSlice {
 export const createAuthSlice: StateCreator<GlobalStore, [], [], AuthSlice> = (set): AuthSlice => ({
   twoFactorToken: '',
 
-  setTwoFactorToken: value => set(state => ({ ...state, twoFactorToken: value })),
+  setTwoFactorToken: (value) => set((state) => ({ ...state, twoFactorToken: value })),
 });

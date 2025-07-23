@@ -31,36 +31,36 @@ export default () => {
         addToast('Password has been reset.', 'success');
         navigate('/auth/login');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <AuthWrapper title="Reset Password">
+    <AuthWrapper title={'Reset Password'}>
       <form onSubmit={submit}>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
-            id="password"
+            id={'password'}
             variant={Input.Text.Variants.Loose}
-            placeholder="Password"
-            type="password"
-            className="bg-gray-700!"
+            placeholder={'Password'}
+            type={'password'}
+            className={'bg-gray-700!'}
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             variant={Input.Text.Variants.Loose}
-            placeholder="Confirm Password"
-            type="password"
-            className="bg-gray-700!"
+            placeholder={'Confirm Password'}
+            type={'password'}
+            className={'bg-gray-700!'}
             value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
-        <Button type="submit" className="w-full" disabled={password !== confirmPassword}>
+        <Button type={'submit'} className={'w-full'} disabled={password !== confirmPassword}>
           Reset Password
         </Button>
       </form>

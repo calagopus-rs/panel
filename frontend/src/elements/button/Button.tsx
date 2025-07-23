@@ -28,7 +28,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...rest}
       >
         {isLoading && (
-          <div className="flex absolute justify-center items-center w-full h-full left-0 top-0">
+          <div className={'flex absolute justify-center items-center w-full h-full left-0 top-0'}>
             <Spinner size={20} />
           </div>
         )}

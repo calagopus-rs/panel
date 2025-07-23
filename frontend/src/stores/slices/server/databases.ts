@@ -13,20 +13,20 @@ export interface DatabasesSlice {
 export const createDatabasesSlice: StateCreator<ServerStore, [], [], DatabasesSlice> = (set): DatabasesSlice => ({
   databases: getEmptyPaginationSet<any>(),
 
-  setDatabases: value => set(state => ({ ...state, databases: value })),
-  addDatabase: database =>
-    set(state => ({
+  setDatabases: (value) => set((state) => ({ ...state, databases: value })),
+  addDatabase: (database) =>
+    set((state) => ({
       databases: {
         ...state.databases,
         data: [...state.databases.data, database],
         total: state.databases.total + 1,
       },
     })),
-  removeDatabase: database =>
-    set(state => ({
+  removeDatabase: (database) =>
+    set((state) => ({
       databases: {
         ...state.databases,
-        data: state.databases.data.filter(d => d.id !== database.id),
+        data: state.databases.data.filter((d) => d.id !== database.id),
         total: state.databases.total - 1,
       },
     })),

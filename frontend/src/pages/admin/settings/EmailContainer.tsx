@@ -20,29 +20,29 @@ export default () => {
       .then(() => {
         addToast('Email settings updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <AdminSettingContainer title="Email Settings">
-      <div className="mt-4">
-        <Input.Label htmlFor="type">Type</Input.Label>
+    <AdminSettingContainer title={'Email Settings'}>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'type'}>Type</Input.Label>
         <Input.Dropdown
-          id="type"
+          id={'type'}
           options={[
             { label: 'None', value: 'none' },
             { label: 'SMTP', value: 'smtp' },
           ]}
           selected={settings.type}
-          onChange={e => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
+          onChange={(e) => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
         />
       </div>
 
       {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button onClick={handleUpdate}>Update Email Settings</Button>
       </div>
     </AdminSettingContainer>

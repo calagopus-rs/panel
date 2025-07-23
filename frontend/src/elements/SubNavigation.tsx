@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const SubNavigation = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-row items-center flex-shrink-0 h-12 mb-4 border-b border-neutral-700">{children}</div>
+    <div className={'flex flex-row items-center flex-shrink-0 h-12 mb-4 border-b border-neutral-700'}>{children}</div>
   );
 };
 
@@ -26,7 +26,7 @@ export const SubNavigationLink = ({ to, name, icon }: Props) => (
       )
     }
   >
-    <FontAwesomeIcon icon={icon} className="w-6 h-6 mr-2" />
+    <FontAwesomeIcon icon={icon} className={'w-6 h-6 mr-2'} />
     {name}
   </NavLink>
 );

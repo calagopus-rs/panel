@@ -50,35 +50,35 @@ export const TableHeader = ({
   direction?: number | null;
 }) => {
   if (!name) {
-    return <th className="py-2" />;
+    return <th className={'py-2'} />;
   }
 
   return (
-    <th className="px-6 py-2" onClick={onClick}>
-      <span className="flex flex-row items-center cursor-pointer">
-        <span className="text-xs font-medium tracking-wider uppercase text-gray-300 whitespace-nowrap select-none">
+    <th className={'px-6 py-2'} onClick={onClick}>
+      <span className={'flex flex-row items-center cursor-pointer'}>
+        <span className={'text-xs font-medium tracking-wider uppercase text-gray-300 whitespace-nowrap select-none'}>
           {name}
         </span>
 
         {direction !== undefined ? (
-          <div className="ml-1">
-            <svg fill="none" viewBox="0 0 20 20" className="w-4 h-4 text-gray-400">
+          <div className={'ml-1'}>
+            <svg fill={'none'} viewBox={'0 0 20 20'} className={'w-4 h-4 text-gray-400'}>
               {direction === null || direction === 1 ? (
                 <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13 7L10 4L7 7"
+                  stroke={'currentColor'}
+                  strokeWidth={'2'}
+                  strokeLinecap={'round'}
+                  strokeLinejoin={'round'}
+                  d={'M13 7L10 4L7 7'}
                 />
               ) : null}
               {direction === null || direction === 2 ? (
                 <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7 13L10 16L13 13"
+                  stroke={'currentColor'}
+                  strokeWidth={'2'}
+                  strokeLinecap={'round'}
+                  strokeLinejoin={'round'}
+                  d={'M7 13L10 16L13 13'}
                 />
               ) : null}
             </svg>
@@ -91,7 +91,7 @@ export const TableHeader = ({
 
 export const TableHead = ({ children }: { children: React.ReactNode }) => {
   return (
-    <thead className="bg-gray-800 border-t border-b border-gray-500">
+    <thead className={'bg-gray-800 border-t border-b border-gray-500'}>
       <tr>{children}</tr>
     </thead>
   );
@@ -165,16 +165,16 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
     <>
       {children}
 
-      <div className="h-12 flex flex-row items-center w-full px-6 py-3 border-t border-gray-500">
-        <p className="text-sm leading-5 text-gray-400">
-          Showing <span className="text-gray-300">{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span> to{' '}
-          <span className="text-gray-300">{(data.page - 1) * data.perPage + data.data.length}</span> of{' '}
-          <span className="text-gray-300">{data.total}</span> results
+      <div className={'h-12 flex flex-row items-center w-full px-6 py-3 border-t border-gray-500'}>
+        <p className={'text-sm leading-5 text-gray-400'}>
+          Showing <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>{' '}
+          to <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span> of{' '}
+          <span className={'text-gray-300'}>{data.total}</span> results
         </p>
 
         {isFirstPage && isLastPage ? null : (
-          <div className="flex flex-row ml-auto">
-            <nav className="relative z-0 inline-flex shadow-sm">
+          <div className={'flex flex-row ml-auto'}>
+            <nav className={'relative z-0 inline-flex shadow-sm'}>
               <Button
                 onClick={() => setPage(1)}
                 size={Button.Sizes.Small}
@@ -196,7 +196,7 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
                 <FontAwesomeIcon icon={faAngleLeft} />
               </Button>
 
-              {pages.map(page => (
+              {pages.map((page) => (
                 <Button
                   key={page}
                   onClick={() => setPage(page)}
@@ -239,8 +239,8 @@ export function Pagination<T>({ data, onPageSelect, children }: PaginationProps<
 
 export const NoItems = () => {
   return (
-    <div className="w-full flex flex-col items-center justify-center py-6 px-8">
-      <p className="text-lg text-gray-300 text-center font-normal">
+    <div className={'w-full flex flex-col items-center justify-center py-6 px-8'}>
+      <p className={'text-lg text-gray-300 text-center font-normal'}>
         No items could be found, it&apos;s almost like they are hiding.
       </p>
     </div>
@@ -274,32 +274,34 @@ export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, ch
 
   return (
     <>
-      <div className="flex flex-row items-center h-12 px-6">
+      <div className={'flex flex-row items-center h-12 px-6'}>
         {typeof onSelectAllClick === 'function' && (
-          <div className="flex flex-row items-center">
-            <Checkbox name="selectAll" checked={checked} onChange={onSelectAllClick} />
+          <div className={'flex flex-row items-center'}>
+            <Checkbox name={'selectAll'} checked={checked} onChange={onSelectAllClick} />
 
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4 ml-1 text-neutral-200"
+              xmlns={'http://www.w3.org/2000/svg'}
+              viewBox={'0 0 20 20'}
+              fill={'currentColor'}
+              className={'w-4 h-4 ml-1 text-neutral-200'}
             >
               <path
-                clipRule="evenodd"
-                fillRule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule={'evenodd'}
+                fillRule={'evenodd'}
+                d={
+                  'M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z'
+                }
               />
             </svg>
           </div>
         )}
         {header}
-        <div className="flex flex-row items-center ml-auto">
+        <div className={'flex flex-row items-center ml-auto'}>
           <Input.Text
             value={inputText}
-            className="h-8"
-            placeholder="Search..."
-            onChange={e => {
+            className={'h-8'}
+            placeholder={'Search...'}
+            onChange={(e) => {
               setInputText(e.currentTarget.value);
               search(e.currentTarget.value);
             }}
@@ -314,8 +316,8 @@ export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, ch
 
 export default ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex flex-col w-full">
-      <div className="rounded-lg shadow-md bg-gray-700">{children}</div>
+    <div className={'flex flex-col w-full'}>
+      <div className={'rounded-lg shadow-md bg-gray-700'}>{children}</div>
     </div>
   );
 };

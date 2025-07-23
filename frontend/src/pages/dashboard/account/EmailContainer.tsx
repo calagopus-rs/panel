@@ -18,37 +18,37 @@ export default () => {
       .then(() => {
         addToast('Email updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <div className="bg-gray-700/50 rounded-md p-4 h-fit">
-      <h1 className="text-4xl font-bold text-white">Update Email</h1>
+    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
+      <h1 className={'text-4xl font-bold text-white'}>Update Email</h1>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="newEmail">New Email</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'newEmail'}>New Email</Input.Label>
         <Input.Text
-          id="newEmail"
-          placeholder="New Email"
-          type="email"
+          id={'newEmail'}
+          placeholder={'New Email'}
+          type={'email'}
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="currentPassword">Current Password</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'currentPassword'}>Current Password</Input.Label>
         <Input.Text
-          id="currentPassword"
-          placeholder="Current Password"
-          type="password"
-          onChange={e => setPassword(e.target.value)}
+          id={'currentPassword'}
+          placeholder={'Current Password'}
+          type={'password'}
+          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button disabled={!password} onClick={handleUpdate}>
           Update Email
         </Button>

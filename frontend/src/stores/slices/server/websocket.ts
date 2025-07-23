@@ -14,6 +14,6 @@ export const createWebsocketSlice: StateCreator<ServerStore, [], [], WebsocketSl
   socketInstance: null as Websocket | null,
   socketConnected: false,
 
-  setSocketInstance: value => set(state => ({ ...state, socketInstance: value })),
-  setSocketConnectionState: value => set(state => ({ ...state, socketConnected: value })),
+  setSocketInstance: (value) => set((state) => ({ ...state, socketInstance: value })),
+  setSocketConnectionState: (value) => set((state) => ({ ...state, socketConnected: value })),
 });

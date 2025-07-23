@@ -26,7 +26,7 @@ export default () => {
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
 
-    getPermissions().then(res => {
+    getPermissions().then((res) => {
       setAvailablePermissions(res.subuserPermissions);
     });
   }, []);
@@ -36,7 +36,7 @@ export default () => {
   };
 
   useEffect(() => {
-    getSubusers(server.uuid, page).then(data => {
+    getSubusers(server.uuid, page).then((data) => {
       setSubusers(data);
       setLoading(false);
     });
@@ -44,12 +44,12 @@ export default () => {
 
   const doCreate = (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => {
     createSubuser(server.uuid, { email, permissions, ignoredFiles, captcha })
-      .then(subuser => {
+      .then((subuser) => {
         addSubuser(subuser);
         addToast('Subuser created.', 'success');
         setOpenDialog(null);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -62,28 +62,28 @@ export default () => {
         onClose={() => setOpenDialog(null)}
       />
 
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Users</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Users</h1>
+        <div className={'flex gap-2'}>
           <Button onClick={() => setOpenDialog('create')}>Add</Button>
         </div>
       </div>
       <Table>
         <Pagination data={subusers} onPageSelect={onPageSelect}>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="Id" />
-                <TableHeader name="Username" />
-                <TableHeader name="2FA Enabled" />
-                <TableHeader name="Permissions" />
-                <TableHeader name="Ignored Files" />
+                <TableHeader name={'Id'} />
+                <TableHeader name={'Username'} />
+                <TableHeader name={'2FA Enabled'} />
+                <TableHeader name={'Permissions'} />
+                <TableHeader name={'Ignored Files'} />
                 <TableHeader />
               </TableHead>
 
               <ContextMenuProvider>
                 <TableBody>
-                  {subusers.data.map(su => (
+                  {subusers.data.map((su) => (
                     <SubuserRow subuser={su} key={su.user.id} />
                   ))}
                 </TableBody>

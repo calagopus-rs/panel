@@ -26,24 +26,24 @@ export default () => {
 
   const submit = () => {
     createSshKey(name, pubKey)
-      .then(key => {
+      .then((key) => {
         addToast('SSH key created.', 'success');
         setOpen(false);
         addSshKey(key);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Create SSH Key" onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor="name">Name</Input.Label>
-        <Input.Text id="name" name="name" value={name} onChange={e => setName(e.target.value)} />
+      <Dialog title={'Create SSH Key'} onClose={() => setOpen(false)} open={open}>
+        <Input.Label htmlFor={'name'}>Name</Input.Label>
+        <Input.Text id={'name'} name={'name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-        <Input.Label htmlFor="pubKey">Public Key</Input.Label>
-        <Input.Text id="pubKey" name="pubKey" value={pubKey} onChange={e => setPubKey(e.target.value)} />
+        <Input.Label htmlFor={'pubKey'}>Public Key</Input.Label>
+        <Input.Text id={'pubKey'} name={'pubKey'} value={pubKey} onChange={(e) => setPubKey(e.target.value)} />
 
         <Dialog.Footer>
           <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>

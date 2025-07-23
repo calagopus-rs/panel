@@ -8,7 +8,7 @@ import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 
 export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSubmit: (task: any) => void }) => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);
@@ -25,12 +25,12 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
       timeOffset: taskOffset,
       continueOnFailure: taskContinueOnFailure,
     })
-      .then(resTask => {
+      .then((resTask) => {
         onSubmit(resTask);
         setOpen(false);
         addToast(task ? 'Task updated.' : 'Task created.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -38,43 +38,43 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
   return (
     <>
       <Dialog title={task ? 'Update Task' : 'Create Task'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor="taskAction">Action</Input.Label>
+        <Input.Label htmlFor={'taskAction'}>Action</Input.Label>
         <Input.Dropdown
-          id="taskAction"
+          id={'taskAction'}
           options={[
             { label: 'Run Command', value: 'command' },
             { label: 'Power Action', value: 'power' },
             { label: 'Create Backup', value: 'backup' },
           ]}
           selected={taskAction}
-          onChange={e => setTaskAction(e.target.value)}
+          onChange={(e) => setTaskAction(e.target.value)}
         />
 
-        <Input.Label htmlFor="taskPayload">Payload</Input.Label>
+        <Input.Label htmlFor={'taskPayload'}>Payload</Input.Label>
         <Input.Text
-          id="taskPayload"
-          name="taskPayload"
-          placeholder="Payload"
+          id={'taskPayload'}
+          name={'taskPayload'}
+          placeholder={'Payload'}
           value={taskPayload}
-          onChange={e => setTaskPayload(e.target.value)}
+          onChange={(e) => setTaskPayload(e.target.value)}
         />
 
-        <Input.Label htmlFor="taskOffset">Time Offset</Input.Label>
+        <Input.Label htmlFor={'taskOffset'}>Time Offset</Input.Label>
         <Input.Text
-          id="taskOffset"
-          name="taskOffset"
-          type="number"
-          placeholder="Time Offset"
+          id={'taskOffset'}
+          name={'taskOffset'}
+          type={'number'}
+          placeholder={'Time Offset'}
           value={taskOffset}
-          onChange={e => setTaskOffset(parseInt(e.target.value))}
+          onChange={(e) => setTaskOffset(parseInt(e.target.value))}
         />
 
-        <Input.Label htmlFor="taskContinueOnFailure">Continue On Failure</Input.Label>
+        <Input.Label htmlFor={'taskContinueOnFailure'}>Continue On Failure</Input.Label>
         <Input.Switch
-          description="Future tasks will be run when this task fails."
-          name="taskContinueOnFailure"
+          description={'Future tasks will be run when this task fails.'}
+          name={'taskContinueOnFailure'}
           defaultChecked={taskContinueOnFailure}
-          onChange={e => setTaskContinueOnFailure(e.target.checked)}
+          onChange={(e) => setTaskContinueOnFailure(e.target.checked)}
         />
 
         <Dialog.Footer>

@@ -9,8 +9,12 @@ export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
 
   return (
     <>
-      <Dialog title="Activity Details" onClose={() => setOpen(false)} open={open}>
-        <pre className="font-mono bg-gray-800 rounded py-1 px-2 text-sm leading-relaxed overflow-x-scroll whitespace-pre-wrap">
+      <Dialog title={'Activity Details'} onClose={() => setOpen(false)} open={open}>
+        <pre
+          className={
+            'font-mono bg-gray-800 rounded py-1 px-2 text-sm leading-relaxed overflow-x-scroll whitespace-pre-wrap'
+          }
+        >
           {JSON.stringify(activity.data, null, 2)}
         </pre>
 

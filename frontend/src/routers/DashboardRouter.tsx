@@ -28,45 +28,45 @@ export default () => {
 
   return (
     <>
-      <div className="flex">
+      <div className={'flex'}>
         <Sidebar collapsed={false}>
-          <div className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer">
-            <img src={CollapsedIcon} className="my-4 h-20" alt="Pterodactyl Icon" />
+          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
+            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
             <a className={classNames(styles.navLink, 'cursor-pointer')}>
               <FontAwesomeIcon icon={faMagnifyingGlass} />
               <span>Search</span>
             </a>
-            <Sidebar.Link to="/" end>
+            <Sidebar.Link to={'/'} end>
               <FontAwesomeIcon icon={faServer} />
               <span>Servers</span>
             </Sidebar.Link>
             {user.admin && (
-              <Sidebar.Link to="/admin" end>
+              <Sidebar.Link to={'/admin'} end>
                 <FontAwesomeIcon icon={faGraduationCap} />
                 <span>Admin</span>
               </Sidebar.Link>
             )}
           </Sidebar.Section>
           <Sidebar.Section>
-            <Sidebar.Link to="/account" end>
+            <Sidebar.Link to={'/account'} end>
               <FontAwesomeIcon icon={faUser} />
               <span>Account</span>
             </Sidebar.Link>
-            <Sidebar.Link to="/account/api" end>
+            <Sidebar.Link to={'/account/api'} end>
               <FontAwesomeIcon icon={faCloud} />
               <span>API Credentials</span>
             </Sidebar.Link>
-            <Sidebar.Link to="/account/ssh" end>
+            <Sidebar.Link to={'/account/ssh'} end>
               <FontAwesomeIcon icon={faKey} />
               <span>SSH Keys</span>
             </Sidebar.Link>
-            <Sidebar.Link to="/account/activity" end>
+            <Sidebar.Link to={'/account/activity'} end>
               <FontAwesomeIcon icon={faBriefcase} />
               <span>Activity</span>
             </Sidebar.Link>
-            <Sidebar.Link to="/account/sessions" end>
+            <Sidebar.Link to={'/account/sessions'} end>
               <FontAwesomeIcon icon={faUserSecret} />
               <span>Sessions</span>
             </Sidebar.Link>
@@ -74,13 +74,13 @@ export default () => {
           <Sidebar.User />
         </Sidebar>
         <Routes>
-          <Route path="" element={<DashboardHome />} />
-          <Route path="/account" element={<DashboardAccount />} />
-          <Route path="/account/api" element={<DashboardApi />} />
-          <Route path="/account/ssh" element={<DashboardSsh />} />
-          <Route path="/account/activity" element={<DashboardActivity />} />
-          <Route path="/account/sessions" element={<DashboardSessions />} />
-          <Route path="*" element={<NotFound />} />
+          <Route path={''} element={<DashboardHome />} />
+          <Route path={'/account'} element={<DashboardAccount />} />
+          <Route path={'/account/api'} element={<DashboardApi />} />
+          <Route path={'/account/ssh'} element={<DashboardSsh />} />
+          <Route path={'/account/activity'} element={<DashboardActivity />} />
+          <Route path={'/account/sessions'} element={<DashboardSessions />} />
+          <Route path={'*'} element={<NotFound />} />
         </Routes>
       </div>
     </>

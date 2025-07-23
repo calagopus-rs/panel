@@ -22,14 +22,14 @@ export default ({ session }: { session: UserSession }) => {
         setOpen(false);
         removeSession(session);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Sign Out" onClose={() => setOpen(false)} open={open}>
+      <Dialog title={'Sign Out'} onClose={() => setOpen(false)} open={open}>
         <p>Signing out will invalidate the session.</p>
 
         <Dialog.Footer>

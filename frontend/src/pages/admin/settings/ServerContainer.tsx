@@ -22,43 +22,43 @@ export default () => {
       .then(() => {
         addToast('Server settings updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <AdminSettingContainer title="Server Settings">
-      <div className="mt-4">
-        <Input.Label htmlFor="max-file-manager-view-size">Max File Manager View Size</Input.Label>
+    <AdminSettingContainer title={'Server Settings'}>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'max-file-manager-view-size'}>Max File Manager View Size</Input.Label>
         <Input.Text
-          id="max-file-manager-view-size"
-          placeholder="Max File Manager View Size"
-          type="number"
+          id={'max-file-manager-view-size'}
+          placeholder={'Max File Manager View Size'}
+          type={'number'}
           value={maxFileManagerViewSize}
-          onChange={e => setMaxFileManagerViewSize(Number(e.target.value))}
+          onChange={(e) => setMaxFileManagerViewSize(Number(e.target.value))}
         />
       </div>
 
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Allow Overwriting Custom Docker Image"
-          name="allow-overwriting-custom-docker-image"
+          description={'Allow Overwriting Custom Docker Image'}
+          name={'allow-overwriting-custom-docker-image'}
           defaultChecked={allowOverwritingCustomDockerImage}
-          onChange={e => setAllowOverwritingCustomDockerImage(e.target.checked)}
+          onChange={(e) => setAllowOverwritingCustomDockerImage(e.target.checked)}
         />
       </div>
 
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Allow Editing Startup Command"
-          name="allow-editing-startup-command"
+          description={'Allow Editing Startup Command'}
+          name={'allow-editing-startup-command'}
           defaultChecked={allowEditingStartupCommand}
-          onChange={e => setAllowEditingStartupCommand(e.target.checked)}
+          onChange={(e) => setAllowEditingStartupCommand(e.target.checked)}
         />
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button onClick={handleUpdate}>Update Server Settings</Button>
       </div>
     </AdminSettingContainer>

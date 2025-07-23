@@ -22,14 +22,14 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
         setOpen(false);
         removeSshKey(sshKey);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Delete API Key" onClose={() => setOpen(false)} open={open}>
+      <Dialog title={'Delete API Key'} onClose={() => setOpen(false)} open={open}>
         <p>
           Removing the <Code>{sshKey.name}</Code> SSH key will invalidate its usage across the Panel.
         </p>

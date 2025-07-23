@@ -58,7 +58,7 @@ export default ({ server }: { server: ApiServer }) => {
     >
       <div className={classNames('px-6 py-4', [serverListDesign === 'row' && 'xl:col-span-2'])}>
         <div className={classNames('flex items-center gap-2', [serverListDesign === 'grid' && 'justify-between'])}>
-          <span className="text-xl font-medium truncate" title={server.name}>
+          <span className={'text-xl font-medium truncate'} title={server.name}>
             {server.name}
           </span>
           <div
@@ -75,7 +75,7 @@ export default ({ server }: { server: ApiServer }) => {
           <p className="text-sm text-gray-400">{formatAllocation(getPrimaryAllocation(server.allocations))}</p>
         </CopyOnClick> */}
         <CopyOnClick content={formatAllocation(server.allocation)}>
-          <p className="text-sm text-gray-400">{formatAllocation(server.allocation)}</p>
+          <p className={'text-sm text-gray-400'}>{formatAllocation(server.allocation)}</p>
         </CopyOnClick>
       </div>
       <div
@@ -84,30 +84,30 @@ export default ({ server }: { server: ApiServer }) => {
         ])}
       >
         {stats === null ? (
-          <div className="col-span-3 flex flex-col items-center justify-center">
+          <div className={'col-span-3 flex flex-col items-center justify-center'}>
             <Spinner />
           </div>
         ) : (
           <>
-            <div className="flex gap-2 text-sm justify-center items-center">
-              <FontAwesomeIcon icon={faMicrochip} className="size-5 flex-none" />
+            <div className={'flex gap-2 text-sm justify-center items-center'}>
+              <FontAwesomeIcon icon={faMicrochip} className={'size-5 flex-none'} />
               <div>
-                <span className="mr-1">{stats.cpuAbsolute.toFixed(2)}%</span>
-                <span className="inline-block text-xs text-gray-400">/ {cpuLimit}</span>
+                <span className={'mr-1'}>{stats.cpuAbsolute.toFixed(2)}%</span>
+                <span className={'inline-block text-xs text-gray-400'}>/ {cpuLimit}</span>
               </div>
             </div>
-            <div className="flex gap-2 text-sm justify-center items-center">
-              <FontAwesomeIcon icon={faMemory} className="size-5 flex-none" />
+            <div className={'flex gap-2 text-sm justify-center items-center'}>
+              <FontAwesomeIcon icon={faMemory} className={'size-5 flex-none'} />
               <div>
-                <span className="mr-1">{bytesToString(stats.memoryBytes)}</span>
-                <span className="inline-block text-xs text-gray-400">/ {memoryLimit}</span>
+                <span className={'mr-1'}>{bytesToString(stats.memoryBytes)}</span>
+                <span className={'inline-block text-xs text-gray-400'}>/ {memoryLimit}</span>
               </div>
             </div>
-            <div className="flex gap-2 text-sm justify-center items-center">
-              <FontAwesomeIcon icon={faHardDrive} className="size-5 flex-none" />
+            <div className={'flex gap-2 text-sm justify-center items-center'}>
+              <FontAwesomeIcon icon={faHardDrive} className={'size-5 flex-none'} />
               <div>
-                <span className="mr-1">{bytesToString(stats.diskBytes)}</span>
-                <span className="inline-block text-xs text-gray-400">/ {diskLimit}</span>
+                <span className={'mr-1'}>{bytesToString(stats.diskBytes)}</span>
+                <span className={'inline-block text-xs text-gray-400'}>/ {diskLimit}</span>
               </div>
             </div>
           </>

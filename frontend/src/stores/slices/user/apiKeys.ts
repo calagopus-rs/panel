@@ -13,20 +13,20 @@ export interface ApiKeySlice {
 export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = (set): ApiKeySlice => ({
   apiKeys: getEmptyPaginationSet<UserApiKey>(),
 
-  setApiKeys: value => set(state => ({ ...state, apiKeys: value })),
-  addApiKey: key =>
-    set(state => ({
+  setApiKeys: (value) => set((state) => ({ ...state, apiKeys: value })),
+  addApiKey: (key) =>
+    set((state) => ({
       apiKeys: {
         ...state.apiKeys,
         data: [...state.apiKeys.data, key],
         total: state.apiKeys.total + 1,
       },
     })),
-  removeApiKey: key =>
-    set(state => ({
+  removeApiKey: (key) =>
+    set((state) => ({
       apiKeys: {
         ...state.apiKeys,
-        data: state.apiKeys.data.filter(k => k.id !== key.id),
+        data: state.apiKeys.data.filter((k) => k.id !== key.id),
         total: state.apiKeys.total - 1,
       },
     })),

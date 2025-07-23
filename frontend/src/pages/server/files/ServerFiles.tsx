@@ -48,10 +48,10 @@ export default () => {
     setLoading(true);
 
     loadDirectory(server.uuid, browsingDirectory, page)
-      .then(data => {
+      .then((data) => {
         setBrowsingEntries(data);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => setLoading(false));
@@ -73,7 +73,7 @@ export default () => {
         setOpenDialog(null);
         setSearchParams({ directory: join(browsingDirectory, name) });
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -88,9 +88,9 @@ export default () => {
 
       <FileActionBar />
 
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Files</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Files</h1>
+        <div className={'flex gap-2'}>
           <Button style={Button.Styles.Gray} onClick={() => setOpenDialog('nameDirectory')}>
             New directory
           </Button>
@@ -111,24 +111,24 @@ export default () => {
           onSelectAllClick={onSelectAllClick}
         >
           <Pagination data={browsingEntries} onPageSelect={onPageSelect}>
-            <div className="overflow-x-auto">
+            <div className={'overflow-x-auto'}>
               {loading ? (
                 <Spinner.Centered />
               ) : browsingEntries.data.length === 0 ? (
                 <NoItems />
               ) : (
-                <table className="w-full table-auto">
+                <table className={'w-full table-auto'}>
                   <TableHead>
                     <TableHeader />
-                    <TableHeader name="Name" />
-                    <TableHeader name="Size" />
-                    <TableHeader name="Modified" />
+                    <TableHeader name={'Name'} />
+                    <TableHeader name={'Size'} />
+                    <TableHeader name={'Modified'} />
                     <TableHeader />
                   </TableHead>
 
                   <ContextMenuProvider>
                     <TableBody>
-                      {browsingEntries.data.map(file => (
+                      {browsingEntries.data.map((file) => (
                         <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
                       ))}
                     </TableBody>

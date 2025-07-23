@@ -12,13 +12,13 @@ export interface SessionSlice {
 export const createSessionsSlice: StateCreator<UserStore, [], [], SessionSlice> = (set): SessionSlice => ({
   sessions: getEmptyPaginationSet<UserSession>(),
 
-  setSessions: value => set(state => ({ ...state, sessions: value })),
+  setSessions: (value) => set((state) => ({ ...state, sessions: value })),
 
-  removeSession: sess =>
-    set(state => ({
+  removeSession: (sess) =>
+    set((state) => ({
       sessions: {
         ...state.sessions,
-        data: state.sessions.data.filter(s => s.id !== sess.id),
+        data: state.sessions.data.filter((s) => s.id !== sess.id),
         total: state.sessions.total - 1,
       },
     })),

@@ -23,70 +23,70 @@ export default () => {
   };
 
   return (
-    <AuthWrapper title="Register">
+    <AuthWrapper title={'Register'}>
       <form onSubmit={submit}>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
-            id="username"
+            id={'username'}
             variant={Input.Text.Variants.Loose}
-            placeholder="Username"
-            type="text"
-            className="bg-gray-700!"
+            placeholder={'Username'}
+            type={'text'}
+            className={'bg-gray-700!'}
             value={username}
-            onChange={e => setUsername(e.target.value)}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             variant={Input.Text.Variants.Loose}
-            placeholder="Email"
-            type="email"
-            className="bg-gray-700!"
+            placeholder={'Email'}
+            type={'email'}
+            className={'bg-gray-700!'}
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             variant={Input.Text.Variants.Loose}
-            placeholder="First Name"
-            type="text"
-            className="bg-gray-700!"
+            placeholder={'First Name'}
+            type={'text'}
+            className={'bg-gray-700!'}
             value={nameFirst}
-            onChange={e => setNameFirst(e.target.value)}
+            onChange={(e) => setNameFirst(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             variant={Input.Text.Variants.Loose}
-            placeholder="Last Name"
-            type="text"
-            className="bg-gray-700!"
+            placeholder={'Last Name'}
+            type={'text'}
+            className={'bg-gray-700!'}
             value={nameLast}
-            onChange={e => setNameLast(e.target.value)}
+            onChange={(e) => setNameLast(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             variant={Input.Text.Variants.Loose}
-            placeholder="Password"
-            type="password"
-            className="bg-gray-700!"
+            placeholder={'Password'}
+            type={'password'}
+            className={'bg-gray-700!'}
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Captcha ref={captchaRef} />
         </div>
-        <Button type="submit" className="w-full">
+        <Button type={'submit'} className={'w-full'}>
           Register
         </Button>
       </form>
-      <div className="mt-4">
-        <p className="text-sm text-gray-400">
+      <div className={'mt-4'}>
+        <p className={'text-sm text-gray-400'}>
           Already have an account?{' '}
-          <NavLink to="/auth/login" className="text-cyan-200 hover:underline">
+          <NavLink to={'/auth/login'} className={'text-cyan-200 hover:underline'}>
             Login
           </NavLink>
         </p>

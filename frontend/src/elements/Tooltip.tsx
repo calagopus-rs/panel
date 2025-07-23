@@ -16,12 +16,12 @@ interface TooltipProps {
 export default ({ children, content, ...tooltipProps }: TooltipProps) => {
   return (
     <>
-      <span data-tooltip-id="tooltip" data-tooltip-content={content}>
+      <span data-tooltip-id={'tooltip'} data-tooltip-content={content}>
         {children}
       </span>
       <ReactTooltip
-        id="tooltip"
-        className="bg-gray-900 px-3 py-2 rounded pointer-events-none max-w-[24rem]"
+        id={'tooltip'}
+        className={'bg-gray-900 px-3 py-2 rounded pointer-events-none max-w-[24rem]'}
         {...tooltipProps}
       />
     </>

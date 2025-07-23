@@ -38,6 +38,6 @@ export const useServerStore = create<ServerStore>()((...a) => {
     ...createSubusersSlice(...a),
     ...createWebsocketSlice(...a),
   });
-  initialState.reset = () => useServerStore.setState(state => ({ ...initialState, reset: state.reset }), true);
+  initialState.reset = () => useServerStore.setState((state) => ({ ...initialState, reset: state.reset }), true);
   return initialState;
 });

@@ -14,7 +14,7 @@ export default () => {
     socketInstance.send(SocketRequest.SEND_STATS);
   }, [socketInstance, socketConnected]);
 
-  useWebsocketEvent(SocketEvent.STATS, data => {
+  useWebsocketEvent(SocketEvent.STATS, (data) => {
     let wsStats: any = {};
     try {
       wsStats = JSON.parse(data);

@@ -10,5 +10,5 @@ export interface StateSlice {
 export const createStateSlice: StateCreator<ServerStore, [], [], StateSlice> = (set): StateSlice => ({
   state: 'offline',
 
-  setState: value => set(state => ({ ...state, state: value })),
+  setState: (value) => set((state) => ({ ...state, state: value })),
 });

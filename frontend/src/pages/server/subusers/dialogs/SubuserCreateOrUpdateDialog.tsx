@@ -23,7 +23,7 @@ export default ({ subuser, onCreate, onUpdate, open, onClose }: Props) => {
       return;
     }
 
-    captchaRef.current?.getToken().then(token => {
+    captchaRef.current?.getToken().then((token) => {
       onCreate(email, Array.from(selectedPermissions), ignoredFiles, token);
     });
   };
@@ -31,35 +31,35 @@ export default ({ subuser, onCreate, onUpdate, open, onClose }: Props) => {
   return (
     <Dialog title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} open={open} hideCloseIcon>
       {subuser ? (
-        <div className="mt-4">
-          <Input.Label htmlFor="username">Username</Input.Label>
-          <Input.Text id="username" name="username" disabled value={subuser.user.username} />
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'username'}>Username</Input.Label>
+          <Input.Text id={'username'} name={'username'} disabled value={subuser.user.username} />
         </div>
       ) : (
-        <div className="mt-4">
-          <Input.Label htmlFor="email">Email</Input.Label>
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'email'}>Email</Input.Label>
           <Input.Text
-            id="email"
-            name="email"
-            placeholder="Enter the email that this subuser should be saved as."
+            id={'email'}
+            name={'email'}
+            placeholder={'Enter the email that this subuser should be saved as.'}
             autoFocus
-            onChange={e => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
       )}
 
-      <div className="mt-4">
-        <Input.Label htmlFor="permissions">Permissions</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'permissions'}>Permissions</Input.Label>
         <PermissionSelector selectedPermissions={selectedPermissions} setSelectedPermissions={setSelectedPermissions} />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="ignoredFiles">Ignored Files</Input.Label>
-        <Input.MultiInput placeholder="Path or file" options={ignoredFiles} onChange={setIgnoredFiles} />
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'ignoredFiles'}>Ignored Files</Input.Label>
+        <Input.MultiInput placeholder={'Path or file'} options={ignoredFiles} onChange={setIgnoredFiles} />
       </div>
 
       {!subuser && (
-        <div className="mt-4">
+        <div className={'mt-4'}>
           <Captcha ref={captchaRef} />
         </div>
       )}

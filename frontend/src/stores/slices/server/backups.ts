@@ -15,35 +15,35 @@ export interface BackupsSlice {
 export const createBackupsSlice: StateCreator<ServerStore, [], [], BackupsSlice> = (set): BackupsSlice => ({
   backups: getEmptyPaginationSet<ServerBackupWithProgress>(),
 
-  setBackups: value => set(state => ({ ...state, backups: value })),
-  addBackup: backup =>
-    set(state => ({
+  setBackups: (value) => set((state) => ({ ...state, backups: value })),
+  addBackup: (backup) =>
+    set((state) => ({
       backups: {
         ...state.backups,
         data: [...state.backups.data, backup],
         total: state.backups.total + 1,
       },
     })),
-  removeBackup: backup =>
-    set(state => ({
+  removeBackup: (backup) =>
+    set((state) => ({
       backups: {
         ...state.backups,
-        data: state.backups.data.filter(b => b.uuid !== backup.uuid),
+        data: state.backups.data.filter((b) => b.uuid !== backup.uuid),
         total: state.backups.total - 1,
       },
     })),
   updateBackup: (uuid, updatedProps) =>
-    set(state => ({
+    set((state) => ({
       backups: {
         ...state.backups,
-        data: state.backups.data.map(b => (b.uuid === uuid ? { ...b, ...updatedProps } : b)),
+        data: state.backups.data.map((b) => (b.uuid === uuid ? { ...b, ...updatedProps } : b)),
       },
     })),
   setBackupProgress: (uuid, progress, total) =>
-    set(state => ({
+    set((state) => ({
       backups: {
         ...state.backups,
-        data: state.backups.data.map(b => (b.uuid === uuid ? { ...b, progress: { progress, total } } : b)),
+        data: state.backups.data.map((b) => (b.uuid === uuid ? { ...b, progress: { progress, total } } : b)),
       },
     })),
 });

@@ -19,30 +19,30 @@ export interface FilesSlice {
 
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set): FilesSlice => ({
   browsingDirectory: null,
-  setBrowsingDirectory: value => set(state => ({ ...state, browsingDirectory: value })),
+  setBrowsingDirectory: (value) => set((state) => ({ ...state, browsingDirectory: value })),
 
   browsingEntries: getEmptyPaginationSet<DirectoryEntry>(),
-  setBrowsingEntries: value => set(state => ({ ...state, browsingEntries: value })),
-  addBrowsingEntry: entry =>
-    set(state => ({
+  setBrowsingEntries: (value) => set((state) => ({ ...state, browsingEntries: value })),
+  addBrowsingEntry: (entry) =>
+    set((state) => ({
       browsingEntries: {
         ...state.browsingEntries,
         data: [...state.browsingEntries.data, entry],
         total: state.browsingEntries.total + 1,
       },
     })),
-  removeBrowsingEntry: entry =>
-    set(state => ({
+  removeBrowsingEntry: (entry) =>
+    set((state) => ({
       browsingEntries: {
         ...state.browsingEntries,
-        data: state.browsingEntries.data.filter(e => e.name !== entry.name),
+        data: state.browsingEntries.data.filter((e) => e.name !== entry.name),
         total: state.browsingEntries.total - 1,
       },
     })),
 
   selectedFiles: [],
-  setSelectedFiles: value => set(state => ({ ...state, selectedFiles: value })),
-  addSelectedFile: value => set(state => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
-  removeSelectedFile: value =>
-    set(state => ({ ...state, selectedFiles: state.selectedFiles.filter(file => file.name !== value.name) })),
+  setSelectedFiles: (value) => set((state) => ({ ...state, selectedFiles: value })),
+  addSelectedFile: (value) => set((state) => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
+  removeSelectedFile: (value) =>
+    set((state) => ({ ...state, selectedFiles: state.selectedFiles.filter((file) => file.name !== value.name) })),
 });

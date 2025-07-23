@@ -10,5 +10,5 @@ export interface ServerSlice {
 export const createServerSlice: StateCreator<ServerStore, [], [], ServerSlice> = (set): ServerSlice => ({
   server: null,
 
-  setServer: value => set(state => ({ ...state, server: value })),
+  setServer: (value) => set((state) => ({ ...state, server: value })),
 });

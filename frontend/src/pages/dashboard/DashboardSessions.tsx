@@ -23,7 +23,7 @@ export default () => {
   const { sessions, setSessions } = useUserStore();
 
   useEffect(() => {
-    getSessions(page).then(data => {
+    getSessions(page).then((data) => {
       setSessions(data);
       setLoading(false);
     });
@@ -31,8 +31,8 @@ export default () => {
 
   return (
     <Container>
-      <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-bold text-white">Sessions</h1>
+      <div className={'justify-between flex items-center mb-2'}>
+        <h1 className={'text-4xl font-bold text-white'}>Sessions</h1>
       </div>
       {loading ? (
         <Spinner.Centered />
@@ -40,38 +40,38 @@ export default () => {
         <Table>
           <ContentWrapper>
             <Pagination data={sessions} onPageSelect={setPage}>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+              <div className={'overflow-x-auto'}>
+                <table className={'w-full table-auto'}>
                   <TableHead>
-                    <TableHeader name="IP" />
-                    <TableHeader name="This Device?" />
-                    <TableHeader name="User Agent" />
-                    <TableHeader name="Last Used" />
+                    <TableHeader name={'IP'} />
+                    <TableHeader name={'This Device?'} />
+                    <TableHeader name={'User Agent'} />
+                    <TableHeader name={'Last Used'} />
                     <TableHeader />
                   </TableHead>
 
                   <TableBody>
-                    {sessions.data.map(session => (
+                    {sessions.data.map((session) => (
                       <TableRow key={session.id}>
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{session.ip}</Code>
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {session.isUsing ? 'Yes' : 'No'}
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {session.userAgent}
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Tooltip content={formatDateTime(session.lastUsed)}>
                             {formatTimestamp(session.lastUsed)}
                           </Tooltip>
                         </td>
 
-                        <td className="relative">{!session.isUsing && <SessionDeleteButton session={session} />}</td>
+                        <td className={'relative'}>{!session.isUsing && <SessionDeleteButton session={session} />}</td>
                       </TableRow>
                     ))}
                   </TableBody>

@@ -14,17 +14,17 @@ export default ({ backup, onUpdate, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
-      <div className="mt-4">
-        <Input.Label htmlFor="name">Name</Input.Label>
-        <Input.Text id="name" name="name" value={name} onChange={e => setName(e.target.value)} />
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'name'}>Name</Input.Label>
+        <Input.Text id={'name'} name={'name'} value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Locked"
-          name="locked"
+          description={'Locked'}
+          name={'locked'}
           defaultChecked={locked}
-          onChange={e => setLocked(e.target.checked)}
+          onChange={(e) => setLocked(e.target.checked)}
         />
       </div>
 

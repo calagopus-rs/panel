@@ -45,36 +45,36 @@ const LocationsContainer = () => {
 
   useEffect(() => {
     getLocations(page)
-      .then(data => {
+      .then((data) => {
         setLocations(data);
         setLoading(false);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   }, [page]);
 
   return (
     <>
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Locations</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Locations</h1>
+        <div className={'flex gap-2'}>
           <Button onClick={() => navigate('/admin/locations/new')}>New Location</Button>
         </div>
       </div>
       <Table>
         <Pagination data={locations} onPageSelect={onPageSelect}>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="ID" />
-                <TableHeader name="Short Name" />
-                <TableHeader name="Long Name" />
+                <TableHeader name={'ID'} />
+                <TableHeader name={'Short Name'} />
+                <TableHeader name={'Long Name'} />
               </TableHead>
 
               <ContextMenuProvider>
                 <TableBody>
-                  {locations.data.map(location => (
+                  {locations.data.map((location) => (
                     <LocationRow key={location.id} location={location} />
                   ))}
                 </TableBody>
@@ -93,9 +93,9 @@ export default () => {
   return (
     <Container>
       <Routes>
-        <Route path="/" element={<LocationsContainer />} />
-        <Route path="/new" element={<LocationCreateOrUpdate />} />
-        <Route path="/:id" element={<LocationCreateOrUpdate />} />
+        <Route path={'/'} element={<LocationsContainer />} />
+        <Route path={'/new'} element={<LocationCreateOrUpdate />} />
+        <Route path={'/:id'} element={<LocationCreateOrUpdate />} />
       </Routes>
     </Container>
   );

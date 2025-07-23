@@ -39,44 +39,44 @@ export default () => {
     }
 
     getTwoFactor()
-      .then(res => {
+      .then((res) => {
         setToken(res);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   }, [open]);
 
   const submit = () => {
     enableTwoFactor(code, password)
-      .then(recoveryCodes => {
+      .then((recoveryCodes) => {
         setRecoveryCodes(recoveryCodes.recovery_codes);
         addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
         setStage('recovery');
         setUser({ ...user!, totpEnabled: true });
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Enable Two-Step Verification" onClose={() => setOpen(false)} open={open}>
+      <Dialog title={'Enable Two-Step Verification'} onClose={() => setOpen(false)} open={open}>
         {stage === 'setup' ? (
           <>
             <p>
-              Help protect your account from unauthorized access. You'll be prompted for a verification code each time
-              you sign in.
+              Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
+              time you sign in.
             </p>
             {!token ? (
               <Spinner.Centered />
             ) : (
-              <div className="flex flex-col items-center justify-center my-4">
-                <div className="flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow">
-                  <QRCode title="QR Code" value={token.otpUrl} />
+              <div className={'flex flex-col items-center justify-center my-4'}>
+                <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
+                  <QRCode title={'QR Code'} value={token.otpUrl} />
                 </div>
-                <div className="mt-2">
+                <div className={'mt-2'}>
                   <CopyOnClick content={token.secret}>
                     <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
                   </CopyOnClick>
@@ -88,23 +88,23 @@ export default () => {
               generated into the field below.
             </p>
 
-            <Input.Label htmlFor="totpCode">Code</Input.Label>
+            <Input.Label htmlFor={'totpCode'}>Code</Input.Label>
             <Input.Text
-              id="code"
-              name="code"
-              type="number"
-              placeholder="000000"
+              id={'code'}
+              name={'code'}
+              type={'number'}
+              placeholder={'000000'}
               value={code}
-              onChange={e => setCode(e.target.value)}
+              onChange={(e) => setCode(e.target.value)}
             />
 
-            <Input.Label htmlFor="password">Password</Input.Label>
+            <Input.Label htmlFor={'password'}>Password</Input.Label>
             <Input.Text
-              id="password"
-              name="password"
-              type="password"
+              id={'password'}
+              name={'password'}
+              type={'password'}
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
             />
 
             <Dialog.Footer>
@@ -122,7 +122,7 @@ export default () => {
             <CopyOnClick content={recoveryCodes.join('\n')}>
               <Code>
                 {recoveryCodes.map((code, index) => (
-                  <span key={index} className="block">
+                  <span key={index} className={'block'}>
                     {code}
                   </span>
                 ))}

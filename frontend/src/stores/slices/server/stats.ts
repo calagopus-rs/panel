@@ -10,5 +10,5 @@ export interface StatsSlice {
 export const createStatsSlice: StateCreator<ServerStore, [], [], StatsSlice> = (set): StatsSlice => ({
   stats: null,
 
-  setStats: value => set(state => ({ ...state, stats: value })),
+  setStats: (value) => set((state) => ({ ...state, stats: value })),
 });

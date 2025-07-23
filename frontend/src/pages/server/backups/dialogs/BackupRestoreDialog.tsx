@@ -12,12 +12,12 @@ export default ({ onRestore, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Restore Backup'} onClose={onClose} open={open} hideCloseIcon>
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Do you want to empty the filesystem of this server before restoring the backup?"
-          name="truncate"
+          description={'Do you want to empty the filesystem of this server before restoring the backup?'}
+          name={'truncate'}
           defaultChecked={truncate}
-          onChange={e => setTruncate(e.target.checked)}
+          onChange={(e) => setTruncate(e.target.checked)}
         />
       </div>
 

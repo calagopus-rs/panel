@@ -5,12 +5,12 @@ import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import {
-  faBackward,
   faFileArrowDown,
   faLock,
   faLockOpen,
   faPencil,
   faRotateLeft,
+  faShare,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -24,10 +24,13 @@ import updateBackup from '@/api/server/backups/updateBackup';
 import downloadBackup from '@/api/server/backups/downloadBackup';
 import restoreBackup from '@/api/server/backups/restoreBackup';
 import BackupRestoreDialog from './dialogs/BackupRestoreDialog';
+import { useNavigate, useParams } from 'react-router';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
+  const navigate = useNavigate();
+  const params = useParams<'id'>();
 
   const [openDialog, setOpenDialog] = useState<'edit' | 'restore' | 'delete'>(null);
 
@@ -39,7 +42,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         setOpenDialog(null);
         addToast('Backup updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -50,7 +53,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         addToast(`Download started.`, 'success');
         window.open(url);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -61,7 +64,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         setOpenDialog(null);
         addToast('Restoring backup...', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -73,7 +76,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         setOpenDialog(null);
         removeBackup(backup);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -91,8 +94,8 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         open={openDialog === 'delete'}
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
-        title="Confirm Backup Deletion"
-        confirm="Delete"
+        title={'Confirm Backup Deletion'}
+        confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{backup.name}</Code> from this server?
@@ -101,6 +104,13 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('edit'), color: 'gray' },
+          {
+            icon: faShare,
+            label: 'Browse',
+            hidden: !backup.isBrowsable,
+            onClick: () => navigate(`/server/${params.id}/files?directory=%2F.backups%2F${backup.uuid}`),
+            color: 'gray',
+          },
           {
             icon: faFileArrowDown,
             label: 'Download',
@@ -118,20 +128,20 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       >
         {({ openMenu }) => (
           <TableRow
-            onContextMenu={e => {
+            onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={backup.name}>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={backup.name}>
               {backup.name}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {backup.checksum && <Code>{backup.checksum}</Code>}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {backup.completed
                 ? bytesToString(backup.bytes)
                 : backup.progress
@@ -139,15 +149,15 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
                 : null}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {formatTimestamp(backup.created)}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {backup.isLocked ? (
-                <FontAwesomeIcon className="text-green-500" icon={faLock} />
+                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
               ) : (
-                <FontAwesomeIcon className="text-red-500" icon={faLockOpen} />
+                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
               )}
             </td>
 

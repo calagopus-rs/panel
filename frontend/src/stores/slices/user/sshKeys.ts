@@ -13,20 +13,20 @@ export interface SshKeySlice {
 export const createSshKeysSlice: StateCreator<UserStore, [], [], SshKeySlice> = (set): SshKeySlice => ({
   sshKeys: getEmptyPaginationSet<UserSshKey>(),
 
-  setSshKeys: value => set(state => ({ ...state, sshKeys: value })),
-  addSshKey: key =>
-    set(state => ({
+  setSshKeys: (value) => set((state) => ({ ...state, sshKeys: value })),
+  addSshKey: (key) =>
+    set((state) => ({
       sshKeys: {
         ...state.sshKeys,
         data: [...state.sshKeys.data, key],
         total: state.sshKeys.total + 1,
       },
     })),
-  removeSshKey: key =>
-    set(state => ({
+  removeSshKey: (key) =>
+    set((state) => ({
       sshKeys: {
         ...state.sshKeys,
-        data: state.sshKeys.data.filter(k => k.id !== key.id),
+        data: state.sshKeys.data.filter((k) => k.id !== key.id),
         total: state.sshKeys.total - 1,
       },
     })),

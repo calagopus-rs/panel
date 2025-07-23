@@ -26,22 +26,22 @@ export default () => {
   };
 
   return (
-    <AuthWrapper title="Two Factor Authentication">
+    <AuthWrapper title={'Two Factor Authentication'}>
       <form onSubmit={submit}>
-        <div className="mb-4">
+        <div className={'mb-4'}>
           <Input.Text
             autoFocus
-            id="token"
+            id={'token'}
             variant={Input.Text.Variants.Loose}
-            placeholder="Token"
-            type="text"
-            autoComplete="one-time-code"
-            className="bg-gray-700!"
+            placeholder={'Token'}
+            type={'text'}
+            autoComplete={'one-time-code'}
+            className={'bg-gray-700!'}
             value={faToken}
-            onChange={e => setFaToken(e.target.value)}
+            onChange={(e) => setFaToken(e.target.value)}
           />
         </div>
-        <Button type="submit" className="w-full">
+        <Button type={'submit'} className={'w-full'}>
           Login
         </Button>
       </form>

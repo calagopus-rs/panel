@@ -29,7 +29,7 @@ export default () => {
   };
 
   useEffect(() => {
-    getAllocations(server.uuid, page).then(data => {
+    getAllocations(server.uuid, page).then((data) => {
       setAllocations(data);
       setLoading(false);
     });
@@ -37,38 +37,38 @@ export default () => {
 
   const doAdd = () => {
     createAllocation(server.uuid)
-      .then(alloc => {
+      .then((alloc) => {
         addAllocation(alloc);
         addToast('Allocation created.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <Container>
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Network</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Network</h1>
+        <div className={'flex gap-2'}>
           <Button onClick={doAdd}>Add new</Button>
         </div>
       </div>
       <Table>
         <Pagination data={allocations} onPageSelect={onPageSelect}>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="Hostname" />
-                <TableHeader name="Port" />
-                <TableHeader name="Note" />
+                <TableHeader name={'Hostname'} />
+                <TableHeader name={'Port'} />
+                <TableHeader name={'Note'} />
                 <TableHeader />
                 <TableHeader />
               </TableHead>
 
               <ContextMenuProvider>
                 <TableBody>
-                  {allocations.data.map(allocation => (
+                  {allocations.data.map((allocation) => (
                     <AllocationRow key={allocation.id} allocation={allocation} />
                   ))}
                 </TableBody>

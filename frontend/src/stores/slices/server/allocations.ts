@@ -13,20 +13,20 @@ export interface AllocationsSlice {
 export const createAllocationsSlice: StateCreator<ServerStore, [], [], AllocationsSlice> = (set): AllocationsSlice => ({
   allocations: getEmptyPaginationSet<ServerAllocation>(),
 
-  setAllocations: value => set(state => ({ ...state, allocations: value })),
-  addAllocation: allocation =>
-    set(state => ({
+  setAllocations: (value) => set((state) => ({ ...state, allocations: value })),
+  addAllocation: (allocation) =>
+    set((state) => ({
       allocations: {
         ...state.allocations,
         data: [...state.allocations.data, allocation],
         total: state.allocations.total + 1,
       },
     })),
-  removeAllocation: allocation =>
-    set(state => ({
+  removeAllocation: (allocation) =>
+    set((state) => ({
       allocations: {
         ...state.allocations,
-        data: state.allocations.data.filter(a => a.id !== allocation.id),
+        data: state.allocations.data.filter((a) => a.id !== allocation.id),
         total: state.allocations.total - 1,
       },
     })),

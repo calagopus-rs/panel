@@ -5,8 +5,8 @@ import { useEffect, useState } from 'react';
 
 export default () => {
   const [open, setOpen] = useState(false);
-  const state = useServerStore(state => state.state);
-  const instance = useServerStore(state => state.socketInstance);
+  const state = useServerStore((state) => state.state);
+  const instance = useServerStore((state) => state.socketInstance);
 
   const killable = state === 'stopping';
   const onButtonClick = (
@@ -31,13 +31,13 @@ export default () => {
   }, [state]);
 
   return (
-    <div className="flex gap-2">
+    <div className={'flex gap-2'}>
       <Dialog.Confirm
         open={open}
         hideCloseIcon
         onClose={() => setOpen(false)}
-        title="Forcibly Stop Process"
-        confirm="Continue"
+        title={'Forcibly Stop Process'}
+        confirm={'Continue'}
         onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
       >
         Forcibly stopping a server can lead to data corruption.

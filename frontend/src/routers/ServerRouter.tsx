@@ -43,8 +43,8 @@ export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
-  const resetState = useServerStore(state => state.reset);
-  const setServer = useServerStore(state => state.setServer);
+  const resetState = useServerStore((state) => state.reset);
+  const setServer = useServerStore((state) => state.setServer);
 
   useEffect(() => {
     return () => {
@@ -53,7 +53,7 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    getServer(params.id).then(data => {
+    getServer(params.id).then((data) => {
       setServer(data);
       setLoading(false);
     });
@@ -61,17 +61,17 @@ export default () => {
 
   return (
     <>
-      <div className="flex">
+      <div className={'flex'}>
         <Sidebar collapsed={false}>
-          <div className="h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer">
-            <img src={CollapsedIcon} className="my-4 h-20" alt="Pterodactyl Icon" />
+          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
+            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
           </div>
           <Sidebar.Section>
             <a className={classNames(styles.navLink, 'cursor-pointer')}>
               <FontAwesomeIcon icon={faMagnifyingGlass} />
               <span>Search</span>
             </a>
-            <Sidebar.Link to="/" end>
+            <Sidebar.Link to={'/'} end>
               <FontAwesomeIcon icon={faServer} />
               <span>Servers</span>
             </Sidebar.Link>
@@ -122,7 +122,7 @@ export default () => {
         </Sidebar>
 
         {loading ? (
-          <div className="w-full h-screen flex items-center justify-center">
+          <div className={'w-full h-screen flex items-center justify-center'}>
             <Spinner size={75} />
           </div>
         ) : (
@@ -132,19 +132,19 @@ export default () => {
 
             <ErrorBoundary>
               <Routes>
-                <Route path="" element={<ServerConsole />} />
-                <Route path="/files" element={<ServerFiles />} />
-                <Route path="/files/:action" element={<FileEditor />} />
-                <Route path="/databases" element={<ServerDatabases />} />
-                <Route path="/schedules" element={<ServerSchedules />} />
-                <Route path="/schedules/:id" element={<ScheduleView />} />
-                <Route path="/subusers" element={<ServerSubusers />} />
-                <Route path="/backups" element={<ServerBackups />} />
-                <Route path="/network" element={<ServerNetwork />} />
-                <Route path="/startup" element={<ServerStartup />} />
-                <Route path="/settings" element={<ServerSettings />} />
-                <Route path="/activity" element={<ServerActivity />} />
-                <Route path="*" element={<NotFound />} />
+                <Route path={''} element={<ServerConsole />} />
+                <Route path={'/files'} element={<ServerFiles />} />
+                <Route path={'/files/:action'} element={<FileEditor />} />
+                <Route path={'/databases'} element={<ServerDatabases />} />
+                <Route path={'/schedules'} element={<ServerSchedules />} />
+                <Route path={'/schedules/:id'} element={<ScheduleView />} />
+                <Route path={'/subusers'} element={<ServerSubusers />} />
+                <Route path={'/backups'} element={<ServerBackups />} />
+                <Route path={'/network'} element={<ServerNetwork />} />
+                <Route path={'/startup'} element={<ServerStartup />} />
+                <Route path={'/settings'} element={<ServerSettings />} />
+                <Route path={'/activity'} element={<ServerActivity />} />
+                <Route path={'*'} element={<NotFound />} />
               </Routes>
             </ErrorBoundary>
           </>

@@ -73,7 +73,7 @@ function getOptions(opts?: DeepPartial<ChartOptions<'line'>> | undefined): Chart
 type ChartDatasetCallback = (value: ChartDataset<'line'>, index: number) => ChartDataset<'line'>;
 
 function getEmptyData(label: string, sets = 1, callback?: ChartDatasetCallback | undefined): ChartData<'line'> {
-  const next = callback || (value => value);
+  const next = callback || ((value) => value);
 
   return {
     labels: Array(20)
@@ -111,7 +111,7 @@ function useChart(label: string, opts?: UseChartOptions) {
   const [data, setData] = useState(getEmptyData(label, opts?.sets || 1, opts?.callback));
 
   const push = (items: number | null | (number | null)[]) =>
-    setData(state =>
+    setData((state) =>
       merge(state, {
         datasets: (Array.isArray(items) ? items : [items]).map((item, index) => ({
           ...state.datasets[index],
@@ -123,9 +123,9 @@ function useChart(label: string, opts?: UseChartOptions) {
     );
 
   const clear = () =>
-    setData(state =>
+    setData((state) =>
       merge(state, {
-        datasets: state.datasets.map(value => ({
+        datasets: state.datasets.map((value) => ({
           ...value,
           data: Array(20).fill(-5),
         })),

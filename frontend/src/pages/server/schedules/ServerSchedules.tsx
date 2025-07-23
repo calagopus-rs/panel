@@ -8,13 +8,13 @@ import ScheduleRow from './ScheduleRow';
 import ScheduleCreateOrUpdateButton from './actions/ScheduleCreateOrUpdateButton';
 
 export default () => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { schedules, setSchedules } = useServerStore();
 
   const [loading, setLoading] = useState(schedules.data.length === 0);
 
   useEffect(() => {
-    getSchedules(server.uuid).then(data => {
+    getSchedules(server.uuid).then((data) => {
       setSchedules(data);
       setLoading(false);
     });
@@ -22,26 +22,26 @@ export default () => {
 
   return (
     <Container>
-      <div className="mb-4 flex justify-between">
-        <h1 className="text-4xl font-bold text-white">Schedules</h1>
-        <div className="flex gap-2">
+      <div className={'mb-4 flex justify-between'}>
+        <h1 className={'text-4xl font-bold text-white'}>Schedules</h1>
+        <div className={'flex gap-2'}>
           <ScheduleCreateOrUpdateButton />
         </div>
       </div>
       <Table>
         <ContentWrapper>
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
+          <div className={'overflow-x-auto'}>
+            <table className={'w-full table-auto'}>
               <TableHead>
-                <TableHeader name="Name" />
-                <TableHeader name="Frequency" />
-                <TableHeader name="Last Run" />
-                <TableHeader name="Next Run" />
-                <TableHeader name="Status" />
+                <TableHeader name={'Name'} />
+                <TableHeader name={'Frequency'} />
+                <TableHeader name={'Last Run'} />
+                <TableHeader name={'Next Run'} />
+                <TableHeader name={'Status'} />
               </TableHead>
 
               <TableBody>
-                {schedules.data.map(schedule => (
+                {schedules.data.map((schedule) => (
                   <ScheduleRow key={schedule.id} schedule={schedule} />
                 ))}
               </TableBody>

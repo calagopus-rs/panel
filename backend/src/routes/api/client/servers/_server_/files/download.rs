@@ -170,7 +170,7 @@ mod get {
             .log(
                 "server:file.read-content",
                 serde_json::json!({
-                    "directory": params.directory,
+                    "directory": params.root,
                     "files": params.files,
                 }),
             )

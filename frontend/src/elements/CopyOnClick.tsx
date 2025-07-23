@@ -19,7 +19,7 @@ export default ({ content, children }: { content: string; children: React.ReactN
     }
   };
   return (
-    <button onClick={handleCopy} className="cursor-pointer">
+    <button onClick={handleCopy} className={'cursor-pointer'}>
       {children}
     </button>
   );

@@ -14,17 +14,17 @@ export default ({ allocation, onUpdate, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
-      <div className="mt-4">
-        <Input.Label htmlFor="notes">Notes</Input.Label>
-        <Input.Textarea id="notes" name="notes" value={notes} onChange={e => setNotes(e.target.value)} />
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'notes'}>Notes</Input.Label>
+        <Input.Textarea id={'notes'} name={'notes'} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
 
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Primary"
-          name="primary"
+          description={'Primary'}
+          name={'primary'}
           defaultChecked={primary}
-          onChange={e => setPrimary(e.target.checked)}
+          onChange={(e) => setPrimary(e.target.checked)}
         />
       </div>
 

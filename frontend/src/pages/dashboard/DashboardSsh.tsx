@@ -24,7 +24,7 @@ export default () => {
   const { sshKeys, setSshKeys } = useUserStore();
 
   useEffect(() => {
-    getSshKeys(page).then(data => {
+    getSshKeys(page).then((data) => {
       setSshKeys(data);
       setLoading(false);
     });
@@ -32,8 +32,8 @@ export default () => {
 
   return (
     <Container>
-      <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-bold text-white">SSH Keys</h1>
+      <div className={'justify-between flex items-center mb-2'}>
+        <h1 className={'text-4xl font-bold text-white'}>SSH Keys</h1>
         <SshKeyCreateButton />
       </div>
       {loading ? (
@@ -42,29 +42,29 @@ export default () => {
         <Table>
           <ContentWrapper>
             <Pagination data={sshKeys} onPageSelect={setPage}>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+              <div className={'overflow-x-auto'}>
+                <table className={'w-full table-auto'}>
                   <TableHead>
-                    <TableHeader name="Name" />
-                    <TableHeader name="Fingerprint" />
-                    <TableHeader name="Created" />
+                    <TableHeader name={'Name'} />
+                    <TableHeader name={'Fingerprint'} />
+                    <TableHeader name={'Created'} />
                     <TableHeader />
                   </TableHead>
 
                   <TableBody>
-                    {sshKeys.data.map(key => (
+                    {sshKeys.data.map((key) => (
                       <TableRow key={key.id}>
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">{key.name}</td>
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{key.name}</td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{key.fingerprint}</Code>
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Tooltip content={formatDateTime(key.created)}>{formatTimestamp(key.created)}</Tooltip>
                         </td>
 
-                        <td className="relative">
+                        <td className={'relative'}>
                           <SshKeyDeleteButton sshKey={key} />
                         </td>
                       </TableRow>

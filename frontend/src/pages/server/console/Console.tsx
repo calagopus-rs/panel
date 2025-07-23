@@ -42,7 +42,7 @@ export default () => {
   // const scrollDownHelperAddon = new ScrollDownHelperAddon();
   const { socketConnected, socketInstance } = useServerStore();
   // const [canSendCommands] = usePermissions(['control.console']);
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   // const [history, setHistory] = usePersistedState<string[]>(`${server.uuid}:command_history`, []);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
@@ -132,7 +132,7 @@ export default () => {
       [SocketEvent.INSTALL_OUTPUT]: handleConsoleOutput,
       [SocketEvent.TRANSFER_LOGS]: handleConsoleOutput,
       [SocketEvent.TRANSFER_STATUS]: handleTransferStatus,
-      [SocketEvent.DAEMON_MESSAGE]: line => handleConsoleOutput(line, true),
+      [SocketEvent.DAEMON_MESSAGE]: (line) => handleConsoleOutput(line, true),
       [SocketEvent.DAEMON_ERROR]: handleDaemonErrorOutput,
     };
 
@@ -171,21 +171,21 @@ export default () => {
     <div className={classNames(styles.terminal, 'relative')}>
       {!socketConnected && <Spinner />}
       <div className={classNames(styles.container)}>
-        <div className="h-full">
+        <div className={'h-full'}>
           <div id={styles.terminal} ref={ref} />
         </div>
       </div>
       {/* {canSendCommands && ( */}
-      <div className="relative">
+      <div className={'relative'}>
         <input
           className={classNames('peer', styles.command_input)}
-          type="text"
-          placeholder="Type a command..."
-          aria-label="Console command input."
+          type={'text'}
+          placeholder={'Type a command...'}
+          aria-label={'Console command input.'}
           disabled={!socketInstance || !socketConnected}
           onKeyDown={handleCommandKeyDown}
-          autoCorrect="off"
-          autoCapitalize="none"
+          autoCorrect={'off'}
+          autoCapitalize={'none'}
         />
         <div
           className={classNames(
@@ -193,7 +193,7 @@ export default () => {
             styles.command_icon,
           )}
         >
-          <ChevronDoubleRightIcon className="h-4 w-4" />
+          <ChevronDoubleRightIcon className={'h-4 w-4'} />
         </div>
       </div>
       {/* )} */}

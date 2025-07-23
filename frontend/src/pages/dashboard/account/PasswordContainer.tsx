@@ -17,46 +17,46 @@ export default () => {
       .then(() => {
         addToast('Password updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <div className="bg-gray-700/50 rounded-md p-4 h-fit">
-      <h1 className="text-4xl font-bold text-white">Update Password</h1>
+    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
+      <h1 className={'text-4xl font-bold text-white'}>Update Password</h1>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="currentPassword">Current Password</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'currentPassword'}>Current Password</Input.Label>
         <Input.Text
-          id="currentPassword"
-          placeholder="Current Password"
-          type="password"
-          onChange={e => setCurrentPassword(e.target.value)}
+          id={'currentPassword'}
+          placeholder={'Current Password'}
+          type={'password'}
+          onChange={(e) => setCurrentPassword(e.target.value)}
         />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="newPassword">New Password</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'newPassword'}>New Password</Input.Label>
         <Input.Text
-          id="newPassword"
-          placeholder="New Password"
-          type="password"
-          onChange={e => setNewPassword(e.target.value)}
+          id={'newPassword'}
+          placeholder={'New Password'}
+          type={'password'}
+          onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="confirmNewPassword">Confirm New Password</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'confirmNewPassword'}>Confirm New Password</Input.Label>
         <Input.Text
-          id="confirmNewPassword"
-          placeholder="Confirm New Password"
-          type="password"
-          onChange={e => setConfirmNewPassword(e.target.value)}
+          id={'confirmNewPassword'}
+          placeholder={'Confirm New Password'}
+          type={'password'}
+          onChange={(e) => setConfirmNewPassword(e.target.value)}
         />
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button
           disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
           onClick={handleUpdate}

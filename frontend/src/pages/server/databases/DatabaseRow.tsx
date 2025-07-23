@@ -14,7 +14,7 @@ import DatabaseDetailsDialog from './dialogs/DatabaseDetailsDialog';
 
 export default ({ database }: { database: any }) => {
   const { addToast } = useToast();
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
   const { removeDatabase } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'details' | 'delete'>(null);
@@ -26,7 +26,7 @@ export default ({ database }: { database: any }) => {
         setTimeout(() => removeDatabase(database), 150);
         addToast('Database deleted.', 'success');
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
         addToast(httpErrorToHuman(error), 'error');
       });
@@ -50,22 +50,22 @@ export default ({ database }: { database: any }) => {
       >
         {({ openMenu }) => (
           <TableRow
-            onContextMenu={e => {
+            onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={database.name}>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={database.name}>
               {database.name}
             </td>
 
-            <td className="px-6 text-sm text-neutral-100 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'}>
               <CopyOnClick content={database.connectionString}>
                 <Code>{database.connectionString}</Code>
               </CopyOnClick>
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={database.username}>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={database.username}>
               {database.username}
             </td>
 

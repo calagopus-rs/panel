@@ -28,23 +28,23 @@ const Switch = ({ name, label, description, defaultChecked, readOnly, onChange, 
           <input
             id={uuid}
             name={name}
-            type="checkbox"
-            onChange={e => onChange && onChange(e)}
+            type={'checkbox'}
+            onChange={(e) => onChange && onChange(e)}
             defaultChecked={defaultChecked}
             disabled={readOnly}
-            className="hidden"
+            className={'hidden'}
           />
         )}
         <label htmlFor={uuid} />
       </div>
       {(label || description) && (
-        <div className="ml-4 w-full">
+        <div className={'ml-4 w-full'}>
           {label && (
             <label className={classNames('cursor-pointer', !!description && 'mb-0')} htmlFor={uuid}>
               {label}
             </label>
           )}
-          {description && <p className="text-neutral-400 text-sm">{description}</p>}
+          {description && <p className={'text-neutral-400 text-sm'}>{description}</p>}
         </div>
       )}
     </div>

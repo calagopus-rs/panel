@@ -15,6 +15,6 @@ export const createSettingsSlice: StateCreator<GlobalStore, [], [], SettingsSlic
   serverListDesign: 'grid',
   settings: null,
 
-  setServerListDesign: value => set(state => ({ ...state, serverListDesign: value })),
-  setSettings: value => set(state => ({ ...state, settings: value })),
+  setServerListDesign: (value) => set((state) => ({ ...state, serverListDesign: value })),
+  setSettings: (value) => set((state) => ({ ...state, settings: value })),
 });

@@ -21,38 +21,38 @@ export default () => {
       .then(() => {
         addToast('Application settings updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <AdminSettingContainer title="Application Settings">
-      <div className="mt-4">
-        <Input.Label htmlFor="type">Name</Input.Label>
-        <Input.Text id="name" placeholder="Name" value={name} onChange={e => setName(e.target.value)} />
+    <AdminSettingContainer title={'Application Settings'}>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'type'}>Name</Input.Label>
+        <Input.Text id={'name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="icon">Icon</Input.Label>
-        <Input.Text id="icon" placeholder="Icon" value={icon} onChange={e => setIcon(e.target.value)} />
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'icon'}>Icon</Input.Label>
+        <Input.Text id={'icon'} placeholder={'Icon'} value={icon} onChange={(e) => setIcon(e.target.value)} />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="url">URL</Input.Label>
-        <Input.Text id="url" placeholder="URL" value={url} onChange={e => setUrl(e.target.value)} />
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'url'}>URL</Input.Label>
+        <Input.Text id={'url'} placeholder={'URL'} value={url} onChange={(e) => setUrl(e.target.value)} />
       </div>
 
-      <div className="mt-4">
+      <div className={'mt-4'}>
         <Input.Switch
-          description="Enable Telemetry"
-          name="telemetryEnabled"
+          description={'Enable Telemetry'}
+          name={'telemetryEnabled'}
           defaultChecked={telemetryEnabled}
-          onChange={e => setTelemetryEnabled(e.target.checked)}
+          onChange={(e) => setTelemetryEnabled(e.target.checked)}
         />
       </div>
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button onClick={handleUpdate}>Update Application Settings</Button>
       </div>
     </AdminSettingContainer>

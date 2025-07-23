@@ -22,14 +22,14 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
         setOpen(false);
         removeApiKey(apiKey);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
     <>
-      <Dialog title="Delete API Key" onClose={() => setOpen(false)} open={open}>
+      <Dialog title={'Delete API Key'} onClose={() => setOpen(false)} open={open}>
         <p>Are you sure you want to delete this API key?</p>
         <p>
           All requests using the <Code>{apiKey.keyStart}</Code> key will no longer work.

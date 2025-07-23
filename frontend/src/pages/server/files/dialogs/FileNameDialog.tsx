@@ -11,13 +11,13 @@ export default ({ onFileName, open, onClose }: Props) => {
   const [fileName, setFileName] = useState('');
 
   return (
-    <Dialog title="Create File" onClose={onClose} open={open}>
+    <Dialog title={'Create File'} onClose={onClose} open={open}>
       <Input.Text
-        id="fileName"
-        name="fileName"
-        placeholder="Enter the name that this file should be saved as."
+        id={'fileName'}
+        name={'fileName'}
+        placeholder={'Enter the name that this file should be saved as.'}
         autoFocus
-        onChange={e => setFileName(e.target.value)}
+        onChange={(e) => setFileName(e.target.value)}
       />
       <Dialog.Footer>
         <Button style={Button.Styles.Gray} onClick={onClose}>

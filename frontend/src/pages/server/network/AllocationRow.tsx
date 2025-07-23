@@ -25,7 +25,7 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
         setOpenDialog(null);
         addToast('Allocation updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -36,7 +36,7 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
         removeAllocation(allocation);
         addToast('Allocation removed.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -53,8 +53,8 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
         open={openDialog === 'delete'}
         hideCloseIcon
         onClose={() => setOpenDialog(null)}
-        title="Confirm Allocation Removal"
-        confirm="Remove"
+        title={'Confirm Allocation Removal'}
+        confirm={'Remove'}
         onConfirmed={doRemove}
       >
         Are you sure you want to remove
@@ -72,24 +72,24 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
       >
         {({ openMenu }) => (
           <TableRow
-            onContextMenu={e => {
+            onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               <Code>{allocation.ipAlias ?? allocation.ip}</Code>
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               <Code>{allocation.port}</Code>
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap" title={allocation.notes}>
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={allocation.notes}>
               {allocation.notes ?? 'No notes'}
             </td>
 
-            <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {allocation.isPrimary ? 'Primary' : 'Custom'}
             </td>
 

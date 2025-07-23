@@ -22,36 +22,36 @@ export default ({ onCreate, open, onClose }: Props) => {
   }, [format]);
 
   return (
-    <Dialog title="Create Archive" onClose={onClose} open={open}>
-      <div className="mt-4">
-        <Input.Label htmlFor="fileName">Archive Name</Input.Label>
+    <Dialog title={'Create Archive'} onClose={onClose} open={open}>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'fileName'}>Archive Name</Input.Label>
         <Input.Text
-          id="fileName"
-          name="fileName"
-          placeholder="Enter the name that this archive should be saved as."
+          id={'fileName'}
+          name={'fileName'}
+          placeholder={'Enter the name that this archive should be saved as.'}
           disabled
           value={fileName}
         />
       </div>
 
-      <div className="mt-4">
-        <Input.Label htmlFor="format">Format</Input.Label>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'format'}>Format</Input.Label>
         <Input.Dropdown
-          id="format"
+          id={'format'}
           options={Object.entries(archiveFormatExtensionMapping).map(([format, extension]) => ({
             label: extension,
             value: format,
           }))}
           selected={format}
-          onChange={e => setFormat(e.target.value as ArchiveFormat)}
+          onChange={(e) => setFormat(e.target.value as ArchiveFormat)}
         />
       </div>
 
-      <p className="mt-2 text-sm md:text-base break-all">
-        <span className="text-neutral-200">This archive will be created as&nbsp;</span>
+      <p className={'mt-2 text-sm md:text-base break-all'}>
+        <span className={'text-neutral-200'}>This archive will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className="text-cyan-200">{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className={'text-cyan-200'}>{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
       <Dialog.Footer>

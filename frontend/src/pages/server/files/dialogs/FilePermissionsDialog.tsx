@@ -44,7 +44,7 @@ export default ({ file, onChange, open, onClose }: Props) => {
   }, [file.mode]);
 
   const togglePermission = (category, type) => {
-    setPermissions(prev => ({
+    setPermissions((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
@@ -56,7 +56,7 @@ export default ({ file, onChange, open, onClose }: Props) => {
   const getPermissionString = () => {
     const { owner, group, other } = permissions;
 
-    const getTriad = perms => {
+    const getTriad = (perms) => {
       return (perms.read ? 'r' : '-') + (perms.write ? 'w' : '-') + (perms.execute ? 'x' : '-');
     };
 
@@ -66,7 +66,7 @@ export default ({ file, onChange, open, onClose }: Props) => {
   };
 
   const getOctalValue = () => {
-    const getValue = perms => {
+    const getValue = (perms) => {
       return (perms.read ? 4 : 0) + (perms.write ? 2 : 0) + (perms.execute ? 1 : 0);
     };
 
@@ -83,18 +83,18 @@ export default ({ file, onChange, open, onClose }: Props) => {
   };
 
   const PermissionGroup = ({ title, category, perms }) => (
-    <div className="rounded-lg p-4 bg-gray-500">
-      <h3 className="font-semibold mb-3 text-gray-100">{title}</h3>
-      <div className="space-y-2">
+    <div className={'rounded-lg p-4 bg-gray-500'}>
+      <h3 className={'font-semibold mb-3 text-gray-100'}>{title}</h3>
+      <div className={'space-y-2'}>
         {Object.entries(perms).map(([type, value]: [string, boolean]) => (
-          <label key={type} className="flex items-center space-x-2 cursor-pointer">
+          <label key={type} className={'flex items-center space-x-2 cursor-pointer'}>
             <input
-              type="checkbox"
+              type={'checkbox'}
               checked={value}
               onChange={() => togglePermission(category, type)}
-              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+              className={'w-4 h-4 text-blue-600 rounded focus:ring-blue-500'}
             />
-            <span className="text-sm capitalize">{type}</span>
+            <span className={'text-sm capitalize'}>{type}</span>
           </label>
         ))}
       </div>
@@ -102,27 +102,29 @@ export default ({ file, onChange, open, onClose }: Props) => {
   );
 
   return (
-    <Dialog title="File Permissions" onClose={onClose} open={open}>
-      <div className="mb-6 p-4 bg-gray-500 rounded-lg">
-        <div className="flex items-center space-x-4 text-lg font-mono">
-          <span className="text-gray-100">Symbolic:</span>
-          <span className="bg-gray-500 px-3 py-1 rounded border font-bold text-blue-300">{getPermissionString()}</span>
+    <Dialog title={'File Permissions'} onClose={onClose} open={open}>
+      <div className={'mb-6 p-4 bg-gray-500 rounded-lg'}>
+        <div className={'flex items-center space-x-4 text-lg font-mono'}>
+          <span className={'text-gray-100'}>Symbolic:</span>
+          <span className={'bg-gray-500 px-3 py-1 rounded border font-bold text-blue-300'}>
+            {getPermissionString()}
+          </span>
         </div>
-        <div className="flex items-center space-x-4 text-lg font-mono mt-2">
-          <span className="text-gray-100">Octal:</span>
-          <span className="bg-gray-500 px-3 py-1 rounded border font-bold text-green-300">{getOctalValue()}</span>
+        <div className={'flex items-center space-x-4 text-lg font-mono mt-2'}>
+          <span className={'text-gray-100'}>Octal:</span>
+          <span className={'bg-gray-500 px-3 py-1 rounded border font-bold text-green-300'}>{getOctalValue()}</span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <PermissionGroup title="Owner" category="owner" perms={permissions.owner} />
-        <PermissionGroup title="Group" category="group" perms={permissions.group} />
-        <PermissionGroup title="Other" category="other" perms={permissions.other} />
+      <div className={'grid grid-cols-1 md:grid-cols-3 gap-4'}>
+        <PermissionGroup title={'Owner'} category={'owner'} perms={permissions.owner} />
+        <PermissionGroup title={'Group'} category={'group'} perms={permissions.group} />
+        <PermissionGroup title={'Other'} category={'other'} perms={permissions.other} />
       </div>
 
-      <div className="mt-6 p-4 bg-gray-500 rounded-lg">
-        <h3 className="font-semibold mb-2">Permission Breakdown:</h3>
-        <div className="text-sm space-y-1">
+      <div className={'mt-6 p-4 bg-gray-500 rounded-lg'}>
+        <h3 className={'font-semibold mb-2'}>Permission Breakdown:</h3>
+        <div className={'text-sm space-y-1'}>
           <div>
             <strong>r</strong> - Read permission (4)
           </div>

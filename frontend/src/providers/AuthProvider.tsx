@@ -31,7 +31,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     getMe()
-      .then(user => setUser(user))
+      .then((user) => setUser(user))
       .catch(() => {
         setUser(null);
       })
@@ -40,7 +40,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const doLogin = (username: string, password: string, token: string | null) => {
     login({ user: username, password, captcha: token })
-      .then(response => {
+      .then((response) => {
         if (response.type === 'two_factor_required') {
           setTwoFactorToken(response.token!);
           navigate('/auth/two-factor');
@@ -50,29 +50,29 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(response.user!);
         navigate('/');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   const doCheckpointLogin = (faToken: string, twoFactorToken: string) => {
     checkpointLogin({ code: faToken, confirmation_token: twoFactorToken })
-      .then(response => {
+      .then((response) => {
         setUser(response.user!);
         navigate('/');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   const doRegister = (username: string, email: string, nameFirst: string, nameLast: string, password: string) => {
     register({ username, email, name_first: nameFirst, name_last: nameLast, password })
-      .then(response => {
+      .then((response) => {
         setUser(response.user!);
         navigate('/');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
@@ -82,7 +82,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .then(() => {
         setUser(null);
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };

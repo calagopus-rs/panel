@@ -21,24 +21,24 @@ export default () => {
       .then(() => {
         addToast('Captcha settings updated.', 'success');
       })
-      .catch(msg => {
+      .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
   return (
-    <AdminSettingContainer title="Captcha Settings">
-      <div className="mt-4">
-        <Input.Label htmlFor="type">Type</Input.Label>
+    <AdminSettingContainer title={'Captcha Settings'}>
+      <div className={'mt-4'}>
+        <Input.Label htmlFor={'type'}>Type</Input.Label>
         <Input.Dropdown
-          id="type"
+          id={'type'}
           options={[
             { label: 'None', value: 'none' },
             { label: 'Turnstile', value: 'turnstile' },
             { label: 'reCAPTCHA', value: 'recaptcha' },
           ]}
           selected={settings.type}
-          onChange={e => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
+          onChange={(e) => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
         />
       </div>
 
@@ -48,7 +48,7 @@ export default () => {
         <CaptchaRecaptcha settings={settings as CaptchaProviderRecaptcha} setSettings={setSettings} />
       ) : null}
 
-      <div className="mt-4 flex justify-end">
+      <div className={'mt-4 flex justify-end'}>
         <Button onClick={handleUpdate}>Update Captcha Settings</Button>
       </div>
     </AdminSettingContainer>

@@ -9,11 +9,11 @@ export default () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setStage(prevStage => {
+      setStage((prevStage) => {
         const nextStage = (prevStage + 1) % 3;
         if (nextStage === 0) {
-          setRotation(prevRotation => prevRotation + 180);
-          setFlipped(prev => !prev);
+          setRotation((prevRotation) => prevRotation + 180);
+          setFlipped((prev) => !prev);
         }
         return nextStage;
       });
@@ -50,8 +50,8 @@ export default () => {
   };
 
   return (
-    <div className="transition-transform duration-700 ease-in-out" style={{ transform: `rotate(${rotation}deg)` }}>
-      <FontAwesomeIcon icon={getIcon()} size="xl" className="animate-pulse" />
+    <div className={'transition-transform duration-700 ease-in-out'} style={{ transform: `rotate(${rotation}deg)` }}>
+      <FontAwesomeIcon icon={getIcon()} size={'xl'} className={'animate-pulse'} />
     </div>
   );
 };

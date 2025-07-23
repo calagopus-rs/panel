@@ -8,7 +8,7 @@ const reconnectErrors = ['jwt: exp claim is invalid', 'jwt: created too far in p
 export default () => {
   let updatingToken = false;
 
-  const { uuid } = useServerStore(state => state.server);
+  const { uuid } = useServerStore((state) => state.server);
   const { socketInstance, setSocketInstance, setSocketConnectionState } = useServerStore();
   const { setState } = useServerStore();
 
@@ -19,8 +19,8 @@ export default () => {
 
     updatingToken = true;
     getWebsocketToken(uuid)
-      .then(data => socket.setToken(data.token, true))
-      .catch(error => console.error(error))
+      .then((data) => socket.setToken(data.token, true))
+      .catch((error) => console.error(error))
       .then(() => {
         updatingToken = false;
       });
@@ -34,9 +34,9 @@ export default () => {
     socket.on('SOCKET_ERROR', () => {
       setSocketConnectionState(false);
     });
-    socket.on('status', status => setState(status));
+    socket.on('status', (status) => setState(status));
 
-    socket.on('daemon error', message => {
+    socket.on('daemon error', (message) => {
       console.warn('Got error message from daemon socket:', message);
     });
 
@@ -46,7 +46,7 @@ export default () => {
       setSocketConnectionState(false);
       console.warn('JWT validation error from wings:', error);
 
-      if (reconnectErrors.find(v => error.toLowerCase().indexOf(v) >= 0)) {
+      if (reconnectErrors.find((v) => error.toLowerCase().indexOf(v) >= 0)) {
         updateToken(uuid, socket);
       }
     });
@@ -65,14 +65,14 @@ export default () => {
     });
 
     getWebsocketToken(uuid)
-      .then(data => {
+      .then((data) => {
         // Connect and then set the authentication token.
         socket.setToken(data.token).connect(data.socket);
 
         // Once that is done, set the instance.
         setSocketInstance(socket);
       })
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   };
 
   useEffect(() => {

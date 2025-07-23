@@ -19,14 +19,14 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 
 export default () => {
-  const server = useServerStore(state => state.server);
+  const server = useServerStore((state) => state.server);
 
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>();
 
   useEffect(() => {
-    getServerActivity(server.uuid, page).then(data => {
+    getServerActivity(server.uuid, page).then((data) => {
       setActivities(data);
       setLoading(false);
     });
@@ -34,8 +34,8 @@ export default () => {
 
   return (
     <Container>
-      <div className="justify-between flex items-center mb-2">
-        <h1 className="text-4xl font-bold text-white">Activity</h1>
+      <div className={'justify-between flex items-center mb-2'}>
+        <h1 className={'text-4xl font-bold text-white'}>Activity</h1>
       </div>
       {loading ? (
         <Spinner.Centered />
@@ -43,38 +43,38 @@ export default () => {
         <Table>
           <ContentWrapper>
             <Pagination data={activities} onPageSelect={setPage}>
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+              <div className={'overflow-x-auto'}>
+                <table className={'w-full table-auto'}>
                   <TableHead>
-                    <TableHeader name="Actor" />
-                    <TableHeader name="Event" />
-                    <TableHeader name="IP" />
-                    <TableHeader name="When" />
+                    <TableHeader name={'Actor'} />
+                    <TableHeader name={'Event'} />
+                    <TableHeader name={'IP'} />
+                    <TableHeader name={'When'} />
                     <TableHeader />
                   </TableHead>
 
                   <TableBody>
-                    {activities.data.map(activity => (
+                    {activities.data.map((activity) => (
                       <TableRow key={activity.id}>
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {activity.user.username} ({activity.isApi ? 'API' : 'Web'})
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{activity.event}</Code>
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{activity.ip}</Code>
                         </td>
 
-                        <td className="px-6 text-sm text-neutral-200 text-left whitespace-nowrap">
+                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Tooltip content={formatDateTime(activity.created)}>
                             {formatTimestamp(activity.created)}
                           </Tooltip>
                         </td>
 
-                        <td className="relative">
+                        <td className={'relative'}>
                           {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
                         </td>
                       </TableRow>

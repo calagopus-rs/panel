@@ -13,20 +13,20 @@ export interface SchedulesSlice {
 export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSlice> = (set): SchedulesSlice => ({
   schedules: getEmptyPaginationSet<any>(),
 
-  setSchedules: value => set(state => ({ ...state, schedules: value })),
-  addSchedule: schedule =>
-    set(state => ({
+  setSchedules: (value) => set((state) => ({ ...state, schedules: value })),
+  addSchedule: (schedule) =>
+    set((state) => ({
       schedules: {
         ...state.schedules,
         data: [...state.schedules.data, schedule],
         total: state.schedules.total + 1,
       },
     })),
-  removeSchedule: schedule =>
-    set(state => ({
+  removeSchedule: (schedule) =>
+    set((state) => ({
       schedules: {
         ...state.schedules,
-        data: state.schedules.data.filter(s => s.id !== schedule.id),
+        data: state.schedules.data.filter((s) => s.id !== schedule.id),
         total: state.schedules.total - 1,
       },
     })),
