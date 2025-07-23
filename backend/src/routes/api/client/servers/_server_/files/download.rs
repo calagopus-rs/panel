@@ -12,13 +12,17 @@ mod get {
             },
         },
     };
-    use axum::{extract::Query, http::StatusCode};
+    use axum::http::StatusCode;
+    use axum_extra::extract::Query;
     use serde::{Deserialize, Serialize};
+    use std::path::{Path, PathBuf};
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
-        file: String,
+        #[serde(default)]
+        root: String,
+        files: Vec<String>,
 
         #[serde(default)]
         directory: bool,
@@ -40,8 +44,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "file" = String, Query,
-            description = "The file to download",
+            "root" = String, Query,
+            description = "The root directory to download from",
+            example = "/path/to/root",
+        ),
+        (
+            "files" = Vec<String>, Query,
+            description = "The file(s) to download",
             example = "/path/to/file.txt",
         ),
         (
@@ -64,59 +73,105 @@ mod get {
             );
         }
 
-        if server.is_ignored(&params.file, false) {
-            return (
-                StatusCode::NOT_FOUND,
-                axum::Json(ApiError::new_value(&["file not found"])),
-            );
+        for file in &params.files {
+            if server.is_ignored(file, params.directory) {
+                return (
+                    StatusCode::NOT_FOUND,
+                    axum::Json(ApiError::new_value(&["file not found"])),
+                );
+            }
         }
 
-        #[derive(Serialize)]
-        struct FileDownloadJwt<'a> {
-            #[serde(flatten)]
-            base: BasePayload,
+        let url = if params.files.len() == 1 {
+            #[derive(Serialize)]
+            struct FileDownloadJwt {
+                #[serde(flatten)]
+                base: BasePayload,
 
-            file_path: &'a str,
-            server_uuid: uuid::Uuid,
-            unique_id: uuid::Uuid,
-        }
+                file_path: PathBuf,
+                server_uuid: uuid::Uuid,
+                unique_id: uuid::Uuid,
+            }
 
-        let token = server
-            .node
-            .create_jwt(
-                &state.database,
-                &state.jwt,
-                &FileDownloadJwt {
-                    base: BasePayload {
-                        issuer: "panel".into(),
-                        subject: None,
-                        audience: Vec::new(),
-                        expiration_time: Some(chrono::Utc::now().timestamp() + 900),
-                        not_before: None,
-                        issued_at: Some(chrono::Utc::now().timestamp()),
-                        jwt_id: user.id.to_string(),
+            let token = server
+                .node
+                .create_jwt(
+                    &state.database,
+                    &state.jwt,
+                    &FileDownloadJwt {
+                        base: BasePayload {
+                            issuer: "panel".into(),
+                            subject: None,
+                            audience: Vec::new(),
+                            expiration_time: Some(chrono::Utc::now().timestamp() + 900),
+                            not_before: None,
+                            issued_at: Some(chrono::Utc::now().timestamp()),
+                            jwt_id: user.id.to_string(),
+                        },
+                        file_path: Path::new(&params.root).join(&params.files[0]),
+                        server_uuid: server.uuid,
+                        unique_id: uuid::Uuid::new_v4(),
                     },
-                    file_path: &params.file,
-                    server_uuid: server.uuid,
-                    unique_id: uuid::Uuid::new_v4(),
-                },
-            )
-            .unwrap();
+                )
+                .unwrap();
 
-        let mut url = server.node.public_url();
-        if params.directory {
-            url.set_path("/download/directory");
+            let mut url = server.node.public_url();
+            if params.directory {
+                url.set_path("/download/directory");
+            } else {
+                url.set_path("/download/file");
+            }
+            url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+
+            url
         } else {
-            url.set_path("/download/file");
-        }
-        url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+            #[derive(Serialize)]
+            struct FilesDownloadJwt<'a> {
+                #[serde(flatten)]
+                base: BasePayload,
+
+                file_path: &'a str,
+                file_paths: &'a [String],
+                server_uuid: uuid::Uuid,
+                unique_id: uuid::Uuid,
+            }
+
+            let token = server
+                .node
+                .create_jwt(
+                    &state.database,
+                    &state.jwt,
+                    &FilesDownloadJwt {
+                        base: BasePayload {
+                            issuer: "panel".into(),
+                            subject: None,
+                            audience: Vec::new(),
+                            expiration_time: Some(chrono::Utc::now().timestamp() + 900),
+                            not_before: None,
+                            issued_at: Some(chrono::Utc::now().timestamp()),
+                            jwt_id: user.id.to_string(),
+                        },
+                        file_path: &params.root,
+                        file_paths: &params.files,
+                        server_uuid: server.uuid,
+                        unique_id: uuid::Uuid::new_v4(),
+                    },
+                )
+                .unwrap();
+
+            let mut url = server.node.public_url();
+            url.set_path("/download/files");
+            url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+
+            url
+        };
 
         activity_logger
             .log(
                 "server:file.read-content",
                 serde_json::json!({
-                    "file": params.file,
                     "directory": params.directory,
+                    "files": params.files,
                 }),
             )
             .await;

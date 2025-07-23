@@ -14,7 +14,6 @@ import {
   faTrash,
   faAnglesUp,
   faFileShield,
-  faEllipsis,
   faCopy,
   faFileZipper,
   faEnvelopesBulk,
@@ -30,7 +29,7 @@ import compressFiles from '@/api/server/files/compressFiles';
 import decompressFile from '@/api/server/files/decompressFile';
 import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
 import chmodFiles from '@/api/server/files/chmodFiles';
-import downloadFile from '@/api/server/files/downloadFile';
+import downloadFiles from '@/api/server/files/downloadFiles';
 import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 
 function FileTableRow({
@@ -154,7 +153,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   };
 
   const doDownload = () => {
-    downloadFile(server.uuid, join(browsingDirectory, file.name), file.directory)
+    downloadFiles(server.uuid, browsingDirectory, [file.name], file.directory)
       .then(({ url }) => {
         addToast(`Download started.`, 'success');
         window.open(url);

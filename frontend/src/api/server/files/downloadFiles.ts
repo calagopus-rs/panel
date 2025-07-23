@@ -1,12 +1,13 @@
 import { axiosInstance } from '@/api/axios';
 import { createSearchParams } from 'react-router';
 
-export default async (uuid: string, path: string, isDirectory: boolean): Promise<{ url: string }> => {
+export default async (uuid: string, root: string, paths: string[], isDirectory: boolean): Promise<{ url: string }> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(
         `/api/client/servers/${uuid}/files/download?${createSearchParams({
-          file: path,
+          root,
+          files: paths,
           directory: isDirectory.toString(),
         })}`,
       )

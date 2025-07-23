@@ -48,3 +48,4 @@ constant_time_eq = "0.4.2"
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 chrono-tz = { version = "0.10.4", features = ["serde"] }
 infer = "0.19.0"
+axum-extra = { version = "0.10.1", features = ["query"] }
