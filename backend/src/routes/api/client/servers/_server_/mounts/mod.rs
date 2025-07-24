@@ -83,7 +83,7 @@ mod post {
         models::{mount::Mount, server_mount::ServerMount},
         routes::{
             ApiError, GetState,
-            api::client::{GetUserActivityLogger, servers::_server_::GetServer},
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -114,7 +114,7 @@ mod post {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         let mount = match Mount::by_node_id_egg_id_id(

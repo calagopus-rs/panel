@@ -6,7 +6,7 @@ mod delete {
         models::server_mount::ServerMount,
         routes::{
             ApiError, GetState,
-            api::client::{GetUserActivityLogger, servers::_server_::GetServer},
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -34,7 +34,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetServerActivityLogger,
         Path((_server, mount)): Path<(String, i32)>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         let server_mount =
