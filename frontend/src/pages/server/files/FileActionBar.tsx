@@ -18,6 +18,7 @@ export default () => {
   const {
     server,
     browsingDirectory,
+    browsingBackup,
     browsingEntries,
     setBrowsingEntries,
     addBrowsingEntry,
@@ -108,13 +109,17 @@ export default () => {
             <Button onClick={doDownload}>
               <FontAwesomeIcon icon={faFileDownload} className={'mr-2'} /> Download
             </Button>
-            <Button onClick={() => setOpenDialog('archive')}>
-              <FontAwesomeIcon icon={faArchive} className={'mr-2'} /> Archive
-            </Button>
-            <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
-              <FontAwesomeIcon icon={faTrash} className={'mr-2'} />
-              Delete
-            </Button>
+            {!browsingBackup && (
+              <>
+                <Button onClick={() => setOpenDialog('archive')}>
+                  <FontAwesomeIcon icon={faArchive} className={'mr-2'} /> Archive
+                </Button>
+                <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
+                  <FontAwesomeIcon icon={faTrash} className={'mr-2'} />
+                  Delete
+                </Button>
+              </>
+            )}
           </div>
         </motion.div>
       )}

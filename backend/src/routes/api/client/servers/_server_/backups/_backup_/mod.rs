@@ -67,6 +67,59 @@ pub async fn auth(
     Ok(next.run(req).await)
 }
 
+mod get {
+    use crate::routes::{
+        ApiError,
+        api::client::servers::_server_::{GetServer, backups::_backup_::GetServerBackup},
+    };
+    use axum::http::StatusCode;
+    use serde::Serialize;
+    use utoipa::ToSchema;
+
+    #[derive(ToSchema, Serialize)]
+    pub struct Response {
+        backup: crate::models::server_backup::ApiServerBackup,
+    }
+
+    #[utoipa::path(get, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = UNAUTHORIZED, body = ApiError),
+        (status = NOT_FOUND, body = ApiError),
+    ), params(
+        (
+            "server" = uuid::Uuid,
+            description = "The server ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+        (
+            "backup" = uuid::Uuid,
+            description = "The backup ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+    ))]
+    pub async fn route(
+        server: GetServer,
+        backup: GetServerBackup,
+    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+        if let Err(error) = server.has_permission("backups.read") {
+            return (
+                StatusCode::UNAUTHORIZED,
+                axum::Json(ApiError::new_value(&[&error])),
+            );
+        }
+
+        (
+            StatusCode::OK,
+            axum::Json(
+                serde_json::to_value(Response {
+                    backup: backup.0.into_api_object(),
+                })
+                .unwrap(),
+            ),
+        )
+    }
+}
+
 mod delete {
     use crate::routes::{
         ApiError, GetState,
@@ -252,6 +305,7 @@ mod patch {
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/download", download::router(state))

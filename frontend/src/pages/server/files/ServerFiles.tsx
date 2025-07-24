@@ -15,6 +15,7 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
+import getBackup from '@/api/server/backups/getBackup';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,6 +25,8 @@ export default () => {
     server,
     browsingDirectory,
     setBrowsingDirectory,
+    browsingBackup,
+    setBrowsingBackup,
     browsingEntries,
     setBrowsingEntries,
     selectedFiles,
@@ -63,6 +66,28 @@ export default () => {
     loadDirectoryData();
   }, [browsingDirectory, page]);
 
+  useEffect(() => {
+    if (browsingDirectory?.startsWith('/.backups/') && !browsingBackup && !loading) {
+      setLoading(true);
+
+      let backupUuid = browsingDirectory.slice('/.backups/'.length);
+      if (backupUuid.includes('/')) {
+        backupUuid = backupUuid.slice(0, backupUuid.indexOf('/'));
+      }
+
+      getBackup(server.uuid, backupUuid)
+        .then((data) => {
+          setBrowsingBackup(data);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => setLoading(false));
+    } else if (!browsingDirectory?.startsWith('/.backups/') && browsingBackup) {
+      setBrowsingBackup(null);
+    }
+  }, [browsingDirectory, browsingBackup, loading]);
+
   const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedFiles(e.currentTarget.checked ? browsingEntries.data || [] : []);
   };
@@ -90,23 +115,27 @@ export default () => {
 
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Files</h1>
-        <div className={'flex gap-2'}>
-          <Button style={Button.Styles.Gray} onClick={() => setOpenDialog('nameDirectory')}>
-            New directory
-          </Button>
-          <Button>Upload</Button>
-          <Button
-            onClick={() =>
-              navigate(`/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`)
-            }
-          >
-            New File
-          </Button>
-        </div>
+        {!browsingBackup && (
+          <div className={'flex gap-2'}>
+            <Button style={Button.Styles.Gray} onClick={() => setOpenDialog('nameDirectory')}>
+              New directory
+            </Button>
+            <Button>Upload</Button>
+            <Button
+              onClick={() =>
+                navigate(
+                  `/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`,
+                )
+              }
+            >
+              New File
+            </Button>
+          </div>
+        )}
       </div>
       <Table>
         <ContentWrapper
-          header={<FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} />}
+          header={<FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />}
           checked={selectedFiles.length > 0}
           onSelectAllClick={onSelectAllClick}
         >

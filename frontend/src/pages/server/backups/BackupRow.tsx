@@ -24,13 +24,12 @@ import updateBackup from '@/api/server/backups/updateBackup';
 import downloadBackup from '@/api/server/backups/downloadBackup';
 import restoreBackup from '@/api/server/backups/restoreBackup';
 import BackupRestoreDialog from './dialogs/BackupRestoreDialog';
-import { useNavigate, useParams } from 'react-router';
+import { createSearchParams, useNavigate } from 'react-router';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
   const navigate = useNavigate();
-  const params = useParams<'id'>();
 
   const [openDialog, setOpenDialog] = useState<'edit' | 'restore' | 'delete'>(null);
 
@@ -63,6 +62,8 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       .then(() => {
         setOpenDialog(null);
         addToast('Restoring backup...', 'success');
+
+        navigate(`/server/${server?.uuidShort}`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -108,7 +109,12 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             icon: faShare,
             label: 'Browse',
             hidden: !backup.isBrowsable,
-            onClick: () => navigate(`/server/${params.id}/files?directory=%2F.backups%2F${backup.uuid}`),
+            onClick: () =>
+              navigate(
+                `/server/${server?.uuidShort}/files?${createSearchParams({
+                  directory: `/.backups/${backup.uuid}`,
+                })}`,
+              ),
             color: 'gray',
           },
           {
@@ -123,7 +129,13 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             onClick: () => setOpenDialog('restore'),
             color: 'gray',
           },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
+          {
+            icon: faTrash,
+            label: 'Delete',
+            hidden: backup.isLocked,
+            onClick: () => setOpenDialog('delete'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (

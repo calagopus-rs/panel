@@ -182,7 +182,7 @@ interface ApiServer {
 
 interface ServerActivity {
   id: number;
-  user: User;
+  user?: User;
   event: string;
   ip: string | null;
   data: object | null;

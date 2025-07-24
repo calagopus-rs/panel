@@ -77,6 +77,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const {
     server,
     browsingDirectory,
+    browsingBackup,
     addBrowsingEntry,
     removeBrowsingEntry,
     selectedFiles,
@@ -193,19 +194,55 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
 
       <ContextMenu
         items={[
-          { icon: faCopy, label: 'Copy', onClick: () => setOpenDialog('copy'), color: 'gray' },
-          { icon: faAnglesUp, label: 'Move', onClick: () => setOpenDialog('move'), color: 'gray' },
-          { icon: faFileShield, label: 'Permissions', onClick: () => setOpenDialog('permissions'), color: 'gray' },
-          isArchiveType(file.mime)
-            ? { icon: faEnvelopesBulk, label: 'Unarchive', onClick: doUnarchive, color: 'gray' }
-            : { icon: faFileZipper, label: 'Archive', onClick: () => setOpenDialog('archive'), color: 'gray' },
+          {
+            icon: faCopy,
+            label: 'Copy',
+            hidden: !!browsingBackup,
+            onClick: () => setOpenDialog('copy'),
+            color: 'gray',
+          },
+          {
+            icon: faAnglesUp,
+            label: 'Move',
+            hidden: !!browsingBackup,
+            onClick: () => setOpenDialog('move'),
+            color: 'gray',
+          },
+          {
+            icon: faFileShield,
+            label: 'Permissions',
+            hidden: !!browsingBackup,
+            onClick: () => setOpenDialog('permissions'),
+            color: 'gray',
+          },
+          isArchiveType(file.mime) && !browsingBackup
+            ? {
+                icon: faEnvelopesBulk,
+                label: 'Unarchive',
+                hidden: !!browsingBackup,
+                onClick: doUnarchive,
+                color: 'gray',
+              }
+            : {
+                icon: faFileZipper,
+                label: 'Archive',
+                hidden: !!browsingBackup,
+                onClick: () => setOpenDialog('archive'),
+                color: 'gray',
+              },
           {
             icon: faFileArrowDown,
             label: 'Download',
             onClick: doDownload,
             color: 'gray',
           },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenDialog('delete'), color: 'red' },
+          {
+            icon: faTrash,
+            label: 'Delete',
+            hidden: !!browsingBackup,
+            onClick: () => setOpenDialog('delete'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (

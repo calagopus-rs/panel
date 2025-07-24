@@ -6,6 +6,9 @@ export interface FilesSlice {
   browsingDirectory: string;
   setBrowsingDirectory: (dir: string) => void;
 
+  browsingBackup: ServerBackup | null;
+  setBrowsingBackup: (backup: ServerBackup | null) => void;
+
   browsingEntries: ResponseMeta<DirectoryEntry>;
   setBrowsingEntries: (entries: ResponseMeta<DirectoryEntry>) => void;
   addBrowsingEntry: (entry: DirectoryEntry) => void;
@@ -20,6 +23,9 @@ export interface FilesSlice {
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set): FilesSlice => ({
   browsingDirectory: null,
   setBrowsingDirectory: (value) => set((state) => ({ ...state, browsingDirectory: value })),
+
+  browsingBackup: null,
+  setBrowsingBackup: (value) => set((state) => ({ ...state, browsingBackup: value })),
 
   browsingEntries: getEmptyPaginationSet<DirectoryEntry>(),
   setBrowsingEntries: (value) => set((state) => ({ ...state, browsingEntries: value })),

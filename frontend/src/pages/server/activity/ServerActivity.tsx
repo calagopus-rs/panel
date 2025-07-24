@@ -57,7 +57,7 @@ export default () => {
                     {activities.data.map((activity) => (
                       <TableRow key={activity.id}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {activity.user.username} ({activity.isApi ? 'API' : 'Web'})
+                          {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
@@ -65,7 +65,7 @@ export default () => {
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Code>{activity.ip}</Code>
+                          {activity.ip && <Code>{activity.ip}</Code>}
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
