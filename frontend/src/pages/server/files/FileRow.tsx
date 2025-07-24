@@ -146,6 +146,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
     })
       .then((entry) => {
         addToast(`Archive has been created.`, 'success');
+        setOpenDialog(null);
         addBrowsingEntry(entry);
       })
       .catch((msg) => {
