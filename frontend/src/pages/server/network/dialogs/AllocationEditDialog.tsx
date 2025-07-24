@@ -13,7 +13,7 @@ export default ({ allocation, onUpdate, open, onClose }: Props) => {
   const [primary, setPrimary] = useState(allocation.isPrimary);
 
   return (
-    <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
+    <Dialog title={'Edit Allocation'} onClose={onClose} open={open} hideCloseIcon>
       <div className={'mt-4'}>
         <Input.Label htmlFor={'notes'}>Notes</Input.Label>
         <Input.Textarea id={'notes'} name={'notes'} value={notes} onChange={(e) => setNotes(e.target.value)} />

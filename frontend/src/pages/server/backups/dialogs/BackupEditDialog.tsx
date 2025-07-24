@@ -13,7 +13,7 @@ export default ({ backup, onUpdate, open, onClose }: Props) => {
   const [locked, setLocked] = useState<boolean>(backup.isLocked);
 
   return (
-    <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
+    <Dialog title={'Edit Backup'} onClose={onClose} open={open} hideCloseIcon>
       <div className={'mt-4'}>
         <Input.Label htmlFor={'name'}>Name</Input.Label>
         <Input.Text id={'name'} name={'name'} value={name} onChange={(e) => setName(e.target.value)} />
