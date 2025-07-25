@@ -32,10 +32,10 @@ impl BasePayload {
             return false;
         }
 
-        if let Some(nbf) = self.not_before
-            && nbf > now
-        {
-            return false;
+        if let Some(nbf) = self.not_before {
+            if nbf > now {
+                return false;
+            }
         }
 
         if let Some(iat) = self.issued_at {

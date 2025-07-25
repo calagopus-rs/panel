@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@rjweb/utils':
-        specifier: ^1.12.28
-        version: 1.12.28
       change-case:
         specifier: ^5.4.4
         version: 5.4.4
@@ -183,10 +180,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rjweb/utils@1.12.28':
-    resolution: {integrity: sha512-XULx5cU/aKuukK82tP6ku5UTTyf0IQ/CMY2CJYUIut1ChTzHHlksvJCjCSYabL2J4VvMYW6eKQqzC97xBV3dsw==}
-    engines: {node: '>=18.0.0'}
-
   '@types/node@22.16.0':
     resolution: {integrity: sha512-B2egV9wALML1JCpv3VQoQ+yesQKAmNMBIAY7OteVrikcOcAkWm+dGL6qpeCktPjAv6N1JLnhbNiqS35UpFyBsQ==}
 
@@ -203,9 +196,6 @@ packages:
 
   openapi3-ts@4.5.0:
     resolution: {integrity: sha512-jaL+HgTq2Gj5jRcfdutgRGLosCy/hT8sQf6VOy+P+g36cZOjI1iukdPnijC+4CmeRzg/jEllJUboEic2FhxhtQ==}
-
-  ts-arithmetic@0.1.1:
-    resolution: {integrity: sha512-3VqgsRgzaYfj+zKWn+7O66ifHwbOOnT2BoOrHwdEUBz7az0DetoZOS20+juNJh1klgzvWEi2Qxden41pomOUAQ==}
 
   typescript@5.8.3:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
@@ -297,10 +287,6 @@ snapshots:
   '@esbuild/win32-x64@0.25.5':
     optional: true
 
-  '@rjweb/utils@1.12.28':
-    dependencies:
-      ts-arithmetic: 0.1.1
-
   '@types/node@22.16.0':
     dependencies:
       undici-types: 6.21.0
@@ -340,8 +326,6 @@ snapshots:
   openapi3-ts@4.5.0:
     dependencies:
       yaml: 2.8.0
-
-  ts-arithmetic@0.1.1: {}
 
   typescript@5.8.3: {}
 

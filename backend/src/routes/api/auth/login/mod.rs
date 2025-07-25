@@ -80,22 +80,24 @@ mod post {
             }
         };
 
-        if user.totp_enabled
-            && let Some(secret) = &user.totp_secret
-        {
-            let token = state.jwt.create(&TwoFactorRequiredJwt {
-                base: BasePayload {
-                    issuer: "panel".into(),
-                    subject: None,
-                    audience: Vec::new(),
-                    expiration_time: Some(chrono::Utc::now().timestamp() + 300),
-                    not_before: None,
-                    issued_at: Some(chrono::Utc::now().timestamp()),
-                    jwt_id: user.id.to_string(),
-                },
-                user_id: user.id,
-                user_totp_secret: secret.clone(),
-            })?;
+        if user.totp_enabled && user.totp_secret.is_some() {
+            let secret = user.totp_secret.as_ref().unwrap();
+            let token = state
+                .jwt
+                .create(&TwoFactorRequiredJwt {
+                    base: BasePayload {
+                        issuer: "panel".into(),
+                        subject: None,
+                        audience: Vec::new(),
+                        expiration_time: Some(chrono::Utc::now().timestamp() + 300),
+                        not_before: None,
+                        issued_at: Some(chrono::Utc::now().timestamp()),
+                        jwt_id: user.id.to_string(),
+                    },
+                    user_id: user.id,
+                    user_totp_secret: secret.clone(),
+                })
+                .unwrap();
 
             if let Err(err) = UserActivity::log(
                 &state.database,

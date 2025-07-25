@@ -145,16 +145,18 @@ mod post {
                 .ok();
         }
 
-        if !user.admin
-            && let Some(subuser_permissions) = &server.subuser_permissions
-            && !data
-                .permissions
-                .iter()
-                .all(|p| subuser_permissions.contains(p))
-        {
-            return ApiResponse::error("permissions: more permissions than self")
-                .with_status(StatusCode::BAD_REQUEST)
-                .ok();
+        if !user.admin {
+            if let Some(subuser_permissions) = &server.subuser_permissions {
+                if !data
+                    .permissions
+                    .iter()
+                    .all(|p| subuser_permissions.contains(p))
+                {
+                    return ApiResponse::error("permissions: more permissions than self")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
+                }
+            }
         }
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: panel-postgres
+    environment:
+      POSTGRES_DB: panel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d panel"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - panel-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: panel-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - panel-network
+
+  panel-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.dev
+    container_name: panel-backend
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: "redis://redis:6379"
+      DATABASE_URL: "postgresql://postgres:password@postgres:5432/panel"
+      DATABASE_MIGRATE: "true"
+      PORT: "8000"
+      APP_ENCRYPTION_KEY: "randomstring"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - panel-network
+
+  adminer:
+    image: adminer:4
+    container_name: panel-adminer
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    depends_on:
+      - postgres
+    networks:
+      - panel-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  panel-network:
+    driver: bridge

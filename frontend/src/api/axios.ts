@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { transformKeysToCamelCase } from './transformers';
 
 export const axiosInstance: AxiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },

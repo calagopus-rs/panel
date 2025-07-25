@@ -3,10 +3,11 @@ import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faDungeon, faReply, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faBuilding, faDungeon, faReply, faWrench, faServer } from '@fortawesome/free-solid-svg-icons';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
+import AdminServers from '@/pages/admin/servers/AdminServers';
 
 export default () => {
   return (
@@ -37,6 +38,10 @@ export default () => {
               <FontAwesomeIcon icon={faDungeon} />
               <span>Locations</span>
             </Sidebar.Link>
+            <Sidebar.Link to={'/admin/servers'}>
+              <FontAwesomeIcon icon={faServer} />
+              <span>Servers</span>
+            </Sidebar.Link>
           </Sidebar.Section>
           <Sidebar.User />
         </Sidebar>
@@ -44,6 +49,7 @@ export default () => {
           <Route path={''} element={<AdminHome />} />
           <Route path={'/settings/*'} element={<AdminSettings />} />
           <Route path={'/locations/*'} element={<AdminLocations />} />
+          <Route path={'/servers/*'} element={<AdminServers />} />
           <Route path={'*'} element={<NotFound />} />
         </Routes>
       </div>
