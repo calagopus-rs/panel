@@ -4,7 +4,7 @@ import { TwoFactorSetupResponse } from '@/pages/dashboard/account/actions/TwoFac
 export default async (): Promise<TwoFactorSetupResponse> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get(`/api/client/account/two-factor`)
+      .get('/api/client/account/two-factor')
       .then(({ data }) => resolve(data))
       .catch(reject);
   });

@@ -3,7 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_activity::ServerActivity},
+        models::{Pagination, PaginationParamsWithSearch, server_activity::ServerActivity},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -34,11 +34,15 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
+        (
+            "search" = Option<String>, Query,
+            description = "Search term for items",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Query(params): Query<PaginationParams>,
+        Query(params): Query<PaginationParamsWithSearch>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (
@@ -52,6 +56,7 @@ mod get {
             server.id,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await;
 

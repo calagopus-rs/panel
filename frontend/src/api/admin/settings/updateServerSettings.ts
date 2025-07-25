@@ -3,7 +3,7 @@ import { axiosInstance } from '@/api/axios';
 export default async (data: AdminSettings['server']): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put(`/api/admin/settings`, {
+      .put('/api/admin/settings', {
         server: {
           max_file_manager_view_size: data.maxFileManagerViewSize,
           allow_overwriting_custom_docker_image: data.allowOverwritingCustomDockerImage,

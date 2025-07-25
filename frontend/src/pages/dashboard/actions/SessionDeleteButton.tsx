@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import deleteSession from '@/api/me/session/deleteSession';
+import deleteSession from '@/api/me/sessions/deleteSession';
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import { Dialog } from '@/elements/dialog';

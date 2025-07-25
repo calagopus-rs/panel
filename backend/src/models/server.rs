@@ -520,6 +520,7 @@ impl Server {
         user_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -534,13 +535,14 @@ impl Server {
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
-            WHERE servers.owner_id = $1 OR server_subusers.user_id = $1
+            WHERE (servers.owner_id = $1 OR server_subusers.user_id = $1) AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
             ORDER BY servers.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(user_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -560,6 +562,7 @@ impl Server {
         user_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -574,13 +577,17 @@ impl Server {
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
             LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
-            WHERE servers.owner_id != $1 AND server_subusers.user_id != $1
+            WHERE
+                servers.owner_id != $1
+                AND server_subusers.user_id != $1
+                AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%' OR users.email ILIKE '%' || $2 || '%')
             ORDER BY servers.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(user_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

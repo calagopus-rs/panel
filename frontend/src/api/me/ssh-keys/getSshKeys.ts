@@ -1,9 +1,11 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
 
-export default async (page: number): Promise<ResponseMeta<UserSshKey>> => {
+export default async (page: number, search?: string): Promise<ResponseMeta<UserSshKey>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get(`/api/client/account/ssh-keys?page=${page}`)
+      .get('/api/client/account/ssh-keys', {
+        params: { page, search },
+      })
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.sshKeys),

@@ -18,6 +18,7 @@ mod get {
     struct ResponseServer {
         allow_overwriting_custom_docker_image: bool,
         allow_editing_startup_command: bool,
+        max_file_manager_view_size: u64,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -53,6 +54,7 @@ mod get {
                         allow_editing_startup_command: settings
                             .server
                             .allow_editing_startup_command,
+                        max_file_manager_view_size: settings.server.max_file_manager_view_size,
                     },
                 })
                 .unwrap(),

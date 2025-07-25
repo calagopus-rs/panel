@@ -1,9 +1,11 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
 
-export default async (uuid: string, page: number): Promise<ResponseMeta<ServerActivity>> => {
+export default async (uuid: string, page: number, search?: string): Promise<ResponseMeta<ServerActivity>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get(`/api/client/servers/${uuid}/activity?page=${page}`)
+      .get(`/api/client/servers/${uuid}/activity`, {
+        params: { page, search },
+      })
       .then(({ data }) =>
         resolve({
           ...getPaginationSet(data.activities),

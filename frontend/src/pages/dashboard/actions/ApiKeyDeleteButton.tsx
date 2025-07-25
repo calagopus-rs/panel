@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import deleteApiKey from '@/api/me/api/deleteApiKey';
+import deleteApiKey from '@/api/me/api-keys/deleteApiKey';
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import { Dialog } from '@/elements/dialog';

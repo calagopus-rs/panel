@@ -1,4 +1,3 @@
-import getUserActivity from '@/api/me/getUserActivity';
 import getServerActivity from '@/api/server/getServerActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
@@ -17,20 +16,32 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 
 export default () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>();
   const server = useServerStore((state) => state.server);
 
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>();
 
   useEffect(() => {
-    getServerActivity(server.uuid, page).then((data) => {
+    setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
+
+  useEffect(() => {
+    getServerActivity(server.uuid, page, search).then((data) => {
       setActivities(data);
       setLoading(false);
     });
-  }, [page]);
+  }, [page, search]);
 
   return (
     <Container>
@@ -41,7 +52,7 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <Table>
-          <ContentWrapper>
+          <ContentWrapper onSearch={setSearch}>
             <Pagination data={activities} onPageSelect={setPage}>
               <div className={'overflow-x-auto'}>
                 <table className={'w-full table-auto'}>

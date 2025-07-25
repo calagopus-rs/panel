@@ -31,6 +31,7 @@ import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
 import chmodFiles from '@/api/server/files/chmodFiles';
 import downloadFiles from '@/api/server/files/downloadFiles';
 import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
+import { useGlobalStore } from '@/stores/global';
 
 function FileTableRow({
   file,
@@ -45,8 +46,9 @@ function FileTableRow({
   const [_, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
   const { browsingDirectory } = useServerStore();
+  const { settings } = useGlobalStore();
 
-  return isEditableFile(file.mime) || file.directory ? (
+  return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
     <TableRow
       className={'cursor-pointer'}
       onContextMenu={onContextMenu}
@@ -119,7 +121,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
     })
       .then(() => {
         setOpenDialog(null);
-        addToast(`Permissions have been updated.`, 'success');
+        addToast('Permissions have been updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -129,7 +131,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name)
       .then(() => {
-        addToast(`Archive has been decompressed.`, 'success');
+        addToast('Archive has been decompressed.', 'success');
         reloadDirectory();
       })
       .catch((msg) => {
@@ -145,7 +147,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       files: [file.name],
     })
       .then((entry) => {
-        addToast(`Archive has been created.`, 'success');
+        addToast('Archive has been created.', 'success');
         setOpenDialog(null);
         addBrowsingEntry(entry);
       })
@@ -157,7 +159,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doDownload = () => {
     downloadFiles(server.uuid, browsingDirectory, [file.name], file.directory)
       .then(({ url }) => {
-        addToast(`Download started.`, 'success');
+        addToast('Download started.', 'success');
         window.open(url);
       })
       .catch((msg) => {
@@ -168,7 +170,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doDelete = () => {
     deleteFiles(server.uuid, browsingDirectory, [file.name])
       .then(() => {
-        addToast(`File has been deleted.`, 'success');
+        addToast('File has been deleted.', 'success');
         setOpenDialog(null);
         removeBrowsingEntry(file);
       })

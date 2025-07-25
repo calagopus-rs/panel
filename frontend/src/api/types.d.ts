@@ -432,6 +432,7 @@ interface PublicSettings {
   server: {
     allowOverwritingCustomDockerImage: boolean;
     allowEditingStartupCommand: boolean;
+    maxFileManagerViewSize: number;
   };
 }
 

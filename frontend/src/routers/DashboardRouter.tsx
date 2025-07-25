@@ -17,8 +17,8 @@ import {
   faUserSecret,
 } from '@fortawesome/free-solid-svg-icons';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
-import DashboardApi from '@/pages/dashboard/DashboardApi';
-import DashboardSsh from '@/pages/dashboard/DashboardSsh';
+import DashboardApi from '@/pages/dashboard/DashboardApiKeys';
+import DashboardSsh from '@/pages/dashboard/DashboardSshKeys';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import { useAuth } from '@/providers/AuthProvider';
 import DashboardSessions from '@/pages/dashboard/DashboardSessions';

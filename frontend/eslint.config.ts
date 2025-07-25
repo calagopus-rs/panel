@@ -82,6 +82,7 @@ export default [
 
     rules: {
       eqeqeq: 'error',
+      quotes: ['error', 'single'],
 
       'prettier/prettier': [
         'error',

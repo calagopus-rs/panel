@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import deleteSshKey from '@/api/me/ssh/deleteSshKey';
+import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
 import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
 import { Dialog } from '@/elements/dialog';

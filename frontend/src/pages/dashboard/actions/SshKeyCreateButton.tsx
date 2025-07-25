@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import createSshKey from '@/api/me/ssh/createSshKey';
+import createSshKey from '@/api/me/ssh-keys/createSshKey';
 import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';

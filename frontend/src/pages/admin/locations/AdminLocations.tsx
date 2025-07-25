@@ -1,23 +1,9 @@
 import { httpErrorToHuman } from '@/api/axios';
-import createAllocation from '@/api/server/allocations/createAllocation';
-import getAllocations from '@/api/server/allocations/getAllocations';
-import createBackup from '@/api/server/backups/createBackup';
-import getBackups from '@/api/server/backups/getBackups';
 import { Button } from '@/elements/button';
-import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, {
-  ContentWrapper,
-  NoItems,
-  Pagination,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/elements/table/Table';
+import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
@@ -33,18 +19,20 @@ const LocationsContainer = () => {
   const { locations, setLocations } = useAdminStore();
 
   const [loading, setLoading] = useState(locations.data.length === 0);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
   }, []);
 
-  const onPageSelect = (page: number) => {
-    setSearchParams({ page: page.toString() });
-  };
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
 
   useEffect(() => {
-    getLocations(page)
+    getLocations(page, search)
       .then((data) => {
         setLocations(data);
         setLoading(false);
@@ -52,7 +40,7 @@ const LocationsContainer = () => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-  }, [page]);
+  }, [page, search]);
 
   return (
     <>
@@ -63,27 +51,29 @@ const LocationsContainer = () => {
         </div>
       </div>
       <Table>
-        <Pagination data={locations} onPageSelect={onPageSelect}>
-          <div className={'overflow-x-auto'}>
-            <table className={'w-full table-auto'}>
-              <TableHead>
-                <TableHeader name={'ID'} />
-                <TableHeader name={'Short Name'} />
-                <TableHeader name={'Long Name'} />
-              </TableHead>
+        <ContentWrapper onSearch={setSearch}>
+          <Pagination data={locations} onPageSelect={setPage}>
+            <div className={'overflow-x-auto'}>
+              <table className={'w-full table-auto'}>
+                <TableHead>
+                  <TableHeader name={'ID'} />
+                  <TableHeader name={'Short Name'} />
+                  <TableHeader name={'Long Name'} />
+                </TableHead>
 
-              <ContextMenuProvider>
-                <TableBody>
-                  {locations.data.map((location) => (
-                    <LocationRow key={location.id} location={location} />
-                  ))}
-                </TableBody>
-              </ContextMenuProvider>
-            </table>
+                <ContextMenuProvider>
+                  <TableBody>
+                    {locations.data.map((location) => (
+                      <LocationRow key={location.id} location={location} />
+                    ))}
+                  </TableBody>
+                </ContextMenuProvider>
+              </table>
 
-            {loading ? <Spinner.Centered /> : locations.data.length === 0 ? <NoItems /> : null}
-          </div>
-        </Pagination>
+              {loading ? <Spinner.Centered /> : locations.data.length === 0 ? <NoItems /> : null}
+            </div>
+          </Pagination>
+        </ContentWrapper>
       </Table>
     </>
   );

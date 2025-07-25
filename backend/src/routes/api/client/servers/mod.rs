@@ -21,6 +21,12 @@ mod get {
         #[validate(range(min = 1, max = 100))]
         #[serde(default = "Pagination::default_per_page")]
         pub per_page: i64,
+        #[validate(length(min = 1, max = 100))]
+        #[serde(
+            default,
+            deserialize_with = "crate::deserialize::deserialize_string_option"
+        )]
+        pub search: Option<String>,
 
         #[serde(default)]
         other: bool,
@@ -46,6 +52,10 @@ mod get {
             example = "10",
         ),
         (
+            "search" = Option<String>, Query,
+            description = "Search term for items",
+        ),
+        (
             "other" = bool, Query,
             description = "If true, returns servers not owned by the user (admin only)",
             example = "false",
@@ -69,6 +79,7 @@ mod get {
                 user.id,
                 params.page,
                 params.per_page,
+                params.search.as_deref(),
             )
             .await
         } else {
@@ -77,6 +88,7 @@ mod get {
                 user.id,
                 params.page,
                 params.per_page,
+                params.search.as_deref(),
             )
             .await
         };

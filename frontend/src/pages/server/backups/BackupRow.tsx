@@ -49,7 +49,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const doDownload = () => {
     downloadBackup(server.uuid, backup.uuid)
       .then(({ url }) => {
-        addToast(`Download started.`, 'success');
+        addToast('Download started.', 'success');
         window.open(url);
       })
       .catch((msg) => {
@@ -157,8 +157,8 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
               {backup.completed
                 ? bytesToString(backup.bytes)
                 : backup.progress
-                ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
-                : null}
+                  ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
+                  : null}
             </td>
 
             <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>

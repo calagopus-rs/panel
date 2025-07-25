@@ -1,4 +1,4 @@
-import getSessions from '@/api/me/session/getSessions';
+import getSessions from '@/api/me/sessions/getSessions';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
@@ -16,18 +16,31 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
 import SessionDeleteButton from './actions/SessionDeleteButton';
 import { useUserStore } from '@/stores/user';
+import { useSearchParams } from 'react-router';
 
 export default () => {
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
   const { sessions, setSessions } = useUserStore();
 
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+
   useEffect(() => {
-    getSessions(page).then((data) => {
+    setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
+
+  useEffect(() => {
+    getSessions(page, search).then((data) => {
       setSessions(data);
       setLoading(false);
     });
-  }, [page]);
+  }, [page, search]);
 
   return (
     <Container>
@@ -38,7 +51,7 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <Table>
-          <ContentWrapper>
+          <ContentWrapper onSearch={setSearch}>
             <Pagination data={sessions} onPageSelect={setPage}>
               <div className={'overflow-x-auto'}>
                 <table className={'w-full table-auto'}>

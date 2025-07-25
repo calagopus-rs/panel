@@ -1,7 +1,7 @@
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
+import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
@@ -19,23 +19,25 @@ export default () => {
   const { server, backups, setBackups, addBackup } = useServerStore();
 
   const [loading, setLoading] = useState(backups.data.length === 0);
+  const [search, setSearch] = useState('');
   const [openDialog, setOpenDialog] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
   }, []);
 
-  const onPageSelect = (page: number) => {
-    setSearchParams({ page: page.toString() });
-  };
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
 
   useEffect(() => {
-    getBackups(server.uuid, page).then((data) => {
+    getBackups(server.uuid, page, search).then((data) => {
       setBackups(data);
       setLoading(false);
     });
-  }, [page]);
+  }, [page, search]);
 
   const doCreate = (name: string, ignoredFiles: string[]) => {
     createBackup(server.uuid, { name, ignoredFiles })
@@ -60,30 +62,32 @@ export default () => {
         </div>
       </div>
       <Table>
-        <Pagination data={backups} onPageSelect={onPageSelect}>
-          <div className={'overflow-x-auto'}>
-            <table className={'w-full table-auto'}>
-              <TableHead>
-                <TableHeader name={'Name'} />
-                <TableHeader name={'Checksum'} />
-                <TableHeader name={'Size'} />
-                <TableHeader name={'Created At'} />
-                <TableHeader name={'Locked?'} />
-                <TableHeader />
-              </TableHead>
+        <ContentWrapper onSearch={setSearch}>
+          <Pagination data={backups} onPageSelect={setPage}>
+            <div className={'overflow-x-auto'}>
+              <table className={'w-full table-auto'}>
+                <TableHead>
+                  <TableHeader name={'Name'} />
+                  <TableHeader name={'Checksum'} />
+                  <TableHeader name={'Size'} />
+                  <TableHeader name={'Created At'} />
+                  <TableHeader name={'Locked?'} />
+                  <TableHeader />
+                </TableHead>
 
-              <ContextMenuProvider>
-                <TableBody>
-                  {backups.data.map((backup) => (
-                    <BackupRow backup={backup} key={backup.uuid} />
-                  ))}
-                </TableBody>
-              </ContextMenuProvider>
-            </table>
+                <ContextMenuProvider>
+                  <TableBody>
+                    {backups.data.map((backup) => (
+                      <BackupRow backup={backup} key={backup.uuid} />
+                    ))}
+                  </TableBody>
+                </ContextMenuProvider>
+              </table>
 
-            {loading ? <Spinner.Centered /> : backups.data.length === 0 ? <NoItems /> : null}
-          </div>
-        </Pagination>
+              {loading ? <Spinner.Centered /> : backups.data.length === 0 ? <NoItems /> : null}
+            </div>
+          </Pagination>
+        </ContentWrapper>
       </Table>
     </Container>
   );

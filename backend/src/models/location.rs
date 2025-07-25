@@ -258,7 +258,7 @@ impl Location {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
-            WHERE ($1 IS NULL OR locations.name ILIKE '%' || $1 || '%')
+            WHERE ($1 IS NULL OR locations.name ILIKE '%' || $1 || '%' OR locations.short_name ILIKE '%' || $1 || '%')
             ORDER BY locations.id ASC
             LIMIT $2 OFFSET $3
             "#,

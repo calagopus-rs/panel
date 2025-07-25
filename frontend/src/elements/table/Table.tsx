@@ -251,13 +251,12 @@ interface Params {
   checked?: boolean;
   header?: React.ReactNode;
   onSelectAllClick?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSearch?: (query: string) => Promise<void>;
+  onSearch?: (query: string) => void;
 
   children: React.ReactNode;
 }
 
 export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, children }: Params) => {
-  const [_, setLoading] = useState(false);
   const [inputText, setInputText] = useState('');
 
   const search = useCallback(
@@ -266,8 +265,7 @@ export const ContentWrapper = ({ checked, header, onSelectAllClick, onSearch, ch
         return;
       }
 
-      setLoading(true);
-      onSearch(query).then(() => setLoading(false));
+      onSearch(query);
     }, 200),
     [],
   );

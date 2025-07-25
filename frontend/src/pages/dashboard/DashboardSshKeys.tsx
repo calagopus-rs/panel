@@ -1,4 +1,3 @@
-import getApiKeys from '@/api/me/api/getApiKeys';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
@@ -14,64 +13,64 @@ import Table, {
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
-import ApiKeyCreateButton from './actions/ApiKeyCreateButton';
 import { useUserStore } from '@/stores/user';
-import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
+import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
+import SshKeyDeleteButton from './actions/SshKeyDeleteButton';
+import SshKeyCreateButton from './actions/SshKeyCreateButton';
+import { useSearchParams } from 'react-router';
 
 export default () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { sshKeys, setSshKeys } = useUserStore();
+
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const { apiKeys, setApiKeys } = useUserStore();
 
   useEffect(() => {
-    getApiKeys(page).then((data) => {
-      setApiKeys(data);
+    setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
+
+  useEffect(() => {
+    getSshKeys(page, search).then((data) => {
+      setSshKeys(data);
       setLoading(false);
     });
-  }, [page]);
+  }, [page, search]);
 
   return (
     <Container>
       <div className={'justify-between flex items-center mb-2'}>
-        <h1 className={'text-4xl font-bold text-white'}>API Keys</h1>
-        <ApiKeyCreateButton />
+        <h1 className={'text-4xl font-bold text-white'}>SSH Keys</h1>
+        <SshKeyCreateButton />
       </div>
       {loading ? (
         <Spinner.Centered />
       ) : (
         <Table>
-          <ContentWrapper>
-            <Pagination data={apiKeys} onPageSelect={setPage}>
+          <ContentWrapper onSearch={setSearch}>
+            <Pagination data={sshKeys} onPageSelect={setPage}>
               <div className={'overflow-x-auto'}>
                 <table className={'w-full table-auto'}>
                   <TableHead>
                     <TableHeader name={'Name'} />
-                    <TableHeader name={'Key'} />
-                    <TableHeader name={'Permissions'} />
-                    <TableHeader name={'Last Used'} />
+                    <TableHeader name={'Fingerprint'} />
                     <TableHeader name={'Created'} />
                     <TableHeader />
                   </TableHead>
 
                   <TableBody>
-                    {apiKeys.data.map((key) => (
+                    {sshKeys.data.map((key) => (
                       <TableRow key={key.id}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{key.name}</td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Code>{key.keyStart}</Code>
-                        </td>
-
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {key.permissions.length}
-                        </td>
-
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {!key.lastUsed ? (
-                            'N/A'
-                          ) : (
-                            <Tooltip content={formatDateTime(key.lastUsed)}>{formatTimestamp(key.lastUsed)}</Tooltip>
-                          )}
+                          <Code>{key.fingerprint}</Code>
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
@@ -79,14 +78,14 @@ export default () => {
                         </td>
 
                         <td className={'relative'}>
-                          <ApiKeyDeleteButton apiKey={key} />
+                          <SshKeyDeleteButton sshKey={key} />
                         </td>
                       </TableRow>
                     ))}
                   </TableBody>
                 </table>
 
-                {apiKeys.data.length === 0 ? <NoItems /> : null}
+                {sshKeys.data.length === 0 ? <NoItems /> : null}
               </div>
             </Pagination>
           </ContentWrapper>

@@ -36,7 +36,7 @@ export default () => {
       false,
     )
       .then(({ url }) => {
-        addToast(`Download started.`, 'success');
+        addToast('Download started.', 'success');
         window.open(url);
       })
       .catch((msg) => {
@@ -52,7 +52,7 @@ export default () => {
       files: selectedFiles.map((f) => f.name),
     })
       .then((entry) => {
-        addToast(`Files have been archived.`, 'success');
+        addToast('Files have been archived.', 'success');
         setOpenDialog(null);
         setSelectedFiles([]);
         addBrowsingEntry(entry);
@@ -69,7 +69,7 @@ export default () => {
       selectedFiles.map((f) => f.name),
     )
       .then(() => {
-        addToast(`Files have been deleted.`, 'success');
+        addToast('Files have been deleted.', 'success');
         setOpenDialog(null);
         setSelectedFiles([]);
         setBrowsingEntries({
