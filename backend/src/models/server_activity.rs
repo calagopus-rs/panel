@@ -88,6 +88,7 @@ impl ServerActivity {
         Ok(())
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub async fn log_remote(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,

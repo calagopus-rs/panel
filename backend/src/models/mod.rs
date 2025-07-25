@@ -41,6 +41,22 @@ pub struct PaginationParams {
     pub per_page: i64,
 }
 
+#[derive(ToSchema, Validate, Deserialize)]
+pub struct PaginationParamsWithSearch {
+    #[validate(range(min = 1))]
+    #[serde(default = "Pagination::default_page")]
+    pub page: i64,
+    #[validate(range(min = 1, max = 100))]
+    #[serde(default = "Pagination::default_per_page")]
+    pub per_page: i64,
+    #[validate(length(min = 1, max = 100))]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_string_option"
+    )]
+    pub search: Option<String>,
+}
+
 #[derive(ToSchema, Serialize)]
 pub struct Pagination<T: Serialize = serde_json::Value> {
     pub total: i64,

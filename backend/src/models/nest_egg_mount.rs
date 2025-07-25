@@ -86,6 +86,7 @@ impl NestEggMount {
         egg_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> crate::models::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -94,13 +95,14 @@ impl NestEggMount {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nest_egg_mounts
             JOIN mounts ON mounts.id = nest_egg_mounts.mount_id
-            WHERE nest_egg_mounts.egg_id = $1
+            WHERE nest_egg_mounts.egg_id = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
             ORDER BY nest_egg_mounts.mount_id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(egg_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

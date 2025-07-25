@@ -105,6 +105,7 @@ impl UserSession {
         user_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -112,13 +113,14 @@ impl UserSession {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_sessions
-            WHERE user_sessions.user_id = $1
+            WHERE user_sessions.user_id = $1 AND ($2 IS NULL OR user_sessions.user_agent ILIKE '%' || $2 || '%')
             ORDER BY user_sessions.id DESC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(user_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

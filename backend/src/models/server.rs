@@ -474,6 +474,47 @@ impl Server {
         row.map(|row| Self::map(None, &row))
     }
 
+    pub async fn by_owner_id_with_pagination(
+        database: &crate::database::Database,
+        owner_id: i32,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> super::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            WHERE servers.owner_id = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.id ASC
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(owner_id)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
+    }
+
     pub async fn by_user_id_with_pagination(
         database: &crate::database::Database,
         user_id: i32,
@@ -559,6 +600,7 @@ impl Server {
         node_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -572,13 +614,14 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.node_id = $1
+            WHERE servers.node_id = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
             ORDER BY servers.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(node_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -597,6 +640,7 @@ impl Server {
         database: &crate::database::Database,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -610,11 +654,13 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            WHERE $1 IS NULL OR servers.name ILIKE '%' || $1 || '%'
             ORDER BY servers.id ASC
-            LIMIT $1 OFFSET $2
+            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -627,6 +673,20 @@ impl Server {
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
         }
+    }
+
+    pub async fn count_by_user_id(database: &crate::database::Database, user_id: i32) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM servers
+            WHERE servers.owner_id = $1
+            "#,
+        )
+        .bind(user_id)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
     }
 
     pub async fn delete(

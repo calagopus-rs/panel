@@ -1,11 +1,11 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _location_;
+mod _user_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParamsWithSearch, location::Location},
+        models::{Pagination, PaginationParamsWithSearch, user::User},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -15,7 +15,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        locations: Pagination<crate::models::location::AdminApiLocation>,
+        users: Pagination<crate::models::user::ApiUser>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -48,7 +48,7 @@ mod get {
             );
         }
 
-        let locations = Location::all_with_pagination(
+        let users = User::all_with_pagination(
             &state.database,
             params.page,
             params.per_page,
@@ -60,14 +60,14 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    locations: Pagination {
-                        total: locations.total,
-                        per_page: locations.per_page,
-                        page: locations.page,
-                        data: locations
+                    users: Pagination {
+                        total: users.total,
+                        per_page: users.per_page,
+                        page: users.page,
+                        data: users
                             .data
                             .into_iter()
-                            .map(|location| location.into_admin_api_object(&state.database))
+                            .map(|user| user.into_api_object(true))
                             .collect(),
                     },
                 })
@@ -79,7 +79,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::location::Location,
+        models::user::User,
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
@@ -89,23 +89,32 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 2, max = 31))]
-        #[schema(min_length = 2, max_length = 31)]
-        short_name: String,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        name: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        description: Option<String>,
+        #[validate(
+            length(min = 3, max = 15),
+            regex(path = "*crate::models::user::USERNAME_REGEX")
+        )]
+        #[schema(min_length = 3, max_length = 15)]
+        #[schema(pattern = "^[a-zA-Z0-9_]+$")]
+        username: String,
+        #[validate(email)]
+        #[schema(format = "email")]
+        email: String,
+        #[validate(length(min = 2, max = 255))]
+        #[schema(min_length = 2, max_length = 255)]
+        name_first: String,
+        #[validate(length(min = 2, max = 255))]
+        #[schema(min_length = 2, max_length = 255)]
+        name_last: String,
+        #[validate(length(min = 8, max = 512))]
+        #[schema(min_length = 8, max_length = 512)]
+        password: String,
 
-        backup_disk: crate::models::server_backup::BackupDisk,
-        backup_configs: crate::models::location::LocationBackupConfigs,
+        admin: bool,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        location: crate::models::location::AdminApiLocation,
+        user: crate::models::user::ApiUser,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -125,46 +134,46 @@ mod post {
             );
         }
 
-        let location = match Location::create(
+        let user = match User::create(
             &state.database,
-            &data.short_name,
-            &data.name,
-            data.description.as_deref(),
-            data.backup_disk,
-            data.backup_configs,
+            &data.username,
+            &data.email,
+            &data.name_first,
+            &data.name_last,
+            &data.password,
+            data.admin,
         )
         .await
         {
-            Ok(location) => location,
+            Ok(user) => user,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return (
                     StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["location with name already exists"])),
+                    axum::Json(ApiError::new_value(&[
+                        "user with email/username already exists",
+                    ])),
                 );
             }
             Err(err) => {
-                tracing::error!("failed to create location: {:#?}", err);
+                tracing::error!("failed to create user: {:#?}", err);
 
                 return (
                     StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create location"])),
+                    axum::Json(ApiError::new_value(&["failed to create user"])),
                 );
             }
         };
 
-        let mut backup_configs = location.backup_configs.clone();
-        backup_configs.censor();
-
         activity_logger
             .log(
-                "admin:location.create",
+                "admin:user.create",
                 serde_json::json!({
-                    "short_name": location.short_name,
-                    "name": location.name,
-                    "description": location.description,
-
-                    "backup_disk": location.backup_disk,
-                    "backup_configs": backup_configs,
+                    "user_id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "name_first": user.name_first,
+                    "name_last": user.name_last,
+                    "admin": user.admin,
                 }),
             )
             .await;
@@ -173,7 +182,7 @@ mod post {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    location: location.into_admin_api_object(&state.database),
+                    user: user.into_api_object(true),
                 })
                 .unwrap(),
             ),
@@ -185,6 +194,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{location}", _location_::router(state))
+        .nest("/{user}", _user_::router(state))
         .with_state(state.clone())
 }

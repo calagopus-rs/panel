@@ -35,11 +35,15 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
 async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,
-    endpoint: String,
-    body: Option<&serde_json::Value>,
+    endpoint: impl AsRef<str>,
+    body: Option<&impl Serialize>,
     body_raw: Option<String>,
 ) -> Result<T, (StatusCode, super::ApiError)> {
-    let url = format!("{}{}", client.base_url.trim_end_matches('/'), endpoint);
+    let url = format!(
+        "{}{}",
+        client.base_url.trim_end_matches('/'),
+        endpoint.as_ref()
+    );
     let mut request = CLIENT.request(method, &url);
 
     if !client.token.is_empty() {
@@ -48,9 +52,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
 
     if let Some(body) = body {
         request = request.json(body);
-    }
-
-    if let Some(body_raw) = body_raw {
+    } else if let Some(body_raw) = body_raw {
         request = request.body(body_raw);
     }
 
@@ -170,12 +172,12 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
 
             const body = data.requestBody
                 ? (Object.values((data.requestBody as oas31.RequestBodyObject).content)[0].schema as oas31.SchemaObject).type === 'string'
-                    ? 'None, Some(data)'
-                    : 'serde_json::to_value(data).ok().as_ref(), None'
-                : 'None, None'
+                    ? 'None::<&usize>, Some(data)'
+                    : 'Some(data), None'
+                : 'None::<&usize>, None'
 
             if (data.requestBody) {
-                if (body === 'None, Some(data)') {
+                if (body === 'None::<&usize>, Some(data)') {
                     params.push(`data: super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
                 } else {
                     params.push(`data: &super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
@@ -202,7 +204,12 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 query = '?' + query.slice(0, -1)
             }
 
-            clientOutput.write(`        request_impl(self, Method::${method.toUpperCase()}, format!("${path}${query}"), ${body}).await\n`)
+            let p = `format!("${path}${query}")`
+            if (!p.includes('{')) {
+                p = `"${path}${query}"`
+            }
+
+            clientOutput.write(`        request_impl(self, Method::${method.toUpperCase()}, ${p}, ${body}).await\n`)
 
             clientOutput.write('    }\n\n')
         }

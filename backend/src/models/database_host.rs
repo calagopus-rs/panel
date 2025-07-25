@@ -217,6 +217,7 @@ impl DatabaseHost {
         database: &crate::database::Database,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> crate::models::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -224,11 +225,13 @@ impl DatabaseHost {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM database_hosts
+            WHERE ($1 IS NULL OR database_hosts.name ILIKE '%' || $1 || '%')
             ORDER BY database_hosts.id ASC
-            LIMIT $1 OFFSET $2
+            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

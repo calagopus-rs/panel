@@ -76,6 +76,7 @@ impl BaseModel for NestEggVariable {
 }
 
 impl NestEggVariable {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         egg_id: i32,

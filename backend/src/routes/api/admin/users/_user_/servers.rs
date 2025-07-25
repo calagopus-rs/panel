@@ -1,15 +1,10 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _session_;
-
 mod get {
     use crate::{
-        models::{Pagination, PaginationParamsWithSearch, user_session::UserSession},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
-        },
+        models::{Pagination, PaginationParamsWithSearch, server::Server},
+        routes::{ApiError, GetState, api::admin::users::_user_::GetParamUser},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -18,12 +13,18 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        sessions: Pagination<crate::models::user_session::ApiUserSession>,
+        servers: Pagination<crate::models::server::AdminApiServer>,
     }
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
+        (
+            "user" = i32,
+            description = "The user ID",
+            example = "1",
+        ),
         (
             "page" = i64, Query,
             description = "The page number",
@@ -36,14 +37,13 @@ mod get {
         ),
         (
             "search" = Option<String>, Query,
-            description = "Search term for username or email",
-            example = "admin",
+            description = "Search term for server name",
+            example = "example-server",
         ),
     ))]
     pub async fn route(
         state: GetState,
-        auth: GetAuthMethod,
-        user: GetUser,
+        user: GetParamUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -53,7 +53,7 @@ mod get {
             );
         }
 
-        let sessions = UserSession::by_user_id_with_pagination(
+        let servers = Server::by_owner_id_with_pagination(
             &state.database,
             user.id,
             params.page,
@@ -66,14 +66,14 @@ mod get {
             StatusCode::OK,
             axum::Json(
                 serde_json::to_value(Response {
-                    sessions: Pagination {
-                        total: sessions.total,
-                        per_page: sessions.per_page,
-                        page: sessions.page,
-                        data: sessions
+                    servers: Pagination {
+                        total: servers.total,
+                        per_page: servers.per_page,
+                        page: servers.page,
+                        data: servers
                             .data
                             .into_iter()
-                            .map(|session| session.into_api_object(&auth))
+                            .map(|server| server.into_admin_api_object(&state.database))
                             .collect(),
                     },
                 })
@@ -86,6 +86,5 @@ mod get {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
-        .nest("/{session}", _session_::router(state))
         .with_state(state.clone())
 }

@@ -269,6 +269,7 @@ impl NestEgg {
         nest_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -276,13 +277,14 @@ impl NestEgg {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nest_eggs
-            WHERE nest_eggs.nest_id = $1
+            WHERE nest_eggs.nest_id = $1 AND ($2 IS NULL OR nest_eggs.name ILIKE '%' || $2 || '%')
             ORDER BY nest_eggs.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(nest_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

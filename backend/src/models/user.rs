@@ -271,6 +271,39 @@ impl User {
         row.map(|row| Self::map(None, &row))
     }
 
+    pub async fn all_with_pagination(
+        database: &crate::database::Database,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> crate::models::Pagination<Self> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM users
+            WHERE $1 IS NULL OR users.username ILIKE '%' || $1 || '%' OR users.email ILIKE '%' || $1 || '%'
+            ORDER BY users.id ASC
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        .unwrap();
+
+        super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        }
+    }
+
     pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
         sqlx::query(
             r#"

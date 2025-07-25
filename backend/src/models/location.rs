@@ -250,6 +250,7 @@ impl Location {
         database: &crate::database::Database,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -257,11 +258,13 @@ impl Location {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
+            WHERE ($1 IS NULL OR locations.name ILIKE '%' || $1 || '%')
             ORDER BY locations.id ASC
-            LIMIT $1 OFFSET $2
+            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
         ))
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

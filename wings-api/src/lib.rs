@@ -293,6 +293,12 @@ pub enum TransferArchiveFormat {
     Tar,
     #[serde(rename = "tar_gz")]
     TarGz,
+    #[serde(rename = "tar_xz")]
+    TarXz,
+    #[serde(rename = "tar_bz2")]
+    TarBz2,
+    #[serde(rename = "tar_lz4")]
+    TarLz4,
     #[serde(rename = "tar_zstd")]
     TarZstd,
 }
@@ -841,7 +847,7 @@ pub mod servers_server_reinstall {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
 

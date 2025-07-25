@@ -22,6 +22,12 @@ mod get {
         #[validate(range(min = 1, max = 100))]
         #[serde(default = "Pagination::default_per_page")]
         pub per_page: i64,
+        #[validate(length(min = 1, max = 100))]
+        #[serde(
+            default,
+            deserialize_with = "crate::deserialize::deserialize_string_option"
+        )]
+        pub search: Option<String>,
 
         #[serde(default)]
         include_password: bool,
@@ -53,6 +59,11 @@ mod get {
             example = "10",
         ),
         (
+            "search" = Option<String>, Query,
+            description = "Search term for username or email",
+            example = "admin",
+        ),
+        (
             "include_password" = bool, Query,
             description = "Whether to include the database password in the response",
             example = "true",
@@ -82,6 +93,7 @@ mod get {
             server.id,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await;
 

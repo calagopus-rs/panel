@@ -206,6 +206,7 @@ impl Node {
         location_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -214,13 +215,14 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
-            WHERE nodes.location_id = $1
+            WHERE nodes.location_id = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
             ORDER BY nodes.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(location_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -239,6 +241,7 @@ impl Node {
         database: &crate::database::Database,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -247,11 +250,13 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.id = nodes.location_id
+            WHERE $1 IS NULL OR nodes.name ILIKE '%' || $1 || '%'
             ORDER BY nodes.id ASC
-            LIMIT $1 OFFSET $2
+            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

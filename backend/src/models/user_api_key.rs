@@ -109,6 +109,7 @@ impl UserApiKey {
         user_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -116,13 +117,14 @@ impl UserApiKey {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_api_keys
-            WHERE user_api_keys.user_id = $1
+            WHERE user_api_keys.user_id = $1 AND ($2 IS NULL OR user_api_keys.name ILIKE '%' || $2 || '%')
             ORDER BY user_api_keys.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(user_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

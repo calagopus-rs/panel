@@ -118,6 +118,7 @@ impl ServerMount {
         server: &super::server::Server,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> crate::models::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -128,15 +129,16 @@ impl ServerMount {
             JOIN node_mounts ON mounts.id = node_mounts.mount_id AND node_mounts.node_id = $1
             JOIN nest_egg_mounts ON mounts.id = nest_egg_mounts.mount_id AND nest_egg_mounts.egg_id = $2
             LEFT JOIN server_mounts ON server_mounts.mount_id = mounts.id AND server_mounts.server_id = $3
-            WHERE mounts.user_mountable = TRUE
+            WHERE mounts.user_mountable = TRUE AND ($4 IS NULL OR mounts.name ILIKE '%' || $4 || '%')
             ORDER BY mounts.id ASC
-            LIMIT $4 OFFSET $5
+            LIMIT $5 OFFSET $6
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(server.node.id)
         .bind(server.egg.id)
         .bind(server.id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

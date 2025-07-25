@@ -221,6 +221,7 @@ impl ServerDatabase {
         server_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -229,13 +230,14 @@ impl ServerDatabase {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_databases
             JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
-            WHERE server_databases.server_id = $1
+            WHERE server_databases.server_id = $1 AND ($2 IS NULL OR server_databases.name ILIKE '%' || $2 || '%')
             ORDER BY server_databases.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None),
         ))
         .bind(server_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

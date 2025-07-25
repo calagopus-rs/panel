@@ -86,6 +86,7 @@ impl NodeMount {
         node_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> crate::models::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -94,13 +95,14 @@ impl NodeMount {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_mounts
             JOIN mounts ON mounts.id = node_mounts.mount_id
-            WHERE node_mounts.node_id = $1
+            WHERE node_mounts.node_id = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
             ORDER BY node_mounts.mount_id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(node_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())

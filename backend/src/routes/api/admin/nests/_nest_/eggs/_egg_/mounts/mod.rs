@@ -5,7 +5,7 @@ mod _mount_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, nest_egg_mount::NestEggMount},
+        models::{Pagination, PaginationParamsWithSearch, nest_egg_mount::NestEggMount},
         routes::{ApiError, GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -41,11 +41,16 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
+        (
+            "search" = Option<String>, Query,
+            description = "Search term for username or email",
+            example = "admin",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         egg: GetNestEgg,
-        Query(params): Query<PaginationParams>,
+        Query(params): Query<PaginationParamsWithSearch>,
     ) -> (StatusCode, axum::Json<serde_json::Value>) {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return (
@@ -59,6 +64,7 @@ mod get {
             egg.id,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await;
 

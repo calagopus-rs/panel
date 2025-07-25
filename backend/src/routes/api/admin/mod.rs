@@ -10,6 +10,7 @@ mod nests;
 mod nodes;
 mod servers;
 mod settings;
+mod users;
 
 pub async fn auth(user: GetUser, mut req: Request, next: Next) -> Result<Response, StatusCode> {
     if !user.admin {
@@ -36,6 +37,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/nests", nests::router(state))
         .nest("/database-hosts", database_hosts::router(state))
         .nest("/mounts", mounts::router(state))
+        .nest("/users", users::router(state))
         .route_layer(axum::middleware::from_fn(auth))
         .route_layer(axum::middleware::from_fn_with_state(
             state.clone(),

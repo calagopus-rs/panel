@@ -222,6 +222,7 @@ impl ServerBackup {
         server_id: i32,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> super::Pagination<Self> {
         let offset = (page - 1) * per_page;
 
@@ -229,13 +230,17 @@ impl ServerBackup {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
-            WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            WHERE
+                server_backups.server_id = $1
+                AND server_backups.deleted IS NULL
+                AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
             ORDER BY server_backups.id ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(server_id)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -273,7 +278,7 @@ impl ServerBackup {
         if self.disk == BackupDisk::Restic {
             server
                 .node
-                .api_client(&database)
+                .api_client(database)
                 .post_servers_server_sync(server.uuid)
                 .await
                 .ok();
@@ -351,7 +356,7 @@ impl ServerBackup {
                 if disk == BackupDisk::Restic {
                     server
                         .node
-                        .api_client(&database)
+                        .api_client(database)
                         .post_servers_server_sync(server.uuid)
                         .await
                         .ok();
