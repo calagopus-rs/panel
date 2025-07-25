@@ -40,7 +40,6 @@ mod get {
         (
             "search" = Option<String>, Query,
             description = "Search term for username or email",
-            example = "admin",
         ),
     ))]
     pub async fn route(
