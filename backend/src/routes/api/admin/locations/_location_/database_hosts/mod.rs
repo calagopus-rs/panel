@@ -42,7 +42,7 @@ mod get {
         ),
         (
             "search" = Option<String>, Query,
-            description = "Search term for username or email",
+            description = "Search term for items",
         ),
     ))]
     pub async fn route(
