@@ -40,11 +40,13 @@ mod post {
 
         UserSession::delete_by_id(&state.database, session.id).await;
 
+        let settings = state.settings.get().await;
+
         cookies.add(
             Cookie::build(("session", ""))
                 .http_only(true)
                 .same_site(tower_cookies::cookie::SameSite::Lax)
-                .secure(true)
+                .secure(settings.app.url.starts_with("https://"))
                 .path("/")
                 .expires(
                     tower_cookies::cookie::time::OffsetDateTime::now_utc()

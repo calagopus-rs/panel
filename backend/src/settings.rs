@@ -98,7 +98,7 @@ impl AppSettingsApp {
             icon: map.remove("app::icon").filter(|s| !s.is_empty()),
             url: map
                 .remove("app::url")
-                .unwrap_or_else(|| "https://example.com".to_string()),
+                .unwrap_or_else(|| "http://localhost".to_string()),
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
                 .map(|s| s == "true")

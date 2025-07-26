@@ -168,11 +168,13 @@ mod post {
         )
         .await;
 
+        let settings = state.settings.get().await;
+
         cookies.add(
             Cookie::build(("session", key))
                 .http_only(true)
                 .same_site(tower_cookies::cookie::SameSite::Strict)
-                .secure(true)
+                .secure(settings.app.url.starts_with("https://"))
                 .path("/")
                 .expires(
                     tower_cookies::cookie::time::OffsetDateTime::now_utc()
