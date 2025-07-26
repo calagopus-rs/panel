@@ -327,6 +327,7 @@ impl Node {
             memory: self.memory,
             disk: self.disk,
             token_id: self.token_id,
+            token: database.decrypt(&self.token).unwrap(),
             servers: self.servers,
             created: self.created.and_utc(),
         }
@@ -357,6 +358,7 @@ pub struct AdminApiNode {
     pub disk: i64,
 
     pub token_id: String,
+    pub token: String,
 
     pub servers: i64,
 
