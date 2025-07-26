@@ -63,25 +63,23 @@ impl Database {
             .bright_black()
         );
 
-        if env.database_migrate {
-            let writer = instance.write.clone();
-            tokio::spawn(async move {
-                let start = std::time::Instant::now();
-
-                sqlx::migrate!("../database/migrations")
-                    .run(&writer)
-                    .await
-                    .unwrap();
-
-                tracing::info!(
-                    "{} migrated {}",
-                    "database".bright_cyan(),
-                    format!("({}ms)", start.elapsed().as_millis()).bright_black()
-                );
-            });
-        }
-
         instance
+    }
+
+    pub async fn migrate(&self) -> Result<(), sqlx::Error> {
+        let start = std::time::Instant::now();
+
+        sqlx::migrate!("../database/migrations")
+            .run(&self.write)
+            .await?;
+
+        tracing::info!(
+            "{} migrated {}",
+            "database".bright_cyan(),
+            format!("({}ms)", start.elapsed().as_millis()).bright_black()
+        );
+
+        Ok(())
     }
 
     #[inline]

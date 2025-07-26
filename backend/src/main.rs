@@ -177,6 +177,17 @@ async fn main() {
     let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
     let mail = Arc::new(mail::Mail::new(settings.clone()));
 
+    if env.database_migrate {
+        tracing::info!("running database migrations...");
+        match database.migrate().await {
+            Ok(_) => tracing::info!("database migrations completed successfully"),
+            Err(err) => {
+                tracing::error!("failed to run database migrations: {:#?}", err);
+                std::process::exit(1);
+            }
+        }
+    }
+
     let state = Arc::new(routes::AppState {
         start_time: Instant::now(),
         version: format!("{VERSION}:{GIT_COMMIT}"),
