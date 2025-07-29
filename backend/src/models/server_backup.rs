@@ -21,7 +21,8 @@ pub enum BackupDisk {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerBackup {
     pub id: i32,
-    pub server_id: i32,
+    pub server_id: Option<i32>,
+    pub node_id: i32,
     pub uuid: uuid::Uuid,
 
     pub name: String,
@@ -34,6 +35,7 @@ pub struct ServerBackup {
 
     pub disk: BackupDisk,
     pub upload_id: Option<String>,
+    pub upload_path: Option<String>,
 
     pub completed: Option<chrono::NaiveDateTime>,
     pub deleted: Option<chrono::NaiveDateTime>,
@@ -49,6 +51,7 @@ impl BaseModel for ServerBackup {
         BTreeMap::from([
             (format!("{table}.id"), format!("{prefix}id")),
             (format!("{table}.server_id"), format!("{prefix}server_id")),
+            (format!("{table}.node_id"), format!("{prefix}node_id")),
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.successful"), format!("{prefix}successful")),
@@ -61,6 +64,10 @@ impl BaseModel for ServerBackup {
             (format!("{table}.bytes"), format!("{prefix}bytes")),
             (format!("{table}.disk"), format!("{prefix}disk")),
             (format!("{table}.upload_id"), format!("{prefix}upload_id")),
+            (
+                format!("{table}.upload_path"),
+                format!("{prefix}upload_path"),
+            ),
             (format!("{table}.completed"), format!("{prefix}completed")),
             (format!("{table}.deleted"), format!("{prefix}deleted")),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -74,6 +81,7 @@ impl BaseModel for ServerBackup {
         Self {
             id: row.get(format!("{prefix}id").as_str()),
             server_id: row.get(format!("{prefix}server_id").as_str()),
+            node_id: row.get(format!("{prefix}node_id").as_str()),
             uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
@@ -83,6 +91,7 @@ impl BaseModel for ServerBackup {
             bytes: row.get(format!("{prefix}bytes").as_str()),
             disk: row.get(format!("{prefix}disk").as_str()),
             upload_id: row.get(format!("{prefix}upload_id").as_str()),
+            upload_path: row.get(format!("{prefix}upload_path").as_str()),
             completed: row.get(format!("{prefix}completed").as_str()),
             deleted: row.get(format!("{prefix}deleted").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
@@ -99,12 +108,13 @@ impl ServerBackup {
     ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO server_backups (server_id, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO server_backups (server_id, node_id, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(server.id)
+        .bind(server.node.id)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
@@ -132,7 +142,7 @@ impl ServerBackup {
                     server
                         .node
                         .api_client(&database)
-                        .post_servers_server_sync(server.uuid)
+                        .post_backups_sync()
                         .await
                         .ok();
                 }
@@ -202,8 +212,7 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
-            JOIN servers ON servers.id = server_backups.server_id
-            WHERE servers.node_id = $1 AND server_backups.uuid = $2
+            WHERE server_backups.node_id = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
@@ -252,6 +261,44 @@ impl ServerBackup {
         })
     }
 
+    pub async fn by_detached_node_id_with_pagination(
+        database: &crate::database::Database,
+        node_id: i32,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_backups
+            WHERE
+                server_backups.node_id = $1
+                AND server_backups.server_id IS NULL
+                AND server_backups.deleted IS NULL
+                AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
+            ORDER BY server_backups.id ASC
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(node_id)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
     pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
         sqlx::query_scalar(
             r#"
@@ -276,7 +323,7 @@ impl ServerBackup {
             server
                 .node
                 .api_client(database)
-                .post_servers_server_sync(server.uuid)
+                .post_backups_sync()
                 .await
                 .ok();
         }
@@ -304,7 +351,10 @@ impl ServerBackup {
                                 s3_configuration.decrypt(database);
 
                                 let client = s3_configuration.into_client()?;
-                                let file_path = Self::s3_path(server.uuid, self.uuid);
+                                let file_path = match self.upload_path.as_ref() {
+                                    Some(path) => path,
+                                    None => &Self::s3_path(server.uuid, self.uuid),
+                                };
 
                                 Some(client.presign_get(file_path, 60 * 60, None).await?)
                             } else {
@@ -340,7 +390,10 @@ impl ServerBackup {
                     let client = s3_configuration
                         .into_client()
                         .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
-                    let file_path = Self::s3_path(server.uuid, self.uuid);
+                    let file_path = match self.upload_path.as_ref() {
+                        Some(path) => path,
+                        None => &Self::s3_path(server.uuid, self.uuid),
+                    };
 
                     if let Err(err) = client.delete_object(file_path).await {
                         tracing::error!(server = %server.uuid, backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
@@ -354,7 +407,7 @@ impl ServerBackup {
                     server
                         .node
                         .api_client(database)
-                        .post_servers_server_sync(server.uuid)
+                        .post_backups_sync()
                         .await
                         .ok();
                 }
@@ -374,7 +427,72 @@ impl ServerBackup {
 
         sqlx::query(
             r#"
-            DELETE FROM server_backups
+            UPDATE server_backups
+            SET deleted = NOW()
+            WHERE server_backups.id = $1
+            "#,
+        )
+        .bind(self.id)
+        .execute(database.write())
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn delete_detached(
+        &self,
+        database: &crate::database::Database,
+        node: super::node::Node,
+    ) -> Result<(), sqlx::Error> {
+        match self.disk {
+            BackupDisk::S3 => {
+                if let Some(mut s3_configuration) = node.location.backup_configs.s3 {
+                    s3_configuration.decrypt(database);
+
+                    let client = s3_configuration
+                        .into_client()
+                        .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
+                    let file_path = match self.upload_path.as_ref() {
+                        Some(path) => path,
+                        None => {
+                            return Err(sqlx::Error::Io(std::io::Error::new(
+                                std::io::ErrorKind::NotFound,
+                                "upload path not found",
+                            )));
+                        }
+                    };
+
+                    if let Err(err) = client.delete_object(file_path).await {
+                        tracing::error!(backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
+                    }
+                } else {
+                    return Err(sqlx::Error::Io(std::io::Error::new(
+                        std::io::ErrorKind::NotFound,
+                        "S3 configuration not found",
+                    )));
+                }
+            }
+            disk => {
+                if disk == BackupDisk::Restic {
+                    node.api_client(database).post_backups_sync().await.ok();
+                }
+
+                if let Err((status, error)) = node
+                    .api_client(database)
+                    .delete_backups_backup(self.uuid)
+                    .await
+                {
+                    if status != StatusCode::NOT_FOUND {
+                        return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
+                    }
+                }
+            }
+        }
+
+        sqlx::query(
+            r#"
+            UPDATE server_backups
+            SET deleted = NOW()
             WHERE server_backups.id = $1
             "#,
         )

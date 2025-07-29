@@ -9,6 +9,7 @@ use axum::{
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod allocations;
+mod backups;
 mod mounts;
 mod servers;
 
@@ -16,10 +17,19 @@ pub type GetNode = crate::extract::ConsumingExtension<Node>;
 
 pub async fn auth(
     state: GetState,
-    Path(node): Path<i32>,
+    Path(node): Path<Vec<String>>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    let node = match node.first().map(|s| s.parse::<i32>()) {
+        Some(Ok(id)) => id,
+        _ => {
+            return Ok(ApiResponse::error("invalid node id")
+                .with_status(StatusCode::BAD_REQUEST)
+                .into_response());
+        }
+    };
+
     let node = Node::by_id(&state.database, node).await;
     let node = match node {
         Ok(Some(node)) => node,
@@ -323,6 +333,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/allocations", allocations::router(state))
         .nest("/servers", servers::router(state))
         .nest("/mounts", mounts::router(state))
+        .nest("/backups", backups::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

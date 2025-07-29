@@ -187,19 +187,6 @@ nestify::nest! {
         #[schema(inline)]
         pub labels: IndexMap<String, String>,
         #[schema(inline)]
-        pub backup_configurations: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationBackupConfigurations {
-            #[schema(inline)]
-            pub restic: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationBackupConfigurationsRestic {
-                #[schema(inline)]
-                pub repository: String,
-                #[schema(inline)]
-                pub retry_lock_seconds: u64,
-                #[schema(inline)]
-                pub environment: IndexMap<String, String>,
-            }>,
-        },
-
-        #[schema(inline)]
         pub backups: Vec<uuid::Uuid>,
         #[schema(inline)]
         pub allocations: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAllocations {
@@ -303,6 +290,32 @@ pub enum TransferArchiveFormat {
     TarZstd,
 }
 
+pub mod backups_sync {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+    }
+}
+pub mod backups_backup {
+    use super::*;
+
+    pub mod delete {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
+            }
+        }
+
+        pub type Response404 = ApiError;
+    }
+}
 pub mod extensions {
     use super::*;
 
@@ -384,7 +397,7 @@ pub mod servers_server_backup {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
 
@@ -398,7 +411,7 @@ pub mod servers_server_backup_backup {
         use super::*;
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
 
@@ -423,7 +436,7 @@ pub mod servers_server_backup_backup_restore {
         }
 
         nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
 

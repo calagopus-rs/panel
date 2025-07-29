@@ -8,8 +8,8 @@ const openapi: oas31.OpenAPIObject = JSON.parse(fs.readFileSync('../openapi.json
 const output = fs.createWriteStream('../src/lib.rs', { flags: 'w' })
 
 output.write(`// This file is auto-generated from OpenAPI spec. Do not edit manually.
-use serde::{Deserialize, Serialize};
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub mod client;
@@ -59,7 +59,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     match request.send().await {
         Ok(response) => {
             if response.status().is_success() {
-                if std::any::type_name::<T>() == "alloc::string::String" {
+                if std::any::type_name::<T>() == std::any::type_name::<String>() {
                     return match response.text().await {
                         Ok(text) => Ok(*(Box::new(text) as Box<dyn std::any::Any>)
                             .downcast::<T>()

@@ -469,7 +469,8 @@ export const serverMounts = pgTable('server_mounts', {
 export const serverBackups = pgTable('server_backups', {
 	id: serial('id').primaryKey().notNull(),
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
-	serverId: integer('server_id').references(() => servers.id).notNull(),
+	serverId: integer('server_id').references(() => servers.id, { onDelete: 'set null' }),
+	nodeId: integer('node_id').references(() => nodes.id, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	successful: boolean('successful').default(false).notNull(),
@@ -481,6 +482,7 @@ export const serverBackups = pgTable('server_backups', {
 	disk: backupDiskEnum('disk').notNull(),
 
 	uploadId: text('upload_id'),
+	uploadPath: text('upload_path'),
 
 	completed: timestamp('completed'),
 	deleted: timestamp('deleted'),

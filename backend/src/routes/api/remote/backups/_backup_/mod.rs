@@ -105,7 +105,19 @@ mod get {
         };
         s3_configuration.decrypt(&state.database);
 
-        let server = match Server::by_id(&state.database, backup.server_id).await? {
+        let server = match Server::by_id(
+            &state.database,
+            match backup.server_id {
+                Some(id) => id,
+                None => {
+                    return ApiResponse::error("server id not found")
+                        .with_status(StatusCode::EXPECTATION_FAILED)
+                        .ok();
+                }
+            },
+        )
+        .await?
+        {
             Some(server) => server,
             None => {
                 return ApiResponse::error("server not found")
@@ -175,9 +187,10 @@ mod get {
 
         sqlx::query!(
             "UPDATE server_backups
-            SET upload_id = $1
-            WHERE server_backups.uuid = $2",
+            SET upload_id = $1, upload_path = $2
+            WHERE server_backups.uuid = $3",
             multipart.upload_id,
+            file_path,
             backup.uuid
         )
         .execute(state.database.write())
@@ -259,7 +272,19 @@ mod post {
             };
             s3_configuration.decrypt(&state.database);
 
-            let server = match Server::by_id(&state.database, backup.0.server_id).await? {
+            let server = match Server::by_id(
+                &state.database,
+                match backup.0.server_id {
+                    Some(id) => id,
+                    None => {
+                        return ApiResponse::error("server id not found")
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
+                    }
+                },
+            )
+            .await?
+            {
                 Some(server) => server,
                 None => {
                     return ApiResponse::error("server not found")
@@ -362,29 +387,31 @@ mod post {
             .await?;
         }
 
-        if let Err(err) = ServerActivity::log(
-            &state.database,
-            backup.0.server_id,
-            None,
-            None,
-            if data.successful {
-                "server:backup.complete"
-            } else {
-                "server:backup.fail"
-            },
-            None,
-            serde_json::json!({
-                "backup": backup.0.uuid,
-                "name": backup.0.name,
-            }),
-        )
-        .await
-        {
-            tracing::warn!(
-                backup = %backup.0.uuid,
-                "failed to log server activity: {:#?}",
-                err
-            );
+        if let Some(server_id) = backup.0.server_id {
+            if let Err(err) = ServerActivity::log(
+                &state.database,
+                server_id,
+                None,
+                None,
+                if data.successful {
+                    "server:backup.complete"
+                } else {
+                    "server:backup.fail"
+                },
+                None,
+                serde_json::json!({
+                    "backup": backup.0.uuid,
+                    "name": backup.0.name,
+                }),
+            )
+            .await
+            {
+                tracing::warn!(
+                    backup = %backup.0.uuid,
+                    "failed to log server activity: {:#?}",
+                    err
+                );
+            }
         }
 
         ApiResponse::json(Response {}).ok()

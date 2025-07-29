@@ -35,16 +35,14 @@ async fn request_impl<T: DeserializeOwned + 'static>(
 
     if let Some(body) = body {
         request = request.json(body);
-    }
-
-    if let Some(body_raw) = body_raw {
+    } else if let Some(body_raw) = body_raw {
         request = request.body(body_raw);
     }
 
     match request.send().await {
         Ok(response) => {
             if response.status().is_success() {
-                if std::any::type_name::<T>() == "alloc::string::String" {
+                if std::any::type_name::<T>() == std::any::type_name::<String>() {
                     return match response.text().await {
                         Ok(text) => Ok(*(Box::new(text) as Box<dyn std::any::Any>)
                             .downcast::<T>()
@@ -94,6 +92,33 @@ impl WingsClient {
     #[inline]
     pub fn new(base_url: String, token: String) -> Self {
         Self { base_url, token }
+    }
+
+    pub async fn post_backups_sync(
+        &self,
+    ) -> Result<super::backups_sync::post::Response200, (StatusCode, super::ApiError)> {
+        request_impl(
+            self,
+            Method::POST,
+            "/api/backups/sync",
+            None::<&usize>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn delete_backups_backup(
+        &self,
+        backup: uuid::Uuid,
+    ) -> Result<super::backups_backup::delete::Response202, (StatusCode, super::ApiError)> {
+        request_impl(
+            self,
+            Method::DELETE,
+            format!("/api/backups/{backup}"),
+            None::<&usize>,
+            None,
+        )
+        .await
     }
 
     pub async fn get_extensions(
@@ -147,7 +172,7 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         data: &super::servers_server_backup::post::RequestBody,
-    ) -> Result<super::servers_server_backup::post::Response200, (StatusCode, super::ApiError)>
+    ) -> Result<super::servers_server_backup::post::Response202, (StatusCode, super::ApiError)>
     {
         request_impl(
             self,
@@ -164,7 +189,7 @@ impl WingsClient {
         server: uuid::Uuid,
         backup: uuid::Uuid,
     ) -> Result<
-        super::servers_server_backup_backup::delete::Response200,
+        super::servers_server_backup_backup::delete::Response202,
         (StatusCode, super::ApiError),
     > {
         request_impl(
@@ -183,7 +208,7 @@ impl WingsClient {
         backup: uuid::Uuid,
         data: &super::servers_server_backup_backup_restore::post::RequestBody,
     ) -> Result<
-        super::servers_server_backup_backup_restore::post::Response200,
+        super::servers_server_backup_backup_restore::post::Response202,
         (StatusCode, super::ApiError),
     > {
         request_impl(

@@ -34,11 +34,20 @@ mod post {
         backup: GetBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        let server_id = match backup.server_id {
+            Some(id) => id,
+            None => {
+                return ApiResponse::error("server id not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
+            }
+        };
+
         if sqlx::query!(
             "UPDATE servers
             SET status = NULL
             WHERE servers.id = $1 AND servers.status = 'RESTORING_BACKUP'",
-            backup.server_id
+            server_id
         )
         .execute(state.database.write())
         .await?
@@ -52,7 +61,7 @@ mod post {
 
         if let Err(err) = ServerActivity::log(
             &state.database,
-            backup.server_id,
+            server_id,
             None,
             None,
             if data.successful {

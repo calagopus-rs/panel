@@ -860,20 +860,6 @@ impl Server {
                     })
                     .collect(),
                 labels: IndexMap::new(),
-                backup_configurations: wings_api::ServerConfigurationBackupConfigurations {
-                    restic: match self.node.location.backup_configs.restic {
-                        Some(mut config) => {
-                            config.decrypt(database);
-
-                            Some(wings_api::ServerConfigurationBackupConfigurationsRestic {
-                                repository: config.repository,
-                                retry_lock_seconds: config.retry_lock_seconds,
-                                environment: config.environment,
-                            })
-                        }
-                        None => None,
-                    },
-                },
                 backups: backups.into_iter().map(|b| b.uuid).collect(),
                 allocations: wings_api::ServerConfigurationAllocations {
                     force_outgoing_ip: self.egg.force_outgoing_ip,

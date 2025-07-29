@@ -1,0 +1,1 @@
+ALTER TABLE "server_backups" ALTER COLUMN "server_id" DROP NOT NULL;

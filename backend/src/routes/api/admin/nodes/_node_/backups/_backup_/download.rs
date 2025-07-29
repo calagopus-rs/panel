@@ -4,15 +4,13 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         jwt::BasePayload,
-        models::server_backup::{BackupDisk, ServerBackup},
+        models::server_backup::BackupDisk,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{
-                GetUser,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
-                },
+            api::{
+                admin::nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
+                client::GetUser,
             },
         },
     };
@@ -32,9 +30,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "server" = uuid::Uuid,
-            description = "The server ID",
-            example = "123e4567-e89b-12d3-a456-426614174000",
+            "node" = i32,
+            description = "The node ID",
+            example = "1",
         ),
         (
             "backup" = uuid::Uuid,
@@ -45,16 +43,9 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        mut server: GetServer,
-        activity_logger: GetServerActivityLogger,
+        mut node: GetNode,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("backups.download") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
-
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")
                 .with_status(StatusCode::EXPECTATION_FAILED)
@@ -62,7 +53,7 @@ mod get {
         }
 
         if matches!(backup.disk, BackupDisk::S3) {
-            if let Some(s3_configuration) = &mut server.node.location.backup_configs.s3 {
+            if let Some(s3_configuration) = &mut node.location.backup_configs.s3 {
                 s3_configuration.decrypt(&state.database);
 
                 let client = match s3_configuration.clone().into_client() {
@@ -77,20 +68,14 @@ mod get {
                 };
                 let file_path = match backup.upload_path.as_ref() {
                     Some(path) => path,
-                    None => &ServerBackup::s3_path(server.uuid, backup.uuid),
+                    None => {
+                        return ApiResponse::error("upload path not found")
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
+                    }
                 };
 
                 let url = client.presign_get(file_path, 15 * 60, None).await?;
-
-                activity_logger
-                    .log(
-                        "server:backup.download",
-                        serde_json::json!({
-                            "backup": backup.uuid,
-                            "name": backup.name,
-                        }),
-                    )
-                    .await;
 
                 return ApiResponse::json(Response { url }).ok();
             }
@@ -102,11 +87,10 @@ mod get {
             base: BasePayload,
 
             backup_uuid: uuid::Uuid,
-            server_uuid: uuid::Uuid,
             unique_id: uuid::Uuid,
         }
 
-        let token = server.node.create_jwt(
+        let token = node.create_jwt(
             &state.database,
             &state.jwt,
             &BackupDownloadJwt {
@@ -120,24 +104,13 @@ mod get {
                     jwt_id: user.id.to_string(),
                 },
                 backup_uuid: backup.uuid,
-                server_uuid: server.uuid,
                 unique_id: uuid::Uuid::new_v4(),
             },
         )?;
 
-        let mut url = server.node.public_url();
+        let mut url = node.public_url();
         url.set_path("/download/backup");
         url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
-
-        activity_logger
-            .log(
-                "server:backup.download",
-                serde_json::json!({
-                    "backup": backup.uuid,
-                    "name": backup.name,
-                }),
-            )
-            .await;
 
         ApiResponse::json(Response {
             url: url.to_string(),
