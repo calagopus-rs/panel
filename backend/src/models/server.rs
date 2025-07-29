@@ -356,7 +356,10 @@ impl Server {
         }
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -373,17 +376,16 @@ impl Server {
         ))
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_node_id_uuid(
         database: &crate::database::Database,
         node_id: i32,
         uuid: uuid::Uuid,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -401,16 +403,15 @@ impl Server {
         .bind(node_id)
         .bind(uuid)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_identifier(
         database: &crate::database::Database,
         identifier: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, anyhow::Error> {
         let query = format!(
             r#"
             SELECT {}
@@ -426,22 +427,22 @@ impl Server {
             Self::columns_sql(None, None)
         );
 
-        let mut row = sqlx::query(&query).bind(identifier.parse::<i32>().ok()?);
+        let mut row = sqlx::query(&query).bind(identifier.parse::<i32>()?);
         row = match identifier.len() {
-            8 => row.bind(u32::from_str_radix(identifier, 16).ok()? as i32),
-            36 => row.bind(uuid::Uuid::parse_str(identifier).ok()?),
-            _ => row.bind(identifier.parse::<i32>().ok()?),
+            8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
+            36 => row.bind(uuid::Uuid::parse_str(identifier)?),
+            _ => row.bind(identifier.parse::<i32>()?),
         };
-        let row = row.fetch_optional(database.read()).await.unwrap();
+        let row = row.fetch_optional(database.read()).await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_user_identifier(
         database: &crate::database::Database,
         user: &super::user::User,
         identifier: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, anyhow::Error> {
         let query = format!(
             r#"
             SELECT {}, server_subusers.permissions, server_subusers.ignored_files
@@ -465,13 +466,13 @@ impl Server {
 
         let mut row = sqlx::query(&query).bind(user.id).bind(user.admin);
         row = match identifier.len() {
-            8 => row.bind(u32::from_str_radix(identifier, 16).ok()? as i32),
-            36 => row.bind(uuid::Uuid::parse_str(identifier).ok()?),
-            _ => row.bind(identifier.parse::<i32>().ok()?),
+            8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
+            36 => row.bind(uuid::Uuid::parse_str(identifier)?),
+            _ => row.bind(identifier.parse::<i32>()?),
         };
-        let row = row.fetch_optional(database.read()).await.unwrap();
+        let row = row.fetch_optional(database.read()).await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_owner_id_with_pagination(
@@ -480,7 +481,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -504,15 +505,14 @@ impl Server {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn by_user_id_with_pagination(
@@ -521,7 +521,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -546,15 +546,14 @@ impl Server {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn by_not_user_id_with_pagination(
@@ -563,7 +562,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -591,15 +590,14 @@ impl Server {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn by_node_id_with_pagination(
@@ -608,7 +606,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -632,15 +630,14 @@ impl Server {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn all_with_pagination(
@@ -648,7 +645,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -671,15 +668,14 @@ impl Server {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn count_by_user_id(database: &crate::database::Database, user_id: i32) -> i64 {
@@ -701,7 +697,7 @@ impl Server {
         database: &crate::database::Database,
         force: bool,
     ) -> Result<(), sqlx::Error> {
-        let mut transaction = database.write().begin().await.unwrap();
+        let mut transaction = database.write().begin().await?;
 
         sqlx::query!("DELETE FROM servers WHERE servers.id = $1", self.id)
             .execute(&mut *transaction)

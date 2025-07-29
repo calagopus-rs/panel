@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::{user::User, user_password_reset::UserPasswordReset},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::http::StatusCode;
@@ -31,28 +32,23 @@ mod post {
         state: GetState,
         ip: crate::GetIp,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let user = match User::by_email(&state.database, &data.email).await {
+        let user = match User::by_email(&state.database, &data.email).await? {
             Some(user) => user,
             None => {
-                return (
-                    StatusCode::OK,
-                    axum::Json(serde_json::to_value(Response {}).unwrap()),
-                );
+                return ApiResponse::json(Response {}).ok();
             }
         };
 
@@ -93,10 +89,7 @@ mod post {
                 .await;
         });
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

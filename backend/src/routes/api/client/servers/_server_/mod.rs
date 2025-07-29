@@ -2,17 +2,17 @@ use super::State;
 use crate::{
     GetIp,
     models::server::{Server, ServerStatus},
+    response::ApiResponse,
     routes::{
-        ApiError, GetState,
+        GetState,
         api::client::{GetAuthMethod, GetUser},
     },
 };
 use axum::{
-    body::Body,
     extract::{MatchedPath, Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use std::sync::Arc;
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -78,16 +78,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let server = Server::by_user_identifier(&state.database, &user, &server[0]).await;
     let server = match server {
-        Some(server) => server,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["server not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(server)) => server,
+        Ok(None) => {
+            return Ok(ApiResponse::error("server not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     const IGNORED_STATUS_PATHS: &[&str] = &[
@@ -97,13 +94,9 @@ pub async fn auth(
 
     if !user.admin && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
         if server.suspended {
-            return Ok(Response::builder()
-                .status(StatusCode::CONFLICT)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["server is suspended"])).unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error("server is suspended")
+                .with_status(StatusCode::CONFLICT)
+                .into_response());
         } else if let Some(status) = server.status {
             let message = match status {
                 ServerStatus::Installing => "server is currently installing",
@@ -112,13 +105,9 @@ pub async fn auth(
                 ServerStatus::RestoringBackup => "server is restoring from a backup",
             };
 
-            return Ok(Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&[message])).unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error(message)
+                .with_status(StatusCode::CONFLICT)
+                .into_response());
         }
     }
 
@@ -139,8 +128,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::api::client::{GetUser, servers::_server_::GetServer};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::api::client::{GetUser, servers::_server_::GetServer},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -158,19 +149,11 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        user: GetUser,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    server: server.0.into_api_object(&user),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(user: GetUser, server: GetServer) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            server: server.0.into_api_object(&user),
+        })
+        .ok()
     }
 }
 

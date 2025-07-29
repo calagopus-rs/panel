@@ -7,6 +7,7 @@ mod import;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, nest_egg::NestEgg},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::nests::_nest_::GetNest},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -46,12 +47,11 @@ mod get {
         state: GetState,
         nest: GetNest,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let eggs = NestEgg::by_nest_id_with_pagination(
@@ -61,32 +61,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    eggs: Pagination {
-                        total: eggs.total,
-                        per_page: eggs.per_page,
-                        page: eggs.page,
-                        data: eggs
-                            .data
-                            .into_iter()
-                            .map(|egg| egg.into_admin_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            eggs: Pagination {
+                total: eggs.total,
+                per_page: eggs.per_page,
+                page: eggs.page,
+                data: eggs
+                    .data
+                    .into_iter()
+                    .map(|egg| egg.into_admin_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::nest_egg::NestEgg,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
@@ -152,12 +148,11 @@ mod post {
         nest: GetNest,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let egg = match NestEgg::create(
@@ -181,18 +176,16 @@ mod post {
         {
             Ok(egg) => egg,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["egg with name already exists"])),
-                );
+                return ApiResponse::error("egg with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create egg: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create egg"])),
-                );
+                return ApiResponse::error("failed to create egg")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -222,15 +215,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    egg: egg.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            egg: egg.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 

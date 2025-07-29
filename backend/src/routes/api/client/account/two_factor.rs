@@ -2,7 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::client::GetUser};
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, GetState, api::client::GetUser},
+    };
     use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -17,17 +20,11 @@ mod get {
         (status = OK, body = inline(Response)),
         (status = CONFLICT, body = ApiError),
     ))]
-    pub async fn route(
-        state: GetState,
-        user: GetUser,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, user: GetUser) -> ApiResponseResult {
         if user.totp_enabled {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&[
-                    "two-factor authentication is already enabled",
-                ])),
-            );
+            return ApiResponse::error("two-factor authentication is already enabled")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
         let secret = match totp_rs::Secret::generate_secret().to_encoded() {
@@ -41,32 +38,27 @@ mod get {
             user.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         let settings = state.settings.get().await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    otp_url: format!(
-                        "otpauth://totp/{name}:{}?secret={}&issuer={name}",
-                        urlencoding::encode(&user.email),
-                        urlencoding::encode(&secret),
-                        name = urlencoding::encode(&settings.app.name)
-                    ),
-                    secret,
-                })
-                .unwrap(),
+        ApiResponse::json(Response {
+            otp_url: format!(
+                "otpauth://totp/{name}:{}?secret={}&issuer={name}",
+                urlencoding::encode(&user.email),
+                urlencoding::encode(&secret),
+                name = urlencoding::encode(&settings.app.name)
             ),
-        )
+            secret,
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{GetUser, GetUserActivityLogger},
@@ -103,43 +95,35 @@ mod post {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if user.totp_enabled {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&[
-                    "two-factor authentication is already enabled",
-                ])),
-            );
+            return ApiResponse::error("two-factor authentication is already enabled")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
         let totp_secret = match &user.totp_secret {
             Some(secret) => secret,
             None => {
-                return (
-                    StatusCode::UNAUTHORIZED,
-                    axum::Json(ApiError::new_value(&[
-                        "two-factor authentication has not been configured",
-                    ])),
-                );
+                return ApiResponse::error("two-factor authentication has not been configured")
+                    .with_status(StatusCode::UNAUTHORIZED)
+                    .ok();
             }
         };
 
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if !user
             .validate_password(&state.database, &data.password)
-            .await
+            .await?
         {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["invalid password"])),
-            );
+            return ApiResponse::error("invalid password")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let totp = totp_rs::TOTP::new(
@@ -147,45 +131,36 @@ mod post {
             6,
             1,
             30,
-            totp_rs::Secret::Encoded(totp_secret.clone())
-                .to_bytes()
-                .unwrap(),
-        )
-        .unwrap();
+            totp_rs::Secret::Encoded(totp_secret.clone()).to_bytes()?,
+        )?;
 
         if !totp.check_current(&data.code).is_ok_and(|valid| valid) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["invalid confirmation code"])),
-            );
+            return ApiResponse::error("invalid confirmation code")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let recovery_codes = UserRecoveryCode::create_all(&state.database, user.id)
-            .await
-            .unwrap();
+        let recovery_codes = UserRecoveryCode::create_all(&state.database, user.id).await?;
 
         sqlx::query!(
             "UPDATE users SET totp_enabled = true WHERE id = $1",
             user.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log("user:account.two-factor.enable", serde_json::json!({}))
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { recovery_codes }).unwrap()),
-        )
+        ApiResponse::json(Response { recovery_codes }).ok()
     }
 }
 
 mod delete {
     use crate::{
         models::user_recovery_code::UserRecoveryCode,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{GetUser, GetUserActivityLogger},
@@ -220,31 +195,26 @@ mod delete {
         mut user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if !user.totp_enabled {
-            return (
-                StatusCode::CONFLICT,
-                axum::Json(ApiError::new_value(&[
-                    "two-factor authentication is not enabled",
-                ])),
-            );
+            return ApiResponse::error("two-factor authentication is not enabled")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if !user
             .validate_password(&state.database, &data.password)
-            .await
+            .await?
         {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["invalid password"])),
-            );
+            return ApiResponse::error("invalid password")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         match data.code.len() {
@@ -254,56 +224,46 @@ mod delete {
                     6,
                     1,
                     30,
-                    totp_rs::Secret::Encoded(user.0.totp_secret.take().unwrap())
-                        .to_bytes()
-                        .unwrap(),
-                )
-                .unwrap();
+                    totp_rs::Secret::Encoded(user.0.totp_secret.take().unwrap()).to_bytes()?,
+                )?;
 
                 if !totp.check_current(&data.code).is_ok_and(|valid| valid) {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid confirmation code"])),
-                    );
+                    return ApiResponse::error("invalid confirmation code")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
             }
             10 => {
                 if UserRecoveryCode::delete_by_code(&state.database, user.id, &data.code)
-                    .await
+                    .await?
                     .is_none()
                 {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid recovery code"])),
-                    );
+                    return ApiResponse::error("invalid recovery code")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
             }
             _ => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid confirmation code length"])),
-                );
+                return ApiResponse::error("invalid confirmation code length")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         }
 
-        UserRecoveryCode::delete_by_user_id(&state.database, user.id).await;
+        UserRecoveryCode::delete_by_user_id(&state.database, user.id).await?;
 
         sqlx::query!(
             "UPDATE users SET totp_enabled = false, totp_secret = NULL WHERE id = $1",
             user.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log("user:account.two-factor.disable", serde_json::json!({}))
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

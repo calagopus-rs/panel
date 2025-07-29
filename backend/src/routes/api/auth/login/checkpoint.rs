@@ -20,6 +20,7 @@ mod post {
             user_recovery_code::UserRecoveryCode,
             user_session::UserSession,
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
     };
     use axum::http::StatusCode;
@@ -44,6 +45,7 @@ mod post {
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
+        (status = NOT_FOUND, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
@@ -51,22 +53,20 @@ mod post {
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let payload: TwoFactorRequiredJwt = match state.jwt.verify(&data.confirmation_token) {
             Ok(payload) => payload,
             Err(_) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid confirmation token"])),
-                );
+                return ApiResponse::error("invalid confirmation token")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         };
 
         if !payload.base.validate() {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["invalid confirmation token"])),
-            );
+            return ApiResponse::error("invalid confirmation token")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         match data.code.len() {
@@ -76,17 +76,13 @@ mod post {
                     6,
                     1,
                     30,
-                    totp_rs::Secret::Encoded(payload.user_totp_secret)
-                        .to_bytes()
-                        .unwrap(),
-                )
-                .unwrap();
+                    totp_rs::Secret::Encoded(payload.user_totp_secret).to_bytes()?,
+                )?;
 
                 if !totp.check_current(&data.code).is_ok_and(|valid| valid) {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid confirmation code"])),
-                    );
+                    return ApiResponse::error("invalid confirmation code")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
 
                 if let Err(err) = UserActivity::log(
@@ -111,7 +107,7 @@ mod post {
             10 => {
                 if let Some(code) =
                     UserRecoveryCode::delete_by_code(&state.database, payload.user_id, &data.code)
-                        .await
+                        .await?
                 {
                     if let Err(err) = UserActivity::log(
                         &state.database,
@@ -133,27 +129,24 @@ mod post {
                         );
                     }
                 } else {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid recovery code"])),
-                    );
+                    return ApiResponse::error("invalid recovery code")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
             }
             _ => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid confirmation code"])),
-                );
+                return ApiResponse::error("invalid confirmation code")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         }
 
-        let user = match User::by_id(&state.database, payload.user_id).await {
+        let user = match User::by_id(&state.database, payload.user_id).await? {
             Some(user) => user,
             None => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["user not found"])),
-                );
+                return ApiResponse::error("user not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
@@ -166,7 +159,7 @@ mod post {
                 .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                 .unwrap_or("unknown"),
         )
-        .await;
+        .await?;
 
         let settings = state.settings.get().await;
 
@@ -183,15 +176,10 @@ mod post {
                 .build(),
         );
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.into_api_object(true),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            user: user.into_api_object(true),
+        })
+        .ok()
     }
 }
 

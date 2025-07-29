@@ -7,6 +7,7 @@ mod reset;
 mod get {
     use crate::{
         models::{PaginationParams, server::Server},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::remote::GetNode},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -45,12 +46,11 @@ mod get {
         state: GetState,
         node: GetNode,
         Query(params): Query<PaginationParams>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let servers = Server::by_node_id_with_pagination(
@@ -60,31 +60,26 @@ mod get {
             params.per_page,
             None,
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    data: {
-                        let mut api_servers = Vec::new();
-                        api_servers.reserve_exact(servers.data.len());
+        ApiResponse::json(Response {
+            data: {
+                let mut api_servers = Vec::new();
+                api_servers.reserve_exact(servers.data.len());
 
-                        for server in servers.data {
-                            api_servers.push(server.into_remote_api_object(&state.database).await);
-                        }
+                for server in servers.data {
+                    api_servers.push(server.into_remote_api_object(&state.database).await);
+                }
 
-                        api_servers
-                    },
-                    meta: ResponseMeta {
-                        current_page: servers.page,
-                        last_page: (servers.total as f64 / servers.per_page as f64).ceil() as i64,
-                        total: servers.total,
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+                api_servers
+            },
+            meta: ResponseMeta {
+                current_page: servers.page,
+                last_page: (servers.total as f64 / servers.per_page as f64).ceil() as i64,
+                total: servers.total,
+            },
+        })
+        .ok()
     }
 }
 

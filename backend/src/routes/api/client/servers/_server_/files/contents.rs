@@ -2,14 +2,14 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
-    use axum::{
-        extract::Query,
-        http::{HeaderMap, StatusCode},
-    };
+    use axum::{extract::Query, http::StatusCode};
     use serde::Deserialize;
     use utoipa::ToSchema;
 
@@ -39,27 +39,17 @@ mod get {
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
-    ) -> (StatusCode, HeaderMap, String) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("files.read-content") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                HeaderMap::from_iter([(
-                    axum::http::header::CONTENT_TYPE,
-                    "application/json".parse().unwrap(),
-                )]),
-                ApiError::new_value(&[&error]).to_string(),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if server.is_ignored(&params.file, false) {
-            return (
-                StatusCode::NOT_FOUND,
-                HeaderMap::from_iter([(
-                    axum::http::header::CONTENT_TYPE,
-                    "application/json".parse().unwrap(),
-                )]),
-                ApiError::new_value(&["file not found"]).to_string(),
-            );
+            return ApiResponse::error("file not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok();
         }
 
         let settings = state.settings.get().await;
@@ -77,36 +67,21 @@ mod get {
         {
             Ok(data) => data,
             Err((StatusCode::NOT_FOUND, err)) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    HeaderMap::from_iter([(
-                        axum::http::header::CONTENT_TYPE,
-                        "application/json".parse().unwrap(),
-                    )]),
-                    ApiError::new_wings_value(err).to_string(),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
             Err((StatusCode::PAYLOAD_TOO_LARGE, _)) => {
-                return (
-                    StatusCode::PAYLOAD_TOO_LARGE,
-                    HeaderMap::from_iter([(
-                        axum::http::header::CONTENT_TYPE,
-                        "application/json".parse().unwrap(),
-                    )]),
-                    ApiError::new_value(&["file size exceeds limit"]).to_string(),
-                );
+                return ApiResponse::error("file size exceeds limit")
+                    .with_status(StatusCode::PAYLOAD_TOO_LARGE)
+                    .ok();
             }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to get server file content: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    HeaderMap::from_iter([(
-                        axum::http::header::CONTENT_TYPE,
-                        "application/json".parse().unwrap(),
-                    )]),
-                    ApiError::new_value(&["failed to get server file content"]).to_string(),
-                );
+                return ApiResponse::error("failed to get server file content")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -119,7 +94,9 @@ mod get {
             )
             .await;
 
-        (StatusCode::OK, HeaderMap::new(), contents)
+        ApiResponse::new(axum::body::Body::from(contents))
+            .with_header("Content-Type", "text/plain")
+            .ok()
     }
 }
 

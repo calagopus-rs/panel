@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server::Server},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::users::_user_::GetParamUser},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -45,12 +46,11 @@ mod get {
         state: GetState,
         user: GetParamUser,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let servers = Server::by_owner_id_with_pagination(
@@ -60,26 +60,21 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    servers: Pagination {
-                        total: servers.total,
-                        per_page: servers.per_page,
-                        page: servers.page,
-                        data: servers
-                            .data
-                            .into_iter()
-                            .map(|server| server.into_admin_api_object(&state.database))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            servers: Pagination {
+                total: servers.total,
+                per_page: servers.per_page,
+                page: servers.page,
+                data: servers
+                    .data
+                    .into_iter()
+                    .map(|server| server.into_admin_api_object(&state.database))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 

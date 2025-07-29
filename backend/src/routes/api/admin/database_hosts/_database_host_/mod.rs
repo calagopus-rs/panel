@@ -1,14 +1,10 @@
 use super::State;
-use crate::{
-    models::database_host::DatabaseHost,
-    routes::{ApiError, GetState},
-};
+use crate::{models::database_host::DatabaseHost, response::ApiResponse, routes::GetState};
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -24,17 +20,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let database_host = DatabaseHost::by_id(&state.database, database_host).await;
     let database_host = match database_host {
-        Some(database_host) => database_host,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["database host not found"]))
-                        .unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(database_host)) => database_host,
+        Ok(None) => {
+            return Ok(ApiResponse::error("database host not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(database_host);
@@ -43,8 +35,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, api::admin::database_hosts::_database_host_::GetDatabaseHost};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, api::admin::database_hosts::_database_host_::GetDatabaseHost},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -63,24 +57,18 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        database_host: GetDatabaseHost,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    database_host: database_host.0.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(database_host: GetDatabaseHost) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            database_host: database_host.0.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::database_host::DatabaseHost,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{
@@ -99,6 +87,7 @@ mod delete {
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "database_host" = i32,
@@ -110,17 +99,14 @@ mod delete {
         state: GetState,
         database_host: GetDatabaseHost,
         activity_logger: GetUserActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if database_host.databases > 0 {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[
-                    "database host has databases, cannot delete",
-                ])),
-            );
+            return ApiResponse::error("database host has databases, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
-        DatabaseHost::delete_by_id(&state.database, database_host.id).await;
+        DatabaseHost::delete_by_id(&state.database, database_host.id).await?;
 
         activity_logger
             .log(
@@ -132,18 +118,19 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
-    use crate::routes::{
-        ApiError, GetState,
-        api::{
-            admin::database_hosts::_database_host_::GetDatabaseHost, client::GetUserActivityLogger,
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::{
+                admin::database_hosts::_database_host_::GetDatabaseHost,
+                client::GetUserActivityLogger,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -195,12 +182,11 @@ mod patch {
         mut database_host: GetDatabaseHost,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(name) = data.name {
@@ -255,18 +241,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["database host with name already exists"])),
-                );
+                return ApiResponse::error("database host with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update database host: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update database host"])),
-                );
+                return ApiResponse::error("failed to update database host")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -288,10 +272,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::nest_egg_variable::NestEggVariable,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
@@ -41,19 +42,18 @@ mod delete {
         egg: GetNestEgg,
         activity_logger: GetUserActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let egg_variable =
-            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await {
+            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await? {
                 Some(variable) => variable,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["variable not found"])),
-                    );
+                    return ApiResponse::error("variable not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
-        NestEggVariable::delete_by_id(&state.database, egg_variable.id).await;
+        NestEggVariable::delete_by_id(&state.database, egg_variable.id).await?;
 
         activity_logger
             .log(
@@ -67,16 +67,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::nest_egg_variable::NestEggVariable,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
@@ -141,22 +139,20 @@ mod patch {
         activity_logger: GetUserActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let mut egg_variable =
-            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await {
+            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await? {
                 Some(variable) => variable,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["variable not found"])),
-                    );
+                    return ApiResponse::error("variable not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
@@ -214,18 +210,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["variable with name already exists"])),
-                );
+                return ApiResponse::error("variable with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create variable: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create variable"])),
-                );
+                return ApiResponse::error("failed to create variable")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -249,10 +243,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

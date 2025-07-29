@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, node::Node},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -44,12 +45,11 @@ mod get {
         state: GetState,
         location: GetLocation,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let nodes = Node::by_location_id_with_pagination(
@@ -59,26 +59,21 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    nodes: Pagination {
-                        total: nodes.total,
-                        per_page: nodes.per_page,
-                        page: nodes.page,
-                        data: nodes
-                            .data
-                            .into_iter()
-                            .map(|node| node.into_admin_api_object(&state.database))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            nodes: Pagination {
+                total: nodes.total,
+                per_page: nodes.per_page,
+                page: nodes.page,
+                data: nodes
+                    .data
+                    .into_iter()
+                    .map(|node| node.into_admin_api_object(&state.database))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 

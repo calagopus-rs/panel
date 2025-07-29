@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::mount::Mount,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Path, http::StatusCode};
@@ -25,35 +26,27 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        Path(mount): Path<i32>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let mount = match Mount::by_id(&state.database, mount).await {
+    pub async fn route(state: GetState, Path(mount): Path<i32>) -> ApiResponseResult {
+        let mount = match Mount::by_id(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["mount not found"])),
-                );
+                return ApiResponse::error("mount not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    mount: mount.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            mount: mount.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::mount::Mount,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::{extract::Path, http::StatusCode};
@@ -66,6 +59,7 @@ mod delete {
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "mount" = i32,
@@ -77,37 +71,33 @@ mod delete {
         state: GetState,
         Path(mount): Path<i32>,
         activity_logger: GetUserActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let mount = match Mount::by_id(&state.database, mount).await {
+    ) -> ApiResponseResult {
+        let mount = match Mount::by_id(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["mount not found"])),
-                );
+                return ApiResponse::error("mount not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
         if mount.eggs > 0 {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["mount has eggs, cannot delete"])),
-            );
+            return ApiResponse::error("mount has eggs, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
         if mount.nodes > 0 {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["mount has nodes, cannot delete"])),
-            );
+            return ApiResponse::error("mount has nodes, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
         if mount.servers > 0 {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["mount has servers, cannot delete"])),
-            );
+            return ApiResponse::error("mount has servers, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
-        Mount::delete_by_id(&state.database, mount.id).await;
+        Mount::delete_by_id(&state.database, mount.id).await?;
 
         activity_logger
             .log(
@@ -119,16 +109,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::mount::Mount,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::{extract::Path, http::StatusCode};
@@ -176,22 +164,20 @@ mod patch {
         Path(mount): Path<i32>,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let mut mount = match Mount::by_id(&state.database, mount).await {
+    ) -> ApiResponseResult {
+        let mut mount = match Mount::by_id(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["mount not found"])),
-                );
+                return ApiResponse::error("mount not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(name) = data.name {
@@ -234,18 +220,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["mount with name/source/target already exists"])),
-                );
+                return ApiResponse::error("mount with name/source/target already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update mount: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update mount"])),
-                );
+                return ApiResponse::error("failed to update mount")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -266,10 +250,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

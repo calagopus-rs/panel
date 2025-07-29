@@ -2,8 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::api::remote::servers::_server_::GetServer;
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::api::remote::servers::_server_::GetServer,
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -23,27 +25,22 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(server: GetServer) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    container_image: server.0.egg.config_script.container,
-                    entrypoint: server.0.egg.config_script.entrypoint,
-                    script: server.0.egg.config_script.content,
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(server: GetServer) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            container_image: server.0.egg.config_script.container,
+            entrypoint: server.0.egg.config_script.entrypoint,
+            script: server.0.egg.config_script.content,
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::server::ServerStatus,
+        response::{ApiResponse, ApiResponseResult},
         routes::{GetState, api::remote::servers::_server_::GetServer},
     };
-    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -69,7 +66,7 @@ mod post {
         state: GetState,
         server: GetServer,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let status = if !data.successful {
             if data.reinstall {
                 Some(ServerStatus::ReinstallFailed)
@@ -88,13 +85,9 @@ mod post {
             server.0.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

@@ -108,7 +108,10 @@ impl User {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -119,17 +122,19 @@ impl User {
         ))
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_session(
         database: &crate::database::Database,
         session: &str,
-    ) -> Option<(Self, super::user_session::UserSession)> {
-        let (key_id, key) = session.split_once(':')?;
+    ) -> Result<Option<(Self, super::user_session::UserSession)>, sqlx::Error> {
+        let (key_id, key) = match session.split_once(':') {
+            Some((key_id, key)) => (key_id, key),
+            None => return Ok(None),
+        };
 
         let row = sqlx::query(&format!(
             r#"
@@ -144,21 +149,20 @@ impl User {
         .bind(key_id)
         .bind(key)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| {
+        Ok(row.map(|row| {
             (
                 Self::map(None, &row),
                 super::user_session::UserSession::map(Some("session_"), &row),
             )
-        })
+        }))
     }
 
     pub async fn by_api_key(
         database: &crate::database::Database,
         key: &str,
-    ) -> Option<(Self, super::user_api_key::UserApiKey)> {
+    ) -> Result<Option<(Self, super::user_api_key::UserApiKey)>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {}
@@ -172,18 +176,20 @@ impl User {
         .bind(&key[0..16])
         .bind(key)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| {
+        Ok(row.map(|row| {
             (
                 Self::map(None, &row),
                 super::user_api_key::UserApiKey::map(Some("api_key_"), &row),
             )
-        })
+        }))
     }
 
-    pub async fn by_email(database: &crate::database::Database, email: &str) -> Option<Self> {
+    pub async fn by_email(
+        database: &crate::database::Database,
+        email: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -194,17 +200,16 @@ impl User {
         ))
         .bind(email)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_username_password(
         database: &crate::database::Database,
         username: &str,
         password: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -216,17 +221,16 @@ impl User {
         .bind(username)
         .bind(password)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_username_public_key(
         database: &crate::database::Database,
         username: &str,
         public_key: russh::keys::PublicKey,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -243,17 +247,16 @@ impl User {
                 .to_string(),
         )
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_email_password(
         database: &crate::database::Database,
         email: &str,
         password: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -265,10 +268,9 @@ impl User {
         .bind(email)
         .bind(password)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn all_with_pagination(
@@ -276,7 +278,7 @@ impl User {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> crate::models::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -293,18 +295,20 @@ impl User {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM users
@@ -313,15 +317,16 @@ impl User {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     pub async fn validate_password(
         &self,
         database: &crate::database::Database,
         password: &str,
-    ) -> bool {
+    ) -> Result<bool, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -333,10 +338,9 @@ impl User {
         .bind(self.id)
         .bind(password)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.is_some()
+        Ok(row.is_some())
     }
 
     pub async fn update_password(

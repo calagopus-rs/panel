@@ -70,7 +70,7 @@ impl LocationDatabaseHost {
         database: &crate::database::Database,
         location_id: i32,
         database_host_id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -83,10 +83,9 @@ impl LocationDatabaseHost {
         .bind(location_id)
         .bind(database_host_id)
         .fetch_optional(database.read())
-        .await
-        .unwrap()?;
+        .await?;
 
-        Some(Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_location_id_with_pagination(
@@ -95,7 +94,7 @@ impl LocationDatabaseHost {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -114,21 +113,20 @@ impl LocationDatabaseHost {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn all_public_by_location_id(
         database: &crate::database::Database,
         location_id: i32,
-    ) -> Vec<Self> {
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -141,17 +139,16 @@ impl LocationDatabaseHost {
         ))
         .bind(location_id)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
     pub async fn delete_by_ids(
         database: &crate::database::Database,
         location_id: i32,
         database_host_id: i32,
-    ) {
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM location_database_hosts
@@ -161,8 +158,9 @@ impl LocationDatabaseHost {
         .bind(location_id)
         .bind(database_host_id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::{GetUser, GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetUser, GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -33,36 +36,30 @@ mod put {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if !user
             .validate_password(&state.database, &data.password)
-            .await
+            .await?
         {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["invalid password"])),
-            );
+            return ApiResponse::error("invalid password")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         user.update_password(&state.database, &data.new_password)
-            .await
-            .unwrap();
+            .await?;
 
         activity_logger
             .log("user:account.password-changed", serde_json::json!({}))
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::server_allocation::ServerAllocation,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -37,24 +38,27 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, allocation)): Path<(String, i32)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("allocations.delete") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        let allocation =
-            match ServerAllocation::by_server_id_id(&state.database, server.id, allocation).await {
-                Some(allocation) => allocation,
-                None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["allocation not found"])),
-                    );
-                }
-            };
+        let allocation = match ServerAllocation::by_server_id_id(
+            &state.database,
+            server.id,
+            allocation,
+        )
+        .await?
+        {
+            Some(allocation) => allocation,
+            None => {
+                return ApiResponse::error("allocation not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
+            }
+        };
 
         if server
             .egg
@@ -63,13 +67,12 @@ mod delete {
             .require_primary_allocation
             && server.0.allocation.is_some_and(|a| a.id == allocation.id)
         {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["cannot delete primary allocation"])),
-            );
+            return ApiResponse::error("cannot delete primary allocation")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        ServerAllocation::delete_by_id(&state.database, allocation.id).await;
+        ServerAllocation::delete_by_id(&state.database, allocation.id).await?;
 
         activity_logger
             .log(
@@ -82,16 +85,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::server_allocation::ServerAllocation,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -137,33 +138,35 @@ mod patch {
         activity_logger: GetServerActivityLogger,
         Path((_server, allocation)): Path<(String, i32)>,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("allocations.update") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        let allocation =
-            match ServerAllocation::by_server_id_id(&state.database, server.id, allocation).await {
-                Some(allocation) => allocation,
-                None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["allocation not found"])),
-                    );
-                }
-            };
+        let allocation = match ServerAllocation::by_server_id_id(
+            &state.database,
+            server.id,
+            allocation,
+        )
+        .await?
+        {
+            Some(allocation) => allocation,
+            None => {
+                return ApiResponse::error("allocation not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
+            }
+        };
 
-        let mut transaction = state.database.write().begin().await.unwrap();
+        let mut transaction = state.database.write().begin().await?;
 
         if let Some(notes) = &data.notes {
             let notes = if notes.is_empty() { None } else { Some(notes) };
@@ -174,8 +177,7 @@ mod patch {
                 allocation.id,
             )
             .execute(&mut *transaction)
-            .await
-            .unwrap();
+            .await?;
         }
         if let Some(primary) = data.primary {
             if server
@@ -190,12 +192,11 @@ mod patch {
                         .user_self_assign
                         .require_primary_allocation
                     {
-                        transaction.rollback().await.unwrap();
+                        transaction.rollback().await?;
 
-                        return (
-                            StatusCode::BAD_REQUEST,
-                            axum::Json(ApiError::new_value(&["cannot unset primary allocation"])),
-                        );
+                        return ApiResponse::error("cannot unset primary allocation")
+                            .with_status(StatusCode::BAD_REQUEST)
+                            .ok();
                     }
 
                     sqlx::query!(
@@ -203,8 +204,7 @@ mod patch {
                         server.id,
                     )
                     .execute(&mut *transaction)
-                    .await
-                    .unwrap();
+                    .await?;
                 } else {
                     sqlx::query!(
                         "UPDATE servers SET allocation_id = $1 WHERE servers.id = $2",
@@ -212,8 +212,7 @@ mod patch {
                         server.id,
                     )
                     .execute(&mut *transaction)
-                    .await
-                    .unwrap();
+                    .await?;
                 }
             } else if server.allocation.is_none() && primary {
                 sqlx::query!(
@@ -222,12 +221,11 @@ mod patch {
                     server.id,
                 )
                 .execute(&mut *transaction)
-                .await
-                .unwrap();
+                .await?;
             }
         }
 
-        transaction.commit().await.unwrap();
+        transaction.commit().await?;
 
         activity_logger
             .log(
@@ -243,10 +241,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

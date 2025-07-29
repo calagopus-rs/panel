@@ -119,7 +119,7 @@ impl NestEggVariable {
         database: &crate::database::Database,
         egg_id: i32,
         id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -131,13 +131,15 @@ impl NestEggVariable {
         .bind(egg_id)
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap()?;
+        .await?;
 
-        Some(Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn all_by_egg_id(database: &crate::database::Database, egg_id: i32) -> Vec<Self> {
+    pub async fn all_by_egg_id(
+        database: &crate::database::Database,
+        egg_id: i32,
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -149,13 +151,15 @@ impl NestEggVariable {
         ))
         .bind(egg_id)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nest_egg_variables
@@ -164,8 +168,9 @@ impl NestEggVariable {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

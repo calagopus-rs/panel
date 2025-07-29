@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::server_activity::ServerActivity,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::remote::backups::_backup_::GetBackup},
     };
     use axum::http::StatusCode;
@@ -32,7 +33,7 @@ mod post {
         state: GetState,
         backup: GetBackup,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if sqlx::query!(
             "UPDATE servers
             SET status = NULL
@@ -40,15 +41,13 @@ mod post {
             backup.server_id
         )
         .execute(state.database.write())
-        .await
-        .unwrap()
+        .await?
         .rows_affected()
             == 0
         {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["server is not restoring a backup"])),
-            );
+            return ApiResponse::error("server is not restoring a backup")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         if let Err(err) = ServerActivity::log(
@@ -76,10 +75,7 @@ mod post {
             );
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

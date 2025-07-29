@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::user_api_key::UserApiKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
@@ -33,25 +34,23 @@ mod delete {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(api_key): Path<String>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return (
-                StatusCode::FORBIDDEN,
-                axum::Json(ApiError::new_value(&["cannot delete api key with api key"])),
-            );
+            return ApiResponse::error("cannot delete api key with api key")
+                .with_status(StatusCode::FORBIDDEN)
+                .ok();
         }
 
-        let api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await {
+        let api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await? {
             Some(api_key) => api_key,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["api key not found"])),
-                );
+                return ApiResponse::error("api key not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        UserApiKey::delete_by_id(&state.database, api_key.id).await;
+        UserApiKey::delete_by_id(&state.database, api_key.id).await?;
 
         activity_logger
             .log(
@@ -63,16 +62,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::user_api_key::UserApiKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
@@ -116,28 +113,26 @@ mod patch {
         activity_logger: GetUserActivityLogger,
         Path(api_key): Path<String>,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return (
-                StatusCode::FORBIDDEN,
-                axum::Json(ApiError::new_value(&["cannot update api key with api key"])),
-            );
+            return ApiResponse::error("cannot update api key with api key")
+                .with_status(StatusCode::FORBIDDEN)
+                .ok();
         }
 
-        let mut api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await {
+        let mut api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await?
+        {
             Some(api_key) => api_key,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["api key not found"])),
-                );
+                return ApiResponse::error("api key not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
@@ -161,18 +156,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["api key with name already exists"])),
-                );
+                return ApiResponse::error("api key with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update api key: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update api key"])),
-                );
+                return ApiResponse::error("failed to update api key")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -187,10 +180,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

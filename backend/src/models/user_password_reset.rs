@@ -88,7 +88,7 @@ impl UserPasswordReset {
     pub async fn delete_by_token(
         database: &crate::database::Database,
         token: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {} FROM user_password_resets
@@ -102,8 +102,12 @@ impl UserPasswordReset {
         ))
         .bind(token)
         .fetch_optional(database.read())
-        .await
-        .unwrap()?;
+        .await?;
+
+        let row = match row {
+            Some(row) => row,
+            None => return Ok(None),
+        };
 
         sqlx::query(
             r#"
@@ -113,9 +117,8 @@ impl UserPasswordReset {
         )
         .bind(row.get::<i32, _>("id"))
         .execute(database.write())
-        .await
-        .ok()?;
+        .await?;
 
-        Some(Self::map(None, &row))
+        Ok(Some(Self::map(None, &row)))
     }
 }

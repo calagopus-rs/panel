@@ -2,8 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::GetState;
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::GetState,
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -16,24 +18,21 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route(state: GetState) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState) -> ApiResponseResult {
         let settings = state.settings.get().await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    settings: &settings,
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            settings: &settings,
+        })
+        .ok()
     }
 }
 
 mod put {
-    use crate::routes::{GetState, api::client::GetUserActivityLogger};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{GetState, api::client::GetUserActivityLogger},
+    };
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -75,7 +74,7 @@ mod put {
         state: GetState,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let mut settings = state.settings.get_mut().await;
 
         if let Some(mail_mode) = data.mail_mode {
@@ -121,16 +120,13 @@ mod put {
         }
 
         let settings_json = settings.censored();
-        settings.save().await.unwrap();
+        settings.save().await?;
 
         activity_logger
             .log("admin:settings.update", settings_json)
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

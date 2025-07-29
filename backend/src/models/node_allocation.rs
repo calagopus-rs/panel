@@ -51,7 +51,7 @@ impl NodeAllocation {
         ip: &sqlx::types::ipnetwork::IpNetwork,
         ip_alias: Option<&str>,
         port: i32,
-    ) -> bool {
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             INSERT INTO node_allocations (node_id, ip, ip_alias, port)
@@ -63,8 +63,9 @@ impl NodeAllocation {
         .bind(ip_alias)
         .bind(port)
         .fetch_one(database.write())
-        .await
-        .is_ok()
+        .await?;
+
+        Ok(())
     }
 
     pub async fn by_node_id_with_pagination(
@@ -72,7 +73,7 @@ impl NodeAllocation {
         node_id: i32,
         page: i64,
         per_page: i64,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -89,18 +90,20 @@ impl NodeAllocation {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn delete_by_ids(database: &crate::database::Database, ids: &[i32]) {
+    pub async fn delete_by_ids(
+        database: &crate::database::Database,
+        ids: &[i32],
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM node_allocations
@@ -109,8 +112,9 @@ impl NodeAllocation {
         )
         .bind(ids)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

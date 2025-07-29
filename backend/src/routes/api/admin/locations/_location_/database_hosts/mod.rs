@@ -8,6 +8,7 @@ mod get {
         models::{
             Pagination, PaginationParamsWithSearch, location_database_host::LocationDatabaseHost,
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -49,12 +50,11 @@ mod get {
         state: GetState,
         location: GetLocation,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let database_hosts = LocationDatabaseHost::by_location_id_with_pagination(
@@ -64,32 +64,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    database_hosts: Pagination {
-                        total: database_hosts.total,
-                        per_page: database_hosts.per_page,
-                        page: database_hosts.page,
-                        data: database_hosts
-                            .data
-                            .into_iter()
-                            .map(|host| host.into_admin_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            database_hosts: Pagination {
+                total: database_hosts.total,
+                per_page: database_hosts.per_page,
+                page: database_hosts.page,
+                data: database_hosts
+                    .data
+                    .into_iter()
+                    .map(|host| host.into_admin_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::location_database_host::LocationDatabaseHost,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
@@ -122,28 +118,22 @@ mod post {
         location: GetLocation,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         match LocationDatabaseHost::create(&state.database, location.id, data.database_host_id)
             .await
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "database host already exists in this location",
-                    ])),
-                );
+                return ApiResponse::error("database host already exists in this location")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create location database host: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&[
-                        "failed to create location database host",
-                    ])),
-                );
+                return ApiResponse::error("failed to create location database host")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -157,10 +147,7 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

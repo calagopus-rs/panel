@@ -124,7 +124,7 @@ impl ServerActivity {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -143,15 +143,14 @@ impl ServerActivity {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     #[inline]

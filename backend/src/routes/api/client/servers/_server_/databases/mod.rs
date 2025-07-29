@@ -7,6 +7,7 @@ mod hosts;
 mod get {
     use crate::{
         models::{Pagination, server_database::ServerDatabase},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -72,19 +73,17 @@ mod get {
         state: GetState,
         server: GetServer,
         Query(params): Query<Params>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("databases.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let databases = ServerDatabase::by_server_id_with_pagination(
@@ -94,39 +93,35 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
         let can_read_password = server.has_permission("databases.read-password").is_ok();
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    databases: Pagination {
-                        total: databases.total,
-                        per_page: databases.per_page,
-                        page: databases.page,
-                        data: databases
-                            .data
-                            .into_iter()
-                            .map(|database| {
-                                database.into_api_object(
-                                    &state.database,
-                                    params.include_password && can_read_password,
-                                )
-                            })
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            databases: Pagination {
+                total: databases.total,
+                per_page: databases.per_page,
+                page: databases.page,
+                data: databases
+                    .data
+                    .into_iter()
+                    .map(|database| {
+                        database.into_api_object(
+                            &state.database,
+                            params.include_password && can_read_password,
+                        )
+                    })
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::{database_host::DatabaseHost, server_database::ServerDatabase},
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -173,19 +168,17 @@ mod post {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("databases.create") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let database_host = match DatabaseHost::by_location_id_id(
@@ -193,25 +186,21 @@ mod post {
             server.node.location.id,
             data.database_host_id,
         )
-        .await
+        .await?
         {
             Some(host) => host,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["database host not found"])),
-                );
+                return ApiResponse::error("database host not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
         let databases = ServerDatabase::count_by_server_id(&state.database, server.id).await;
         if databases >= server.database_limit as i64 {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[
-                    "maximum number of databases reached",
-                ])),
-            );
+            return ApiResponse::error("maximum number of databases reached")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         let database =
@@ -219,21 +208,24 @@ mod post {
                 .await
             {
                 Ok(database_id) => ServerDatabase::by_id(&state.database, database_id)
-                    .await
-                    .unwrap(),
+                    .await?
+                    .ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "failed to retrieve database after creation: {}",
+                            database_id
+                        )
+                    })?,
                 Err(err) if err.to_string().contains("unique constraint") => {
-                    return (
-                        StatusCode::CONFLICT,
-                        axum::Json(ApiError::new_value(&["database with name already exists"])),
-                    );
+                    return ApiResponse::error("database with name already exists")
+                        .with_status(StatusCode::CONFLICT)
+                        .ok();
                 }
                 Err(err) => {
                     tracing::error!(server = %server.uuid, "failed to create database: {:#?}", err);
 
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        axum::Json(ApiError::new_value(&["failed to create database"])),
-                    );
+                    return ApiResponse::error("failed to create database")
+                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .ok();
                 }
             };
 
@@ -247,18 +239,13 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    database: database.into_api_object(
-                        &state.database,
-                        server.has_permission("databases.read-password").is_ok(),
-                    ),
-                })
-                .unwrap(),
+        ApiResponse::json(Response {
+            database: database.into_api_object(
+                &state.database,
+                server.has_permission("databases.read-password").is_ok(),
             ),
-        )
+        })
+        .ok()
     }
 }
 

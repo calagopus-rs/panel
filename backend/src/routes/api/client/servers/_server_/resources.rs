@@ -2,7 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::client::servers::_server_::GetServer};
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{GetState, api::client::servers::_server_::GetServer},
+    };
     use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -21,10 +24,7 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         let server_details = match server
             .node
             .api_client(&state.database)
@@ -35,22 +35,16 @@ mod get {
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to get server details: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to get server details"])),
-                );
+                return ApiResponse::error("failed to get server details")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    resources: server_details.utilization,
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            resources: server_details.utilization,
+        })
+        .ok()
     }
 }
 

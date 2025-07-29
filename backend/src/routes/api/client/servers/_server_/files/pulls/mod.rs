@@ -4,7 +4,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _pull_;
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::client::servers::_server_::GetServer};
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+    };
     use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -24,15 +27,11 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         if let Err(error) = server.has_permission("files.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let pulls = match server
@@ -43,25 +42,20 @@ mod get {
         {
             Ok(data) => data.downloads,
             Err((StatusCode::EXPECTATION_FAILED, err)) => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to list server file pulls: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to list server file pulls"])),
-                );
+                return ApiResponse::error("failed to list server file pulls")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { pulls }).unwrap()),
-        )
+        ApiResponse::json(Response { pulls }).ok()
     }
 }
 

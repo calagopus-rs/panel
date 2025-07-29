@@ -1,14 +1,14 @@
 use super::State;
 use crate::{
     models::server_backup::ServerBackup,
-    routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+    response::ApiResponse,
+    routes::{GetState, api::client::servers::_server_::GetServer},
 };
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -27,38 +27,27 @@ pub async fn auth(
     let backup = match backup.get(1).map(|s| s.parse::<uuid::Uuid>()) {
         Some(Ok(id)) => id,
         _ => {
-            return Ok(Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["invalid backup uuid"])).unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error("invalid backup uuid")
+                .with_status(StatusCode::BAD_REQUEST)
+                .into_response());
         }
     };
 
     if let Err(error) = server.has_permission("backups.read") {
-        return Ok(Response::builder()
-            .status(StatusCode::UNAUTHORIZED)
-            .header("Content-Type", "application/json")
-            .body(Body::from(
-                serde_json::to_string(&ApiError::new_value(&[&error])).unwrap(),
-            ))
-            .unwrap());
+        return Ok(ApiResponse::error(&error)
+            .with_status(StatusCode::UNAUTHORIZED)
+            .into_response());
     }
 
     let backup = ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await;
     let backup = match backup {
-        Some(backup) => backup,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["backup not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(backup)) => backup,
+        Ok(None) => {
+            return Ok(ApiResponse::error("backup not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(server.0);
@@ -68,9 +57,12 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{
-        ApiError,
-        api::client::servers::_server_::{GetServer, backups::_backup_::GetServerBackup},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError,
+            api::client::servers::_server_::{GetServer, backups::_backup_::GetServerBackup},
+        },
     };
     use axum::http::StatusCode;
     use serde::Serialize;
@@ -97,34 +89,28 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        server: GetServer,
-        backup: GetServerBackup,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(server: GetServer, backup: GetServerBackup) -> ApiResponseResult {
         if let Err(error) = server.has_permission("backups.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    backup: backup.0.into_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            backup: backup.0.into_api_object(),
+        })
+        .ok()
     }
 }
 
 mod delete {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{
-            GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{
+                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -156,29 +142,26 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("backups.delete") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if backup.completed.is_none() {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
-            );
+            return ApiResponse::error("backup has not been completed yet")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         let uuid = server.uuid;
         if let Err(err) = backup.delete(&state.database, server.0).await {
             tracing::error!(server = %uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
 
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(ApiError::new_value(&["failed to delete backup"])),
-            );
+            return ApiResponse::error("failed to delete backup")
+                .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                .ok();
         }
 
         activity_logger
@@ -191,18 +174,18 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{
-            GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{
+                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -244,26 +227,23 @@ mod patch {
         activity_logger: GetServerActivityLogger,
         mut backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("backups.update") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if backup.completed.is_none() {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
-            );
+            return ApiResponse::error("backup has not been completed yet")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         if let Some(name) = data.name {
@@ -282,8 +262,7 @@ mod patch {
             backup.id,
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log(
@@ -296,10 +275,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

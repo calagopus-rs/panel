@@ -1,4 +1,4 @@
-use super::{ApiError, GetState, State};
+use super::{GetState, State};
 use axum::{
     http::{HeaderMap, StatusCode},
     routing::get,

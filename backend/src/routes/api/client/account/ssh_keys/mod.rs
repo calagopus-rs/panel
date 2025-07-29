@@ -6,6 +6,7 @@ mod _ssh_key_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_ssh_key::UserSshKey},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -40,12 +41,11 @@ mod get {
         state: GetState,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let ssh_keys = UserSshKey::by_user_id_with_pagination(
@@ -55,32 +55,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    ssh_keys: Pagination {
-                        total: ssh_keys.total,
-                        per_page: ssh_keys.per_page,
-                        page: ssh_keys.page,
-                        data: ssh_keys
-                            .data
-                            .into_iter()
-                            .map(|ssh_key| ssh_key.into_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            ssh_keys: Pagination {
+                total: ssh_keys.total,
+                per_page: ssh_keys.per_page,
+                page: ssh_keys.page,
+                data: ssh_keys
+                    .data
+                    .into_iter()
+                    .map(|ssh_key| ssh_key.into_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::user_ssh_key::UserSshKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{GetUser, GetUserActivityLogger},
@@ -115,21 +111,19 @@ mod post {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let public_key = match russh::keys::PublicKey::from_openssh(&data.public_key) {
             Ok(key) => key,
             Err(_) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid public key"])),
-                );
+                return ApiResponse::error("invalid public key")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         };
 
@@ -137,20 +131,16 @@ mod post {
             match UserSshKey::create(&state.database, user.id, &data.name, public_key).await {
                 Ok(ssh_key) => ssh_key,
                 Err(err) if err.to_string().contains("unique constraint") => {
-                    return (
-                        StatusCode::CONFLICT,
-                        axum::Json(ApiError::new_value(&[
-                            "ssh key with name or fingerprint already exists",
-                        ])),
-                    );
+                    return ApiResponse::error("ssh key with name or fingerprint already exists")
+                        .with_status(StatusCode::CONFLICT)
+                        .ok();
                 }
                 Err(err) => {
                     tracing::error!("failed to create ssh key: {:#?}", err);
 
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        axum::Json(ApiError::new_value(&["failed to create ssh key"])),
-                    );
+                    return ApiResponse::error("failed to create ssh key")
+                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .ok();
                 }
             };
 
@@ -164,15 +154,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    ssh_key: ssh_key.into_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            ssh_key: ssh_key.into_api_object(),
+        })
+        .ok()
     }
 }
 

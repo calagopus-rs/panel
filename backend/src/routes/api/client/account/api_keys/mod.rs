@@ -6,6 +6,7 @@ mod _api_key_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_api_key::UserApiKey},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -40,12 +41,11 @@ mod get {
         state: GetState,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let api_keys = UserApiKey::by_user_id_with_pagination(
@@ -55,32 +55,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    api_keys: Pagination {
-                        total: api_keys.total,
-                        per_page: api_keys.per_page,
-                        page: api_keys.page,
-                        data: api_keys
-                            .data
-                            .into_iter()
-                            .map(|api_key| api_key.into_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            api_keys: Pagination {
+                total: api_keys.total,
+                per_page: api_keys.per_page,
+                page: api_keys.page,
+                data: api_keys
+                    .data
+                    .into_iter()
+                    .map(|api_key| api_key.into_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::user_api_key::UserApiKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
@@ -118,19 +114,17 @@ mod post {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return (
-                StatusCode::FORBIDDEN,
-                axum::Json(ApiError::new_value(&["cannot create api key with api key"])),
-            );
+            return ApiResponse::error("cannot create api key with api key")
+                .with_status(StatusCode::FORBIDDEN)
+                .ok();
         }
 
         let (key, api_key) = match UserApiKey::create(
@@ -143,18 +137,16 @@ mod post {
         {
             Ok(api_key) => api_key,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["api key with name already exists"])),
-                );
+                return ApiResponse::error("api key with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create api key: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create api key"])),
-                );
+                return ApiResponse::error("failed to create api key")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -169,16 +161,11 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    api_key: api_key.into_api_object(),
-                    key,
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            api_key: api_key.into_api_object(),
+            key,
+        })
+        .ok()
     }
 }
 

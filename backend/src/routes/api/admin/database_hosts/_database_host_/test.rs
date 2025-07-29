@@ -2,8 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{
-        ApiError, GetState, api::admin::database_hosts::_database_host_::GetDatabaseHost,
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState, api::admin::database_hosts::_database_host_::GetDatabaseHost,
+        },
     };
     use axum::http::StatusCode;
     use serde::Serialize;
@@ -23,41 +26,32 @@ mod post {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        database_host: GetDatabaseHost,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, database_host: GetDatabaseHost) -> ApiResponseResult {
         match database_host.get_connection(&state.database).await {
             Ok(pool) => match pool {
                 crate::models::database_host::DatabasePool::Mysql(pool) => {
                     if let Err(err) = sqlx::query("SELECT 1").execute(pool.as_ref()).await {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&[&err.to_string()])),
-                        );
+                        return ApiResponse::error(&err.to_string())
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
                     }
                 }
                 crate::models::database_host::DatabasePool::Postgres(pool) => {
                     if let Err(err) = sqlx::query("SELECT 1").execute(pool.as_ref()).await {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&[&err.to_string()])),
-                        );
+                        return ApiResponse::error(&err.to_string())
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
                     }
                 }
             },
             Err(err) => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&[&err.to_string()])),
-                );
+                return ApiResponse::error(&err.to_string())
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

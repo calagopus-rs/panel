@@ -1,14 +1,10 @@
 use super::State;
-use crate::{
-    models::server::Server,
-    routes::{ApiError, GetState},
-};
+use crate::{models::server::Server, response::ApiResponse, routes::GetState};
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -25,16 +21,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let server = Server::by_identifier(&state.database, &server[0]).await;
     let server = match server {
-        Some(server) => server,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["server not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(server)) => server,
+        Ok(None) => {
+            return Ok(ApiResponse::error("server not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(server);
@@ -43,8 +36,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::admin::servers::_server_::GetServer};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -63,26 +58,21 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    server: server.0.into_admin_api_object(&state.database),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            server: server.0.into_admin_api_object(&state.database),
+        })
+        .ok()
     }
 }
 
 mod delete {
-    use crate::routes::{
-        ApiError, GetState,
-        api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -112,14 +102,13 @@ mod delete {
         server: GetServer,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(err) = server.delete(&state.database, data.force).await {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[&format!(
-                    "failed to delete server: {err}"
-                )])),
-            );
+            tracing::error!("failed to delete server: {:#?}", err);
+
+            return ApiResponse::error(&format!("failed to delete server: {err}"))
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         activity_logger
@@ -133,16 +122,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::{nest_egg::NestEgg, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
@@ -205,35 +192,32 @@ mod patch {
         mut server: GetServer,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(owner_id) = data.owner_id {
-            let owner = match User::by_id(&state.database, owner_id).await {
+            let owner = match User::by_id(&state.database, owner_id).await? {
                 Some(owner) => owner,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["owner not found"])),
-                    );
+                    return ApiResponse::error("owner not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
             server.owner = owner;
         }
         if let Some(egg_id) = data.egg_id {
-            let egg = match NestEgg::by_id(&state.database, egg_id).await {
+            let egg = match NestEgg::by_id(&state.database, egg_id).await? {
                 Some(egg) => egg,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["egg not found"])),
-                    );
+                    return ApiResponse::error("egg not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
@@ -277,10 +261,9 @@ mod patch {
                 server.timezone = None;
             } else {
                 if chrono_tz::Tz::from_str(&timezone).is_err() {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid timezone"])),
-                    );
+                    return ApiResponse::error("invalid timezone")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
 
                 server.timezone = Some(timezone);
@@ -327,12 +310,9 @@ mod patch {
             Err(err) => {
                 tracing::error!("failed to update server: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&[&format!(
-                        "failed to update server: {err}"
-                    )])),
-                );
+                return ApiResponse::error(&format!("failed to update server: {err}"))
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -368,10 +348,7 @@ mod patch {
             }
         });
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

@@ -6,6 +6,7 @@ mod _server_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server::Server},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -39,12 +40,11 @@ mod get {
     pub async fn route(
         state: GetState,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let servers = Server::all_with_pagination(
@@ -53,32 +53,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    servers: Pagination {
-                        total: servers.total,
-                        per_page: servers.per_page,
-                        page: servers.page,
-                        data: servers
-                            .data
-                            .into_iter()
-                            .map(|server| server.into_admin_api_object(&state.database))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            servers: Pagination {
+                total: servers.total,
+                per_page: servers.per_page,
+                page: servers.page,
+                data: servers
+                    .data
+                    .into_iter()
+                    .map(|server| server.into_admin_api_object(&state.database))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::{nest_egg::NestEgg, node::Node, server::Server, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
@@ -138,41 +134,37 @@ mod post {
         state: GetState,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let node = match Node::by_id(&state.database, data.node_id).await {
+        let node = match Node::by_id(&state.database, data.node_id).await? {
             Some(node) => node,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["node not found"])),
-                );
+                return ApiResponse::error("node not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        let owner = match User::by_id(&state.database, data.owner_id).await {
+        let owner = match User::by_id(&state.database, data.owner_id).await? {
             Some(user) => user,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["owner not found"])),
-                );
+                return ApiResponse::error("owner not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        let egg = match NestEgg::by_id(&state.database, data.egg_id).await {
+        let egg = match NestEgg::by_id(&state.database, data.egg_id).await? {
             Some(egg) => egg,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["egg not found"])),
-                );
+                return ApiResponse::error("egg not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
@@ -197,24 +189,20 @@ mod post {
         )
         .await
         {
-            Ok((server_id, _)) => Server::by_id(&state.database, server_id).await.unwrap(),
+            Ok((server_id, _)) => Server::by_id(&state.database, server_id)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("server not found after creation"))?,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "server with allocation(s) already exists",
-                    ])),
-                );
+                return ApiResponse::error("server with allocation(s) already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create server: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&[&format!(
-                        "failed to create server: {err}"
-                    )])),
-                );
+                return ApiResponse::error(&format!("failed to create server: {err}"))
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -245,15 +233,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    server: server.into_admin_api_object(&state.database),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            server: server.into_admin_api_object(&state.database),
+        })
+        .ok()
     }
 }
 

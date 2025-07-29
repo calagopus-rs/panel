@@ -11,6 +11,7 @@ mod post {
             user_activity::UserActivity,
             user_session::UserSession,
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
     };
     use axum::http::StatusCode;
@@ -46,39 +47,35 @@ mod post {
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let user = if data.user.contains('@') {
-            match User::by_email_password(&state.database, &data.user, &data.password).await {
+            match User::by_email_password(&state.database, &data.user, &data.password).await? {
                 Some(user) => user,
                 None => {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid username or password"])),
-                    );
+                    return ApiResponse::error("invalid username or password")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
             }
         } else {
-            match User::by_username_password(&state.database, &data.user, &data.password).await {
+            match User::by_username_password(&state.database, &data.user, &data.password).await? {
                 Some(user) => user,
                 None => {
-                    return (
-                        StatusCode::BAD_REQUEST,
-                        axum::Json(ApiError::new_value(&["invalid username or password"])),
-                    );
+                    return ApiResponse::error("invalid username or password")
+                        .with_status(StatusCode::BAD_REQUEST)
+                        .ok();
                 }
             }
         };
@@ -86,22 +83,19 @@ mod post {
         if user.totp_enabled
             && let Some(secret) = &user.totp_secret
         {
-            let token = state
-                .jwt
-                .create(&TwoFactorRequiredJwt {
-                    base: BasePayload {
-                        issuer: "panel".into(),
-                        subject: None,
-                        audience: Vec::new(),
-                        expiration_time: Some(chrono::Utc::now().timestamp() + 300),
-                        not_before: None,
-                        issued_at: Some(chrono::Utc::now().timestamp()),
-                        jwt_id: user.id.to_string(),
-                    },
-                    user_id: user.id,
-                    user_totp_secret: secret.clone(),
-                })
-                .unwrap();
+            let token = state.jwt.create(&TwoFactorRequiredJwt {
+                base: BasePayload {
+                    issuer: "panel".into(),
+                    subject: None,
+                    audience: Vec::new(),
+                    expiration_time: Some(chrono::Utc::now().timestamp() + 300),
+                    not_before: None,
+                    issued_at: Some(chrono::Utc::now().timestamp()),
+                    jwt_id: user.id.to_string(),
+                },
+                user_id: user.id,
+                user_totp_secret: secret.clone(),
+            })?;
 
             if let Err(err) = UserActivity::log(
                 &state.database,
@@ -116,10 +110,7 @@ mod post {
                 tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
             }
 
-            (
-                StatusCode::OK,
-                axum::Json(serde_json::to_value(Response::TwoFactorRequired { token }).unwrap()),
-            )
+            ApiResponse::json(Response::TwoFactorRequired { token }).ok()
         } else {
             let key = UserSession::create(
                 &state.database,
@@ -130,7 +121,7 @@ mod post {
                     .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                     .unwrap_or("unknown"),
             )
-            .await;
+            .await?;
 
             let settings = state.settings.get().await;
 
@@ -162,15 +153,10 @@ mod post {
                 tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
             }
 
-            (
-                StatusCode::OK,
-                axum::Json(
-                    serde_json::to_value(Response::Completed {
-                        user: user.into_api_object(true),
-                    })
-                    .unwrap(),
-                ),
-            )
+            ApiResponse::json(Response::Completed {
+                user: user.into_api_object(true),
+            })
+            .ok()
         }
     }
 }

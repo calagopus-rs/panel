@@ -6,6 +6,7 @@ mod _backup_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_backup::ServerBackup},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -46,19 +47,17 @@ mod get {
         state: GetState,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("backups.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let backups = ServerBackup::by_server_id_with_pagination(
@@ -68,26 +67,21 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    backups: Pagination {
-                        total: backups.total,
-                        per_page: backups.per_page,
-                        page: backups.page,
-                        data: backups
-                            .data
-                            .into_iter()
-                            .map(|backup| backup.into_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            backups: Pagination {
+                total: backups.total,
+                per_page: backups.per_page,
+                page: backups.page,
+                data: backups
+                    .data
+                    .into_iter()
+                    .map(|backup| backup.into_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 

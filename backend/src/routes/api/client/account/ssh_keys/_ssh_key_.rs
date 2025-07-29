@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::user_ssh_key::UserSshKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{GetUser, GetUserActivityLogger},
@@ -31,18 +32,17 @@ mod delete {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<String>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let ssh_key = match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await {
+    ) -> ApiResponseResult {
+        let ssh_key = match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await? {
             Some(ssh_key) => ssh_key,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["ssh key not found"])),
-                );
+                return ApiResponse::json(ApiError::new_value(&["ssh key not found"]))
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        UserSshKey::delete_by_id(&state.database, ssh_key.id).await;
+        UserSshKey::delete_by_id(&state.database, ssh_key.id).await?;
 
         activity_logger
             .log(
@@ -54,16 +54,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::user_ssh_key::UserSshKey,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{GetUser, GetUserActivityLogger},
@@ -102,24 +100,22 @@ mod patch {
         activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<String>,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let mut ssh_key = match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await
-        {
-            Some(ssh_key) => ssh_key,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["ssh key not found"])),
-                );
-            }
-        };
+        let mut ssh_key =
+            match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await? {
+                Some(ssh_key) => ssh_key,
+                None => {
+                    return ApiResponse::error("ssh key not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
         if let Some(name) = data.name {
             ssh_key.name = name;
@@ -135,20 +131,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "ssh key with name or fingerprint already exists",
-                    ])),
-                );
+                return ApiResponse::error("ssh key with name or fingerprint already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update ssh key: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update ssh key"])),
-                );
+                return ApiResponse::error("failed to update ssh key")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -162,10 +154,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

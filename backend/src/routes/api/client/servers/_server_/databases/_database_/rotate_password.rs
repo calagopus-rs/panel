@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::server_database::ServerDatabase,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -39,22 +40,20 @@ mod post {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, database)): Path<(String, i32)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.update") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let database =
-            match ServerDatabase::by_server_id_id(&state.database, server.id, database).await {
+            match ServerDatabase::by_server_id_id(&state.database, server.id, database).await? {
                 Some(database) => database,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["database not found"])),
-                    );
+                    return ApiResponse::error("database not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
@@ -63,10 +62,9 @@ mod post {
             Err(err) => {
                 tracing::error!(server = %server.uuid, "failed to rotate database password: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to rotate database password"])),
-                );
+                return ApiResponse::error("failed to rotate database password")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -80,19 +78,14 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    password: if server.has_permission("databases.read-password").is_ok() {
-                        Some(password)
-                    } else {
-                        None
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            password: if server.has_permission("databases.read-password").is_ok() {
+                Some(password)
+            } else {
+                None
+            },
+        })
+        .ok()
     }
 }
 

@@ -175,7 +175,10 @@ impl ServerDatabase {
         Ok(row.get("id"))
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -187,17 +190,16 @@ impl ServerDatabase {
         ))
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_server_id_id(
         database: &crate::database::Database,
         server_id: i32,
         id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -210,10 +212,9 @@ impl ServerDatabase {
         .bind(server_id)
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_server_id_with_pagination(
@@ -222,7 +223,7 @@ impl ServerDatabase {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -241,15 +242,14 @@ impl ServerDatabase {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {

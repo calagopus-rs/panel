@@ -2,10 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{
-            GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{
+                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -43,22 +46,20 @@ mod post {
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("backups.restore") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if backup.completed.is_none() {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
-            );
+            return ApiResponse::error("backup has not been completed yet")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
-        let mut transaction = state.database.write().begin().await.unwrap();
+        let mut transaction = state.database.write().begin().await?;
 
         let rows_affected = sqlx::query!(
             "UPDATE servers
@@ -67,19 +68,15 @@ mod post {
             server.id
         )
         .execute(&mut *transaction)
-        .await
-        .unwrap()
+        .await?
         .rows_affected();
 
         if rows_affected == 0 {
-            transaction.rollback().await.unwrap();
+            transaction.rollback().await?;
 
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[
-                    "server is not in a valid state to restore backup.",
-                ])),
-            );
+            return ApiResponse::error("server is not in a valid state to restore backup.")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         let uuid = server.uuid;
@@ -87,16 +84,15 @@ mod post {
             .restore(&state.database, server.0, data.truncate_directory)
             .await
         {
-            transaction.rollback().await.unwrap();
+            transaction.rollback().await?;
             tracing::error!(server = %uuid, backup = %backup.uuid, "failed to restore backup: {:#?}", err);
 
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(ApiError::new_value(&["failed to restore backup"])),
-            );
+            return ApiResponse::error("failed to restore backup")
+                .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                .ok();
         }
 
-        transaction.commit().await.unwrap();
+        transaction.commit().await?;
 
         activity_logger
             .log(
@@ -109,10 +105,7 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

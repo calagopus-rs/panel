@@ -50,3 +50,4 @@ chrono-tz = { version = "0.10.4", features = ["serde"] }
 infer = "0.19.0"
 axum-extra = { version = "0.10.1", features = ["query"] }
 tikv-jemallocator = "0.6.0"
+anyhow = "1.0.98"

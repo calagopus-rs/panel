@@ -270,7 +270,7 @@ impl NestEgg {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -288,18 +288,20 @@ impl NestEgg {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -310,17 +312,16 @@ impl NestEgg {
         ))
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_nest_id_id(
         database: &crate::database::Database,
         nest_id: i32,
         id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -332,13 +333,15 @@ impl NestEgg {
         .bind(nest_id)
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nest_eggs
@@ -347,8 +350,9 @@ impl NestEgg {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

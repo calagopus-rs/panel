@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::{Pagination, PaginationParams, node_allocation::NodeAllocation},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -40,12 +41,11 @@ mod get {
         state: GetState,
         node: GetNode,
         Query(params): Query<PaginationParams>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let allocations = NodeAllocation::by_node_id_with_pagination(
@@ -54,38 +54,33 @@ mod get {
             params.page,
             params.per_page,
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    allocations: Pagination {
-                        total: allocations.total,
-                        per_page: allocations.per_page,
-                        page: allocations.page,
-                        data: allocations
-                            .data
-                            .into_iter()
-                            .map(|node| node.into_admin_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            allocations: Pagination {
+                total: allocations.total,
+                per_page: allocations.per_page,
+                page: allocations.page,
+                data: allocations
+                    .data
+                    .into_iter()
+                    .map(|node| node.into_admin_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::node_allocation::NodeAllocation,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
         },
     };
-    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -112,8 +107,8 @@ mod delete {
         node: GetNode,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        NodeAllocation::delete_by_ids(&state.database, &data.ids).await;
+    ) -> ApiResponseResult {
+        NodeAllocation::delete_by_ids(&state.database, &data.ids).await?;
 
         activity_logger
             .log(
@@ -126,16 +121,14 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod put {
     use crate::{
         models::node_allocation::NodeAllocation,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
@@ -174,12 +167,11 @@ mod put {
         node: GetNode,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let allocation_ip = data.ip.into();
@@ -201,7 +193,7 @@ mod put {
         }
 
         let results = futures_util::future::join_all(promises).await;
-        let created = results.iter().filter(|r| **r).count();
+        let created = results.iter().filter(|r| r.is_ok()).count();
 
         activity_logger
             .log(
@@ -216,10 +208,7 @@ mod put {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { created }).unwrap()),
-        )
+        ApiResponse::json(Response { created }).ok()
     }
 }
 

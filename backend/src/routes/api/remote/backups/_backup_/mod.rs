@@ -1,14 +1,14 @@
 use super::State;
 use crate::{
     models::server_backup::ServerBackup,
-    routes::{ApiError, GetState, api::remote::GetNode},
+    response::ApiResponse,
+    routes::{GetState, api::remote::GetNode},
 };
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -25,16 +25,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let backup = ServerBackup::by_node_id_uuid(&state.database, node.id, backup).await;
     let backup = match backup {
-        Some(backup) => backup,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["backup not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(backup)) => backup,
+        Ok(None) => {
+            return Ok(ApiResponse::error("backup not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(backup);
@@ -49,6 +46,7 @@ mod get {
             server::Server,
             server_backup::{BackupDisk, ServerBackup},
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::remote::{GetNode, backups::_backup_::GetBackup},
@@ -90,32 +88,29 @@ mod get {
         node: GetNode,
         backup: GetBackup,
         Query(params): Query<Params>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if backup.disk != BackupDisk::S3 {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["backup is not stored on S3"])),
-            );
+            return ApiResponse::error("backup is not stored on S3")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         let mut s3_configuration = match node.0.location.backup_configs.s3 {
             Some(config) => config,
             None => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["S3 configuration not found"])),
-                );
+                return ApiResponse::error("S3 configuration not found")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         };
         s3_configuration.decrypt(&state.database);
 
-        let server = match Server::by_id(&state.database, backup.server_id).await {
+        let server = match Server::by_id(&state.database, backup.server_id).await? {
             Some(server) => server,
             None => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["server not found"])),
-                );
+                return ApiResponse::error("server not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
@@ -134,10 +129,9 @@ mod get {
                     err
                 );
 
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["failed to create S3 client"])),
-                );
+                return ApiResponse::error("failed to create S3 client")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         };
 
@@ -157,17 +151,14 @@ mod get {
                     err
                 );
 
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&[
-                        "failed to initiate multipart upload",
-                    ])),
-                );
+                return ApiResponse::error("failed to initiate multipart upload")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         };
 
         for i in 0..part_count {
-            let url = match client
+            let url = client
                 .presign_put(
                     &file_path,
                     60 * 60 * 24,
@@ -177,23 +168,7 @@ mod get {
                         ("uploadId".to_string(), multipart.upload_id.clone()),
                     ])),
                 )
-                .await
-            {
-                Ok(url) => url,
-                Err(err) => {
-                    tracing::error!(
-                        backup = %backup.uuid,
-                        location = %node.0.location.name,
-                        "failed to presign post: {:#?}",
-                        err
-                    );
-
-                    return (
-                        StatusCode::EXPECTATION_FAILED,
-                        axum::Json(ApiError::new_value(&["failed to presign post"])),
-                    );
-                }
-            };
+                .await?;
 
             parts.push(url);
         }
@@ -206,13 +181,9 @@ mod get {
             backup.uuid
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { parts, part_size }).unwrap()),
-        )
+        ApiResponse::json(Response { parts, part_size }).ok()
     }
 }
 
@@ -223,6 +194,7 @@ mod post {
             server_activity::ServerActivity,
             server_backup::{BackupDisk, ServerBackup},
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::remote::{GetNode, backups::_backup_::GetBackup},
@@ -266,36 +238,33 @@ mod post {
         node: GetNode,
         backup: GetBackup,
         axum::Json(mut data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if backup.disk == BackupDisk::S3 {
             let upload_id = match backup.0.upload_id {
                 Some(id) => id,
                 None => {
-                    return (
-                        StatusCode::EXPECTATION_FAILED,
-                        axum::Json(ApiError::new_value(&["upload ID not found"])),
-                    );
+                    return ApiResponse::error("upload ID not found")
+                        .with_status(StatusCode::EXPECTATION_FAILED)
+                        .ok();
                 }
             };
 
             let mut s3_configuration = match node.0.location.backup_configs.s3 {
                 Some(config) => config,
                 None => {
-                    return (
-                        StatusCode::EXPECTATION_FAILED,
-                        axum::Json(ApiError::new_value(&["S3 configuration not found"])),
-                    );
+                    return ApiResponse::error("S3 configuration not found")
+                        .with_status(StatusCode::EXPECTATION_FAILED)
+                        .ok();
                 }
             };
             s3_configuration.decrypt(&state.database);
 
-            let server = match Server::by_id(&state.database, backup.0.server_id).await {
+            let server = match Server::by_id(&state.database, backup.0.server_id).await? {
                 Some(server) => server,
                 None => {
-                    return (
-                        StatusCode::EXPECTATION_FAILED,
-                        axum::Json(ApiError::new_value(&["server not found"])),
-                    );
+                    return ApiResponse::error("server not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
@@ -309,10 +278,9 @@ mod post {
                         err
                     );
 
-                    return (
-                        StatusCode::EXPECTATION_FAILED,
-                        axum::Json(ApiError::new_value(&["failed to create S3 client"])),
-                    );
+                    return ApiResponse::error("failed to create S3 client")
+                        .with_status(StatusCode::EXPECTATION_FAILED)
+                        .ok();
                 }
             };
 
@@ -382,8 +350,7 @@ mod post {
                 backup.0.uuid
             )
             .execute(state.database.write())
-            .await
-            .unwrap();
+            .await?;
         } else {
             sqlx::query!(
                 "UPDATE server_backups
@@ -392,8 +359,7 @@ mod post {
                 backup.0.uuid
             )
             .execute(state.database.write())
-            .await
-            .unwrap();
+            .await?;
         }
 
         if let Err(err) = ServerActivity::log(
@@ -421,10 +387,7 @@ mod post {
             );
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

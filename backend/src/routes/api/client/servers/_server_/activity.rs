@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_activity::ServerActivity},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -43,12 +44,11 @@ mod get {
         state: GetState,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let activities = ServerActivity::by_server_id_with_pagination(
@@ -58,26 +58,21 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    activities: Pagination {
-                        total: activities.total,
-                        per_page: activities.per_page,
-                        page: activities.page,
-                        data: activities
-                            .data
-                            .into_iter()
-                            .map(|activity| activity.into_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            activities: Pagination {
+                total: activities.total,
+                per_page: activities.per_page,
+                page: activities.page,
+                data: activities
+                    .data
+                    .into_iter()
+                    .map(|activity| activity.into_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 

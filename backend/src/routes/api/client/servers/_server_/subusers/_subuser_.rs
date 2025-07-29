@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::server_subuser::ServerSubuser,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -38,31 +39,25 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, subuser)): Path<(String, String)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("subusers.delete") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::json(ApiError::new_value(&[&error]))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        let subuser = match ServerSubuser::by_server_id_username(
-            &state.database,
-            server.id,
-            &subuser,
-        )
-        .await
-        {
-            Some(subuser) => subuser,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["subuser not found"])),
-                );
-            }
-        };
+        let subuser =
+            match ServerSubuser::by_server_id_username(&state.database, server.id, &subuser).await?
+            {
+                Some(subuser) => subuser,
+                None => {
+                    return ApiResponse::error("subuser not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
-        ServerSubuser::delete_by_ids(&state.database, server.id, subuser.user.id).await;
+        ServerSubuser::delete_by_ids(&state.database, server.id, subuser.user.id).await?;
 
         activity_logger
             .log(
@@ -113,16 +108,14 @@ mod delete {
             }
         });
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
     use crate::{
         models::server_subuser::ServerSubuser,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{
@@ -171,12 +164,11 @@ mod patch {
         activity_logger: GetServerActivityLogger,
         Path((_server, subuser)): Path<(String, String)>,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(permissions) = &data.permissions {
@@ -184,43 +176,33 @@ mod patch {
                 && let Some(subuser_permissions) = &server.subuser_permissions
                 && !permissions.iter().all(|p| subuser_permissions.contains(p))
             {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[
-                        "permissions: more permissions than self",
-                    ])),
-                );
+                return ApiResponse::error("permissions: more permissions than self")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         }
 
         if let Err(error) = server.has_permission("subusers.update") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        let mut subuser = match ServerSubuser::by_server_id_username(
-            &state.database,
-            server.id,
-            &subuser,
-        )
-        .await
-        {
-            Some(subuser) => subuser,
-            None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["subuser not found"])),
-                );
-            }
-        };
+        let mut subuser =
+            match ServerSubuser::by_server_id_username(&state.database, server.id, &subuser).await?
+            {
+                Some(subuser) => subuser,
+                None => {
+                    return ApiResponse::error("subuser not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
         if subuser.user.id == user.id {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["cannot update permissions for self"])),
-            );
+            return ApiResponse::error("cannot update permissions for self")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(permissions) = data.permissions {
@@ -240,8 +222,7 @@ mod patch {
             subuser.user.id,
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log(
@@ -280,10 +261,7 @@ mod patch {
             }
         });
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

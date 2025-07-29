@@ -6,6 +6,7 @@ mod _nest_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, nest::Nest},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -39,12 +40,11 @@ mod get {
     pub async fn route(
         state: GetState,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let nests = Nest::all_with_pagination(
@@ -53,32 +53,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    nests: Pagination {
-                        total: nests.total,
-                        per_page: nests.per_page,
-                        page: nests.page,
-                        data: nests
-                            .data
-                            .into_iter()
-                            .map(|nest| nest.into_admin_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            nests: Pagination {
+                total: nests.total,
+                per_page: nests.per_page,
+                page: nests.page,
+                data: nests
+                    .data
+                    .into_iter()
+                    .map(|nest| nest.into_admin_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::nest::Nest,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
@@ -113,12 +109,11 @@ mod post {
         state: GetState,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let nest = match Nest::create(
@@ -131,18 +126,16 @@ mod post {
         {
             Ok(nest) => nest,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["nest with name already exists"])),
-                );
+                return ApiResponse::error("nest with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create nest: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create nest"])),
-                );
+                return ApiResponse::error("failed to create nest")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -157,15 +150,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    nest: nest.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            nest: nest.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 

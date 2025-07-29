@@ -2,8 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::models::server_subuser::PERMISSIONS;
-    use axum::http::StatusCode;
+    use crate::{
+        models::server_subuser::PERMISSIONS,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use indexmap::IndexMap;
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -17,16 +19,11 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route() -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    subuser_permissions: &PERMISSIONS,
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route() -> ApiResponseResult {
+        ApiResponse::json(Response {
+            subuser_permissions: &PERMISSIONS,
+        })
+        .ok()
     }
 }
 

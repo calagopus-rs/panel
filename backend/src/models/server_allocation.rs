@@ -101,7 +101,10 @@ impl ServerAllocation {
         Ok(row.get("id"))
     }
 
-    pub async fn by_id(database: &crate::database::Database, id: i32) -> Option<Self> {
+    pub async fn by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -113,17 +116,16 @@ impl ServerAllocation {
         ))
         .bind(id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_server_id_id(
         database: &crate::database::Database,
         server_id: i32,
         allocation_id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -136,10 +138,9 @@ impl ServerAllocation {
         .bind(server_id)
         .bind(allocation_id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_server_id_with_pagination(
@@ -147,7 +148,7 @@ impl ServerAllocation {
         server_id: i32,
         page: i64,
         per_page: i64,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -165,15 +166,14 @@ impl ServerAllocation {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
     pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
@@ -190,7 +190,10 @@ impl ServerAllocation {
         .unwrap_or(0)
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM server_allocations
@@ -199,8 +202,9 @@ impl ServerAllocation {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::Pagination,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -61,26 +62,23 @@ mod get {
         state: GetState,
         mut server: GetServer,
         Query(params): Query<Params>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("files.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if server.is_ignored(&params.directory, true) {
-            return (
-                StatusCode::NOT_FOUND,
-                axum::Json(ApiError::new_value(&["directory not found"])),
-            );
+            return ApiResponse::error("directory not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok();
         }
 
         let entries = match server
@@ -97,35 +95,28 @@ mod get {
         {
             Ok(data) => data,
             Err((StatusCode::NOT_FOUND, err)) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
             Err((_, err)) => {
-                tracing::error!(server = %server.0.uuid, "failed to get server files: {:#?}", err);
+                tracing::error!(server = %server.0.uuid, "failed to list server files: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to list server files"])),
-                );
+                return ApiResponse::error("failed to list server files")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    entries: Pagination {
-                        total: entries.total as i64,
-                        per_page: params.per_page,
-                        page: params.page,
-                        data: entries.entries,
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            entries: Pagination {
+                total: entries.total as i64,
+                per_page: params.per_page,
+                page: params.page,
+                data: entries.entries,
+            },
+        })
+        .ok()
     }
 }
 

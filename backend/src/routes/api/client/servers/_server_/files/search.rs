@@ -2,7 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{ApiError, GetState, api::client::servers::_server_::GetServer};
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -40,19 +43,17 @@ mod post {
         state: GetState,
         mut server: GetServer,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("files.create") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if server.is_ignored(&data.root, true) {
-            return (
-                StatusCode::NOT_FOUND,
-                axum::Json(ApiError::new_value(&["root not found"])),
-            );
+            return ApiResponse::error("root not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok();
         }
 
         let request_body = wings_api::servers_server_files_search::post::RequestBody {
@@ -71,31 +72,25 @@ mod post {
         {
             Ok(data) => data.results,
             Err((StatusCode::NOT_FOUND, err)) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
             Err((StatusCode::EXPECTATION_FAILED, err)) => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to search server files: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to search server files"])),
-                );
+                return ApiResponse::error("failed to search server files")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response { entries }).unwrap()),
-        )
+        ApiResponse::json(Response { entries }).ok()
     }
 }
 

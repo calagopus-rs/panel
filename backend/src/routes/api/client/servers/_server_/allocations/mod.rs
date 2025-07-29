@@ -6,6 +6,7 @@ mod _allocation_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParams, server_allocation::ServerAllocation},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -42,19 +43,17 @@ mod get {
         state: GetState,
         server: GetServer,
         Query(params): Query<PaginationParams>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("allocations.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let allocations = ServerAllocation::by_server_id_with_pagination(
@@ -63,34 +62,30 @@ mod get {
             params.page,
             params.per_page,
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    allocations: Pagination {
-                        total: allocations.total,
-                        per_page: allocations.per_page,
-                        page: allocations.page,
-                        data: allocations
-                            .data
-                            .into_iter()
-                            .map(|allocation| {
-                                allocation.into_api_object(server.allocation.as_ref().map(|a| a.id))
-                            })
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            allocations: Pagination {
+                total: allocations.total,
+                per_page: allocations.per_page,
+                page: allocations.page,
+                data: allocations
+                    .data
+                    .into_iter()
+                    .map(|allocation| {
+                        allocation.into_api_object(server.allocation.as_ref().map(|a| a.id))
+                    })
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::server_allocation::ServerAllocation,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -121,50 +116,41 @@ mod post {
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("allocations.create") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let allocations = ServerAllocation::count_by_server_id(&state.database, server.id).await;
         if allocations >= server.allocation_limit as i64 {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[
-                    "maximum number of allocations reached",
-                ])),
-            );
+            return ApiResponse::error("maximum number of allocations reached")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         if !server.egg.config_allocations.user_self_assign.enabled {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[
-                    "self-assigning allocations is not enabled for this server",
-                ])),
-            );
+            return ApiResponse::error("self-assigning allocations is not enabled for this server")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         let allocation = match ServerAllocation::create_random(&state.database, &server).await {
             Ok(allocation_id) => ServerAllocation::by_id(&state.database, allocation_id)
-                .await
-                .unwrap(),
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("allocation not found after creation"))?,
             Err(err) if err.to_string().contains("null value in column") => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["no node allocations are available"])),
-                );
+                return ApiResponse::error("no node allocations are available")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!(server = %server.uuid, "failed to create allocation: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create allocation"])),
-                );
+                return ApiResponse::error("failed to create allocation")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -179,16 +165,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    allocation: allocation
-                        .into_api_object(server.allocation.as_ref().map(|a| a.id)),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            allocation: allocation.into_api_object(server.allocation.as_ref().map(|a| a.id)),
+        })
+        .ok()
     }
 }
 

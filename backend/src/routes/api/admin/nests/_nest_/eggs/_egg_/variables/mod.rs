@@ -6,9 +6,9 @@ mod _variable_;
 mod get {
     use crate::{
         models::nest_egg_variable::NestEggVariable,
+        response::{ApiResponse, ApiResponseResult},
         routes::{GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -31,30 +31,23 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        egg: GetNestEgg,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let variables = NestEggVariable::all_by_egg_id(&state.database, egg.id).await;
+    pub async fn route(state: GetState, egg: GetNestEgg) -> ApiResponseResult {
+        let variables = NestEggVariable::all_by_egg_id(&state.database, egg.id).await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    variables: variables
-                        .into_iter()
-                        .map(|variable| variable.into_admin_api_object())
-                        .collect(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            variables: variables
+                .into_iter()
+                .map(|variable| variable.into_admin_api_object())
+                .collect(),
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::nest_egg_variable::NestEggVariable,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
@@ -114,12 +107,11 @@ mod post {
         egg: GetNestEgg,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let egg_variable = match NestEggVariable::create(
@@ -138,18 +130,16 @@ mod post {
         {
             Ok(variable) => variable,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["variable with name already exists"])),
-                );
+                return ApiResponse::error("variable with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create variable: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create variable"])),
-                );
+                return ApiResponse::error("failed to create variable")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -173,15 +163,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    variable: egg_variable.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            variable: egg_variable.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 

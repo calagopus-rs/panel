@@ -342,7 +342,7 @@ pub struct SettingsGuard<'a> {
 }
 
 impl<'a> SettingsGuard<'a> {
-    pub async fn save(self) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    pub async fn save(self) -> Result<(), sqlx::Error> {
         let (keys, values) = self.settings.serialize(&self.database);
         drop(self.settings);
 

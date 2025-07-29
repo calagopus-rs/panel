@@ -1,6 +1,14 @@
-use super::{ApiError, GetState, State};
-use crate::models::{user::User, user_api_key::UserApiKey, user_session::UserSession};
-use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
+use super::{GetState, State};
+use crate::{
+    models::{user::User, user_api_key::UserApiKey, user_session::UserSession},
+    response::ApiResponse,
+};
+use axum::{
+    extract::Request,
+    http::StatusCode,
+    middleware::Next,
+    response::{IntoResponse, Response},
+};
 use std::sync::Arc;
 use tower_cookies::{Cookie, Cookies};
 use utoipa_axum::router::OpenApiRouter;
@@ -57,28 +65,20 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     if let Some(session_id) = cookies.get("session") {
         if session_id.value().len() != 81 {
-            return Ok(Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["invalid authorization cookie"]))
-                        .unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error("invalid authorization cookie")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .into_response());
         }
 
         let user = User::by_session(&state.database, session_id.value()).await;
         let (user, session) = match user {
-            Some(data) => data,
-            None => {
-                return Ok(Response::builder()
-                    .status(StatusCode::UNAUTHORIZED)
-                    .header("Content-Type", "application/json")
-                    .body(Body::from(
-                        serde_json::to_string(&ApiError::new_value(&["invalid session"])).unwrap(),
-                    ))
-                    .unwrap());
+            Ok(Some(data)) => data,
+            Ok(None) => {
+                return Ok(ApiResponse::error("invalid session")
+                    .with_status(StatusCode::UNAUTHORIZED)
+                    .into_response());
             }
+            Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
         tokio::spawn({
@@ -132,14 +132,9 @@ pub async fn auth(
         req.extensions_mut().insert(AuthMethod::Session(session));
     } else if let Some(api_token) = req.headers().get("Authorization") {
         if api_token.len() != 55 {
-            return Ok(Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["invalid authorization header"]))
-                        .unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error("invalid authorization header")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .into_response());
         }
 
         let user = User::by_api_key(
@@ -151,16 +146,13 @@ pub async fn auth(
         )
         .await;
         let (user, api_key) = match user {
-            Some(data) => data,
-            None => {
-                return Ok(Response::builder()
-                    .status(StatusCode::UNAUTHORIZED)
-                    .header("Content-Type", "application/json")
-                    .body(Body::from(
-                        serde_json::to_string(&ApiError::new_value(&["invalid api key"])).unwrap(),
-                    ))
-                    .unwrap());
+            Ok(Some(data)) => data,
+            Ok(None) => {
+                return Ok(ApiResponse::error("invalid api key")
+                    .with_status(StatusCode::UNAUTHORIZED)
+                    .into_response());
             }
+            Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
         tokio::spawn({
@@ -190,14 +182,9 @@ pub async fn auth(
         req.extensions_mut().insert(user);
         req.extensions_mut().insert(AuthMethod::ApiKey(api_key));
     } else {
-        return Ok(Response::builder()
-            .status(StatusCode::UNAUTHORIZED)
-            .header("Content-Type", "application/json")
-            .body(Body::from(
-                serde_json::to_string(&ApiError::new_value(&["invalid authorization method"]))
-                    .unwrap(),
-            ))
-            .unwrap());
+        return Ok(ApiResponse::error("missing authorization")
+            .with_status(StatusCode::UNAUTHORIZED)
+            .into_response());
     }
 
     Ok(next.run(req).await)

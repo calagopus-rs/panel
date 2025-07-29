@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::{GetUser, GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetUser, GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -34,38 +37,44 @@ mod put {
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if !user
             .validate_password(&state.database, &data.password)
-            .await
+            .await?
         {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&["invalid password"])),
-            );
+            return ApiResponse::error("invalid password")
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if user.email != data.email {
-            if sqlx::query!(
+            match sqlx::query!(
                 "UPDATE users SET email = $1 WHERE id = $2",
                 data.email,
                 user.id
             )
             .execute(state.database.write())
             .await
-            .is_err()
             {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["user with email already exists"])),
-                );
+                Ok(_) => {}
+                Err(err) if err.to_string().contains("unique constraint") => {
+                    return ApiResponse::error("email already in use")
+                        .with_status(StatusCode::CONFLICT)
+                        .ok();
+                }
+                Err(err) => {
+                    tracing::error!("failed to update user email: {:#?}", err);
+
+                    return ApiResponse::error("failed to update user email")
+                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .ok();
+                }
             }
 
             activity_logger
@@ -79,10 +88,7 @@ mod put {
                 .await;
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

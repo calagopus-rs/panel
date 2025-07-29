@@ -2,8 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{GetState, api::remote::GetNode};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{GetState, api::remote::GetNode},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -13,10 +15,7 @@ mod post {
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route(
-        state: GetState,
-        node: GetNode,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, node: GetNode) -> ApiResponseResult {
         let (_, backups) = tokio::try_join!(
             sqlx::query!(
                 "UPDATE servers
@@ -32,8 +31,7 @@ mod post {
                 node.id
             )
             .fetch_all(state.database.read()),
-        )
-        .unwrap();
+        )?;
 
         sqlx::query!(
             "UPDATE server_backups
@@ -42,13 +40,9 @@ mod post {
             &backups.into_iter().map(|b| b.id).collect::<Vec<_>>()
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

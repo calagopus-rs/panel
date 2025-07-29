@@ -4,9 +4,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::{server_activity::ServerActivity, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
-    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -38,7 +38,7 @@ mod post {
     pub async fn route(
         state: GetState,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         for activity in data.data {
             if let Err(err) = ServerActivity::log_remote(
                 &state.database,
@@ -60,10 +60,7 @@ mod post {
             }
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

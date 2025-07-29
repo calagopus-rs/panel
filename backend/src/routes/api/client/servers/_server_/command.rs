@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -36,19 +39,17 @@ mod post {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("control.console") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let request_body = wings_api::servers_server_commands::post::RequestBody {
@@ -65,10 +66,9 @@ mod post {
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to post server command: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to send command to server"])),
-                );
+                return ApiResponse::error("failed to send command to server")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -81,10 +81,7 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

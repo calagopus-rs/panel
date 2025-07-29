@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::Serialize;
@@ -28,15 +31,14 @@ mod post {
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("settings.reinstall") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
-        let mut transaction = state.database.write().begin().await.unwrap();
+        let mut transaction = state.database.write().begin().await?;
 
         let rows_affected = sqlx::query!(
             "UPDATE servers
@@ -45,19 +47,15 @@ mod post {
             server.id
         )
         .execute(&mut *transaction)
-        .await
-        .unwrap()
+        .await?
         .rows_affected();
 
         if rows_affected == 0 {
-            transaction.rollback().await.unwrap();
+            transaction.rollback().await?;
 
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&[
-                    "server is not in a valid state to reinstall.",
-                ])),
-            );
+            return ApiResponse::error("server is not in a valid state to reinstall.")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         match server
@@ -68,26 +66,22 @@ mod post {
         {
             Ok(_) => {}
             Err((_, err)) => {
-                transaction.rollback().await.unwrap();
+                transaction.rollback().await?;
                 tracing::error!(server = %server.uuid, "failed to reinstall server: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to reinstall server"])),
-                );
+                return ApiResponse::error("failed to reinstall server")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
-        transaction.commit().await.unwrap();
+        transaction.commit().await?;
 
         activity_logger
             .log("server:settings.reinstall", serde_json::json!({}))
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

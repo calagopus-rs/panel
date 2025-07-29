@@ -78,7 +78,7 @@ impl UserSshKey {
         database: &crate::database::Database,
         user_id: i32,
         fingerprint: String,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -94,10 +94,9 @@ impl UserSshKey {
             format!("SHA256:{fingerprint}")
         })
         .fetch_optional(database.read())
-        .await
-        .unwrap()?;
+        .await?;
 
-        Some(Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_user_id_with_pagination(
@@ -106,7 +105,7 @@ impl UserSshKey {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -124,18 +123,20 @@ impl UserSshKey {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_ssh_keys
@@ -144,8 +145,9 @@ impl UserSshKey {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

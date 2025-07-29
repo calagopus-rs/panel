@@ -75,7 +75,7 @@ impl UserRecoveryCode {
         database: &crate::database::Database,
         user_id: i32,
         code: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             DELETE FROM user_recovery_codes
@@ -87,13 +87,15 @@ impl UserRecoveryCode {
         .bind(user_id)
         .bind(code)
         .fetch_optional(database.write())
-        .await
-        .unwrap()?;
+        .await?;
 
-        Some(Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn delete_by_user_id(database: &crate::database::Database, user_id: i32) {
+    pub async fn delete_by_user_id(
+        database: &crate::database::Database,
+        user_id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_recovery_codes
@@ -102,7 +104,8 @@ impl UserRecoveryCode {
         )
         .bind(user_id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 }

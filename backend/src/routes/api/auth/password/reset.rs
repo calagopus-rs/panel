@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::{user_activity::UserActivity, user_password_reset::UserPasswordReset},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::http::StatusCode;
@@ -32,21 +33,19 @@ mod post {
         state: GetState,
         ip: crate::GetIp,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let token = match UserPasswordReset::delete_by_token(&state.database, &data.token).await {
+        let token = match UserPasswordReset::delete_by_token(&state.database, &data.token).await? {
             Some(token) => token,
             None => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["invalid or expired token"])),
-                );
+                return ApiResponse::error("invalid or expired token")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
         };
 
@@ -70,13 +69,9 @@ mod post {
         token
             .user
             .update_password(&state.database, &data.new_password)
-            .await
-            .unwrap();
+            .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

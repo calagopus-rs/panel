@@ -62,7 +62,7 @@ impl NodeMount {
         database: &crate::database::Database,
         node_id: i32,
         mount_id: i32,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -75,10 +75,9 @@ impl NodeMount {
         .bind(node_id)
         .bind(mount_id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_node_id_with_pagination(
@@ -87,7 +86,7 @@ impl NodeMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> crate::models::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -106,18 +105,21 @@ impl NodeMount {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn delete_by_ids(database: &crate::database::Database, node_id: i32, mount_id: i32) {
+    pub async fn delete_by_ids(
+        database: &crate::database::Database,
+        node_id: i32,
+        mount_id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM node_mounts
@@ -129,8 +131,9 @@ impl NodeMount {
         .bind(node_id)
         .bind(mount_id)
         .execute(database.write())
-        .await
-        .unwrap();
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

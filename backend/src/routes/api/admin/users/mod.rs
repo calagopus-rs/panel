@@ -6,6 +6,7 @@ mod _user_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -39,12 +40,11 @@ mod get {
     pub async fn route(
         state: GetState,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let users = User::all_with_pagination(
@@ -53,32 +53,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    users: Pagination {
-                        total: users.total,
-                        per_page: users.per_page,
-                        page: users.page,
-                        data: users
-                            .data
-                            .into_iter()
-                            .map(|user| user.into_api_object(true))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            users: Pagination {
+                total: users.total,
+                per_page: users.per_page,
+                page: users.page,
+                data: users
+                    .data
+                    .into_iter()
+                    .map(|user| user.into_api_object(true))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::user::User,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
@@ -125,12 +121,11 @@ mod post {
         state: GetState,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let user = match User::create(
@@ -146,20 +141,14 @@ mod post {
         {
             Ok(user) => user,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "user with email/username already exists",
-                    ])),
-                );
+                return ApiResponse::error("user with email/username already exists").ok();
             }
             Err(err) => {
                 tracing::error!("failed to create user: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create user"])),
-                );
+                return ApiResponse::error("failed to create user")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -177,15 +166,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.into_api_object(true),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            user: user.into_api_object(true),
+        })
+        .ok()
     }
 }
 

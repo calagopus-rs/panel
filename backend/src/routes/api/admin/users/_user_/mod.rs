@@ -1,14 +1,10 @@
 use super::State;
-use crate::{
-    models::user::User,
-    routes::{ApiError, GetState},
-};
+use crate::{models::user::User, response::ApiResponse, routes::GetState};
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use std::ops::{Deref, DerefMut};
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -42,16 +38,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let user = User::by_id(&state.database, user).await;
     let user = match user {
-        Some(user) => user,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["user not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            return Ok(ApiResponse::error("user not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(ParamUser(user));
@@ -60,8 +53,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, api::admin::users::_user_::GetParamUser};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, api::admin::users::_user_::GetParamUser},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -80,22 +75,18 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(user: GetParamUser) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.0.0.into_api_object(true),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(user: GetParamUser) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            user: user.0.0.into_api_object(true),
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::{server::Server, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::users::_user_::GetParamUser, client::GetUserActivityLogger},
@@ -122,16 +113,15 @@ mod delete {
         state: GetState,
         user: GetParamUser,
         activity_logger: GetUserActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let servers = Server::count_by_user_id(&state.database, user.id).await;
         if servers > 0 {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["user has servers, cannot delete"])),
-            );
+            return ApiResponse::error("user has servers, cannot delete")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        User::delete_by_id(&state.database, user.id).await;
+        User::delete_by_id(&state.database, user.id).await?;
 
         activity_logger
             .log(
@@ -147,17 +137,17 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
-    use crate::routes::{
-        ApiError, GetState,
-        api::{admin::users::_user_::GetParamUser, client::GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::{admin::users::_user_::GetParamUser, client::GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -209,12 +199,11 @@ mod patch {
         mut user: GetParamUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(username) = data.username {
@@ -234,10 +223,10 @@ mod patch {
                 Ok(_) => {}
                 Err(err) => {
                     tracing::error!("failed to update user password: {:#?}", err);
-                    return (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        axum::Json(ApiError::new_value(&["failed to update user password"])),
-                    );
+
+                    return ApiResponse::error("failed to update user password")
+                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .ok();
                 }
             }
         }
@@ -261,20 +250,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&[
-                        "user with email/username already exists",
-                    ])),
-                );
+                return ApiResponse::error("user with email/username already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update user: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update user"])),
-                );
+                return ApiResponse::error("failed to update user")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -292,10 +277,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

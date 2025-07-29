@@ -1,14 +1,10 @@
 use super::State;
-use crate::{
-    models::location::Location,
-    routes::{ApiError, GetState},
-};
+use crate::{models::location::Location, response::ApiResponse, routes::GetState};
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -25,16 +21,13 @@ pub async fn auth(
 ) -> Result<Response, StatusCode> {
     let location = Location::by_id(&state.database, location).await;
     let location = match location {
-        Some(location) => location,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["location not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(location)) => location,
+        Ok(None) => {
+            return Ok(ApiResponse::error("location not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(location);
@@ -43,8 +36,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -63,25 +58,18 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        location: GetLocation,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    location: location.0.into_admin_api_object(&state.database),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(state: GetState, location: GetLocation) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            location: location.0.into_admin_api_object(&state.database),
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::location::Location,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
@@ -108,15 +96,14 @@ mod delete {
         state: GetState,
         location: GetLocation,
         activity_logger: GetUserActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if location.nodes > 0 {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["location has nodes, cannot delete"])),
-            );
+            return ApiResponse::error("location has nodes, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
         }
 
-        Location::delete_by_id(&state.database, location.id).await;
+        Location::delete_by_id(&state.database, location.id).await?;
 
         activity_logger
             .log(
@@ -128,17 +115,17 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
-    use crate::routes::{
-        ApiError, GetState,
-        api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -181,12 +168,11 @@ mod patch {
         mut location: GetLocation,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(name) = data.name {
@@ -218,7 +204,7 @@ mod patch {
             location.name,
             location.description,
             location.backup_disk as crate::models::server_backup::BackupDisk,
-            serde_json::to_value(&location.backup_configs).unwrap(),
+            serde_json::to_value(&location.backup_configs)?,
             location.id,
         )
         .execute(state.database.write())
@@ -226,18 +212,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["location with name already exists"])),
-                );
+                return ApiResponse::error("location with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update location: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update location"])),
-                );
+                return ApiResponse::error("failed to update location")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -257,10 +241,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

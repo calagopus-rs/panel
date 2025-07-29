@@ -5,6 +5,7 @@ mod get {
     use crate::{
         jwt::BasePayload,
         models::server_backup::{BackupDisk, ServerBackup},
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{
@@ -47,19 +48,17 @@ mod get {
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("backups.download") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if backup.completed.is_none() {
-            return (
-                StatusCode::EXPECTATION_FAILED,
-                axum::Json(ApiError::new_value(&["backup has not been completed yet"])),
-            );
+            return ApiResponse::error("backup has not been completed yet")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
         }
 
         if matches!(backup.disk, BackupDisk::S3) {
@@ -71,15 +70,14 @@ mod get {
                     Err(err) => {
                         tracing::error!("Failed to create S3 client: {:#?}", err);
 
-                        return (
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            axum::Json(ApiError::new_value(&["failed to download s3 backup"])),
-                        );
+                        return ApiResponse::error("failed to download s3 backup")
+                            .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                            .ok();
                     }
                 };
                 let file_path = ServerBackup::s3_path(server.uuid, backup.uuid);
 
-                let url = client.presign_get(file_path, 15 * 60, None).await.unwrap();
+                let url = client.presign_get(file_path, 15 * 60, None).await?;
 
                 activity_logger
                     .log(
@@ -91,10 +89,7 @@ mod get {
                     )
                     .await;
 
-                return (
-                    StatusCode::OK,
-                    axum::Json(serde_json::to_value(Response { url }).unwrap()),
-                );
+                return ApiResponse::json(Response { url }).ok();
             }
         }
 
@@ -108,27 +103,24 @@ mod get {
             unique_id: uuid::Uuid,
         }
 
-        let token = server
-            .node
-            .create_jwt(
-                &state.database,
-                &state.jwt,
-                &BackupDownloadJwt {
-                    base: BasePayload {
-                        issuer: "panel".into(),
-                        subject: None,
-                        audience: Vec::new(),
-                        expiration_time: Some(chrono::Utc::now().timestamp() + 900),
-                        not_before: None,
-                        issued_at: Some(chrono::Utc::now().timestamp()),
-                        jwt_id: user.id.to_string(),
-                    },
-                    backup_uuid: backup.uuid,
-                    server_uuid: server.uuid,
-                    unique_id: uuid::Uuid::new_v4(),
+        let token = server.node.create_jwt(
+            &state.database,
+            &state.jwt,
+            &BackupDownloadJwt {
+                base: BasePayload {
+                    issuer: "panel".into(),
+                    subject: None,
+                    audience: Vec::new(),
+                    expiration_time: Some(chrono::Utc::now().timestamp() + 900),
+                    not_before: None,
+                    issued_at: Some(chrono::Utc::now().timestamp()),
+                    jwt_id: user.id.to_string(),
                 },
-            )
-            .unwrap();
+                backup_uuid: backup.uuid,
+                server_uuid: server.uuid,
+                unique_id: uuid::Uuid::new_v4(),
+            },
+        )?;
 
         let mut url = server.node.public_url();
         url.set_path("/download/backup");
@@ -144,15 +136,10 @@ mod get {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    url: url.to_string(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            url: url.to_string(),
+        })
+        .ok()
     }
 }
 

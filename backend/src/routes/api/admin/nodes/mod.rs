@@ -6,6 +6,7 @@ mod _node_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, node::Node},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -39,12 +40,11 @@ mod get {
     pub async fn route(
         state: GetState,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let nodes = Node::all_with_pagination(
@@ -53,32 +53,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    nodes: Pagination {
-                        total: nodes.total,
-                        per_page: nodes.per_page,
-                        page: nodes.page,
-                        data: nodes
-                            .data
-                            .into_iter()
-                            .map(|node| node.into_admin_api_object(&state.database))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            nodes: Pagination {
+                total: nodes.total,
+                per_page: nodes.per_page,
+                page: nodes.page,
+                data: nodes
+                    .data
+                    .into_iter()
+                    .map(|node| node.into_admin_api_object(&state.database))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::{location::Location, node::Node},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUserActivityLogger},
     };
     use axum::http::StatusCode;
@@ -128,21 +124,19 @@ mod post {
         state: GetState,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
-        let location = match Location::by_id(&state.database, data.location_id).await {
+        let location = match Location::by_id(&state.database, data.location_id).await? {
             Some(location) => location,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["location not found"])),
-                );
+                return ApiResponse::error("location not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
@@ -161,20 +155,20 @@ mod post {
         )
         .await
         {
-            Ok(node_id) => Node::by_id(&state.database, node_id).await.unwrap(),
+            Ok(node_id) => Node::by_id(&state.database, node_id)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("node not found after creation"))?,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["node with name already exists"])),
-                );
+                return ApiResponse::error("node with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create node: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create node"])),
-                );
+                return ApiResponse::error("failed to create node")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -197,15 +191,10 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    node: node.into_admin_api_object(&state.database),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            node: node.into_admin_api_object(&state.database),
+        })
+        .ok()
     }
 }
 

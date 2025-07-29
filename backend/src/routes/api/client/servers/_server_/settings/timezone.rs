@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -35,12 +38,11 @@ mod put {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("settings.timezone") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         sqlx::query!(
@@ -51,8 +53,7 @@ mod put {
             server.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log(
@@ -63,10 +64,7 @@ mod put {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

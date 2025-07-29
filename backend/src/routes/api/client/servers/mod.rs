@@ -6,6 +6,7 @@ mod _server_;
 mod get {
     use crate::{
         models::{Pagination, server::Server},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -65,12 +66,11 @@ mod get {
         state: GetState,
         user: GetUser,
         Query(params): Query<Params>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let servers = if params.other && user.admin {
@@ -91,26 +91,21 @@ mod get {
                 params.search.as_deref(),
             )
             .await
-        };
+        }?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    servers: Pagination {
-                        total: servers.total,
-                        per_page: servers.per_page,
-                        page: servers.page,
-                        data: servers
-                            .data
-                            .into_iter()
-                            .map(|server| server.into_api_object(&user))
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            servers: Pagination {
+                total: servers.total,
+                per_page: servers.per_page,
+                page: servers.page,
+                data: servers
+                    .data
+                    .into_iter()
+                    .map(|server| server.into_api_object(&user))
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 

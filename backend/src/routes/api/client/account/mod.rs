@@ -11,8 +11,11 @@ mod ssh_keys;
 mod two_factor;
 
 mod get {
-    use crate::{models::user::ApiUser, routes::api::client::GetUser};
-    use axum::http::StatusCode;
+    use crate::{
+        models::user::ApiUser,
+        response::{ApiResponse, ApiResponseResult},
+        routes::api::client::GetUser,
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -24,16 +27,11 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route(user: GetUser) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.0.into_api_object(true),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(user: GetUser) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            user: user.0.into_api_object(true),
+        })
+        .ok()
     }
 }
 

@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         models::location_database_host::LocationDatabaseHost,
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::http::StatusCode;
@@ -25,35 +26,26 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let database_hosts = LocationDatabaseHost::all_public_by_location_id(
             &state.database,
             server.node.location.id,
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    database_hosts: database_hosts
-                        .into_iter()
-                        .map(|host| host.database_host.into_api_object())
-                        .collect(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            database_hosts: database_hosts
+                .into_iter()
+                .map(|host| host.database_host.into_api_object())
+                .collect(),
+        })
+        .ok()
     }
 }
 

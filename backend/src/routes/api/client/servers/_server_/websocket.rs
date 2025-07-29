@@ -4,12 +4,12 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         jwt::BasePayload,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             GetState,
             api::client::{GetUser, servers::_server_::GetServer},
         },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -29,11 +29,7 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        user: GetUser,
-        server: GetServer,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    pub async fn route(state: GetState, user: GetUser, server: GetServer) -> ApiResponseResult {
         #[derive(Serialize)]
         struct WebsocketJwt<'a> {
             #[serde(flatten)]
@@ -44,27 +40,24 @@ mod get {
             permissions: Vec<&'a str>,
         }
 
-        let token = server
-            .node
-            .create_jwt(
-                &state.database,
-                &state.jwt,
-                &WebsocketJwt {
-                    base: BasePayload {
-                        issuer: "panel".into(),
-                        subject: None,
-                        audience: Vec::new(),
-                        expiration_time: Some(chrono::Utc::now().timestamp() + 600),
-                        not_before: None,
-                        issued_at: Some(chrono::Utc::now().timestamp()),
-                        jwt_id: user.id.to_string(),
-                    },
-                    user_uuid: user.to_uuid(),
-                    server_uuid: server.uuid,
-                    permissions: server.wings_permissions(&user),
+        let token = server.node.create_jwt(
+            &state.database,
+            &state.jwt,
+            &WebsocketJwt {
+                base: BasePayload {
+                    issuer: "panel".into(),
+                    subject: None,
+                    audience: Vec::new(),
+                    expiration_time: Some(chrono::Utc::now().timestamp() + 600),
+                    not_before: None,
+                    issued_at: Some(chrono::Utc::now().timestamp()),
+                    jwt_id: user.id.to_string(),
                 },
-            )
-            .unwrap();
+                user_uuid: user.to_uuid(),
+                server_uuid: server.uuid,
+                permissions: server.wings_permissions(&user),
+            },
+        )?;
 
         let mut url = server.node.public_url();
         url.set_path(&format!("/api/servers/{}/ws", server.uuid));
@@ -74,16 +67,11 @@ mod get {
             url.set_scheme("wss").unwrap();
         }
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    token,
-                    url: url.to_string(),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            token,
+            url: url.to_string(),
+        })
+        .ok()
     }
 }
 

@@ -7,6 +7,7 @@ mod size;
 mod delete {
     use crate::{
         models::server_database::ServerDatabase,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::servers::_server_::{GetServer, GetServerActivityLogger},
@@ -40,32 +41,29 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, database)): Path<(String, i32)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.delete") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let database =
-            match ServerDatabase::by_server_id_id(&state.database, server.id, database).await {
+            match ServerDatabase::by_server_id_id(&state.database, server.id, database).await? {
                 Some(database) => database,
                 None => {
-                    return (
-                        StatusCode::NOT_FOUND,
-                        axum::Json(ApiError::new_value(&["database not found"])),
-                    );
+                    return ApiResponse::error("database not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
                 }
             };
 
         if let Err(err) = database.delete(&state.database).await {
             tracing::error!(server = %server.uuid, "failed to delete database: {:#?}", err);
 
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(ApiError::new_value(&["failed to delete database"])),
-            );
+            return ApiResponse::error("failed to delete database")
+                .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                .ok();
         }
 
         activity_logger
@@ -78,10 +76,7 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

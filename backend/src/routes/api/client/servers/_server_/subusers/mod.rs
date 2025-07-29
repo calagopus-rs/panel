@@ -6,6 +6,7 @@ mod _subuser_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_subuser::ServerSubuser},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -46,19 +47,17 @@ mod get {
         state: GetState,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("subusers.read") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let subusers = ServerSubuser::by_server_id_with_pagination(
@@ -68,32 +67,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    subusers: Pagination {
-                        total: subusers.total,
-                        per_page: subusers.per_page,
-                        page: subusers.page,
-                        data: subusers
-                            .data
-                            .into_iter()
-                            .map(|subuser| subuser.into_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            subusers: Pagination {
+                total: subusers.total,
+                per_page: subusers.per_page,
+                page: subusers.page,
+                data: subusers
+                    .data
+                    .into_iter()
+                    .map(|subuser| subuser.into_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::server_subuser::ServerSubuser,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{
@@ -143,12 +138,11 @@ mod post {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if !user.admin
@@ -158,26 +152,21 @@ mod post {
                 .iter()
                 .all(|p| subuser_permissions.contains(p))
         {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[
-                    "permissions: more permissions than self",
-                ])),
-            );
+            return ApiResponse::error("permissions: more permissions than self")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("subusers.create") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let username = match ServerSubuser::create(
@@ -193,24 +182,21 @@ mod post {
         {
             Ok(username) => username,
             Err(sqlx::Error::InvalidArgument(err)) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[&err])),
-                );
+                return ApiResponse::error(&err)
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
             }
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["subuser with email already exists"])),
-                );
+                return ApiResponse::error("subuser with email already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!(email = %data.email, "failed to create subuser: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create subuser"])),
-                );
+                return ApiResponse::error("failed to create subuser")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -224,22 +210,18 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    subuser: ServerSubuser::by_server_id_username(
-                        &state.database,
-                        server.id,
-                        &username,
+        ApiResponse::json(Response {
+            subuser: ServerSubuser::by_server_id_username(&state.database, server.id, &username)
+                .await?
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "subuser with username {} not found after creation",
+                        username
                     )
-                    .await
-                    .unwrap()
-                    .into_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+                })?
+                .into_api_object(),
+        })
+        .ok()
     }
 }
 

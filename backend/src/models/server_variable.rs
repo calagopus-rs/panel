@@ -83,7 +83,7 @@ impl ServerVariable {
         database: &crate::database::Database,
         server_id: i32,
         egg_id: i32,
-    ) -> Vec<Self> {
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -97,10 +97,9 @@ impl ServerVariable {
         .bind(server_id)
         .bind(egg_id)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        rows.into_iter().map(|row| Self::map(None, &row)).collect()
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
     #[inline]

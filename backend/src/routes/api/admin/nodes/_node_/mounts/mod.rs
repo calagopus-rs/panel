@@ -6,6 +6,7 @@ mod _mount_;
 mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, node_mount::NodeMount},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
     };
     use axum::{extract::Query, http::StatusCode};
@@ -45,12 +46,11 @@ mod get {
         state: GetState,
         node: GetNode,
         Query(params): Query<PaginationParamsWithSearch>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         let mounts = NodeMount::by_node_id_with_pagination(
@@ -60,32 +60,28 @@ mod get {
             params.per_page,
             params.search.as_deref(),
         )
-        .await;
+        .await?;
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    mounts: Pagination {
-                        total: mounts.total,
-                        per_page: mounts.per_page,
-                        page: mounts.page,
-                        data: mounts
-                            .data
-                            .into_iter()
-                            .map(|mount| mount.into_admin_api_object())
-                            .collect(),
-                    },
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            mounts: Pagination {
+                total: mounts.total,
+                per_page: mounts.per_page,
+                page: mounts.page,
+                data: mounts
+                    .data
+                    .into_iter()
+                    .map(|mount| mount.into_admin_api_object())
+                    .collect(),
+            },
+        })
+        .ok()
     }
 }
 
 mod post {
     use crate::{
         models::{mount::Mount, node_mount::NodeMount},
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
@@ -120,39 +116,35 @@ mod post {
         node: GetNode,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        let mount = match Mount::by_id(&state.database, data.mount_id).await {
+    ) -> ApiResponseResult {
+        let mount = match Mount::by_id(&state.database, data.mount_id).await? {
             Some(mount) => mount,
             None => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&["mount not found"])),
-                );
+                return ApiResponse::error("mount not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         match NodeMount::create(&state.database, node.id, mount.id).await {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["mount already exists"])),
-                );
+                return ApiResponse::error("mount already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to create node mount: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to create node mount"])),
-                );
+                return ApiResponse::error("failed to create node mount")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -166,10 +158,7 @@ mod post {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

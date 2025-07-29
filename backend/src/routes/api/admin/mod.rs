@@ -1,6 +1,11 @@
-use super::{ApiError, State};
-use crate::routes::api::client::GetUser;
-use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
+use super::State;
+use crate::{response::ApiResponse, routes::api::client::GetUser};
+use axum::{
+    extract::Request,
+    http::StatusCode,
+    middleware::Next,
+    response::{IntoResponse, Response},
+};
 use utoipa_axum::router::OpenApiRouter;
 
 mod database_hosts;
@@ -14,13 +19,9 @@ mod users;
 
 pub async fn auth(user: GetUser, mut req: Request, next: Next) -> Result<Response, StatusCode> {
     if !user.admin {
-        return Ok(Response::builder()
-            .status(StatusCode::UNAUTHORIZED)
-            .header("Content-Type", "application/json")
-            .body(Body::from(
-                serde_json::to_string(&ApiError::new_value(&["unauthorized access"])).unwrap(),
-            ))
-            .unwrap());
+        return Ok(ApiResponse::error("unauthorized")
+            .with_status(StatusCode::UNAUTHORIZED)
+            .into_response());
     }
 
     req.extensions_mut().insert(user.0);

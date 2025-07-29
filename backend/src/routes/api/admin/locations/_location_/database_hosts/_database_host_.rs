@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod delete {
     use crate::{
         models::location_database_host::LocationDatabaseHost,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
@@ -19,6 +20,7 @@ mod delete {
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "location" = i32,
@@ -36,24 +38,23 @@ mod delete {
         location: GetLocation,
         activity_logger: GetUserActivityLogger,
         Path((_location, database_host)): Path<(i32, i32)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let database_host = match LocationDatabaseHost::by_location_id_database_host_id(
             &state.database,
             location.id,
             database_host,
         )
-        .await
+        .await?
         {
             Some(host) => host.database_host,
             None => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["database host not found"])),
-                );
+                return ApiResponse::error("database host not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        LocationDatabaseHost::delete_by_ids(&state.database, location.id, database_host.id).await;
+        LocationDatabaseHost::delete_by_ids(&state.database, location.id, database_host.id).await?;
 
         activity_logger
             .log(
@@ -65,10 +66,7 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

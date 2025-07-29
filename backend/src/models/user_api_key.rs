@@ -86,7 +86,7 @@ impl UserApiKey {
         database: &crate::database::Database,
         user_id: i32,
         key_start: &str,
-    ) -> Option<Self> {
+    ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -98,10 +98,9 @@ impl UserApiKey {
         .bind(key_start)
         .bind(user_id)
         .fetch_optional(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        row.map(|row| Self::map(None, &row))
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_user_id_with_pagination(
@@ -110,7 +109,7 @@ impl UserApiKey {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> super::Pagination<Self> {
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -128,18 +127,20 @@ impl UserApiKey {
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
-        .await
-        .unwrap();
+        .await?;
 
-        super::Pagination {
+        Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),
             per_page,
             page,
             data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        }
+        })
     }
 
-    pub async fn delete_by_id(database: &crate::database::Database, id: i32) -> bool {
+    pub async fn delete_by_id(
+        database: &crate::database::Database,
+        id: i32,
+    ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_api_keys
@@ -148,8 +149,9 @@ impl UserApiKey {
         )
         .bind(id)
         .execute(database.write())
-        .await
-        .is_ok()
+        .await?;
+
+        Ok(())
     }
 
     #[inline]

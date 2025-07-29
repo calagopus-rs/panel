@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -39,19 +42,17 @@ mod put {
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Err(error) = server.has_permission("settings.auto-kill") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         server.auto_kill.enabled = data.enabled;
@@ -63,12 +64,11 @@ mod put {
             "UPDATE servers
             SET auto_kill = $1
             WHERE id = $2",
-            serde_json::to_value(&server.auto_kill).unwrap(),
+            serde_json::to_value(&server.auto_kill)?,
             server.id
         )
         .execute(state.database.write())
-        .await
-        .unwrap();
+        .await?;
 
         activity_logger
             .log(
@@ -80,10 +80,7 @@ mod put {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

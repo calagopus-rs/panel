@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::user_session::UserSession,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::client::{AuthMethod, GetAuthMethod},
@@ -25,20 +26,19 @@ mod post {
         state: GetState,
         auth: GetAuthMethod,
         cookies: Cookies,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let session = match auth.0 {
             AuthMethod::Session(session) => session,
             _ => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[
-                        "unable to log out when not using session authentication",
-                    ])),
-                );
+                return ApiResponse::error(
+                    "unable to log out when not using session authentication",
+                )
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
             }
         };
 
-        UserSession::delete_by_id(&state.database, session.id).await;
+        UserSession::delete_by_id(&state.database, session.id).await?;
 
         let settings = state.settings.get().await;
 
@@ -55,10 +55,7 @@ mod post {
                 .build(),
         );
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

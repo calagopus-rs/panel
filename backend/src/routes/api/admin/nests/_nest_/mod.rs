@@ -1,14 +1,10 @@
 use super::State;
-use crate::{
-    models::nest::Nest,
-    routes::{ApiError, GetState},
-};
+use crate::{models::nest::Nest, response::ApiResponse, routes::GetState};
 use axum::{
-    body::Body,
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -25,28 +21,21 @@ pub async fn auth(
     let nest = match nest.first().map(|s| s.parse::<i32>()) {
         Some(Ok(id)) => id,
         _ => {
-            return Ok(Response::builder()
-                .status(StatusCode::BAD_REQUEST)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["invalid nest id"])).unwrap(),
-                ))
-                .unwrap());
+            return Ok(ApiResponse::error("invalid nest id")
+                .with_status(StatusCode::BAD_REQUEST)
+                .into_response());
         }
     };
 
     let nest = Nest::by_id(&state.database, nest).await;
     let nest = match nest {
-        Some(nest) => nest,
-        None => {
-            return Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    serde_json::to_string(&ApiError::new_value(&["nest not found"])).unwrap(),
-                ))
-                .unwrap());
+        Ok(Some(nest)) => nest,
+        Ok(None) => {
+            return Ok(ApiResponse::error("nest not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
         }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
     };
 
     req.extensions_mut().insert(nest);
@@ -55,8 +44,10 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::routes::{ApiError, api::admin::nests::_nest_::GetNest};
-    use axum::http::StatusCode;
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{ApiError, api::admin::nests::_nest_::GetNest},
+    };
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -75,22 +66,18 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(nest: GetNest) -> (StatusCode, axum::Json<serde_json::Value>) {
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    nest: nest.0.into_admin_api_object(),
-                })
-                .unwrap(),
-            ),
-        )
+    pub async fn route(nest: GetNest) -> ApiResponseResult {
+        ApiResponse::json(Response {
+            nest: nest.0.into_admin_api_object(),
+        })
+        .ok()
     }
 }
 
 mod delete {
     use crate::{
         models::nest::Nest,
+        response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
             api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
@@ -106,6 +93,7 @@ mod delete {
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "nest" = i32,
@@ -117,8 +105,14 @@ mod delete {
         state: GetState,
         nest: GetNest,
         activity_logger: GetUserActivityLogger,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
-        Nest::delete_by_id(&state.database, nest.id).await;
+    ) -> ApiResponseResult {
+        if nest.eggs > 0 {
+            return ApiResponse::error("nest has eggs, cannot delete")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
+        }
+
+        Nest::delete_by_id(&state.database, nest.id).await?;
 
         activity_logger
             .log(
@@ -130,17 +124,17 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 
 mod patch {
-    use crate::routes::{
-        ApiError, GetState,
-        api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -181,12 +175,11 @@ mod patch {
         mut nest: GetNest,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         if let Some(name) = data.name {
@@ -217,18 +210,16 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return (
-                    StatusCode::CONFLICT,
-                    axum::Json(ApiError::new_value(&["nest with name already exists"])),
-                );
+                return ApiResponse::error("nest with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
                 tracing::error!("failed to update nest: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to update nest"])),
-                );
+                return ApiResponse::error("failed to update nest")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         }
 
@@ -243,10 +234,7 @@ mod patch {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

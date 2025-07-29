@@ -2,9 +2,12 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
-    use crate::routes::{
-        ApiError, GetState,
-        api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -34,12 +37,11 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, pull)): Path<(String, uuid::Uuid)>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("files.delete") {
-            return (
-                StatusCode::UNAUTHORIZED,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
         }
 
         match server
@@ -50,18 +52,16 @@ mod delete {
         {
             Ok(_) => {}
             Err((StatusCode::NOT_FOUND, err)) => {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_wings_value(err)),
-                );
+                return ApiResponse::json(ApiError::new_wings_value(err))
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to delete server file pull: {:#?}", err);
 
-                return (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    axum::Json(ApiError::new_value(&["failed to delete server file pull"])),
-                );
+                return ApiResponse::error("failed to delete server file pull")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -74,10 +74,7 @@ mod delete {
             )
             .await;
 
-        (
-            StatusCode::OK,
-            axum::Json(serde_json::to_value(Response {}).unwrap()),
-        )
+        ApiResponse::json(Response {}).ok()
     }
 }
 

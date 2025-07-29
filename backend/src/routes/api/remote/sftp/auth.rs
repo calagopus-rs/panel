@@ -4,6 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::{
         models::{server::Server, user::User},
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::http::StatusCode;
@@ -40,36 +41,33 @@ mod post {
     pub async fn route(
         state: GetState,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         let mut parts = data.username.splitn(2, '.');
         let user = match parts.next() {
             Some(user) => user,
             None => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["invalid username"])),
-                );
+                return ApiResponse::error("invalid username")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         };
         let server = match parts.next() {
             Some(server) => server,
             None => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["invalid username"])),
-                );
+                return ApiResponse::error("invalid username")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
             }
         };
 
         let user = match data.r#type {
             AuthenticationType::Password => {
-                match User::by_username_password(&state.database, user, &data.password).await {
+                match User::by_username_password(&state.database, user, &data.password).await? {
                     Some(user) => user,
                     None => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["user not found"])),
-                        );
+                        return ApiResponse::error("user not found")
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
                     }
                 }
             }
@@ -77,46 +75,38 @@ mod post {
                 let public_key = match russh::keys::PublicKey::from_openssh(&data.password) {
                     Ok(public_key) => public_key,
                     Err(_) => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["invalid public key"])),
-                        );
+                        return ApiResponse::error("invalid public key")
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
                     }
                 };
 
-                match User::by_username_public_key(&state.database, user, public_key).await {
+                match User::by_username_public_key(&state.database, user, public_key).await? {
                     Some(user) => user,
                     None => {
-                        return (
-                            StatusCode::EXPECTATION_FAILED,
-                            axum::Json(ApiError::new_value(&["user not found"])),
-                        );
+                        return ApiResponse::error("user not found")
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
                     }
                 }
             }
         };
-        let server = match Server::by_user_identifier(&state.database, &user, server).await {
+        let server = match Server::by_user_identifier(&state.database, &user, server).await? {
             Some(server) => server,
             None => {
-                return (
-                    StatusCode::EXPECTATION_FAILED,
-                    axum::Json(ApiError::new_value(&["server not found"])),
-                );
+                return ApiResponse::error("server not found")
+                    .with_status(StatusCode::NOT_FOUND)
+                    .ok();
             }
         };
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.to_uuid(),
-                    server: server.uuid,
-                    permissions: server.wings_permissions(&user),
-                    ignored_files: server.subuser_ignored_files.as_deref().unwrap_or(&[]),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            user: user.to_uuid(),
+            server: server.uuid,
+            permissions: server.wings_permissions(&user),
+            ignored_files: server.subuser_ignored_files.as_deref().unwrap_or(&[]),
+        })
+        .ok()
     }
 }
 

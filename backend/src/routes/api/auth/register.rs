@@ -7,6 +7,7 @@ mod post {
             user::{ApiUser, User},
             user_session::UserSession,
         },
+        response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
     use axum::http::StatusCode;
@@ -55,29 +56,26 @@ mod post {
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
-    ) -> (StatusCode, axum::Json<serde_json::Value>) {
+    ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_strings_value(errors)),
-            );
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let settings = state.settings.get().await;
         if !settings.app.registration_enabled {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&["registration is disabled"])),
-            );
+            return ApiResponse::error("registration is disabled")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         drop(settings);
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
-            return (
-                StatusCode::BAD_REQUEST,
-                axum::Json(ApiError::new_value(&[&error])),
-            );
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
         }
 
         let user = match User::create(
@@ -92,13 +90,17 @@ mod post {
         .await
         {
             Ok(user) => user,
-            Err(_) => {
-                return (
-                    StatusCode::BAD_REQUEST,
-                    axum::Json(ApiError::new_value(&[
-                        "this username or email is already taken",
-                    ])),
-                );
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return ApiResponse::error("user with username or email already exists")
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
+            }
+            Err(err) => {
+                tracing::error!("failed to create user: {:#?}", err);
+
+                return ApiResponse::error("failed to create user")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
             }
         };
 
@@ -111,7 +113,7 @@ mod post {
                 .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                 .unwrap_or("unknown"),
         )
-        .await;
+        .await?;
 
         let settings = state.settings.get().await;
 
@@ -128,15 +130,10 @@ mod post {
                 .build(),
         );
 
-        (
-            StatusCode::OK,
-            axum::Json(
-                serde_json::to_value(Response {
-                    user: user.into_api_object(true),
-                })
-                .unwrap(),
-            ),
-        )
+        ApiResponse::json(Response {
+            user: user.into_api_object(true),
+        })
+        .ok()
     }
 }
 
