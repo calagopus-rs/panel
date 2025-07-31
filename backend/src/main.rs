@@ -255,7 +255,7 @@ async fn main() {
         .layer(axum::middleware::from_fn(handle_request))
         .layer(CookieManagerLayer::new())
         .route_layer(axum::middleware::from_fn(handle_postprocessing))
-        .route_layer(SentryHttpLayer::with_transaction())
+        .route_layer(SentryHttpLayer::new().enable_transaction())
         .with_state(state.clone());
 
     let listener = tokio::net::TcpListener::bind(format!("{}:{}", &state.env.bind, state.env.port))

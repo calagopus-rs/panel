@@ -13,7 +13,7 @@ axum = "0.8.1"
 colored = "3.0.0"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "mysql", "chrono", "ipnetwork", "uuid"] }
 dotenvy = "0.15.7"
-rustis = "0.13.3"
+rustis = "0.16.1"
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1.43.0", features = ["full"] }
@@ -22,10 +22,10 @@ utoipa-axum = "0.2.0"
 chrono = { workspace = true }
 indexmap = { workspace = true }
 tower-http = { version = "0.6.2", features = ["catch-panic", "cors", "normalize-path"] }
-sentry = { version = "0.37.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
+sentry = { version = "0.42.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
 reqwest = { workspace = true }
 sha2 = "0.10.8"
-sentry-tower = { version = "0.37.0", default-features = false, features = ["http", "axum-matched-path"] }
+sentry-tower = { version = "0.42.0", default-features = false, features = ["http", "axum-matched-path"] }
 rand = "0.9.0"
 image = "0.25.5"
 tower-cookies = "0.11.0"
@@ -40,7 +40,7 @@ uuid = { workspace = true }
 totp-rs = { version = "5.7.0", features = ["gen_secret"] }
 validator = { workspace = true }
 regex = { workspace = true }
-russh = "0.52.1"
+russh = "0.53.0"
 urlencoding = { workspace = true }
 lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "tokio1-rustls-tls", "tokio1"] }
 base32 = "0.5.1"
