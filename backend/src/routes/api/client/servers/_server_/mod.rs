@@ -92,9 +92,15 @@ pub async fn auth(
         "/api/client/servers/{server}",
     ];
 
-    if !user.admin && !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
+    if !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
         if server.suspended {
-            return Ok(ApiResponse::error("server is suspended")
+            if !user.admin {
+                return Ok(ApiResponse::error("server is suspended")
+                    .with_status(StatusCode::CONFLICT)
+                    .into_response());
+            }
+        } else if server.destination_node_id.is_some() {
+            return Ok(ApiResponse::error("server is being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .into_response());
         } else if let Some(status) = server.status {

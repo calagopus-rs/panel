@@ -934,8 +934,7 @@ pub mod servers_server_transfer {
                 #[schema(inline)]
                 pub archive_format: TransferArchiveFormat,
                 #[schema(inline)]
-                pub compression_level: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyCompressionLevel {
-                }>,
+                pub compression_level: Option<CompressionLevel>,
                 #[schema(inline)]
                 pub backups: Vec<uuid::Uuid>,
                 #[schema(inline)]

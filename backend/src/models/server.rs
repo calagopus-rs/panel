@@ -24,7 +24,9 @@ pub struct Server {
     pub uuid_short: i32,
     pub external_id: Option<String>,
     pub allocation: Option<super::server_allocation::ServerAllocation>,
+    pub destination_allocation_id: Option<i32>,
     pub node: super::node::Node,
+    pub destination_node_id: Option<i32>,
     pub owner: super::user::User,
     pub egg: super::nest_egg::NestEgg,
 
@@ -73,12 +75,13 @@ impl BaseModel for Server {
                 format!("{prefix}external_id"),
             ),
             (
-                format!("{table}.allocation_id"),
-                format!("{prefix}allocation_id"),
+                format!("{table}.destination_allocation_id"),
+                format!("{prefix}destination_allocation_id"),
             ),
-            (format!("{table}.node_id"), format!("{prefix}node_id")),
-            (format!("{table}.owner_id"), format!("{prefix}owner_id")),
-            (format!("{table}.egg_id"), format!("{prefix}egg_id")),
+            (
+                format!("{table}.destination_node_id"),
+                format!("{prefix}destination_node_id"),
+            ),
             (format!("{table}.status"), format!("{prefix}status")),
             (format!("{table}.suspended"), format!("{prefix}suspended")),
             (format!("{table}.name"), format!("{prefix}name")),
@@ -145,7 +148,13 @@ impl BaseModel for Server {
             } else {
                 None
             },
+            destination_allocation_id: row
+                .try_get::<i32, _>(format!("{prefix}destination_allocation_id").as_str())
+                .ok(),
             node: super::node::Node::map(Some("node_"), row),
+            destination_node_id: row
+                .try_get::<i32, _>(format!("{prefix}destination_node_id").as_str())
+                .ok(),
             owner: super::user::User::map(Some("owner_"), row),
             egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
             status: row.get(format!("{prefix}status").as_str()),
@@ -396,7 +405,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.node_id = $1 AND servers.uuid = $2
+            WHERE (servers.node_id = $1 OR servers.destination_node_id = $1) AND servers.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
@@ -422,12 +431,17 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
             JOIN users ON users.id = servers.owner_id
             JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.id = $1 OR servers.uuid = $2
+            WHERE servers.{} = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None, None),
+            match identifier.len() {
+                8 => "uuid_short",
+                36 => "uuid",
+                _ => "id",
+            }
         );
 
-        let mut row = sqlx::query(&query).bind(identifier.parse::<i32>()?);
+        let mut row = sqlx::query(&query);
         row = match identifier.len() {
             8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
             36 => row.bind(uuid::Uuid::parse_str(identifier)?),
@@ -690,6 +704,17 @@ impl Server {
         .fetch_one(database.read())
         .await
         .unwrap_or(0)
+    }
+
+    pub async fn destination_node(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<Option<super::node::Node>, sqlx::Error> {
+        if let Some(destination_node_id) = self.destination_node_id {
+            super::node::Node::by_id(database, destination_node_id).await
+        } else {
+            Ok(None)
+        }
     }
 
     pub async fn delete(

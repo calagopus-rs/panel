@@ -56,7 +56,12 @@ export default function generateSchemaProperty(output: fs.WriteStream, _spaces: 
         const schema = object.oneOf.find(((t: oas31.SchemaObject) => t.type !== 'null') as any)!
 
         output.write('Option<')
-        generateSchemaObject(output, _spaces + 4, parent, pascalCase(parent) + pascalCase(name), schema as any, true)
+        if (schema.$ref) {
+            output.write(`${schema.$ref.split('/').at(-1)}>,\n`)
+            return
+        } else {
+            generateSchemaObject(output, _spaces + 4, parent, pascalCase(parent) + pascalCase(name), schema as any, true)
+        }
         output.write('>,\n')
 
         return

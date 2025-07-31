@@ -2,7 +2,7 @@
 resolver = "3"
 members = ["backend", "rule-validator", "wings-api"]
 default-members = ["backend"]
-package.version = "0.2.0"
+package.version = "0.3.0"
 package.edition = "2024"
 
 [workspace.dependencies]

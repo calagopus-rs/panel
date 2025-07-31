@@ -9,6 +9,7 @@ use axum::{
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod mounts;
+mod transfer;
 mod variables;
 
 pub type GetServer = crate::extract::ConsumingExtension<Server>;
@@ -359,6 +360,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(patch::route))
         .nest("/variables", variables::router(state))
         .nest("/mounts", mounts::router(state))
+        .nest("/transfer", transfer::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

@@ -29,6 +29,8 @@ pub struct Node {
     pub token: Vec<u8>,
 
     pub servers: i64,
+    pub outgoing_transfers: i64,
+    pub incoming_transfers: i64,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -68,6 +70,18 @@ impl BaseModel for Node {
                 format!("(SELECT COUNT(*) FROM servers WHERE servers.node_id = {table}.id)"),
                 format!("{prefix}servers"),
             ),
+            (
+                format!(
+                    "(SELECT COUNT(*) FROM servers WHERE servers.node_id = {table}.id AND servers.destination_node_id IS NOT NULL)"
+                ),
+                format!("{prefix}outgoing_transfers"),
+            ),
+            (
+                format!(
+                    "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_id = {table}.id)"
+                ),
+                format!("{prefix}incoming_transfers"),
+            ),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
 
@@ -102,6 +116,8 @@ impl BaseModel for Node {
             token_id: row.get(format!("{prefix}token_id").as_str()),
             token: row.get(format!("{prefix}token").as_str()),
             servers: row.get(format!("{prefix}servers").as_str()),
+            outgoing_transfers: row.get(format!("{prefix}outgoing_transfers").as_str()),
+            incoming_transfers: row.get(format!("{prefix}incoming_transfers").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -129,6 +145,7 @@ impl Node {
             r#"
             INSERT INTO nodes (location_id, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            RETURNING id
             "#
         )
         .bind(location_id)
@@ -332,6 +349,8 @@ impl Node {
             token_id: self.token_id,
             token: database.decrypt(&self.token).unwrap(),
             servers: self.servers,
+            outgoing_transfers: self.outgoing_transfers,
+            incoming_transfers: self.incoming_transfers,
             created: self.created.and_utc(),
         }
     }
@@ -364,6 +383,8 @@ pub struct AdminApiNode {
     pub token: String,
 
     pub servers: i64,
+    pub outgoing_transfers: i64,
+    pub incoming_transfers: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

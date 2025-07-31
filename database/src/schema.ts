@@ -359,7 +359,9 @@ export const servers = pgTable('servers', {
 	uuidShort: integer('uuid_short').notNull(),
 	externalId: varchar('external_id', { length: 255 }),
 	allocationId: integer('allocation_id').references((): PgColumn => serverAllocations.id, { onDelete: 'set null' }),
+	destinationAllocationId: integer('destination_allocation_id').references((): PgColumn => serverAllocations.id, { onDelete: 'set null' }),
 	nodeId: integer('node_id').references(() => nodes.id).notNull(),
+	destinationNodeId: integer('destination_node_id').references(() => nodes.id),
 	ownerId: integer('owner_id').references(() => users.id).notNull(),
 	eggId: integer('egg_id').references(() => nestEggs.id).notNull(),
 

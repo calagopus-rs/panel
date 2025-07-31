@@ -68,7 +68,6 @@ mod put {
     #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
-        (status = UNAUTHORIZED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,

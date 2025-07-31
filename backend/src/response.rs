@@ -63,7 +63,7 @@ where
 {
     #[inline]
     fn from(err: T) -> Self {
-        let err = err.into();
+        let err: anyhow::Error = err.into();
         tracing::error!("a request error occurred: {:#?}", err);
 
         ApiResponse::json(ApiError::new_value(&["internal server error"]))

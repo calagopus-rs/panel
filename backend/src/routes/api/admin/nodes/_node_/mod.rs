@@ -116,6 +116,18 @@ mod delete {
                 .ok();
         }
 
+        if node.incoming_transfers > 0 {
+            return ApiResponse::error("node has incoming transfers, cannot delete")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
+        if node.outgoing_transfers > 0 {
+            return ApiResponse::error("node has outgoing transfers, cannot delete")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
         Node::delete_by_id(&state.database, node.id).await?;
 
         activity_logger
