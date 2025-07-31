@@ -359,6 +359,7 @@ export const archiveFormatExtensionMapping: Record<string, string> = {
   tar_lz4: '.tar.lz4',
   tar_zstd: '.tar.zst',
   zip: '.zip',
+  seven_zip: '.7z',
 };
 
 export function generateArchiveName(extension: string) {

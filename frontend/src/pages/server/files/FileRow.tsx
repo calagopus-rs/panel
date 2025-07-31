@@ -153,6 +153,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+        setOpenDialog(null);
       });
   };
 

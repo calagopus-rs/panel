@@ -28,6 +28,8 @@ pub enum ArchiveFormat {
     TarZstd,
     #[serde(rename = "zip")]
     Zip,
+    #[serde(rename = "seven_zip")]
+    SevenZip,
 }
 
 #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
