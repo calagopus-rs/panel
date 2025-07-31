@@ -20,13 +20,10 @@ interface TerminalLine {
   height: number;
 }
 
-// Helper function to strip ANSI codes
 const stripAnsiCodes = (text: string): string => {
-  // eslint-disable-next-line no-control-regex
   return text.replace(/\u001b\[[0-9;]*m/g, '');
 };
 
-// Memoize the line renderer to prevent unnecessary re-renders
 const LineRenderer = memo(
   ({
     line,
@@ -41,11 +38,9 @@ const LineRenderer = memo(
   }) => {
     if (!line) return null;
 
-    // Extract plain text from the line for copying
     const getPlainText = () => {
       let text = stripAnsiCodes(line.content);
       if (line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m')) {
-        // Add plain prelude text
         text = 'container@pterodactyl~ ' + text;
       }
       return text;
@@ -69,13 +64,11 @@ const LineRenderer = memo(
         ) : (
           <span dangerouslySetInnerHTML={{ __html: line.html }} />
         )}
-        {/* Add a newline character that will be included in selection but not visible */}
         {!isLastLine && <span style={{ userSelect: 'text', fontSize: 0, lineHeight: 0 }}>{'\n'}</span>}
       </div>
     );
   },
   (prevProps, nextProps) => {
-    // Custom comparison function - only re-render if the line data actually changed
     return (
       prevProps.line.id === nextProps.line.id &&
       prevProps.line.html === nextProps.line.html &&
@@ -143,7 +136,6 @@ export default () => {
     [terminalWidth, calculateLineHeight, TERMINAL_PRELUDE],
   );
 
-  // Handle copy event to ensure proper line breaks
   useEffect(() => {
     const handleCopy = (e: ClipboardEvent) => {
       const selection = window.getSelection();
@@ -152,10 +144,8 @@ export default () => {
       const range = selection.getRangeAt(0);
       const container = range.commonAncestorContainer;
 
-      // Check if the selection is within our terminal
       if (!containerRef.current?.contains(container)) return;
 
-      // Get all selected elements
       const selectedElements = containerRef.current.querySelectorAll('[data-plain-text]');
       let textContent = '';
       let foundStart = false;
@@ -164,18 +154,15 @@ export default () => {
         const rect = element.getBoundingClientRect();
         const rangeRect = range.getBoundingClientRect();
 
-        // Check if element is within the selection range
         if (rect.bottom > rangeRect.top && rect.top < rangeRect.bottom) {
           if (!foundStart) foundStart = true;
           const plainText = element.getAttribute('data-plain-text') || '';
           textContent += plainText + '\n';
         } else if (foundStart && rect.top > rangeRect.bottom) {
-          // We've passed the selection
           return;
         }
       });
 
-      // Remove trailing newline
       textContent = textContent.replace(/\n$/, '');
 
       if (textContent) {
@@ -339,7 +326,6 @@ export default () => {
     handleTransferStatus,
   ]);
 
-  // Memoized row renderer to prevent unnecessary re-renders
   const rowRenderer = useCallback(
     ({ index, style }: { index: number; style: React.CSSProperties }) => {
       const line = lines[index];
