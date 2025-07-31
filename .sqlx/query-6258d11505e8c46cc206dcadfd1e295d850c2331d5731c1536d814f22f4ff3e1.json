@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO server_allocations (server_id, allocation_id)\n                SELECT $1, UNNEST($2::int[])\n                ON CONFLICT DO NOTHING\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6258d11505e8c46cc206dcadfd1e295d850c2331d5731c1536d814f22f4ff3e1"
+}

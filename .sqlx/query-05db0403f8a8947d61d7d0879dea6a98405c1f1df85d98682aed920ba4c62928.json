@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                SELECT server_allocations.id, node_allocations.node_id FROM server_allocations\n                JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id\n                WHERE server_allocations.server_id = $1 AND node_allocations.node_id != $2\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "node_id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "05db0403f8a8947d61d7d0879dea6a98405c1f1df85d98682aed920ba4c62928"
+}

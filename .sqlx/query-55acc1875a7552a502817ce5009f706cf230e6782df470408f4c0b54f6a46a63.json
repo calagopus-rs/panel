@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DELETE FROM server_allocations\n            WHERE server_allocations.id = ANY($1)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "55acc1875a7552a502817ce5009f706cf230e6782df470408f4c0b54f6a46a63"
+}

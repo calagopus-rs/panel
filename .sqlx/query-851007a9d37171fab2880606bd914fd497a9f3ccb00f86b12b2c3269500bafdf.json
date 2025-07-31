@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO server_allocations (server_id, allocation_id)\n                VALUES ($1, $2)\n                ON CONFLICT DO NOTHING\n                RETURNING id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "851007a9d37171fab2880606bd914fd497a9f3ccb00f86b12b2c3269500bafdf"
+}
