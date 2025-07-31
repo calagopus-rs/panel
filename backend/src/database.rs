@@ -63,6 +63,21 @@ impl Database {
             .bright_black()
         );
 
+        if env.database_migrate {
+            let start = std::time::Instant::now();
+
+            sqlx::migrate!("../database/migrations")
+                .run(&instance.write)
+                .await
+                .unwrap();
+
+            tracing::info!(
+                "{} migrated {}",
+                "database".bright_cyan(),
+                format!("({}ms)", start.elapsed().as_millis()).bright_black()
+            );
+        }
+
         instance
     }
 

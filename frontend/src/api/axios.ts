@@ -6,6 +6,7 @@ export const axiosInstance: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Auto transform all data to camel case keys

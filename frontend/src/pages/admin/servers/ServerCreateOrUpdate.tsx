@@ -66,10 +66,27 @@ export default () => {
       getNests({ perPage: 100 }),
       getUsers({ perPage: 100 })
     ])
-      .then(([nodesData, nestsData, usersData]) => {
+      .then(async ([nodesData, nestsData, usersData]) => {
         setNodes(nodesData);
         setNests(nestsData);
         setUsers(usersData);
+        
+        // Load all eggs from all nests with nest context
+        const allEggsWithContext = [];
+        for (const nest of nestsData.data) {
+          try {
+            const eggsData = await getEggs(nest.id, { perPage: 100 });
+            allEggsWithContext.push(...eggsData.data.map(egg => ({ 
+              ...egg, 
+              _nestId: nest.id, 
+              _nestName: nest.name 
+            })));
+          } catch (error) {
+            console.warn(`Failed to load eggs for nest ${nest.name}:`, error);
+          }
+        }
+        setEggs({ data: allEggsWithContext, pagination: { currentPage: 1, perPage: 100, total: allEggsWithContext.length, totalPages: 1 } });
+        
         setLoading(false);
       })
       .catch((msg) => {
@@ -77,17 +94,6 @@ export default () => {
       });
   }, []);
 
-  useEffect(() => {
-    if (nestId && nestId > 0) {
-      getEggs(nestId, { perPage: 100 })
-        .then((eggsData) => {
-          setEggs(eggsData);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [nestId]);
 
   useEffect(() => {
     if (nodeId && nodeId > 0) {
@@ -210,31 +216,33 @@ export default () => {
           />
         </div>
         <div className={'mt-4'}>
-          <Input.Label htmlFor={'nest'}>Nest</Input.Label>
+          <Input.Label htmlFor={'egg'}>Server Type</Input.Label>
           <Input.Dropdown
-            id={'nest'}
+            id={'egg'}
             options={[
-              { label: 'Select a nest...', value: '0' },
-              ...nests.data.map(nest => ({ label: nest.name, value: nest.id.toString() }))
+              { label: 'Select a server type...', value: '0' },
+              ...eggs.data.map(egg => ({ 
+                label: `${egg.name} (${(egg as any)._nestName})`, 
+                value: egg.id.toString() 
+              }))
             ]}
-            selected={nestId.toString()}
-            onChange={(e) => setNestId(parseInt(e.target.value))}
+            selected={eggId.toString()}
+            onChange={(e) => {
+              const selectedEggId = parseInt(e.target.value);
+              setEggId(selectedEggId);
+              
+              // Automatically set the nest when an egg is selected
+              if (selectedEggId > 0) {
+                const selectedEgg = eggs.data.find(egg => egg.id === selectedEggId);
+                if (selectedEgg) {
+                  setNestId((selectedEgg as any)._nestId);
+                }
+              } else {
+                setNestId(0);
+              }
+            }}
           />
         </div>
-        {nestId > 0 && (
-          <div className={'mt-4'}>
-            <Input.Label htmlFor={'egg'}>Egg</Input.Label>
-            <Input.Dropdown
-              id={'egg'}
-              options={[
-                { label: 'Select an egg...', value: '0' },
-                ...eggs.data.map(egg => ({ label: egg.name, value: egg.id.toString() }))
-              ]}
-              selected={eggId.toString()}
-              onChange={(e) => setEggId(parseInt(e.target.value))}
-            />
-          </div>
-        )}
       </AdminSettingContainer>
 
       {nodeId > 0 && (
