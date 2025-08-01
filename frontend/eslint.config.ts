@@ -24,6 +24,7 @@ export default [
     ignores: [
       '**/public',
       '**/node_modules',
+      '**/dist',
       'resources/views',
       '**/babel.config.js',
       '**/tailwind.config.js',

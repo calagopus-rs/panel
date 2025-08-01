@@ -33,7 +33,7 @@ interface CreateServerData {
 export default async (data: CreateServerData): Promise<AdminServer> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/admin/servers`, transformKeysToSnakeCase(data))
+      .post('/api/admin/servers', transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.server))
       .catch(reject);
   });

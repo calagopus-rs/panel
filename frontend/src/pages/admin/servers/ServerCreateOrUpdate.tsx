@@ -18,26 +18,27 @@ export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
-  const { nodes, setNodes, nests, setNests, eggs, setEggs, users, setUsers, allocations, setAllocations } = useAdminStore();
+  const { nodes, setNodes, nests, setNests, eggs, setEggs, users, setUsers, allocations, setAllocations } =
+    useAdminStore();
 
   const [loading, setLoading] = useState(true);
   const [server, setServer] = useState<AdminServer | null>(null);
-  
+
   // Basic server info
   const [name, setName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [externalId, setExternalId] = useState<string>('');
-  
+
   // Server configuration
   const [nodeId, setNodeId] = useState<number>(0);
   const [ownerId, setOwnerId] = useState<number>(0);
   const [nestId, setNestId] = useState<number>(0);
   const [eggId, setEggId] = useState<number>(0);
-  
+
   // Allocations
   const [allocationId, setAllocationId] = useState<number>(0);
   const [additionalAllocations, setAdditionalAllocations] = useState<number[]>([]);
-  
+
   // Resource limits
   const [cpu, setCpu] = useState<number>(100);
   const [memory, setMemory] = useState<number>(1024);
@@ -45,55 +46,55 @@ export default () => {
   const [disk, setDisk] = useState<number>(5120);
   const [ioWeight, setIoWeight] = useState<number>(500);
   const [pinnedCpus, setPinnedCpus] = useState<string>('');
-  
+
   // Feature limits
   const [maxAllocations, setMaxAllocations] = useState<number>(5);
   const [maxDatabases, setMaxDatabases] = useState<number>(5);
   const [maxBackups, setMaxBackups] = useState<number>(2);
-  
+
   // Startup configuration
   const [startup, setStartup] = useState<string>('');
   const [image, setImage] = useState<string>('');
   const [timezone, setTimezone] = useState<string>('');
-  
+
   // Options
   const [startOnCompletion, setStartOnCompletion] = useState<boolean>(true);
   const [skipScripts, setSkipScripts] = useState<boolean>(false);
 
   useEffect(() => {
-    Promise.all([
-      getNodes({ perPage: 100 }),
-      getNests({ perPage: 100 }),
-      getUsers({ perPage: 100 })
-    ])
+    Promise.all([getNodes({ perPage: 100 }), getNests({ perPage: 100 }), getUsers({ perPage: 100 })])
       .then(async ([nodesData, nestsData, usersData]) => {
         setNodes(nodesData);
         setNests(nestsData);
         setUsers(usersData);
-        
+
         // Load all eggs from all nests with nest context
         const allEggsWithContext = [];
         for (const nest of nestsData.data) {
           try {
             const eggsData = await getEggs(nest.id, { perPage: 100 });
-            allEggsWithContext.push(...eggsData.data.map(egg => ({ 
-              ...egg, 
-              _nestId: nest.id, 
-              _nestName: nest.name 
-            })));
+            allEggsWithContext.push(
+              ...eggsData.data.map((egg) => ({
+                ...egg,
+                _nestId: nest.id,
+                _nestName: nest.name,
+              })),
+            );
           } catch (error) {
             console.warn(`Failed to load eggs for nest ${nest.name}:`, error);
           }
         }
-        setEggs({ data: allEggsWithContext, pagination: { currentPage: 1, perPage: 100, total: allEggsWithContext.length, totalPages: 1 } });
-        
+        setEggs({
+          data: allEggsWithContext,
+          pagination: { currentPage: 1, perPage: 100, total: allEggsWithContext.length, totalPages: 1 },
+        });
+
         setLoading(false);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
   }, []);
-
 
   useEffect(() => {
     if (nodeId && nodeId > 0) {
@@ -110,15 +111,15 @@ export default () => {
   const doCreateServer = () => {
     const pinnedCpusArray = pinnedCpus
       .split(',')
-      .map(cpu => parseInt(cpu.trim()))
-      .filter(cpu => !isNaN(cpu));
+      .map((cpu) => parseInt(cpu.trim()))
+      .filter((cpu) => !isNaN(cpu));
 
     createServer({
       nodeId,
       ownerId,
       eggId,
       allocationId: allocationId || undefined,
-      allocationIds: [allocationId, ...additionalAllocations].filter(id => id > 0),
+      allocationIds: [allocationId, ...additionalAllocations].filter((id) => id > 0),
       startOnCompletion,
       skipScripts,
       externalId: externalId || undefined,
@@ -159,16 +160,11 @@ export default () => {
       <div className={'mb-4'}>
         <h1 className={'text-4xl font-bold text-white'}>{params.id ? 'Update' : 'Create'} Server</h1>
       </div>
-      
+
       <AdminSettingContainer title={'Basic Information'}>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'name'}>Server Name</Input.Label>
-          <Input.Text
-            id={'name'}
-            placeholder={'Server Name'}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <Input.Text id={'name'} placeholder={'Server Name'} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'description'}>Description</Input.Label>
@@ -197,7 +193,7 @@ export default () => {
             id={'node'}
             options={[
               { label: 'Select a node...', value: '0' },
-              ...nodes.data.map(node => ({ label: node.name, value: node.id.toString() }))
+              ...nodes.data.map((node) => ({ label: node.name, value: node.id.toString() })),
             ]}
             selected={nodeId.toString()}
             onChange={(e) => setNodeId(parseInt(e.target.value))}
@@ -209,7 +205,7 @@ export default () => {
             id={'owner'}
             options={[
               { label: 'Select an owner...', value: '0' },
-              ...users.data.map(user => ({ label: `${user.username} (${user.email})`, value: user.id.toString() }))
+              ...users.data.map((user) => ({ label: `${user.username} (${user.email})`, value: user.id.toString() })),
             ]}
             selected={ownerId.toString()}
             onChange={(e) => setOwnerId(parseInt(e.target.value))}
@@ -221,19 +217,19 @@ export default () => {
             id={'egg'}
             options={[
               { label: 'Select a server type...', value: '0' },
-              ...eggs.data.map(egg => ({ 
-                label: `${egg.name} (${(egg as any)._nestName})`, 
-                value: egg.id.toString() 
-              }))
+              ...eggs.data.map((egg) => ({
+                label: `${egg.name} (${(egg as any)._nestName})`,
+                value: egg.id.toString(),
+              })),
             ]}
             selected={eggId.toString()}
             onChange={(e) => {
               const selectedEggId = parseInt(e.target.value);
               setEggId(selectedEggId);
-              
+
               // Automatically set the nest when an egg is selected
               if (selectedEggId > 0) {
-                const selectedEgg = eggs.data.find(egg => egg.id === selectedEggId);
+                const selectedEgg = eggs.data.find((egg) => egg.id === selectedEggId);
                 if (selectedEgg) {
                   setNestId((selectedEgg as any)._nestId);
                 }
@@ -253,10 +249,10 @@ export default () => {
               id={'allocation'}
               options={[
                 { label: 'Select an allocation...', value: '0' },
-                ...allocations.data.map(alloc => ({ 
+                ...allocations.data.map((alloc) => ({
                   label: `${alloc.ip}:${alloc.port}`,
-                  value: alloc.id.toString()
-                }))
+                  value: alloc.id.toString(),
+                })),
               ]}
               selected={allocationId.toString()}
               onChange={(e) => setAllocationId(parseInt(e.target.value))}
@@ -404,11 +400,7 @@ export default () => {
           <Input.Label htmlFor={'startOnCompletion'}>Start server after installation completes</Input.Label>
         </div>
         <div className={'mt-4 flex items-center gap-4'}>
-          <Input.Checkbox
-            id={'skipScripts'}
-            checked={skipScripts}
-            onChange={(e) => setSkipScripts(e.target.checked)}
-          />
+          <Input.Checkbox id={'skipScripts'} checked={skipScripts} onChange={(e) => setSkipScripts(e.target.checked)} />
           <Input.Label htmlFor={'skipScripts'}>Skip egg install script</Input.Label>
         </div>
       </AdminSettingContainer>

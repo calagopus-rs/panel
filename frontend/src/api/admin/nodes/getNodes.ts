@@ -1,14 +1,11 @@
 import { axiosInstance } from '@/api/axios';
 
-interface GetNodesParams {
-  page?: number;
-  perPage?: number;
-}
-
-export default async (params: GetNodesParams = {}): Promise<ResponseMeta<Node>> => {
+export default async (page: number, search?: string): Promise<ResponseMeta<Node>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .get('/api/admin/nodes', { params })
+      .get('/api/admin/nodes', {
+        params: { page, search },
+      })
       .then(({ data }) => resolve(data.nodes))
       .catch(reject);
   });

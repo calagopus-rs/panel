@@ -2,13 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, {
-  NoItems,
-  Pagination,
-  TableBody,
-  TableHead,
-  TableHeader,
-} from '@/elements/table/Table';
+import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';

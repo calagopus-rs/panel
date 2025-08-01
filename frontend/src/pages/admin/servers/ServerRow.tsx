@@ -48,13 +48,9 @@ export default ({ server }: { server: AdminServer }) => {
         </NavLink>
       </td>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-        {server.ower.username}
-      </td>
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{server.ower.username}</td>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-        {server.node.name}
-      </td>
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{server.node.name}</td>
 
       <td className={'px-6 text-sm text-left whitespace-nowrap'}>
         <span className={getStatusColor(server.status, server.suspended)}>
