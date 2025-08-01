@@ -62,7 +62,7 @@ impl NodeAllocation {
         .bind(ip)
         .bind(ip_alias)
         .bind(port)
-        .fetch_one(database.write())
+        .execute(database.write())
         .await?;
 
         Ok(())
