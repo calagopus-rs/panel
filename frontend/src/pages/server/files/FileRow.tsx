@@ -201,7 +201,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
           {
             icon: faCopy,
             label: 'Copy',
-            hidden: !!browsingBackup,
+            hidden: !!browsingBackup || file.directory,
             onClick: () => setOpenDialog('copy'),
             color: 'gray',
           },

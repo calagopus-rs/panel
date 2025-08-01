@@ -21,7 +21,7 @@ export default () => {
   const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
   const server = useServerStore((state) => state.server);
-  const { browsingDirectory, setBrowsingDirectory } = useServerStore();
+  const { browsingDirectory, setBrowsingDirectory, browsingBackup } = useServerStore();
 
   const [loading, setLoading] = useState(false);
   const [nameDialogOpen, setNameDialogOpen] = useState(false);
@@ -87,8 +87,8 @@ export default () => {
       />
 
       <div className={'flex justify-between w-full p-4'}>
-        <FileBreadcrumbs path={join(decodeURIComponent(browsingDirectory), fileName)} />
-        <div>
+        <FileBreadcrumbs path={join(decodeURIComponent(browsingDirectory), fileName)} browsingBackup={browsingBackup} />
+        <div hidden={!!browsingBackup}>
           {params.action === 'edit' ? (
             <Button style={Button.Styles.Green} onClick={() => saveFile()}>
               Save

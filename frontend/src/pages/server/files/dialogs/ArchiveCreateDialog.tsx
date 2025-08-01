@@ -48,10 +48,12 @@ export default ({ onCreate, open, onClose }: Props) => {
         <Code>
           /home/container/
           <span className={'text-cyan-200'}>
-            {join(browsingDirectory, fileName || generateArchiveName(archiveFormatExtensionMapping[format])).replace(
-              /^(\.\.\/|\/)+/,
-              '',
-            )}
+            {join(
+              browsingDirectory,
+              fileName
+                ? `${fileName}${archiveFormatExtensionMapping[format]}`
+                : generateArchiveName(archiveFormatExtensionMapping[format]),
+            ).replace(/^(\.\.\/|\/)+/, '')}
           </span>
         </Code>
       </p>
@@ -61,7 +63,14 @@ export default ({ onCreate, open, onClose }: Props) => {
         </Button>
         <Button
           style={Button.Styles.Green}
-          onClick={() => onCreate(fileName || generateArchiveName(archiveFormatExtensionMapping[format]), format)}
+          onClick={() =>
+            onCreate(
+              fileName
+                ? `${fileName}${archiveFormatExtensionMapping[format]}`
+                : generateArchiveName(archiveFormatExtensionMapping[format]),
+              format,
+            )
+          }
         >
           Create
         </Button>
