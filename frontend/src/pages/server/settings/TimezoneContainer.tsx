@@ -19,7 +19,7 @@ export default () => {
   const { server } = useServerStore();
 
   const [timezone, setTimezone] = useState(server.timezone || '');
-  const [time, setTime] = useState(new Date().toLocaleString('en-US', { timeZone: timezone }));
+  const [time, setTime] = useState('');
 
   const handleUpdate = () => {
     updateTimezone(server.uuid, { timezone })
