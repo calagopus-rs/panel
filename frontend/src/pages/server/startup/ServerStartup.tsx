@@ -72,7 +72,7 @@ export default () => {
           <Input.Textarea
             id={'startup-command'}
             placeholder={'Startup Command'}
-            variant={Input.Text.Variants.Loose}
+            className={'h-full'}
             disabled={!settings.server.allowEditingStartupCommand}
             value={command}
             onChange={(e) => setCommand(e.target.value)}
