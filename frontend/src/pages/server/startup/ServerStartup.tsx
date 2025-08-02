@@ -3,7 +3,7 @@ import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { NoItems } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import VariableContainer from './VariableContainer';
 import { useGlobalStore } from '@/stores/global';
 import { Input } from '@/elements/inputs';
@@ -11,6 +11,7 @@ import { useToast } from '@/providers/ToastProvider';
 import updateDockerImage from '@/api/server/startup/updateDockerImage';
 import { httpErrorToHuman } from '@/api/axios';
 import updateCommand from '@/api/server/startup/updateCommand';
+import debounce from 'debounce';
 
 export default () => {
   const { addToast } = useToast();
@@ -21,6 +22,20 @@ export default () => {
   const [command, setCommand] = useState(server.startup);
   const [dockerImage, setDockerImage] = useState(server.image);
 
+  const setDebouncedCommand = useCallback(
+    debounce((command: string) => {
+      updateCommand(server.uuid, { command })
+        .then(() => {
+          addToast('Startup command updated.', 'success');
+          updateServer({ startup: command });
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    }, 200),
+    [],
+  );
+
   useEffect(() => {
     getVariables(server.uuid).then((data) => {
       setVariables(data);
@@ -30,16 +45,9 @@ export default () => {
 
   useEffect(() => {
     if (command !== server.startup) {
-      updateCommand(server.uuid, { command })
-        .then(() => {
-          addToast('Startup command updated.', 'success');
-          updateServer({ startup: command });
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
+      setDebouncedCommand(command);
     }
-  });
+  }, [command]);
 
   useEffect(() => {
     if (dockerImage !== server.image) {
@@ -52,7 +60,7 @@ export default () => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     }
-  }, [server.uuid, dockerImage]);
+  }, [dockerImage]);
 
   return (
     <Container>
