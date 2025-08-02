@@ -27,7 +27,7 @@ export default () => {
   };
 
   return (
-    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
+    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
       <SettingsReinstallDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onReinstall={handleReinstall} />
 
       <h1 className={'text-4xl font-bold text-white'}>Reinstall Server</h1>

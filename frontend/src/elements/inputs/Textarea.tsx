@@ -15,7 +15,12 @@ interface TextareaProps extends React.ComponentProps<'textarea'> {
 const Component = forwardRef<HTMLTextAreaElement, TextareaProps>(({ className, variant, ...props }, ref) => (
   <textarea
     ref={ref}
-    className={classNames('form-input', styles.text_input, { [styles.loose]: variant === Variant.Loose }, className)}
+    className={classNames(
+      'form-input resize-none',
+      styles.text_input,
+      { [styles.loose]: variant === Variant.Loose },
+      className,
+    )}
     {...props}
   />
 ));

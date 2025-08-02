@@ -147,7 +147,7 @@ interface NestEgg {
   features: string[];
   dockerImages: {
     [key: string]: string;
-  }[];
+  };
   created: Date;
 }
 

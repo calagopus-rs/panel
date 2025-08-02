@@ -24,29 +24,31 @@ export default () => {
   };
 
   return (
-    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
-      <h1 className={'text-4xl font-bold text-white'}>Update Auto-Kill</h1>
+    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
+      <div>
+        <h1 className={'text-4xl font-bold text-white'}>Update Auto-Kill</h1>
 
-      <div className={'mt-4'}>
-        <Input.Switch
-          name={'enabled'}
-          defaultChecked={enabled}
-          onChange={(e) => setEnabled(e.target.checked)}
-          label={'Enabled'}
-        />
-      </div>
+        <div className={'mt-4'}>
+          <Input.Switch
+            name={'enabled'}
+            defaultChecked={enabled}
+            onChange={(e) => setEnabled(e.target.checked)}
+            label={'Enabled'}
+          />
+        </div>
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'seconds'}>Seconds</Input.Label>
-        <Input.Text
-          id={'seconds'}
-          placeholder={'Seconds until auto-kill'}
-          type={'number'}
-          min={0}
-          max={3600}
-          value={seconds}
-          onChange={(e) => setSeconds(Number(e.target.value))}
-        />
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'seconds'}>Seconds</Input.Label>
+          <Input.Text
+            id={'seconds'}
+            placeholder={'Seconds until auto-kill'}
+            type={'number'}
+            min={0}
+            max={3600}
+            value={seconds}
+            onChange={(e) => setSeconds(Number(e.target.value))}
+          />
+        </div>
       </div>
 
       <div className={'mt-4 flex justify-end'}>

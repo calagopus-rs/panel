@@ -33,6 +33,8 @@ export default () => {
 
   useEffect(() => {
     if (timezone) {
+      setTime(new Date().toLocaleString('en-US', { timeZone: timezone }));
+
       const interval = setInterval(() => {
         setTime(new Date().toLocaleString('en-US', { timeZone: timezone }));
       }, 1000);
@@ -42,18 +44,20 @@ export default () => {
   }, [timezone]);
 
   return (
-    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
-      <h1 className={'text-4xl font-bold text-white'}>Update Timezone</h1>
+    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
+      <div>
+        <h1 className={'text-4xl font-bold text-white'}>Update Timezone</h1>
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'timezone'}>Timezone</Input.Label>
-        <Input.Dropdown
-          id={'timezone'}
-          options={timezones}
-          selected={timezone}
-          onChange={(e) => setTimezone(e.target.value)}
-        />
-        <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
+        <div className={'mt-4'}>
+          <Input.Label htmlFor={'timezone'}>Timezone</Input.Label>
+          <Input.Dropdown
+            id={'timezone'}
+            options={timezones}
+            selected={timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+          />
+          <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
+        </div>
       </div>
 
       <div className={'mt-4 flex justify-end'}>

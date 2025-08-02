@@ -8,6 +8,7 @@ import { ServerSlice, createServerSlice } from './slices/server/server';
 import { StateSlice, createStateSlice } from './slices/server/state';
 import { StatsSlice, createStatsSlice } from './slices/server/stats';
 import { SubusersSlice, createSubusersSlice } from './slices/server/subusers';
+import { StartupSlice, createStartupSlice } from './slices/server/startup';
 import { WebsocketSlice, createWebsocketSlice } from './slices/server/websocket';
 
 export interface ServerStore
@@ -20,6 +21,7 @@ export interface ServerStore
     StatsSlice,
     StateSlice,
     SubusersSlice,
+    StartupSlice,
     WebsocketSlice {
   reset: () => void;
 }
@@ -36,6 +38,7 @@ export const useServerStore = create<ServerStore>()((...a) => {
     ...createStateSlice(...a),
     ...createStatsSlice(...a),
     ...createSubusersSlice(...a),
+    ...createStartupSlice(...a),
     ...createWebsocketSlice(...a),
   });
   initialState.reset = () => useServerStore.setState((state) => ({ ...initialState, reset: state.reset }), true);
