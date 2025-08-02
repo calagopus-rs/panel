@@ -52,7 +52,10 @@ mod put {
     use crate::{
         models::server_variable::ServerVariable,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetUserActivityLogger, servers::_server_::GetServer},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -87,6 +90,7 @@ mod put {
     pub async fn route(
         state: GetState,
         server: GetServer,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -155,6 +159,16 @@ mod put {
         }
 
         ServerVariable::create(&state.database, server.id, variable_id, &data.value).await?;
+
+        activity_logger
+            .log(
+                "server:startup.variable",
+                serde_json::json!({
+                    "env_variable": data.env_variable,
+                    "value": data.value,
+                }),
+            )
+            .await;
 
         ApiResponse::json(Response {}).ok()
     }

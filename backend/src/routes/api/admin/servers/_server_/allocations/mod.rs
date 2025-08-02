@@ -154,6 +154,8 @@ mod post {
             .log(
                 "admin:server.allocation.create",
                 serde_json::json!({
+                    "server_id": server.id,
+
                     "ip": allocation.allocation.ip,
                     "ip_alias": allocation.allocation.ip_alias,
                     "port": allocation.allocation.port,

@@ -6,7 +6,10 @@ mod post {
         jwt::BasePayload,
         models::node::Node,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -42,6 +45,7 @@ mod post {
     pub async fn route(
         state: GetState,
         server: GetServer,
+        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if server.destination_node_id.is_some() {
@@ -157,6 +161,18 @@ mod post {
                     .ok();
             }
         }
+
+        activity_logger
+            .log(
+                "admin:server.transfer",
+                serde_json::json!({
+                    "server_id": server.id,
+                    "destination_node_id": destination_node.id,
+                    "allocation_id": destination_allocation_id,
+                    "allocation_ids": data.allocation_ids,
+                }),
+            )
+            .await;
 
         ApiResponse::json(Response {}).ok()
     }
