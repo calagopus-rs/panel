@@ -49,7 +49,7 @@ mod get {
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
-                .with_status(StatusCode::UNAUTHORIZED)
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 

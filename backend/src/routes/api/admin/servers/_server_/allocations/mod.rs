@@ -1,11 +1,11 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _mount_;
+mod _allocation_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_mount::ServerMount},
+        models::{Pagination, PaginationParams, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
     };
@@ -16,7 +16,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        mounts: Pagination<crate::models::server_mount::AdminApiServerMount>,
+        allocations: Pagination<crate::models::server_allocation::ApiServerAllocation>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -49,7 +49,7 @@ mod get {
                 .ok();
         }
 
-        let mounts = ServerMount::by_server_id_with_pagination(
+        let allocations = ServerAllocation::by_server_id_with_pagination(
             &state.database,
             server.id,
             params.page,
@@ -58,14 +58,16 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            mounts: Pagination {
-                total: mounts.total,
-                per_page: mounts.per_page,
-                page: mounts.page,
-                data: mounts
+            allocations: Pagination {
+                total: allocations.total,
+                per_page: allocations.per_page,
+                page: allocations.page,
+                data: allocations
                     .data
                     .into_iter()
-                    .map(|mount| mount.into_admin_api_object())
+                    .map(|allocation| {
+                        allocation.into_api_object(server.allocation.as_ref().map(|a| a.id))
+                    })
                     .collect(),
             },
         })
@@ -75,7 +77,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::{mount::Mount, server_mount::ServerMount},
+        models::{node_allocation::NodeAllocation, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -85,21 +87,22 @@ mod post {
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
-    use validator::Validate;
 
-    #[derive(ToSchema, Validate, Deserialize)]
+    #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        mount_id: i32,
+        allocation_id: i32,
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {}
+    struct Response {
+        allocation: crate::models::server_allocation::ApiServerAllocation,
+    }
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = ApiError),
         (status = BAD_REQUEST, body = ApiError),
-        (status = CONFLICT, body = ApiError),
+        (status = UNAUTHORIZED, body = ApiError),
+        (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
             "server" = i32,
@@ -113,39 +116,35 @@ mod post {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let mount = match Mount::by_node_id_egg_id_id(
+        let node_allocation = match NodeAllocation::by_node_id_id(
             &state.database,
             server.node.id,
-            server.egg.id,
-            data.mount_id,
+            data.allocation_id,
         )
         .await?
         {
-            Some(mount) => mount,
+            Some(allocation) => allocation,
             None => {
-                return ApiResponse::error("mount not found")
+                return ApiResponse::error("allocation not found")
                     .with_status(StatusCode::NOT_FOUND)
                     .ok();
             }
         };
 
-        if let Err(errors) = crate::utils::validate_data(&data) {
-            return ApiResponse::json(ApiError::new_strings_value(errors))
-                .with_status(StatusCode::BAD_REQUEST)
-                .ok();
-        }
-
-        match ServerMount::create(&state.database, server.id, mount.id).await {
-            Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
-                return ApiResponse::error("mount already exists")
-                    .with_status(StatusCode::CONFLICT)
-                    .ok();
-            }
+        let allocation = match ServerAllocation::create(
+            &state.database,
+            server.id,
+            node_allocation.id,
+        )
+        .await
+        {
+            Ok(allocation_id) => ServerAllocation::by_id(&state.database, allocation_id)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("allocation not found after creation"))?,
             Err(err) => {
-                tracing::error!("failed to create server mount: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to create allocation: {:#?}", err);
 
-                return ApiResponse::error("failed to create server mount")
+                return ApiResponse::error("failed to create allocation")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
@@ -153,15 +152,19 @@ mod post {
 
         activity_logger
             .log(
-                "admin:server.mount.create",
+                "admin:server.allocation.create",
                 serde_json::json!({
-                    "server_id": server.id,
-                    "mount_id": mount.id,
+                    "ip": allocation.allocation.ip,
+                    "ip_alias": allocation.allocation.ip_alias,
+                    "port": allocation.allocation.port,
                 }),
             )
             .await;
 
-        ApiResponse::json(Response {}).ok()
+        ApiResponse::json(Response {
+            allocation: allocation.into_api_object(server.allocation.as_ref().map(|a| a.id)),
+        })
+        .ok()
     }
 }
 
@@ -169,6 +172,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{mount}", _mount_::router(state))
+        .nest("/{allocation}", _allocation_::router(state))
         .with_state(state.clone())
 }

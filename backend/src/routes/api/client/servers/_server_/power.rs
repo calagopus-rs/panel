@@ -48,15 +48,16 @@ mod post {
                 .ok();
         }
 
-        let request_body = wings_api::servers_server_power::post::RequestBody {
-            action: data.signal,
-            wait_seconds: None,
-        };
-
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_power(server.uuid, &request_body)
+            .post_servers_server_power(
+                server.uuid,
+                &wings_api::servers_server_power::post::RequestBody {
+                    action: data.signal,
+                    wait_seconds: None,
+                },
+            )
             .await
         {
             Ok(data) => data,
@@ -73,7 +74,7 @@ mod post {
             .log(
                 "server:power.signal",
                 serde_json::json!({
-                    "signal": request_body.action
+                    "signal": data.signal
                 }),
             )
             .await;

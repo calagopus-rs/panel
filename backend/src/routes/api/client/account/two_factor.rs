@@ -113,7 +113,7 @@ mod post {
 
         if let Err(errors) = crate::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
-                .with_status(StatusCode::UNAUTHORIZED)
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 
@@ -204,7 +204,7 @@ mod delete {
 
         if let Err(errors) = crate::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
-                .with_status(StatusCode::UNAUTHORIZED)
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 

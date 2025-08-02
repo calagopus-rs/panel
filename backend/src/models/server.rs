@@ -417,6 +417,31 @@ impl Server {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
+    pub async fn by_external_id(
+        database: &crate::database::Database,
+        external_id: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM servers
+            JOIN nodes ON nodes.id = servers.node_id
+            JOIN locations ON locations.id = nodes.location_id
+            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
+            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
+            JOIN users ON users.id = servers.owner_id
+            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            WHERE servers.external_id = $1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(external_id)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
     pub async fn by_identifier(
         database: &crate::database::Database,
         identifier: &str,

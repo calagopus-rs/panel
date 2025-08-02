@@ -68,6 +68,27 @@ impl NodeAllocation {
         Ok(())
     }
 
+    pub async fn by_node_id_id(
+        database: &crate::database::Database,
+        node_id: i32,
+        id: i32,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM node_allocations
+            WHERE node_allocations.node_id = $1 AND node_allocations.id = $2
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(node_id)
+        .bind(id)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
     pub async fn by_node_id_with_pagination(
         database: &crate::database::Database,
         node_id: i32,

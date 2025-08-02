@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _server_;
+mod external;
 
 mod get {
     use crate::{
@@ -43,7 +44,7 @@ mod get {
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
-                .with_status(StatusCode::UNAUTHORIZED)
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 
@@ -245,5 +246,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(post::route))
         .nest("/{server}", _server_::router(state))
+        .nest("/external", external::router(state))
         .with_state(state.clone())
 }

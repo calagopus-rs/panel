@@ -8,6 +8,7 @@ use axum::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod allocations;
 mod mounts;
 mod transfer;
 mod variables;
@@ -147,6 +148,8 @@ mod patch {
         owner_id: Option<i32>,
         egg_id: Option<i32>,
 
+        suspended: Option<bool>,
+
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
         external_id: Option<String>,
@@ -224,6 +227,9 @@ mod patch {
 
             server.egg = egg;
         }
+        if let Some(suspended) = data.suspended {
+            server.suspended = suspended;
+        }
         if let Some(external_id) = &data.external_id {
             if external_id.is_empty() {
                 server.external_id = None;
@@ -279,14 +285,15 @@ mod patch {
         match sqlx::query!(
             "UPDATE servers
             SET
-                owner_id = $1, egg_id = $2, external_id = $3,
-                name = $4, description = $5, cpu = $6, memory = $7,
-                swap = $8, disk = $9, io_weight = $10, pinned_cpus = $11,
-                startup = $12, image = $13, timezone = $14, allocation_limit = $15,
-                backup_limit = $16, database_limit = $17
-            WHERE id = $18",
+                owner_id = $1, egg_id = $2, suspended = $3, external_id = $4,
+                name = $5, description = $6, cpu = $7, memory = $8,
+                swap = $9, disk = $10, io_weight = $11, pinned_cpus = $12,
+                startup = $13, image = $14, timezone = $15, allocation_limit = $16,
+                backup_limit = $17, database_limit = $18
+            WHERE id = $19",
             server.owner.id,
             server.egg.id,
+            server.suspended,
             server.external_id,
             server.name,
             server.description,
@@ -361,6 +368,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/variables", variables::router(state))
         .nest("/mounts", mounts::router(state))
         .nest("/transfer", transfer::router(state))
+        .nest("/allocations", allocations::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

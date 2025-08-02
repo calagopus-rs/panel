@@ -56,19 +56,20 @@ impl ServerAllocation {
         database: &crate::database::Database,
         server_id: i32,
         allocation_id: i32,
-    ) -> Result<(), sqlx::Error> {
-        sqlx::query(
+    ) -> Result<i32, sqlx::Error> {
+        let row = sqlx::query(
             r#"
             INSERT INTO server_allocations (server_id, allocation_id)
             VALUES ($1, $2)
+            RETURNING id
             "#,
         )
         .bind(server_id)
         .bind(allocation_id)
-        .execute(database.write())
+        .fetch_one(database.write())
         .await?;
 
-        Ok(())
+        Ok(row.get("id"))
     }
 
     pub async fn create_random(
