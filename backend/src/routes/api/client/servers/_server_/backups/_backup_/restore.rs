@@ -100,7 +100,7 @@ mod post {
                 serde_json::json!({
                     "backup": backup.uuid,
                     "name": backup.name,
-                    "locked": backup.locked,
+                    "truncate_directory": data.truncate_directory,
                 }),
             )
             .await;

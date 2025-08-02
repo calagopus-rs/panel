@@ -63,7 +63,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
         setOpenDialog(null);
         addToast('Restoring backup...', 'success');
 
-        navigate(`/server/${server?.uuidShort}`);
+        navigate(`/server/${server.uuidShort}`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

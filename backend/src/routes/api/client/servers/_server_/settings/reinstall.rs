@@ -10,8 +10,13 @@ mod post {
         },
     };
     use axum::http::StatusCode;
-    use serde::Serialize;
+    use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
+
+    #[derive(ToSchema, Deserialize)]
+    pub struct Payload {
+        truncate_directory: bool,
+    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -26,11 +31,12 @@ mod post {
             description = "The server ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
-    ))]
+    ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
+        axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("settings.reinstall") {
             return ApiResponse::error(&error)
@@ -61,7 +67,12 @@ mod post {
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_reinstall(server.uuid)
+            .post_servers_server_reinstall(
+                server.uuid,
+                &wings_api::servers_server_reinstall::post::RequestBody {
+                    truncate_directory: data.truncate_directory,
+                },
+            )
             .await
         {
             Ok(_) => {}
@@ -78,7 +89,12 @@ mod post {
         transaction.commit().await?;
 
         activity_logger
-            .log("server:settings.reinstall", serde_json::json!({}))
+            .log(
+                "server:settings.reinstall",
+                serde_json::json!({
+                    "truncate_directory": data.truncate_directory
+                }),
+            )
             .await;
 
         ApiResponse::json(Response {}).ok()

@@ -44,6 +44,7 @@
     "sockette": "^2.0.6",
     "tailwindcss": "^4.1.11",
     "ts-essentials": "^10.1.1",
+    "tzdata": "^1.0.44",
     "uuid": "^11.1.0",
     "zustand": "^5.0.6"
   },

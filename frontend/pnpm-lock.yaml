@@ -107,6 +107,9 @@ importers:
       ts-essentials:
         specifier: ^10.1.1
         version: 10.1.1(typescript@5.8.3)
+      tzdata:
+        specifier: ^1.0.44
+        version: 1.0.44
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -2225,6 +2228,9 @@ packages:
     resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  tzdata@1.0.44:
+    resolution: {integrity: sha512-xJ8xcdoFRwFpIQ90QV3WFXJNCO/feNn9vHVsZMJiKmtMYuo7nvF6CTpBc+SgegC1fb/3L+m32ytXT9XrBjrINg==}
 
   unbox-primitive@1.1.0:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
@@ -4499,6 +4505,8 @@ snapshots:
       - supports-color
 
   typescript@5.8.3: {}
+
+  tzdata@1.0.44: {}
 
   unbox-primitive@1.1.0:
     dependencies:

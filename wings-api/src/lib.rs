@@ -862,6 +862,13 @@ pub mod servers_server_reinstall {
         use super::*;
 
         nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub truncate_directory: bool,
+            }
+        }
+
+        nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }

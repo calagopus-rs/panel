@@ -543,13 +543,14 @@ impl WingsClient {
     pub async fn post_servers_server_reinstall(
         &self,
         server: uuid::Uuid,
+        data: &super::servers_server_reinstall::post::RequestBody,
     ) -> Result<super::servers_server_reinstall::post::Response202, (StatusCode, super::ApiError)>
     {
         request_impl(
             self,
             Method::POST,
             format!("/api/servers/{server}/reinstall"),
-            None::<&usize>,
+            Some(data),
             None,
         )
         .await
