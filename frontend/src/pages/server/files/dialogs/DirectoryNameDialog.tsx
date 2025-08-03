@@ -35,7 +35,7 @@ export default ({ onDirectoryName, open, onClose }: Props) => {
         <Button style={Button.Styles.Gray} onClick={onClose}>
           Close
         </Button>
-        <Button style={Button.Styles.Green} onClick={() => onDirectoryName(dirName)}>
+        <Button style={Button.Styles.Green} disabled={!dirName} onClick={() => onDirectoryName(dirName)}>
           Create
         </Button>
       </Dialog.Footer>

@@ -32,6 +32,8 @@ import chmodFiles from '@/api/server/files/chmodFiles';
 import downloadFiles from '@/api/server/files/downloadFiles';
 import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 import { useGlobalStore } from '@/stores/global';
+import FileCopyDialog from './dialogs/FileCopyDialog';
+import copyFile from '@/api/server/files/copyFile';
 
 function FileTableRow({
   file,
@@ -109,7 +111,17 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
     );
   };
 
-  const doCopy = () => {};
+  const doCopy = (name: string) => {
+    copyFile(server.uuid, join(browsingDirectory, file.name), name || null)
+      .then((entry) => {
+        addToast('File has been copied.', 'success');
+        setOpenDialog(null);
+        addBrowsingEntry(entry);
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
 
   const doMove = () => {};
 
@@ -182,6 +194,15 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
 
   return (
     <>
+      <FileCopyDialog
+        open={openDialog === 'copy'}
+        onClose={() => setOpenDialog(null)}
+        fileName={file.name}
+        onFileCopy={(name) => {
+          doCopy(name);
+          setOpenDialog(null);
+        }}
+      />
       <FilePermissionsDialog
         file={file}
         onChange={doChmod}

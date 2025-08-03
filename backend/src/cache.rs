@@ -6,7 +6,7 @@ use rustis::{
     resp::cmd,
 };
 use serde::{Serialize, de::DeserializeOwned};
-use std::{future::Future, sync::atomic::AtomicUsize};
+use std::future::Future;
 
 pub struct Cache {
     pub client: Client,
