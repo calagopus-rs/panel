@@ -37,7 +37,7 @@ export default ({ fileName, onFileCopy, open, onClose }: Props) => {
         suffix = ` copy ${i}`;
       }
 
-      const newName = `${baseName}${suffix}${extension}`;
+      const newName = baseName.concat(suffix, extension);
       const newPath = parent + newName;
 
       const exists = browsingEntries.data.some((entry) => entry.name === newPath);
@@ -50,12 +50,12 @@ export default ({ fileName, onFileCopy, open, onClose }: Props) => {
         const timestamp = new Date().toISOString();
         suffix = `copy.${timestamp}`;
 
-        const finalName = `${baseName}${suffix}${extension}`;
+        const finalName = baseName.concat(suffix, extension);
         return finalName;
       }
     }
 
-    return `${baseName}${suffix}${extension}`;
+    return baseName.concat(suffix, extension);
   };
 
   return (
