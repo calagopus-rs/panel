@@ -30,12 +30,27 @@ const LineRenderer = memo(
     style,
     terminalPrelude,
     isLastLine,
+    onHeightChange,
+    index,
   }: {
     line: TerminalLine;
     style: React.CSSProperties;
     terminalPrelude: string;
     isLastLine: boolean;
+    onHeightChange: (index: number, height: number) => void;
+    index: number;
   }) => {
+    const lineRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      if (lineRef.current) {
+        const actualHeight = lineRef.current.scrollHeight;
+        if (actualHeight !== line.height) {
+          onHeightChange(index, actualHeight);
+        }
+      }
+    }, [line.content, line.html, index, line.height, onHeightChange]);
+
     if (!line) return null;
 
     const getPlainText = () => {
@@ -48,12 +63,14 @@ const LineRenderer = memo(
 
     return (
       <div
+        ref={lineRef}
         style={{
           ...style,
           height: 'auto',
           minHeight: style.height,
+          overflow: 'visible',
         }}
-        className='px-2 font-mono text-sm whitespace-pre-wrap select-text'
+        className='px-2 font-mono text-sm whitespace-pre-wrap break-all select-text'
         data-plain-text={getPlainText()}
       >
         {line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m') ? (
@@ -73,7 +90,8 @@ const LineRenderer = memo(
       prevProps.line.id === nextProps.line.id &&
       prevProps.line.html === nextProps.line.html &&
       prevProps.style.top === nextProps.style.top &&
-      prevProps.isLastLine === nextProps.isLastLine
+      prevProps.isLastLine === nextProps.isLastLine &&
+      prevProps.index === nextProps.index
     );
   },
 );
@@ -94,22 +112,38 @@ export default () => {
   const [autoScroll, setAutoScroll] = useState(true);
   const [terminalHeight, setTerminalHeight] = useState(500);
   const [terminalWidth, setTerminalWidth] = useState(800);
+  const lineHeightCache = useRef<Map<number, number>>(new Map());
 
   const calculateLineHeight = useCallback((content: string, width: number): number => {
-    if (!sizeCalculatorRef.current) return 20;
+    if (!sizeCalculatorRef.current) return 24;
 
+    // Set up the calculator with the same styles as the actual line
     sizeCalculatorRef.current.innerHTML = content;
-    sizeCalculatorRef.current.style.width = `${width}px`;
+    sizeCalculatorRef.current.style.width = `${width - 16}px`; // Account for padding
+    sizeCalculatorRef.current.style.whiteSpace = 'pre-wrap';
+    sizeCalculatorRef.current.style.wordBreak = 'break-all';
+    sizeCalculatorRef.current.style.padding = '0 8px';
 
-    const height = sizeCalculatorRef.current.offsetHeight;
+    const height = sizeCalculatorRef.current.scrollHeight;
     sizeCalculatorRef.current.innerHTML = '';
 
-    return Math.max(20, height + 2);
+    return Math.max(24, height + 4); // Add some buffer
+  }, []);
+
+  const handleLineHeightChange = useCallback((index: number, height: number) => {
+    if (lineHeightCache.current.get(index) !== height) {
+      lineHeightCache.current.set(index, height);
+      if (listRef.current) {
+        listRef.current.resetAfterIndex(index);
+      }
+    }
   }, []);
 
   const getLineHeight = useCallback(
     (index: number) => {
-      return lines[index]?.height || 20;
+      const cachedHeight = lineHeightCache.current.get(index);
+      if (cachedHeight) return cachedHeight;
+      return lines[index]?.height || 24;
     },
     [lines],
   );
@@ -127,7 +161,7 @@ export default () => {
           content: processedText,
           html: html,
           isPrelude: prelude,
-          height: calculateLineHeight(fullContent, terminalWidth - 20),
+          height: calculateLineHeight(fullContent, terminalWidth),
         };
 
         return [...prevLines, newLine];
@@ -183,13 +217,16 @@ export default () => {
 
   useEffect(() => {
     if (lines.length > 0 && terminalWidth > 0) {
+      // Clear the height cache when width changes
+      lineHeightCache.current.clear();
+
       setLines((prevLines) =>
         prevLines.map((line) => {
           const fullContent = line.isPrelude ? ansiUp.ansi_to_html(TERMINAL_PRELUDE) + line.html : line.html;
 
           return {
             ...line,
-            height: calculateLineHeight(fullContent, terminalWidth - 20),
+            height: calculateLineHeight(fullContent, terminalWidth),
           };
         }),
       );
@@ -293,6 +330,7 @@ export default () => {
 
     if (socketConnected && socketInstance) {
       setLines([]);
+      lineHeightCache.current.clear();
 
       Object.keys(listeners).forEach((key: string) => {
         const listener = listeners[key];
@@ -330,9 +368,18 @@ export default () => {
     ({ index, style }: { index: number; style: React.CSSProperties }) => {
       const line = lines[index];
       const isLastLine = index === lines.length - 1;
-      return <LineRenderer line={line} style={style} terminalPrelude={TERMINAL_PRELUDE} isLastLine={isLastLine} />;
+      return (
+        <LineRenderer
+          line={line}
+          style={style}
+          terminalPrelude={TERMINAL_PRELUDE}
+          isLastLine={isLastLine}
+          onHeightChange={handleLineHeightChange}
+          index={index}
+        />
+      );
     },
-    [lines, TERMINAL_PRELUDE],
+    [lines, TERMINAL_PRELUDE, handleLineHeightChange],
   );
 
   const handleScroll = useCallback(
@@ -354,7 +401,15 @@ export default () => {
     <div className={classNames(styles.terminal, 'relative')} ref={ref}>
       {!socketConnected && <Spinner />}
 
-      <div ref={sizeCalculatorRef} className='size-calculator font-mono text-sm' />
+      <div
+        ref={sizeCalculatorRef}
+        className='absolute invisible font-mono text-sm'
+        style={{
+          top: -9999,
+          left: -9999,
+          lineHeight: 'normal',
+        }}
+      />
 
       <div className={classNames(styles.container, 'font-mono')} ref={containerRef}>
         <div className='h-full'>
@@ -367,6 +422,7 @@ export default () => {
             className='custom-scrollbar'
             onScroll={handleScroll}
             overscanCount={20}
+            estimatedItemSize={24}
           >
             {rowRenderer}
           </List>

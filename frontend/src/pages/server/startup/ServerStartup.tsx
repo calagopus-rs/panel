@@ -32,7 +32,7 @@ export default () => {
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
-    }, 200),
+    }, 1000),
     [],
   );
 
