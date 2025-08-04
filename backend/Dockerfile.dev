@@ -5,23 +5,39 @@ FROM rust:1.85-bookworm as builder
 RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
 WORKDIR /app
 
-# Copy workspace files
-COPY ../Cargo.toml ../Cargo.lock ./
-COPY ../rule-validator ./rule-validator
-COPY ../wings-api ./wings-api
+# Copy workspace files (available from build context root)
+COPY panel/Cargo.toml panel/Cargo.lock ./
+COPY panel/rule-validator ./rule-validator
+COPY panel/wings-api ./wings-api
 
-# Copy backend source
-COPY . ./backend
+# Copy backend source structure
+COPY panel/backend/Cargo.toml ./backend/
+COPY panel/backend/build.rs ./backend/
 
-# Set working directory to backend
+# Create a dependency cache by building just dependencies first
 WORKDIR /app/backend
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release
+RUN rm -rf src
 
-# Build the application in release mode for better performance
+# Copy the actual source code
+COPY panel/backend/src ./src
+
+# Copy required assets and data
+COPY panel/frontend/dist ./frontend/dist
+COPY panel/database ./database  
+COPY panel/backend/static ./static
+
+# Verify assets are in the right places
+RUN ls -la ./frontend/dist/ && ls -la ./database/ && ls -la ./static/
+
+# Build the application in release mode
 RUN cargo build --release
 
 # Runtime stage
@@ -31,6 +47,7 @@ FROM debian:bookworm-slim
 RUN apt-get update && apt-get install -y \
     ca-certificates \
     libssl3 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Create app user
@@ -40,7 +57,7 @@ RUN useradd -r -s /bin/false panel
 WORKDIR /app
 
 # Copy the binary from builder stage
-COPY --from=builder /app/backend/target/release/panel-rs /app/panel-rs
+COPY --from=builder /app/target/release/panel-rs /app/panel-rs
 
 # Static files directory doesn't exist, skipping copy
 
