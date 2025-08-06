@@ -1,11 +1,15 @@
 use colored::Colorize;
 use sqlx::postgres::PgPoolOptions;
+use std::{collections::HashMap, sync::Arc};
+use tokio::sync::Mutex;
 
+type EmptyFuture = Box<dyn Future<Output = ()> + Send>;
 pub struct Database {
     write: sqlx::PgPool,
     read: Option<sqlx::PgPool>,
 
     encryption_key: String,
+    batch_actions: Arc<Mutex<HashMap<(&'static str, i32), EmptyFuture>>>,
 }
 
 impl Database {
@@ -45,6 +49,7 @@ impl Database {
             },
 
             encryption_key: env.app_encryption_key.clone(),
+            batch_actions: Arc::new(Mutex::new(HashMap::new())),
         };
 
         let version: (String,) = sqlx::query_as("SELECT split_part(version(), ' ', 4)")
@@ -62,6 +67,26 @@ impl Database {
             )
             .bright_black()
         );
+
+        tokio::spawn({
+            let batch_actions = instance.batch_actions.clone();
+
+            async move {
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+
+                    let mut actions = batch_actions.lock().await;
+                    for (key, action) in actions.drain() {
+                        tracing::debug!(
+                            "executing batch action for {}:{}",
+                            key.0.bright_cyan(),
+                            key.1
+                        );
+                        Box::into_pin(action).await;
+                    }
+                }
+            }
+        });
 
         instance
     }
@@ -102,5 +127,14 @@ impl Database {
         simple_crypt::decrypt(data.as_ref(), self.encryption_key.as_bytes())
             .map(|s| String::from_utf8_lossy(&s).to_string())
             .ok()
+    }
+
+    #[inline]
+    pub async fn batch_action<F>(&self, key: &'static str, id: i32, action: F)
+    where
+        F: Future<Output = ()> + Send + 'static,
+    {
+        let mut actions = self.batch_actions.lock().await;
+        actions.insert((key, id), Box::new(action));
     }
 }

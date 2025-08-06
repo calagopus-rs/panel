@@ -155,6 +155,12 @@ mod post {
                 .ok();
         }
 
+        if !data.config_allocations.user_self_assign.is_valid() {
+            return ApiResponse::error("config_allocations.user_self_assign: port ranges must be 1024-65535 and start_port < end_port")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
         let egg = match NestEgg::create(
             &state.database,
             nest.id,

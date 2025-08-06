@@ -257,6 +257,12 @@ mod patch {
             egg.config_script = config_script;
         }
         if let Some(config_allocations) = data.config_allocations {
+            if !config_allocations.user_self_assign.is_valid() {
+                return ApiResponse::error("config_allocations.user_self_assign: port ranges must be 1024-65535 and start_port < end_port")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+            }
+
             egg.config_allocations = config_allocations;
         }
         if let Some(startup) = data.startup {

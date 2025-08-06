@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_api_keys\n                        SET last_used = NOW()\n                        WHERE id = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "969254750c3a4dcfba0c4494ac76047235295ba57e7a2c6e24816b7cc08382fd"
+}

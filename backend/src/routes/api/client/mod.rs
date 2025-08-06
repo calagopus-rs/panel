@@ -81,33 +81,36 @@ pub async fn auth(
             Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
-        tokio::spawn({
-            let state = state.clone();
-            let user_agent = crate::utils::slice_up_to(
-                req.headers()
-                    .get("User-Agent")
-                    .and_then(|ua| ua.to_str().ok())
-                    .unwrap_or("unknown"),
-                255,
-            )
-            .to_string();
-
-            async move {
-                if let Err(err) = sqlx::query!(
-                    "UPDATE user_sessions
-                    SET ip = $1, user_agent = $2, last_used = NOW()
-                    WHERE id = $3",
-                    sqlx::types::ipnetwork::IpNetwork::from(ip.0),
-                    user_agent,
-                    session.id,
+        state
+            .database
+            .batch_action("update_user_session", session.id, {
+                let state = state.clone();
+                let user_agent = crate::utils::slice_up_to(
+                    req.headers()
+                        .get("User-Agent")
+                        .and_then(|ua| ua.to_str().ok())
+                        .unwrap_or("unknown"),
+                    255,
                 )
-                .execute(state.database.write())
-                .await
-                {
-                    tracing::warn!(user = user.id, "failed to update user session: {:#?}", err);
+                .to_string();
+
+                async move {
+                    if let Err(err) = sqlx::query!(
+                        "UPDATE user_sessions
+                        SET ip = $1, user_agent = $2, last_used = NOW()
+                        WHERE id = $3",
+                        sqlx::types::ipnetwork::IpNetwork::from(ip.0),
+                        user_agent,
+                        session.id,
+                    )
+                    .execute(state.database.write())
+                    .await
+                    {
+                        tracing::warn!(user = user.id, "failed to update user session: {:#?}", err);
+                    }
                 }
-            }
-        });
+            })
+            .await;
 
         cookies.add(
             Cookie::build(("session", session_id.value().to_string()))
@@ -155,23 +158,26 @@ pub async fn auth(
             Err(err) => return Ok(ApiResponse::from(err).into_response()),
         };
 
-        tokio::spawn({
-            let state = state.clone();
+        state
+            .database
+            .batch_action("update_user_api_key", api_key.id, {
+                let state = state.clone();
 
-            async move {
-                if let Err(err) = sqlx::query!(
-                    "UPDATE user_api_keys
-                    SET last_used = NOW()
-                    WHERE id = $1",
-                    api_key.id,
-                )
-                .execute(state.database.write())
-                .await
-                {
-                    tracing::warn!(user = user.id, "failed to update api key: {:#?}", err);
+                async move {
+                    if let Err(err) = sqlx::query!(
+                        "UPDATE user_api_keys
+                        SET last_used = NOW()
+                        WHERE id = $1",
+                        api_key.id,
+                    )
+                    .execute(state.database.write())
+                    .await
+                    {
+                        tracing::warn!(user = user.id, "failed to update api key: {:#?}", err);
+                    }
                 }
-            }
-        });
+            })
+            .await;
 
         req.extensions_mut().insert(UserActivityLogger {
             state: Arc::clone(&state),

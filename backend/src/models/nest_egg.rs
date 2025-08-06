@@ -84,6 +84,13 @@ impl Default for NestEggConfigAllocationsUserSelfAssign {
     }
 }
 
+impl NestEggConfigAllocationsUserSelfAssign {
+    #[inline]
+    pub fn is_valid(&self) -> bool {
+        self.start_port < self.end_port && self.start_port >= 1024
+    }
+}
+
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct NestEggConfigAllocations {
     #[schema(inline)]
