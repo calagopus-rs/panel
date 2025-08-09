@@ -52,33 +52,33 @@ mod get {
                 .ok();
         }
 
-        if matches!(backup.disk, BackupDisk::S3) {
-            if let Some(s3_configuration) = &mut node.location.backup_configs.s3 {
-                s3_configuration.decrypt(&state.database);
+        if matches!(backup.disk, BackupDisk::S3)
+            && let Some(s3_configuration) = &mut node.location.backup_configs.s3
+        {
+            s3_configuration.decrypt(&state.database);
 
-                let client = match s3_configuration.clone().into_client() {
-                    Ok(client) => client,
-                    Err(err) => {
-                        tracing::error!("Failed to create S3 client: {:#?}", err);
+            let client = match s3_configuration.clone().into_client() {
+                Ok(client) => client,
+                Err(err) => {
+                    tracing::error!("Failed to create S3 client: {:#?}", err);
 
-                        return ApiResponse::error("failed to download s3 backup")
-                            .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                            .ok();
-                    }
-                };
-                let file_path = match backup.upload_path.as_ref() {
-                    Some(path) => path,
-                    None => {
-                        return ApiResponse::error("upload path not found")
-                            .with_status(StatusCode::EXPECTATION_FAILED)
-                            .ok();
-                    }
-                };
+                    return ApiResponse::error("failed to download s3 backup")
+                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                        .ok();
+                }
+            };
+            let file_path = match backup.upload_path.as_ref() {
+                Some(path) => path,
+                None => {
+                    return ApiResponse::error("upload path not found")
+                        .with_status(StatusCode::EXPECTATION_FAILED)
+                        .ok();
+                }
+            };
 
-                let url = client.presign_get(file_path, 15 * 60, None).await?;
+            let url = client.presign_get(file_path, 15 * 60, None).await?;
 
-                return ApiResponse::json(Response { url }).ok();
-            }
+            return ApiResponse::json(Response { url }).ok();
         }
 
         #[derive(Serialize)]

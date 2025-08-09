@@ -12,6 +12,7 @@ use axum::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod restic;
 mod restore;
 
 pub type GetBackup = crate::extract::ConsumingExtension<ServerBackup>;
@@ -91,6 +92,12 @@ mod get {
     ) -> ApiResponseResult {
         if backup.disk != BackupDisk::S3 {
             return ApiResponse::error("backup is not stored on S3")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
+        }
+
+        if backup.upload_id.is_some() {
+            return ApiResponse::error("backup is already being uploaded")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
@@ -387,8 +394,8 @@ mod post {
             .await?;
         }
 
-        if let Some(server_id) = backup.0.server_id {
-            if let Err(err) = ServerActivity::log(
+        if let Some(server_id) = backup.0.server_id
+            && let Err(err) = ServerActivity::log(
                 &state.database,
                 server_id,
                 None,
@@ -405,13 +412,12 @@ mod post {
                 }),
             )
             .await
-            {
-                tracing::warn!(
-                    backup = %backup.0.uuid,
-                    "failed to log server activity: {:#?}",
-                    err
-                );
-            }
+        {
+            tracing::warn!(
+                backup = %backup.0.uuid,
+                "failed to log server activity: {:#?}",
+                err
+            );
         }
 
         ApiResponse::json(Response {}).ok()
@@ -422,6 +428,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
+        .nest("/restic", restic::router(state))
         .nest("/restore", restore::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())

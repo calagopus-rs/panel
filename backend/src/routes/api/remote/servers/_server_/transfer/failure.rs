@@ -74,14 +74,13 @@ mod post {
         .execute(&mut *transaction)
         .await?;
 
-        if let Ok(Some(destination_node)) = server.destination_node(&state.database).await {
-            if let Err(err) = destination_node
+        if let Ok(Some(destination_node)) = server.destination_node(&state.database).await
+            && let Err(err) = destination_node
                 .api_client(&state.database)
                 .delete_servers_server(server.uuid)
                 .await
-            {
-                tracing::error!("failed to delete server on destination node: {:#?}", err);
-            }
+        {
+            tracing::error!("failed to delete server on destination node: {:#?}", err);
         }
 
         transaction.commit().await?;

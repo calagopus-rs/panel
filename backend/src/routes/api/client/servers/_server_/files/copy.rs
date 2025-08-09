@@ -54,12 +54,12 @@ mod post {
                 .ok();
         }
 
-        if let Some(destination) = &data.destination {
-            if server.is_ignored(destination, false) {
-                return ApiResponse::error("file not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
+        if let Some(destination) = &data.destination
+            && server.is_ignored(destination, false)
+        {
+            return ApiResponse::error("file not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok();
         }
 
         let request_body = wings_api::servers_server_files_copy::post::RequestBody {

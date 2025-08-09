@@ -64,7 +64,9 @@ where
     #[inline]
     fn from(err: T) -> Self {
         let err: anyhow::Error = err.into();
+
         tracing::error!("a request error occurred: {:#?}", err);
+        sentry_anyhow::capture_anyhow(&err);
 
         ApiResponse::json(ApiError::new_value(&["internal server error"]))
             .with_status(axum::http::StatusCode::INTERNAL_SERVER_ERROR)

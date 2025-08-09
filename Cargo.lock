@@ -2711,6 +2711,7 @@ dependencies = [
  "rust-s3",
  "rustis",
  "sentry",
+ "sentry-anyhow",
  "sentry-tower",
  "serde",
  "serde_json",
@@ -2907,7 +2908,7 @@ checksum = "3af6b589e163c5a788fab00ce0c0366f6efbb9959c2f9874b224936af7fce7e1"
 dependencies = [
  "base64 0.22.1",
  "indexmap",
- "quick-xml 0.38.0",
+ "quick-xml 0.38.1",
  "serde",
  "time",
 ]
@@ -3101,9 +3102,9 @@ dependencies = [
 
 [[package]]
 name = "quick-xml"
-version = "0.38.0"
+version = "0.38.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8927b0664f5c5a98265138b7e3f90aa19a6b21353182469ace36d4ac527b7b1b"
+checksum = "9845d9dccf565065824e69f9f235fafba1587031eda353c1f1561cd6a6be78f4"
 dependencies = [
  "memchr",
 ]
@@ -3894,6 +3895,17 @@ dependencies = [
  "sentry-tracing",
  "tokio",
  "ureq",
+]
+
+[[package]]
+name = "sentry-anyhow"
+version = "0.42.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1b4523c2595d6730bfbe401e95a6423fe9cb16dc3b6046f340551591cffe723"
+dependencies = [
+ "anyhow",
+ "sentry-backtrace",
+ "sentry-core",
 ]
 
 [[package]]

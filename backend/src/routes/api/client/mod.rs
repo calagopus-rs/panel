@@ -107,6 +107,7 @@ pub async fn auth(
                     .await
                     {
                         tracing::warn!(user = user.id, "failed to update user session: {:#?}", err);
+                        sentry::capture_error(&err);
                     }
                 }
             })

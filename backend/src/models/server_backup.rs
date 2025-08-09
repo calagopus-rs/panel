@@ -417,10 +417,9 @@ impl ServerBackup {
                     .api_client(database)
                     .delete_servers_server_backup_backup(server.uuid, self.uuid)
                     .await
+                    && status != StatusCode::NOT_FOUND
                 {
-                    if status != StatusCode::NOT_FOUND {
-                        return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
-                    }
+                    return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
                 }
             }
         }
@@ -481,10 +480,9 @@ impl ServerBackup {
                     .api_client(database)
                     .delete_backups_backup(self.uuid)
                     .await
+                    && status != StatusCode::NOT_FOUND
                 {
-                    if status != StatusCode::NOT_FOUND {
-                        return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
-                    }
+                    return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
                 }
             }
         }

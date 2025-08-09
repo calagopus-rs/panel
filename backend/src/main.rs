@@ -85,35 +85,34 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
     let if_none_match = req.headers().get("If-None-Match").cloned();
     let mut response = next.run(req).await;
 
-    if let Some(content_type) = response.headers().get("Content-Type") {
-        if content_type
+    if let Some(content_type) = response.headers().get("Content-Type")
+        && content_type
             .to_str()
             .map(|c| c.starts_with("text/plain"))
             .unwrap_or(false)
-            && response.status().is_client_error()
-            && response.status() != StatusCode::NOT_FOUND
-        {
-            let (mut parts, body) = response.into_parts();
+        && response.status().is_client_error()
+        && response.status() != StatusCode::NOT_FOUND
+    {
+        let (mut parts, body) = response.into_parts();
 
-            let text_body = String::from_utf8(
-                axum::body::to_bytes(body, usize::MAX)
-                    .await
-                    .unwrap()
-                    .into_iter()
-                    .by_ref()
-                    .collect::<Vec<u8>>(),
-            )
-            .unwrap();
+        let text_body = String::from_utf8(
+            axum::body::to_bytes(body, usize::MAX)
+                .await
+                .unwrap()
+                .into_iter()
+                .by_ref()
+                .collect::<Vec<u8>>(),
+        )
+        .unwrap();
 
-            parts
-                .headers
-                .insert("Content-Type", "application/json".parse().unwrap());
+        parts
+            .headers
+            .insert("Content-Type", "application/json".parse().unwrap());
 
-            response = Response::from_parts(
-                parts,
-                Body::from(ApiError::new_value(&[&text_body]).to_string()),
-            );
-        }
+        response = Response::from_parts(
+            parts,
+            Body::from(ApiError::new_value(&[&text_body]).to_string()),
+        );
     }
 
     let (mut parts, body) = response.into_parts();

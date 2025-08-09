@@ -117,13 +117,13 @@ mod post {
             );
         }
 
-        if let Some(name) = &data.name {
-            if server.is_ignored(name, false) {
-                return (
-                    StatusCode::NOT_FOUND,
-                    axum::Json(ApiError::new_value(&["root directory not found"])),
-                );
-            }
+        if let Some(name) = &data.name
+            && server.is_ignored(name, false)
+        {
+            return (
+                StatusCode::NOT_FOUND,
+                axum::Json(ApiError::new_value(&["root directory not found"])),
+            );
         }
 
         let request_body = wings_api::servers_server_files_pull::post::RequestBody {

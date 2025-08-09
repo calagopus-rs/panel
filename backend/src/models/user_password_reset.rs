@@ -63,10 +63,10 @@ impl UserPasswordReset {
         .fetch_optional(database.read())
         .await?;
 
-        if let Some(row) = existing {
-            if row.get::<i64, _>(0) > 0 {
-                return Err(sqlx::Error::RowNotFound);
-            }
+        if let Some(row) = existing
+            && row.get::<i64, _>(0) > 0
+        {
+            return Err(sqlx::Error::RowNotFound);
         }
 
         let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 96);
