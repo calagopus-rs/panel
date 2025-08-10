@@ -207,6 +207,7 @@ interface ServerBackup {
   isSuccessful: boolean;
   isLocked: boolean;
   isBrowsable: boolean;
+  isStreaming: boolean;
   checksum: string | null;
   bytes: number;
   completed: Date | null;

@@ -16,9 +16,15 @@ mod get {
             },
         },
     };
-    use axum::http::StatusCode;
-    use serde::Serialize;
+    use axum::{extract::Query, http::StatusCode};
+    use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
+
+    #[derive(ToSchema, Deserialize)]
+    pub struct Params {
+        #[serde(default)]
+        archive_format: wings_api::StreamableArchiveFormat,
+    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
@@ -41,6 +47,11 @@ mod get {
             description = "The backup ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
+        (
+            "archive_format" = wings_api::StreamableArchiveFormat, Query,
+            description = "The format of the archive to download (only for is_streaming = true)",
+            example = "tar_gz",
+        ),
     ))]
     pub async fn route(
         state: GetState,
@@ -48,6 +59,7 @@ mod get {
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
+        Query(params): Query<Params>,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("backups.download") {
             return ApiResponse::error(&error)
@@ -127,7 +139,11 @@ mod get {
 
         let mut url = server.node.public_url();
         url.set_path("/download/backup");
-        url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+        url.set_query(Some(&format!(
+            "token={}&archive_format={}",
+            urlencoding::encode(&token),
+            params.archive_format
+        )));
 
         activity_logger
             .log(

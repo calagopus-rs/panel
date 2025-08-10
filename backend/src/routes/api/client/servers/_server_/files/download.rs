@@ -27,6 +27,8 @@ mod get {
 
         #[serde(default)]
         directory: bool,
+        #[serde(default)]
+        archive_format: wings_api::StreamableArchiveFormat,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -58,6 +60,11 @@ mod get {
             "directory" = bool, Query,
             description = "Whether the file is a directory",
             example = "false",
+        ),
+        (
+            "archive_format" = wings_api::StreamableArchiveFormat, Query,
+            description = "The format of the archive to download",
+            example = "tar_gz",
         ),
     ))]
     pub async fn route(
@@ -117,7 +124,11 @@ mod get {
             } else {
                 url.set_path("/download/file");
             }
-            url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+            url.set_query(Some(&format!(
+                "token={}&archive_format={}",
+                urlencoding::encode(&token),
+                params.archive_format
+            )));
 
             url
         } else {

@@ -11,9 +11,6 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
         .expect("Failed to create reqwest client")
 });
 
-type Algorithm = String;
-type Game = String;
-
 #[inline]
 async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
@@ -92,19 +89,6 @@ impl WingsClient {
     #[inline]
     pub fn new(base_url: String, token: String) -> Self {
         Self { base_url, token }
-    }
-
-    pub async fn post_backups_sync(
-        &self,
-    ) -> Result<super::backups_sync::post::Response200, (StatusCode, super::ApiError)> {
-        request_impl(
-            self,
-            Method::POST,
-            "/api/backups/sync",
-            None::<&usize>,
-            None,
-        )
-        .await
     }
 
     pub async fn delete_backups_backup(

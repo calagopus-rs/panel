@@ -138,15 +138,6 @@ impl ServerBackup {
                     BackupDisk::Restic => wings_api::BackupAdapter::Restic,
                 };
 
-                if server.node.location.backup_disk == BackupDisk::Restic {
-                    server
-                        .node
-                        .api_client(&database)
-                        .post_backups_sync()
-                        .await
-                        .ok();
-                }
-
                 if let Err(err) = server
                     .node
                     .api_client(&database)
@@ -319,15 +310,6 @@ impl ServerBackup {
         server: super::server::Server,
         truncate_directory: bool,
     ) -> Result<(), s3::error::S3Error> {
-        if self.disk == BackupDisk::Restic {
-            server
-                .node
-                .api_client(database)
-                .post_backups_sync()
-                .await
-                .ok();
-        }
-
         if let Err((status, error)) = server
             .node
             .api_client(database)
@@ -402,16 +384,7 @@ impl ServerBackup {
                     tracing::warn!(server = %server.uuid, backup = %self.uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");
                 }
             }
-            disk => {
-                if disk == BackupDisk::Restic {
-                    server
-                        .node
-                        .api_client(database)
-                        .post_backups_sync()
-                        .await
-                        .ok();
-                }
-
+            _ => {
                 if let Err((status, error)) = server
                     .node
                     .api_client(database)
@@ -471,11 +444,7 @@ impl ServerBackup {
                     )));
                 }
             }
-            disk => {
-                if disk == BackupDisk::Restic {
-                    node.api_client(database).post_backups_sync().await.ok();
-                }
-
+            _ => {
                 if let Err((status, error)) = node
                     .api_client(database)
                     .delete_backups_backup(self.uuid)
@@ -527,6 +496,10 @@ impl ServerBackup {
                 self.disk,
                 BackupDisk::DdupBak | BackupDisk::Btrfs | BackupDisk::Zfs | BackupDisk::Restic
             ),
+            is_streaming: matches!(
+                self.disk,
+                BackupDisk::DdupBak | BackupDisk::Btrfs | BackupDisk::Zfs | BackupDisk::Restic
+            ),
             checksum: self.checksum,
             bytes: self.bytes,
             completed: self.completed.map(|dt| dt.and_utc()),
@@ -546,6 +519,7 @@ pub struct ApiServerBackup {
     pub is_successful: bool,
     pub is_locked: bool,
     pub is_browsable: bool,
+    pub is_streaming: bool,
     pub checksum: Option<String>,
     pub bytes: i64,
 

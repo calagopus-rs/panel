@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub mod client;
+mod extra;
+pub use extra::*;
 
 `)
 

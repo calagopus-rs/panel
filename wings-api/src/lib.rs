@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 pub mod client;
+mod extra;
+pub use extra::*;
 
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ApiError {
@@ -292,18 +294,6 @@ pub enum TransferArchiveFormat {
     TarZstd,
 }
 
-pub mod backups_sync {
-    use super::*;
-
-    pub mod post {
-        use super::*;
-
-        nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
-            }
-        }
-    }
-}
 pub mod backups_backup {
     use super::*;
 
