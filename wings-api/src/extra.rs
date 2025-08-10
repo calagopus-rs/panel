@@ -6,12 +6,12 @@ use utoipa::ToSchema;
 #[schema(rename_all = "snake_case")]
 pub enum StreamableArchiveFormat {
     Tar,
-    #[default]
     TarGz,
     TarXz,
     TarBz2,
     TarLz4,
     TarZstd,
+    #[default]
     Zip,
 }
 

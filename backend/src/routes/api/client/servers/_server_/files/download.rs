@@ -165,7 +165,11 @@ mod get {
 
             let mut url = server.node.public_url();
             url.set_path("/download/files");
-            url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+            url.set_query(Some(&format!(
+                "token={}&archive_format={}",
+                urlencoding::encode(&token),
+                params.archive_format
+            )));
 
             url
         };
