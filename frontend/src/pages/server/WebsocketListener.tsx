@@ -48,6 +48,7 @@ export default () => {
       isSuccessful: wsData.isSuccessful,
       checksum: `${wsData.checksum_type}:${wsData.checksum}`,
       bytes: wsData.size,
+      files: wsData.files,
       completed: new Date(),
     });
   });
