@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm"
-import { index, integer, pgTable, varchar, uniqueIndex, pgEnum, serial, char, boolean, timestamp, text, uuid, smallint, jsonb, inet, bigint, primaryKey, PgColumn, customType } from "drizzle-orm/pg-core"
+import { index, integer, pgTable, varchar, uniqueIndex, pgEnum, serial, char, boolean, timestamp, text, uuid, smallint, jsonb, inet, bigint, primaryKey, PgColumn, customType, json } from "drizzle-orm/pg-core"
 
 export const bytea = customType<{ data: string; notNull: false; default: false }>({
   dataType() {
@@ -290,7 +290,7 @@ export const nestEggs = pgTable('nest_eggs', {
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
 
 	features: text('features').array().notNull(),
-	docker_images: jsonb('docker_images').$type<Record<string, string>>().notNull(),
+	docker_images: json('docker_images').$type<Record<string, string>>().notNull(),
 	file_denylist: text('file_denylist').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
