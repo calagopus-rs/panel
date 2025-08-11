@@ -16,7 +16,7 @@
         "Varchar",
         "Bool",
         "TextArray",
-        "Jsonb",
+        "Json",
         "TextArray",
         "Int4",
         "Int4"
