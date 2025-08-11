@@ -235,6 +235,7 @@ mod post {
         pub checksum: String,
         pub checksum_type: String,
         pub size: u64,
+        pub files: u64,
         pub successful: bool,
         #[schema(inline)]
         pub parts: Vec<PayloadPart>,
@@ -375,10 +376,11 @@ mod post {
         if data.successful {
             sqlx::query!(
                 "UPDATE server_backups
-                SET checksum = $1, bytes = $2, successful = true, completed = NOW()
-                WHERE server_backups.uuid = $3",
+                SET checksum = $1, bytes = $2, files = $3, successful = true, completed = NOW()
+                WHERE server_backups.uuid = $4",
                 format!("{}:{}", data.checksum_type, data.checksum),
                 data.size as i64,
+                data.files as i64,
                 backup.0.uuid
             )
             .execute(state.database.write())

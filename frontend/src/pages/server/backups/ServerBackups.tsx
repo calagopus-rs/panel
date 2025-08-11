@@ -70,6 +70,7 @@ export default () => {
                   <TableHeader name={'Name'} />
                   <TableHeader name={'Checksum'} />
                   <TableHeader name={'Size'} />
+                  <TableHeader name={'Files'} />
                   <TableHeader name={'Created At'} />
                   <TableHeader name={'Locked?'} />
                   <TableHeader />

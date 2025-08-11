@@ -162,6 +162,10 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             </td>
 
             <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+              {backup.completed ? backup.files : null}
+            </td>
+
+            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
               {formatTimestamp(backup.created)}
             </td>
 

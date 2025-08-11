@@ -480,7 +480,8 @@ export const serverBackups = pgTable('server_backups', {
 
 	ignoredFiles: text('ignored_files').array().notNull(),
 	checksum: varchar('checksum', { length: 255 }),
-	bytes: bigint('bytes', { mode: 'number' }).notNull(),
+	bytes: bigint('bytes', { mode: 'number' }).default(0).notNull(),
+	files: bigint('files', { mode: 'number' }).default(0).notNull(),
 	disk: backupDiskEnum('disk').notNull(),
 
 	uploadId: text('upload_id'),

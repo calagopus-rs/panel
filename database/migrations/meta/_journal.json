@@ -351,6 +351,13 @@
       "when": 1754912567504,
       "tag": "0049_narrow_nightmare",
       "breakpoints": false
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1754946053124,
+      "tag": "0050_thick_bloodaxe",
+      "breakpoints": false
     }
   ]
 }

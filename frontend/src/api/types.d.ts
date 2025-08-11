@@ -210,6 +210,7 @@ interface ServerBackup {
   isStreaming: boolean;
   checksum: string | null;
   bytes: number;
+  files: number;
   completed: Date | null;
   created: Date;
 }

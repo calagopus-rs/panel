@@ -32,6 +32,7 @@ pub struct ServerBackup {
     pub ignored_files: Vec<String>,
     pub checksum: Option<String>,
     pub bytes: i64,
+    pub files: i64,
 
     pub disk: BackupDisk,
     pub upload_id: Option<String>,
@@ -62,6 +63,7 @@ impl BaseModel for ServerBackup {
             ),
             (format!("{table}.checksum"), format!("{prefix}checksum")),
             (format!("{table}.bytes"), format!("{prefix}bytes")),
+            (format!("{table}.files"), format!("{prefix}files")),
             (format!("{table}.disk"), format!("{prefix}disk")),
             (format!("{table}.upload_id"), format!("{prefix}upload_id")),
             (
@@ -89,6 +91,7 @@ impl BaseModel for ServerBackup {
             ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
             checksum: row.get(format!("{prefix}checksum").as_str()),
             bytes: row.get(format!("{prefix}bytes").as_str()),
+            files: row.get(format!("{prefix}files").as_str()),
             disk: row.get(format!("{prefix}disk").as_str()),
             upload_id: row.get(format!("{prefix}upload_id").as_str()),
             upload_path: row.get(format!("{prefix}upload_path").as_str()),
@@ -502,6 +505,7 @@ impl ServerBackup {
             ),
             checksum: self.checksum,
             bytes: self.bytes,
+            files: self.files,
             completed: self.completed.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),
         }
@@ -520,8 +524,10 @@ pub struct ApiServerBackup {
     pub is_locked: bool,
     pub is_browsable: bool,
     pub is_streaming: bool,
+
     pub checksum: Option<String>,
     pub bytes: i64,
+    pub files: i64,
 
     pub completed: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,
