@@ -13,7 +13,6 @@ use routes::ApiError;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
 use std::{net::SocketAddr, sync::Arc, time::Instant};
-use tikv_jemallocator::Jemalloc;
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
 use tower_http::{
@@ -38,7 +37,7 @@ mod utils;
 
 #[cfg(target_os = "linux")]
 #[global_allocator]
-static ALLOC: Jemalloc = Jemalloc;
+static ALLOC: Jemalloc = tikv_jemallocator::Jemalloc;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
