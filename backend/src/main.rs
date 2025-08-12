@@ -36,6 +36,7 @@ mod routes;
 mod settings;
 mod utils;
 
+#[cfg(target_os = "linux")]
 #[global_allocator]
 static ALLOC: Jemalloc = Jemalloc;
 

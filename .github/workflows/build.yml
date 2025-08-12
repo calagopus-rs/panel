@@ -120,6 +120,12 @@ jobs:
           name: frontend-build
           path: frontend/dist/
 
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install nasm
+          echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Install ${{ matrix.rust }} toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -147,15 +153,19 @@ jobs:
           command: build
           args: --release --target ${{ matrix.target }}
 
-      - name: Prepare binary with platform name
+      - name: Prepare binary with platform name (Unix)
+        if: runner.os != 'Windows'
         shell: bash
         run: |
           mkdir -p dist
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            cp "target/${{ matrix.target }}/release/$BIN_NAME${{ matrix.binary_suffix }}" "dist/$BIN_NAME-${{ matrix.build }}${{ matrix.binary_suffix }}"
-          else
-            cp "target/${{ matrix.target }}/release/$BIN_NAME${{ matrix.binary_suffix }}" "dist/$BIN_NAME-${{ matrix.build }}"
-          fi
+          cp "target/${{ matrix.target }}/release/$BIN_NAME${{ matrix.binary_suffix }}" "dist/$BIN_NAME-${{ matrix.build }}"
+
+      - name: Prepare binary with platform name (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist
+          Copy-Item "target\${{ matrix.target }}\release\$env:BIN_NAME${{ matrix.binary_suffix }}" "dist\$env:BIN_NAME-${{ matrix.build }}${{ matrix.binary_suffix }}"
 
       - name: Upload binary artifact
         uses: actions/upload-artifact@v4
