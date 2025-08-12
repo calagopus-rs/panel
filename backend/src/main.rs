@@ -37,7 +37,7 @@ mod utils;
 
 #[cfg(target_os = "linux")]
 #[global_allocator]
-static ALLOC: Jemalloc = tikv_jemallocator::Jemalloc;
+static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
