@@ -1,7 +1,8 @@
+use anyhow::Context;
 use dotenvy::dotenv;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum RedisMode {
     Redis { redis_url: String },
     Sentinel { redis_sentinels: Vec<String> },
@@ -26,7 +27,7 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn parse() -> (tracing_appender::non_blocking::WorkerGuard, Env) {
+    pub fn parse() -> Result<(Env, tracing_appender::non_blocking::WorkerGuard), anyhow::Error> {
         dotenv().ok();
 
         let env = Self {
@@ -36,19 +37,23 @@ impl Env {
             {
                 "redis" => RedisMode::Redis {
                     redis_url: std::env::var("REDIS_URL")
-                        .expect("REDIS_URL is required")
+                        .context("REDIS_URL is required")?
                         .trim_matches('"')
                         .to_string(),
                 },
                 "sentinel" => RedisMode::Sentinel {
                     redis_sentinels: std::env::var("REDIS_SENTINELS")
-                        .expect("REDIS_SENTINELS is required")
+                        .context("REDIS_SENTINELS is required")?
                         .trim_matches('"')
                         .split(',')
                         .map(|s| s.to_string())
                         .collect(),
                 },
-                _ => panic!("Invalid REDIS_MODE"),
+                _ => {
+                    return Err(anyhow::anyhow!(
+                        "Invalid REDIS_MODE. Expected 'redis' or 'sentinel'."
+                    ));
+                }
             },
 
             sentry_url: std::env::var("SENTRY_URL")
@@ -60,7 +65,7 @@ impl Env {
                 .parse()
                 .unwrap(),
             database_url: std::env::var("DATABASE_URL")
-                .expect("DATABASE_URL is required")
+                .context("DATABASE_URL is required")?
                 .trim_matches('"')
                 .to_string(),
             database_url_primary: std::env::var("DATABASE_URL_PRIMARY")
@@ -74,13 +79,13 @@ impl Env {
             port: std::env::var("PORT")
                 .unwrap_or("6969".to_string())
                 .parse()
-                .unwrap(),
+                .context("Invalid PORT value")?,
 
             app_debug: std::env::var("APP_DEBUG")
                 .unwrap_or("false".to_string())
                 .trim_matches('"')
                 .parse()
-                .unwrap(),
+                .context("Invalid APP_DEBUG value")?,
             app_log_directory: std::env::var("APP_LOG_DIRECTORY")
                 .unwrap_or("logs".to_string())
                 .trim_matches('"')
@@ -96,7 +101,7 @@ impl Env {
 
         if !std::path::Path::new(&env.app_log_directory).exists() {
             std::fs::create_dir_all(&env.app_log_directory)
-                .expect("failed to create log directory");
+                .context("failed to create log directory")?;
         }
 
         let latest_log_path = std::path::Path::new(&env.app_log_directory).join("panel.log");
@@ -104,7 +109,7 @@ impl Env {
             .create(true)
             .append(true)
             .open(&latest_log_path)
-            .expect("failed to open latest log file");
+            .context("failed to open latest log file")?;
 
         let rolling_appender = tracing_appender::rolling::Builder::new()
             .filename_prefix("panel")
@@ -112,7 +117,7 @@ impl Env {
             .max_log_files(30)
             .rotation(tracing_appender::rolling::Rotation::DAILY)
             .build(&env.app_log_directory)
-            .expect("failed to create rolling log file appender");
+            .context("failed to create rolling log file appender")?;
 
         let (file_appender, _guard) = tracing_appender::non_blocking::NonBlockingBuilder::default()
             .buffered_lines_limit(50)
@@ -136,6 +141,6 @@ impl Env {
         )
         .unwrap();
 
-        (_guard, env)
+        Ok((env, _guard))
     }
 }

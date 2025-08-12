@@ -2,11 +2,12 @@ use axum::{
     ServiceExt,
     body::Body,
     extract::{ConnectInfo, Request},
-    http::{Method, StatusCode},
+    http::StatusCode,
     middleware::Next,
     response::Response,
     routing::get,
 };
+use clap::{Arg, Command};
 use colored::Colorize;
 use include_dir::{Dir, include_dir};
 use routes::ApiError;
@@ -15,14 +16,13 @@ use sha2::Digest;
 use std::{net::SocketAddr, sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
-use tower_http::{
-    catch_panic::CatchPanicLayer, cors::CorsLayer, normalize_path::NormalizePathLayer,
-};
+use tower_http::normalize_path::NormalizePathLayer;
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa_axum::router::OpenApiRouter;
 
 mod cache;
 mod captcha;
+mod commands;
 mod database;
 mod deserialize;
 mod env;
@@ -43,16 +43,46 @@ const VERSION: &str = env!("CARGO_PKG_VERSION");
 const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
 const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
-fn handle_panic(_err: Box<dyn std::any::Any + Send + 'static>) -> Response<Body> {
-    tracing::error!("a request panic has occurred");
-
-    let body = serde_json::to_string(&ApiError::new_value(&["internal server error"])).unwrap();
-
-    Response::builder()
-        .status(StatusCode::INTERNAL_SERVER_ERROR)
-        .header("Content-Type", "application/json")
-        .body(Body::from(body))
-        .unwrap()
+fn cli() -> Command {
+    Command::new("panel-rs")
+        .about(
+            "The API server allowing programmatic control of game servers for Pterodactyl Panel.",
+        )
+        .allow_external_subcommands(true)
+        .subcommand(
+            Command::new("version")
+                .about("Prints the current executable version and exits.")
+                .arg_required_else_help(false),
+        )
+        .subcommand(
+            Command::new("service-install")
+                .about("Installs the Wings service on the system.")
+                .arg(
+                    Arg::new("override")
+                        .help("set to true to override an existing service file")
+                        .num_args(0)
+                        .long("override")
+                        .default_value("false")
+                        .value_parser(clap::value_parser!(bool))
+                        .required(false),
+                )
+                .arg_required_else_help(false),
+        )
+        .subcommand(
+            Command::new("diagnostics")
+                .about("Collect and report information about this Panel to assist in debugging.")
+                .arg(
+                    Arg::new("log_lines")
+                        .help("the number of log lines to include in the report")
+                        .num_args(1)
+                        .short('l')
+                        .long("log-lines")
+                        .default_value("500")
+                        .value_parser(clap::value_parser!(usize))
+                        .required(false),
+                )
+                .arg_required_else_help(false),
+        )
 }
 
 pub type GetIp = axum::extract::Extension<std::net::IpAddr>;
@@ -142,20 +172,51 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
 
 #[tokio::main]
 async fn main() {
-    let (_tracing_guard, env) = env::Env::parse();
+    let matches = cli().get_matches();
 
-    tracing::info!("                         _");
-    tracing::info!("  _ __   __ _ _ __   ___| |");
-    tracing::info!(" | '_ \\ / _` | '_ \\ / _ \\ |");
-    tracing::info!(" | |_) | (_| | | | |  __/ |");
-    tracing::info!(" | .__/ \\__,_|_| |_|\\___|_|____");
-    tracing::info!(" | |                  | '__/ __|");
-    tracing::info!(" |_|                  | |  \\__ \\");
-    tracing::info!(
-        "{: >21} |_|  |___/",
-        format!("{VERSION} (git-{GIT_COMMIT})")
-    );
-    tracing::info!("github.com/pterodactyl-rs/panel\n");
+    let env = env::Env::parse();
+
+    match matches.subcommand() {
+        Some(("version", sub_matches)) => std::process::exit(
+            commands::version::version(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+        ),
+        Some(("service-install", sub_matches)) => std::process::exit(
+            commands::service_install::service_install(
+                sub_matches,
+                env.as_ref().ok().map(|c| &c.0),
+            )
+            .await,
+        ),
+        Some(("diagnostics", sub_matches)) => std::process::exit(
+            commands::diagnostics::diagnostics(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+        ),
+        None => {
+            tracing::info!("                         _");
+            tracing::info!("  _ __   __ _ _ __   ___| |");
+            tracing::info!(" | '_ \\ / _` | '_ \\ / _ \\ |");
+            tracing::info!(" | |_) | (_| | | | |  __/ |");
+            tracing::info!(" | .__/ \\__,_|_| |_|\\___|_|____");
+            tracing::info!(" | |                  | '__/ __|");
+            tracing::info!(" |_|                  | |  \\__ \\");
+            tracing::info!(
+                "{: >21} |_|  |___/",
+                format!("{VERSION} (git-{GIT_COMMIT})")
+            );
+            tracing::info!("github.com/pterodactyl-rs/panel\n");
+        }
+        _ => {
+            cli().print_help().unwrap();
+            std::process::exit(0);
+        }
+    }
+
+    let (env, _tracing_guard) = match env {
+        Ok((env, tracing_guard)) => (env, tracing_guard),
+        Err(err) => {
+            eprintln!("{}: {err:#?}", "failed to parse environment".red());
+            std::process::exit(1);
+        }
+    };
 
     let _guard = sentry::init((
         env.sentry_url.clone(),
@@ -249,8 +310,6 @@ async fn main() {
                 ))
                 .unwrap()
         })
-        .layer(CatchPanicLayer::custom(handle_panic))
-        .layer(CorsLayer::permissive().allow_methods([Method::GET, Method::POST]))
         .layer(axum::middleware::from_fn(handle_request))
         .layer(CookieManagerLayer::new())
         .route_layer(axum::middleware::from_fn(handle_postprocessing))
