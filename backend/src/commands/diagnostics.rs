@@ -42,7 +42,7 @@ pub async fn diagnostics(matches: &ArgMatches, env: Option<&crate::env::Env>) ->
     );
     write_line(&mut output, "logs directory", &env.app_log_directory);
     writeln!(output).unwrap();
-    write_line(&mut output, "redis mode", &format!("{:?}", env.redis_mode));
+    write_line(&mut output, "redis mode", &env.redis_mode.to_string());
     write_line(
         &mut output,
         "sentry url set",
@@ -50,7 +50,7 @@ pub async fn diagnostics(matches: &ArgMatches, env: Option<&crate::env::Env>) ->
     );
     write_line(
         &mut output,
-        "sqlx database migrations",
+        "sqlx migrations",
         &env.database_migrate.to_string(),
     );
     writeln!(output).unwrap();

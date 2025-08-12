@@ -2,10 +2,19 @@ use anyhow::Context;
 use dotenvy::dotenv;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum RedisMode {
     Redis { redis_url: String },
     Sentinel { redis_sentinels: Vec<String> },
+}
+
+impl std::fmt::Display for RedisMode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RedisMode::Redis { .. } => write!(f, "Redis"),
+            RedisMode::Sentinel { .. } => write!(f, "Sentinel"),
+        }
+    }
 }
 
 #[derive(Clone)]

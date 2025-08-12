@@ -36,8 +36,11 @@ fn main() {
 
     let target_arch =
         std::env::var("CARGO_CFG_TARGET_ARCH").unwrap_or_else(|_| "unknown".to_string());
-    let target_env =
-        std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_else(|_| "unknown".to_string());
+    let target_env = if std::env::var("CARGO_CFG_TARGET_ENV").is_ok_and(|s| s.is_empty()) {
+        "unknown".to_string()
+    } else {
+        std::env::var("CARGO_CFG_TARGET_ENV").unwrap_or_else(|_| "unknown".to_string())
+    };
 
     println!("cargo:rustc-env=CARGO_GIT_COMMIT={git_hash}");
     println!("cargo:rustc-env=CARGO_TARGET={target_arch}-{target_env}");
