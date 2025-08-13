@@ -124,7 +124,7 @@ mod delete {
         if data.delete_backups {
             for backup in backups {
                 if let Err(err) = backup.delete(&state.database, &server).await {
-                    tracing::error!(backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+                    tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
 
                     if !data.force {
                         return ApiResponse::error(&format!("failed to delete backup: {err}"))

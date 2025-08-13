@@ -386,9 +386,17 @@ impl ServerBackup {
         database: &crate::database::Database,
         server: &super::server::Server,
     ) -> Result<(), sqlx::Error> {
+        let node = if self.node_id == server.node.id {
+            &server.node
+        } else {
+            &super::node::Node::by_id(database, self.node_id)
+                .await?
+                .ok_or_else(|| sqlx::Error::RowNotFound)?
+        };
+
         match self.disk {
             BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = server.node.location.backup_configs.s3.clone() {
+                if let Some(mut s3_configuration) = node.location.backup_configs.s3.clone() {
                     s3_configuration.decrypt(database);
 
                     let client = s3_configuration
@@ -407,8 +415,7 @@ impl ServerBackup {
                 }
             }
             _ => {
-                if let Err((status, error)) = server
-                    .node
+                if let Err((status, error)) = node
                     .api_client(database)
                     .delete_servers_server_backup_backup(server.uuid, self.uuid)
                     .await
