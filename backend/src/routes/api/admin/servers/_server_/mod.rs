@@ -70,6 +70,7 @@ mod get {
 
 mod delete {
     use crate::{
+        models::server_backup::ServerBackup,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -83,6 +84,7 @@ mod delete {
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
         force: bool,
+        delete_backups: bool,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -105,12 +107,32 @@ mod delete {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        let backups = if data.delete_backups {
+            ServerBackup::all_by_server_id(&state.database, server.id).await?
+        } else {
+            Vec::new()
+        };
+
         if let Err(err) = server.delete(&state.database, data.force).await {
             tracing::error!("failed to delete server: {:#?}", err);
 
             return ApiResponse::error(&format!("failed to delete server: {err}"))
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
+        }
+
+        if data.delete_backups {
+            for backup in backups {
+                if let Err(err) = backup.delete(&state.database, &server).await {
+                    tracing::error!(backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+
+                    if !data.force {
+                        return ApiResponse::error(&format!("failed to delete backup: {err}"))
+                            .with_status(StatusCode::EXPECTATION_FAILED)
+                            .ok();
+                    }
+                }
+            }
         }
 
         activity_logger

@@ -252,6 +252,26 @@ impl ServerDatabase {
         })
     }
 
+    pub async fn all_by_server_id(
+        database: &crate::database::Database,
+        server_id: i32,
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_databases
+            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
+            WHERE server_databases.server_id = $1
+            "#,
+            Self::columns_sql(None, None),
+        ))
+        .bind(server_id)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+    }
+
     pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
         sqlx::query_scalar(
             r#"

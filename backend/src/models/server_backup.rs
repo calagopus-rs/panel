@@ -293,6 +293,25 @@ impl ServerBackup {
         })
     }
 
+    pub async fn all_by_server_id(
+        database: &crate::database::Database,
+        server_id: i32,
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_backups
+            WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(server_id)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+    }
+
     pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
         sqlx::query_scalar(
             r#"
@@ -365,11 +384,11 @@ impl ServerBackup {
     pub async fn delete(
         &self,
         database: &crate::database::Database,
-        server: super::server::Server,
+        server: &super::server::Server,
     ) -> Result<(), sqlx::Error> {
         match self.disk {
             BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = server.node.location.backup_configs.s3 {
+                if let Some(mut s3_configuration) = server.node.location.backup_configs.s3.clone() {
                     s3_configuration.decrypt(database);
 
                     let client = s3_configuration

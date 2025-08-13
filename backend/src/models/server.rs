@@ -747,6 +747,22 @@ impl Server {
         database: &crate::database::Database,
         force: bool,
     ) -> Result<(), sqlx::Error> {
+        let databases =
+            super::server_database::ServerDatabase::all_by_server_id(database, self.id).await?;
+
+        for db in databases {
+            match db.delete(database).await {
+                Ok(_) => {}
+                Err(err) => {
+                    tracing::error!(server = %self.uuid, "failed to delete database: {:#?}", err);
+
+                    if !force {
+                        return Err(err);
+                    }
+                }
+            }
+        }
+
         let mut transaction = database.write().begin().await?;
 
         sqlx::query!("DELETE FROM servers WHERE servers.id = $1", self.id)
