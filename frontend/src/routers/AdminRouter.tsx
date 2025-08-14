@@ -40,12 +40,14 @@ export default () => {
           </Sidebar.Section>
           <Sidebar.User />
         </Sidebar>
-        <Routes>
-          <Route path={''} element={<AdminHome />} />
-          <Route path={'/settings/*'} element={<AdminSettings />} />
-          <Route path={'/locations/*'} element={<AdminLocations />} />
-          <Route path={'*'} element={<NotFound />} />
-        </Routes>
+        <div className={'flex-1 md:ml-0 pt-16 md:pt-0'}>
+          <Routes>
+            <Route path={''} element={<AdminHome />} />
+            <Route path={'/settings/*'} element={<AdminSettings />} />
+            <Route path={'/locations/*'} element={<AdminLocations />} />
+            <Route path={'*'} element={<NotFound />} />
+          </Routes>
+        </div>
       </div>
     </>
   );

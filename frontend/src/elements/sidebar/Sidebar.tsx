@@ -3,8 +3,11 @@ import styles from './sidebar.module.css';
 import { NavLink } from 'react-router';
 import { Button } from '../button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightFromBracket, faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/providers/AuthProvider';
+import { useState, useEffect } from 'react';
+import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
+import { Fragment } from 'react';
 
 type SidebarProps = {
   collapsed?: boolean;
@@ -12,7 +15,79 @@ type SidebarProps = {
 };
 
 function Sidebar({ collapsed = false, children }: SidebarProps) {
-  return <div className={classNames(styles.sidebar, { [styles.sidebarCollapsed]: collapsed })}>{children}</div>;
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, []);
+
+  return (
+    <>
+      <div className={'md:hidden fixed top-4 left-4 z-50'}>
+        <Button
+          style={Button.Styles.Gray}
+          shape={Button.Shapes.IconSquare}
+          variant={Button.Variants.Secondary}
+          onClick={() => setIsMobileMenuOpen(true)}
+        >
+          <FontAwesomeIcon icon={faBars} />
+        </Button>
+      </div>
+
+      <Transition show={isMobileMenuOpen} as={Fragment}>
+        <Dialog as={'div'} className={'relative z-50 md:hidden'} onClose={setIsMobileMenuOpen}>
+          <TransitionChild
+            as={Fragment}
+            enter={'ease-in-out duration-300'}
+            enterFrom={'opacity-0'}
+            enterTo={'opacity-100'}
+            leave={'ease-in-out duration-300'}
+            leaveFrom={'opacity-100'}
+            leaveTo={'opacity-0'}
+          >
+            <div
+              className={'fixed inset-0 bg-black bg-opacity-25 transition-opacity'}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          </TransitionChild>
+
+          <div className={'fixed inset-0 overflow-hidden'}>
+            <div className={'absolute inset-0 overflow-hidden'}>
+              <div className={'pointer-events-none fixed inset-y-0 left-0 flex max-w-full pr-10'}>
+                <TransitionChild
+                  as={Fragment}
+                  enter={'transform transition ease-in-out duration-300'}
+                  enterFrom={'-translate-x-full'}
+                  enterTo={'translate-x-0'}
+                  leave={'transform transition ease-in-out duration-300'}
+                  leaveFrom={'translate-x-0'}
+                  leaveTo={'-translate-x-full'}
+                >
+                  <DialogPanel className={'pointer-events-auto w-screen max-w-md'}>
+                    <div className={'flex h-full flex-col bg-neutral-900'}>
+                      <div className={'flex items-center justify-end px-4 py-3 border-b border-neutral-700'}>
+                        <Button
+                          style={Button.Styles.Gray}
+                          shape={Button.Shapes.IconSquare}
+                          variant={Button.Variants.Secondary}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                        >
+                          <FontAwesomeIcon icon={faXmark} />
+                        </Button>
+                      </div>
+                      {children}
+                    </div>
+                  </DialogPanel>
+                </TransitionChild>
+              </div>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <div className={classNames(styles.sidebar, { [styles.sidebarCollapsed]: collapsed })}>{children}</div>
+    </>
+  );
 }
 
 function Wrapper({ children }: { children: React.ReactNode }) {

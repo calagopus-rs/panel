@@ -36,6 +36,7 @@
 .navLink {
   @apply h-10 w-full flex flex-row items-center text-neutral-300 cursor-pointer select-none px-4;
   @apply hover:text-neutral-50;
+  @apply transition-colors duration-150 ease-in-out;
 
   & > svg {
     @apply h-5 w-5 flex flex-shrink-0;
@@ -56,4 +57,26 @@
 
 .user {
   @apply mt-auto p-6 h-16 w-full flex items-center bg-neutral-700 justify-between;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    @apply hidden;
+  }
+
+  .navLink {
+    @apply h-12 min-h-[3rem];
+
+    & > svg {
+      @apply h-6 w-6;
+    }
+
+    & > span {
+      @apply text-base;
+    }
+  }
+
+  .section {
+    @apply p-3;
+  }
 }

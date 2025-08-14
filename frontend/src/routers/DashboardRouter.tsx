@@ -73,15 +73,17 @@ export default () => {
           </Sidebar.Section>
           <Sidebar.User />
         </Sidebar>
-        <Routes>
-          <Route path={''} element={<DashboardHome />} />
-          <Route path={'/account'} element={<DashboardAccount />} />
-          <Route path={'/account/api'} element={<DashboardApi />} />
-          <Route path={'/account/ssh'} element={<DashboardSsh />} />
-          <Route path={'/account/activity'} element={<DashboardActivity />} />
-          <Route path={'/account/sessions'} element={<DashboardSessions />} />
-          <Route path={'*'} element={<NotFound />} />
-        </Routes>
+        <div className={'flex-1 md:ml-0 pt-16 md:pt-0'}>
+          <Routes>
+            <Route path={''} element={<DashboardHome />} />
+            <Route path={'/account'} element={<DashboardAccount />} />
+            <Route path={'/account/api'} element={<DashboardApi />} />
+            <Route path={'/account/ssh'} element={<DashboardSsh />} />
+            <Route path={'/account/activity'} element={<DashboardActivity />} />
+            <Route path={'/account/sessions'} element={<DashboardSessions />} />
+            <Route path={'*'} element={<NotFound />} />
+          </Routes>
+        </div>
       </div>
     </>
   );

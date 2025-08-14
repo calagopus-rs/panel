@@ -120,35 +120,36 @@ export default () => {
           </Sidebar.Section>
           <Sidebar.User />
         </Sidebar>
+        <div className={'flex-1 md:ml-0 pt-16 md:pt-0'}>
+          {loading ? (
+            <div className={'w-full h-screen flex items-center justify-center'}>
+              <Spinner size={75} />
+            </div>
+          ) : (
+            <>
+              <WebsocketHandler />
+              <WebsocketListener />
 
-        {loading ? (
-          <div className={'w-full h-screen flex items-center justify-center'}>
-            <Spinner size={75} />
-          </div>
-        ) : (
-          <>
-            <WebsocketHandler />
-            <WebsocketListener />
-
-            <ErrorBoundary>
-              <Routes>
-                <Route path={''} element={<ServerConsole />} />
-                <Route path={'/files'} element={<ServerFiles />} />
-                <Route path={'/files/:action'} element={<FileEditor />} />
-                <Route path={'/databases'} element={<ServerDatabases />} />
-                <Route path={'/schedules'} element={<ServerSchedules />} />
-                <Route path={'/schedules/:id'} element={<ScheduleView />} />
-                <Route path={'/subusers'} element={<ServerSubusers />} />
-                <Route path={'/backups'} element={<ServerBackups />} />
-                <Route path={'/network'} element={<ServerNetwork />} />
-                <Route path={'/startup'} element={<ServerStartup />} />
-                <Route path={'/settings'} element={<ServerSettings />} />
-                <Route path={'/activity'} element={<ServerActivity />} />
-                <Route path={'*'} element={<NotFound />} />
-              </Routes>
-            </ErrorBoundary>
-          </>
-        )}
+              <ErrorBoundary>
+                <Routes>
+                  <Route path={''} element={<ServerConsole />} />
+                  <Route path={'/files'} element={<ServerFiles />} />
+                  <Route path={'/files/:action'} element={<FileEditor />} />
+                  <Route path={'/databases'} element={<ServerDatabases />} />
+                  <Route path={'/schedules'} element={<ServerSchedules />} />
+                  <Route path={'/schedules/:id'} element={<ScheduleView />} />
+                  <Route path={'/subusers'} element={<ServerSubusers />} />
+                  <Route path={'/backups'} element={<ServerBackups />} />
+                  <Route path={'/network'} element={<ServerNetwork />} />
+                  <Route path={'/startup'} element={<ServerStartup />} />
+                  <Route path={'/settings'} element={<ServerSettings />} />
+                  <Route path={'/activity'} element={<ServerActivity />} />
+                  <Route path={'*'} element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </>
+          )}
+        </div>
       </div>
     </>
   );
