@@ -18,8 +18,7 @@ interface Nest {
   created: Date;
 }
 
-interface AdminNestEgg {
-  id: number;
+interface AdminUpdateNestEgg {
   author: string;
   name: string;
   description: string | null;
@@ -60,6 +59,10 @@ interface AdminNestEgg {
     [key: string]: string;
   }[];
   fileDenylist: string[];
+}
+
+interface AdminNestEgg extends AdminUpdateNestEgg {
+  id: number;
   created: Date;
 }
 
