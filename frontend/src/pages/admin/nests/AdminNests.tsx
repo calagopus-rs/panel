@@ -9,8 +9,9 @@ import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import NestRow from './NestRow';
-import NestCreateOrUpdate from './NestCreateOrUpdate';
 import getNests from '@/api/admin/nests/getNests';
+import NestCreate from './NestCreate';
+import NestUpdate from './NestUpdate';
 
 const NestsContainer = () => {
   const navigate = useNavigate();
@@ -84,8 +85,8 @@ export default () => {
     <Container>
       <Routes>
         <Route path={'/'} element={<NestsContainer />} />
-        <Route path={'/new'} element={<NestCreateOrUpdate />} />
-        <Route path={'/:id'} element={<NestCreateOrUpdate />} />
+        <Route path={'/new'} element={<NestCreate />} />
+        <Route path={'/:id/*'} element={<NestUpdate />} />
       </Routes>
     </Container>
   );
