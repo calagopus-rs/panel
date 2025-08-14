@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Response {
-  recovery_codes: string[];
+  recoveryCodes: string[];
 }
 
 export default async (code: string, password: string): Promise<Response> => {

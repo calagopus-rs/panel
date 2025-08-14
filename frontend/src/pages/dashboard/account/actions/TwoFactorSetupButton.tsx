@@ -49,11 +49,10 @@ export default () => {
 
   const submit = () => {
     enableTwoFactor(code, password)
-      .then((recoveryCodes) => {
-        setRecoveryCodes(recoveryCodes.recovery_codes);
+      .then(({ recoveryCodes }) => {
+        setRecoveryCodes(recoveryCodes);
         addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
         setStage('recovery');
-        setUser({ ...user!, totpEnabled: true });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -62,7 +61,13 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Enable Two-Step Verification'} onClose={() => setOpen(false)} open={open}>
+      <Dialog
+        title={'Enable Two-Step Verification'}
+        onClose={() => setOpen(false)}
+        open={open}
+        preventExternalClose
+        hideCloseIcon
+      >
         {stage === 'setup' ? (
           <>
             <p>
@@ -129,7 +134,13 @@ export default () => {
               </Code>
             </CopyOnClick>
             <Dialog.Footer>
-              <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
+              <Button
+                style={Button.Styles.Gray}
+                onClick={() => {
+                  setOpen(false);
+                  setUser({ ...user!, totpEnabled: true });
+                }}
+              >
                 Close
               </Button>
             </Dialog.Footer>
