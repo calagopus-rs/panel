@@ -110,9 +110,9 @@ export default () => {
             <Dialog.Footer>
               <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
                 Close
-                <Button onClick={submit} disabled={!code || !password}>
-                  Enable
-                </Button>
+              </Button>
+              <Button onClick={submit} disabled={!code || !password}>
+                Enable
               </Button>
             </Dialog.Footer>
           </>
