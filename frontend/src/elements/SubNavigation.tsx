@@ -13,12 +13,13 @@ interface Props {
   to: string;
   name: string;
   icon: IconDefinition;
+  end?: boolean;
 }
 
-export const SubNavigationLink = ({ to, name, icon }: Props) => (
+export const SubNavigationLink = ({ to, name, icon, end = true }: Props) => (
   <NavLink
     to={to}
-    end
+    end={end}
     className={({ isActive }) =>
       classNames(
         isActive && 'text-cyan-300! border-cyan-300!',

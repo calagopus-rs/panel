@@ -8,6 +8,7 @@ import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import NestSettingsContainer from './NestSettingsContainer';
+import AdminEggs from './eggs/AdminEggs';
 
 export default () => {
   const params = useParams<'id'>();
@@ -35,7 +36,7 @@ export default () => {
 
       <SubNavigation>
         <SubNavigationLink to={`/admin/nests/${nest?.id}`} name={'General'} icon={faCog} />
-        <SubNavigationLink to={`/admin/nests/${nest?.id}/eggs`} name={'Eggs'} icon={faEgg} />
+        <SubNavigationLink to={`/admin/nests/${nest?.id}/eggs`} name={'Eggs'} icon={faEgg} end={false} />
       </SubNavigation>
 
       {!nest ? (
@@ -43,7 +44,7 @@ export default () => {
       ) : (
         <Routes>
           <Route path={'/'} element={<NestSettingsContainer nest={nest} />} />
-          <Route path={'/eggs'} element={<></>} />
+          <Route path={'/eggs/*'} element={<AdminEggs nest={nest} />} />
         </Routes>
       )}
     </Container>

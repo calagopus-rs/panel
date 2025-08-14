@@ -22,7 +22,7 @@ interface AdminNestEgg {
   id: number;
   author: string;
   name: string;
-  description: string;
+  description: string | null;
   configFiles: {
     file: string;
     parser: ProcessConfigurationConfigParser;
