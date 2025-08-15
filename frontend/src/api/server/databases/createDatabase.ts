@@ -1,24 +1,16 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Data {
-  databaseName: string;
-  connectionsFrom: string;
+  name: string;
 }
 
 export default async (uuid: string, data: Data): Promise<any> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(
-        `/api/client/servers/${uuid}/databases`,
-        {
-          database: data.databaseName,
-          remote: data.connectionsFrom,
-        },
-        {
-          params: { include: 'password' },
-        },
-      )
-      .then(({ data }) => resolve(null))
+      .post(`/api/client/servers/${uuid}/databases`, {
+        name: data.name,
+      })
+      .then(({ data }) => resolve(data.database))
       .catch(reject);
   });
 };

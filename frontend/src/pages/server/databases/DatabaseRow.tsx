@@ -6,8 +6,7 @@ import CopyOnClick from '@/elements/CopyOnClick';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis, faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
 import DatabaseDetailsDialog from './dialogs/DatabaseDetailsDialog';
@@ -37,7 +36,7 @@ export default ({ database }: { database: any }) => {
       <DatabaseDetailsDialog database={database} open={openDialog === 'details'} onClose={() => setOpenDialog(null)} />
       <DatabaseDeleteDialog
         databaseName={database.name}
-        onDeleted={() => doDeleteDatabase()}
+        onDelete={() => doDeleteDatabase()}
         open={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
       />
