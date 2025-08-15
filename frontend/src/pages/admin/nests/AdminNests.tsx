@@ -59,7 +59,9 @@ const NestsContainer = () => {
                 <TableHead>
                   <TableHeader name={'ID'} />
                   <TableHeader name={'Name'} />
+                  <TableHeader name={'Author'} />
                   <TableHeader name={'Description'} />
+                  <TableHeader name={'Eggs'} />
                 </TableHead>
 
                 <ContextMenuProvider>

@@ -57,7 +57,9 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
                 <TableHead>
                   <TableHeader name={'ID'} />
                   <TableHeader name={'Name'} />
+                  <TableHeader name={'Author'} />
                   <TableHeader name={'Description'} />
+                  <TableHeader name={'Servers'} />
                 </TableHead>
 
                 <ContextMenuProvider>

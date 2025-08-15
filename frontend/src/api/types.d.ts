@@ -88,6 +88,7 @@ interface AdminUpdateNestEgg {
   features: string[];
   dockerImages: Record<string, string>;
   fileDenylist: string[];
+  servers: number;
 }
 
 interface AdminNestEgg extends AdminUpdateNestEgg {

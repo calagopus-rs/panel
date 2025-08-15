@@ -18,9 +18,13 @@ export default ({ nest, egg }: { nest: Nest; egg: AdminNestEgg }) => {
         </NavLink>
       </td>
 
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{egg.author}</td>
+
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={egg.description}>
         {egg.description}
       </td>
+
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{egg.servers}</td>
     </TableRow>
   );
 };

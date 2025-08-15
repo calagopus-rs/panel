@@ -379,6 +379,7 @@ impl NestEgg {
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
+            servers: self.servers,
             created: self.created.and_utc(),
         }
     }
@@ -423,6 +424,8 @@ pub struct AdminApiNestEgg {
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
+
+    pub servers: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
