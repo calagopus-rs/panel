@@ -55,9 +55,7 @@ interface AdminUpdateNestEgg {
   startup: string;
   forceOutgoingIp: boolean;
   features: string[];
-  dockerImages: {
-    [key: string]: string;
-  }[];
+  dockerImages: Record<string, string>;
   fileDenylist: string[];
 }
 

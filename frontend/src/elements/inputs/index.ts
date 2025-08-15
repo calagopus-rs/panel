@@ -5,6 +5,7 @@ import Dropdown from './Dropdown';
 import Label from './Label';
 import { MultiInput } from './MultiInput';
 import Textarea from './Textarea';
+import { MultiKeyValueInput } from './MultiKeyValueInput';
 
 const Input = Object.assign(
   {},
@@ -16,6 +17,7 @@ const Input = Object.assign(
     Dropdown,
     MultiInput,
     Textarea,
+    MultiKeyValueInput,
   },
 );
 

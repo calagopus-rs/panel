@@ -10,6 +10,7 @@ import Code from '@/elements/Code';
 import getEgg from '@/api/admin/eggs/getEgg';
 import deleteEgg from '@/api/admin/eggs/deleteEgg';
 import Spinner from '@/elements/Spinner';
+import updateEgg from '@/api/admin/eggs/updateEgg';
 
 export default ({ nest }: { nest: Nest }) => {
   const params = useParams<'id'>();
@@ -32,17 +33,13 @@ export default ({ nest }: { nest: Nest }) => {
   }, [params.id]);
 
   const doUpdate = () => {
-    // updateNest(nest.id, {
-    //   author,
-    //   name,
-    //   description,
-    // })
-    //   .then(() => {
-    //     addToast('Nest updated.', 'success');
-    //   })
-    //   .catch((msg) => {
-    //     addToast(httpErrorToHuman(msg), 'error');
-    //   });
+    updateEgg(nest.id, egg.id, egg)
+      .then(() => {
+        addToast('Egg updated.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   const doDelete = () => {
@@ -246,9 +243,9 @@ export default ({ nest }: { nest: Nest }) => {
             onChange={(e) => setEgg({ ...egg, features: e })}
           />
         </div>
-
-        {/* TODO: dockerImages */}
-
+        <div className={'mt-4'}>
+          <Input.MultiKeyValueInput options={egg.dockerImages} onChange={(e) => setEgg({ ...egg, dockerImages: e })} />
+        </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'fileDenyList'}>File Deny List</Input.Label>
           <Input.MultiInput
