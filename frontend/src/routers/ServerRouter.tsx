@@ -60,97 +60,95 @@ export default () => {
   }, [params.id]);
 
   return (
-    <>
-      <div className={'flex'}>
-        <Sidebar collapsed={false}>
-          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
-            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
-          </div>
-          <Sidebar.Section>
-            <a className={classNames(styles.navLink, 'cursor-pointer')}>
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-              <span>Search</span>
-            </a>
-            <Sidebar.Link to={'/'} end>
-              <FontAwesomeIcon icon={faServer} />
-              <span>Servers</span>
-            </Sidebar.Link>
-          </Sidebar.Section>
-          <Sidebar.Section>
-            <Sidebar.Link to={`/server/${params.id}`} end>
-              <FontAwesomeIcon icon={faTerminal} />
-              <span>Console</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/files`}>
-              <FontAwesomeIcon icon={faFolderOpen} />
-              <span>Files</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/databases`} end>
-              <FontAwesomeIcon icon={faDatabase} />
-              <span>Databases</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/schedules`}>
-              <FontAwesomeIcon icon={faStopwatch} />
-              <span>Schedules</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/subusers`} end>
-              <FontAwesomeIcon icon={faUsers} />
-              <span>Subusers</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/backups`} end>
-              <FontAwesomeIcon icon={faBoxArchive} />
-              <span>Backups</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/network`} end>
-              <FontAwesomeIcon icon={faNetworkWired} />
-              <span>Network</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/startup`} end>
-              <FontAwesomeIcon icon={faPlay} />
-              <span>Startup</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/settings`} end>
-              <FontAwesomeIcon icon={faCog} />
-              <span>Settings</span>
-            </Sidebar.Link>
-            <Sidebar.Link to={`/server/${params.id}/activity`} end>
-              <FontAwesomeIcon icon={faBriefcase} />
-              <span>Activity</span>
-            </Sidebar.Link>
-          </Sidebar.Section>
-          <Sidebar.User />
-        </Sidebar>
-        <div className={'flex-1 md:ml-0 pt-16 md:pt-0'}>
-          {loading ? (
-            <div className={'w-full h-screen flex items-center justify-center'}>
-              <Spinner size={75} />
-            </div>
-          ) : (
-            <>
-              <WebsocketHandler />
-              <WebsocketListener />
-
-              <ErrorBoundary>
-                <Routes>
-                  <Route path={''} element={<ServerConsole />} />
-                  <Route path={'/files'} element={<ServerFiles />} />
-                  <Route path={'/files/:action'} element={<FileEditor />} />
-                  <Route path={'/databases'} element={<ServerDatabases />} />
-                  <Route path={'/schedules'} element={<ServerSchedules />} />
-                  <Route path={'/schedules/:id'} element={<ScheduleView />} />
-                  <Route path={'/subusers'} element={<ServerSubusers />} />
-                  <Route path={'/backups'} element={<ServerBackups />} />
-                  <Route path={'/network'} element={<ServerNetwork />} />
-                  <Route path={'/startup'} element={<ServerStartup />} />
-                  <Route path={'/settings'} element={<ServerSettings />} />
-                  <Route path={'/activity'} element={<ServerActivity />} />
-                  <Route path={'*'} element={<NotFound />} />
-                </Routes>
-              </ErrorBoundary>
-            </>
-          )}
+    <div className={'lg:flex'}>
+      <Sidebar collapsed={false}>
+        <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
+          <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
         </div>
+        <Sidebar.Section>
+          <a className={classNames(styles.navLink, 'cursor-pointer')}>
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            <span>Search</span>
+          </a>
+          <Sidebar.Link to={'/'} end>
+            <FontAwesomeIcon icon={faServer} />
+            <span>Servers</span>
+          </Sidebar.Link>
+        </Sidebar.Section>
+        <Sidebar.Section>
+          <Sidebar.Link to={`/server/${params.id}`} end>
+            <FontAwesomeIcon icon={faTerminal} />
+            <span>Console</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/files`}>
+            <FontAwesomeIcon icon={faFolderOpen} />
+            <span>Files</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/databases`} end>
+            <FontAwesomeIcon icon={faDatabase} />
+            <span>Databases</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/schedules`}>
+            <FontAwesomeIcon icon={faStopwatch} />
+            <span>Schedules</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/subusers`} end>
+            <FontAwesomeIcon icon={faUsers} />
+            <span>Subusers</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/backups`} end>
+            <FontAwesomeIcon icon={faBoxArchive} />
+            <span>Backups</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/network`} end>
+            <FontAwesomeIcon icon={faNetworkWired} />
+            <span>Network</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/startup`} end>
+            <FontAwesomeIcon icon={faPlay} />
+            <span>Startup</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/settings`} end>
+            <FontAwesomeIcon icon={faCog} />
+            <span>Settings</span>
+          </Sidebar.Link>
+          <Sidebar.Link to={`/server/${params.id}/activity`} end>
+            <FontAwesomeIcon icon={faBriefcase} />
+            <span>Activity</span>
+          </Sidebar.Link>
+        </Sidebar.Section>
+        <Sidebar.User />
+      </Sidebar>
+      <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
+        {loading ? (
+          <div className={'w-full h-screen flex items-center justify-center'}>
+            <Spinner size={75} />
+          </div>
+        ) : (
+          <>
+            <WebsocketHandler />
+            <WebsocketListener />
+
+            <ErrorBoundary>
+              <Routes>
+                <Route path={''} element={<ServerConsole />} />
+                <Route path={'/files'} element={<ServerFiles />} />
+                <Route path={'/files/:action'} element={<FileEditor />} />
+                <Route path={'/databases'} element={<ServerDatabases />} />
+                <Route path={'/schedules'} element={<ServerSchedules />} />
+                <Route path={'/schedules/:id'} element={<ScheduleView />} />
+                <Route path={'/subusers'} element={<ServerSubusers />} />
+                <Route path={'/backups'} element={<ServerBackups />} />
+                <Route path={'/network'} element={<ServerNetwork />} />
+                <Route path={'/startup'} element={<ServerStartup />} />
+                <Route path={'/settings'} element={<ServerSettings />} />
+                <Route path={'/activity'} element={<ServerActivity />} />
+                <Route path={'*'} element={<NotFound />} />
+              </Routes>
+            </ErrorBoundary>
+          </>
+        )}
       </div>
-    </>
+    </div>
   );
 };

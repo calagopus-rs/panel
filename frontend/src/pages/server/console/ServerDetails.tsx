@@ -1,5 +1,5 @@
 import Spinner from '@/elements/Spinner';
-import { formatAllocation, getPrimaryAllocation } from '@/lib/server';
+import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { formatMiliseconds } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
@@ -27,7 +27,7 @@ function StatCard({
   limit?: string;
 }) {
   return (
-    <div className={'bg-gray-700 p-4 rounded flex gap-4'}>
+    <div className={'bg-gray-700 p-4 rounded flex gap-4 w-auto'}>
       <FontAwesomeIcon className={'text-gray-100 bg-gray-600 p-4 rounded-lg'} size={'xl'} icon={icon} />
       <div className={'flex flex-col'}>
         <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
@@ -49,7 +49,7 @@ export default () => {
   const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited';
 
   return stats ? (
-    <div className={'col-span-1 grid gap-4'}>
+    <div className={'xl:col-span-1 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-1 gap-4'}>
       <StatCard
         icon={faEthernet}
         label={'Address'}

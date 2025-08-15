@@ -23,7 +23,7 @@ function Sidebar({ collapsed = false, children }: SidebarProps) {
 
   return (
     <>
-      <div className={'md:hidden fixed top-4 left-4 z-50'}>
+      <div className={'lg:hidden my-4 ml-4'}>
         <Button
           style={Button.Styles.Gray}
           shape={Button.Shapes.IconSquare}
@@ -35,7 +35,7 @@ function Sidebar({ collapsed = false, children }: SidebarProps) {
       </div>
 
       <Transition show={isMobileMenuOpen} as={Fragment}>
-        <Dialog as={'div'} className={'relative z-50 md:hidden'} onClose={setIsMobileMenuOpen}>
+        <Dialog as={'div'} className={'relative z-50 lg:hidden'} onClose={setIsMobileMenuOpen}>
           <TransitionChild
             as={Fragment}
             enter={'ease-in-out duration-300'}

@@ -5,7 +5,6 @@ import { Route, Routes, useParams } from 'react-router';
 import getNest from '@/api/admin/nests/getNest';
 import { SubNavigation, SubNavigationLink } from '@/elements/SubNavigation';
 import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import NestSettingsContainer from './NestSettingsContainer';
 import AdminEggs from './eggs/AdminEggs';
@@ -29,7 +28,7 @@ export default () => {
   }, [params.id]);
 
   return (
-    <Container>
+    <>
       <div className={'mb-4'}>
         <h1 className={'text-4xl font-bold text-white'}>Update Nest</h1>
       </div>
@@ -47,6 +46,6 @@ export default () => {
           <Route path={'/eggs/*'} element={<AdminEggs nest={nest} />} />
         </Routes>
       )}
-    </Container>
+    </>
   );
 };

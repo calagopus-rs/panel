@@ -67,8 +67,8 @@ export default () => {
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Startup</h1>
       </div>
-      <div className={'grid grid-cols-3 gap-4'}>
-        <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full col-span-2'}>
+      <div className={'grid lg:grid-cols-3 gap-4'}>
+        <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full lg:col-span-2'}>
           <Input.Textarea
             id={'startup-command'}
             placeholder={'Startup Command'}

@@ -2,7 +2,7 @@ import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useEffect, useState } from 'react';
-import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
+import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import loadDirectory from '@/api/server/files/loadDirectory';

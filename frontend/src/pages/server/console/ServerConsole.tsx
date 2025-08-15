@@ -15,8 +15,8 @@ export default () => {
         <h1 className={'text-4xl font-bold text-white'}>{server.name}</h1>
         <ServerPowerControls />
       </div>
-      <div className={'grid grid-cols-4 gap-4 mb-4'}>
-        <div className={'col-span-3 h-full'}>
+      <div className={'grid xl:grid-cols-4 gap-4 mb-4'}>
+        <div className={'xl:col-span-3 h-full'}>
           <Spinner.Suspense>
             <Console />
           </Spinner.Suspense>
