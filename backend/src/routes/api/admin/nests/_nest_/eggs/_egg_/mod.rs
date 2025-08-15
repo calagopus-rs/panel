@@ -92,7 +92,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
+            api::admin::{
+                GetAdminActivityLogger,
+                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -120,8 +123,9 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        nest: GetNest,
         egg: GetNestEgg,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         if egg.servers > 0 {
             return ApiResponse::error("egg has servers, cannot delete")
@@ -133,8 +137,9 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:egg.delete",
+                "nest:egg.delete",
                 serde_json::json!({
+                    "nest_id": nest.id,
                     "egg_id": egg.id,
 
                     "author": egg.author,
@@ -152,9 +157,9 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{
-                admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                client::GetUserActivityLogger,
+            api::admin::{
+                GetAdminActivityLogger,
+                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
             },
         },
     };
@@ -222,7 +227,7 @@ mod patch {
         state: GetState,
         nest: GetNest,
         mut egg: GetNestEgg,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -326,8 +331,9 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:egg.update",
+                "nest:egg.update",
                 serde_json::json!({
+                    "nest_id": nest.id,
                     "egg_id": egg.id,
 
                     "author": egg.author,

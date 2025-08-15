@@ -71,9 +71,8 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{
-                admin::database_hosts::_database_host_::GetDatabaseHost,
-                client::GetUserActivityLogger,
+            api::admin::{
+                GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost,
             },
         },
     };
@@ -98,7 +97,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         database_host: GetDatabaseHost,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         if database_host.databases > 0 {
             return ApiResponse::error("database host has databases, cannot delete")
@@ -110,7 +109,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:database-host.delete",
+                "database-host:delete",
                 serde_json::json!({
                     "id": database_host.id,
                     "name": database_host.name,
@@ -127,9 +126,8 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{
-                admin::database_hosts::_database_host_::GetDatabaseHost,
-                client::GetUserActivityLogger,
+            api::admin::{
+                GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost,
             },
         },
     };
@@ -180,7 +178,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         mut database_host: GetDatabaseHost,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -256,7 +254,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:database-host.update",
+                "database-host:update",
                 serde_json::json!({
                     "name": database_host.name,
                     "public": database_host.public,

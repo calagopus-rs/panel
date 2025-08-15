@@ -8,6 +8,7 @@ import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminNests from '@/pages/admin/nests/AdminNests';
+import AdminActivity from '@/pages/admin/activity/AdminActivity';
 
 export default () => {
   return (
@@ -42,6 +43,12 @@ export default () => {
             <span>Nests</span>
           </Sidebar.Link>
         </Sidebar.Section>
+        <Sidebar.Section>
+          <Sidebar.Link to={'/admin/activity'}>
+            <FontAwesomeIcon icon={faDungeon} />
+            <span>Activity</span>
+          </Sidebar.Link>
+        </Sidebar.Section>
         <Sidebar.User />
       </Sidebar>
       <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
@@ -50,6 +57,7 @@ export default () => {
           <Route path={'/settings/*'} element={<AdminSettings />} />
           <Route path={'/locations/*'} element={<AdminLocations />} />
           <Route path={'/nests/*'} element={<AdminNests />} />
+          <Route path={'/activity'} element={<AdminActivity />} />
           <Route path={'*'} element={<NotFound />} />
         </Routes>
       </div>

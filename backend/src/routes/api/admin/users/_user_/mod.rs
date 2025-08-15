@@ -89,7 +89,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::users::_user_::GetParamUser, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, users::_user_::GetParamUser},
         },
     };
     use axum::http::StatusCode;
@@ -112,7 +112,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         user: GetParamUser,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         let servers = Server::count_by_user_id(&state.database, user.id).await;
         if servers > 0 {
@@ -125,7 +125,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:user.delete",
+                "user:delete",
                 serde_json::json!({
                     "id": user.id,
                     "username": user.username,
@@ -146,7 +146,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::users::_user_::GetParamUser, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, users::_user_::GetParamUser},
         },
     };
     use axum::http::StatusCode;
@@ -197,7 +197,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         mut user: GetParamUser,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -265,7 +265,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:user.update",
+                "user:update",
                 serde_json::json!({
                     "id": user.id,
                     "username": user.username,

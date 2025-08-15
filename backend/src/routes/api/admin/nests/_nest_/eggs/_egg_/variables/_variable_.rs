@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
+            api::admin::{
+                GetAdminActivityLogger,
+                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -39,8 +42,9 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        nest: GetNest,
         egg: GetNestEgg,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
     ) -> ApiResponseResult {
         let egg_variable =
@@ -57,8 +61,9 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:egg.variable.delete",
+                "nest:egg.variable.delete",
                 serde_json::json!({
+                    "nest_id": nest.id,
                     "egg_id": egg.id,
 
                     "name": egg_variable.name,
@@ -77,7 +82,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetUserActivityLogger},
+            api::admin::{
+                GetAdminActivityLogger,
+                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -135,8 +143,9 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        nest: GetNest,
         egg: GetNestEgg,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -225,8 +234,9 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:egg.variable.update",
+                "nest:egg.variable.update",
                 serde_json::json!({
+                    "nest_id": nest.id,
                     "egg_id": egg.id,
 
                     "name": egg_variable.name,

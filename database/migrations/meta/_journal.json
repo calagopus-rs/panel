@@ -358,6 +358,20 @@
       "when": 1754946053124,
       "tag": "0050_thick_bloodaxe",
       "breakpoints": false
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1755287785593,
+      "tag": "0051_pretty_jane_foster",
+      "breakpoints": false
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1755289237016,
+      "tag": "0052_silly_makkari",
+      "breakpoints": false
     }
   ]
 }

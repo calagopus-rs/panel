@@ -66,7 +66,7 @@ export default () => {
 
                   <TableBody>
                     {activities.data.map((activity) => (
-                      <TableRow key={activity.id}>
+                      <TableRow key={activity.created.toString()}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
                         </td>

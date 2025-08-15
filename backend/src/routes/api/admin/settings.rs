@@ -31,7 +31,7 @@ mod get {
 mod put {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::client::GetUserActivityLogger},
+        routes::{GetState, api::admin::GetAdminActivityLogger},
     };
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -72,7 +72,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let mut settings = state.settings.get_mut().await;
@@ -122,9 +122,7 @@ mod put {
         let settings_json = settings.censored();
         settings.save().await?;
 
-        activity_logger
-            .log("admin:settings.update", settings_json)
-            .await;
+        activity_logger.log("settings:update", settings_json).await;
 
         ApiResponse::json(Response {}).ok()
     }

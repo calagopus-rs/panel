@@ -48,6 +48,21 @@ export const settings = pgTable('settings', {
 	uniqueIndex('settings_key_idx').on(settings.key)
 ])
 
+export const adminActivities = pgTable('admin_activities', {
+	userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
+
+	event: varchar('event', { length: 255 }).notNull(),
+	ip: inet('ip'),
+	data: jsonb('data').notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (adminActivities) => [
+	index('admin_activities_user_id_idx').on(adminActivities.userId),
+	index('admin_activities_event_idx').on(adminActivities.event),
+	index('admin_activities_user_id_event_idx').on(adminActivities.userId, adminActivities.event)
+])
+
 export const users = pgTable('users', {
 	id: serial('id').primaryKey().notNull(),
 	externalId: varchar('external_id', { length: 255 }),
@@ -73,7 +88,6 @@ export const users = pgTable('users', {
 ])
 
 export const userActivities = pgTable('user_activities', {
-	id: serial('id').primaryKey().notNull(),
 	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
 	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
 
@@ -84,7 +98,7 @@ export const userActivities = pgTable('user_activities', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userActivities) => [
 	index('user_activities_user_id_idx').on(userActivities.userId),
-	index('user_activities_event_idx').on(userActivities.event)
+	index('user_activities_user_id_event_idx').on(userActivities.userId, userActivities.event)
 ])
 
 export const userSessions = pgTable('user_sessions', {
@@ -425,7 +439,6 @@ export const serverSubusers = pgTable('server_subusers', {
 ])
 
 export const serverActivities = pgTable('server_activities', {
-	id: serial('id').primaryKey().notNull(),
 	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
 	userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
 	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),

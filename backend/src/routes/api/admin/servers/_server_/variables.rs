@@ -46,7 +46,7 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
         },
     };
     use axum::http::StatusCode;
@@ -81,7 +81,7 @@ mod put {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -141,7 +141,7 @@ mod put {
 
         activity_logger
             .log(
-                "admin:server.variable.update",
+                "server:variable.update",
                 serde_json::json!({
                     "server_id": server.id,
                     "variable_id": variable_id,

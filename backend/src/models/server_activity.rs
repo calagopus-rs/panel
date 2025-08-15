@@ -6,7 +6,6 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct ServerActivity {
-    pub id: i32,
     pub user: Option<super::user::User>,
     pub api_key_id: Option<i32>,
 
@@ -24,7 +23,6 @@ impl BaseModel for ServerActivity {
         let table = table.unwrap_or("server_activities");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
             (format!("{table}.api_key_id"), format!("{prefix}api_key_id")),
             (format!("{table}.event"), format!("{prefix}event")),
             (format!("{table}.ip"), format!("{prefix}ip")),
@@ -42,7 +40,6 @@ impl BaseModel for ServerActivity {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
             user: if row
                 .try_get::<i32, _>("user_id".to_string().as_str())
                 .is_ok()
@@ -156,7 +153,6 @@ impl ServerActivity {
     #[inline]
     pub fn into_api_object(self) -> ApiServerActivity {
         ApiServerActivity {
-            id: self.id,
             user: self.user.map(|user| user.into_api_object(false)),
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
@@ -170,7 +166,6 @@ impl ServerActivity {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "ServerActivity")]
 pub struct ApiServerActivity {
-    pub id: i32,
     pub user: Option<super::user::ApiUser>,
 
     pub event: String,

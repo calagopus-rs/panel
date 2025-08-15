@@ -10,7 +10,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
         },
     };
     use axum::http::StatusCode;
@@ -99,7 +99,7 @@ mod post {
     pub async fn route(
         state: GetState,
         nest: GetNest,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -191,7 +191,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:egg.import",
+                "nest:egg.create",
                 serde_json::json!({
                     "nest_id": nest.id,
 

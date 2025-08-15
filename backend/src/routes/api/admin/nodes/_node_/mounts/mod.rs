@@ -84,7 +84,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
         },
     };
     use axum::http::StatusCode;
@@ -114,7 +114,7 @@ mod post {
     pub async fn route(
         state: GetState,
         node: GetNode,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let mount = match Mount::by_id(&state.database, data.mount_id).await? {
@@ -150,7 +150,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:node.mount.create",
+                "node:mount.create",
                 serde_json::json!({
                     "node_id": node.id,
                     "mount_id": mount.id,

@@ -78,7 +78,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
         },
     };
     use serde::{Deserialize, Serialize};
@@ -105,14 +105,14 @@ mod delete {
     pub async fn route(
         state: GetState,
         node: GetNode,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         NodeAllocation::delete_by_ids(&state.database, &data.ids).await?;
 
         activity_logger
             .log(
-                "admin:node.delete-allocations",
+                "node:allocation.delete",
                 serde_json::json!({
                     "node_id": node.id,
 
@@ -131,7 +131,7 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nodes::_node_::GetNode, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
         },
     };
     use axum::http::StatusCode;
@@ -165,7 +165,7 @@ mod put {
     pub async fn route(
         state: GetState,
         node: GetNode,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -197,7 +197,7 @@ mod put {
 
         activity_logger
             .log(
-                "admin:node.create-allocations",
+                "node:allocation.create",
                 serde_json::json!({
                     "node_id": node.id,
 

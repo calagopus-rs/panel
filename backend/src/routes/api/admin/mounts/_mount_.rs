@@ -47,7 +47,7 @@ mod delete {
     use crate::{
         models::mount::Mount,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
+        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -70,7 +70,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         Path(mount): Path<i32>,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         let mount = match Mount::by_id(&state.database, mount).await? {
             Some(mount) => mount,
@@ -101,7 +101,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:mount.delete",
+                "mount:delete",
                 serde_json::json!({
                     "id": mount.id,
                     "name": mount.name,
@@ -117,7 +117,7 @@ mod patch {
     use crate::{
         models::mount::Mount,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
+        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -162,7 +162,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         Path(mount): Path<i32>,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let mut mount = match Mount::by_id(&state.database, mount).await? {
@@ -235,7 +235,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:mount.update",
+                "mount:update",
                 serde_json::json!({
                     "id": mount.id,
                     "name": mount.name,

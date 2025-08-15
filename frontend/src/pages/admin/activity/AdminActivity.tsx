@@ -1,4 +1,4 @@
-import getUserActivity from '@/api/me/getUserActivity';
+import getAdminActivity from '@/api/admin/getAdminActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
 import Container from '@/elements/Container';
@@ -19,7 +19,7 @@ import { useSearchParams } from 'react-router';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activities, setActivities] = useState<ResponseMeta<UserActivity>>();
+  const [activities, setActivities] = useState<ResponseMeta<AdminActivity>>();
 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -35,7 +35,7 @@ export default () => {
   }, [page, search]);
 
   useEffect(() => {
-    getUserActivity(page, search).then((data) => {
+    getAdminActivity(page, search).then((data) => {
       setActivities(data);
       setLoading(false);
     });
@@ -66,7 +66,7 @@ export default () => {
                     {activities.data.map((activity) => (
                       <TableRow key={activity.created.toString()}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {activity.isApi ? 'API' : 'Web'}
+                          {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
@@ -74,7 +74,7 @@ export default () => {
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Code>{activity.ip}</Code>
+                          {activity.ip && <Code>{activity.ip}</Code>}
                         </td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>

@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 use utoipa::ToSchema;
 use validator::Validate;
 
+pub mod admin_activity;
 pub mod database_host;
 pub mod location;
 pub mod location_database_host;

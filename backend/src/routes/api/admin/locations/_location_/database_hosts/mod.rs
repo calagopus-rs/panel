@@ -88,7 +88,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
         },
     };
     use axum::http::StatusCode;
@@ -116,7 +116,7 @@ mod post {
     pub async fn route(
         state: GetState,
         location: GetLocation,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         match LocationDatabaseHost::create(&state.database, location.id, data.database_host_id)
@@ -139,7 +139,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:location.database-host.create",
+                "location:database-host.create",
                 serde_json::json!({
                     "location_id": location.id,
                     "database_host_id": data.database_host_id,

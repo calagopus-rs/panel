@@ -7,7 +7,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -36,7 +36,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         location: GetLocation,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         Path((_location, database_host)): Path<(i32, i32)>,
     ) -> ApiResponseResult {
         let database_host = match LocationDatabaseHost::by_location_id_database_host_id(
@@ -58,7 +58,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:location.database-host.delete",
+                "location:database-host.delete",
                 serde_json::json!({
                     "location_id": location.id,
                     "database_host_id": database_host.id,

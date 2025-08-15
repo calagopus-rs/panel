@@ -91,9 +91,9 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{
-                admin::nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
-                client::GetUserActivityLogger,
+            api::admin::{
+                GetAdminActivityLogger,
+                nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
             },
         },
     };
@@ -124,7 +124,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         node: GetNode,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
         if backup.completed.is_none() {
@@ -144,7 +144,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:node.backup.delete",
+                "node:backup.delete",
                 serde_json::json!({
                     "node_id": node_id,
                     "backup": backup.uuid,

@@ -75,7 +75,7 @@ mod post {
     use crate::{
         models::location::Location,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUserActivityLogger},
+        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -110,7 +110,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -149,7 +149,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:location.create",
+                "location:create",
                 serde_json::json!({
                     "short_name": location.short_name,
                     "name": location.name,

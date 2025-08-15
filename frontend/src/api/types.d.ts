@@ -1,3 +1,12 @@
+interface AdminActivity {
+  user?: User;
+  event: string;
+  ip: string | null;
+  data: object | null;
+  isApi: boolean;
+  created: Date;
+}
+
 interface AdminDatabaseHost {
   id: number;
   name: string;
@@ -232,7 +241,6 @@ interface Server {
 }
 
 interface ServerActivity {
-  id: number;
   user?: User;
   event: string;
   ip: string | null;
@@ -338,7 +346,6 @@ interface User {
 }
 
 interface UserActivity {
-  id: number;
   event: string;
   ip: string;
   data: object | null;

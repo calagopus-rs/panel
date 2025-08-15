@@ -8,7 +8,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
         },
     };
     use axum::http::StatusCode;
@@ -45,7 +45,7 @@ mod post {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if server.destination_node_id.is_some() {
@@ -75,9 +75,9 @@ mod post {
             Some(
                 sqlx::query!(
                     "INSERT INTO server_allocations (server_id, allocation_id)
-                VALUES ($1, $2)
-                ON CONFLICT DO NOTHING
-                RETURNING id",
+                    VALUES ($1, $2)
+                    ON CONFLICT DO NOTHING
+                    RETURNING id",
                     server.id,
                     allocation_id
                 )
@@ -164,7 +164,7 @@ mod post {
 
         activity_logger
             .log(
-                "admin:server.transfer",
+                "server:transfer",
                 serde_json::json!({
                     "server_id": server.id,
                     "destination_node_id": destination_node.id,

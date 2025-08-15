@@ -7,7 +7,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -36,7 +36,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         Path((_server, allocation)): Path<(String, i32)>,
     ) -> ApiResponseResult {
         let allocation = match ServerAllocation::by_server_id_id(
@@ -58,7 +58,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:server.allocation.delete",
+                "server:allocation.delete",
                 serde_json::json!({
                     "server_id": server.id,
 
@@ -79,7 +79,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -119,7 +119,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         Path((_server, allocation)): Path<(String, i32)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -207,7 +207,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:server.allocation.update",
+                "server:allocation.update",
                 serde_json::json!({
                     "server_id": server.id,
 

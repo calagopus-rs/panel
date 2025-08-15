@@ -80,7 +80,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
         },
     };
     use axum::http::StatusCode;
@@ -104,7 +104,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         nest: GetNest,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         if nest.eggs > 0 {
             return ApiResponse::error("nest has eggs, cannot delete")
@@ -116,7 +116,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:nest.delete",
+                "nest:delete",
                 serde_json::json!({
                     "author": nest.author,
                     "name": nest.name,
@@ -133,7 +133,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::nests::_nest_::GetNest, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
         },
     };
     use axum::http::StatusCode;
@@ -173,7 +173,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         mut nest: GetNest,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -225,7 +225,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:nest.update",
+                "nest:update",
                 serde_json::json!({
                     "author": nest.author,
                     "name": nest.name,

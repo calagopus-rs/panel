@@ -72,7 +72,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
         },
     };
     use axum::http::StatusCode;
@@ -95,7 +95,7 @@ mod delete {
     pub async fn route(
         state: GetState,
         location: GetLocation,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
         if location.nodes > 0 {
             return ApiResponse::error("location has nodes, cannot delete")
@@ -107,7 +107,7 @@ mod delete {
 
         activity_logger
             .log(
-                "admin:location.delete",
+                "location:delete",
                 serde_json::json!({
                     "short_name": location.short_name,
                     "name": location.name,
@@ -124,7 +124,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::{admin::locations::_location_::GetLocation, client::GetUserActivityLogger},
+            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
         },
     };
     use axum::http::StatusCode;
@@ -166,7 +166,7 @@ mod patch {
     pub async fn route(
         state: GetState,
         mut location: GetLocation,
-        activity_logger: GetUserActivityLogger,
+        activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -229,7 +229,7 @@ mod patch {
 
         activity_logger
             .log(
-                "admin:location.update",
+                "location:update",
                 serde_json::json!({
                     "short_name": location.short_name,
                     "name": location.name,
