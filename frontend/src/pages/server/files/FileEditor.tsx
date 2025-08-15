@@ -4,7 +4,7 @@ import { getLanguageFromExtension } from '@/lib/files';
 import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
-import { createSearchParams, useLocation, useNavigate, useParams, useSearchParams } from 'react-router';
+import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import { Button } from '@/elements/button';
 import saveFileContent from '@/api/server/files/saveFileContent';
@@ -79,7 +79,7 @@ export default () => {
       <Spinner size={75} />
     </div>
   ) : (
-    <div className={'flex flex-col w-full'}>
+    <div className={'flex flex-col w-full h-full'}>
       <FileNameDialog
         onFileName={(name: string) => saveFile(name)}
         open={nameDialogOpen}
