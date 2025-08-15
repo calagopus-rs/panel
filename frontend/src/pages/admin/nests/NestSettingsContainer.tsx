@@ -15,16 +15,9 @@ export default ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
-  const [author, setAuthor] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
 
   const doUpdate = () => {
-    updateNest(nest.id, {
-      author,
-      name,
-      description,
-    })
+    updateNest(nest.id, nest)
       .then(() => {
         addToast('Nest updated.', 'success');
       })
@@ -60,19 +53,29 @@ export default ({ nest }: { nest: Nest }) => {
       <AdminSettingContainer title={'Nest Settings'}>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'author'}>Author</Input.Label>
-          <Input.Text id={'author'} placeholder={'Author'} value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <Input.Text
+            id={'author'}
+            placeholder={'Author'}
+            value={nest.author}
+            onChange={(e) => (nest.author = e.target.value)}
+          />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'name'}>Name</Input.Label>
-          <Input.Text id={'name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+          <Input.Text
+            id={'name'}
+            placeholder={'Name'}
+            value={nest.name}
+            onChange={(e) => (nest.name = e.target.value)}
+          />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'description'}>Description</Input.Label>
           <Input.Text
             id={'description'}
             placeholder={'Description'}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={nest.description || ''}
+            onChange={(e) => (nest.description = e.target.value)}
           />
         </div>
 

@@ -3,7 +3,6 @@ import { Input } from '@/elements/inputs';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import AuthWrapper from './AuthWrapper';
-import forgotPassword from '@/api/auth/forgotPassword';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import resetPassword from '@/api/auth/resetPassword';

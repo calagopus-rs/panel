@@ -1,11 +1,16 @@
-interface Location {
-  id: number;
+interface UpdateLocation {
   shortName: string;
   name: string;
   description: string | null;
   backupDisk: LocationConfigBackupType;
-  backupConfigs: LocationConfigBackup;
+  backupConfigs: {
+    [K in LocationConfigBackupType]: LocationConfigBackup;
+  };
   nodes: number;
+}
+
+interface Location extends UpdateLocation {
+  id: number;
   created: Date;
 }
 

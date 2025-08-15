@@ -1,12 +1,12 @@
 import { Input } from '@/elements/inputs';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch } from 'react';
 
 export default ({
-  backupConfigs,
+  backupConfig,
   setBackupConfigs,
 }: {
-  backupConfigs: LocationConfigBackupS3;
-  setBackupConfigs: Dispatch<SetStateAction<LocationConfigBackupS3>>;
+  backupConfig: LocationConfigBackupS3;
+  setBackupConfigs: Dispatch<LocationConfigBackupS3>;
 }) => {
   return (
     <>
@@ -15,8 +15,8 @@ export default ({
         <Input.Text
           id={'accessKey'}
           placeholder={'Access Key'}
-          value={backupConfigs?.accessKey || ''}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, accessKey: e.target.value }))}
+          value={backupConfig?.accessKey || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, accessKey: e.target.value })}
         />
       </div>
 
@@ -26,8 +26,8 @@ export default ({
           id={'secretKey'}
           placeholder={'Secret Key'}
           type={'password'}
-          value={backupConfigs?.secretKey || ''}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, secretKey: e.target.value }))}
+          value={backupConfig?.secretKey || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, secretKey: e.target.value })}
         />
       </div>
 
@@ -36,8 +36,8 @@ export default ({
         <Input.Text
           id={'bucket'}
           placeholder={'Bucket'}
-          value={backupConfigs?.bucket || ''}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, bucket: e.target.value }))}
+          value={backupConfig?.bucket || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, bucket: e.target.value })}
         />
       </div>
 
@@ -46,8 +46,8 @@ export default ({
         <Input.Text
           id={'region'}
           placeholder={'Region'}
-          value={backupConfigs?.region || ''}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, region: e.target.value }))}
+          value={backupConfig?.region || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, region: e.target.value })}
         />
       </div>
 
@@ -56,8 +56,8 @@ export default ({
         <Input.Text
           id={'endpoint'}
           placeholder={'Endpoint'}
-          value={backupConfigs?.endpoint || ''}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, endpoint: e.target.value }))}
+          value={backupConfig?.endpoint || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, endpoint: e.target.value })}
         />
       </div>
 
@@ -65,9 +65,9 @@ export default ({
         <Input.Label htmlFor={'pathStyle'}>Path Style</Input.Label>
         <Input.Switch
           name={'pathStyle'}
-          description={backupConfigs?.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
-          defaultChecked={backupConfigs?.pathStyle || false}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, pathStyle: e.target.checked }))}
+          description={backupConfig?.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
+          defaultChecked={backupConfig?.pathStyle || false}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, pathStyle: e.target.checked })}
         />
       </div>
 
@@ -77,8 +77,8 @@ export default ({
           id={'pathSize'}
           placeholder={'Path Size'}
           type={'number'}
-          value={backupConfigs?.partSize || 0}
-          onChange={(e) => setBackupConfigs((config) => ({ ...config, partSize: Number(e.target.value) }))}
+          value={backupConfig?.partSize || 0}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, partSize: Number(e.target.value) })}
         />
       </div>
     </>

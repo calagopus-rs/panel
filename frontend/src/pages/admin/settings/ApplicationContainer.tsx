@@ -11,13 +11,10 @@ export default () => {
   const { addToast } = useToast();
   const { app } = useAdminStore();
 
-  const [name, setName] = useState(app.name);
-  const [icon, setIcon] = useState(app.icon);
-  const [url, setUrl] = useState(app.url);
-  const [telemetryEnabled, setTelemetryEnabled] = useState(app.telemetryEnabled);
+  const [appSettings, setAppSettings] = useState<AdminSettings['app']>(app);
 
   const handleUpdate = () => {
-    updateApplicationSettings({ name, icon, url, telemetryEnabled })
+    updateApplicationSettings(appSettings)
       .then(() => {
         addToast('Application settings updated.', 'success');
       })
@@ -30,25 +27,40 @@ export default () => {
     <AdminSettingContainer title={'Application Settings'}>
       <div className={'mt-4'}>
         <Input.Label htmlFor={'type'}>Name</Input.Label>
-        <Input.Text id={'name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+        <Input.Text
+          id={'name'}
+          placeholder={'Name'}
+          value={appSettings.name || ''}
+          onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
+        />
       </div>
 
       <div className={'mt-4'}>
         <Input.Label htmlFor={'icon'}>Icon</Input.Label>
-        <Input.Text id={'icon'} placeholder={'Icon'} value={icon} onChange={(e) => setIcon(e.target.value)} />
+        <Input.Text
+          id={'icon'}
+          placeholder={'Icon'}
+          value={appSettings.icon || ''}
+          onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
+        />
       </div>
 
       <div className={'mt-4'}>
         <Input.Label htmlFor={'url'}>URL</Input.Label>
-        <Input.Text id={'url'} placeholder={'URL'} value={url} onChange={(e) => setUrl(e.target.value)} />
+        <Input.Text
+          id={'url'}
+          placeholder={'URL'}
+          value={appSettings.url || ''}
+          onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
+        />
       </div>
 
       <div className={'mt-4'}>
         <Input.Switch
           description={'Enable Telemetry'}
           name={'telemetryEnabled'}
-          defaultChecked={telemetryEnabled}
-          onChange={(e) => setTelemetryEnabled(e.target.checked)}
+          defaultChecked={appSettings.telemetryEnabled}
+          onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
         />
       </div>
 

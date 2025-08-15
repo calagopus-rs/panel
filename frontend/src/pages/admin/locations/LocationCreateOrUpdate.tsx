@@ -20,23 +20,13 @@ export default () => {
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
-  const [location, setLocation] = useState<Location | null>(null);
-  const [shortName, setShortName] = useState<string>('');
-  const [name, setName] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [backupDisk, setBackupDisk] = useState<LocationConfigBackupType>('local');
-  const [backupConfigs, setBackupConfigs] = useState<LocationConfigBackup>(null);
+  const [location, setLocation] = useState<Location>({} as Location);
 
   useEffect(() => {
     if (params.id) {
       getLocation(Number(params.id))
         .then((location) => {
           setLocation(location);
-          setShortName(location.shortName);
-          setName(location.name);
-          setDescription(location.description || '');
-          setBackupDisk(location.backupDisk);
-          setBackupConfigs(location.backupConfigs[location.backupDisk]);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -46,15 +36,7 @@ export default () => {
 
   const doCreateOrUpdate = () => {
     if (location?.id) {
-      updateLocation(location.id, {
-        shortName,
-        name,
-        description,
-        backupDisk,
-        backupConfigs: {
-          [backupDisk]: backupConfigs,
-        },
-      })
+      updateLocation(location.id, location)
         .then(() => {
           addToast('Location updated.', 'success');
         })
@@ -62,15 +44,7 @@ export default () => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     } else {
-      createLocation({
-        shortName,
-        name,
-        description,
-        backupDisk,
-        backupConfigs: {
-          [backupDisk]: backupConfigs,
-        },
-      })
+      createLocation(location)
         .then((location) => {
           addToast('Location created.', 'success');
           navigate(`/admin/locations/${location.id}`);
@@ -114,21 +88,26 @@ export default () => {
           <Input.Text
             id={'shortName'}
             placeholder={'Short Name'}
-            value={shortName}
-            onChange={(e) => setShortName(e.target.value)}
+            value={location.shortName || ''}
+            onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
           />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'name'}>Name</Input.Label>
-          <Input.Text id={'name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+          <Input.Text
+            id={'name'}
+            placeholder={'Name'}
+            value={location.name || ''}
+            onChange={(e) => setLocation({ ...location, name: e.target.value })}
+          />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'description'}>Description</Input.Label>
           <Input.Text
             id={'description'}
             placeholder={'Description'}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            value={location.description || ''}
+            onChange={(e) => setLocation({ ...location, description: e.target.value })}
           />
         </div>
         <div className={'mt-4'}>
@@ -143,13 +122,18 @@ export default () => {
               { label: 'Zfs', value: 'zfs' },
               { label: 'Restic', value: 'restic' },
             ]}
-            selected={backupDisk}
-            onChange={(e) => setBackupDisk(e.target.value as LocationConfigBackupType)}
+            selected={location.backupDisk || 'local'}
+            onChange={(e) => setLocation({ ...location, backupDisk: e.target.value as LocationConfigBackupType })}
           />
         </div>
 
-        {backupDisk === 's3' ? (
-          <BackupS3 backupConfigs={backupConfigs as LocationConfigBackupS3} setBackupConfigs={setBackupConfigs} />
+        {location.backupDisk === 's3' ? (
+          <BackupS3
+            backupConfig={location.backupConfigs?.s3 as LocationConfigBackupS3}
+            setBackupConfigs={(config) =>
+              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
+            }
+          />
         ) : null}
 
         <div className={classNames('mt-4 flex', location ? 'justify-between' : 'justify-end')}>

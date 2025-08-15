@@ -11,14 +11,10 @@ export default () => {
   const { addToast } = useToast();
   const { server } = useAdminStore();
 
-  const [maxFileManagerViewSize, setMaxFileManagerViewSize] = useState(server.maxFileManagerViewSize);
-  const [allowOverwritingCustomDockerImage, setAllowOverwritingCustomDockerImage] = useState(
-    server.allowOverwritingCustomDockerImage,
-  );
-  const [allowEditingStartupCommand, setAllowEditingStartupCommand] = useState(server.allowEditingStartupCommand);
+  const [serverSettings, setServerSettings] = useState<AdminSettings['server']>(server);
 
   const handleUpdate = () => {
-    updateServerSettings({ maxFileManagerViewSize, allowOverwritingCustomDockerImage, allowEditingStartupCommand })
+    updateServerSettings(serverSettings)
       .then(() => {
         addToast('Server settings updated.', 'success');
       })
@@ -35,8 +31,8 @@ export default () => {
           id={'max-file-manager-view-size'}
           placeholder={'Max File Manager View Size'}
           type={'number'}
-          value={maxFileManagerViewSize}
-          onChange={(e) => setMaxFileManagerViewSize(Number(e.target.value))}
+          value={serverSettings.maxFileManagerViewSize}
+          onChange={(e) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: Number(e.target.value) })}
         />
       </div>
 
@@ -44,8 +40,10 @@ export default () => {
         <Input.Switch
           description={'Allow Overwriting Custom Docker Image'}
           name={'allow-overwriting-custom-docker-image'}
-          defaultChecked={allowOverwritingCustomDockerImage}
-          onChange={(e) => setAllowOverwritingCustomDockerImage(e.target.checked)}
+          defaultChecked={serverSettings.allowOverwritingCustomDockerImage}
+          onChange={(e) =>
+            setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.target.checked })
+          }
         />
       </div>
 
@@ -53,8 +51,8 @@ export default () => {
         <Input.Switch
           description={'Allow Editing Startup Command'}
           name={'allow-editing-startup-command'}
-          defaultChecked={allowEditingStartupCommand}
-          onChange={(e) => setAllowEditingStartupCommand(e.target.checked)}
+          defaultChecked={serverSettings.allowEditingStartupCommand}
+          onChange={(e) => setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.target.checked })}
         />
       </div>
 

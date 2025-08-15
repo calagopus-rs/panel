@@ -21,7 +21,7 @@ interface TerminalLine {
 }
 
 const stripAnsiCodes = (text: string): string => {
-  return text.replace(/\u001b\[[0-9;]*m/g, '');
+  return text.replace(/[\p{Cc}]/gu, '');
 };
 
 const LineRenderer = memo(
@@ -70,7 +70,7 @@ const LineRenderer = memo(
           minHeight: style.height,
           overflow: 'visible',
         }}
-        className='px-2 font-mono text-sm whitespace-pre-wrap break-all select-text'
+        className={'px-2 font-mono text-sm whitespace-pre-wrap break-all select-text'}
         data-plain-text={getPlainText()}
       >
         {line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m') ? (
@@ -403,7 +403,7 @@ export default () => {
 
       <div
         ref={sizeCalculatorRef}
-        className='absolute invisible font-mono text-sm'
+        className={'absolute invisible font-mono text-sm'}
         style={{
           top: -9999,
           left: -9999,
@@ -412,14 +412,14 @@ export default () => {
       />
 
       <div className={classNames(styles.container, 'font-mono')} ref={containerRef}>
-        <div className='h-full'>
+        <div className={'h-full'}>
           <List
             ref={listRef}
             height={terminalHeight}
             itemCount={lines.length}
             itemSize={getLineHeight}
-            width='100%'
-            className='custom-scrollbar'
+            width={'100%'}
+            className={'custom-scrollbar'}
             onScroll={handleScroll}
             overscanCount={20}
             estimatedItemSize={24}
@@ -428,17 +428,17 @@ export default () => {
           </List>
         </div>
       </div>
-      <div className='relative'>
+      <div className={'relative'}>
         <input
           ref={inputRef}
           className={classNames('peer', styles.command_input)}
-          type='text'
-          placeholder='Type a command...'
-          aria-label='Console command input.'
+          type={'text'}
+          placeholder={'Type a command...'}
+          aria-label={'Console command input.'}
           disabled={!socketInstance || !socketConnected}
           onKeyDown={handleCommandKeyDown}
-          autoCorrect='off'
-          autoCapitalize='none'
+          autoCorrect={'off'}
+          autoCapitalize={'none'}
           onFocus={() => setAutoScroll(true)}
         />
         <div
@@ -447,7 +447,7 @@ export default () => {
             styles.command_icon,
           )}
         >
-          <ChevronDoubleRightIcon className='h-4 w-4' />
+          <ChevronDoubleRightIcon className={'h-4 w-4'} />
         </div>
       </div>
     </div>
