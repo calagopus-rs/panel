@@ -1,4 +1,5 @@
 import { Button } from '@/elements/button';
+import Can from '@/elements/Can';
 import { Dialog } from '@/elements/dialog';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
@@ -43,19 +44,25 @@ export default () => {
         Forcibly stopping a server can lead to data corruption.
       </Dialog.Confirm>
 
-      <Button style={Button.Styles.Green} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
-        Start
-      </Button>
-      <Button style={Button.Styles.Gray} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
-        Restart
-      </Button>
-      <Button
-        style={Button.Styles.Red}
-        disabled={state === 'offline'}
-        onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
-      >
-        {killable ? 'Kill' : 'Stop'}
-      </Button>
+      <Can action={'control.start'}>
+        <Button style={Button.Styles.Green} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
+          Start
+        </Button>
+      </Can>
+      <Can action={'control.restart'}>
+        <Button style={Button.Styles.Gray} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
+          Restart
+        </Button>
+      </Can>
+      <Can action={'control.stop'}>
+        <Button
+          style={Button.Styles.Red}
+          disabled={state === 'offline'}
+          onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
+        >
+          {killable ? 'Kill' : 'Stop'}
+        </Button>
+      </Can>
     </div>
   );
 };
