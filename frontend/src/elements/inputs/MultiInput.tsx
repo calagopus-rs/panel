@@ -11,22 +11,25 @@ interface MultiInputProps {
 export const MultiInput: React.FC<MultiInputProps> = ({ options, onChange, placeholder }) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<string[]>(options);
-
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    onChange(selectedOptions);
-  }, [selectedOptions, onChange]);
+    setSelectedOptions(options);
+  }, [options]);
 
   const handleRemove = (option: string) => {
-    setSelectedOptions((prev) => prev.filter((item) => item !== option));
+    const newOptions = selectedOptions.filter((item) => item !== option);
+    setSelectedOptions(newOptions);
+    onChange(newOptions);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && inputValue.trim() !== '') {
       if (!selectedOptions.includes(inputValue.trim())) {
-        setSelectedOptions((prev) => [...prev, inputValue.trim()]);
+        const newOptions = [...selectedOptions, inputValue.trim()];
+        setSelectedOptions(newOptions);
+        onChange(newOptions);
       }
       setInputValue('');
     }
