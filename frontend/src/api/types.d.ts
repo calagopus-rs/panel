@@ -1,3 +1,17 @@
+interface AdminDatabaseHost {
+  id: number;
+  name: string;
+  username: string;
+  host: string;
+  port: number;
+  public: boolean;
+  publicHost: string | null;
+  publicPort: number | null;
+  type: DatabaseType;
+  databases: number;
+  created: Date;
+}
+
 interface UpdateLocation {
   shortName: string;
   name: string;
@@ -11,6 +25,20 @@ interface UpdateLocation {
 
 interface Location extends UpdateLocation {
   id: number;
+  created: Date;
+}
+
+interface Mount {
+  id: number;
+  name: string;
+  description: string | null;
+  readOnly: boolean;
+  source: string;
+  target: string;
+  userMountable: boolean;
+  eggs: number;
+  nodes: number;
+  servers: number;
   created: Date;
 }
 
@@ -109,6 +137,11 @@ interface NodeAllocation {
   created: Date;
 }
 
+interface NodeMount {
+  mount: Mount;
+  created: Date;
+}
+
 interface AdminServer {
   id: number;
   uuid: string;
@@ -145,6 +178,19 @@ interface AdminServer {
   created: Date;
 }
 
+interface AdminServerMount {
+  mount: Mount;
+  created: Date;
+}
+
+interface DatabaseHost {
+  id: number;
+  name: string;
+  host: string;
+  port: number;
+  type: DatabaseType;
+}
+
 interface NestEgg {
   id: number;
   name: string;
@@ -157,7 +203,7 @@ interface NestEgg {
   created: Date;
 }
 
-interface ApiServer {
+interface Server {
   id: number;
   uuid: string;
   uuidShort: string;
@@ -228,6 +274,17 @@ interface ServerBackupWithProgress extends ServerBackup {
   };
 }
 
+interface ServerDatabase {
+  id: number;
+  name: string;
+  username: string;
+  password: string;
+  host: string;
+  port: number;
+  type: DatabaseType;
+  created: Date;
+}
+
 interface ApiServerFeatureLimits {
   allocations: number;
   databases: number;
@@ -240,6 +297,15 @@ interface ApiServerLimits {
   swap: number;
   disk: number;
   ioWeight: number;
+}
+
+interface ServerMount {
+  id: number;
+  name: string;
+  description: string | null;
+  readOnly: boolean;
+  target: string;
+  created: Date | null;
 }
 
 interface ServerSubuser {
@@ -328,6 +394,10 @@ interface CaptchaProviderRecaptcha {
 }
 
 type CaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
+
+type CompressionLevel = 'best_speed' | 'good_speed' | 'good_compression' | 'best_compression';
+
+type DatabaseType = 'mysql' | 'postgres';
 
 interface DirectoryEntry {
   name: string;

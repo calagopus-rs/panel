@@ -1,6 +1,6 @@
 import { axiosInstance, getPaginationSet } from '@/api/axios';
 
-export default async (): Promise<ResponseMeta<ApiServer>> => {
+export default async (): Promise<ResponseMeta<Server>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/client/servers')

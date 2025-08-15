@@ -2,10 +2,10 @@ import { ServerStore } from '@/stores/server';
 import { StateCreator } from 'zustand';
 
 export interface ServerSlice {
-  server: ApiServer;
+  server: Server;
 
-  setServer: (server: ApiServer) => void;
-  updateServer: (updatedProps: Partial<ApiServer>) => void;
+  setServer: (server: Server) => void;
+  updateServer: (updatedProps: Partial<Server>) => void;
 }
 
 export const createServerSlice: StateCreator<ServerStore, [], [], ServerSlice> = (set): ServerSlice => ({

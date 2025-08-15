@@ -12,7 +12,7 @@ export default () => {
   const { serverListDesign, setServerListDesign } = useGlobalStore();
 
   const [loading, setLoading] = useState(true);
-  const [servers, setServers] = useState<ApiServer[]>([]);
+  const [servers, setServers] = useState<Server[]>([]);
 
   useEffect(() => {
     getServers().then((response) => {

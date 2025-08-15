@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
-export default ({ server }: { server: ApiServer }) => {
+export default ({ server }: { server: Server }) => {
   const { serverListDesign } = useGlobalStore();
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
