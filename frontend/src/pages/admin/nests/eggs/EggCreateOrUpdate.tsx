@@ -149,7 +149,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'stripAnsi'}
             label={'Strip ansi from startup messages'}
-            defaultChecked={egg.configStartup?.stripAnsi || false}
+            checked={egg.configStartup?.stripAnsi || false}
             onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
           />
         </div>
@@ -189,7 +189,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'allocationSelfAssign'}
             label={'Allocation Self Assign'}
-            defaultChecked={egg.configAllocations?.userSelfAssign?.enabled || false}
+            checked={egg.configAllocations?.userSelfAssign?.enabled || false}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -205,7 +205,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'requirePrimaryAllocation'}
             label={'Require Primary Allocation'}
-            defaultChecked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
+            checked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -261,7 +261,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Text
             id={'startup'}
             placeholder={'Startup'}
-            value={egg.startup}
+            value={egg.startup || ''}
             onChange={(e) => setEgg({ ...egg, startup: e.target.value })}
           />
         </div>
@@ -269,7 +269,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'forceOutgoingIp'}
             label={'Force Outgoing IP'}
-            defaultChecked={egg.forceOutgoingIp || false}
+            checked={egg.forceOutgoingIp || false}
             onChange={(e) => setEgg({ ...egg, forceOutgoingIp: e.target.checked })}
           />
         </div>

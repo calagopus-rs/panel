@@ -1,4 +1,4 @@
-import { axiosInstance, getPaginationSet } from '@/api/axios';
+import { axiosInstance } from '@/api/axios';
 
 export default async (page: number, search?: string): Promise<ResponseMeta<AdminActivity>> => {
   return new Promise((resolve, reject) => {
@@ -6,12 +6,7 @@ export default async (page: number, search?: string): Promise<ResponseMeta<Admin
       .get('/api/admin/activity', {
         params: { page, search },
       })
-      .then(({ data }) =>
-        resolve({
-          ...getPaginationSet(data.activities),
-          data: data.activities.data || [],
-        }),
-      )
+      .then(({ data }) => resolve(data.activities))
       .catch(reject);
   });
 };
