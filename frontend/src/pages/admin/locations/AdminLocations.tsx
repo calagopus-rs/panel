@@ -59,6 +59,8 @@ const LocationsContainer = () => {
                   <TableHeader name={'ID'} />
                   <TableHeader name={'Short Name'} />
                   <TableHeader name={'Long Name'} />
+                  <TableHeader name={'Backup Disk'} />
+                  <TableHeader name={'Nodes'} />
                 </TableHead>
 
                 <ContextMenuProvider>

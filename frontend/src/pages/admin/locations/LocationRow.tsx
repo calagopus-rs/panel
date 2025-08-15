@@ -18,6 +18,10 @@ export default ({ location }: { location: Location }) => {
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={location.name}>
         {location.name}
       </td>
+
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.backupDisk}</td>
+
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.nodes}</td>
     </TableRow>
   );
 };

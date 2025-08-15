@@ -118,7 +118,7 @@ export default () => {
             options={[
               { label: 'Local', value: 'local' },
               { label: 'S3', value: 's3' },
-              { label: 'Ddup-Bak', value: 'ddup-bak' },
+              { label: 'DdupBak', value: 'ddup-bak' },
               { label: 'Btrfs', value: 'btrfs' },
               { label: 'Zfs', value: 'zfs' },
               { label: 'Restic', value: 'restic' },
