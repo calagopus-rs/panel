@@ -35,7 +35,7 @@ interface AdminUpdateNestEgg {
       ifValue: string | null;
       replaceWith: string;
     }[];
-  };
+  }[];
   configStartup: {
     done: string[];
     stripAnsi: boolean;

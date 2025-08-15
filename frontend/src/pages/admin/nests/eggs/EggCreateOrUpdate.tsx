@@ -9,20 +9,49 @@ import { Dialog } from '@/elements/dialog';
 import Code from '@/elements/Code';
 import getEgg from '@/api/admin/eggs/getEgg';
 import deleteEgg from '@/api/admin/eggs/deleteEgg';
-import Spinner from '@/elements/Spinner';
 import updateEgg from '@/api/admin/eggs/updateEgg';
+import createEgg from '@/api/admin/eggs/createEgg';
 
 export default ({ nest }: { nest: Nest }) => {
-  const params = useParams<'id'>();
+  const params = useParams<'eggId'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [egg, setEgg] = useState<AdminNestEgg | null>(null);
+  const [egg, setEgg] = useState<AdminNestEgg>({
+    author: '',
+    name: '',
+    description: '',
+    configFiles: [],
+    configStartup: {
+      done: [],
+    },
+    configStop: {
+      type: '',
+    },
+    configScript: {
+      container: '',
+      entrypoint: '',
+      content: '',
+    },
+    configAllocations: {
+      userSelfAssign: {
+        enabled: false,
+        requirePrimaryAllocation: false,
+        startPort: 0,
+        endPort: 0,
+      },
+    },
+    startup: '',
+    forceOutgoingIp: false,
+    features: [],
+    dockerImages: {},
+    fileDenylist: [],
+  } as AdminNestEgg);
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
 
   useEffect(() => {
-    if (params.id) {
-      getEgg(nest.id, Number(params.id))
+    if (params.eggId) {
+      getEgg(nest.id, Number(params.eggId))
         .then((egg) => {
           setEgg(egg);
         })
@@ -30,16 +59,27 @@ export default ({ nest }: { nest: Nest }) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     }
-  }, [params.id]);
+  }, [params.eggId]);
 
-  const doUpdate = () => {
-    updateEgg(nest.id, egg.id, egg)
-      .then(() => {
-        addToast('Egg updated.', 'success');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+  const doCreateOrUpdate = () => {
+    if (egg?.id) {
+      updateEgg(nest.id, egg.id, egg)
+        .then(() => {
+          addToast('Egg updated.', 'success');
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    } else {
+      createEgg(nest.id, egg)
+        .then((egg) => {
+          addToast('Egg created.', 'success');
+          navigate(`/admin/nests/${nest.id}/eggs/${egg.id}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    }
   };
 
   const doDelete = () => {
@@ -53,9 +93,7 @@ export default ({ nest }: { nest: Nest }) => {
       });
   };
 
-  return !egg ? (
-    <Spinner.Centered />
-  ) : (
+  return (
     <>
       <Dialog.Confirm
         open={openDialog === 'delete'}
@@ -65,7 +103,7 @@ export default ({ nest }: { nest: Nest }) => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{egg.name}</Code>?
+        Are you sure you want to delete <Code>{egg?.name}</Code>?
       </Dialog.Confirm>
 
       <AdminSettingContainer title={'Egg Settings'}>
@@ -74,7 +112,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Text
             id={'author'}
             placeholder={'Author'}
-            value={egg.author}
+            value={egg.author || ''}
             onChange={(e) => setEgg({ ...egg, author: e.target.value })}
           />
         </div>
@@ -83,7 +121,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Text
             id={'name'}
             placeholder={'Name'}
-            value={egg.name}
+            value={egg.name || ''}
             onChange={(e) => setEgg({ ...egg, name: e.target.value })}
           />
         </div>
@@ -92,7 +130,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Textarea
             id={'description'}
             placeholder={'Description'}
-            value={egg.description}
+            value={egg.description || ''}
             onChange={(e) => setEgg({ ...egg, description: e.target.value })}
           />
         </div>
@@ -103,7 +141,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Label htmlFor={'starupDone'}>Startup Done</Input.Label>
           <Input.MultiInput
             placeholder={'Message'}
-            options={egg.configStartup.done}
+            options={egg.configStartup?.done || []}
             onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, done: e } })}
           />
         </div>
@@ -111,7 +149,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'stripAnsi'}
             label={'Strip ansi from startup messages'}
-            defaultChecked={egg.configStartup.stripAnsi || false}
+            defaultChecked={egg.configStartup?.stripAnsi || false}
             onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
           />
         </div>
@@ -123,7 +161,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Text
             id={'scriptContainer'}
             placeholder={'Script Container'}
-            value={egg.configScript.container}
+            value={egg.configScript?.container || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
           />
         </div>
@@ -132,7 +170,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Text
             id={'scriptEntrypoint'}
             placeholder={'Script Entrypoint'}
-            value={egg.configScript.entrypoint}
+            value={egg.configScript?.entrypoint || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, entrypoint: e.target.value } })}
           />
         </div>
@@ -141,7 +179,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Textarea
             id={'scriptContent'}
             placeholder={'Script Content'}
-            value={egg.configScript.content}
+            value={egg.configScript?.content || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, content: e.target.value } })}
             rows={10}
           />
@@ -151,7 +189,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'allocationSelfAssign'}
             label={'Allocation Self Assign'}
-            defaultChecked={egg.configAllocations.userSelfAssign.enabled || false}
+            defaultChecked={egg.configAllocations?.userSelfAssign?.enabled || false}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -167,7 +205,7 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Switch
             name={'requirePrimaryAllocation'}
             label={'Require Primary Allocation'}
-            defaultChecked={egg.configAllocations.userSelfAssign.requirePrimaryAllocation || false}
+            defaultChecked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -188,7 +226,7 @@ export default ({ nest }: { nest: Nest }) => {
             id={'allocationAutoStart'}
             placeholder={'Automatic Allocation Start'}
             type={'number'}
-            value={egg.configAllocations.userSelfAssign.startPort}
+            value={egg.configAllocations?.userSelfAssign?.startPort || 0}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -206,7 +244,7 @@ export default ({ nest }: { nest: Nest }) => {
             id={'allocationAutoEnd'}
             placeholder={'Automatic Allocation End'}
             type={'number'}
-            value={egg.configAllocations.userSelfAssign.endPort}
+            value={egg.configAllocations?.userSelfAssign?.endPort || 0}
             onChange={(e) =>
               setEgg({
                 ...egg,
@@ -239,27 +277,33 @@ export default ({ nest }: { nest: Nest }) => {
           <Input.Label htmlFor={'features'}>Features</Input.Label>
           <Input.MultiInput
             placeholder={'Feature'}
-            options={egg.features}
+            options={egg.features || []}
             onChange={(e) => setEgg({ ...egg, features: e })}
           />
         </div>
         <div className={'mt-4'}>
-          <Input.MultiKeyValueInput options={egg.dockerImages} onChange={(e) => setEgg({ ...egg, dockerImages: e })} />
+          <Input.Label htmlFor={'dockerImages'}>Docker Images</Input.Label>
+          <Input.MultiKeyValueInput
+            options={egg.dockerImages || {}}
+            onChange={(e) => setEgg({ ...egg, dockerImages: e })}
+          />
         </div>
         <div className={'mt-4'}>
           <Input.Label htmlFor={'fileDenyList'}>File Deny List</Input.Label>
           <Input.MultiInput
             placeholder={'Denied File'}
-            options={egg.fileDenylist}
+            options={egg.fileDenylist || []}
             onChange={(e) => setEgg({ ...egg, fileDenylist: e })}
           />
         </div>
 
         <div className={'mt-4 flex justify-between'}>
-          <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
-            Delete
-          </Button>
-          <Button onClick={doUpdate}>Save</Button>
+          {params.eggId && (
+            <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
+              Delete
+            </Button>
+          )}
+          <Button onClick={doCreateOrUpdate}>Save</Button>
         </div>
       </AdminSettingContainer>
     </>

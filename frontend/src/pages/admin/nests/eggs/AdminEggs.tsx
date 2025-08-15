@@ -9,7 +9,7 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import EggRow from './EggRow';
 import getEggs from '@/api/admin/eggs/getEggs';
-import EggUpdate from './EggUpdate';
+import EggCreateOrUpdate from './EggCreateOrUpdate';
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
@@ -82,8 +82,8 @@ export default ({ nest }: { nest: Nest }) => {
   return (
     <Routes>
       <Route path={'/'} element={<EggsContainer nest={nest} />} />
-      {/* <Route path={'/new'} element={<EggCreate nest={nest} />} /> */}
-      <Route path={'/:id'} element={<EggUpdate nest={nest} />} />
+      <Route path={'/new'} element={<EggCreateOrUpdate nest={nest} />} />
+      <Route path={'/:eggId'} element={<EggCreateOrUpdate nest={nest} />} />
     </Routes>
   );
 };
