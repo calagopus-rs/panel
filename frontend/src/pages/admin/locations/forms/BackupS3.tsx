@@ -5,8 +5,8 @@ export default ({
   backupConfig,
   setBackupConfigs,
 }: {
-  backupConfig: LocationConfigBackupS3;
-  setBackupConfigs: Dispatch<LocationConfigBackupS3>;
+  backupConfig: LocationConfigBackupConfigsS3;
+  setBackupConfigs: Dispatch<LocationConfigBackupConfigsS3>;
 }) => {
   return (
     <>
@@ -72,10 +72,10 @@ export default ({
       </div>
 
       <div className={'mt-4'}>
-        <Input.Label htmlFor={'pathSize'}>Path Size</Input.Label>
+        <Input.Label htmlFor={'partSize'}>Part Size</Input.Label>
         <Input.Text
-          id={'pathSize'}
-          placeholder={'Path Size'}
+          id={'partSize'}
+          placeholder={'Part Size'}
           type={'number'}
           value={backupConfig?.partSize || 0}
           onChange={(e) => setBackupConfigs({ ...backupConfig, partSize: Number(e.target.value) })}

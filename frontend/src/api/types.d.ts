@@ -16,15 +16,13 @@ interface UpdateLocation {
   shortName: string;
   name: string;
   description: string | null;
-  backupDisk: LocationConfigBackupType;
-  backupConfigs: {
-    [K in LocationConfigBackupType]: LocationConfigBackup;
-  };
-  nodes: number;
+  backupDisk: LocationConfigBackupDisk;
+  backupConfigs: LocationConfigBackupConfigs | null;
 }
 
 interface Location extends UpdateLocation {
   id: number;
+  nodes: number;
   created: Date;
 }
 
@@ -419,14 +417,9 @@ interface Download {
   total: number;
 }
 
-type LocationConfigBackupType = 'local' | 's3' | 'ddup-bak' | 'btrfs' | 'zfs' | 'restic';
+type LocationConfigBackupDisk = 'local' | 's3' | 'ddup-bak' | 'btrfs' | 'zfs' | 'restic';
 
-interface LocationConfigBackupBase {
-  type: Exclude<LocationConfigBackupType, 's3'>;
-}
-
-interface LocationConfigBackupS3 {
-  type: 's3';
+interface LocationConfigBackupConfigsS3 {
   accessKey: string;
   secretKey: string;
   bucket: string;
@@ -436,7 +429,16 @@ interface LocationConfigBackupS3 {
   partSize: number;
 }
 
-type LocationConfigBackup = LocationConfigBackupBase | LocationConfigBackupS3;
+interface LocationConfigBackupConfigsRestic {
+  repository: string;
+  retryLockSeconds: number;
+  environment: Record<string, string>;
+}
+
+interface LocationConfigBackupConfigs {
+  s3: LocationConfigBackupConfigsS3 | null;
+  restic: LocationConfigBackupConfigsRestic | null;
+}
 
 type MailModeType = 'none' | 'smtp';
 

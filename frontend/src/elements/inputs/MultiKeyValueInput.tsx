@@ -5,6 +5,8 @@ import styles from './inputs.module.css';
 interface MultiKeyValueInputProps {
   options: Record<string, string>; // { key: value, ... }
   onChange: (selected: Record<string, string>) => void;
+  transformValue?: (key: string, value: string) => string;
+  hideKey?: (key: string) => boolean;
   placeholderKey?: string;
   placeholderValue?: string;
 }
@@ -12,6 +14,8 @@ interface MultiKeyValueInputProps {
 export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
   options,
   onChange,
+  transformValue,
+  hideKey,
   placeholderKey = 'Key',
   placeholderValue = 'Value',
 }) => {
@@ -69,16 +73,18 @@ export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
   return (
     <div className={'relative'}>
       <div className={'flex flex-wrap gap-2 p-2 bg-gray-700 rounded'}>
-        {selectedOptions.map(({ key, value }) => (
-          <span key={key} className={'flex items-center gap-2 bg-gray-600 rounded px-2 py-1'}>
-            <span className={'font-semibold'}>{key}</span>
-            <span className={'text-gray-300'}>:</span>
-            <span>{value}</span>
-            <button type={'button'} className={'text-red-400 hover:text-red-600'} onClick={() => handleRemove(key)}>
-              &times;
-            </button>
-          </span>
-        ))}
+        {selectedOptions
+          .filter(({ key }) => !hideKey?.(key))
+          .map(({ key, value }) => (
+            <span key={key} className={'flex items-center gap-2 bg-gray-600 rounded px-2 py-1'}>
+              <span className={'font-semibold'}>{key}</span>
+              <span className={'text-gray-300'}>:</span>
+              <span>{transformValue ? transformValue(key, value) : value}</span>
+              <button type={'button'} className={'text-red-400 hover:text-red-600'} onClick={() => handleRemove(key)}>
+                &times;
+              </button>
+            </span>
+          ))}
         <div className={'flex gap-2 items-center'}>
           <input
             ref={keyInputRef}

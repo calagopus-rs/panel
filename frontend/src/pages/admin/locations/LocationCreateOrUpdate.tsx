@@ -13,6 +13,7 @@ import { Dialog } from '@/elements/dialog';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import classNames from 'classnames';
+import BackupRestic from './forms/BackupRestic';
 
 export default () => {
   const params = useParams<'id'>();
@@ -111,7 +112,7 @@ export default () => {
           />
         </div>
         <div className={'mt-4'}>
-          <Input.Label htmlFor={'type'}>Type</Input.Label>
+          <Input.Label htmlFor={'type'}>Backup Disk</Input.Label>
           <Input.Dropdown
             id={'type'}
             options={[
@@ -123,18 +124,9 @@ export default () => {
               { label: 'Restic', value: 'restic' },
             ]}
             selected={location.backupDisk || 'local'}
-            onChange={(e) => setLocation({ ...location, backupDisk: e.target.value as LocationConfigBackupType })}
+            onChange={(e) => setLocation({ ...location, backupDisk: e.target.value as LocationConfigBackupDisk })}
           />
         </div>
-
-        {location.backupDisk === 's3' ? (
-          <BackupS3
-            backupConfig={location.backupConfigs?.s3 as LocationConfigBackupS3}
-            setBackupConfigs={(config) =>
-              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
-            }
-          />
-        ) : null}
 
         <div className={classNames('mt-4 flex', location ? 'justify-between' : 'justify-end')}>
           {location && (
@@ -145,6 +137,44 @@ export default () => {
           <Button onClick={doCreateOrUpdate}>Save</Button>
         </div>
       </AdminSettingContainer>
+
+      {location.backupDisk === 's3' || location.backupConfigs?.s3 ? (
+        <AdminSettingContainer title={'Location S3 Settings'} className={'mt-4'}>
+          <BackupS3
+            backupConfig={
+              location.backupConfigs?.s3 ?? {
+                accessKey: '',
+                secretKey: '',
+                bucket: '',
+                region: '',
+                endpoint: '',
+                pathStyle: false,
+                partSize: 512 * 1024 * 1024,
+              }
+            }
+            setBackupConfigs={(config) =>
+              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
+            }
+          />
+        </AdminSettingContainer>
+      ) : null}
+
+      {location.backupDisk === 'restic' || location.backupConfigs?.restic ? (
+        <AdminSettingContainer title={'Location Restic Settings'} className={'mt-4'}>
+          <BackupRestic
+            backupConfig={
+              location.backupConfigs?.restic ?? {
+                repository: '',
+                retryLockSeconds: 60,
+                environment: {},
+              }
+            }
+            setBackupConfigs={(config) =>
+              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, restic: config } })
+            }
+          />
+        </AdminSettingContainer>
+      ) : null}
     </>
   );
 };
