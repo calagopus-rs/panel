@@ -1,9 +1,13 @@
 import { useServerStore } from '@/stores/server';
 
 export const usePermissions = (action: string | string[]): boolean[] => {
-  const userPermissions = useServerStore((state) => state.server.permissions);
+  const server = useServerStore((state) => state.server);
 
-  if (userPermissions[0] === '*') {
+  if (!server) {
+    return Array(Array.isArray(action) ? action.length : 1).fill(false);
+  }
+
+  if (server.permissions[0] === '*') {
     return Array(Array.isArray(action) ? action.length : 1).fill(true);
   }
 
@@ -11,8 +15,9 @@ export const usePermissions = (action: string | string[]): boolean[] => {
     (permission) =>
       // Allows checking for any permission matching a name, for example files.*
       // will return if the user has any permission under the file.XYZ namespace.
-      (permission.endsWith('.*') && userPermissions.filter((p) => p.startsWith(permission.split('.')[0])).length > 0) ||
+      (permission.endsWith('.*') &&
+        server.permissions.filter((p) => p.startsWith(permission.split('.')[0])).length > 0) ||
       // Otherwise just check if the entire permission exists in the array or not.
-      userPermissions.indexOf(permission) >= 0,
+      server.permissions.indexOf(permission) >= 0,
   );
 };
