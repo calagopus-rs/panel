@@ -6,17 +6,15 @@ export default ({ location }: { location: Location }) => {
   return (
     <TableRow>
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-        <Code>{location.uuid}</Code>
-      </td>
-
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
         <NavLink
           to={`/admin/locations/${location.uuid}`}
           className={'text-blue-400 hover:text-blue-200 hover:underline'}
         >
-          {location.shortName}
+          <Code>{location.uuid}</Code>
         </NavLink>
       </td>
+
+      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.shortName}</td>
 
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={location.name}>
         {location.name}

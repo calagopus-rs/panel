@@ -3,12 +3,21 @@ import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBriefcase, faBuilding, faCrow, faDungeon, faReply, faWrench } from '@fortawesome/free-solid-svg-icons';
+import {
+  faBriefcase,
+  faBuilding,
+  faCrow,
+  faDungeon,
+  faReply,
+  faUsers,
+  faWrench,
+} from '@fortawesome/free-solid-svg-icons';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminNests from '@/pages/admin/nests/AdminNests';
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
+import AdminUsers from '@/pages/admin/users/AdminUsers';
 
 export default () => {
   return (
@@ -34,6 +43,10 @@ export default () => {
           </Sidebar.Link>
         </Sidebar.Section>
         <Sidebar.Section>
+          <Sidebar.Link to={'/admin/users'}>
+            <FontAwesomeIcon icon={faUsers} />
+            <span>Users</span>
+          </Sidebar.Link>
           <Sidebar.Link to={'/admin/locations'}>
             <FontAwesomeIcon icon={faDungeon} />
             <span>Locations</span>
@@ -55,6 +68,7 @@ export default () => {
         <Routes>
           <Route path={''} element={<AdminHome />} />
           <Route path={'/settings/*'} element={<AdminSettings />} />
+          <Route path={'/users/*'} element={<AdminUsers />} />
           <Route path={'/locations/*'} element={<AdminLocations />} />
           <Route path={'/nests/*'} element={<AdminNests />} />
           <Route path={'/activity'} element={<AdminActivity />} />

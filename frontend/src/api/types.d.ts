@@ -98,11 +98,11 @@ interface AdminUpdateNestEgg {
   features: string[];
   dockerImages: Record<string, string>;
   fileDenylist: string[];
-  servers: number;
 }
 
 interface AdminNestEgg extends AdminUpdateNestEgg {
   uuid: string;
+  servers: number;
   created: Date;
 }
 
@@ -338,6 +338,7 @@ interface User {
   email: string;
   nameFirst: string;
   nameLast: string;
+  password?: string;
   admin: boolean;
   totpEnabled: boolean;
   created: Date;

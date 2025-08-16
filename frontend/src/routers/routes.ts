@@ -46,7 +46,7 @@ export default {
     {
       name: 'Console',
       icon: faTerminal,
-      path: '',
+      path: '/',
       element: ServerConsole,
       exact: true,
       permission: null,
