@@ -21,7 +21,11 @@ export default () => {
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
-  const [location, setLocation] = useState<Location>({} as Location);
+  const [location, setLocation] = useState<Location>({
+    shortName: '',
+    name: '',
+    backupDisk: 'local',
+  } as Location);
 
   useEffect(() => {
     if (params.id) {
@@ -128,8 +132,8 @@ export default () => {
           />
         </div>
 
-        <div className={classNames('mt-4 flex', location ? 'justify-between' : 'justify-end')}>
-          {location && (
+        <div className={classNames('mt-4 flex', params.id ? 'justify-between' : 'justify-end')}>
+          {params.id && (
             <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
               Delete
             </Button>

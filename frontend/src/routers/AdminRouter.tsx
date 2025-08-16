@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding, faCrow, faDungeon, faReply, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faBuilding, faCrow, faDungeon, faReply, faWrench } from '@fortawesome/free-solid-svg-icons';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
@@ -45,7 +45,7 @@ export default () => {
         </Sidebar.Section>
         <Sidebar.Section>
           <Sidebar.Link to={'/admin/activity'}>
-            <FontAwesomeIcon icon={faDungeon} />
+            <FontAwesomeIcon icon={faBriefcase} />
             <span>Activity</span>
           </Sidebar.Link>
         </Sidebar.Section>
