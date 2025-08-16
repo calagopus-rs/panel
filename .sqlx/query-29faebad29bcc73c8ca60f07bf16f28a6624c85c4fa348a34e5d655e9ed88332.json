@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT server_backups.uuid FROM server_backups\n                JOIN servers ON servers.uuid = server_backups.server_uuid\n                WHERE servers.node_uuid = $1 AND server_backups.completed IS NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "uuid",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "29faebad29bcc73c8ca60f07bf16f28a6624c85c4fa348a34e5d655e9ed88332"
+}

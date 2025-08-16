@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT mounts.source, mounts.target, mounts.read_only\n                FROM server_mounts\n                JOIN mounts ON mounts.uuid = server_mounts.mount_uuid\n                WHERE server_mounts.server_uuid = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 1,
+        "name": "target",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "read_only",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a8a3e85707e1f6d8b084d9704381e754ea1beb9572540ab04503f3f9ea18855f"
+}

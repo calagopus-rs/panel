@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE server_backups\n            SET node_uuid = $3\n            WHERE server_backups.server_uuid = $1 AND server_backups.uuid = ANY($2)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "025faf6b37b1bfd671dec9e997bf85937c0d7a2ac70d5f9928a747d2e8dc60ea"
+}

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE servers\n            SET destination_node_uuid = $2, destination_allocation_uuid = $3\n            WHERE servers.uuid = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f9681ba69ee29fc4564e630edfd000c41d8c74c3089733770e192ae5844b74d2"
+}

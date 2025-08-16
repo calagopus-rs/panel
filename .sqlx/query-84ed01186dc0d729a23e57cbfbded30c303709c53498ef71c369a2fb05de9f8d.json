@@ -1,0 +1,32 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE servers\n            SET\n                owner_uuid = $1, egg_uuid = $2, suspended = $3, external_id = $4,\n                name = $5, description = $6, cpu = $7, memory = $8,\n                swap = $9, disk = $10, io_weight = $11, pinned_cpus = $12,\n                startup = $13, image = $14, timezone = $15, allocation_limit = $16,\n                backup_limit = $17, database_limit = $18\n            WHERE servers.uuid = $19",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Bool",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4",
+        "Int8",
+        "Int8",
+        "Int8",
+        "Int2",
+        "Int2Array",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "84ed01186dc0d729a23e57cbfbded30c303709c53498ef71c369a2fb05de9f8d"
+}

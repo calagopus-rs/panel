@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO server_allocations (server_uuid, allocation_uuid)\n                SELECT $1, UNNEST($2::uuid[])\n                ON CONFLICT DO NOTHING\n                ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ee17862ab78c9efb123c194f1b445a93312cb5f5b9688411b5f4b1c7f12d9f71"
+}

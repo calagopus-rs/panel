@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_ssh_keys\n            SET name = $1\n            WHERE user_ssh_keys.uuid = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "81fd7e0d97fd24ce25e1e8350986429d6cbe59c34c04f82845a7b960c2f5e4ca"
+}

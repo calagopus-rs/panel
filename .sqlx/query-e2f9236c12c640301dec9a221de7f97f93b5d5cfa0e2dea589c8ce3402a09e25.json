@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_backups\n            SET name = $1, locked = $2\n            WHERE server_backups.uuid = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e2f9236c12c640301dec9a221de7f97f93b5d5cfa0e2dea589c8ce3402a09e25"
+}

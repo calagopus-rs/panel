@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT node_allocations.ip, node_allocations.port\n                FROM server_allocations\n                JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid\n                WHERE server_allocations.server_uuid = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ip",
+        "type_info": "Inet"
+      },
+      {
+        "ordinal": 1,
+        "name": "port",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "0ac611422a9141ac2b4130e2fbba1a327647dfe172cac06e02858e6de689cd99"
+}

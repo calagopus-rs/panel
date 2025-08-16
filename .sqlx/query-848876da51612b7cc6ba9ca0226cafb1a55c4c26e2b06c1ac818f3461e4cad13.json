@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE servers\n            SET status = NULL\n            WHERE servers.uuid = $1 AND servers.status = 'RESTORING_BACKUP'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "848876da51612b7cc6ba9ca0226cafb1a55c4c26e2b06c1ac818f3461e4cad13"
+}

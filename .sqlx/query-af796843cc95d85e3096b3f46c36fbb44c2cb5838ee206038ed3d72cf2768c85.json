@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nests\n            SET author = $1, name = $2, description = $3\n            WHERE nests.uuid = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "af796843cc95d85e3096b3f46c36fbb44c2cb5838ee206038ed3d72cf2768c85"
+}
