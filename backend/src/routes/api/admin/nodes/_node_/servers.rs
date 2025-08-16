@@ -22,9 +22,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -52,9 +52,9 @@ mod get {
                 .ok();
         }
 
-        let servers = Server::by_node_id_with_pagination(
+        let servers = Server::by_node_uuid_with_pagination(
             &state.database,
-            node.id,
+            node.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),

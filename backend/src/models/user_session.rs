@@ -9,7 +9,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UserSession {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub user_agent: String,
@@ -25,7 +25,7 @@ impl BaseModel for UserSession {
         let table = table.unwrap_or("user_sessions");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.ip"), format!("{prefix}ip")),
             (format!("{table}.user_agent"), format!("{prefix}user_agent")),
             (format!("{table}.last_used"), format!("{prefix}last_used")),
@@ -38,7 +38,7 @@ impl BaseModel for UserSession {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             ip: row.get(format!("{prefix}ip").as_str()),
             user_agent: row.get(format!("{prefix}user_agent").as_str()),
             last_used: row.get(format!("{prefix}last_used").as_str()),
@@ -50,24 +50,24 @@ impl BaseModel for UserSession {
 impl UserSession {
     pub async fn create(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         ip: sqlx::types::ipnetwork::IpNetwork,
         user_agent: &str,
     ) -> Result<String, sqlx::Error> {
         let key_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
 
         let mut hash = sha2::Sha256::new();
-        hash.update(chrono::Utc::now().timestamp().to_be_bytes());
-        hash.update(user_id.to_be_bytes());
+        hash.update(chrono::Utc::now().timestamp().to_le_bytes());
+        hash.update(user_uuid.to_bytes_le());
         let hash = format!("{:x}", hash.finalize());
 
         sqlx::query(
             r#"
-            INSERT INTO user_sessions (user_id, key_id, key, ip, user_agent, last_used, created)
+            INSERT INTO user_sessions (user_uuid, key_id, key, ip, user_agent, last_used, created)
             VALUES ($1, $2, crypt($3, gen_salt('xdes', 321)), $4, $5, NOW(), NOW())
             "#,
         )
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(&key_id)
         .bind(&hash)
         .bind(ip)
@@ -78,30 +78,30 @@ impl UserSession {
         Ok(format!("{key_id}:{hash}"))
     }
 
-    pub async fn by_user_id_id(
+    pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
-        user_id: i32,
-        id: i32,
+        user_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM user_sessions
-            WHERE user_sessions.user_id = $1 AND user_sessions.id = $2
+            WHERE user_sessions.user_uuid = $1 AND user_sessions.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
-        .bind(id)
+        .bind(user_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_user_id_with_pagination(
+    pub async fn by_user_uuid_with_pagination(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -112,13 +112,13 @@ impl UserSession {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_sessions
-            WHERE user_sessions.user_id = $1 AND ($2 IS NULL OR user_sessions.user_agent ILIKE '%' || $2 || '%')
-            ORDER BY user_sessions.id DESC
+            WHERE user_sessions.user_uuid = $1 AND ($2 IS NULL OR user_sessions.user_agent ILIKE '%' || $2 || '%')
+            ORDER BY user_sessions.created DESC
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -133,17 +133,17 @@ impl UserSession {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_sessions
-            WHERE user_sessions.id = $1
+            WHERE user_sessions.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -153,11 +153,11 @@ impl UserSession {
     #[inline]
     pub fn into_api_object(self, auth: &GetAuthMethod) -> ApiUserSession {
         ApiUserSession {
-            id: self.id,
+            uuid: self.uuid,
             ip: self.ip.ip().to_string(),
             user_agent: self.user_agent,
             is_using: match &**auth {
-                AuthMethod::Session(session) => session.id == self.id,
+                AuthMethod::Session(session) => session.uuid == self.uuid,
                 _ => false,
             },
             last_used: self.last_used.and_utc(),
@@ -169,7 +169,7 @@ impl UserSession {
 #[derive(ToSchema, Serialize, Deserialize)]
 #[schema(title = "UserSession")]
 pub struct ApiUserSession {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub ip: String,
     pub user_agent: String,

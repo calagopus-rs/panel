@@ -1,2 +1,0 @@
-ALTER TABLE "servers" ADD COLUMN "destination_allocation_id" integer;
-ALTER TABLE "servers" ADD CONSTRAINT "servers_destination_allocation_id_server_allocations_id_fk" FOREIGN KEY ("destination_allocation_id") REFERENCES "public"."server_allocations"("id") ON DELETE set null ON UPDATE no action;

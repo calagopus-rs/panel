@@ -135,7 +135,7 @@ impl LocationBackupConfigs {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Location {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub short_name: String,
     pub name: String,
@@ -156,7 +156,7 @@ impl BaseModel for Location {
         let table = table.unwrap_or("locations");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.short_name"), format!("{prefix}short_name")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
@@ -172,7 +172,7 @@ impl BaseModel for Location {
                 format!("{prefix}backup_configs"),
             ),
             (
-                format!("(SELECT COUNT(*) FROM nodes WHERE nodes.location_id = {table}.id)"),
+                format!("(SELECT COUNT(*) FROM nodes WHERE nodes.location_uuid = {table}.uuid)"),
                 format!("{prefix}nodes"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -184,7 +184,7 @@ impl BaseModel for Location {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             short_name: row.get(format!("{prefix}short_name").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
@@ -229,19 +229,19 @@ impl Location {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM locations
-            WHERE locations.id = $1
+            WHERE locations.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -261,7 +261,7 @@ impl Location {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
             WHERE ($1 IS NULL OR locations.name ILIKE '%' || $1 || '%' OR locations.short_name ILIKE '%' || $1 || '%')
-            ORDER BY locations.id ASC
+            ORDER BY locations.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
@@ -280,17 +280,17 @@ impl Location {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM locations
-            WHERE locations.id = $1
+            WHERE locations.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -305,7 +305,7 @@ impl Location {
         self.backup_configs.decrypt(database);
 
         AdminApiLocation {
-            id: self.id,
+            uuid: self.uuid,
             short_name: self.short_name,
             name: self.name,
             description: self.description,
@@ -320,7 +320,7 @@ impl Location {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "Location")]
 pub struct AdminApiLocation {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub short_name: String,
     pub name: String,

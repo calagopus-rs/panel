@@ -20,15 +20,15 @@ mod post {
             sqlx::query!(
                 "UPDATE servers
                 SET status = NULL
-                WHERE servers.node_id = $1 AND servers.status = 'RESTORING_BACKUP'",
-                node.id
+                WHERE servers.node_uuid = $1 AND servers.status = 'RESTORING_BACKUP'",
+                node.uuid
             )
             .execute(state.database.write()),
             sqlx::query!(
-                "SELECT server_backups.id FROM server_backups
-                JOIN servers ON servers.id = server_backups.server_id
-                WHERE servers.node_id = $1 AND server_backups.completed IS NULL",
-                node.id
+                "SELECT server_backups.uuid FROM server_backups
+                JOIN servers ON servers.uuid = server_backups.server_uuid
+                WHERE servers.node_uuid = $1 AND server_backups.completed IS NULL",
+                node.uuid
             )
             .fetch_all(state.database.read()),
         )?;
@@ -36,8 +36,8 @@ mod post {
         sqlx::query!(
             "UPDATE server_backups
             SET successful = false, completed = NOW()
-            WHERE server_backups.id = ANY($1)",
-            &backups.into_iter().map(|b| b.id).collect::<Vec<_>>()
+            WHERE server_backups.uuid = ANY($1)",
+            &backups.into_iter().map(|b| b.uuid).collect::<Vec<_>>()
         )
         .execute(state.database.write())
         .await?;

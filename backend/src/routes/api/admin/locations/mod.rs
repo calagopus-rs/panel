@@ -95,6 +95,7 @@ mod post {
         description: Option<String>,
 
         backup_disk: crate::models::server_backup::BackupDisk,
+        #[serde(default)]
         backup_configs: crate::models::location::LocationBackupConfigs,
     }
 
@@ -151,6 +152,7 @@ mod post {
             .log(
                 "location:create",
                 serde_json::json!({
+                    "uuid": location.uuid,
                     "short_name": location.short_name,
                     "name": location.name,
                     "description": location.description,

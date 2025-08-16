@@ -1,1 +1,0 @@
-ALTER TABLE "server_activities" ALTER COLUMN "ip" DROP NOT NULL;

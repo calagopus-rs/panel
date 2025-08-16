@@ -49,8 +49,8 @@ mod post {
         let rows_affected = sqlx::query!(
             "UPDATE servers
             SET status = 'INSTALLING'
-            WHERE servers.id = $1 AND servers.status IS NULL",
-            server.id
+            WHERE servers.uuid = $1 AND servers.status IS NULL",
+            server.uuid
         )
         .execute(&mut *transaction)
         .await?

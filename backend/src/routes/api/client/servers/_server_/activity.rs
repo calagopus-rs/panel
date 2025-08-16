@@ -51,9 +51,9 @@ mod get {
                 .ok();
         }
 
-        let activities = ServerActivity::by_server_id_with_pagination(
+        let activities = ServerActivity::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),

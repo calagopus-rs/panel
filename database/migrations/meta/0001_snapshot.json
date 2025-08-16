@@ -1,22 +1,166 @@
 {
-  "id": "ff3685ca-fc34-4309-a6e2-ab3b1f1ae200",
-  "prevId": "5e726f91-9376-4c76-a912-4b4ef3266b20",
+  "id": "16300978-f9ae-477e-aa05-1250e4bc5593",
+  "prevId": "fab13934-963c-4de8-b1e1-bcb421167d24",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.admin_activities": {
+      "name": "admin_activities",
+      "schema": "",
+      "columns": {
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "api_key_uuid": {
+          "name": "api_key_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event": {
+          "name": "event",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip": {
+          "name": "ip",
+          "type": "inet",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "admin_activities_user_uuid_idx": {
+          "name": "admin_activities_user_uuid_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "admin_activities_event_idx": {
+          "name": "admin_activities_event_idx",
+          "columns": [
+            {
+              "expression": "event",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "admin_activities_user_uuid_event_idx": {
+          "name": "admin_activities_user_uuid_event_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "admin_activities_user_uuid_users_uuid_fk": {
+          "name": "admin_activities_user_uuid_users_uuid_fk",
+          "tableFrom": "admin_activities",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "admin_activities_api_key_uuid_user_api_keys_uuid_fk": {
+          "name": "admin_activities_api_key_uuid_user_api_keys_uuid_fk",
+          "tableFrom": "admin_activities",
+          "tableTo": "user_api_keys",
+          "columnsFrom": [
+            "api_key_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.database_hosts": {
       "name": "database_hosts",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "type": {
+          "name": "type",
+          "type": "database_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
         },
@@ -52,7 +196,7 @@
         },
         "password": {
           "name": "password",
-          "type": "text",
+          "type": "bytea",
           "primaryKey": false,
           "notNull": true
         },
@@ -65,6 +209,21 @@
         }
       },
       "indexes": {
+        "database_hosts_name_idx": {
+          "name": "database_hosts_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "database_hosts_host_port_idx": {
           "name": "database_hosts_host_port_idx",
           "columns": [
@@ -94,19 +253,19 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.egg_mounts": {
-      "name": "egg_mounts",
+    "public.location_database_hosts": {
+      "name": "location_database_hosts",
       "schema": "",
       "columns": {
-        "egg_id": {
-          "name": "egg_id",
-          "type": "integer",
+        "location_uuid": {
+          "name": "location_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "mount_id": {
-          "name": "mount_id",
-          "type": "integer",
+        "database_host_uuid": {
+          "name": "database_host_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -118,202 +277,44 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "egg_mounts_egg_id_idx": {
-          "name": "egg_mounts_egg_id_idx",
-          "columns": [
-            {
-              "expression": "egg_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "egg_mounts_mount_id_idx": {
-          "name": "egg_mounts_mount_id_idx",
-          "columns": [
-            {
-              "expression": "mount_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "egg_mounts_egg_id_nest_eggs_id_fk": {
-          "name": "egg_mounts_egg_id_nest_eggs_id_fk",
-          "tableFrom": "egg_mounts",
-          "tableTo": "nest_eggs",
+        "location_database_hosts_location_uuid_locations_uuid_fk": {
+          "name": "location_database_hosts_location_uuid_locations_uuid_fk",
+          "tableFrom": "location_database_hosts",
+          "tableTo": "locations",
           "columnsFrom": [
-            "egg_id"
+            "location_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "egg_mounts_mount_id_mounts_id_fk": {
-          "name": "egg_mounts_mount_id_mounts_id_fk",
-          "tableFrom": "egg_mounts",
-          "tableTo": "mounts",
+        "location_database_hosts_database_host_uuid_database_hosts_uuid_fk": {
+          "name": "location_database_hosts_database_host_uuid_database_hosts_uuid_fk",
+          "tableFrom": "location_database_hosts",
+          "tableTo": "database_hosts",
           "columnsFrom": [
-            "mount_id"
+            "database_host_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
-        "egg_mounts_pk": {
-          "name": "egg_mounts_pk",
+        "location_database_hosts_pk": {
+          "name": "location_database_hosts_pk",
           "columns": [
-            "egg_id",
-            "mount_id"
+            "location_uuid",
+            "database_host_uuid"
           ]
         }
       },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.egg_variables": {
-      "name": "egg_variables",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "egg_id": {
-          "name": "egg_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "env_variable": {
-          "name": "env_variable",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "default_value": {
-          "name": "default_value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "user_viewable": {
-          "name": "user_viewable",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "user_editable": {
-          "name": "user_editable",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "rules": {
-          "name": "rules",
-          "type": "varchar(255)[]",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created": {
-          "name": "created",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "egg_variables_egg_id_idx": {
-          "name": "egg_variables_egg_id_idx",
-          "columns": [
-            {
-              "expression": "egg_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "egg_variables_egg_id_name_idx": {
-          "name": "egg_variables_egg_id_name_idx",
-          "columns": [
-            {
-              "expression": "egg_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "egg_variables_egg_id_nest_eggs_id_fk": {
-          "name": "egg_variables_egg_id_nest_eggs_id_fk",
-          "tableFrom": "egg_variables",
-          "tableTo": "nest_eggs",
-          "columnsFrom": [
-            "egg_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -323,15 +324,16 @@
       "name": "locations",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "short": {
-          "name": "short",
-          "type": "varchar(32)",
+        "short_name": {
+          "name": "short_name",
+          "type": "varchar(31)",
           "primaryKey": false,
           "notNull": true
         },
@@ -346,6 +348,21 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "backup_disk": {
+          "name": "backup_disk",
+          "type": "backup_disk",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'LOCAL'"
+        },
+        "backup_configs": {
+          "name": "backup_configs",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "created": {
           "name": "created",
@@ -360,7 +377,7 @@
           "name": "locations_short_idx",
           "columns": [
             {
-              "expression": "short",
+              "expression": "short_name",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -398,11 +415,12 @@
       "name": "mounts",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "name": {
           "name": "name",
@@ -451,6 +469,21 @@
         }
       },
       "indexes": {
+        "mounts_name_idx": {
+          "name": "mounts_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "mounts_source_target_idx": {
           "name": "mounts_source_target_idx",
           "columns": [
@@ -480,19 +513,274 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.nest_egg_mounts": {
+      "name": "nest_egg_mounts",
+      "schema": "",
+      "columns": {
+        "egg_uuid": {
+          "name": "egg_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mount_uuid": {
+          "name": "mount_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "egg_mounts_egg_uuid_idx": {
+          "name": "egg_mounts_egg_uuid_idx",
+          "columns": [
+            {
+              "expression": "egg_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "egg_mounts_mount_uuid_idx": {
+          "name": "egg_mounts_mount_uuid_idx",
+          "columns": [
+            {
+              "expression": "mount_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "nest_egg_mounts_egg_uuid_nest_eggs_uuid_fk": {
+          "name": "nest_egg_mounts_egg_uuid_nest_eggs_uuid_fk",
+          "tableFrom": "nest_egg_mounts",
+          "tableTo": "nest_eggs",
+          "columnsFrom": [
+            "egg_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "nest_egg_mounts_mount_uuid_mounts_uuid_fk": {
+          "name": "nest_egg_mounts_mount_uuid_mounts_uuid_fk",
+          "tableFrom": "nest_egg_mounts",
+          "tableTo": "mounts",
+          "columnsFrom": [
+            "mount_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "egg_mounts_pk": {
+          "name": "egg_mounts_pk",
+          "columns": [
+            "egg_uuid",
+            "mount_uuid"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.nest_egg_variables": {
+      "name": "nest_egg_variables",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "egg_uuid": {
+          "name": "egg_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "order_": {
+          "name": "order_",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "env_variable": {
+          "name": "env_variable",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "default_value": {
+          "name": "default_value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "user_viewable": {
+          "name": "user_viewable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "user_editable": {
+          "name": "user_editable",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "rules": {
+          "name": "rules",
+          "type": "text[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "egg_variables_egg_uuid_idx": {
+          "name": "egg_variables_egg_uuid_idx",
+          "columns": [
+            {
+              "expression": "egg_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "egg_variables_egg_uuid_name_idx": {
+          "name": "egg_variables_egg_uuid_name_idx",
+          "columns": [
+            {
+              "expression": "egg_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "egg_variables_egg_uuid_env_variable_idx": {
+          "name": "egg_variables_egg_uuid_env_variable_idx",
+          "columns": [
+            {
+              "expression": "egg_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "env_variable",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "nest_egg_variables_egg_uuid_nest_eggs_uuid_fk": {
+          "name": "nest_egg_variables_egg_uuid_nest_eggs_uuid_fk",
+          "tableFrom": "nest_egg_variables",
+          "tableTo": "nest_eggs",
+          "columnsFrom": [
+            "egg_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.nest_eggs": {
       "name": "nest_eggs",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "nest_id": {
-          "name": "nest_id",
-          "type": "integer",
+        "nest_uuid": {
+          "name": "nest_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -526,17 +814,24 @@
           "primaryKey": false,
           "notNull": true
         },
-        "config_logs": {
-          "name": "config_logs",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
         "config_stop": {
           "name": "config_stop",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": true
+        },
+        "config_script": {
+          "name": "config_script",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "config_allocations": {
+          "name": "config_allocations",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "startup": {
           "name": "startup",
@@ -544,39 +839,28 @@
           "primaryKey": false,
           "notNull": true
         },
-        "script_container": {
-          "name": "script_container",
-          "type": "varchar(255)",
+        "force_outgoing_ip": {
+          "name": "force_outgoing_ip",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": true
-        },
-        "script_entrypoint": {
-          "name": "script_entrypoint",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "script_content": {
-          "name": "script_content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": false
         },
         "features": {
           "name": "features",
-          "type": "varchar(255)[]",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": true
         },
         "docker_images": {
           "name": "docker_images",
-          "type": "jsonb",
+          "type": "json",
           "primaryKey": false,
           "notNull": true
         },
         "file_denylist": {
           "name": "file_denylist",
-          "type": "varchar(255)[]",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": true
         },
@@ -589,11 +873,11 @@
         }
       },
       "indexes": {
-        "eggs_nest_id_idx": {
-          "name": "eggs_nest_id_idx",
+        "eggs_nest_uuid_idx": {
+          "name": "eggs_nest_uuid_idx",
           "columns": [
             {
-              "expression": "nest_id",
+              "expression": "nest_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -603,18 +887,39 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "eggs_nest_uuid_name_idx": {
+          "name": "eggs_nest_uuid_name_idx",
+          "columns": [
+            {
+              "expression": "nest_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {
-        "nest_eggs_nest_id_nests_id_fk": {
-          "name": "nest_eggs_nest_id_nests_id_fk",
+        "nest_eggs_nest_uuid_nests_uuid_fk": {
+          "name": "nest_eggs_nest_uuid_nests_uuid_fk",
           "tableFrom": "nest_eggs",
           "tableTo": "nests",
           "columnsFrom": [
-            "nest_id"
+            "nest_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -630,11 +935,12 @@
       "name": "nests",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "author": {
           "name": "author",
@@ -690,15 +996,16 @@
       "name": "node_allocations",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "node_id": {
-          "name": "node_id",
-          "type": "integer",
+        "node_uuid": {
+          "name": "node_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -729,11 +1036,11 @@
         }
       },
       "indexes": {
-        "allocations_node_id_idx": {
-          "name": "allocations_node_id_idx",
+        "allocations_node_uuid_idx": {
+          "name": "allocations_node_uuid_idx",
           "columns": [
             {
-              "expression": "node_id",
+              "expression": "node_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -744,17 +1051,11 @@
           "method": "btree",
           "with": {}
         },
-        "allocations_node_id_ip_port_idx": {
-          "name": "allocations_node_id_ip_port_idx",
+        "allocations_node_uuid_port_idx": {
+          "name": "allocations_node_uuid_port_idx",
           "columns": [
             {
-              "expression": "node_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "ip",
+              "expression": "node_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -773,15 +1074,15 @@
         }
       },
       "foreignKeys": {
-        "node_allocations_node_id_nodes_id_fk": {
-          "name": "node_allocations_node_id_nodes_id_fk",
+        "node_allocations_node_uuid_nodes_uuid_fk": {
+          "name": "node_allocations_node_uuid_nodes_uuid_fk",
           "tableFrom": "node_allocations",
           "tableTo": "nodes",
           "columnsFrom": [
-            "node_id"
+            "node_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -797,15 +1098,15 @@
       "name": "node_mounts",
       "schema": "",
       "columns": {
-        "node_id": {
-          "name": "node_id",
-          "type": "integer",
+        "node_uuid": {
+          "name": "node_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "mount_id": {
-          "name": "mount_id",
-          "type": "integer",
+        "mount_uuid": {
+          "name": "mount_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -818,11 +1119,11 @@
         }
       },
       "indexes": {
-        "node_mounts_node_id_idx": {
-          "name": "node_mounts_node_id_idx",
+        "node_mounts_node_uuid_idx": {
+          "name": "node_mounts_node_uuid_idx",
           "columns": [
             {
-              "expression": "node_id",
+              "expression": "node_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -833,11 +1134,11 @@
           "method": "btree",
           "with": {}
         },
-        "node_mounts_mount_id_idx": {
-          "name": "node_mounts_mount_id_idx",
+        "node_mounts_mount_uuid_idx": {
+          "name": "node_mounts_mount_uuid_idx",
           "columns": [
             {
-              "expression": "mount_id",
+              "expression": "mount_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -850,28 +1151,28 @@
         }
       },
       "foreignKeys": {
-        "node_mounts_node_id_nodes_id_fk": {
-          "name": "node_mounts_node_id_nodes_id_fk",
+        "node_mounts_node_uuid_nodes_uuid_fk": {
+          "name": "node_mounts_node_uuid_nodes_uuid_fk",
           "tableFrom": "node_mounts",
           "tableTo": "nodes",
           "columnsFrom": [
-            "node_id"
+            "node_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "node_mounts_mount_id_mounts_id_fk": {
-          "name": "node_mounts_mount_id_mounts_id_fk",
+        "node_mounts_mount_uuid_mounts_uuid_fk": {
+          "name": "node_mounts_mount_uuid_mounts_uuid_fk",
           "tableFrom": "node_mounts",
           "tableTo": "mounts",
           "columnsFrom": [
-            "mount_id"
+            "mount_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -881,8 +1182,8 @@
         "node_mounts_pk": {
           "name": "node_mounts_pk",
           "columns": [
-            "node_id",
-            "mount_id"
+            "node_uuid",
+            "mount_uuid"
           ]
         }
       },
@@ -895,30 +1196,18 @@
       "name": "nodes",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "uuid": {
           "name": "uuid",
           "type": "uuid",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "location_id": {
-          "name": "location_id",
-          "type": "integer",
+        "location_uuid": {
+          "name": "location_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "database_host_id": {
-          "name": "database_host_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "name": {
           "name": "name",
@@ -938,15 +1227,27 @@
           "primaryKey": false,
           "notNull": false
         },
-        "public_fqdn": {
-          "name": "public_fqdn",
+        "public_url": {
+          "name": "public_url",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
         },
-        "fqdn": {
-          "name": "fqdn",
+        "url": {
+          "name": "url",
           "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sftp_host": {
+          "name": "sftp_host",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sftp_port": {
+          "name": "sftp_port",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         },
@@ -976,7 +1277,7 @@
         },
         "token": {
           "name": "token",
-          "type": "varchar(255)",
+          "type": "bytea",
           "primaryKey": false,
           "notNull": true
         },
@@ -994,6 +1295,21 @@
           "columns": [
             {
               "expression": "uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "nodes_name_idx": {
+          "name": "nodes_name_idx",
+          "columns": [
+            {
+              "expression": "name",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1036,30 +1352,17 @@
         }
       },
       "foreignKeys": {
-        "nodes_location_id_locations_id_fk": {
-          "name": "nodes_location_id_locations_id_fk",
+        "nodes_location_uuid_locations_uuid_fk": {
+          "name": "nodes_location_uuid_locations_uuid_fk",
           "tableFrom": "nodes",
           "tableTo": "locations",
           "columnsFrom": [
-            "location_id"
+            "location_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "nodes_database_host_id_database_hosts_id_fk": {
-          "name": "nodes_database_host_id_database_hosts_id_fk",
-          "tableFrom": "nodes",
-          "tableTo": "database_hosts",
-          "columnsFrom": [
-            "database_host_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -1073,27 +1376,21 @@
       "name": "server_activities",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
-        "api_key_id": {
-          "name": "api_key_id",
-          "type": "integer",
+        "api_key_uuid": {
+          "name": "api_key_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": false
         },
@@ -1107,7 +1404,7 @@
           "name": "ip",
           "type": "inet",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "data": {
           "name": "data",
@@ -1124,11 +1421,11 @@
         }
       },
       "indexes": {
-        "server_activities_server_id_idx": {
-          "name": "server_activities_server_id_idx",
+        "server_activities_server_uuid_idx": {
+          "name": "server_activities_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1139,11 +1436,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_activities_user_id_idx": {
-          "name": "server_activities_user_id_idx",
+        "server_activities_user_uuid_idx": {
+          "name": "server_activities_user_uuid_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1154,11 +1451,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_activities_server_id_event_idx": {
-          "name": "server_activities_server_id_event_idx",
+        "server_activities_server_uuid_event_idx": {
+          "name": "server_activities_server_uuid_event_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1175,11 +1472,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_activities_user_id_event_idx": {
-          "name": "server_activities_user_id_event_idx",
+        "server_activities_user_uuid_event_idx": {
+          "name": "server_activities_user_uuid_event_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1198,41 +1495,41 @@
         }
       },
       "foreignKeys": {
-        "server_activities_server_id_servers_id_fk": {
-          "name": "server_activities_server_id_servers_id_fk",
+        "server_activities_server_uuid_servers_uuid_fk": {
+          "name": "server_activities_server_uuid_servers_uuid_fk",
           "tableFrom": "server_activities",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "server_activities_user_id_users_id_fk": {
-          "name": "server_activities_user_id_users_id_fk",
+        "server_activities_user_uuid_users_uuid_fk": {
+          "name": "server_activities_user_uuid_users_uuid_fk",
           "tableFrom": "server_activities",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "user_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
-        "server_activities_api_key_id_user_api_keys_id_fk": {
-          "name": "server_activities_api_key_id_user_api_keys_id_fk",
+        "server_activities_api_key_uuid_user_api_keys_uuid_fk": {
+          "name": "server_activities_api_key_uuid_user_api_keys_uuid_fk",
           "tableFrom": "server_activities",
           "tableTo": "user_api_keys",
           "columnsFrom": [
-            "api_key_id"
+            "api_key_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
@@ -1248,15 +1545,22 @@
       "name": "server_allocations",
       "schema": "",
       "columns": {
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "allocation_id": {
-          "name": "allocation_id",
-          "type": "integer",
+        "allocation_uuid": {
+          "name": "allocation_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1265,13 +1569,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "primary": {
-          "name": "primary",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "created": {
           "name": "created",
@@ -1282,11 +1579,11 @@
         }
       },
       "indexes": {
-        "server_allocations_server_id_idx": {
-          "name": "server_allocations_server_id_idx",
+        "server_allocations_server_uuid_idx": {
+          "name": "server_allocations_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1297,11 +1594,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_allocations_allocation_id_idx": {
-          "name": "server_allocations_allocation_id_idx",
+        "server_allocations_allocation_uuid_idx": {
+          "name": "server_allocations_allocation_uuid_idx",
           "columns": [
             {
-              "expression": "allocation_id",
+              "expression": "allocation_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1314,42 +1611,34 @@
         }
       },
       "foreignKeys": {
-        "server_allocations_server_id_servers_id_fk": {
-          "name": "server_allocations_server_id_servers_id_fk",
+        "server_allocations_server_uuid_servers_uuid_fk": {
+          "name": "server_allocations_server_uuid_servers_uuid_fk",
           "tableFrom": "server_allocations",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "server_allocations_allocation_id_node_allocations_id_fk": {
-          "name": "server_allocations_allocation_id_node_allocations_id_fk",
+        "server_allocations_allocation_uuid_node_allocations_uuid_fk": {
+          "name": "server_allocations_allocation_uuid_node_allocations_uuid_fk",
           "tableFrom": "server_allocations",
           "tableTo": "node_allocations",
           "columnsFrom": [
-            "allocation_id"
+            "allocation_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "server_allocations_pk": {
-          "name": "server_allocations_pk",
-          "columns": [
-            "server_id",
-            "allocation_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -1359,22 +1648,22 @@
       "name": "server_backups",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "uuid": {
           "name": "uuid",
           "type": "uuid",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "node_uuid": {
+          "name": "node_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1400,7 +1689,7 @@
         },
         "ignored_files": {
           "name": "ignored_files",
-          "type": "varchar(255)[]",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": true
         },
@@ -1408,19 +1697,40 @@
           "name": "checksum",
           "type": "varchar(255)",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "bytes": {
           "name": "bytes",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": 0
+        },
+        "files": {
+          "name": "files",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "disk": {
           "name": "disk",
-          "type": "varchar(31)",
+          "type": "backup_disk",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true
+        },
+        "upload_id": {
+          "name": "upload_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "upload_path": {
+          "name": "upload_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "completed": {
           "name": "completed",
@@ -1443,11 +1753,11 @@
         }
       },
       "indexes": {
-        "server_backups_server_id_idx": {
-          "name": "server_backups_server_id_idx",
+        "server_backups_server_uuid_idx": {
+          "name": "server_backups_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1475,15 +1785,28 @@
         }
       },
       "foreignKeys": {
-        "server_backups_server_id_servers_id_fk": {
-          "name": "server_backups_server_id_servers_id_fk",
+        "server_backups_server_uuid_servers_uuid_fk": {
+          "name": "server_backups_server_uuid_servers_uuid_fk",
           "tableFrom": "server_backups",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "server_backups_node_uuid_nodes_uuid_fk": {
+          "name": "server_backups_node_uuid_nodes_uuid_fk",
+          "tableFrom": "server_backups",
+          "tableTo": "nodes",
+          "columnsFrom": [
+            "node_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1505,15 +1828,15 @@
           "primaryKey": true,
           "notNull": true
         },
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "database_host_id": {
-          "name": "database_host_id",
-          "type": "integer",
+        "database_host_uuid": {
+          "name": "database_host_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1531,7 +1854,7 @@
         },
         "password": {
           "name": "password",
-          "type": "text",
+          "type": "bytea",
           "primaryKey": false,
           "notNull": true
         },
@@ -1544,11 +1867,11 @@
         }
       },
       "indexes": {
-        "server_databases_server_id_idx": {
-          "name": "server_databases_server_id_idx",
+        "server_databases_server_uuid_idx": {
+          "name": "server_databases_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1559,11 +1882,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_databases_server_id_database_idx": {
-          "name": "server_databases_server_id_database_idx",
+        "server_databases_server_uuid_database_idx": {
+          "name": "server_databases_server_uuid_database_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1582,28 +1905,28 @@
         }
       },
       "foreignKeys": {
-        "server_databases_server_id_servers_id_fk": {
-          "name": "server_databases_server_id_servers_id_fk",
+        "server_databases_server_uuid_servers_uuid_fk": {
+          "name": "server_databases_server_uuid_servers_uuid_fk",
           "tableFrom": "server_databases",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "server_databases_database_host_id_database_hosts_id_fk": {
-          "name": "server_databases_database_host_id_database_hosts_id_fk",
+        "server_databases_database_host_uuid_database_hosts_uuid_fk": {
+          "name": "server_databases_database_host_uuid_database_hosts_uuid_fk",
           "tableFrom": "server_databases",
           "tableTo": "database_hosts",
           "columnsFrom": [
-            "database_host_id"
+            "database_host_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -1619,15 +1942,15 @@
       "name": "server_mounts",
       "schema": "",
       "columns": {
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "mount_id": {
-          "name": "mount_id",
-          "type": "integer",
+        "mount_uuid": {
+          "name": "mount_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1640,11 +1963,11 @@
         }
       },
       "indexes": {
-        "server_mounts_server_id_idx": {
-          "name": "server_mounts_server_id_idx",
+        "server_mounts_server_uuid_idx": {
+          "name": "server_mounts_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1655,11 +1978,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_mounts_mount_id_idx": {
-          "name": "server_mounts_mount_id_idx",
+        "server_mounts_mount_uuid_idx": {
+          "name": "server_mounts_mount_uuid_idx",
           "columns": [
             {
-              "expression": "mount_id",
+              "expression": "mount_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1672,28 +1995,28 @@
         }
       },
       "foreignKeys": {
-        "server_mounts_server_id_servers_id_fk": {
-          "name": "server_mounts_server_id_servers_id_fk",
+        "server_mounts_server_uuid_servers_uuid_fk": {
+          "name": "server_mounts_server_uuid_servers_uuid_fk",
           "tableFrom": "server_mounts",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "server_mounts_mount_id_mounts_id_fk": {
-          "name": "server_mounts_mount_id_mounts_id_fk",
+        "server_mounts_mount_uuid_mounts_uuid_fk": {
+          "name": "server_mounts_mount_uuid_mounts_uuid_fk",
           "tableFrom": "server_mounts",
           "tableTo": "mounts",
           "columnsFrom": [
-            "mount_id"
+            "mount_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1703,8 +2026,8 @@
         "server_mounts_pk": {
           "name": "server_mounts_pk",
           "columns": [
-            "server_id",
-            "mount_id"
+            "server_uuid",
+            "mount_uuid"
           ]
         }
       },
@@ -1717,21 +2040,27 @@
       "name": "server_subusers",
       "schema": "",
       "columns": {
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
         "permissions": {
           "name": "permissions",
           "type": "varchar(32)[]",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ignored_files": {
+          "name": "ignored_files",
+          "type": "text[]",
           "primaryKey": false,
           "notNull": true
         },
@@ -1744,11 +2073,11 @@
         }
       },
       "indexes": {
-        "server_subusers_server_id_idx": {
-          "name": "server_subusers_server_id_idx",
+        "server_subusers_server_uuid_idx": {
+          "name": "server_subusers_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1759,11 +2088,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_subusers_user_id_idx": {
-          "name": "server_subusers_user_id_idx",
+        "server_subusers_user_uuid_idx": {
+          "name": "server_subusers_user_uuid_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1776,28 +2105,28 @@
         }
       },
       "foreignKeys": {
-        "server_subusers_server_id_servers_id_fk": {
-          "name": "server_subusers_server_id_servers_id_fk",
+        "server_subusers_server_uuid_servers_uuid_fk": {
+          "name": "server_subusers_server_uuid_servers_uuid_fk",
           "tableFrom": "server_subusers",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "server_subusers_user_id_users_id_fk": {
-          "name": "server_subusers_user_id_users_id_fk",
+        "server_subusers_user_uuid_users_uuid_fk": {
+          "name": "server_subusers_user_uuid_users_uuid_fk",
           "tableFrom": "server_subusers",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "user_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1807,8 +2136,8 @@
         "server_subusers_pk": {
           "name": "server_subusers_pk",
           "columns": [
-            "server_id",
-            "user_id"
+            "server_uuid",
+            "user_uuid"
           ]
         }
       },
@@ -1821,15 +2150,15 @@
       "name": "server_variables",
       "schema": "",
       "columns": {
-        "server_id": {
-          "name": "server_id",
-          "type": "integer",
+        "server_uuid": {
+          "name": "server_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "variable_id": {
-          "name": "variable_id",
-          "type": "integer",
+        "variable_uuid": {
+          "name": "variable_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1848,11 +2177,11 @@
         }
       },
       "indexes": {
-        "server_variables_server_id_idx": {
-          "name": "server_variables_server_id_idx",
+        "server_variables_server_uuid_idx": {
+          "name": "server_variables_server_uuid_idx",
           "columns": [
             {
-              "expression": "server_id",
+              "expression": "server_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1863,11 +2192,11 @@
           "method": "btree",
           "with": {}
         },
-        "server_variables_variable_id_idx": {
-          "name": "server_variables_variable_id_idx",
+        "server_variables_variable_uuid_idx": {
+          "name": "server_variables_variable_uuid_idx",
           "columns": [
             {
-              "expression": "variable_id",
+              "expression": "variable_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -1880,28 +2209,28 @@
         }
       },
       "foreignKeys": {
-        "server_variables_server_id_servers_id_fk": {
-          "name": "server_variables_server_id_servers_id_fk",
+        "server_variables_server_uuid_servers_uuid_fk": {
+          "name": "server_variables_server_uuid_servers_uuid_fk",
           "tableFrom": "server_variables",
           "tableTo": "servers",
           "columnsFrom": [
-            "server_id"
+            "server_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "server_variables_variable_id_egg_variables_id_fk": {
-          "name": "server_variables_variable_id_egg_variables_id_fk",
+        "server_variables_variable_uuid_nest_egg_variables_uuid_fk": {
+          "name": "server_variables_variable_uuid_nest_egg_variables_uuid_fk",
           "tableFrom": "server_variables",
-          "tableTo": "egg_variables",
+          "tableTo": "nest_egg_variables",
           "columnsFrom": [
-            "variable_id"
+            "variable_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1911,8 +2240,8 @@
         "server_variables_pk": {
           "name": "server_variables_pk",
           "columns": [
-            "server_id",
-            "variable_id"
+            "server_uuid",
+            "variable_uuid"
           ]
         }
       },
@@ -1925,16 +2254,10 @@
       "name": "servers",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "uuid": {
           "name": "uuid",
           "type": "uuid",
-          "primaryKey": false,
+          "primaryKey": true,
           "notNull": true
         },
         "uuid_short": {
@@ -1949,21 +2272,39 @@
           "primaryKey": false,
           "notNull": false
         },
-        "node_id": {
-          "name": "node_id",
-          "type": "integer",
+        "allocation_uuid": {
+          "name": "allocation_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "destination_allocation_id": {
+          "name": "destination_allocation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "node_uuid": {
+          "name": "node_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "integer",
+        "destination_node_uuid": {
+          "name": "destination_node_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner_uuid": {
+          "name": "owner_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "egg_id": {
-          "name": "egg_id",
-          "type": "integer",
+        "egg_uuid": {
+          "name": "egg_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -1986,6 +2327,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "suspended": {
+          "name": "suspended",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "memory": {
           "name": "memory",
           "type": "bigint",
@@ -2004,11 +2352,11 @@
           "primaryKey": false,
           "notNull": true
         },
-        "io": {
-          "name": "io",
-          "type": "integer",
+        "io_weight": {
+          "name": "io_weight",
+          "type": "smallint",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "cpu": {
           "name": "cpu",
@@ -2033,6 +2381,19 @@
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": true
+        },
+        "auto_kill": {
+          "name": "auto_kill",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"enabled\":false,\"seconds\":30}'::jsonb"
+        },
+        "timezone": {
+          "name": "timezone",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         },
         "allocation_limit": {
           "name": "allocation_limit",
@@ -2061,11 +2422,11 @@
         }
       },
       "indexes": {
-        "servers_node_id_idx": {
-          "name": "servers_node_id_idx",
+        "servers_node_uuid_idx": {
+          "name": "servers_node_uuid_idx",
           "columns": [
             {
-              "expression": "node_id",
+              "expression": "node_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2121,11 +2482,11 @@
           "method": "btree",
           "with": {}
         },
-        "servers_owner_id_idx": {
-          "name": "servers_owner_id_idx",
+        "servers_owner_uuid_idx": {
+          "name": "servers_owner_uuid_idx",
           "columns": [
             {
-              "expression": "owner_id",
+              "expression": "owner_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2138,41 +2499,80 @@
         }
       },
       "foreignKeys": {
-        "servers_node_id_nodes_id_fk": {
-          "name": "servers_node_id_nodes_id_fk",
+        "servers_allocation_uuid_server_allocations_uuid_fk": {
+          "name": "servers_allocation_uuid_server_allocations_uuid_fk",
+          "tableFrom": "servers",
+          "tableTo": "server_allocations",
+          "columnsFrom": [
+            "allocation_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "servers_destination_allocation_id_server_allocations_uuid_fk": {
+          "name": "servers_destination_allocation_id_server_allocations_uuid_fk",
+          "tableFrom": "servers",
+          "tableTo": "server_allocations",
+          "columnsFrom": [
+            "destination_allocation_id"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "servers_node_uuid_nodes_uuid_fk": {
+          "name": "servers_node_uuid_nodes_uuid_fk",
           "tableFrom": "servers",
           "tableTo": "nodes",
           "columnsFrom": [
-            "node_id"
+            "node_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "servers_owner_id_users_id_fk": {
-          "name": "servers_owner_id_users_id_fk",
+        "servers_destination_node_uuid_nodes_uuid_fk": {
+          "name": "servers_destination_node_uuid_nodes_uuid_fk",
+          "tableFrom": "servers",
+          "tableTo": "nodes",
+          "columnsFrom": [
+            "destination_node_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "servers_owner_uuid_users_uuid_fk": {
+          "name": "servers_owner_uuid_users_uuid_fk",
           "tableFrom": "servers",
           "tableTo": "users",
           "columnsFrom": [
-            "owner_id"
+            "owner_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "servers_egg_id_nest_eggs_id_fk": {
-          "name": "servers_egg_id_nest_eggs_id_fk",
+        "servers_egg_uuid_nest_eggs_uuid_fk": {
+          "name": "servers_egg_uuid_nest_eggs_uuid_fk",
           "tableFrom": "servers",
           "tableTo": "nest_eggs",
           "columnsFrom": [
-            "egg_id"
+            "egg_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -2225,19 +2625,134 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.user_activities": {
+      "name": "user_activities",
+      "schema": "",
+      "columns": {
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "api_key_uuid": {
+          "name": "api_key_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event": {
+          "name": "event",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ip": {
+          "name": "ip",
+          "type": "inet",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "user_activities_user_id_idx": {
+          "name": "user_activities_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_activities_user_id_event_idx": {
+          "name": "user_activities_user_id_event_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "event",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_activities_user_uuid_users_uuid_fk": {
+          "name": "user_activities_user_uuid_users_uuid_fk",
+          "tableFrom": "user_activities",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_activities_api_key_uuid_user_api_keys_uuid_fk": {
+          "name": "user_activities_api_key_uuid_user_api_keys_uuid_fk",
+          "tableFrom": "user_activities",
+          "tableTo": "user_api_keys",
+          "columnsFrom": [
+            "api_key_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.user_api_keys": {
       "name": "user_api_keys",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -2280,11 +2795,11 @@
         }
       },
       "indexes": {
-        "user_api_keys_user_id_idx": {
-          "name": "user_api_keys_user_id_idx",
+        "user_api_keys_user_uuid_idx": {
+          "name": "user_api_keys_user_uuid_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2295,17 +2810,38 @@
           "method": "btree",
           "with": {}
         },
-        "user_api_keys_user_id_name_idx": {
-          "name": "user_api_keys_user_id_name_idx",
+        "user_api_keys_user_uuid_name_idx": {
+          "name": "user_api_keys_user_uuid_name_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
             },
             {
               "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_api_keys_user_uuid_key_start_idx": {
+          "name": "user_api_keys_user_uuid_key_start_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "key_start",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2333,15 +2869,182 @@
         }
       },
       "foreignKeys": {
-        "user_api_keys_user_id_users_id_fk": {
-          "name": "user_api_keys_user_id_users_id_fk",
+        "user_api_keys_user_uuid_users_uuid_fk": {
+          "name": "user_api_keys_user_uuid_users_uuid_fk",
           "tableFrom": "user_api_keys",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "user_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_password_resets": {
+      "name": "user_password_resets",
+      "schema": "",
+      "columns": {
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "user_password_resets_user_uuid_idx": {
+          "name": "user_password_resets_user_uuid_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_password_resets_token_idx": {
+          "name": "user_password_resets_token_idx",
+          "columns": [
+            {
+              "expression": "token",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_password_resets_user_uuid_users_uuid_fk": {
+          "name": "user_password_resets_user_uuid_users_uuid_fk",
+          "tableFrom": "user_password_resets",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_recovery_codes": {
+      "name": "user_recovery_codes",
+      "schema": "",
+      "columns": {
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "user_recovery_codes_user_uuid_idx": {
+          "name": "user_recovery_codes_user_uuid_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "user_recovery_codes_user_uuid_code_idx": {
+          "name": "user_recovery_codes_user_uuid_code_idx",
+          "columns": [
+            {
+              "expression": "user_uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "code",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_recovery_codes_user_uuid_users_uuid_fk": {
+          "name": "user_recovery_codes_user_uuid_users_uuid_fk",
+          "tableFrom": "user_recovery_codes",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_uuid"
+          ],
+          "columnsTo": [
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -2357,15 +3060,22 @@
       "name": "user_sessions",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
+          "primaryKey": false,
           "notNull": true
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
+        "key_id": {
+          "name": "key_id",
+          "type": "char(16)",
           "primaryKey": false,
           "notNull": true
         },
@@ -2407,7 +3117,7 @@
           "name": "user_sessions_user_id_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2435,15 +3145,15 @@
         }
       },
       "foreignKeys": {
-        "user_sessions_user_id_users_id_fk": {
-          "name": "user_sessions_user_id_users_id_fk",
+        "user_sessions_user_uuid_users_uuid_fk": {
+          "name": "user_sessions_user_uuid_users_uuid_fk",
           "tableFrom": "user_sessions",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "user_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -2459,15 +3169,16 @@
       "name": "user_ssh_keys",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
+        "user_uuid": {
+          "name": "user_uuid",
+          "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
@@ -2479,13 +3190,13 @@
         },
         "fingerprint": {
           "name": "fingerprint",
-          "type": "varchar(255)",
+          "type": "char(50)",
           "primaryKey": false,
           "notNull": true
         },
         "public_key": {
           "name": "public_key",
-          "type": "text",
+          "type": "bytea",
           "primaryKey": false,
           "notNull": true
         },
@@ -2498,11 +3209,11 @@
         }
       },
       "indexes": {
-        "user_ssh_keys_user_id_idx": {
-          "name": "user_ssh_keys_user_id_idx",
+        "user_ssh_keys_user_uuid_idx": {
+          "name": "user_ssh_keys_user_uuid_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2513,11 +3224,11 @@
           "method": "btree",
           "with": {}
         },
-        "user_ssh_keys_user_id_name_idx": {
-          "name": "user_ssh_keys_user_id_name_idx",
+        "user_ssh_keys_user_uuid_name_idx": {
+          "name": "user_ssh_keys_user_uuid_name_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2534,11 +3245,11 @@
           "method": "btree",
           "with": {}
         },
-        "user_ssh_keys_user_id_fingerprint_idx": {
-          "name": "user_ssh_keys_user_id_fingerprint_idx",
+        "user_ssh_keys_user_uuid_fingerprint_idx": {
+          "name": "user_ssh_keys_user_uuid_fingerprint_idx",
           "columns": [
             {
-              "expression": "user_id",
+              "expression": "user_uuid",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -2557,15 +3268,15 @@
         }
       },
       "foreignKeys": {
-        "user_ssh_keys_user_id_users_id_fk": {
-          "name": "user_ssh_keys_user_id_users_id_fk",
+        "user_ssh_keys_user_uuid_users_uuid_fk": {
+          "name": "user_ssh_keys_user_uuid_users_uuid_fk",
           "tableFrom": "user_ssh_keys",
           "tableTo": "users",
           "columnsFrom": [
-            "user_id"
+            "user_uuid"
           ],
           "columnsTo": [
-            "id"
+            "uuid"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -2581,14 +3292,21 @@
       "name": "users",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "external_id": {
           "name": "external_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatar": {
+          "name": "avatar",
           "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false
@@ -2707,6 +3425,26 @@
     }
   },
   "enums": {
+    "public.backup_disk": {
+      "name": "backup_disk",
+      "schema": "public",
+      "values": [
+        "LOCAL",
+        "S3",
+        "DDUP_BAK",
+        "BTRFS",
+        "ZFS",
+        "RESTIC"
+      ]
+    },
+    "public.database_type": {
+      "name": "database_type",
+      "schema": "public",
+      "values": [
+        "MYSQL",
+        "POSTGRES"
+      ]
+    },
     "public.server_status": {
       "name": "server_status",
       "schema": "public",
@@ -2714,7 +3452,6 @@
         "INSTALLING",
         "INSTALL_FAILED",
         "REINSTALL_FAILED",
-        "SUSPENDED",
         "RESTORING_BACKUP"
       ]
     }

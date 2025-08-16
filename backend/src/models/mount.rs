@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct Mount {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,
@@ -31,7 +31,7 @@ impl BaseModel for Mount {
         let table = table.unwrap_or("mounts");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
                 format!("{table}.description"),
@@ -46,19 +46,19 @@ impl BaseModel for Mount {
             ),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM nest_egg_mounts WHERE nest_egg_mounts.mount_id = {table}.id)"
+                    "(SELECT COUNT(*) FROM nest_egg_mounts WHERE nest_egg_mounts.mount_uuid = {table}.uuid)"
                 ),
                 format!("{prefix}eggs"),
             ),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM node_mounts WHERE node_mounts.mount_id = {table}.id)"
+                    "(SELECT COUNT(*) FROM node_mounts WHERE node_mounts.mount_uuid = {table}.uuid)"
                 ),
                 format!("{prefix}nodes"),
             ),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM server_mounts WHERE server_mounts.mount_id = {table}.id)"
+                    "(SELECT COUNT(*) FROM server_mounts WHERE server_mounts.mount_uuid = {table}.uuid)"
                 ),
                 format!("{prefix}servers"),
             ),
@@ -71,7 +71,7 @@ impl BaseModel for Mount {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
             source: row.get(format!("{prefix}source").as_str()),
@@ -116,44 +116,44 @@ impl Mount {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM mounts
-            WHERE mounts.id = $1
+            WHERE mounts.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_node_id_egg_id_id(
+    pub async fn by_node_uuid_egg_uuid_uuid(
         database: &crate::database::Database,
-        node_id: i32,
-        egg_id: i32,
-        id: i32,
+        node_uuid: uuid::Uuid,
+        egg_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM mounts
-            JOIN node_mounts ON mounts.id = node_mounts.mount_id
-            JOIN nest_egg_mounts ON mounts.id = nest_egg_mounts.mount_id
-            WHERE node_mounts.node_id = $1 AND nest_egg_mounts.egg_id = $2 AND mounts.id = $3
+            JOIN node_mounts ON mounts.uuid = node_mounts.mount_uuid
+            JOIN nest_egg_mounts ON mounts.uuid = nest_egg_mounts.mount_uuid
+            WHERE node_mounts.node_uuid = $1 AND nest_egg_mounts.egg_uuid = $2 AND mounts.uuid = $3
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
-        .bind(egg_id)
-        .bind(id)
+        .bind(node_uuid)
+        .bind(egg_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -173,7 +173,7 @@ impl Mount {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM mounts
             WHERE ($1 IS NULL OR mounts.name ILIKE '%' || $1 || '%')
-            ORDER BY mounts.id ASC
+            ORDER BY mounts.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -192,17 +192,17 @@ impl Mount {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM mounts
-            WHERE mounts.id = $1
+            WHERE mounts.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -212,7 +212,7 @@ impl Mount {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiMount {
         AdminApiMount {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             description: self.description,
             source: self.source,
@@ -230,7 +230,7 @@ impl Mount {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "Mount")]
 pub struct AdminApiMount {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,

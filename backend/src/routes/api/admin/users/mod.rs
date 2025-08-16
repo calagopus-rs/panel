@@ -156,7 +156,7 @@ mod post {
             .log(
                 "user:create",
                 serde_json::json!({
-                    "user_id": user.id,
+                    "uuid": user.uuid,
                     "username": user.username,
                     "email": user.email,
                     "name_first": user.name_first,

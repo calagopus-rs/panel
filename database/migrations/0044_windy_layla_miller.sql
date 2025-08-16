@@ -1,1 +1,0 @@
-ALTER TABLE "server_backups" ADD COLUMN "upload_path" text;

@@ -22,24 +22,24 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "mount" = i32,
+            "mount" = uuid::Uuid,
             description = "The mount ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
-        Path((_node, mount)): Path<(i32, i32)>,
+        Path((_node, mount)): Path<(uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
         let node_mount =
-            match NodeMount::by_node_id_mount_id(&state.database, node.id, mount).await? {
+            match NodeMount::by_node_uuid_mount_uuid(&state.database, node.uuid, mount).await? {
                 Some(mount) => mount,
                 None => {
                     return ApiResponse::error("mount not found")
@@ -48,14 +48,14 @@ mod delete {
                 }
             };
 
-        NodeMount::delete_by_ids(&state.database, node.id, node_mount.mount.id).await?;
+        NodeMount::delete_by_uuids(&state.database, node.uuid, node_mount.mount.uuid).await?;
 
         activity_logger
             .log(
                 "node:mount.delete",
                 serde_json::json!({
-                    "node_id": node.id,
-                    "mount_id": node_mount.mount.id,
+                    "node_uuid": node.uuid,
+                    "mount_uuid": node_mount.mount.uuid,
                 }),
             )
             .await;

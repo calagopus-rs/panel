@@ -18,7 +18,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let nest = match nest.first().map(|s| s.parse::<i32>()) {
+    let nest = match nest.first().map(|s| s.parse::<uuid::Uuid>()) {
         Some(Ok(id)) => id,
         _ => {
             return Ok(ApiResponse::error("invalid nest id")
@@ -27,7 +27,7 @@ pub async fn auth(
         }
     };
 
-    let nest = Nest::by_id(&state.database, nest).await;
+    let nest = Nest::by_uuid(&state.database, nest).await;
     let nest = match nest {
         Ok(Some(nest)) => nest,
         Ok(None) => {
@@ -61,9 +61,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(nest: GetNest) -> ApiResponseResult {
@@ -112,12 +112,13 @@ mod delete {
                 .ok();
         }
 
-        Nest::delete_by_id(&state.database, nest.id).await?;
+        Nest::delete_by_uuid(&state.database, nest.uuid).await?;
 
         activity_logger
             .log(
                 "nest:delete",
                 serde_json::json!({
+                    "uuid": nest.uuid,
                     "author": nest.author,
                     "name": nest.name,
                 }),
@@ -165,9 +166,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -199,11 +200,11 @@ mod patch {
         match sqlx::query!(
             "UPDATE nests
             SET author = $1, name = $2, description = $3
-            WHERE id = $4",
+            WHERE nests.uuid = $4",
             nest.author,
             nest.name,
             nest.description,
-            nest.id,
+            nest.uuid,
         )
         .execute(state.database.write())
         .await
@@ -227,6 +228,7 @@ mod patch {
             .log(
                 "nest:update",
                 serde_json::json!({
+                    "uuid": nest.uuid,
                     "author": nest.author,
                     "name": nest.name,
                     "description": nest.description,

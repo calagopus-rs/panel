@@ -30,8 +30,8 @@ pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivity
 #[derive(Clone)]
 pub struct UserActivityLogger {
     state: State,
-    user_id: i32,
-    api_key_id: Option<i32>,
+    user_uuid: uuid::Uuid,
+    api_key_uuid: Option<uuid::Uuid>,
     ip: std::net::IpAddr,
 }
 
@@ -39,8 +39,8 @@ impl UserActivityLogger {
     pub async fn log(&self, event: &str, data: serde_json::Value) {
         if let Err(err) = crate::models::user_activity::UserActivity::log(
             &self.state.database,
-            self.user_id,
-            self.api_key_id,
+            self.user_uuid,
+            self.api_key_uuid,
             event,
             self.ip.into(),
             data,
@@ -48,7 +48,7 @@ impl UserActivityLogger {
         .await
         {
             tracing::warn!(
-                user = self.user_id,
+                user = %self.user_uuid,
                 "failed to log user activity: {:#?}",
                 err
             );
@@ -83,7 +83,7 @@ pub async fn auth(
 
         state
             .database
-            .batch_action("update_user_session", session.id, {
+            .batch_action("update_user_session", session.uuid, {
                 let state = state.clone();
                 let user_agent = crate::utils::slice_up_to(
                     req.headers()
@@ -98,15 +98,15 @@ pub async fn auth(
                     if let Err(err) = sqlx::query!(
                         "UPDATE user_sessions
                         SET ip = $1, user_agent = $2, last_used = NOW()
-                        WHERE id = $3",
+                        WHERE user_sessions.uuid = $3",
                         sqlx::types::ipnetwork::IpNetwork::from(ip.0),
                         user_agent,
-                        session.id,
+                        session.uuid,
                     )
                     .execute(state.database.write())
                     .await
                     {
-                        tracing::warn!(user = user.id, "failed to update user session: {:#?}", err);
+                        tracing::warn!(user = %user.uuid, "failed to update user session: {:#?}", err);
                         sentry::capture_error(&err);
                     }
                 }
@@ -128,8 +128,8 @@ pub async fn auth(
 
         req.extensions_mut().insert(UserActivityLogger {
             state: Arc::clone(&state),
-            user_id: user.id,
-            api_key_id: None,
+            user_uuid: user.uuid,
+            api_key_uuid: None,
             ip: ip.0,
         });
         req.extensions_mut().insert(user);
@@ -161,20 +161,20 @@ pub async fn auth(
 
         state
             .database
-            .batch_action("update_user_api_key", api_key.id, {
+            .batch_action("update_user_api_key", api_key.uuid, {
                 let state = state.clone();
 
                 async move {
                     if let Err(err) = sqlx::query!(
                         "UPDATE user_api_keys
                         SET last_used = NOW()
-                        WHERE id = $1",
-                        api_key.id,
+                        WHERE user_api_keys.uuid = $1",
+                        api_key.uuid,
                     )
                     .execute(state.database.write())
                     .await
                     {
-                        tracing::warn!(user = user.id, "failed to update api key: {:#?}", err);
+                        tracing::warn!(user = %user.uuid, "failed to update api key: {:#?}", err);
                     }
                 }
             })
@@ -182,8 +182,8 @@ pub async fn auth(
 
         req.extensions_mut().insert(UserActivityLogger {
             state: Arc::clone(&state),
-            user_id: user.id,
-            api_key_id: Some(api_key.id),
+            user_uuid: user.uuid,
+            api_key_uuid: Some(api_key.uuid),
             ip: ip.0,
         });
         req.extensions_mut().insert(user);

@@ -7,10 +7,10 @@ interface Data {
   description: string | null;
 }
 
-export default async (nest: number, data: Data): Promise<void> => {
+export default async (nestUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/admin/nests/${nest}`, transformKeysToSnakeCase(data))
+      .patch(`/api/admin/nests/${nestUuid}`, transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

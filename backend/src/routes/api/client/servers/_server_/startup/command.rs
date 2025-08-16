@@ -65,9 +65,9 @@ mod put {
         sqlx::query!(
             "UPDATE servers
             SET startup = $1
-            WHERE servers.id = $2",
+            WHERE servers.uuid = $2",
             data.command,
-            server.id
+            server.uuid
         )
         .execute(state.database.write())
         .await?;

@@ -67,7 +67,7 @@ const NestsContainer = () => {
                 <ContextMenuProvider>
                   <TableBody>
                     {nests.data.map((nest) => (
-                      <NestRow key={nest.id} nest={nest} />
+                      <NestRow key={nest.uuid} nest={nest} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>

@@ -55,9 +55,11 @@ mod put {
 
         if user.email != data.email {
             match sqlx::query!(
-                "UPDATE users SET email = $1 WHERE id = $2",
+                "UPDATE users
+                SET email = $1
+                WHERE users.uuid = $2",
                 data.email,
-                user.id
+                user.uuid
             )
             .execute(state.database.write())
             .await

@@ -60,9 +60,9 @@ mod get {
                 .ok();
         }
 
-        let backups = ServerBackup::by_server_id_with_pagination(
+        let backups = ServerBackup::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -143,7 +143,7 @@ mod post {
             );
         }
 
-        let backups = ServerBackup::count_by_server_id(&state.database, server.id).await;
+        let backups = ServerBackup::count_by_server_uuid(&state.database, server.uuid).await;
         if backups >= server.backup_limit as i64 {
             return (
                 StatusCode::EXPECTATION_FAILED,
@@ -170,7 +170,7 @@ mod post {
             .log(
                 "server:backup.create",
                 serde_json::json!({
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
                     "name": backup.name,
                     "ignored_files": backup.ignored_files,
                 }),

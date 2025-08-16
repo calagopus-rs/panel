@@ -91,15 +91,15 @@ mod post {
                     expiration_time: Some(chrono::Utc::now().timestamp() + 300),
                     not_before: None,
                     issued_at: Some(chrono::Utc::now().timestamp()),
-                    jwt_id: user.id.to_string(),
+                    jwt_id: user.uuid.to_string(),
                 },
-                user_id: user.id,
+                user_uuid: user.uuid,
                 user_totp_secret: secret.clone(),
             })?;
 
             if let Err(err) = UserActivity::log(
                 &state.database,
-                user.id,
+                user.uuid,
                 None,
                 "auth:checkpoint",
                 ip.0.into(),
@@ -107,14 +107,14 @@ mod post {
             )
             .await
             {
-                tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
+                tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
             }
 
             ApiResponse::json(Response::TwoFactorRequired { token }).ok()
         } else {
             let key = UserSession::create(
                 &state.database,
-                user.id,
+                user.uuid,
                 ip.0.into(),
                 headers
                     .get("User-Agent")
@@ -140,7 +140,7 @@ mod post {
 
             if let Err(err) = UserActivity::log(
                 &state.database,
-                user.id,
+                user.uuid,
                 None,
                 "auth:success",
                 ip.0.into(),
@@ -150,7 +150,7 @@ mod post {
             )
             .await
             {
-                tracing::warn!(user = user.id, "failed to log user activity: {:#?}", err);
+                tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
             }
 
             ApiResponse::json(Response::Completed {

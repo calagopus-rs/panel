@@ -55,9 +55,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
@@ -96,9 +96,9 @@ mod delete {
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -108,7 +108,7 @@ mod delete {
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let backups = if data.delete_backups {
-            ServerBackup::all_by_server_id(&state.database, server.id).await?
+            ServerBackup::all_by_server_uuid(&state.database, server.uuid).await?
         } else {
             Vec::new()
         };
@@ -139,8 +139,7 @@ mod delete {
             .log(
                 "server:delete",
                 serde_json::json!({
-                    "server": server.uuid,
-
+                    "uuid": server.uuid,
                     "name": server.name,
                 }),
             )
@@ -167,8 +166,8 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        owner_id: Option<i32>,
-        egg_id: Option<i32>,
+        owner_uuid: Option<uuid::Uuid>,
+        egg_uuid: Option<uuid::Uuid>,
 
         suspended: Option<bool>,
 
@@ -208,9 +207,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -225,8 +224,8 @@ mod patch {
                 .ok();
         }
 
-        if let Some(owner_id) = data.owner_id {
-            let owner = match User::by_id(&state.database, owner_id).await? {
+        if let Some(owner_uuid) = data.owner_uuid {
+            let owner = match User::by_uuid(&state.database, owner_uuid).await? {
                 Some(owner) => owner,
                 None => {
                     return ApiResponse::error("owner not found")
@@ -237,8 +236,8 @@ mod patch {
 
             server.owner = owner;
         }
-        if let Some(egg_id) = data.egg_id {
-            let egg = match NestEgg::by_id(&state.database, egg_id).await? {
+        if let Some(egg_uuid) = data.egg_uuid {
+            let egg = match NestEgg::by_uuid(&state.database, egg_uuid).await? {
                 Some(egg) => egg,
                 None => {
                     return ApiResponse::error("egg not found")
@@ -307,14 +306,14 @@ mod patch {
         match sqlx::query!(
             "UPDATE servers
             SET
-                owner_id = $1, egg_id = $2, suspended = $3, external_id = $4,
+                owner_uuid = $1, egg_uuid = $2, suspended = $3, external_id = $4,
                 name = $5, description = $6, cpu = $7, memory = $8,
                 swap = $9, disk = $10, io_weight = $11, pinned_cpus = $12,
                 startup = $13, image = $14, timezone = $15, allocation_limit = $16,
                 backup_limit = $17, database_limit = $18
-            WHERE id = $19",
-            server.owner.id,
-            server.egg.id,
+            WHERE servers.uuid = $19",
+            server.owner.uuid,
+            server.egg.uuid,
             server.suspended,
             server.external_id,
             server.name,
@@ -331,7 +330,7 @@ mod patch {
             server.allocation_limit,
             server.backup_limit,
             server.database_limit,
-            server.id,
+            server.uuid,
         )
         .execute(state.database.write())
         .await
@@ -350,9 +349,9 @@ mod patch {
             .log(
                 "server:update",
                 serde_json::json!({
-                    "server_id": server.id,
-                    "owner_id": server.owner.id,
-                    "egg_id": server.egg.id,
+                    "uuid": server.uuid,
+                    "owner_uuid": server.owner.uuid,
+                    "egg_uuid": server.egg.uuid,
 
                     "external_id": server.external_id,
                     "name": server.name,

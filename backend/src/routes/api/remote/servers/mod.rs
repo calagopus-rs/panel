@@ -53,9 +53,9 @@ mod get {
                 .ok();
         }
 
-        let servers = Server::by_node_id_with_pagination(
+        let servers = Server::by_node_uuid_with_pagination(
             &state.database,
-            node.id,
+            node.uuid,
             params.page,
             params.per_page,
             None,

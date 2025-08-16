@@ -28,13 +28,13 @@ mod post {
         ),
     ))]
     pub async fn route(state: GetState, node: GetNode, server: GetServer) -> ApiResponseResult {
-        if server.destination_node_id.is_none() {
+        if server.destination_node_uuid.is_none() {
             return ApiResponse::error("server is not being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
         }
 
-        if node.id != server.node.id {
+        if node.uuid != server.node.uuid {
             return ApiResponse::error("source node must call failure endpoint")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
@@ -45,21 +45,21 @@ mod post {
         let (allocations, _) = tokio::try_join!(
             sqlx::query!(
                 r#"
-                SELECT server_allocations.id FROM server_allocations
-                JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-                WHERE server_allocations.server_id = $1 AND node_allocations.node_id != $2
+                SELECT server_allocations.uuid FROM server_allocations
+                JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                WHERE server_allocations.server_uuid = $1 AND node_allocations.node_uuid != $2
                 "#,
-                server.id,
-                server.node.id
+                server.uuid,
+                server.node.uuid
             )
             .fetch_all(state.database.read()),
             sqlx::query!(
                 r#"
                 UPDATE servers
-                SET destination_allocation_id = NULL, destination_node_id = NULL
-                WHERE servers.id = $1
+                SET destination_allocation_uuid = NULL, destination_node_uuid = NULL
+                WHERE servers.uuid = $1
                 "#,
-                server.id
+                server.uuid
             )
             .execute(&mut *transaction)
         )?;
@@ -67,9 +67,9 @@ mod post {
         sqlx::query!(
             r#"
             DELETE FROM server_allocations
-            WHERE server_allocations.id = ANY($1)
+            WHERE server_allocations.uuid = ANY($1)
             "#,
-            &allocations.into_iter().map(|a| a.id).collect::<Vec<_>>()
+            &allocations.into_iter().map(|a| a.uuid).collect::<Vec<_>>()
         )
         .execute(&mut *transaction)
         .await?;

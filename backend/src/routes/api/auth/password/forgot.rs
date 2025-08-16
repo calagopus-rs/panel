@@ -53,11 +53,11 @@ mod post {
         };
 
         tokio::spawn(async move {
-            let token = match UserPasswordReset::create(&state.database, user.id).await {
+            let token = match UserPasswordReset::create(&state.database, user.uuid).await {
                 Ok(token) => token,
                 Err(err) => {
                     tracing::warn!(
-                        user = user.id,
+                        user = %user.uuid,
                         "failed to create password reset token: {:#?}",
                         err
                     );

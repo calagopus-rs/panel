@@ -49,8 +49,8 @@ export const settings = pgTable('settings', {
 ])
 
 export const adminActivities = pgTable('admin_activities', {
-	userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
-	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'set null' }),
+	apiKeyUuid: uuid('api_key_uuid').references(() => userApiKeys.uuid, { onDelete: 'set null' }),
 
 	event: varchar('event', { length: 255 }).notNull(),
 	ip: inet('ip'),
@@ -58,13 +58,13 @@ export const adminActivities = pgTable('admin_activities', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (adminActivities) => [
-	index('admin_activities_user_id_idx').on(adminActivities.userId),
+	index('admin_activities_user_uuid_idx').on(adminActivities.userUuid),
 	index('admin_activities_event_idx').on(adminActivities.event),
-	index('admin_activities_user_id_event_idx').on(adminActivities.userId, adminActivities.event)
+	index('admin_activities_user_uuid_event_idx').on(adminActivities.userUuid, adminActivities.event)
 ])
 
 export const users = pgTable('users', {
-	id: serial('id').primaryKey().notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	externalId: varchar('external_id', { length: 255 }),
 
 	avatar: varchar('avatar', { length: 255 }),
@@ -88,8 +88,8 @@ export const users = pgTable('users', {
 ])
 
 export const userActivities = pgTable('user_activities', {
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
-	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
+	userId: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
+	apiKeyUuid: uuid('api_key_uuid').references(() => userApiKeys.uuid, { onDelete: 'set null' }),
 
 	event: varchar('event', { length: 255 }).notNull(),
 	ip: inet('ip').notNull(),
@@ -102,8 +102,8 @@ export const userActivities = pgTable('user_activities', {
 ])
 
 export const userSessions = pgTable('user_sessions', {
-	id: serial('id').primaryKey().notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userId: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	key_id: char('key_id', { length: 16 }).notNull(),
 	key: text('key').notNull(),
@@ -118,32 +118,31 @@ export const userSessions = pgTable('user_sessions', {
 ])
 
 export const userRecoveryCodes = pgTable('user_recovery_codes', {
-	id: serial('id').primaryKey().notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	code: text('code').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userRecoveryCodes) => [
-	index('user_recovery_codes_user_id_idx').on(userRecoveryCodes.userId),
-	uniqueIndex('user_recovery_codes_user_id_code_idx').on(userRecoveryCodes.userId, userRecoveryCodes.code)
+	index('user_recovery_codes_user_uuid_idx').on(userRecoveryCodes.userUuid),
+	uniqueIndex('user_recovery_codes_user_uuid_code_idx').on(userRecoveryCodes.userUuid, userRecoveryCodes.code)
 ])
 
 export const userPasswordResets = pgTable('user_password_resets', {
-	id: serial('id').primaryKey().notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	token: text('token').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userPasswordResets) => [
-	index('user_password_resets_user_id_idx').on(userPasswordResets.userId),
+	index('user_password_resets_user_uuid_idx').on(userPasswordResets.userUuid),
 	uniqueIndex('user_password_resets_token_idx').on(userPasswordResets.token)
 ])
 
 export const userSshKeys = pgTable('user_ssh_keys', {
-	id: serial('id').primaryKey().notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 31 }).notNull(),
 	fingerprint: char('fingerprint', { length: 50 }).notNull(),
@@ -152,14 +151,14 @@ export const userSshKeys = pgTable('user_ssh_keys', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userSshKeys) => [
-	index('user_ssh_keys_user_id_idx').on(userSshKeys.userId),
-	uniqueIndex('user_ssh_keys_user_id_name_idx').on(userSshKeys.userId, userSshKeys.name),
-	uniqueIndex('user_ssh_keys_user_id_fingerprint_idx').on(userSshKeys.userId, userSshKeys.fingerprint)
+	index('user_ssh_keys_user_uuid_idx').on(userSshKeys.userUuid),
+	uniqueIndex('user_ssh_keys_user_uuid_name_idx').on(userSshKeys.userUuid, userSshKeys.name),
+	uniqueIndex('user_ssh_keys_user_uuid_fingerprint_idx').on(userSshKeys.userUuid, userSshKeys.fingerprint)
 ])
 
 export const userApiKeys = pgTable('user_api_keys', {
-	id: serial('id').primaryKey().notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 31 }).notNull(),
 	keyStart: char('key_start', { length: 16 }).notNull(),
@@ -169,14 +168,14 @@ export const userApiKeys = pgTable('user_api_keys', {
 	created: timestamp('created').default(sql`now()`).notNull(),
 	lastUsed: timestamp('last_used')
 }, (userApiKeys) => [
-	index('user_api_keys_user_id_idx').on(userApiKeys.userId),
-	uniqueIndex('user_api_keys_user_id_name_idx').on(userApiKeys.userId, userApiKeys.name),
-	uniqueIndex('user_api_keys_user_id_key_start_idx').on(userApiKeys.userId, userApiKeys.keyStart),
+	index('user_api_keys_user_uuid_idx').on(userApiKeys.userUuid),
+	uniqueIndex('user_api_keys_user_uuid_name_idx').on(userApiKeys.userUuid, userApiKeys.name),
+	uniqueIndex('user_api_keys_user_uuid_key_start_idx').on(userApiKeys.userUuid, userApiKeys.keyStart),
 	uniqueIndex('user_api_keys_key_idx').on(userApiKeys.key)
 ])
 
 export const mounts = pgTable('mounts', {
-	id: serial('id').primaryKey().notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -194,7 +193,7 @@ export const mounts = pgTable('mounts', {
 ])
 
 export const locations = pgTable('locations', {
-	id: serial('id').primaryKey().notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
 	shortName: varchar('short_name', { length: 31 }).notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
@@ -210,18 +209,17 @@ export const locations = pgTable('locations', {
 ])
 
 export const locationDatabaseHosts = pgTable('location_database_hosts', {
-	locationId: integer('location_id').references(() => locations.id, { onDelete: 'cascade' }).notNull(),
-	databaseHostId: integer('database_host_id').references(() => databaseHosts.id, { onDelete: 'cascade' }).notNull(),
+	locationUuid: uuid('location_uuid').references(() => locations.uuid, { onDelete: 'cascade' }).notNull(),
+	databaseHostUuid: uuid('database_host_uuid').references(() => databaseHosts.uuid, { onDelete: 'cascade' }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locationDatabaseHosts) => [
-	primaryKey({ name: 'location_database_hosts_pk', columns: [locationDatabaseHosts.locationId, locationDatabaseHosts.databaseHostId] }),
+	primaryKey({ name: 'location_database_hosts_pk', columns: [locationDatabaseHosts.locationUuid, locationDatabaseHosts.databaseHostUuid] }),
 ])
 
 export const nodes = pgTable('nodes', {
-	id: serial('id').primaryKey().notNull(),
-	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
-	locationId: integer('location_id').references(() => locations.id).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	locationUuid: uuid('location_uuid').references(() => locations.uuid).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	public: boolean('public').notNull(),
@@ -249,20 +247,20 @@ export const nodes = pgTable('nodes', {
 ])
 
 export const nodeMounts = pgTable('node_mounts', {
-	nodeId: integer('node_id').references(() => nodes.id, { onDelete: 'cascade' }).notNull(),
-	mountId: integer('mount_id').references(() => mounts.id, { onDelete: 'cascade' }).notNull(),
+	nodeUuid: uuid('node_uuid').references(() => nodes.uuid, { onDelete: 'cascade' }).notNull(),
+	mountUuid: uuid('mount_uuid').references(() => mounts.uuid, { onDelete: 'cascade' }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (nodeMounts) => [
-	primaryKey({ name: 'node_mounts_pk', columns: [nodeMounts.nodeId, nodeMounts.mountId] }),
+	primaryKey({ name: 'node_mounts_pk', columns: [nodeMounts.nodeUuid, nodeMounts.mountUuid] }),
 
-	index('node_mounts_node_id_idx').on(nodeMounts.nodeId),
-	index('node_mounts_mount_id_idx').on(nodeMounts.mountId)
+	index('node_mounts_node_uuid_idx').on(nodeMounts.nodeUuid),
+	index('node_mounts_mount_uuid_idx').on(nodeMounts.mountUuid)
 ])
 
 export const nodeAllocations = pgTable('node_allocations', {
-	id: serial('id').primaryKey().notNull(),
-	nodeId: integer('node_id').references(() => nodes.id).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
 
 	ip: inet('ip').notNull(),
 	ipAlias: varchar('ip_alias', { length: 255 }),
@@ -270,13 +268,13 @@ export const nodeAllocations = pgTable('node_allocations', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (allocations) => [
-	index('allocations_node_id_idx').on(allocations.nodeId),
-	uniqueIndex('allocations_node_id_ip_port_idx').on(allocations.nodeId, allocations.ip, allocations.port)
+	index('allocations_node_uuid_idx').on(allocations.nodeUuid),
+	uniqueIndex('allocations_node_uuid_port_idx').on(allocations.nodeUuid, allocations.port)
 ])
 
 export const nests = pgTable('nests', {
-	id: serial('id').primaryKey().notNull(),
-	
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+
 	author: varchar('author', { length: 255 }).notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -287,8 +285,8 @@ export const nests = pgTable('nests', {
 ])
 
 export const nestEggs = pgTable('nest_eggs', {
-	id: serial('id').primaryKey().notNull(),
-	nestId: integer('nest_id').references(() => nests.id).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	nestUuid: uuid('nest_uuid').references(() => nests.uuid).notNull(),
 
 	author: varchar('author', { length: 255 }).notNull(),
 	name: varchar('name', { length: 255 }).notNull(),
@@ -309,25 +307,25 @@ export const nestEggs = pgTable('nest_eggs', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggs) => [
-	index('eggs_nest_id_idx').on(eggs.nestId),
-	uniqueIndex('eggs_nest_id_name_idx').on(eggs.nestId, eggs.name),
+	index('eggs_nest_uuid_idx').on(eggs.nestUuid),
+	uniqueIndex('eggs_nest_uuid_name_idx').on(eggs.nestUuid, eggs.name),
 ])
 
 export const nestEggMounts = pgTable('nest_egg_mounts', {
-	eggId: integer('egg_id').references(() => nestEggs.id, { onDelete: 'cascade' }).notNull(),
-	mountId: integer('mount_id').references(() => mounts.id, { onDelete: 'cascade' }).notNull(),
+	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid, { onDelete: 'cascade' }).notNull(),
+	mountUuid: uuid('mount_uuid').references(() => mounts.uuid, { onDelete: 'cascade' }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggMounts) => [
-	primaryKey({ name: 'egg_mounts_pk', columns: [eggMounts.eggId, eggMounts.mountId] }),
+	primaryKey({ name: 'egg_mounts_pk', columns: [eggMounts.eggUuid, eggMounts.mountUuid] }),
 
-	index('egg_mounts_egg_id_idx').on(eggMounts.eggId),
-	index('egg_mounts_mount_id_idx').on(eggMounts.mountId)
+	index('egg_mounts_egg_uuid_idx').on(eggMounts.eggUuid),
+	index('egg_mounts_mount_uuid_idx').on(eggMounts.mountUuid)
 ])
 
 export const nestEggVariables = pgTable('nest_egg_variables', {
-	id: serial('id').primaryKey().notNull(),
-	eggId: integer('egg_id').references(() => nestEggs.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -341,13 +339,13 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggVariables) => [
-	index('egg_variables_egg_id_idx').on(eggVariables.eggId),
-	uniqueIndex('egg_variables_egg_id_name_idx').on(eggVariables.eggId, eggVariables.name),
-	uniqueIndex('egg_variables_egg_id_env_variable_idx').on(eggVariables.eggId, eggVariables.envVariable)
+	index('egg_variables_egg_uuid_idx').on(eggVariables.eggUuid),
+	uniqueIndex('egg_variables_egg_uuid_name_idx').on(eggVariables.eggUuid, eggVariables.name),
+	uniqueIndex('egg_variables_egg_uuid_env_variable_idx').on(eggVariables.eggUuid, eggVariables.envVariable)
 ])
 
 export const databaseHosts = pgTable('database_hosts', {
-	id: serial('id').primaryKey().notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	public: boolean('public').default(false).notNull(),
@@ -368,16 +366,15 @@ export const databaseHosts = pgTable('database_hosts', {
 ])
 
 export const servers = pgTable('servers', {
-	id: serial('id').primaryKey().notNull(),
-	uuid: uuid('uuid').notNull(),
+	uuid: uuid('uuid').primaryKey().notNull(),
 	uuidShort: integer('uuid_short').notNull(),
 	externalId: varchar('external_id', { length: 255 }),
-	allocationId: integer('allocation_id').references((): PgColumn => serverAllocations.id, { onDelete: 'set null' }),
-	destinationAllocationId: integer('destination_allocation_id').references((): PgColumn => serverAllocations.id, { onDelete: 'set null' }),
-	nodeId: integer('node_id').references(() => nodes.id).notNull(),
-	destinationNodeId: integer('destination_node_id').references(() => nodes.id),
-	ownerId: integer('owner_id').references(() => users.id).notNull(),
-	eggId: integer('egg_id').references(() => nestEggs.id).notNull(),
+	allocationUuid: uuid('allocation_uuid').references((): PgColumn => serverAllocations.uuid, { onDelete: 'set null' }),
+	destinationAllocationUuid: uuid('destination_allocation_uuid').references((): PgColumn => serverAllocations.uuid, { onDelete: 'set null' }),
+	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
+	destinationNodeUuid: uuid('destination_node_uuid').references(() => nodes.uuid),
+	ownerUuid: uuid('owner_uuid').references(() => users.uuid).notNull(),
+	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
@@ -403,45 +400,45 @@ export const servers = pgTable('servers', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (servers) => [
-	index('servers_node_id_idx').on(servers.nodeId),
+	index('servers_node_uuid_idx').on(servers.nodeUuid),
 	uniqueIndex('servers_uuid_idx').on(servers.uuid),
 	uniqueIndex('servers_uuid_short_idx').on(servers.uuidShort),
 	index('servers_external_id_idx').on(servers.externalId),
-	index('servers_owner_id_idx').on(servers.ownerId),
+	index('servers_owner_uuid_idx').on(servers.ownerUuid),
 ])
 
 export const serverAllocations = pgTable('server_allocations', {
-	id: serial('id').primaryKey().notNull(),
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
-	allocationId: integer('allocation_id').references(() => nodeAllocations.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
+	allocationUuid: uuid('allocation_uuid').references(() => nodeAllocations.uuid, { onDelete: 'cascade' }).notNull(),
 
 	notes: text('notes'),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverAllocations) => [
-	index('server_allocations_server_id_idx').on(serverAllocations.serverId),
-	uniqueIndex('server_allocations_allocation_id_idx').on(serverAllocations.allocationId)
+	index('server_allocations_server_uuid_idx').on(serverAllocations.serverUuid),
+	uniqueIndex('server_allocations_allocation_uuid_idx').on(serverAllocations.allocationUuid)
 ])
 
 export const serverSubusers = pgTable('server_subusers', {
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	permissions: varchar('permissions', { length: 32 }).array().notNull(),
 	ignored_files: text('ignored_files').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverSubusers) => [
-	primaryKey({ name: 'server_subusers_pk', columns: [serverSubusers.serverId, serverSubusers.userId] }),
+	primaryKey({ name: 'server_subusers_pk', columns: [serverSubusers.serverUuid, serverSubusers.userUuid] }),
 
-	index('server_subusers_server_id_idx').on(serverSubusers.serverId),
-	index('server_subusers_user_id_idx').on(serverSubusers.userId)
+	index('server_subusers_server_uuid_idx').on(serverSubusers.serverUuid),
+	index('server_subusers_user_uuid_idx').on(serverSubusers.userUuid)
 ])
 
 export const serverActivities = pgTable('server_activities', {
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
-	userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
-	apiKeyId: integer('api_key_id').references(() => userApiKeys.id, { onDelete: 'set null' }),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'set null' }),
+	apiKeyUuid: uuid('api_key_uuid').references(() => userApiKeys.uuid, { onDelete: 'set null' }),
 
 	event: varchar('event', { length: 255 }).notNull(),
 	ip: inet('ip'),
@@ -449,43 +446,42 @@ export const serverActivities = pgTable('server_activities', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverActivities) => [
-	index('server_activities_server_id_idx').on(serverActivities.serverId),
-	index('server_activities_user_id_idx').on(serverActivities.userId),
-	index('server_activities_server_id_event_idx').on(serverActivities.serverId, serverActivities.event),
-	index('server_activities_user_id_event_idx').on(serverActivities.userId, serverActivities.event)
+	index('server_activities_server_uuid_idx').on(serverActivities.serverUuid),
+	index('server_activities_user_uuid_idx').on(serverActivities.userUuid),
+	index('server_activities_server_uuid_event_idx').on(serverActivities.serverUuid, serverActivities.event),
+	index('server_activities_user_uuid_event_idx').on(serverActivities.userUuid, serverActivities.event)
 ])
 
 export const serverVariables = pgTable('server_variables', {
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
-	variableId: integer('variable_id').references(() => nestEggVariables.id, { onDelete: 'cascade' }).notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
+	variableUuid: uuid('variable_uuid').references(() => nestEggVariables.uuid, { onDelete: 'cascade' }).notNull(),
 
 	value: text('value').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverVariables) => [
-	primaryKey({ name: 'server_variables_pk', columns: [serverVariables.serverId, serverVariables.variableId] }),
+	primaryKey({ name: 'server_variables_pk', columns: [serverVariables.serverUuid, serverVariables.variableUuid] }),
 
-	index('server_variables_server_id_idx').on(serverVariables.serverId),
-	index('server_variables_variable_id_idx').on(serverVariables.variableId)
+	index('server_variables_server_uuid_idx').on(serverVariables.serverUuid),
+	index('server_variables_variable_uuid_idx').on(serverVariables.variableUuid)
 ])
 
 export const serverMounts = pgTable('server_mounts', {
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'cascade' }).notNull(),
-	mountId: integer('mount_id').references(() => mounts.id, { onDelete: 'cascade' }).notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
+	mountUuid: uuid('mount_uuid').references(() => mounts.uuid, { onDelete: 'cascade' }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverMounts) => [
-	primaryKey({ name: 'server_mounts_pk', columns: [serverMounts.serverId, serverMounts.mountId] }),
+	primaryKey({ name: 'server_mounts_pk', columns: [serverMounts.serverUuid, serverMounts.mountUuid] }),
 
-	index('server_mounts_server_id_idx').on(serverMounts.serverId),
-	index('server_mounts_mount_id_idx').on(serverMounts.mountId)
+	index('server_mounts_server_uuid_idx').on(serverMounts.serverUuid),
+	index('server_mounts_mount_uuid_idx').on(serverMounts.mountUuid)
 ])
 
 export const serverBackups = pgTable('server_backups', {
-	id: serial('id').primaryKey().notNull(),
-	uuid: uuid('uuid').default(sql`gen_random_uuid()`).notNull(),
-	serverId: integer('server_id').references(() => servers.id, { onDelete: 'set null' }),
-	nodeId: integer('node_id').references(() => nodes.id, { onDelete: 'cascade' }).notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'set null' }),
+	nodeUuid: uuid('node_uuid').references(() => nodes.uuid, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	successful: boolean('successful').default(false).notNull(),
@@ -504,14 +500,14 @@ export const serverBackups = pgTable('server_backups', {
 	deleted: timestamp('deleted'),
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverBackups) => [
-	index('server_backups_server_id_idx').on(serverBackups.serverId),
+	index('server_backups_server_uuid_idx').on(serverBackups.serverUuid),
 	uniqueIndex('server_backups_uuid_idx').on(serverBackups.uuid)
 ])
 
 export const serverDatabases = pgTable('server_databases', {
 	id: serial('id').primaryKey().notNull(),
-	serverId: integer('server_id').references(() => servers.id).notNull(),
-	databaseHostId: integer('database_host_id').references(() => databaseHosts.id).notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid).notNull(),
+	databaseHostUuid: uuid('database_host_uuid').references(() => databaseHosts.uuid).notNull(),
 
 	name: varchar('name', { length: 31 }).notNull(),
 	username: varchar('username', { length: 31 }).notNull(),
@@ -519,6 +515,6 @@ export const serverDatabases = pgTable('server_databases', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverDatabases) => [
-	index('server_databases_server_id_idx').on(serverDatabases.serverId),
-	uniqueIndex('server_databases_server_id_database_idx').on(serverDatabases.serverId, serverDatabases.name)
+	index('server_databases_server_uuid_idx').on(serverDatabases.serverUuid),
+	uniqueIndex('server_databases_server_uuid_database_idx').on(serverDatabases.serverUuid, serverDatabases.name)
 ])

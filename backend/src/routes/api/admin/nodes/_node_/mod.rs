@@ -21,16 +21,16 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let node = match node.first().map(|s| s.parse::<i32>()) {
+    let node = match node.first().map(|s| s.parse::<uuid::Uuid>()) {
         Some(Ok(id)) => id,
         _ => {
-            return Ok(ApiResponse::error("invalid node id")
+            return Ok(ApiResponse::error("invalid node uuid")
                 .with_status(StatusCode::BAD_REQUEST)
                 .into_response());
         }
     };
 
-    let node = Node::by_id(&state.database, node).await;
+    let node = Node::by_uuid(&state.database, node).await;
     let node = match node {
         Ok(Some(node)) => node,
         Ok(None) => {
@@ -65,9 +65,9 @@ mod get {
         (status = BAD_REQUEST, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(state: GetState, node: GetNode) -> ApiResponseResult {
@@ -100,9 +100,9 @@ mod delete {
         (status = BAD_REQUEST, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -128,15 +128,13 @@ mod delete {
                 .ok();
         }
 
-        Node::delete_by_id(&state.database, node.id).await?;
+        Node::delete_by_uuid(&state.database, node.uuid).await?;
 
         activity_logger
             .log(
                 "node:delete",
                 serde_json::json!({
-                    "location_id": node.location.id,
-                    "node_id": node.id,
-
+                    "uuid": node.uuid,
                     "name": node.name,
                 }),
             )
@@ -162,7 +160,7 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        location_id: Option<i32>,
+        location_uuid: Option<uuid::Uuid>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -201,9 +199,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -218,8 +216,8 @@ mod patch {
                 .ok();
         }
 
-        if let Some(location_id) = data.location_id {
-            let location = match Location::by_id(&state.database, location_id).await? {
+        if let Some(location_uuid) = data.location_uuid {
+            let location = match Location::by_uuid(&state.database, location_uuid).await? {
                 Some(location) => location,
                 None => {
                     return ApiResponse::error("location not found")
@@ -279,12 +277,12 @@ mod patch {
 
         match sqlx::query!(
             "UPDATE nodes
-            SET location_id = $1, name = $2,
+            SET location_uuid = $1, name = $2,
                 public = $3, description = $4, public_url = $5,
                 url = $6, sftp_host = $7, sftp_port = $8,
                 memory = $9, disk = $10
-            WHERE id = $11",
-            node.location.id,
+            WHERE nodes.uuid = $11",
+            node.location.uuid,
             node.name,
             node.public,
             node.description,
@@ -294,7 +292,7 @@ mod patch {
             node.sftp_port,
             node.memory,
             node.disk,
-            node.id,
+            node.uuid,
         )
         .execute(state.database.write())
         .await
@@ -318,7 +316,8 @@ mod patch {
             .log(
                 "node:update",
                 serde_json::json!({
-                    "node_id": node.id,
+                    "uuid": node.uuid,
+                    "location_uuid": node.location.uuid,
 
                     "name": node.name,
                     "public": node.public,

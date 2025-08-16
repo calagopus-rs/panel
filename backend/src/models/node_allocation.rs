@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NodeAllocation {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub ip_alias: Option<String>,
@@ -22,7 +22,7 @@ impl BaseModel for NodeAllocation {
         let table = table.unwrap_or("node_allocations");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.ip"), format!("{prefix}ip")),
             (format!("{table}.ip_alias"), format!("{prefix}ip_alias")),
             (format!("{table}.port"), format!("{prefix}port")),
@@ -35,7 +35,7 @@ impl BaseModel for NodeAllocation {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             ip: row.get(format!("{prefix}ip").as_str()),
             ip_alias: row.get(format!("{prefix}ip_alias").as_str()),
             port: row.get(format!("{prefix}port").as_str()),
@@ -47,18 +47,18 @@ impl BaseModel for NodeAllocation {
 impl NodeAllocation {
     pub async fn create(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         ip: &sqlx::types::ipnetwork::IpNetwork,
         ip_alias: Option<&str>,
         port: i32,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO node_allocations (node_id, ip, ip_alias, port)
+            INSERT INTO node_allocations (node_uuid, ip, ip_alias, port)
             VALUES ($1, $2, $3, $4)
             "#,
         )
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(ip)
         .bind(ip_alias)
         .bind(port)
@@ -68,30 +68,30 @@ impl NodeAllocation {
         Ok(())
     }
 
-    pub async fn by_node_id_id(
+    pub async fn by_node_uuid_uuid(
         database: &crate::database::Database,
-        node_id: i32,
-        id: i32,
+        node_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM node_allocations
-            WHERE node_allocations.node_id = $1 AND node_allocations.id = $2
+            WHERE node_allocations.node_uuid = $1 AND node_allocations.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
-        .bind(id)
+        .bind(node_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_node_id_with_pagination(
+    pub async fn by_node_uuid_with_pagination(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
     ) -> Result<super::Pagination<Self>, sqlx::Error> {
@@ -101,13 +101,13 @@ impl NodeAllocation {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_allocations
-            WHERE node_allocations.node_id = $1
+            WHERE node_allocations.node_uuid = $1
             ORDER BY node_allocations.ip, node_allocations.port
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -121,17 +121,17 @@ impl NodeAllocation {
         })
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_uuids(
         database: &crate::database::Database,
-        ids: &[i32],
+        uuids: &[uuid::Uuid],
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM node_allocations
-            WHERE node_allocations.id = ANY($1)
+            WHERE node_allocations.uuid = ANY($1)
             "#,
         )
-        .bind(ids)
+        .bind(uuids)
         .execute(database.write())
         .await?;
 
@@ -141,7 +141,7 @@ impl NodeAllocation {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNodeAllocation {
         AdminApiNodeAllocation {
-            id: self.id,
+            uuid: self.uuid,
             ip: self.ip.ip().to_string(),
             ip_alias: self.ip_alias,
             port: self.port,
@@ -153,7 +153,7 @@ impl NodeAllocation {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "NodeAllocation")]
 pub struct AdminApiNodeAllocation {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub ip: String,
     pub ip_alias: Option<String>,

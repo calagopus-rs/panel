@@ -47,7 +47,8 @@ mod delete {
         }
 
         let subuser =
-            match ServerSubuser::by_server_id_username(&state.database, server.id, &subuser).await?
+            match ServerSubuser::by_server_uuid_username(&state.database, server.uuid, &subuser)
+                .await?
             {
                 Some(subuser) => subuser,
                 None => {
@@ -57,12 +58,13 @@ mod delete {
                 }
             };
 
-        ServerSubuser::delete_by_ids(&state.database, server.id, subuser.user.id).await?;
+        ServerSubuser::delete_by_uuids(&state.database, server.uuid, subuser.user.uuid).await?;
 
         activity_logger
             .log(
                 "server:subuser.delete",
                 serde_json::json!({
+                    "username": subuser.user.username,
                     "email": subuser.user.email,
                 }),
             )
@@ -81,7 +83,7 @@ mod delete {
                         server.uuid,
                         &wings_api::servers_server_ws_permissions::post::RequestBody {
                             user_permissions: vec![wings_api::servers_server_ws_permissions::post::RequestBodyUserPermissions {
-                                user: subuser.user.to_uuid(),
+                                user: subuser.user.uuid,
                                 permissions: Vec::new(),
                                 ignored_files: Vec::new(),
                             }]
@@ -98,7 +100,7 @@ mod delete {
                     .post_servers_server_ws_deny(
                         server.uuid,
                         &wings_api::servers_server_ws_deny::post::RequestBody {
-                            jtis: vec![subuser.user.id.to_string()],
+                            jtis: vec![subuser.user.uuid.to_string()],
                         },
                     )
                     .await
@@ -188,7 +190,8 @@ mod patch {
         }
 
         let mut subuser =
-            match ServerSubuser::by_server_id_username(&state.database, server.id, &subuser).await?
+            match ServerSubuser::by_server_uuid_username(&state.database, server.uuid, &subuser)
+                .await?
             {
                 Some(subuser) => subuser,
                 None => {
@@ -198,7 +201,7 @@ mod patch {
                 }
             };
 
-        if subuser.user.id == user.id {
+        if subuser.user.uuid == user.uuid {
             return ApiResponse::error("cannot update permissions for self")
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -214,11 +217,11 @@ mod patch {
         sqlx::query!(
             "UPDATE server_subusers
             SET permissions = $1, ignored_files = $2
-            WHERE server_subusers.server_id = $3 AND server_subusers.user_id = $4",
+            WHERE server_subusers.server_uuid = $3 AND server_subusers.user_uuid = $4",
             &subuser.permissions,
             &subuser.ignored_files,
-            server.id,
-            subuser.user.id,
+            server.uuid,
+            subuser.user.uuid,
         )
         .execute(state.database.write())
         .await?;
@@ -227,6 +230,7 @@ mod patch {
             .log(
                 "server:subuser.update",
                 serde_json::json!({
+                    "username": subuser.user.username,
                     "email": subuser.user.email,
                     "permissions": subuser.permissions,
                     "ignored_files": subuser.ignored_files,
@@ -247,7 +251,7 @@ mod patch {
                         server.uuid,
                         &wings_api::servers_server_ws_permissions::post::RequestBody {
                             user_permissions: vec![wings_api::servers_server_ws_permissions::post::RequestBodyUserPermissions {
-                                user: subuser.user.to_uuid(),
+                                user: subuser.user.uuid,
                                 permissions: server.wings_permissions(&subuser.user).into_iter().map(String::from).collect(),
                                 ignored_files: subuser.ignored_files,
                             }]

@@ -26,9 +26,12 @@ mod get {
         ),
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
-        let variables =
-            ServerVariable::all_by_server_id_egg_id(&state.database, server.id, server.egg.id)
-                .await?;
+        let variables = ServerVariable::all_by_server_uuid_egg_uuid(
+            &state.database,
+            server.uuid,
+            server.egg.uuid,
+        )
+        .await?;
 
         ApiResponse::json(Response {
             variables: variables
@@ -73,9 +76,9 @@ mod put {
         (status = BAD_REQUEST, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -90,15 +93,18 @@ mod put {
                 .ok();
         }
 
-        let variables =
-            ServerVariable::all_by_server_id_egg_id(&state.database, server.id, server.egg.id)
-                .await?;
+        let variables = ServerVariable::all_by_server_uuid_egg_uuid(
+            &state.database,
+            server.uuid,
+            server.egg.uuid,
+        )
+        .await?;
 
-        let variable_id = if let Some(variable) = variables
+        let variable_uuid = if let Some(variable) = variables
             .iter()
             .find(|variable| variable.variable.env_variable == data.env_variable)
         {
-            variable.variable.id
+            variable.variable.uuid
         } else {
             return ApiResponse::error("variable not found")
                 .with_status(StatusCode::NOT_FOUND)
@@ -137,14 +143,14 @@ mod put {
                 .ok();
         }
 
-        ServerVariable::create(&state.database, server.id, variable_id, &data.value).await?;
+        ServerVariable::create(&state.database, server.uuid, variable_uuid, &data.value).await?;
 
         activity_logger
             .log(
                 "server:variable.update",
                 serde_json::json!({
-                    "server_id": server.id,
-                    "variable_id": variable_id,
+                    "uuid": server.uuid,
+                    "variable_uuid": variable_uuid,
                     "env_variable": data.env_variable,
                     "value": data.value,
                 }),

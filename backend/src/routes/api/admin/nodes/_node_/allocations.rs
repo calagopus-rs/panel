@@ -22,9 +22,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -48,9 +48,9 @@ mod get {
                 .ok();
         }
 
-        let allocations = NodeAllocation::by_node_id_with_pagination(
+        let allocations = NodeAllocation::by_node_uuid_with_pagination(
             &state.database,
-            node.id,
+            node.uuid,
             params.page,
             params.per_page,
         )
@@ -86,7 +86,7 @@ mod delete {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        ids: Vec<i32>,
+        uuids: Vec<uuid::Uuid>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -97,9 +97,9 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -108,15 +108,15 @@ mod delete {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        NodeAllocation::delete_by_ids(&state.database, &data.ids).await?;
+        NodeAllocation::delete_by_uuids(&state.database, &data.uuids).await?;
 
         activity_logger
             .log(
                 "node:allocation.delete",
                 serde_json::json!({
-                    "node_id": node.id,
+                    "node_uuid": node.uuid,
 
-                    "ids": data.ids
+                    "uuids": data.uuids
                 }),
             )
             .await;
@@ -157,9 +157,9 @@ mod put {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -175,31 +175,31 @@ mod put {
         }
 
         let allocation_ip = data.ip.into();
-        let mut promises = Vec::new();
-        promises.reserve_exact(data.ports.len());
+        let mut futures = Vec::new();
+        futures.reserve_exact(data.ports.len());
 
         for port in data.ports.iter().copied() {
             if port < 1024 {
                 continue;
             }
 
-            promises.push(NodeAllocation::create(
+            futures.push(NodeAllocation::create(
                 &state.database,
-                node.id,
+                node.uuid,
                 &allocation_ip,
                 data.ip_alias.as_deref(),
                 port as i32,
             ));
         }
 
-        let results = futures_util::future::join_all(promises).await;
+        let results = futures_util::future::join_all(futures).await;
         let created = results.iter().filter(|r| r.is_ok()).count();
 
         activity_logger
             .log(
                 "node:allocation.create",
                 serde_json::json!({
-                    "node_id": node.id,
+                    "node_uuid": node.uuid,
 
                     "ip": allocation_ip,
                     "ip_alias": data.ip_alias,

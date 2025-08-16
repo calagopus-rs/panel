@@ -17,7 +17,7 @@ export default () => {
 
   useEffect(() => {
     if (params.id) {
-      getNest(Number(params.id))
+      getNest(params.id)
         .then((nest) => {
           setNest(nest);
         })
@@ -34,8 +34,8 @@ export default () => {
       </div>
 
       <SubNavigation>
-        <SubNavigationLink to={`/admin/nests/${nest?.id}`} name={'General'} icon={faCog} />
-        <SubNavigationLink to={`/admin/nests/${nest?.id}/eggs`} name={'Eggs'} icon={faEgg} end={false} />
+        <SubNavigationLink to={`/admin/nests/${nest?.uuid}`} name={'General'} icon={faCog} />
+        <SubNavigationLink to={`/admin/nests/${nest?.uuid}/eggs`} name={'Eggs'} icon={faEgg} end={false} />
       </SubNavigation>
 
       {!nest ? (

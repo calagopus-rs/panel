@@ -24,7 +24,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let server = Server::by_node_id_uuid(&state.database, node.id, server).await;
+    let server = Server::by_node_uuid_uuid(&state.database, node.uuid, server).await;
     let server = match server {
         Ok(Some(server)) => server,
         Ok(None) => {

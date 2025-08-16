@@ -24,9 +24,9 @@ mod get {
         (status = OK, body = inline(Response)),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -54,9 +54,9 @@ mod get {
                 .ok();
         }
 
-        let eggs = NestEgg::by_nest_id_with_pagination(
+        let eggs = NestEgg::by_nest_uuid_with_pagination(
             &state.database,
-            nest.id,
+            nest.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -138,9 +138,9 @@ mod post {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         )
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -163,7 +163,7 @@ mod post {
 
         let egg = match NestEgg::create(
             &state.database,
-            nest.id,
+            nest.uuid,
             &data.author,
             &data.name,
             data.description.as_deref(),
@@ -199,7 +199,8 @@ mod post {
             .log(
                 "nest:egg.create",
                 serde_json::json!({
-                    "nest_id": nest.id,
+                    "uuid": egg.uuid,
+                    "nest_uuid": nest.uuid,
 
                     "author": egg.author,
                     "name": egg.name,

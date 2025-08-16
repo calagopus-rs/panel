@@ -39,48 +39,48 @@ impl BaseModel for ServerMount {
 impl ServerMount {
     pub async fn create(
         database: &crate::database::Database,
-        server_id: i32,
-        mount_id: i32,
+        server_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO server_mounts (server_id, mount_id)
+            INSERT INTO server_mounts (server_uuid, mount_uuid)
             VALUES ($1, $2)
             "#,
         )
-        .bind(server_id)
-        .bind(mount_id)
+        .bind(server_uuid)
+        .bind(mount_uuid)
         .execute(database.write())
         .await?;
 
         Ok(())
     }
 
-    pub async fn by_server_id_mount_id(
+    pub async fn by_server_uuid_mount_uuid(
         database: &crate::database::Database,
-        server_id: i32,
-        mount_id: i32,
+        server_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_mounts
-            JOIN mounts ON mounts.id = server_mounts.mount_id
-            WHERE server_mounts.server_id = $1 AND server_mounts.mount_id = $2
+            JOIN mounts ON mounts.uuid = server_mounts.mount_uuid
+            WHERE server_mounts.server_uuid = $1 AND server_mounts.mount_uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
-        .bind(mount_id)
+        .bind(server_uuid)
+        .bind(mount_uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_id_with_pagination(
+    pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
     ) -> Result<super::Pagination<Self>, sqlx::Error> {
@@ -90,14 +90,14 @@ impl ServerMount {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_mounts
-            JOIN mounts ON mounts.id = server_mounts.mount_id
-            WHERE server_mounts.server_id = $1
-            ORDER BY server_mounts.mount_id ASC
+            JOIN mounts ON mounts.uuid = server_mounts.mount_uuid
+            WHERE server_mounts.server_uuid = $1
+            ORDER BY server_mounts.mount_uuid ASC
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
@@ -111,7 +111,7 @@ impl ServerMount {
         })
     }
 
-    pub async fn mountable_by_server_id_with_pagination(
+    pub async fn mountable_by_server_with_pagination(
         database: &crate::database::Database,
         server: &super::server::Server,
         page: i64,
@@ -124,18 +124,18 @@ impl ServerMount {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM mounts
-            JOIN node_mounts ON mounts.id = node_mounts.mount_id AND node_mounts.node_id = $1
-            JOIN nest_egg_mounts ON mounts.id = nest_egg_mounts.mount_id AND nest_egg_mounts.egg_id = $2
-            LEFT JOIN server_mounts ON server_mounts.mount_id = mounts.id AND server_mounts.server_id = $3
+            JOIN node_mounts ON mounts.uuid = node_mounts.mount_uuid AND node_mounts.node_uuid = $1
+            JOIN nest_egg_mounts ON mounts.uuid = nest_egg_mounts.mount_uuid AND nest_egg_mounts.egg_uuid = $2
+            LEFT JOIN server_mounts ON server_mounts.mount_uuid = mounts.uuid AND server_mounts.server_uuid = $3
             WHERE mounts.user_mountable = TRUE AND ($4 IS NULL OR mounts.name ILIKE '%' || $4 || '%')
-            ORDER BY mounts.id ASC
+            ORDER BY mounts.created
             LIMIT $5 OFFSET $6
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server.node.id)
-        .bind(server.egg.id)
-        .bind(server.id)
+        .bind(server.node.uuid)
+        .bind(server.egg.uuid)
+        .bind(server.uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -151,21 +151,19 @@ impl ServerMount {
         })
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_uuids(
         database: &crate::database::Database,
-        server_id: i32,
-        mount_id: i32,
+        server_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM server_mounts
-            WHERE
-                server_mounts.server_id = $1
-                AND server_mounts.mount_id = $2
+            WHERE server_mounts.server_uuid = $1 AND server_mounts.mount_uuid = $2
             "#,
         )
-        .bind(server_id)
-        .bind(mount_id)
+        .bind(server_uuid)
+        .bind(mount_uuid)
         .execute(database.write())
         .await?;
 
@@ -175,7 +173,7 @@ impl ServerMount {
     #[inline]
     pub fn into_api_object(self) -> ApiServerMount {
         ApiServerMount {
-            id: self.mount.id,
+            uuid: self.mount.uuid,
             name: self.mount.name,
             description: self.mount.description,
             target: self.mount.target,
@@ -196,7 +194,7 @@ impl ServerMount {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "ServerMount")]
 pub struct ApiServerMount {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,

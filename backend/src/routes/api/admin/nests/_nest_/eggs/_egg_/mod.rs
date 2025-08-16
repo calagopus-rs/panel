@@ -24,7 +24,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let egg = match egg.get(1).map(|s| s.parse::<i32>()) {
+    let egg = match egg.get(1).map(|s| s.parse::<uuid::Uuid>()) {
         Some(Ok(id)) => id,
         _ => {
             return Ok(ApiResponse::error("invalid egg id")
@@ -33,7 +33,7 @@ pub async fn auth(
         }
     };
 
-    let egg = NestEgg::by_nest_id_id(&state.database, nest.id, egg).await;
+    let egg = NestEgg::by_nest_uuid_uuid(&state.database, nest.uuid, egg).await;
     let egg = match egg {
         Ok(Some(egg)) => egg,
         Ok(None) => {
@@ -68,14 +68,14 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(egg: GetNestEgg) -> ApiResponseResult {
@@ -111,14 +111,14 @@ mod delete {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -133,14 +133,14 @@ mod delete {
                 .ok();
         }
 
-        NestEgg::delete_by_id(&state.database, egg.id).await?;
+        NestEgg::delete_by_uuid(&state.database, egg.uuid).await?;
 
         activity_logger
             .log(
                 "nest:egg.delete",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
+                    "uuid": egg.uuid,
+                    "nest_uuid": nest.uuid,
 
                     "author": egg.author,
                     "name": egg.name,
@@ -213,14 +213,14 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -294,7 +294,7 @@ mod patch {
                 config_script = $7, config_allocations = $8, startup = $9,
                 force_outgoing_ip = $10, features = $11, docker_images = $12,
                 file_denylist = $13
-            WHERE nest_id = $14 AND id = $15",
+            WHERE nest_eggs.uuid = $14",
             egg.author,
             egg.name,
             egg.description,
@@ -308,8 +308,7 @@ mod patch {
             &egg.features,
             serde_json::to_value(&egg.docker_images).unwrap(),
             &egg.file_denylist,
-            nest.id,
-            egg.id,
+            egg.uuid,
         )
         .execute(state.database.write())
         .await
@@ -333,8 +332,8 @@ mod patch {
             .log(
                 "nest:egg.update",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
+                    "uuid": egg.uuid,
+                    "nest_uuid": nest.uuid,
 
                     "author": egg.author,
                     "name": egg.name,

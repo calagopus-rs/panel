@@ -76,7 +76,6 @@ export default () => {
             <div className={'overflow-x-auto'}>
               <table className={'w-full table-auto'}>
                 <TableHead>
-                  <TableHeader name={'Id'} />
                   <TableHeader name={'Username'} />
                   <TableHeader name={'2FA Enabled'} />
                   <TableHeader name={'Permissions'} />
@@ -87,7 +86,7 @@ export default () => {
                 <ContextMenuProvider>
                   <TableBody>
                     {subusers.data.map((su) => (
-                      <SubuserRow subuser={su} key={su.user.id} />
+                      <SubuserRow subuser={su} key={su.user.uuid} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>

@@ -1,1 +1,0 @@
-ALTER TABLE "database_hosts" ADD COLUMN "public" boolean DEFAULT false NOT NULL;

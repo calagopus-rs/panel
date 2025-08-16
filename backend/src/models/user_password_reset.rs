@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserPasswordReset {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
     pub user: super::user::User,
 
     pub token: String,
@@ -21,7 +21,7 @@ impl BaseModel for UserPasswordReset {
         let table = table.unwrap_or("user_password_resets");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.token"), format!("{prefix}token")),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
@@ -36,7 +36,7 @@ impl BaseModel for UserPasswordReset {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             user: super::user::User::map(Some("user_"), row),
             token: row.get(format!("{prefix}token").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
@@ -48,18 +48,16 @@ impl UserPasswordReset {
     #[inline]
     pub async fn create(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
     ) -> Result<String, sqlx::Error> {
         let existing = sqlx::query(
             r#"
             SELECT COUNT(*)
             FROM user_password_resets
-            WHERE
-                user_password_resets.user_id = $1
-                AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
+            WHERE user_password_resets.user_uuid = $1 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
             "#,
         )
-        .bind(user_id)
+        .bind(user_uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -73,11 +71,11 @@ impl UserPasswordReset {
 
         sqlx::query(
             r#"
-            INSERT INTO user_password_resets (user_id, token, created)
+            INSERT INTO user_password_resets (user_uuid, token, created)
             VALUES ($1, crypt($2, gen_salt('bf')), NOW())
             "#,
         )
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(&token)
         .execute(database.write())
         .await?;
@@ -92,7 +90,7 @@ impl UserPasswordReset {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {} FROM user_password_resets
-            JOIN users ON users.id = user_password_resets.user_id
+            JOIN users ON users.uuid = user_password_resets.user_uuid
             WHERE
                 user_password_resets.token = crypt($1, user_password_resets.token)
                 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
@@ -112,10 +110,10 @@ impl UserPasswordReset {
         sqlx::query(
             r#"
             DELETE FROM user_password_resets
-            WHERE user_password_resets.id = $1
+            WHERE user_password_resets.uuid = $1
             "#,
         )
-        .bind(row.get::<i32, _>("id"))
+        .bind(row.get::<uuid::Uuid, _>("uuid"))
         .execute(database.write())
         .await?;
 

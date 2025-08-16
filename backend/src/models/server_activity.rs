@@ -7,7 +7,7 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize)]
 pub struct ServerActivity {
     pub user: Option<super::user::User>,
-    pub api_key_id: Option<i32>,
+    pub api_key_uuid: Option<uuid::Uuid>,
 
     pub event: String,
     pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
@@ -23,7 +23,10 @@ impl BaseModel for ServerActivity {
         let table = table.unwrap_or("server_activities");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.api_key_id"), format!("{prefix}api_key_id")),
+            (
+                format!("{table}.api_key_uuid"),
+                format!("{prefix}api_key_uuid"),
+            ),
             (format!("{table}.event"), format!("{prefix}event")),
             (format!("{table}.ip"), format!("{prefix}ip")),
             (format!("{table}.data"), format!("{prefix}data")),
@@ -41,14 +44,14 @@ impl BaseModel for ServerActivity {
 
         Self {
             user: if row
-                .try_get::<i32, _>("user_id".to_string().as_str())
+                .try_get::<uuid::Uuid, _>("user_uuid".to_string().as_str())
                 .is_ok()
             {
                 Some(super::user::User::map(Some("user_"), row))
             } else {
                 None
             },
-            api_key_id: row.get(format!("{prefix}api_key_id").as_str()),
+            api_key_uuid: row.get(format!("{prefix}api_key_uuid").as_str()),
             event: row.get(format!("{prefix}event").as_str()),
             ip: row.get(format!("{prefix}ip").as_str()),
             data: row.get(format!("{prefix}data").as_str()),
@@ -60,22 +63,22 @@ impl BaseModel for ServerActivity {
 impl ServerActivity {
     pub async fn log(
         database: &crate::database::Database,
-        server_id: i32,
-        user_id: Option<i32>,
-        api_key_id: Option<i32>,
+        server_uuid: uuid::Uuid,
+        user_uuid: Option<uuid::Uuid>,
+        api_key_uuid: Option<uuid::Uuid>,
         event: &str,
         ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO server_activities (server_id, user_id, api_key_id, event, ip, data)
+            INSERT INTO server_activities (server_uuid, user_uuid, api_key_uuid, event, ip, data)
             VALUES ($1, $2, $3, $4, $5, $6)
             "#,
         )
-        .bind(server_id)
-        .bind(user_id)
-        .bind(api_key_id)
+        .bind(server_uuid)
+        .bind(user_uuid)
+        .bind(api_key_uuid)
         .bind(event)
         .bind(ip)
         .bind(data)
@@ -89,8 +92,7 @@ impl ServerActivity {
     pub async fn log_remote(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
-        user_id: Option<i32>,
-        api_key_id: Option<i32>,
+        user_uuid: Option<uuid::Uuid>,
         event: &str,
         ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
@@ -98,13 +100,12 @@ impl ServerActivity {
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO server_activities (server_id, user_id, api_key_id, event, ip, data, created)
-            VALUES ((SELECT servers.id FROM servers WHERE servers.uuid = $1), $2, $3, $4, $5, $6, $7)
+            INSERT INTO server_activities (server_uuid, user_uuid, event, ip, data, created)
+            VALUES ($1, $2, $3, $4, $5, $6)
             "#,
         )
         .bind(server_uuid)
-        .bind(user_id)
-        .bind(api_key_id)
+        .bind(user_uuid)
         .bind(event)
         .bind(ip)
         .bind(data)
@@ -115,9 +116,9 @@ impl ServerActivity {
         Ok(())
     }
 
-    pub async fn by_server_id_with_pagination(
+    pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -128,14 +129,14 @@ impl ServerActivity {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_activities
-            LEFT JOIN users ON users.id = server_activities.user_id
-            WHERE server_activities.server_id = $1 AND ($2 IS NULL OR server_activities.event ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%')
+            LEFT JOIN users ON users.uuid = server_activities.user_uuid
+            WHERE server_activities.server_uuid = $1 AND ($2 IS NULL OR server_activities.event ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%')
             ORDER BY server_activities.created DESC
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -157,7 +158,7 @@ impl ServerActivity {
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,
-            is_api: self.api_key_id.is_some(),
+            is_api: self.api_key_uuid.is_some(),
             created: self.created.and_utc(),
         }
     }

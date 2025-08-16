@@ -85,12 +85,12 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        node_id: i32,
-        owner_id: i32,
-        egg_id: i32,
+        node_uuid: uuid::Uuid,
+        owner_uuid: uuid::Uuid,
+        egg_uuid: uuid::Uuid,
 
-        allocation_id: Option<i32>,
-        allocation_ids: Vec<i32>,
+        allocation_uuid: Option<uuid::Uuid>,
+        allocation_uuids: Vec<uuid::Uuid>,
 
         start_on_completion: bool,
         skip_scripts: bool,
@@ -142,7 +142,7 @@ mod post {
                 .ok();
         }
 
-        let node = match Node::by_id(&state.database, data.node_id).await? {
+        let node = match Node::by_uuid(&state.database, data.node_uuid).await? {
             Some(node) => node,
             None => {
                 return ApiResponse::error("node not found")
@@ -151,7 +151,7 @@ mod post {
             }
         };
 
-        let owner = match User::by_id(&state.database, data.owner_id).await? {
+        let owner = match User::by_uuid(&state.database, data.owner_uuid).await? {
             Some(user) => user,
             None => {
                 return ApiResponse::error("owner not found")
@@ -160,7 +160,7 @@ mod post {
             }
         };
 
-        let egg = match NestEgg::by_id(&state.database, data.egg_id).await? {
+        let egg = match NestEgg::by_uuid(&state.database, data.egg_uuid).await? {
             Some(egg) => egg,
             None => {
                 return ApiResponse::error("egg not found")
@@ -172,10 +172,10 @@ mod post {
         let server = match Server::create(
             &state.database,
             &node,
-            owner.id,
-            egg.id,
-            data.allocation_id,
-            &data.allocation_ids,
+            owner.uuid,
+            egg.uuid,
+            data.allocation_uuid,
+            &data.allocation_uuids,
             data.external_id.as_deref(),
             data.start_on_completion,
             data.skip_scripts,
@@ -190,7 +190,7 @@ mod post {
         )
         .await
         {
-            Ok((server_id, _)) => Server::by_id(&state.database, server_id)
+            Ok(server_uuid) => Server::by_uuid(&state.database, server_uuid)
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("server not found after creation"))?,
             Err(err) if err.to_string().contains("unique constraint") => {
@@ -211,12 +211,13 @@ mod post {
             .log(
                 "server:create",
                 serde_json::json!({
-                    "node_id": node.id,
-                    "owner_id": owner.id,
-                    "egg_id": egg.id,
+                    "uuid": server.uuid,
+                    "node_uuid": node.uuid,
+                    "owner_uuid": owner.uuid,
+                    "egg_uuid": egg.uuid,
 
-                    "allocation_id": data.allocation_id,
-                    "allocation_ids": data.allocation_ids,
+                    "allocation_uuid": data.allocation_uuid,
+                    "allocation_uuids": data.allocation_uuids,
                     "external_id": data.external_id,
 
                     "start_on_completion": data.start_on_completion,

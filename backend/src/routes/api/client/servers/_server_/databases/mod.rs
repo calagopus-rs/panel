@@ -86,9 +86,9 @@ mod get {
                 .ok();
         }
 
-        let databases = ServerDatabase::by_server_id_with_pagination(
+        let databases = ServerDatabase::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -134,7 +134,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        database_host_id: i32,
+        database_host_uuid: uuid::Uuid,
 
         #[validate(
             length(min = 3, max = 31),
@@ -181,10 +181,10 @@ mod post {
                 .ok();
         }
 
-        let database_host = match DatabaseHost::by_location_id_id(
+        let database_host = match DatabaseHost::by_location_uuid_uuid(
             &state.database,
-            server.node.location.id,
-            data.database_host_id,
+            server.node.location.uuid,
+            data.database_host_uuid,
         )
         .await?
         {
@@ -196,44 +196,48 @@ mod post {
             }
         };
 
-        let databases = ServerDatabase::count_by_server_id(&state.database, server.id).await;
+        let databases = ServerDatabase::count_by_server_uuid(&state.database, server.uuid).await;
         if databases >= server.database_limit as i64 {
             return ApiResponse::error("maximum number of databases reached")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
 
-        let database =
-            match ServerDatabase::create(&state.database, server.id, &database_host, &data.name)
-                .await
-            {
-                Ok(database_id) => ServerDatabase::by_id(&state.database, database_id)
-                    .await?
-                    .ok_or_else(|| {
-                        anyhow::anyhow!(
-                            "failed to retrieve database after creation: {}",
-                            database_id
-                        )
-                    })?,
-                Err(err) if err.to_string().contains("unique constraint") => {
-                    return ApiResponse::error("database with name already exists")
-                        .with_status(StatusCode::CONFLICT)
-                        .ok();
-                }
-                Err(err) => {
-                    tracing::error!(server = %server.uuid, "failed to create database: {:#?}", err);
+        let database = match ServerDatabase::create(
+            &state.database,
+            &server,
+            &database_host,
+            &data.name,
+        )
+        .await
+        {
+            Ok(database_uuid) => ServerDatabase::by_uuid(&state.database, database_uuid)
+                .await?
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "failed to retrieve database after creation: {}",
+                        database_uuid
+                    )
+                })?,
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return ApiResponse::error("database with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
+            }
+            Err(err) => {
+                tracing::error!(server = %server.uuid, "failed to create database: {:#?}", err);
 
-                    return ApiResponse::error("failed to create database")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
-            };
+                return ApiResponse::error("failed to create database")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
+            }
+        };
 
         activity_logger
             .log(
                 "server:database.create",
                 serde_json::json!({
-                    "database_host": database_host.name,
+                    "uuid": database.uuid,
                     "name": database.name,
                 }),
             )

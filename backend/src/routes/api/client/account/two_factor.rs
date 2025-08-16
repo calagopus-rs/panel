@@ -33,9 +33,11 @@ mod get {
         };
 
         sqlx::query!(
-            "UPDATE users SET totp_secret = $1 WHERE id = $2",
+            "UPDATE users
+            SET totp_secret = $1
+            WHERE users.uuid = $2",
             secret,
-            user.id
+            user.uuid
         )
         .execute(state.database.write())
         .await?;
@@ -140,11 +142,13 @@ mod post {
                 .ok();
         }
 
-        let recovery_codes = UserRecoveryCode::create_all(&state.database, user.id).await?;
+        let recovery_codes = UserRecoveryCode::create_all(&state.database, user.uuid).await?;
 
         sqlx::query!(
-            "UPDATE users SET totp_enabled = true WHERE id = $1",
-            user.id
+            "UPDATE users
+            SET totp_enabled = true
+            WHERE users.uuid = $1",
+            user.uuid
         )
         .execute(state.database.write())
         .await?;
@@ -234,9 +238,13 @@ mod delete {
                 }
             }
             10 => {
-                if UserRecoveryCode::delete_by_code(&state.database, user.id, &data.code)
-                    .await?
-                    .is_none()
+                if UserRecoveryCode::delete_by_user_uuid_code(
+                    &state.database,
+                    user.uuid,
+                    &data.code,
+                )
+                .await?
+                .is_none()
                 {
                     return ApiResponse::error("invalid recovery code")
                         .with_status(StatusCode::BAD_REQUEST)
@@ -250,11 +258,13 @@ mod delete {
             }
         }
 
-        UserRecoveryCode::delete_by_user_id(&state.database, user.id).await?;
+        UserRecoveryCode::delete_by_user_uuid(&state.database, user.uuid).await?;
 
         sqlx::query!(
-            "UPDATE users SET totp_enabled = false, totp_secret = NULL WHERE id = $1",
-            user.id
+            "UPDATE users
+            SET totp_enabled = false, totp_secret = NULL
+            WHERE users.uuid = $1",
+            user.uuid
         )
         .execute(state.database.write())
         .await?;

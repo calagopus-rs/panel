@@ -24,7 +24,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let backup = ServerBackup::by_node_id_uuid(&state.database, node.id, backup).await;
+    let backup = ServerBackup::by_node_uuid_uuid(&state.database, node.uuid, backup).await;
     let backup = match backup {
         Ok(Some(backup)) => backup,
         Ok(None) => {
@@ -112,12 +112,12 @@ mod get {
         };
         s3_configuration.decrypt(&state.database);
 
-        let server = match Server::by_id(
+        let server = match Server::by_uuid(
             &state.database,
-            match backup.server_id {
+            match backup.server_uuid {
                 Some(id) => id,
                 None => {
-                    return ApiResponse::error("server id not found")
+                    return ApiResponse::error("server uuid not found")
                         .with_status(StatusCode::EXPECTATION_FAILED)
                         .ok();
                 }
@@ -280,12 +280,12 @@ mod post {
             };
             s3_configuration.decrypt(&state.database);
 
-            let server = match Server::by_id(
+            let server = match Server::by_uuid(
                 &state.database,
-                match backup.0.server_id {
+                match backup.0.server_uuid {
                     Some(id) => id,
                     None => {
-                        return ApiResponse::error("server id not found")
+                        return ApiResponse::error("server uuid not found")
                             .with_status(StatusCode::EXPECTATION_FAILED)
                             .ok();
                     }
@@ -396,10 +396,10 @@ mod post {
             .await?;
         }
 
-        if let Some(server_id) = backup.0.server_id
+        if let Some(server_uuid) = backup.0.server_uuid
             && let Err(err) = ServerActivity::log(
                 &state.database,
-                server_id,
+                server_uuid,
                 None,
                 None,
                 if data.successful {
@@ -409,7 +409,7 @@ mod post {
                 },
                 None,
                 serde_json::json!({
-                    "backup": backup.0.uuid,
+                    "uuid": backup.0.uuid,
                     "name": backup.0.name,
                 }),
             )

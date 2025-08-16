@@ -101,7 +101,7 @@ mod post {
         };
 
         ApiResponse::json(Response {
-            user: user.to_uuid(),
+            user: user.uuid,
             server: server.uuid,
             permissions: server.wings_permissions(&user),
             ignored_files: server.subuser_ignored_files.as_deref().unwrap_or(&[]),

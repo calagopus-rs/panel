@@ -17,10 +17,8 @@ impl BaseModel for NodeMount {
         let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("node_mounts");
 
-        let mut columns = BTreeMap::from([
-            (format!("{table}.mount_id"), format!("{prefix}mount_id")),
-            (format!("{table}.created"), format!("{prefix}created")),
-        ]);
+        let mut columns =
+            BTreeMap::from([(format!("{table}.created"), format!("{prefix}created"))]);
 
         columns.extend(super::mount::Mount::columns(Some("mount_"), None));
 
@@ -41,48 +39,48 @@ impl BaseModel for NodeMount {
 impl NodeMount {
     pub async fn create(
         database: &crate::database::Database,
-        node_id: i32,
-        mount_id: i32,
+        node_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO node_mounts (node_id, mount_id)
+            INSERT INTO node_mounts (node_uuid, mount_uuid)
             VALUES ($1, $2)
             "#,
         )
-        .bind(node_id)
-        .bind(mount_id)
+        .bind(node_uuid)
+        .bind(mount_uuid)
         .execute(database.write())
         .await?;
 
         Ok(())
     }
 
-    pub async fn by_node_id_mount_id(
+    pub async fn by_node_uuid_mount_uuid(
         database: &crate::database::Database,
-        node_id: i32,
-        mount_id: i32,
+        node_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM node_mounts
-            JOIN mounts ON mounts.id = node_mounts.mount_id
-            WHERE node_mounts.node_id = $1 AND node_mounts.mount_id = $2
+            JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
+            WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
-        .bind(mount_id)
+        .bind(node_uuid)
+        .bind(mount_uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_node_id_with_pagination(
+    pub async fn by_node_uuid_with_pagination(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -93,14 +91,14 @@ impl NodeMount {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_mounts
-            JOIN mounts ON mounts.id = node_mounts.mount_id
-            WHERE node_mounts.node_id = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
-            ORDER BY node_mounts.mount_id ASC
+            JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
+            WHERE node_mounts.node_uuid = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
+            ORDER BY node_mounts.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -115,21 +113,19 @@ impl NodeMount {
         })
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_uuids(
         database: &crate::database::Database,
-        node_id: i32,
-        mount_id: i32,
+        node_uuid: uuid::Uuid,
+        mount_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM node_mounts
-            WHERE
-                node_mounts.node_id = $1
-                AND node_mounts.mount_id = $2
+            WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
             "#,
         )
-        .bind(node_id)
-        .bind(mount_id)
+        .bind(node_uuid)
+        .bind(mount_uuid)
         .execute(database.write())
         .await?;
 

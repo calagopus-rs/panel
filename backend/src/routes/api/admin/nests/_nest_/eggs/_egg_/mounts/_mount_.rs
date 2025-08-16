@@ -25,19 +25,19 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "mount" = i32,
+            "mount" = uuid::Uuid,
             description = "The mount ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -45,10 +45,10 @@ mod delete {
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
-        Path((_nest, _egg, mount)): Path<(i32, i32, i32)>,
+        Path((_nest, _egg, mount)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
         let egg_mount =
-            match NestEggMount::by_egg_id_mount_id(&state.database, egg.id, mount).await? {
+            match NestEggMount::by_egg_uuid_mount_uuid(&state.database, egg.uuid, mount).await? {
                 Some(mount) => mount,
                 None => {
                     return ApiResponse::error("mount not found")
@@ -57,15 +57,15 @@ mod delete {
                 }
             };
 
-        NestEggMount::delete_by_ids(&state.database, egg.id, egg_mount.mount.id).await?;
+        NestEggMount::delete_by_uuids(&state.database, egg.uuid, egg_mount.mount.uuid).await?;
 
         activity_logger
             .log(
                 "nest:egg.mount.delete",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
-                    "mount_id": egg_mount.mount.id,
+                    "nest_uuid": nest.uuid,
+                    "egg_uuid": egg.uuid,
+                    "mount_uuid": egg_mount.mount.uuid,
                 }),
             )
             .await;

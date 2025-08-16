@@ -3,7 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
     use crate::{
-        models::{server_activity::ServerActivity, user::User},
+        models::server_activity::ServerActivity,
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
@@ -43,8 +43,7 @@ mod post {
             if let Err(err) = ServerActivity::log_remote(
                 &state.database,
                 activity.server,
-                activity.user.map(User::from_uuid),
-                None,
+                activity.user,
                 &activity.event,
                 activity.ip.map(|ip| ip.into()),
                 activity.metadata.unwrap_or_else(|| serde_json::json!({})),

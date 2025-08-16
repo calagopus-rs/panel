@@ -30,8 +30,8 @@ pub type GetAdminActivityLogger = crate::extract::ConsumingExtension<AdminActivi
 #[derive(Clone)]
 pub struct AdminActivityLogger {
     state: State,
-    user_id: i32,
-    api_key_id: Option<i32>,
+    user_uuid: uuid::Uuid,
+    api_key_uuid: Option<uuid::Uuid>,
     ip: std::net::IpAddr,
 }
 
@@ -39,8 +39,8 @@ impl AdminActivityLogger {
     pub async fn log(&self, event: &str, data: serde_json::Value) {
         if let Err(err) = crate::models::admin_activity::AdminActivity::log(
             &self.state.database,
-            Some(self.user_id),
-            self.api_key_id,
+            Some(self.user_uuid),
+            self.api_key_uuid,
             event,
             Some(self.ip.into()),
             data,
@@ -48,7 +48,7 @@ impl AdminActivityLogger {
         .await
         {
             tracing::warn!(
-                user = self.user_id,
+                user = %self.user_uuid,
                 "failed to log admin activity: {:#?}",
                 err
             );
@@ -72,9 +72,9 @@ pub async fn auth(
 
     req.extensions_mut().insert(AdminActivityLogger {
         state: Arc::clone(&state),
-        user_id: user.id,
-        api_key_id: match &*auth {
-            AuthMethod::ApiKey(api_key) => Some(api_key.id),
+        user_uuid: user.uuid,
+        api_key_uuid: match &*auth {
+            AuthMethod::ApiKey(api_key) => Some(api_key.uuid),
             AuthMethod::Session(_) => None,
         },
         ip: ip.0,

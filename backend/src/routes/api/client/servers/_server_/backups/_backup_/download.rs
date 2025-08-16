@@ -129,7 +129,7 @@ mod get {
                     expiration_time: Some(chrono::Utc::now().timestamp() + 900),
                     not_before: None,
                     issued_at: Some(chrono::Utc::now().timestamp()),
-                    jwt_id: user.id.to_string(),
+                    jwt_id: user.uuid.to_string(),
                 },
                 backup_uuid: backup.uuid,
                 server_uuid: server.uuid,
@@ -149,7 +149,7 @@ mod get {
             .log(
                 "server:backup.download",
                 serde_json::json!({
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
                     "name": backup.name,
                 }),
             )

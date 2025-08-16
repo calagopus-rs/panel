@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Nest {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub author: String,
     pub name: String,
@@ -24,7 +24,7 @@ impl BaseModel for Nest {
         let table = table.unwrap_or("nests");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.author"), format!("{prefix}author")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
@@ -32,7 +32,9 @@ impl BaseModel for Nest {
                 format!("{prefix}description"),
             ),
             (
-                format!("(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_id = {table}.id)"),
+                format!(
+                    "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_uuid = {table}.uuid)"
+                ),
                 format!("{prefix}eggs"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -44,7 +46,7 @@ impl BaseModel for Nest {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             author: row.get(format!("{prefix}author").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
@@ -78,19 +80,19 @@ impl Nest {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nests
-            WHERE nests.id = $1
+            WHERE nests.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -110,7 +112,7 @@ impl Nest {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nests
             WHERE ($1 IS NULL OR nests.name ILIKE '%' || $1 || '%')
-            ORDER BY nests.id ASC
+            ORDER BY nests.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -129,17 +131,17 @@ impl Nest {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nests
-            WHERE nests.id = $1
+            WHERE nests.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -149,7 +151,7 @@ impl Nest {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNest {
         AdminApiNest {
-            id: self.id,
+            uuid: self.uuid,
             author: self.author,
             name: self.name,
             description: self.description,
@@ -162,7 +164,7 @@ impl Nest {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "Nest")]
 pub struct AdminApiNest {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub author: String,
     pub name: String,

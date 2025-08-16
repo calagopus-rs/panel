@@ -30,16 +30,16 @@ mod post {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "database" = i32,
+            "database" = uuid::Uuid,
             description = "The database ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
-        Path((_server, database)): Path<(String, i32)>,
+        Path((_server, database)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.update") {
             return ApiResponse::error(&error)
@@ -48,7 +48,9 @@ mod post {
         }
 
         let database =
-            match ServerDatabase::by_server_id_id(&state.database, server.id, database).await? {
+            match ServerDatabase::by_server_uuid_uuid(&state.database, server.uuid, database)
+                .await?
+            {
                 Some(database) => database,
                 None => {
                     return ApiResponse::error("database not found")
@@ -72,7 +74,7 @@ mod post {
             .log(
                 "server:database.rotate-password",
                 serde_json::json!({
-                    "database_host": database.database_host.name,
+                    "uuid": database.uuid,
                     "name": database.name,
                 }),
             )

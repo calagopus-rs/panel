@@ -32,11 +32,11 @@ pub type GetParamUser = crate::extract::ConsumingExtension<ParamUser>;
 
 pub async fn auth(
     state: GetState,
-    Path(user): Path<i32>,
+    Path(user): Path<uuid::Uuid>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let user = User::by_id(&state.database, user).await;
+    let user = User::by_uuid(&state.database, user).await;
     let user = match user {
         Ok(Some(user)) => user,
         Ok(None) => {
@@ -70,9 +70,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "user" = i32,
+            "user" = uuid::Uuid,
             description = "The user ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(user: GetParamUser) -> ApiResponseResult {
@@ -104,9 +104,9 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "user" = i32,
+            "user" = uuid::Uuid,
             description = "The user ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -114,20 +114,20 @@ mod delete {
         user: GetParamUser,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
-        let servers = Server::count_by_user_id(&state.database, user.id).await;
+        let servers = Server::count_by_user_uuid(&state.database, user.uuid).await;
         if servers > 0 {
             return ApiResponse::error("user has servers, cannot delete")
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 
-        User::delete_by_id(&state.database, user.id).await?;
+        User::delete_by_uuid(&state.database, user.uuid).await?;
 
         activity_logger
             .log(
                 "user:delete",
                 serde_json::json!({
-                    "id": user.id,
+                    "uuid": user.uuid,
                     "username": user.username,
                     "email": user.email,
                     "name_first": user.name_first,
@@ -189,9 +189,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "mount" = i32,
-            description = "The mount ID",
-            example = "1",
+            "user" = uuid::Uuid,
+            description = "The user ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -237,13 +237,13 @@ mod patch {
         match sqlx::query!(
             "UPDATE users
             SET username = $1, email = $2, name_first = $3, name_last = $4, admin = $5
-            WHERE id = $6",
+            WHERE users.uuid = $6",
             user.username,
             user.email,
             user.name_first,
             user.name_last,
             user.admin,
-            user.id,
+            user.uuid,
         )
         .execute(state.database.write())
         .await
@@ -267,7 +267,7 @@ mod patch {
             .log(
                 "user:update",
                 serde_json::json!({
-                    "id": user.id,
+                    "uuid": user.uuid,
                     "username": user.username,
                     "email": user.email,
                     "name_first": user.name_first,

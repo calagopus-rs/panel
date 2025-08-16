@@ -33,9 +33,12 @@ mod get {
                 .ok();
         }
 
-        let variables =
-            ServerVariable::all_by_server_id_egg_id(&state.database, server.id, server.egg.id)
-                .await?;
+        let variables = ServerVariable::all_by_server_uuid_egg_uuid(
+            &state.database,
+            server.uuid,
+            server.egg.uuid,
+        )
+        .await?;
 
         ApiResponse::json(Response {
             variables: variables
@@ -105,11 +108,14 @@ mod put {
                 .ok();
         }
 
-        let variables =
-            ServerVariable::all_by_server_id_egg_id(&state.database, server.id, server.egg.id)
-                .await?;
+        let variables = ServerVariable::all_by_server_uuid_egg_uuid(
+            &state.database,
+            server.uuid,
+            server.egg.uuid,
+        )
+        .await?;
 
-        let variable_id = if let Some(variable) = variables
+        let variable_uuid = if let Some(variable) = variables
             .iter()
             .find(|variable| variable.variable.env_variable == data.env_variable)
         {
@@ -119,7 +125,7 @@ mod put {
                     .ok();
             }
 
-            variable.variable.id
+            variable.variable.uuid
         } else {
             return ApiResponse::error("variable not found")
                 .with_status(StatusCode::NOT_FOUND)
@@ -158,7 +164,7 @@ mod put {
                 .ok();
         }
 
-        ServerVariable::create(&state.database, server.id, variable_id, &data.value).await?;
+        ServerVariable::create(&state.database, server.uuid, variable_uuid, &data.value).await?;
 
         activity_logger
             .log(

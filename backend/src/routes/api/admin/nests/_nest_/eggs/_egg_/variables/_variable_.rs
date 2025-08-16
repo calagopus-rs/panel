@@ -25,19 +25,19 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "variable" = i32,
+            "variable" = uuid::Uuid,
             description = "The variable ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -45,10 +45,10 @@ mod delete {
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
-        Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
+        Path((_nest, _egg, variable)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
         let egg_variable =
-            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await? {
+            match NestEggVariable::by_egg_uuid_uuid(&state.database, egg.uuid, variable).await? {
                 Some(variable) => variable,
                 None => {
                     return ApiResponse::error("variable not found")
@@ -57,14 +57,15 @@ mod delete {
                 }
             };
 
-        NestEggVariable::delete_by_id(&state.database, egg_variable.id).await?;
+        NestEggVariable::delete_by_uuid(&state.database, egg_variable.uuid).await?;
 
         activity_logger
             .log(
                 "nest:egg.variable.delete",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
+                    "uuid": variable,
+                    "nest_uuid": nest.uuid,
+                    "egg_uuid": egg.uuid,
 
                     "name": egg_variable.name,
                     "env_variable": egg_variable.env_variable,
@@ -126,19 +127,19 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "variable" = i32,
+            "variable" = uuid::Uuid,
             description = "The variable ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -146,7 +147,7 @@ mod patch {
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
-        Path((_nest, _egg, variable)): Path<(i32, i32, i32)>,
+        Path((_nest, _egg, variable)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -156,7 +157,7 @@ mod patch {
         }
 
         let mut egg_variable =
-            match NestEggVariable::by_egg_id_id(&state.database, egg.id, variable).await? {
+            match NestEggVariable::by_egg_uuid_uuid(&state.database, egg.uuid, variable).await? {
                 Some(variable) => variable,
                 None => {
                     return ApiResponse::error("variable not found")
@@ -203,7 +204,7 @@ mod patch {
             SET
                 name = $1, description = $2, order_ = $3, env_variable = $4,
                 default_value = $5, user_viewable = $6, user_editable = $7, rules = $8
-            WHERE id = $9",
+            WHERE nest_egg_variables.uuid = $9",
             egg_variable.name,
             egg_variable.description,
             egg_variable.order,
@@ -212,7 +213,7 @@ mod patch {
             egg_variable.user_viewable,
             egg_variable.user_editable,
             &egg_variable.rules,
-            egg_variable.id,
+            egg_variable.uuid,
         )
         .execute(state.database.write())
         .await
@@ -236,8 +237,9 @@ mod patch {
             .log(
                 "nest:egg.variable.update",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
+                    "uuid": egg_variable.uuid,
+                    "nest_uuid": nest.uuid,
+                    "egg_uuid": egg.uuid,
 
                     "name": egg_variable.name,
                     "description": egg_variable.description,

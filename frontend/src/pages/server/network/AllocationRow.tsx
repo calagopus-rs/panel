@@ -18,7 +18,7 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
   const [openDialog, setOpenDialog] = useState<'edit' | 'delete'>(null);
 
   const doUpdate = (notes: string, primary: boolean) => {
-    updateAllocation(server.uuid, allocation.id, { notes, primary })
+    updateAllocation(server.uuid, allocation.uuid, { notes, primary })
       .then(() => {
         allocation.notes = notes;
         allocation.isPrimary = primary;
@@ -31,7 +31,7 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
   };
 
   const doRemove = () => {
-    deleteAllocation(server.uuid, allocation.id)
+    deleteAllocation(server.uuid, allocation.uuid)
       .then(() => {
         removeAllocation(allocation);
         addToast('Allocation removed.', 'success');

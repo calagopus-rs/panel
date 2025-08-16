@@ -22,9 +22,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "user" = i32,
+            "user" = uuid::Uuid,
             description = "The user ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -53,9 +53,9 @@ mod get {
                 .ok();
         }
 
-        let servers = Server::by_owner_id_with_pagination(
+        let servers = Server::by_owner_uuid_with_pagination(
             &state.database,
-            user.id,
+            user.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),

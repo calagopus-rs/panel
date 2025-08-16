@@ -21,18 +21,18 @@ mod get {
         (status = OK, body = inline(Response)),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(state: GetState, egg: GetNestEgg) -> ApiResponseResult {
-        let variables = NestEggVariable::all_by_egg_id(&state.database, egg.id).await?;
+        let variables = NestEggVariable::all_by_egg_uuid(&state.database, egg.uuid).await?;
 
         ApiResponse::json(Response {
             variables: variables
@@ -95,14 +95,14 @@ mod post {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "egg" = i32,
+            "egg" = uuid::Uuid,
             description = "The egg ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -120,7 +120,7 @@ mod post {
 
         let egg_variable = match NestEggVariable::create(
             &state.database,
-            egg.id,
+            egg.uuid,
             &data.name,
             data.description.as_deref(),
             data.order,
@@ -151,8 +151,9 @@ mod post {
             .log(
                 "nest:egg.variable.create",
                 serde_json::json!({
-                    "nest_id": nest.id,
-                    "egg_id": egg.id,
+                    "uuid": egg_variable.uuid,
+                    "nest_uuid": nest.uuid,
+                    "egg_uuid": egg.uuid,
 
                     "name": egg_variable.name,
                     "description": egg_variable.description,

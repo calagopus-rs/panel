@@ -1,1 +1,0 @@
-ALTER TABLE "locations" ADD COLUMN "config_backups" jsonb DEFAULT '{"type":"local"}'::jsonb NOT NULL;

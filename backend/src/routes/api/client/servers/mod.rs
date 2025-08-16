@@ -74,18 +74,18 @@ mod get {
         }
 
         let servers = if params.other && user.admin {
-            Server::by_not_user_id_with_pagination(
+            Server::by_not_user_uuid_with_pagination(
                 &state.database,
-                user.id,
+                user.uuid,
                 params.page,
                 params.per_page,
                 params.search.as_deref(),
             )
             .await
         } else {
-            Server::by_user_id_with_pagination(
+            Server::by_user_uuid_with_pagination(
                 &state.database,
-                user.id,
+                user.uuid,
                 params.page,
                 params.per_page,
                 params.search.as_deref(),

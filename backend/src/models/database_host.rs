@@ -24,9 +24,9 @@ pub enum DatabasePool {
 }
 
 type DatabasePoolValue = (std::time::Instant, DatabasePool);
-static DATABASE_CLIENTS: LazyLock<Arc<Mutex<HashMap<i32, DatabasePoolValue>>>> =
+static DATABASE_CLIENTS: LazyLock<Arc<Mutex<HashMap<uuid::Uuid, DatabasePoolValue>>>> =
     LazyLock::new(|| {
-        let clients = Arc::new(Mutex::new(HashMap::<i32, DatabasePoolValue>::new()));
+        let clients = Arc::new(Mutex::new(HashMap::<uuid::Uuid, DatabasePoolValue>::new()));
 
         tokio::spawn({
             let clients = Arc::clone(&clients);
@@ -56,7 +56,7 @@ pub enum DatabaseType {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct DatabaseHost {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub public: bool,
@@ -71,6 +71,7 @@ pub struct DatabaseHost {
     pub password: Vec<u8>,
 
     pub databases: i64,
+    pub locations: i64,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -82,7 +83,7 @@ impl BaseModel for DatabaseHost {
         let table = table.unwrap_or("database_hosts");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.public"), format!("{prefix}public")),
             (format!("{table}.type"), format!("{prefix}type")),
@@ -100,9 +101,15 @@ impl BaseModel for DatabaseHost {
             (format!("{table}.password"), format!("{prefix}password")),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM server_databases WHERE server_databases.database_host_id = {table}.id)"
+                    "(SELECT COUNT(*) FROM server_databases WHERE server_databases.database_host_uuid = {table}.uuid)"
                 ),
                 format!("{prefix}databases"),
+            ),
+            (
+                format!(
+                    "(SELECT COUNT(*) FROM location_database_hosts WHERE location_database_hosts.database_host_uuid = {table}.uuid)"
+                ),
+                format!("{prefix}locations"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
         ])
@@ -113,7 +120,7 @@ impl BaseModel for DatabaseHost {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             public: row.get(format!("{prefix}public").as_str()),
             r#type: row.get(format!("{prefix}type").as_str()),
@@ -124,6 +131,7 @@ impl BaseModel for DatabaseHost {
             username: row.get(format!("{prefix}username").as_str()),
             password: row.get(format!("{prefix}password").as_str()),
             databases: row.get(format!("{prefix}databases").as_str()),
+            locations: row.get(format!("{prefix}locations").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -172,7 +180,7 @@ impl DatabaseHost {
     ) -> Result<DatabasePool, sqlx::Error> {
         let mut clients = DATABASE_CLIENTS.lock().await;
 
-        if let Some((last_used, pool)) = clients.get_mut(&self.id) {
+        if let Some((last_used, pool)) = clients.get_mut(&self.uuid) {
             *last_used = std::time::Instant::now();
 
             return Ok(pool.clone());
@@ -209,7 +217,7 @@ impl DatabaseHost {
         DATABASE_CLIENTS
             .lock()
             .await
-            .insert(self.id, (std::time::Instant::now(), pool.clone()));
+            .insert(self.uuid, (std::time::Instant::now(), pool.clone()));
         Ok(pool)
     }
 
@@ -226,7 +234,7 @@ impl DatabaseHost {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM database_hosts
             WHERE ($1 IS NULL OR database_hosts.name ILIKE '%' || $1 || '%')
-            ORDER BY database_hosts.id ASC
+            ORDER BY database_hosts.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -245,58 +253,58 @@ impl DatabaseHost {
         })
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM database_hosts
-            WHERE database_hosts.id = $1
+            WHERE database_hosts.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_location_id_id(
+    pub async fn by_location_uuid_uuid(
         database: &crate::database::Database,
-        location_id: i32,
-        id: i32,
+        location_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM database_hosts
-            JOIN location_database_hosts ON location_database_hosts.database_host_id = database_hosts.id AND location_database_hosts.location_id = $1
-            WHERE database_hosts.id = $2
+            JOIN location_database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid AND location_database_hosts.location_uuid = $1
+            WHERE database_hosts.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(location_id)
-        .bind(id)
+        .bind(location_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM database_hosts
-            WHERE database_hosts.id = $1
+            WHERE database_hosts.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -306,7 +314,7 @@ impl DatabaseHost {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiDatabaseHost {
         AdminApiDatabaseHost {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             public: self.public,
             r#type: self.r#type,
@@ -316,6 +324,7 @@ impl DatabaseHost {
             port: self.port,
             username: self.username,
             databases: self.databases,
+            locations: self.locations,
             created: self.created.and_utc(),
         }
     }
@@ -323,7 +332,7 @@ impl DatabaseHost {
     #[inline]
     pub fn into_api_object(self) -> ApiDatabaseHost {
         ApiDatabaseHost {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             r#type: self.r#type,
             host: self.public_host.unwrap_or(self.host),
@@ -335,7 +344,7 @@ impl DatabaseHost {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "AdminDatabaseHost")]
 pub struct AdminApiDatabaseHost {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub public: bool,
@@ -349,6 +358,7 @@ pub struct AdminApiDatabaseHost {
     pub username: String,
 
     pub databases: i64,
+    pub locations: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -356,7 +366,7 @@ pub struct AdminApiDatabaseHost {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "DatabaseHost")]
 pub struct ApiDatabaseHost {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub r#type: DatabaseType,

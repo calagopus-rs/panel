@@ -100,7 +100,7 @@ pub struct NestEggConfigAllocations {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NestEgg {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub author: String,
     pub name: String,
@@ -131,7 +131,7 @@ impl BaseModel for NestEgg {
         let table = table.unwrap_or("nest_eggs");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.author"), format!("{prefix}author")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
@@ -174,7 +174,7 @@ impl BaseModel for NestEgg {
             ),
             (format!("{table}.created"), format!("{prefix}created")),
             (
-                format!("(SELECT COUNT(*) FROM servers WHERE servers.egg_id = {table}.id)"),
+                format!("(SELECT COUNT(*) FROM servers WHERE servers.egg_uuid = {table}.uuid)"),
                 format!("{prefix}servers"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -186,7 +186,7 @@ impl BaseModel for NestEgg {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             author: row.get(format!("{prefix}author").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
@@ -224,7 +224,7 @@ impl NestEgg {
     #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
-        nest_id: i32,
+        nest_uuid: uuid::Uuid,
         author: &str,
         name: &str,
         description: Option<&str>,
@@ -242,7 +242,7 @@ impl NestEgg {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_eggs (
-                nest_id, author, name, description, config_files, config_startup,
+                nest_uuid, author, name, description, config_files, config_startup,
                 config_stop, config_script, config_allocations, startup,
                 force_outgoing_ip, features, docker_images, file_denylist
             )
@@ -251,7 +251,7 @@ impl NestEgg {
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(nest_id)
+        .bind(nest_uuid)
         .bind(author)
         .bind(name)
         .bind(description)
@@ -271,9 +271,9 @@ impl NestEgg {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_nest_id_with_pagination(
+    pub async fn by_nest_uuid_with_pagination(
         database: &crate::database::Database,
-        nest_id: i32,
+        nest_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -284,13 +284,13 @@ impl NestEgg {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nest_eggs
-            WHERE nest_eggs.nest_id = $1 AND ($2 IS NULL OR nest_eggs.name ILIKE '%' || $2 || '%')
-            ORDER BY nest_eggs.id ASC
+            WHERE nest_eggs.nest_uuid = $1 AND ($2 IS NULL OR nest_eggs.name ILIKE '%' || $2 || '%')
+            ORDER BY nest_eggs.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(nest_id)
+        .bind(nest_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -305,57 +305,57 @@ impl NestEgg {
         })
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_eggs
-            WHERE nest_eggs.id = $1
+            WHERE nest_eggs.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_nest_id_id(
+    pub async fn by_nest_uuid_uuid(
         database: &crate::database::Database,
-        nest_id: i32,
-        id: i32,
+        nest_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_eggs
-            WHERE nest_eggs.nest_id = $1 AND nest_eggs.id = $2
+            WHERE nest_eggs.nest_uuid = $1 AND nest_eggs.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(nest_id)
-        .bind(id)
+        .bind(nest_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nest_eggs
-            WHERE nest_eggs.id = $1
+            WHERE nest_eggs.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -365,7 +365,7 @@ impl NestEgg {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNestEgg {
         AdminApiNestEgg {
-            id: self.id,
+            uuid: self.uuid,
             author: self.author,
             name: self.name,
             description: self.description,
@@ -387,7 +387,7 @@ impl NestEgg {
     #[inline]
     pub fn into_api_object(self) -> ApiNestEgg {
         ApiNestEgg {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             description: self.description,
             startup: self.startup,
@@ -401,7 +401,7 @@ impl NestEgg {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "AdminNestEgg")]
 pub struct AdminApiNestEgg {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub author: String,
     pub name: String,
@@ -433,7 +433,7 @@ pub struct AdminApiNestEgg {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "NestEgg")]
 pub struct ApiNestEgg {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,

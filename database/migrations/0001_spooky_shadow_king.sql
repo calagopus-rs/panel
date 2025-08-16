@@ -1,0 +1,1 @@
+ALTER TABLE "user_recovery_codes" DROP COLUMN "uuid";

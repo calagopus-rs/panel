@@ -153,6 +153,7 @@ mod post {
             .log(
                 "mount:create",
                 serde_json::json!({
+                    "uuid": mount.uuid,
                     "name": mount.name,
                     "description": mount.description,
 

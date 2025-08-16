@@ -53,7 +53,7 @@ mod get {
                 .ok();
         }
 
-        let mounts = ServerMount::mountable_by_server_id_with_pagination(
+        let mounts = ServerMount::mountable_by_server_with_pagination(
             &state.database,
             &server,
             params.page,
@@ -94,7 +94,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        mount_id: i32,
+        mount_uuid: uuid::Uuid,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -118,11 +118,11 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let mount = match Mount::by_node_id_egg_id_id(
+        let mount = match Mount::by_node_uuid_egg_uuid_uuid(
             &state.database,
-            server.node.id,
-            server.egg.id,
-            data.mount_id,
+            server.node.uuid,
+            server.egg.uuid,
+            data.mount_uuid,
         )
         .await?
         {
@@ -146,7 +146,7 @@ mod post {
                 .ok();
         }
 
-        match ServerMount::create(&state.database, server.id, mount.id).await {
+        match ServerMount::create(&state.database, server.uuid, mount.uuid).await {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("mount already exists")
@@ -166,7 +166,7 @@ mod post {
             .log(
                 "server:mounts.create",
                 serde_json::json!({
-                    "mount_id": mount.id,
+                    "mount_uuid": mount.uuid,
                 }),
             )
             .await;

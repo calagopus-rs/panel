@@ -26,8 +26,8 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(state: GetState, Path(mount): Path<i32>) -> ApiResponseResult {
-        let mount = match Mount::by_id(&state.database, mount).await? {
+    pub async fn route(state: GetState, Path(mount): Path<uuid::Uuid>) -> ApiResponseResult {
+        let mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -62,17 +62,17 @@ mod delete {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "mount" = i32,
+            "mount" = uuid::Uuid,
             description = "The mount ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
-        Path(mount): Path<i32>,
+        Path(mount): Path<uuid::Uuid>,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
-        let mount = match Mount::by_id(&state.database, mount).await? {
+        let mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -97,13 +97,13 @@ mod delete {
                 .ok();
         }
 
-        Mount::delete_by_id(&state.database, mount.id).await?;
+        Mount::delete_by_uuid(&state.database, mount.uuid).await?;
 
         activity_logger
             .log(
                 "mount:delete",
                 serde_json::json!({
-                    "id": mount.id,
+                    "uuid": mount.uuid,
                     "name": mount.name,
                 }),
             )
@@ -154,18 +154,18 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "mount" = i32,
+            "mount" = uuid::Uuid,
             description = "The mount ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        Path(mount): Path<i32>,
+        Path(mount): Path<uuid::Uuid>,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let mut mount = match Mount::by_id(&state.database, mount).await? {
+        let mut mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -206,14 +206,14 @@ mod patch {
         match sqlx::query!(
             "UPDATE mounts
             SET name = $1, description = $2, source = $3, target = $4, read_only = $5, user_mountable = $6
-            WHERE id = $7",
+            WHERE mounts.uuid = $7",
             mount.name,
             mount.description,
             mount.source,
             mount.target,
             mount.read_only,
             mount.user_mountable,
-            mount.id,
+            mount.uuid,
         )
         .execute(state.database.write())
         .await
@@ -237,7 +237,7 @@ mod patch {
             .log(
                 "mount:update",
                 serde_json::json!({
-                    "id": mount.id,
+                    "uuid": mount.uuid,
                     "name": mount.name,
                     "description": mount.description,
 

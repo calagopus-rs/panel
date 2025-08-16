@@ -106,7 +106,7 @@ mod post {
 
         let key = UserSession::create(
             &state.database,
-            user.id,
+            user.uuid,
             ip.0.into(),
             headers
                 .get("User-Agent")

@@ -9,7 +9,7 @@ pub struct Database {
     read: Option<sqlx::PgPool>,
 
     encryption_key: String,
-    batch_actions: Arc<Mutex<HashMap<(&'static str, i32), EmptyFuture>>>,
+    batch_actions: Arc<Mutex<HashMap<(&'static str, uuid::Uuid), EmptyFuture>>>,
 }
 
 impl Database {
@@ -130,11 +130,11 @@ impl Database {
     }
 
     #[inline]
-    pub async fn batch_action<F>(&self, key: &'static str, id: i32, action: F)
+    pub async fn batch_action<F>(&self, key: &'static str, uuid: uuid::Uuid, action: F)
     where
         F: Future<Output = ()> + Send + 'static,
     {
         let mut actions = self.batch_actions.lock().await;
-        actions.insert((key, id), Box::new(action));
+        actions.insert((key, uuid), Box::new(action));
     }
 }

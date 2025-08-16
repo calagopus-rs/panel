@@ -1,1 +1,0 @@
-ALTER TABLE "server_subusers" ADD COLUMN "ignored_files" text[] NOT NULL;

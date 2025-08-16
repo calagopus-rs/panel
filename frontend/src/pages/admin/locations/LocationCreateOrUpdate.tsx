@@ -25,7 +25,7 @@ export default () => {
 
   useEffect(() => {
     if (params.id) {
-      getLocation(Number(params.id))
+      getLocation(params.id)
         .then((location) => {
           setLocation(location);
         })
@@ -36,8 +36,8 @@ export default () => {
   }, [params.id]);
 
   const doCreateOrUpdate = () => {
-    if (location?.id) {
-      updateLocation(location.id, location)
+    if (location?.uuid) {
+      updateLocation(location.uuid, location)
         .then(() => {
           addToast('Location updated.', 'success');
         })
@@ -48,7 +48,7 @@ export default () => {
       createLocation(location)
         .then((location) => {
           addToast('Location created.', 'success');
-          navigate(`/admin/locations/${location.id}`);
+          navigate(`/admin/locations/${location.uuid}`);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -57,7 +57,7 @@ export default () => {
   };
 
   const doDelete = () => {
-    deleteLocation(location.id)
+    deleteLocation(location.uuid)
       .then(() => {
         addToast('Location deleted.', 'success');
         navigate('/admin/locations');

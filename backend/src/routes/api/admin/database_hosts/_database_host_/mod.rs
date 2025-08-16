@@ -14,11 +14,11 @@ pub type GetDatabaseHost = crate::extract::ConsumingExtension<DatabaseHost>;
 
 pub async fn auth(
     state: GetState,
-    Path(database_host): Path<i32>,
+    Path(database_host): Path<uuid::Uuid>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let database_host = DatabaseHost::by_id(&state.database, database_host).await;
+    let database_host = DatabaseHost::by_uuid(&state.database, database_host).await;
     let database_host = match database_host {
         Ok(Some(database_host)) => database_host,
         Ok(None) => {
@@ -52,9 +52,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "database_host" = i32,
+            "database_host" = uuid::Uuid,
             description = "The database host ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(database_host: GetDatabaseHost) -> ApiResponseResult {
@@ -89,9 +89,9 @@ mod delete {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "database_host" = i32,
+            "database_host" = uuid::Uuid,
             description = "The database host ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -105,13 +105,13 @@ mod delete {
                 .ok();
         }
 
-        DatabaseHost::delete_by_id(&state.database, database_host.id).await?;
+        DatabaseHost::delete_by_uuid(&state.database, database_host.uuid).await?;
 
         activity_logger
             .log(
                 "database-host:delete",
                 serde_json::json!({
-                    "id": database_host.id,
+                    "uuid": database_host.uuid,
                     "name": database_host.name,
                 }),
             )
@@ -170,9 +170,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "database_host" = i32,
+            "database_host" = uuid::Uuid,
             description = "The database host ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -223,7 +223,7 @@ mod patch {
         match sqlx::query!(
             "UPDATE database_hosts
             SET name = $1, public = $2, public_host = $3, host = $4, public_port = $5, port = $6, username = $7, password = $8
-            WHERE id = $9",
+            WHERE database_hosts.uuid = $9",
             database_host.name,
             database_host.public,
             database_host.public_host,
@@ -232,7 +232,7 @@ mod patch {
             database_host.port,
             database_host.username,
             database_host.password,
-            database_host.id,
+            database_host.uuid,
         )
         .execute(state.database.write())
         .await
@@ -256,6 +256,7 @@ mod patch {
             .log(
                 "database-host:update",
                 serde_json::json!({
+                    "uuid": database_host.uuid,
                     "name": database_host.name,
                     "public": database_host.public,
                     "type": database_host.r#type,

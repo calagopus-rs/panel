@@ -65,7 +65,7 @@ export default () => {
 
                   <TableBody>
                     {sessions.data.map((session) => (
-                      <TableRow key={session.id}>
+                      <TableRow key={session.uuid}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
                           <Code>{session.ip}</Code>
                         </td>

@@ -20,10 +20,9 @@ pub enum BackupDisk {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerBackup {
-    pub id: i32,
-    pub server_id: Option<i32>,
-    pub node_id: i32,
     pub uuid: uuid::Uuid,
+    pub server_uuid: Option<uuid::Uuid>,
+    pub node_uuid: uuid::Uuid,
 
     pub name: String,
     pub successful: bool,
@@ -50,10 +49,12 @@ impl BaseModel for ServerBackup {
         let table = table.unwrap_or("server_backups");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
-            (format!("{table}.server_id"), format!("{prefix}server_id")),
-            (format!("{table}.node_id"), format!("{prefix}node_id")),
             (format!("{table}.uuid"), format!("{prefix}uuid")),
+            (
+                format!("{table}.server_uuid"),
+                format!("{prefix}server_uuid"),
+            ),
+            (format!("{table}.node_uuid"), format!("{prefix}node_uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.successful"), format!("{prefix}successful")),
             (format!("{table}.locked"), format!("{prefix}locked")),
@@ -81,10 +82,9 @@ impl BaseModel for ServerBackup {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
-            server_id: row.get(format!("{prefix}server_id").as_str()),
-            node_id: row.get(format!("{prefix}node_id").as_str()),
             uuid: row.get(format!("{prefix}uuid").as_str()),
+            server_uuid: row.get(format!("{prefix}server_uuid").as_str()),
+            node_uuid: row.get(format!("{prefix}node_uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
             locked: row.get(format!("{prefix}locked").as_str()),
@@ -111,13 +111,13 @@ impl ServerBackup {
     ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO server_backups (server_id, node_id, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server.id)
-        .bind(server.node.id)
+        .bind(server.uuid)
+        .bind(server.node.uuid)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
@@ -176,20 +176,20 @@ impl ServerBackup {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_server_id_uuid(
+    pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_backups
-            WHERE server_backups.server_id = $1 AND server_backups.uuid = $2
+            WHERE server_backups.server_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(uuid)
         .fetch_optional(database.read())
         .await?;
@@ -197,20 +197,20 @@ impl ServerBackup {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_node_id_uuid(
+    pub async fn by_node_uuid_uuid(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_backups
-            WHERE server_backups.node_id = $1 AND server_backups.uuid = $2
+            WHERE server_backups.node_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(uuid)
         .fetch_optional(database.read())
         .await?;
@@ -218,9 +218,9 @@ impl ServerBackup {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_id_with_pagination(
+    pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -232,15 +232,15 @@ impl ServerBackup {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
             WHERE
-                server_backups.server_id = $1
+                server_backups.server_uuid = $1
                 AND server_backups.deleted IS NULL
                 AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
-            ORDER BY server_backups.id ASC
+            ORDER BY server_backups.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -255,9 +255,9 @@ impl ServerBackup {
         })
     }
 
-    pub async fn by_detached_node_id_with_pagination(
+    pub async fn by_detached_node_uuid_with_pagination(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -269,16 +269,16 @@ impl ServerBackup {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
             WHERE
-                server_backups.node_id = $1
-                AND server_backups.server_id IS NULL
+                server_backups.node_uuid = $1
+                AND server_backups.server_uuid IS NULL
                 AND server_backups.deleted IS NULL
                 AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
-            ORDER BY server_backups.id ASC
+            ORDER BY server_backups.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -293,34 +293,37 @@ impl ServerBackup {
         })
     }
 
-    pub async fn all_by_server_id(
+    pub async fn all_by_server_uuid(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
     ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_backups
-            WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            WHERE server_backups.server_uuid = $1 AND server_backups.deleted IS NULL
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .fetch_all(database.read())
         .await?;
 
         Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
-    pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
+    pub async fn count_by_server_uuid(
+        database: &crate::database::Database,
+        server_uuid: uuid::Uuid,
+    ) -> i64 {
         sqlx::query_scalar(
             r#"
             SELECT COUNT(*)
             FROM server_backups
-            WHERE server_backups.server_id = $1 AND server_backups.deleted IS NULL
+            WHERE server_backups.server_uuid = $1 AND server_backups.deleted IS NULL
             "#,
         )
-        .bind(server_id)
+        .bind(server_uuid)
         .fetch_one(database.read())
         .await
         .unwrap_or(0)
@@ -386,10 +389,10 @@ impl ServerBackup {
         database: &crate::database::Database,
         server: &super::server::Server,
     ) -> Result<(), sqlx::Error> {
-        let node = if self.node_id == server.node.id {
+        let node = if self.node_uuid == server.node.uuid {
             &server.node
         } else {
-            &super::node::Node::by_id(database, self.node_id)
+            &super::node::Node::by_uuid(database, self.node_uuid)
                 .await?
                 .ok_or_else(|| sqlx::Error::RowNotFound)?
         };
@@ -430,10 +433,10 @@ impl ServerBackup {
             r#"
             UPDATE server_backups
             SET deleted = NOW()
-            WHERE server_backups.id = $1
+            WHERE server_backups.uuid = $1
             "#,
         )
-        .bind(self.id)
+        .bind(self.uuid)
         .execute(database.write())
         .await?;
 
@@ -489,10 +492,10 @@ impl ServerBackup {
             r#"
             UPDATE server_backups
             SET deleted = NOW()
-            WHERE server_backups.id = $1
+            WHERE server_backups.uuid = $1
             "#,
         )
-        .bind(self.id)
+        .bind(self.uuid)
         .execute(database.write())
         .await?;
 

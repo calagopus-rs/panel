@@ -6,8 +6,6 @@ use std::collections::BTreeMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserRecoveryCode {
-    pub id: i32,
-
     pub code: String,
 
     pub created: chrono::NaiveDateTime,
@@ -20,7 +18,6 @@ impl BaseModel for UserRecoveryCode {
         let table = table.unwrap_or("user_recovery_codes");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
             (format!("{table}.code"), format!("{prefix}code")),
             (format!("{table}.created"), format!("{prefix}created")),
         ])
@@ -31,7 +28,6 @@ impl BaseModel for UserRecoveryCode {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
             code: row.get(format!("{prefix}code").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
@@ -42,7 +38,7 @@ impl UserRecoveryCode {
     #[inline]
     pub async fn create_all(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
     ) -> Result<Vec<String>, sqlx::Error> {
         let mut codes = Vec::new();
         codes.reserve_exact(10);
@@ -54,11 +50,11 @@ impl UserRecoveryCode {
 
             sqlx::query(
                 r#"
-                INSERT INTO user_recovery_codes (user_id, code, created)
+                INSERT INTO user_recovery_codes (user_uuid, code, created)
                 VALUES ($1, $2, NOW())
                 "#,
             )
-            .bind(user_id)
+            .bind(user_uuid)
             .bind(&code)
             .execute(&mut *transaction)
             .await?;
@@ -71,20 +67,20 @@ impl UserRecoveryCode {
         Ok(codes)
     }
 
-    pub async fn delete_by_code(
+    pub async fn delete_by_user_uuid_code(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         code: &str,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             DELETE FROM user_recovery_codes
-            WHERE user_recovery_codes.user_id = $1 AND user_recovery_codes.code = $2
+            WHERE user_recovery_codes.user_uuid = $1 AND user_recovery_codes.code = $2
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(code)
         .fetch_optional(database.write())
         .await?;
@@ -92,17 +88,17 @@ impl UserRecoveryCode {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn delete_by_user_id(
+    pub async fn delete_by_user_uuid(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_recovery_codes
-            WHERE user_recovery_codes.user_id = $1
+            WHERE user_recovery_codes.user_uuid = $1
             "#,
         )
-        .bind(user_id)
+        .bind(user_uuid)
         .execute(database.write())
         .await?;
 

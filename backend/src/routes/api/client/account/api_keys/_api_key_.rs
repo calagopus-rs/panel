@@ -23,9 +23,9 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "apikey" = String,
-            description = "The API key identifier",
-            example = "ptlc_1HUayQFz6ba",
+            "api_key" = uuid::Uuid,
+            description = "The API key ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -33,7 +33,7 @@ mod delete {
         auth: GetAuthMethod,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(api_key): Path<String>,
+        Path(api_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
         if matches!(*auth, AuthMethod::ApiKey(_)) {
             return ApiResponse::error("cannot delete api key with api key")
@@ -41,21 +41,23 @@ mod delete {
                 .ok();
         }
 
-        let api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await? {
-            Some(api_key) => api_key,
-            None => {
-                return ApiResponse::error("api key not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
+        let api_key =
+            match UserApiKey::by_user_uuid_uuid(&state.database, user.uuid, api_key).await? {
+                Some(api_key) => api_key,
+                None => {
+                    return ApiResponse::error("api key not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
-        UserApiKey::delete_by_id(&state.database, api_key.id).await?;
+        UserApiKey::delete_by_uuid(&state.database, api_key.uuid).await?;
 
         activity_logger
             .log(
                 "user:api-key.delete",
                 serde_json::json!({
+                    "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
                 }),
@@ -101,9 +103,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "apikey" = String,
+            "api_key" = uuid::Uuid,
             description = "The API key identifier",
-            example = "ptlc_1HUayQFz6ba",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -111,7 +113,7 @@ mod patch {
         auth: GetAuthMethod,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(api_key): Path<String>,
+        Path(api_key): Path<uuid::Uuid>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -126,15 +128,15 @@ mod patch {
                 .ok();
         }
 
-        let mut api_key = match UserApiKey::by_key_start(&state.database, user.id, &api_key).await?
-        {
-            Some(api_key) => api_key,
-            None => {
-                return ApiResponse::error("api key not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
+        let mut api_key =
+            match UserApiKey::by_user_uuid_uuid(&state.database, user.uuid, api_key).await? {
+                Some(api_key) => api_key,
+                None => {
+                    return ApiResponse::error("api key not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
         if let Some(name) = data.name {
             api_key.name = name;
@@ -146,10 +148,10 @@ mod patch {
         match sqlx::query!(
             "UPDATE user_api_keys
             SET name = $1, permissions = $2
-            WHERE id = $3",
+            WHERE user_api_keys.uuid = $3",
             api_key.name,
             &api_key.permissions,
-            api_key.id,
+            api_key.uuid,
         )
         .execute(state.database.write())
         .await
@@ -173,6 +175,7 @@ mod patch {
             .log(
                 "user:api-key.update",
                 serde_json::json!({
+                    "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
                     "permissions": api_key.permissions,

@@ -60,9 +60,9 @@ mod get {
                 .ok();
         }
 
-        let subusers = ServerSubuser::by_server_id_with_pagination(
+        let subusers = ServerSubuser::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -204,6 +204,7 @@ mod post {
             .log(
                 "server:subuser.create",
                 serde_json::json!({
+                    "username": username,
                     "email": data.email,
                     "permissions": data.permissions,
                 }),
@@ -211,15 +212,19 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            subuser: ServerSubuser::by_server_id_username(&state.database, server.id, &username)
-                .await?
-                .ok_or_else(|| {
-                    anyhow::anyhow!(
-                        "subuser with username {} not found after creation",
-                        username
-                    )
-                })?
-                .into_api_object(),
+            subuser: ServerSubuser::by_server_uuid_username(
+                &state.database,
+                server.uuid,
+                &username,
+            )
+            .await?
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "subuser with username {} not found after creation",
+                    username
+                )
+            })?
+            .into_api_object(),
         })
         .ok()
     }

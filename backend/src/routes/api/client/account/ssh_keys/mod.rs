@@ -48,9 +48,9 @@ mod get {
                 .ok();
         }
 
-        let ssh_keys = UserSshKey::by_user_id_with_pagination(
+        let ssh_keys = UserSshKey::by_user_uuid_with_pagination(
             &state.database,
-            user.id,
+            user.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -128,7 +128,7 @@ mod post {
         };
 
         let ssh_key =
-            match UserSshKey::create(&state.database, user.id, &data.name, public_key).await {
+            match UserSshKey::create(&state.database, user.uuid, &data.name, public_key).await {
                 Ok(ssh_key) => ssh_key,
                 Err(err) if err.to_string().contains("unique constraint") => {
                     return ApiResponse::error("ssh key with name or fingerprint already exists")
@@ -148,6 +148,7 @@ mod post {
             .log(
                 "user:ssh-key.create",
                 serde_json::json!({
+                    "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,
                     "name": ssh_key.name,
                 }),

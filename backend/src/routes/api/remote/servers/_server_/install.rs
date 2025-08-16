@@ -80,9 +80,9 @@ mod post {
         sqlx::query!(
             "UPDATE servers
             SET status = $1
-            WHERE id = $2",
+            WHERE servers.uuid = $2",
             status as Option<ServerStatus>,
-            server.0.id
+            server.0.uuid
         )
         .execute(state.database.write())
         .await?;

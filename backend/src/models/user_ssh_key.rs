@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserSshKey {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub fingerprint: String,
@@ -21,7 +21,7 @@ impl BaseModel for UserSshKey {
         let table = table.unwrap_or("user_ssh_keys");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
                 format!("{table}.fingerprint"),
@@ -36,7 +36,7 @@ impl BaseModel for UserSshKey {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             fingerprint: row.get(format!("{prefix}fingerprint").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
@@ -48,19 +48,19 @@ impl UserSshKey {
     #[inline]
     pub async fn create(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         name: &str,
         public_key: russh::keys::PublicKey,
     ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO user_ssh_keys (user_id, name, fingerprint, public_key, created)
+            INSERT INTO user_ssh_keys (user_uuid, name, fingerprint, public_key, created)
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(name)
         .bind(
             public_key
@@ -74,34 +74,30 @@ impl UserSshKey {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_fingerprint(
+    pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
-        user_id: i32,
-        fingerprint: String,
+        user_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM user_ssh_keys
-            WHERE user_ssh_keys.user_id = $1 AND user_ssh_keys.fingerprint = $2
+            WHERE user_ssh_keys.user_uuid = $1 AND user_ssh_keys.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
-        .bind(if fingerprint.starts_with("SHA256:") {
-            fingerprint
-        } else {
-            format!("SHA256:{fingerprint}")
-        })
+        .bind(user_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_user_id_with_pagination(
+    pub async fn by_user_uuid_with_pagination(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -112,13 +108,13 @@ impl UserSshKey {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_ssh_keys
-            WHERE user_ssh_keys.user_id = $1 AND ($2 IS NULL OR user_ssh_keys.name ILIKE '%' || $2 || '%')
-            ORDER BY user_ssh_keys.id ASC
+            WHERE user_ssh_keys.user_uuid = $1 AND ($2 IS NULL OR user_ssh_keys.name ILIKE '%' || $2 || '%')
+            ORDER BY user_ssh_keys.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -133,17 +129,17 @@ impl UserSshKey {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM user_ssh_keys
-            WHERE user_ssh_keys.id = $1
+            WHERE user_ssh_keys.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -153,7 +149,7 @@ impl UserSshKey {
     #[inline]
     pub fn into_api_object(self) -> ApiUserSshKey {
         ApiUserSshKey {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             fingerprint: self.fingerprint,
             created: self.created.and_utc(),
@@ -164,7 +160,7 @@ impl UserSshKey {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "UserSshKey")]
 pub struct ApiUserSshKey {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub fingerprint: String,

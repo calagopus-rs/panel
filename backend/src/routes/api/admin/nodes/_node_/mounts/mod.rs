@@ -23,9 +23,9 @@ mod get {
         (status = OK, body = inline(Response)),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -53,9 +53,9 @@ mod get {
                 .ok();
         }
 
-        let mounts = NodeMount::by_node_id_with_pagination(
+        let mounts = NodeMount::by_node_uuid_with_pagination(
             &state.database,
-            node.id,
+            node.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -94,7 +94,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        mount_id: i32,
+        mount_uuid: uuid::Uuid,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -117,7 +117,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let mount = match Mount::by_id(&state.database, data.mount_id).await? {
+        let mount = match Mount::by_uuid(&state.database, data.mount_uuid).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -132,7 +132,7 @@ mod post {
                 .ok();
         }
 
-        match NodeMount::create(&state.database, node.id, mount.id).await {
+        match NodeMount::create(&state.database, node.uuid, mount.uuid).await {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("mount already exists")
@@ -152,8 +152,8 @@ mod post {
             .log(
                 "node:mount.create",
                 serde_json::json!({
-                    "node_id": node.id,
-                    "mount_id": mount.id,
+                    "node_uuid": node.uuid,
+                    "mount_uuid": mount.uuid,
                 }),
             )
             .await;

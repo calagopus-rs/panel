@@ -4,7 +4,7 @@ import ContextMenu from '@/elements/ContextMenu';
 import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEllipsis, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import SubuserCreateOrUpdateDialog from './dialogs/SubuserCreateOrUpdateDialog';
@@ -74,10 +74,6 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'}>
-              <Code>{subuser.user.id}</Code>
-            </td>
-
             <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={subuser.user.username}>
               {subuser.user.username}
             </td>

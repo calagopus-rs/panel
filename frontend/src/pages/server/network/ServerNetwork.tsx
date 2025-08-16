@@ -4,7 +4,7 @@ import getAllocations from '@/api/server/allocations/getAllocations';
 import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, { NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
+import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState, useEffect } from 'react';
@@ -18,22 +18,24 @@ export default () => {
   const { server, allocations, setAllocations, addAllocation } = useServerStore();
 
   const [loading, setLoading] = useState(allocations.data.length === 0);
+  const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
   }, []);
 
-  const onPageSelect = (page: number) => {
-    setSearchParams({ page: page.toString() });
-  };
+  useEffect(() => {
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
 
   useEffect(() => {
-    getAllocations(server.uuid, page).then((data) => {
+    getAllocations(server.uuid, page, search).then((data) => {
       setAllocations(data);
       setLoading(false);
     });
-  }, [page]);
+  }, [page, search]);
 
   const doAdd = () => {
     createAllocation(server.uuid)
@@ -55,29 +57,31 @@ export default () => {
         </div>
       </div>
       <Table>
-        <Pagination data={allocations} onPageSelect={onPageSelect}>
-          <div className={'overflow-x-auto'}>
-            <table className={'w-full table-auto'}>
-              <TableHead>
-                <TableHeader name={'Hostname'} />
-                <TableHeader name={'Port'} />
-                <TableHeader name={'Note'} />
-                <TableHeader />
-                <TableHeader />
-              </TableHead>
+        <ContentWrapper onSearch={setSearch}>
+          <Pagination data={allocations} onPageSelect={setPage}>
+            <div className={'overflow-x-auto'}>
+              <table className={'w-full table-auto'}>
+                <TableHead>
+                  <TableHeader name={'Hostname'} />
+                  <TableHeader name={'Port'} />
+                  <TableHeader name={'Note'} />
+                  <TableHeader />
+                  <TableHeader />
+                </TableHead>
 
-              <ContextMenuProvider>
-                <TableBody>
-                  {allocations.data.map((allocation) => (
-                    <AllocationRow key={allocation.id} allocation={allocation} />
-                  ))}
-                </TableBody>
-              </ContextMenuProvider>
-            </table>
+                <ContextMenuProvider>
+                  <TableBody>
+                    {allocations.data.map((allocation) => (
+                      <AllocationRow key={allocation.uuid} allocation={allocation} />
+                    ))}
+                  </TableBody>
+                </ContextMenuProvider>
+              </table>
 
-            {loading ? <Spinner.Centered /> : allocations.data.length === 0 ? <NoItems /> : null}
-          </div>
-        </Pagination>
+              {loading ? <Spinner.Centered /> : allocations.data.length === 0 ? <NoItems /> : null}
+            </div>
+          </Pagination>
+        </ContentWrapper>
       </Table>
     </Container>
   );

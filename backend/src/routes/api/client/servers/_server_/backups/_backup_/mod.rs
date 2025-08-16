@@ -39,7 +39,7 @@ pub async fn auth(
             .into_response());
     }
 
-    let backup = ServerBackup::by_server_id_uuid(&state.database, server.id, backup).await;
+    let backup = ServerBackup::by_server_uuid_uuid(&state.database, server.uuid, backup).await;
     let backup = match backup {
         Ok(Some(backup)) => backup,
         Ok(None) => {
@@ -167,7 +167,7 @@ mod delete {
             .log(
                 "server:backup.delete",
                 serde_json::json!({
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
                     "name": backup.name,
                 }),
             )
@@ -255,10 +255,10 @@ mod patch {
         sqlx::query!(
             "UPDATE server_backups
             SET name = $1, locked = $2
-            WHERE id = $3",
+            WHERE server_backups.uuid = $3",
             &backup.name,
             backup.locked,
-            backup.id,
+            backup.uuid,
         )
         .execute(state.database.write())
         .await?;
@@ -267,7 +267,7 @@ mod patch {
             .log(
                 "server:backup.update",
                 serde_json::json!({
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
                     "name": backup.name,
                     "locked": backup.locked,
                 }),

@@ -13,7 +13,7 @@ pub static DB_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 
 #[derive(Serialize, Deserialize)]
 pub struct ServerDatabase {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
     pub database_host: super::database_host::DatabaseHost,
 
     pub name: String,
@@ -30,7 +30,7 @@ impl BaseModel for ServerDatabase {
         let table = table.unwrap_or("server_databases");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.username"), format!("{prefix}username")),
             (format!("{table}.password"), format!("{prefix}password")),
@@ -50,7 +50,7 @@ impl BaseModel for ServerDatabase {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
             name: row.get(format!("{prefix}name").as_str()),
             username: row.get(format!("{prefix}username").as_str()),
@@ -63,10 +63,11 @@ impl BaseModel for ServerDatabase {
 impl ServerDatabase {
     pub async fn create(
         database: &crate::database::Database,
-        server_id: i32,
+        server: &super::server::Server,
         database_host: &super::database_host::DatabaseHost,
         name: &str,
-    ) -> Result<i32, sqlx::Error> {
+    ) -> Result<uuid::Uuid, sqlx::Error> {
+        let server_id = format!("{:08x}", server.uuid_short);
         let name = format!("s{server_id}_{name}");
         let username = format!(
             "u{}_{}",
@@ -115,13 +116,13 @@ impl ServerDatabase {
 
         let row = match sqlx::query(
             r#"
-            INSERT INTO server_databases (server_id, database_host_id, name, username, password)
+            INSERT INTO server_databases (server_uuid, database_host_uuid, name, username, password)
             VALUES ($1, $2, $3, $4, $5)
-            RETURNING id
+            RETURNING uuid
             "#,
         )
-        .bind(server_id)
-        .bind(database_host.id)
+        .bind(server.uuid)
+        .bind(database_host.uuid)
         .bind(&name)
         .bind(&username)
         .bind(database.encrypt(&password).unwrap())
@@ -160,10 +161,10 @@ impl ServerDatabase {
                 sqlx::query(
                     r#"
                     DELETE FROM server_databases
-                    WHERE id = $1
+                    WHERE server_databases.uuid = $1
                     "#,
                 )
-                .bind(row.get::<i32, _>("id"))
+                .bind(row.get::<uuid::Uuid, _>("uuid"))
                 .execute(database.write())
                 .await
                 .ok();
@@ -172,54 +173,54 @@ impl ServerDatabase {
             }
         }
 
-        Ok(row.get("id"))
+        Ok(row.get("uuid"))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_databases
-            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
-            WHERE server_databases.id = $1
+            JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
+            WHERE server_databases.uuid = $1
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_id_id(
+    pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
-        server_id: i32,
-        id: i32,
+        server_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_databases
-            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
-            WHERE server_databases.server_id = $1 AND server_databases.id = $2
+            JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
+            WHERE server_databases.server_uuid = $1 AND server_databases.uuid = $2
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(server_id)
-        .bind(id)
+        .bind(server_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_id_with_pagination(
+    pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -230,14 +231,14 @@ impl ServerDatabase {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_databases
-            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
-            WHERE server_databases.server_id = $1 AND ($2 IS NULL OR server_databases.name ILIKE '%' || $2 || '%')
-            ORDER BY server_databases.id ASC
+            JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
+            WHERE server_databases.server_uuid = $1 AND ($2 IS NULL OR server_databases.name ILIKE '%' || $2 || '%')
+            ORDER BY server_databases.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -252,35 +253,38 @@ impl ServerDatabase {
         })
     }
 
-    pub async fn all_by_server_id(
+    pub async fn all_by_server_uuid(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
     ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_databases
-            JOIN database_hosts ON database_hosts.id = server_databases.database_host_id
-            WHERE server_databases.server_id = $1
+            JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
+            WHERE server_databases.server_uuid = $1
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .fetch_all(database.read())
         .await?;
 
         Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
-    pub async fn count_by_server_id(database: &crate::database::Database, server_id: i32) -> i64 {
+    pub async fn count_by_server_uuid(
+        database: &crate::database::Database,
+        server_uuid: uuid::Uuid,
+    ) -> i64 {
         sqlx::query_scalar(
             r#"
             SELECT COUNT(*)
             FROM server_databases
-            WHERE server_databases.server_id = $1
+            WHERE server_databases.server_uuid = $1
             "#,
         )
-        .bind(server_id)
+        .bind(server_uuid)
         .fetch_one(database.read())
         .await
         .unwrap_or(0)
@@ -315,11 +319,11 @@ impl ServerDatabase {
             r#"
             UPDATE server_databases
             SET password = $1
-            WHERE server_databases.id = $2
+            WHERE server_databases.uuid = $2
             "#,
         )
         .bind(database.encrypt(&new_password).unwrap())
-        .bind(self.id)
+        .bind(self.uuid)
         .execute(database.write())
         .await?;
 
@@ -371,10 +375,10 @@ impl ServerDatabase {
         sqlx::query(
             r#"
             DELETE FROM server_databases
-            WHERE server_databases.id = $1
+            WHERE server_databases.uuid = $1
             "#,
         )
-        .bind(self.id)
+        .bind(self.uuid)
         .execute(database.write())
         .await?;
 
@@ -388,7 +392,7 @@ impl ServerDatabase {
         show_password: bool,
     ) -> ApiServerDatabase {
         ApiServerDatabase {
-            id: self.id,
+            uuid: self.uuid,
             r#type: self.database_host.r#type,
             host: self
                 .database_host
@@ -413,7 +417,7 @@ impl ServerDatabase {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "ServerDatabase")]
 pub struct ApiServerDatabase {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub r#type: DatabaseType,
     pub host: String,

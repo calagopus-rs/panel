@@ -8,7 +8,7 @@ interface AdminActivity {
 }
 
 interface AdminDatabaseHost {
-  id: number;
+  uuid: string;
   name: string;
   username: string;
   host: string;
@@ -18,6 +18,7 @@ interface AdminDatabaseHost {
   publicPort: number | null;
   type: DatabaseType;
   databases: number;
+  locations: number;
   created: Date;
 }
 
@@ -30,13 +31,13 @@ interface UpdateLocation {
 }
 
 interface Location extends UpdateLocation {
-  id: number;
+  uuid: string;
   nodes: number;
   created: Date;
 }
 
 interface Mount {
-  id: number;
+  uuid: string;
   name: string;
   description: string | null;
   readOnly: boolean;
@@ -50,7 +51,7 @@ interface Mount {
 }
 
 interface Nest {
-  id: number;
+  uuid: string;
   author: string;
   name: string;
   description: string | null;
@@ -101,12 +102,12 @@ interface AdminUpdateNestEgg {
 }
 
 interface AdminNestEgg extends AdminUpdateNestEgg {
-  id: number;
+  uuid: string;
   created: Date;
 }
 
 interface NestEggVariable {
-  id: number;
+  uuid: string;
   name: string;
   description: string | null;
   order: number;
@@ -119,7 +120,6 @@ interface NestEggVariable {
 }
 
 interface Node {
-  id: number;
   uuid: string;
   location: Location;
   name: string;
@@ -138,7 +138,7 @@ interface Node {
 }
 
 interface NodeAllocation {
-  id: number;
+  uuid: string;
   ip: string;
   ipAlias: string | null;
   port: number;
@@ -151,13 +151,12 @@ interface NodeMount {
 }
 
 interface AdminServer {
-  id: number;
   uuid: string;
   uuidShort: string;
   externalId: string | null;
   allocation: ServerAllocation | null;
   node: Node;
-  ower: User;
+  owner: User;
   egg: AdminNestEgg;
   status: ServerStatus | null;
   suspended: boolean;
@@ -192,7 +191,7 @@ interface AdminServerMount {
 }
 
 interface DatabaseHost {
-  id: number;
+  uuid: string;
   name: string;
   host: string;
   port: number;
@@ -200,7 +199,7 @@ interface DatabaseHost {
 }
 
 interface NestEgg {
-  id: number;
+  uuid: string;
   name: string;
   description: string | null;
   startup: string;
@@ -212,7 +211,6 @@ interface NestEgg {
 }
 
 interface Server {
-  id: number;
   uuid: string;
   uuidShort: string;
   allocation: ServerAllocation | null;
@@ -250,7 +248,7 @@ interface ServerActivity {
 }
 
 interface ServerAllocation {
-  id: number;
+  uuid: string;
   ip: string;
   ipAlias: string | null;
   port: number;
@@ -282,7 +280,7 @@ interface ServerBackupWithProgress extends ServerBackup {
 }
 
 interface ServerDatabase {
-  id: number;
+  uuid: string;
   name: string;
   username: string;
   password: string;
@@ -307,7 +305,7 @@ interface ApiServerLimits {
 }
 
 interface ServerMount {
-  id: number;
+  uuid: string;
   name: string;
   description: string | null;
   readOnly: boolean;
@@ -334,7 +332,7 @@ interface ServerVariable {
 }
 
 interface User {
-  id: number;
+  uuid: string;
   avatar?: string;
   username: string;
   email: string;
@@ -354,7 +352,7 @@ interface UserActivity {
 }
 
 interface UserApiKey {
-  id: number;
+  uuid: string;
   name: string;
   keyStart: string;
   permissions: string[];
@@ -363,7 +361,7 @@ interface UserApiKey {
 }
 
 interface UserSession {
-  id: number;
+  uuid: string;
   ip: string;
   userAgent: string;
   isUsing: boolean;
@@ -372,7 +370,7 @@ interface UserSession {
 }
 
 interface UserSshKey {
-  id: number;
+  uuid: string;
   name: string;
   fingerprint: string;
   created: Date;

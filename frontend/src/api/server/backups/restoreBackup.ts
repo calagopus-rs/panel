@@ -4,10 +4,10 @@ interface Data {
   truncateDirectory: boolean;
 }
 
-export default async (uuid: string, backup: string, data: Data): Promise<void> => {
+export default async (uuid: string, backupUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/client/servers/${uuid}/backups/${backup}/restore`, {
+      .post(`/api/client/servers/${uuid}/backups/${backupUuid}/restore`, {
         truncate_directory: data.truncateDirectory,
       })
       .then(() => resolve())

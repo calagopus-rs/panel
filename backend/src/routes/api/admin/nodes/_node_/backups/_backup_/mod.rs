@@ -32,9 +32,9 @@ pub async fn auth(
         }
     };
 
-    let backup = ServerBackup::by_node_id_uuid(&state.database, node.id, backup).await;
+    let backup = ServerBackup::by_node_uuid_uuid(&state.database, node.uuid, backup).await;
     let backup = match backup {
-        Ok(Some(backup)) if backup.server_id.is_none() => backup,
+        Ok(Some(backup)) if backup.server_uuid.is_none() => backup,
         Ok(_) => {
             return Ok(ApiResponse::error("backup not found")
                 .with_status(StatusCode::NOT_FOUND)
@@ -68,9 +68,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "backup" = uuid::Uuid,
@@ -111,9 +111,9 @@ mod delete {
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
-            "node" = i32,
+            "node" = uuid::Uuid,
             description = "The node ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "backup" = uuid::Uuid,
@@ -133,7 +133,7 @@ mod delete {
                 .ok();
         }
 
-        let node_id = node.id;
+        let node_uuid = node.uuid;
         if let Err(err) = backup.delete_detached(&state.database, node.0).await {
             tracing::error!(backup = %backup.uuid, "failed to delete detached backup: {:#?}", err);
 
@@ -146,8 +146,9 @@ mod delete {
             .log(
                 "node:backup.delete",
                 serde_json::json!({
-                    "node_id": node_id,
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
+                    "node_uuid": node_uuid,
+
                     "name": backup.name,
                 }),
             )

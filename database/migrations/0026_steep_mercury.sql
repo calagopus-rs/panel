@@ -1,1 +1,0 @@
-ALTER TABLE "nest_egg_variables" ADD COLUMN "order" smallint DEFAULT 0 NOT NULL;

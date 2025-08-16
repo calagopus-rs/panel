@@ -51,7 +51,7 @@ export default ({ nest }: { nest: Nest }) => {
 
   useEffect(() => {
     if (params.eggId) {
-      getEgg(nest.id, Number(params.eggId))
+      getEgg(nest.uuid, params.eggId)
         .then((egg) => {
           setEgg(egg);
         })
@@ -62,8 +62,8 @@ export default ({ nest }: { nest: Nest }) => {
   }, [params.eggId]);
 
   const doCreateOrUpdate = () => {
-    if (egg?.id) {
-      updateEgg(nest.id, egg.id, egg)
+    if (egg?.uuid) {
+      updateEgg(nest.uuid, egg.uuid, egg)
         .then(() => {
           addToast('Egg updated.', 'success');
         })
@@ -71,10 +71,10 @@ export default ({ nest }: { nest: Nest }) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
     } else {
-      createEgg(nest.id, egg)
+      createEgg(nest.uuid, egg)
         .then((egg) => {
           addToast('Egg created.', 'success');
-          navigate(`/admin/nests/${nest.id}/eggs/${egg.id}`);
+          navigate(`/admin/nests/${nest.uuid}/eggs/${egg.uuid}`);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -83,10 +83,10 @@ export default ({ nest }: { nest: Nest }) => {
   };
 
   const doDelete = () => {
-    deleteEgg(nest.id, egg.id)
+    deleteEgg(nest.uuid, egg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
-        navigate(`/admin/nests/${nest.id}/eggs`);
+        navigate(`/admin/nests/${nest.uuid}/eggs`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

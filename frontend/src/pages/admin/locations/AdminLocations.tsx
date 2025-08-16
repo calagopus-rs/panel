@@ -66,7 +66,7 @@ const LocationsContainer = () => {
                 <ContextMenuProvider>
                   <TableBody>
                     {locations.data.map((location) => (
-                      <LocationRow key={location.id} location={location} />
+                      <LocationRow key={location.uuid} location={location} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>

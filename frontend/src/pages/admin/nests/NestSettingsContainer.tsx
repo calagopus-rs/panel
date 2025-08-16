@@ -17,7 +17,7 @@ export default ({ nest }: { nest: Nest }) => {
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
 
   const doUpdate = () => {
-    updateNest(nest.id, nest)
+    updateNest(nest.uuid, nest)
       .then(() => {
         addToast('Nest updated.', 'success');
       })
@@ -27,7 +27,7 @@ export default ({ nest }: { nest: Nest }) => {
   };
 
   const doDelete = () => {
-    deleteNest(nest.id)
+    deleteNest(nest.uuid)
       .then(() => {
         addToast('Nest deleted.', 'success');
         navigate('/admin/nests');

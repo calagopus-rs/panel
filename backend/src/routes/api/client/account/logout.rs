@@ -38,7 +38,7 @@ mod post {
             }
         };
 
-        UserSession::delete_by_id(&state.database, session.id).await?;
+        UserSession::delete_by_uuid(&state.database, session.uuid).await?;
 
         let settings = state.settings.get().await;
 

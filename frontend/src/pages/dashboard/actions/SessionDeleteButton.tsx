@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSession from '@/api/me/sessions/deleteSession';
 import { Button } from '@/elements/button';
-import Code from '@/elements/Code';
 import { Dialog } from '@/elements/dialog';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
@@ -16,7 +15,7 @@ export default ({ session }: { session: UserSession }) => {
   const [open, setOpen] = useState(false);
 
   const submit = () => {
-    deleteSession(session.id)
+    deleteSession(session.uuid)
       .then(() => {
         addToast('Session signed out.', 'success');
         setOpen(false);

@@ -31,7 +31,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
   }, [page, search]);
 
   useEffect(() => {
-    getEggs(nest.id, page, search)
+    getEggs(nest.uuid, page, search)
       .then((data) => {
         setEggs(data);
         setLoading(false);
@@ -46,7 +46,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Eggs</h1>
         <div className={'flex gap-2'}>
-          <Button onClick={() => navigate(`/admin/nests/${nest.id}/eggs/new`)}>New Egg</Button>
+          <Button onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)}>New Egg</Button>
         </div>
       </div>
       <Table>
@@ -65,7 +65,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
                 <ContextMenuProvider>
                   <TableBody>
                     {eggs.data.map((egg) => (
-                      <EggRow key={egg.id} nest={nest} egg={egg} />
+                      <EggRow key={egg.uuid} nest={nest} egg={egg} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>

@@ -91,9 +91,9 @@ mod post {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -120,7 +120,7 @@ mod post {
 
         let egg = match NestEgg::create(
             &state.database,
-            nest.id,
+            nest.uuid,
             &data.author,
             &data.name,
             if let Some(description) = &data.description {
@@ -175,7 +175,7 @@ mod post {
 
             NestEggVariable::create(
                 &state.database,
-                egg.id,
+                egg.uuid,
                 &variable.name,
                 variable.description.as_deref(),
                 0,
@@ -193,7 +193,8 @@ mod post {
             .log(
                 "nest:egg.create",
                 serde_json::json!({
-                    "nest_id": nest.id,
+                    "uuid": egg.uuid,
+                    "nest_uuid": nest.uuid,
 
                     "author": egg.author,
                     "name": egg.name,

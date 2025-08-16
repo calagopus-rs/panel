@@ -84,7 +84,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        location_id: i32,
+        location_uuid: uuid::Uuid,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -131,7 +131,7 @@ mod post {
                 .ok();
         }
 
-        let location = match Location::by_id(&state.database, data.location_id).await? {
+        let location = match Location::by_uuid(&state.database, data.location_uuid).await? {
             Some(location) => location,
             None => {
                 return ApiResponse::error("location not found")
@@ -142,7 +142,7 @@ mod post {
 
         let node = match Node::create(
             &state.database,
-            location.id,
+            location.uuid,
             &data.name,
             data.public,
             data.description.as_deref(),
@@ -155,7 +155,7 @@ mod post {
         )
         .await
         {
-            Ok(node_id) => Node::by_id(&state.database, node_id)
+            Ok(node_uuid) => Node::by_uuid(&state.database, node_uuid)
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("node not found after creation"))?,
             Err(err) if err.to_string().contains("unique constraint") => {
@@ -176,7 +176,8 @@ mod post {
             .log(
                 "node:create",
                 serde_json::json!({
-                    "location_id": location.id,
+                    "uuid": node.uuid,
+                    "location_uuid": location.uuid,
 
                     "name": node.name,
                     "public": node.public,

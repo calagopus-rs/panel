@@ -22,32 +22,34 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "sshkey" = String,
-            description = "The SSH key fingerprint",
-            example = "ncZIBg5GoioMFHMbeyh0h7TzX2Zy3LpoQgRPDbq2qfA",
+            "ssh_key" = uuid::Uuid,
+            description = "The SSH key ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(ssh_key): Path<String>,
+        Path(ssh_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
-        let ssh_key = match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await? {
-            Some(ssh_key) => ssh_key,
-            None => {
-                return ApiResponse::json(ApiError::new_value(&["ssh key not found"]))
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
+        let ssh_key =
+            match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {
+                Some(ssh_key) => ssh_key,
+                None => {
+                    return ApiResponse::json(ApiError::new_value(&["ssh key not found"]))
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            };
 
-        UserSshKey::delete_by_id(&state.database, ssh_key.id).await?;
+        UserSshKey::delete_by_uuid(&state.database, ssh_key.uuid).await?;
 
         activity_logger
             .log(
                 "user:ssh-key.delete",
                 serde_json::json!({
+                    "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,
                     "name": ssh_key.name,
                 }),
@@ -89,16 +91,16 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "sshkey" = String,
-            description = "The SSH key fingerprint",
-            example = "ncZIBg5GoioMFHMbeyh0h7TzX2Zy3LpoQgRPDbq2qfA",
+            "ssh_key" = uuid::Uuid,
+            description = "The SSH key ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(ssh_key): Path<String>,
+        Path(ssh_key): Path<uuid::Uuid>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -108,7 +110,7 @@ mod patch {
         }
 
         let mut ssh_key =
-            match UserSshKey::by_fingerprint(&state.database, user.id, ssh_key).await? {
+            match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {
                 Some(ssh_key) => ssh_key,
                 None => {
                     return ApiResponse::error("ssh key not found")
@@ -122,9 +124,11 @@ mod patch {
         }
 
         match sqlx::query!(
-            "UPDATE user_ssh_keys SET name = $1 WHERE id = $2",
+            "UPDATE user_ssh_keys
+            SET name = $1
+            WHERE user_ssh_keys.uuid = $2",
             ssh_key.name,
-            ssh_key.id,
+            ssh_key.uuid,
         )
         .execute(state.database.write())
         .await
@@ -148,6 +152,7 @@ mod patch {
             .log(
                 "user:ssh-key.update",
                 serde_json::json!({
+                    "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,
                     "name": ssh_key.name,
                 }),

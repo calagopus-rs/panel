@@ -17,7 +17,7 @@ export default () => {
     createNest(nest)
       .then((nest) => {
         addToast('Nest created.', 'success');
-        navigate(`/admin/nests/${nest.id}`);
+        navigate(`/admin/nests/${nest.uuid}`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

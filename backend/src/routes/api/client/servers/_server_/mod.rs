@@ -37,9 +37,9 @@ pub type GetServerActivityLogger = crate::extract::ConsumingExtension<ServerActi
 #[derive(Clone)]
 pub struct ServerActivityLogger {
     state: State,
-    server_id: i32,
-    user_id: i32,
-    api_key_id: Option<i32>,
+    server_uuid: uuid::Uuid,
+    user_uuid: uuid::Uuid,
+    api_key_uuid: Option<uuid::Uuid>,
     ip: std::net::IpAddr,
 }
 
@@ -47,9 +47,9 @@ impl ServerActivityLogger {
     pub async fn log(&self, event: &str, data: serde_json::Value) {
         if let Err(err) = crate::models::server_activity::ServerActivity::log(
             &self.state.database,
-            self.server_id,
-            Some(self.user_id),
-            self.api_key_id,
+            self.server_uuid,
+            Some(self.user_uuid),
+            self.api_key_uuid,
             event,
             Some(self.ip.into()),
             data,
@@ -57,7 +57,7 @@ impl ServerActivityLogger {
         .await
         {
             tracing::warn!(
-                user = self.user_id,
+                user = %self.user_uuid,
                 "failed to log server activity: {:#?}",
                 err
             );
@@ -99,7 +99,7 @@ pub async fn auth(
                     .with_status(StatusCode::CONFLICT)
                     .into_response());
             }
-        } else if server.destination_node_id.is_some() {
+        } else if server.destination_node_uuid.is_some() {
             return Ok(ApiResponse::error("server is being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .into_response());
@@ -119,10 +119,10 @@ pub async fn auth(
 
     req.extensions_mut().insert(ServerActivityLogger {
         state: Arc::clone(&state),
-        server_id: server.id,
-        user_id: user.id,
-        api_key_id: match auth.0 {
-            crate::routes::api::client::AuthMethod::ApiKey(api_key) => Some(api_key.id),
+        server_uuid: server.uuid,
+        user_uuid: user.uuid,
+        api_key_uuid: match auth.0 {
+            crate::routes::api::client::AuthMethod::ApiKey(api_key) => Some(api_key.uuid),
             _ => None,
         },
         ip: ip.0,

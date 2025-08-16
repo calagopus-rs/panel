@@ -6,12 +6,12 @@ export default ({ nest, egg }: { nest: Nest; egg: AdminNestEgg }) => {
   return (
     <TableRow>
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-        <Code>{egg.id}</Code>
+        <Code>{egg.uuid}</Code>
       </td>
 
       <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
         <NavLink
-          to={`/admin/nests/${nest.id}/eggs/${egg.id}`}
+          to={`/admin/nests/${nest.uuid}/eggs/${egg.uuid}`}
           className={'text-blue-400 hover:text-blue-200 hover:underline'}
         >
           {egg.name}

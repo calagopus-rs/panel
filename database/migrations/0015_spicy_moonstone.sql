@@ -1,1 +1,0 @@
-ALTER TABLE "user_api_keys" ALTER COLUMN "key" SET DATA TYPE text;

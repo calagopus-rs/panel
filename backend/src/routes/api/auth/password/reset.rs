@@ -51,7 +51,7 @@ mod post {
 
         if let Err(err) = UserActivity::log(
             &state.database,
-            token.user.id,
+            token.user.uuid,
             None,
             "auth:reset-password",
             ip.0.into(),
@@ -60,7 +60,7 @@ mod post {
         .await
         {
             tracing::warn!(
-                user = token.user.id,
+                user = %token.user.uuid,
                 "failed to log user activity: {:#?}",
                 err
             );

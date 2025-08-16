@@ -63,9 +63,9 @@ mod put {
         sqlx::query!(
             "UPDATE servers
             SET auto_kill = $1
-            WHERE id = $2",
+            WHERE servers.uuid = $2",
             serde_json::to_value(&server.auto_kill)?,
-            server.id
+            server.uuid
         )
         .execute(state.database.write())
         .await?;

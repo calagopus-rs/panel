@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LocationDatabaseHost {
-    pub location_id: i32,
+    pub location_uuid: uuid::Uuid,
     pub database_host: super::database_host::DatabaseHost,
 
     pub created: chrono::NaiveDateTime,
@@ -20,8 +20,8 @@ impl BaseModel for LocationDatabaseHost {
 
         let mut columns = BTreeMap::from([
             (
-                format!("{table}.location_id"),
-                format!("{prefix}location_id"),
+                format!("{table}.location_uuid"),
+                format!("{prefix}location_uuid"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
@@ -39,7 +39,7 @@ impl BaseModel for LocationDatabaseHost {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            location_id: row.get(format!("{prefix}location_id").as_str()),
+            location_uuid: row.get(format!("{prefix}location_uuid").as_str()),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
             created: row.get(format!("{prefix}created").as_str()),
         }
@@ -49,48 +49,48 @@ impl BaseModel for LocationDatabaseHost {
 impl LocationDatabaseHost {
     pub async fn create(
         database: &crate::database::Database,
-        location_id: i32,
-        database_host_id: i32,
+        location_uuid: uuid::Uuid,
+        database_host_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO location_database_hosts (location_id, database_host_id)
+            INSERT INTO location_database_hosts (location_uuid, database_host_uuid)
             VALUES ($1, $2)
             "#,
         )
-        .bind(location_id)
-        .bind(database_host_id)
+        .bind(location_uuid)
+        .bind(database_host_uuid)
         .execute(database.write())
         .await?;
 
         Ok(())
     }
 
-    pub async fn by_location_id_database_host_id(
+    pub async fn by_location_uuid_database_host_uuid(
         database: &crate::database::Database,
-        location_id: i32,
-        database_host_id: i32,
+        location_uuid: uuid::Uuid,
+        database_host_uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM location_database_hosts
-            JOIN database_hosts ON location_database_hosts.database_host_id = database_hosts.id
-            WHERE location_database_hosts.location_id = $1 AND location_database_hosts.database_host_id = $2
+            JOIN database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid
+            WHERE location_database_hosts.location_uuid = $1 AND location_database_hosts.database_host_uuid = $2
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(location_id)
-        .bind(database_host_id)
+        .bind(location_uuid)
+        .bind(database_host_uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_location_id_with_pagination(
+    pub async fn by_location_uuid_with_pagination(
         database: &crate::database::Database,
-        location_id: i32,
+        location_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -101,14 +101,14 @@ impl LocationDatabaseHost {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM location_database_hosts
-            JOIN database_hosts ON location_database_hosts.database_host_id = database_hosts.id
-            WHERE location_database_hosts.location_id = $1 AND ($2 IS NULL OR database_hosts.name ILIKE '%' || $2 || '%')
-            ORDER BY location_database_hosts.database_host_id ASC
+            JOIN database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid
+            WHERE location_database_hosts.location_uuid = $1 AND ($2 IS NULL OR database_hosts.name ILIKE '%' || $2 || '%')
+            ORDER BY location_database_hosts.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(location_id)
+        .bind(location_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -123,40 +123,40 @@ impl LocationDatabaseHost {
         })
     }
 
-    pub async fn all_public_by_location_id(
+    pub async fn all_public_by_location_uuid(
         database: &crate::database::Database,
-        location_id: i32,
+        location_uuid: uuid::Uuid,
     ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM location_database_hosts
-            JOIN database_hosts ON location_database_hosts.database_host_id = database_hosts.id
-            WHERE location_database_hosts.location_id = $1 AND database_hosts.public
-            ORDER BY location_database_hosts.database_host_id ASC
+            JOIN database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid
+            WHERE location_database_hosts.location_uuid = $1 AND database_hosts.public
+            ORDER BY location_database_hosts.created DESC
             "#,
             Self::columns_sql(None, None),
         ))
-        .bind(location_id)
+        .bind(location_uuid)
         .fetch_all(database.read())
         .await?;
 
         Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_uuids(
         database: &crate::database::Database,
-        location_id: i32,
-        database_host_id: i32,
+        location_uuid: uuid::Uuid,
+        database_host_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM location_database_hosts
-            WHERE location_id = $1 AND database_host_id = $2
+            WHERE location_database_hosts.location_uuid = $1 AND location_database_hosts.database_host_uuid = $2
             "#,
         )
-        .bind(location_id)
-        .bind(database_host_id)
+        .bind(location_uuid)
+        .bind(database_host_uuid)
         .execute(database.write())
         .await?;
 

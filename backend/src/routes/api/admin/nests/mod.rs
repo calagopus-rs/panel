@@ -143,6 +143,7 @@ mod post {
             .log(
                 "nest:create",
                 serde_json::json!({
+                    "uuid": nest.uuid,
                     "author": nest.author,
                     "name": nest.name,
                     "description": nest.description,

@@ -38,7 +38,7 @@ mod post {
         server: GetServer,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let destination_node_id = match server.destination_node_id {
+        let destination_node_uuid = match server.destination_node_uuid {
             Some(id) => id,
             None => {
                 return ApiResponse::error("server is not being transferred")
@@ -47,7 +47,7 @@ mod post {
             }
         };
 
-        if node.id != destination_node_id {
+        if node.uuid != destination_node_uuid {
             return ApiResponse::error("destination node must call success endpoint")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
@@ -58,23 +58,23 @@ mod post {
         let (allocations, _) = tokio::try_join!(
             sqlx::query!(
                 r#"
-                SELECT server_allocations.id, node_allocations.node_id FROM server_allocations
-                JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-                WHERE server_allocations.server_id = $1 AND node_allocations.node_id != $2
+                SELECT server_allocations.uuid, node_allocations.node_uuid FROM server_allocations
+                JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                WHERE server_allocations.server_uuid = $1 AND node_allocations.node_uuid != $2
                 "#,
-                server.id,
-                destination_node_id
+                server.uuid,
+                destination_node_uuid
             )
             .fetch_all(state.database.read()),
             sqlx::query!(
                 r#"
                 UPDATE servers
-                SET node_id = $1, allocation_id = $2, destination_allocation_id = NULL, destination_node_id = NULL
-                WHERE servers.id = $3
+                SET node_uuid = $1, allocation_uuid = $2, destination_allocation_uuid = NULL, destination_node_uuid = NULL
+                WHERE servers.uuid = $3
                 "#,
-                destination_node_id,
-                server.destination_allocation_id,
-                server.id
+                destination_node_uuid,
+                server.destination_allocation_uuid,
+                server.uuid
             )
             .execute(&mut *transaction)
         )?;
@@ -82,21 +82,21 @@ mod post {
         sqlx::query!(
             r#"
             UPDATE server_backups
-            SET node_id = $3
-            WHERE server_backups.server_id = $1 AND server_backups.uuid = ANY($2)
+            SET node_uuid = $3
+            WHERE server_backups.server_uuid = $1 AND server_backups.uuid = ANY($2)
             "#,
-            server.id,
+            server.uuid,
             &data.backups,
-            destination_node_id
+            destination_node_uuid
         )
         .execute(&mut *transaction)
         .await?;
         sqlx::query!(
             r#"
             DELETE FROM server_allocations
-            WHERE server_allocations.id = ANY($1)
+            WHERE server_allocations.uuid = ANY($1)
             "#,
-            &allocations.into_iter().map(|a| a.id).collect::<Vec<_>>()
+            &allocations.into_iter().map(|a| a.uuid).collect::<Vec<_>>()
         )
         .execute(&mut *transaction)
         .await?;

@@ -10,7 +10,7 @@ pub static USERNAME_REGEX: LazyLock<Regex> =
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct User {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
     pub external_id: Option<String>,
 
     pub avatar: Option<String>,
@@ -34,7 +34,7 @@ impl BaseModel for User {
         let table = table.unwrap_or("users");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (
                 format!("{table}.external_id"),
                 format!("{prefix}external_id"),
@@ -63,7 +63,7 @@ impl BaseModel for User {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             external_id: row.get(format!("{prefix}external_id").as_str()),
             avatar: row.get(format!("{prefix}avatar").as_str()),
             username: row.get(format!("{prefix}username").as_str()),
@@ -108,19 +108,19 @@ impl User {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM users
-            WHERE users.id = $1
+            WHERE users.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -140,7 +140,7 @@ impl User {
             r#"
             SELECT {}, {}
             FROM users
-            JOIN user_sessions ON user_sessions.user_id = users.id
+            JOIN user_sessions ON user_sessions.user_uuid = users.uuid
             WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
             "#,
             Self::columns_sql(None, None),
@@ -167,7 +167,7 @@ impl User {
             r#"
             SELECT {}, {}
             FROM users
-            JOIN user_api_keys ON user_api_keys.user_id = users.id
+            JOIN user_api_keys ON user_api_keys.user_uuid = users.uuid
             WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
             "#,
             Self::columns_sql(None, None),
@@ -235,7 +235,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
-            JOIN user_ssh_keys ON user_ssh_keys.user_id = users.id
+            JOIN user_ssh_keys ON user_ssh_keys.user_uuid = users.uuid
             WHERE users.username = $1 AND user_ssh_keys.fingerprint = $2
             "#,
             Self::columns_sql(None, None)
@@ -286,7 +286,7 @@ impl User {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM users
             WHERE $1 IS NULL OR users.username ILIKE '%' || $1 || '%' OR users.email ILIKE '%' || $1 || '%'
-            ORDER BY users.id ASC
+            ORDER BY users.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -305,17 +305,17 @@ impl User {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM users
-            WHERE users.id = $1
+            WHERE users.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -331,11 +331,11 @@ impl User {
             r#"
             SELECT {}
             FROM users
-            WHERE users.id = $1 AND users.password = crypt($2, users.password)
+            WHERE users.uuid = $1 AND users.password = crypt($2, users.password)
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(self.id)
+        .bind(self.uuid)
         .bind(password)
         .fetch_optional(database.read())
         .await?;
@@ -352,10 +352,10 @@ impl User {
             r#"
             UPDATE users
             SET password = crypt($2, gen_salt('bf'))
-            WHERE users.id = $1
+            WHERE users.uuid = $1
             "#,
         )
-        .bind(self.id)
+        .bind(self.uuid)
         .bind(password)
         .execute(database.write())
         .await?;
@@ -364,24 +364,9 @@ impl User {
     }
 
     #[inline]
-    pub fn to_uuid(&self) -> uuid::Uuid {
-        uuid::Uuid::from_fields(
-            self.id as u32,
-            (self.id >> 16) as u16,
-            self.id as u16,
-            &[0; 8],
-        )
-    }
-
-    #[inline]
-    pub fn from_uuid(uuid: uuid::Uuid) -> i32 {
-        uuid.as_fields().0 as i32
-    }
-
-    #[inline]
     pub fn into_api_object(self, show_personal: bool) -> ApiUser {
         ApiUser {
-            id: self.id,
+            uuid: self.uuid,
             username: self.username,
             avatar: self.avatar,
             email: if show_personal {
@@ -409,7 +394,7 @@ impl User {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "User")]
 pub struct ApiUser {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub avatar: Option<String>,
     pub username: String,

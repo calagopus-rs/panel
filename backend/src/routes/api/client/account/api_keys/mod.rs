@@ -48,9 +48,9 @@ mod get {
                 .ok();
         }
 
-        let api_keys = UserApiKey::by_user_id_with_pagination(
+        let api_keys = UserApiKey::by_user_uuid_with_pagination(
             &state.database,
-            user.id,
+            user.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -129,7 +129,7 @@ mod post {
 
         let (key, api_key) = match UserApiKey::create(
             &state.database,
-            user.id,
+            user.uuid,
             &data.name,
             data.permissions,
         )
@@ -154,6 +154,7 @@ mod post {
             .log(
                 "user:api-key.create",
                 serde_json::json!({
+                    "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
                     "permissions": api_key.permissions,

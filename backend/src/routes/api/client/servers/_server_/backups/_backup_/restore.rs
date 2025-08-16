@@ -64,8 +64,8 @@ mod post {
         let rows_affected = sqlx::query!(
             "UPDATE servers
             SET status = 'RESTORING_BACKUP'
-            WHERE servers.id = $1 AND servers.status IS NULL",
-            server.id
+            WHERE servers.uuid = $1 AND servers.status IS NULL",
+            server.uuid
         )
         .execute(&mut *transaction)
         .await?
@@ -98,7 +98,7 @@ mod post {
             .log(
                 "server:backup.restore",
                 serde_json::json!({
-                    "backup": backup.uuid,
+                    "uuid": backup.uuid,
                     "name": backup.name,
                     "truncate_directory": data.truncate_directory,
                 }),

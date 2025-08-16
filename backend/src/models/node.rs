@@ -7,7 +7,6 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Node {
-    pub id: i32,
     pub uuid: uuid::Uuid,
     pub location: super::location::Location,
 
@@ -42,12 +41,7 @@ impl BaseModel for Node {
         let table = table.unwrap_or("nodes");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
             (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (
-                format!("{table}.location_id"),
-                format!("{prefix}location_id"),
-            ),
             (format!("{table}.name"), format!("{prefix}name")),
             (format!("{table}.public"), format!("{prefix}public")),
             (
@@ -67,18 +61,18 @@ impl BaseModel for Node {
             (format!("{table}.token_id"), format!("{prefix}token_id")),
             (format!("{table}.token"), format!("{prefix}token")),
             (
-                format!("(SELECT COUNT(*) FROM servers WHERE servers.node_id = {table}.id)"),
+                format!("(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = {table}.uuid)"),
                 format!("{prefix}servers"),
             ),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.node_id = {table}.id AND servers.destination_node_id IS NOT NULL)"
+                    "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = {table}.uuid AND servers.destination_node_uuid IS NOT NULL)"
                 ),
                 format!("{prefix}outgoing_transfers"),
             ),
             (
                 format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_id = {table}.id)"
+                    "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_uuid = {table}.uuid)"
                 ),
                 format!("{prefix}incoming_transfers"),
             ),
@@ -95,7 +89,6 @@ impl BaseModel for Node {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
             uuid: row.get(format!("{prefix}uuid").as_str()),
             location: super::location::Location::map(Some("location_"), row),
             name: row.get(format!("{prefix}name").as_str()),
@@ -127,7 +120,7 @@ impl Node {
     #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
-        location_id: i32,
+        location_uuid: uuid::Uuid,
         name: &str,
         public: bool,
         description: Option<&str>,
@@ -137,18 +130,18 @@ impl Node {
         sftp_port: i32,
         memory: i64,
         disk: i64,
-    ) -> Result<i32, sqlx::Error> {
+    ) -> Result<uuid::Uuid, sqlx::Error> {
         let token_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
         let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 64);
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_id, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
+            INSERT INTO nodes (location_uuid, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-            RETURNING id
+            RETURNING uuid
             "#
         )
-        .bind(location_id)
+        .bind(location_uuid)
         .bind(name)
         .bind(public)
         .bind(description)
@@ -163,24 +156,24 @@ impl Node {
         .fetch_one(database.write())
         .await?;
 
-        Ok(row.get("id"))
+        Ok(row.get("uuid"))
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {}
             FROM nodes
-            JOIN locations ON locations.id = nodes.location_id
-            WHERE nodes.id = $1
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            WHERE nodes.uuid = $1
             "#,
             Self::columns_sql(None, None),
             super::location::Location::columns_sql(Some("location_"), None),
         ))
-        .bind(id)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
@@ -196,7 +189,7 @@ impl Node {
             r#"
             SELECT {}
             FROM nodes
-            JOIN locations ON locations.id = nodes.location_id
+            JOIN locations ON locations.uuid = nodes.location_uuid
             WHERE nodes.token_id = $1
             "#,
             Self::columns_sql(None, None)
@@ -219,9 +212,9 @@ impl Node {
         })
     }
 
-    pub async fn by_location_id_with_pagination(
+    pub async fn by_location_uuid_with_pagination(
         database: &crate::database::Database,
-        location_id: i32,
+        location_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -232,14 +225,14 @@ impl Node {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
-            JOIN locations ON locations.id = nodes.location_id
-            WHERE nodes.location_id = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
-            ORDER BY nodes.id ASC
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            WHERE nodes.location_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
+            ORDER BY nodes.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(location_id)
+        .bind(location_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -266,9 +259,9 @@ impl Node {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
-            JOIN locations ON locations.id = nodes.location_id
+            JOIN locations ON locations.uuid = nodes.location_uuid
             WHERE $1 IS NULL OR nodes.name ILIKE '%' || $1 || '%'
-            ORDER BY nodes.id ASC
+            ORDER BY nodes.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -287,17 +280,17 @@ impl Node {
         })
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nodes
-            WHERE nodes.id = $1
+            WHERE nodes.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -333,7 +326,6 @@ impl Node {
     #[inline]
     pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiNode {
         AdminApiNode {
-            id: self.id,
             uuid: self.uuid,
             location: self.location.into_admin_api_object(database),
             name: self.name,
@@ -359,7 +351,6 @@ impl Node {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "Node")]
 pub struct AdminApiNode {
-    pub id: i32,
     pub uuid: uuid::Uuid,
     pub location: super::location::AdminApiLocation,
 

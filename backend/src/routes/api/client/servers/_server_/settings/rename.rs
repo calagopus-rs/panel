@@ -70,10 +70,10 @@ mod post {
         sqlx::query!(
             "UPDATE servers
             SET name = $1, description = $2
-            WHERE id = $3",
+            WHERE servers.uuid = $3",
             server.name,
             server.description,
-            server.id
+            server.uuid
         )
         .execute(state.database.write())
         .await?;

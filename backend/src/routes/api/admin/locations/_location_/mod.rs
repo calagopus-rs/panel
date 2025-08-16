@@ -15,11 +15,20 @@ pub type GetLocation = crate::extract::ConsumingExtension<Location>;
 
 pub async fn auth(
     state: GetState,
-    Path(location): Path<i32>,
+    Path(location): Path<Vec<String>>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let location = Location::by_id(&state.database, location).await;
+    let location = match location.first().map(|s| s.parse::<uuid::Uuid>()) {
+        Some(Ok(id)) => id,
+        _ => {
+            return Ok(ApiResponse::error("invalid location uuid")
+                .with_status(StatusCode::BAD_REQUEST)
+                .into_response());
+        }
+    };
+
+    let location = Location::by_uuid(&state.database, location).await;
     let location = match location {
         Ok(Some(location)) => location,
         Ok(None) => {
@@ -53,9 +62,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(state: GetState, location: GetLocation) -> ApiResponseResult {
@@ -87,9 +96,9 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -103,12 +112,13 @@ mod delete {
                 .ok();
         }
 
-        Location::delete_by_id(&state.database, location.id).await?;
+        Location::delete_by_uuid(&state.database, location.uuid).await?;
 
         activity_logger
             .log(
                 "location:delete",
                 serde_json::json!({
+                    "uuid": location.uuid,
                     "short_name": location.short_name,
                     "name": location.name,
                 }),
@@ -158,9 +168,9 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -199,13 +209,13 @@ mod patch {
         match sqlx::query!(
             "UPDATE locations
             SET short_name = $1, name = $2, description = $3, backup_disk = $4, backup_configs = $5
-            WHERE id = $6",
+            WHERE locations.uuid = $6",
             location.short_name,
             location.name,
             location.description,
             location.backup_disk as crate::models::server_backup::BackupDisk,
             serde_json::to_value(&location.backup_configs)?,
-            location.id,
+            location.uuid,
         )
         .execute(state.database.write())
         .await
@@ -231,6 +241,7 @@ mod patch {
             .log(
                 "location:update",
                 serde_json::json!({
+                    "uuid": location.uuid,
                     "short_name": location.short_name,
                     "name": location.name,
                     "description": location.description,

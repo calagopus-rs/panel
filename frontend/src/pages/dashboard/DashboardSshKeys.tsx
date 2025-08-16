@@ -66,7 +66,7 @@ export default () => {
 
                   <TableBody>
                     {sshKeys.data.map((key) => (
-                      <TableRow key={key.id}>
+                      <TableRow key={key.uuid}>
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{key.name}</td>
 
                         <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>

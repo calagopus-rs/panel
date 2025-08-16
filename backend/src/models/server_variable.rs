@@ -59,19 +59,19 @@ impl BaseModel for ServerVariable {
 impl ServerVariable {
     pub async fn create(
         database: &crate::database::Database,
-        server_id: i32,
-        variable_id: i32,
+        server_uuid: uuid::Uuid,
+        variable_uuid: uuid::Uuid,
         value: &str,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO server_variables (server_id, variable_id, value)
+            INSERT INTO server_variables (server_uuid, variable_uuid, value)
             VALUES ($1, $2, $3)
-            ON CONFLICT (server_id, variable_id) DO UPDATE SET value = EXCLUDED.value
+            ON CONFLICT (server_uuid, variable_uuid) DO UPDATE SET value = EXCLUDED.value
             "#,
         )
-        .bind(server_id)
-        .bind(variable_id)
+        .bind(server_uuid)
+        .bind(variable_uuid)
         .bind(value)
         .execute(database.write())
         .await?;
@@ -79,23 +79,23 @@ impl ServerVariable {
         Ok(())
     }
 
-    pub async fn all_by_server_id_egg_id(
+    pub async fn all_by_server_uuid_egg_uuid(
         database: &crate::database::Database,
-        server_id: i32,
-        egg_id: i32,
+        server_uuid: uuid::Uuid,
+        egg_uuid: uuid::Uuid,
     ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_egg_variables
-            LEFT JOIN server_variables ON server_variables.variable_id = nest_egg_variables.id AND server_variables.server_id = $1
-            WHERE nest_egg_variables.egg_id = $2
-            ORDER BY nest_egg_variables.order_, nest_egg_variables.id
+            LEFT JOIN server_variables ON server_variables.variable_uuid = nest_egg_variables.uuid AND server_variables.server_uuid = $1
+            WHERE nest_egg_variables.egg_uuid = $2
+            ORDER BY nest_egg_variables.order_, nest_egg_variables.created
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
-        .bind(egg_id)
+        .bind(server_uuid)
+        .bind(egg_uuid)
         .fetch_all(database.read())
         .await?;
 

@@ -76,7 +76,7 @@ export default () => {
                 <ContextMenuProvider>
                   <TableBody>
                     {databases.data.map((database) => (
-                      <DatabaseRow database={database} key={database.id} />
+                      <DatabaseRow database={database} key={database.uuid} />
                     ))}
                   </TableBody>
                 </ContextMenuProvider>

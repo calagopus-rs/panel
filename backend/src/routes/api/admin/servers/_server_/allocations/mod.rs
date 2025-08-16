@@ -5,7 +5,7 @@ mod _allocation_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_allocation::ServerAllocation},
+        models::{Pagination, PaginationParamsWithSearch, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
     };
@@ -23,9 +23,9 @@ mod get {
         (status = OK, body = inline(Response)),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -37,11 +37,15 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
+        (
+            "search" = Option<String>, Query,
+            description = "Search term for items",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Query(params): Query<PaginationParams>,
+        Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -49,13 +53,16 @@ mod get {
                 .ok();
         }
 
-        let allocations = ServerAllocation::by_server_id_with_pagination(
+        let allocations = ServerAllocation::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await?;
+
+        let allocation_uuid = server.0.allocation.map(|a| a.uuid);
 
         ApiResponse::json(Response {
             allocations: Pagination {
@@ -65,9 +72,7 @@ mod get {
                 data: allocations
                     .data
                     .into_iter()
-                    .map(|allocation| {
-                        allocation.into_api_object(server.allocation.as_ref().map(|a| a.id))
-                    })
+                    .map(|allocation| allocation.into_api_object(allocation_uuid))
                     .collect(),
             },
         })
@@ -90,7 +95,7 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        allocation_id: i32,
+        allocation_uuid: uuid::Uuid,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -105,9 +110,9 @@ mod post {
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -116,10 +121,10 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let node_allocation = match NodeAllocation::by_node_id_id(
+        let node_allocation = match NodeAllocation::by_node_uuid_uuid(
             &state.database,
-            server.node.id,
-            data.allocation_id,
+            server.node.uuid,
+            data.allocation_uuid,
         )
         .await?
         {
@@ -133,12 +138,12 @@ mod post {
 
         let allocation = match ServerAllocation::create(
             &state.database,
-            server.id,
-            node_allocation.id,
+            server.uuid,
+            node_allocation.uuid,
         )
         .await
         {
-            Ok(allocation_id) => ServerAllocation::by_id(&state.database, allocation_id)
+            Ok(allocation_uuid) => ServerAllocation::by_uuid(&state.database, allocation_uuid)
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("allocation not found after creation"))?,
             Err(err) => {
@@ -154,7 +159,8 @@ mod post {
             .log(
                 "server:allocation.create",
                 serde_json::json!({
-                    "server_id": server.id,
+                    "uuid": allocation.uuid,
+                    "server_uuid": server.uuid,
 
                     "ip": allocation.allocation.ip,
                     "ip_alias": allocation.allocation.ip_alias,
@@ -164,7 +170,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            allocation: allocation.into_api_object(server.allocation.as_ref().map(|a| a.id)),
+            allocation: allocation.into_api_object(server.0.allocation.map(|a| a.uuid)),
         })
         .ok()
     }

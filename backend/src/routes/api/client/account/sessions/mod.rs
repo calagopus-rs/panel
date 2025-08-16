@@ -52,9 +52,9 @@ mod get {
                 .ok();
         }
 
-        let sessions = UserSession::by_user_id_with_pagination(
+        let sessions = UserSession::by_user_uuid_with_pagination(
             &state.database,
-            user.id,
+            user.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),

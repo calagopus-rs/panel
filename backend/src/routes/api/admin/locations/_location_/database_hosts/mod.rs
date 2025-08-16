@@ -27,9 +27,9 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -57,9 +57,9 @@ mod get {
                 .ok();
         }
 
-        let database_hosts = LocationDatabaseHost::by_location_id_with_pagination(
+        let database_hosts = LocationDatabaseHost::by_location_uuid_with_pagination(
             &state.database,
-            location.id,
+            location.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
@@ -97,7 +97,7 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        database_host_id: i32,
+        database_host_uuid: uuid::Uuid,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -108,9 +108,9 @@ mod post {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -119,7 +119,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        match LocationDatabaseHost::create(&state.database, location.id, data.database_host_id)
+        match LocationDatabaseHost::create(&state.database, location.uuid, data.database_host_uuid)
             .await
         {
             Ok(_) => {}
@@ -141,8 +141,8 @@ mod post {
             .log(
                 "location:database-host.create",
                 serde_json::json!({
-                    "location_id": location.id,
-                    "database_host_id": data.database_host_id,
+                    "location_uuid": location.uuid,
+                    "database_host_uuid": data.database_host_uuid,
                 }),
             )
             .await;

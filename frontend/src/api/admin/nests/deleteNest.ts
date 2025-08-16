@@ -1,9 +1,9 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (nest: number): Promise<void> => {
+export default async (nestUuid: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .delete(`/api/admin/nests/${nest}`)
+      .delete(`/api/admin/nests/${nestUuid}`)
       .then(() => resolve())
       .catch(reject);
   });

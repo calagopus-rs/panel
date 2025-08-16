@@ -6,7 +6,7 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct NestEggVariable {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,
@@ -28,7 +28,7 @@ impl BaseModel for NestEggVariable {
         let table = table.unwrap_or("nest_egg_variables");
 
         BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
             (
                 format!("{table}.description"),
@@ -61,7 +61,7 @@ impl BaseModel for NestEggVariable {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
             order: row.get(format!("{prefix}order").as_str()),
@@ -79,7 +79,7 @@ impl NestEggVariable {
     #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
-        egg_id: i32,
+        egg_uuid: uuid::Uuid,
         name: &str,
         description: Option<&str>,
         order: i16,
@@ -92,7 +92,7 @@ impl NestEggVariable {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_egg_variables (
-                egg_id, name, description, order_, env_variable,
+                egg_uuid, name, description, order_, env_variable,
                 default_value, user_viewable, user_editable, rules
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
@@ -100,7 +100,7 @@ impl NestEggVariable {
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(egg_id)
+        .bind(egg_uuid)
         .bind(name)
         .bind(description)
         .bind(order)
@@ -115,58 +115,58 @@ impl NestEggVariable {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_egg_id_id(
+    pub async fn by_egg_uuid_uuid(
         database: &crate::database::Database,
-        egg_id: i32,
-        id: i32,
+        egg_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_egg_variables
-            WHERE nest_egg_variables.egg_id = $1 AND nest_egg_variables.id = $2
+            WHERE nest_egg_variables.egg_uuid = $1 AND nest_egg_variables.uuid = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(egg_id)
-        .bind(id)
+        .bind(egg_uuid)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn all_by_egg_id(
+    pub async fn all_by_egg_uuid(
         database: &crate::database::Database,
-        egg_id: i32,
+        egg_uuid: uuid::Uuid,
     ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM nest_egg_variables
-            WHERE nest_egg_variables.egg_id = $1
-            ORDER BY nest_egg_variables.order_, nest_egg_variables.id
+            WHERE nest_egg_variables.egg_uuid = $1
+            ORDER BY nest_egg_variables.order_, nest_egg_variables.created
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(egg_id)
+        .bind(egg_uuid)
         .fetch_all(database.read())
         .await?;
 
         Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
-    pub async fn delete_by_id(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        id: i32,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM nest_egg_variables
-            WHERE nest_egg_variables.id = $1
+            WHERE nest_egg_variables.uuid = $1
             "#,
         )
-        .bind(id)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -176,7 +176,7 @@ impl NestEggVariable {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNestEggVariable {
         AdminApiNestEggVariable {
-            id: self.id,
+            uuid: self.uuid,
             name: self.name,
             description: self.description,
             order: self.order,
@@ -193,7 +193,7 @@ impl NestEggVariable {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "NestEggVariable")]
 pub struct AdminApiNestEggVariable {
-    pub id: i32,
+    pub uuid: uuid::Uuid,
 
     pub name: String,
     pub description: Option<String>,

@@ -268,7 +268,6 @@ impl BaseModel for ServerSubuser {
         let table = table.unwrap_or("server_subusers");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.user_id"), format!("{prefix}user_id")),
             (
                 format!("{table}.permissions"),
                 format!("{prefix}permissions"),
@@ -338,7 +337,7 @@ impl ServerSubuser {
                     }
                 };
 
-                match UserPasswordReset::create(database, user.id).await {
+                match UserPasswordReset::create(database, user.uuid).await {
                     Ok(token) => {
                         let settings = settings.get().await;
 
@@ -365,7 +364,7 @@ impl ServerSubuser {
                     }
                     Err(err) => {
                         tracing::warn!(
-                            user = user.id,
+                            user = %user.uuid,
                             "failed to create subuser password reset token: {:#?}",
                             err
                         );
@@ -376,7 +375,7 @@ impl ServerSubuser {
             }
         };
 
-        if server.owner.id == user.id {
+        if server.owner.uuid == user.uuid {
             return Err(sqlx::Error::InvalidArgument(
                 "cannot create subuser for server owner".into(),
             ));
@@ -384,12 +383,12 @@ impl ServerSubuser {
 
         sqlx::query(
             r#"
-            INSERT INTO server_subusers (server_id, user_id, permissions, ignored_files)
+            INSERT INTO server_subusers (server_uuid, user_uuid, permissions, ignored_files)
             VALUES ($1, $2, $3, $4)
             "#,
         )
-        .bind(server.id)
-        .bind(user.id)
+        .bind(server.uuid)
+        .bind(user.uuid)
         .bind(permissions)
         .bind(ignored_files)
         .execute(database.write())
@@ -398,21 +397,21 @@ impl ServerSubuser {
         Ok(user.username)
     }
 
-    pub async fn by_server_id_username(
+    pub async fn by_server_uuid_username(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         username: &str,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM server_subusers
-            JOIN users ON users.id = server_subusers.user_id
-            WHERE server_subusers.server_id = $1 AND users.username = $2
+            JOIN users ON users.uuid = server_subusers.user_uuid
+            WHERE server_subusers.server_uuid = $1 AND users.username = $2
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(username)
         .fetch_optional(database.read())
         .await?;
@@ -420,9 +419,9 @@ impl ServerSubuser {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_id_with_pagination(
+    pub async fn by_server_uuid_with_pagination(
         database: &crate::database::Database,
-        server_id: i32,
+        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -433,14 +432,14 @@ impl ServerSubuser {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_subusers
-            JOIN users ON users.id = server_subusers.user_id
-            WHERE server_subusers.server_id = $1 AND ($2 IS NULL OR users.username ILIKE '%' || $2 || '%')
-            ORDER BY server_subusers.created ASC
+            JOIN users ON users.uuid = server_subusers.user_uuid
+            WHERE server_subusers.server_uuid = $1 AND ($2 IS NULL OR users.username ILIKE '%' || $2 || '%')
+            ORDER BY server_subusers.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_id)
+        .bind(server_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -455,21 +454,19 @@ impl ServerSubuser {
         })
     }
 
-    pub async fn delete_by_ids(
+    pub async fn delete_by_uuids(
         database: &crate::database::Database,
-        server_id: i32,
-        user_id: i32,
+        server_uuid: uuid::Uuid,
+        user_uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
             DELETE FROM server_subusers
-            WHERE
-                server_subusers.server_id = $1
-                AND server_subusers.user_id = $2
+            WHERE server_subusers.server_uuid = $1 AND server_subusers.user_uuid = $2
             "#,
         )
-        .bind(server_id)
-        .bind(user_id)
+        .bind(server_uuid)
+        .bind(user_uuid)
         .execute(database.write())
         .await?;
 

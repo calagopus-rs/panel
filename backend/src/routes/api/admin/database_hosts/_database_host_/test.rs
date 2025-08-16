@@ -21,9 +21,9 @@ mod post {
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
-            "database_host" = i32,
+            "database_host" = uuid::Uuid,
             description = "The database host ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(state: GetState, database_host: GetDatabaseHost) -> ApiResponseResult {

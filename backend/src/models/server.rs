@@ -19,14 +19,13 @@ pub enum ServerStatus {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Server {
-    pub id: i32,
     pub uuid: uuid::Uuid,
     pub uuid_short: i32,
     pub external_id: Option<String>,
     pub allocation: Option<super::server_allocation::ServerAllocation>,
-    pub destination_allocation_id: Option<i32>,
+    pub destination_allocation_uuid: Option<uuid::Uuid>,
     pub node: super::node::Node,
-    pub destination_node_id: Option<i32>,
+    pub destination_node_uuid: Option<uuid::Uuid>,
     pub owner: super::user::User,
     pub egg: super::nest_egg::NestEgg,
 
@@ -67,7 +66,6 @@ impl BaseModel for Server {
         let table = table.unwrap_or("servers");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.id"), format!("{prefix}id")),
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.uuid_short"), format!("{prefix}uuid_short")),
             (
@@ -75,12 +73,12 @@ impl BaseModel for Server {
                 format!("{prefix}external_id"),
             ),
             (
-                format!("{table}.destination_allocation_id"),
-                format!("{prefix}destination_allocation_id"),
+                format!("{table}.destination_allocation_uuid"),
+                format!("{prefix}destination_allocation_uuid"),
             ),
             (
-                format!("{table}.destination_node_id"),
-                format!("{prefix}destination_node_id"),
+                format!("{table}.destination_node_uuid"),
+                format!("{prefix}destination_node_uuid"),
             ),
             (format!("{table}.status"), format!("{prefix}status")),
             (format!("{table}.suspended"), format!("{prefix}suspended")),
@@ -133,12 +131,11 @@ impl BaseModel for Server {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            id: row.get(format!("{prefix}id").as_str()),
             uuid: row.get(format!("{prefix}uuid").as_str()),
             uuid_short: row.get(format!("{prefix}uuid_short").as_str()),
             external_id: row.get(format!("{prefix}external_id").as_str()),
             allocation: if row
-                .try_get::<i32, _>(format!("{prefix}allocation_id").as_str())
+                .try_get::<uuid::Uuid, _>(format!("{prefix}allocation_uuid").as_str())
                 .is_ok()
             {
                 Some(super::server_allocation::ServerAllocation::map(
@@ -148,12 +145,12 @@ impl BaseModel for Server {
             } else {
                 None
             },
-            destination_allocation_id: row
-                .try_get::<i32, _>(format!("{prefix}destination_allocation_id").as_str())
+            destination_allocation_uuid: row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}destination_allocation_uuid").as_str())
                 .ok(),
             node: super::node::Node::map(Some("node_"), row),
-            destination_node_id: row
-                .try_get::<i32, _>(format!("{prefix}destination_node_id").as_str())
+            destination_node_uuid: row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}destination_node_uuid").as_str())
                 .ok(),
             owner: super::user::User::map(Some("owner_"), row),
             egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
@@ -190,10 +187,10 @@ impl Server {
     pub async fn create(
         database: &crate::database::Database,
         node: &super::node::Node,
-        owner_id: i32,
-        egg_id: i32,
-        allocation_id: Option<i32>,
-        allocation_ids: &[i32],
+        owner_uuid: uuid::Uuid,
+        egg_uuid: uuid::Uuid,
+        allocation_uuid: Option<uuid::Uuid>,
+        allocation_uuids: &[uuid::Uuid],
         external_id: Option<&str>,
         start_on_completion: bool,
         skip_scripts: bool,
@@ -205,7 +202,7 @@ impl Server {
         image: &str,
         timezone: Option<&str>,
         feature_limits: &ApiServerFeatureLimits,
-    ) -> Result<(i32, uuid::Uuid), sqlx::Error> {
+    ) -> Result<uuid::Uuid, sqlx::Error> {
         let mut transaction = database.write().begin().await?;
         let mut attempts = 0;
 
@@ -219,9 +216,9 @@ impl Server {
                     uuid,
                     uuid_short,
                     external_id,
-                    node_id,
-                    owner_id,
-                    egg_id,
+                    node_uuid,
+                    owner_uuid,
+                    egg_uuid,
                     name,
                     description,
                     status,
@@ -243,15 +240,15 @@ impl Server {
                     $9, $10, $11, $12, $13, $14, $15,
                     $16, $17, $18, $19, $20, $21
                 )
-                RETURNING id, uuid
+                RETURNING uuid
                 "#,
             )
             .bind(uuid)
             .bind(uuid_short)
             .bind(external_id)
-            .bind(node.id)
-            .bind(owner_id)
-            .bind(egg_id)
+            .bind(node.uuid)
+            .bind(owner_uuid)
+            .bind(egg_uuid)
             .bind(name)
             .bind(description)
             .bind(if skip_scripts {
@@ -275,35 +272,36 @@ impl Server {
             .await
             {
                 Ok(row) => {
-                    let id: i32 = row.get("id");
+                    let uuid: uuid::Uuid = row.get("uuid");
 
-                    let allocation_id: Option<i32> = if let Some(allocation_id) = allocation_id {
-                        let row = sqlx::query(
-                            r#"
-                            INSERT INTO server_allocations (server_id, allocation_id)
+                    let allocation_uuid: Option<uuid::Uuid> =
+                        if let Some(allocation_uuid) = allocation_uuid {
+                            let row = sqlx::query(
+                                r#"
+                            INSERT INTO server_allocations (server_uuid, allocation_uuid)
                             VALUES ($1, $2)
-                            RETURNING id
+                            RETURNING uuid
                             "#,
-                        )
-                        .bind(id)
-                        .bind(allocation_id)
-                        .fetch_one(&mut *transaction)
-                        .await?;
+                            )
+                            .bind(uuid)
+                            .bind(allocation_uuid)
+                            .fetch_one(&mut *transaction)
+                            .await?;
 
-                        Some(row.get("id"))
-                    } else {
-                        None
-                    };
+                            Some(row.get("uuid"))
+                        } else {
+                            None
+                        };
 
-                    for allocation_id in allocation_ids {
+                    for allocation_uuid in allocation_uuids {
                         sqlx::query(
                             r#"
-                            INSERT INTO server_allocations (server_id, allocation_id)
+                            INSERT INTO server_allocations (server_uuid, allocation_uuid)
                             VALUES ($1, $2)
                             "#,
                         )
-                        .bind(id)
-                        .bind(allocation_id)
+                        .bind(uuid)
+                        .bind(allocation_uuid)
                         .execute(&mut *transaction)
                         .await?;
                     }
@@ -311,12 +309,12 @@ impl Server {
                     sqlx::query(
                         r#"
                         UPDATE servers
-                        SET allocation_id = $1
-                        WHERE id = $2
+                        SET allocation_uuid = $1
+                        WHERE servers.uuid = $2
                         "#,
                     )
-                    .bind(allocation_id)
-                    .bind(id)
+                    .bind(allocation_uuid)
+                    .bind(uuid)
                     .execute(&mut *transaction)
                     .await?;
 
@@ -333,14 +331,14 @@ impl Server {
                     {
                         tracing::error!(server = %uuid, node = %node.uuid, "failed to create server: {:#?}", err);
 
-                        sqlx::query!("DELETE FROM servers WHERE id = $1", id,)
+                        sqlx::query!("DELETE FROM servers WHERE servers.uuid = $1", uuid)
                             .execute(database.write())
                             .await?;
 
                         return Err(sqlx::Error::Io(std::io::Error::other(err.1.error)));
                     }
 
-                    return Ok((id, row.get("uuid")));
+                    return Ok(uuid);
                 }
                 Err(err) => {
                     if attempts >= 8 {
@@ -365,51 +363,51 @@ impl Server {
         }
     }
 
-    pub async fn by_id(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        id: i32,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.id = $1
-            "#,
-            Self::columns_sql(None, None)
-        ))
-        .bind(id)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
-    }
-
-    pub async fn by_node_id_uuid(
-        database: &crate::database::Database,
-        node_id: i32,
         uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE (servers.node_id = $1 OR servers.destination_node_id = $1) AND servers.uuid = $2
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            WHERE servers.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_node_uuid_uuid(
+        database: &crate::database::Database,
+        node_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM servers
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            WHERE (servers.node_uuid = $1 OR servers.destination_node_uuid = $1) AND servers.uuid = $2
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(node_uuid)
         .bind(uuid)
         .fetch_optional(database.read())
         .await?;
@@ -425,12 +423,12 @@ impl Server {
             r#"
             SELECT {}
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             WHERE servers.external_id = $1
             "#,
             Self::columns_sql(None, None)
@@ -450,19 +448,19 @@ impl Server {
             r#"
             SELECT {}
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             WHERE servers.{} = $1
             "#,
             Self::columns_sql(None, None),
             match identifier.len() {
                 8 => "uuid_short",
                 36 => "uuid",
-                _ => "id",
+                _ => return Ok(None),
             }
         );
 
@@ -470,7 +468,7 @@ impl Server {
         row = match identifier.len() {
             8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
             36 => row.bind(uuid::Uuid::parse_str(identifier)?),
-            _ => row.bind(identifier.parse::<i32>()?),
+            _ => return Ok(None),
         };
         let row = row.fetch_optional(database.read()).await?;
 
@@ -486,37 +484,37 @@ impl Server {
             r#"
             SELECT {}, server_subusers.permissions, server_subusers.ignored_files
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
-            WHERE servers.{} = $3 AND (servers.owner_id = $1 OR server_subusers.user_id = $1 OR $2)
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+            WHERE servers.{} = $3 AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $2)
             "#,
             Self::columns_sql(None, None),
             match identifier.len() {
                 8 => "uuid_short",
                 36 => "uuid",
-                _ => "id",
+                _ => return Ok(None),
             }
         );
 
-        let mut row = sqlx::query(&query).bind(user.id).bind(user.admin);
+        let mut row = sqlx::query(&query).bind(user.uuid).bind(user.admin);
         row = match identifier.len() {
             8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
             36 => row.bind(uuid::Uuid::parse_str(identifier)?),
-            _ => row.bind(identifier.parse::<i32>()?),
+            _ => return Ok(None),
         };
         let row = row.fetch_optional(database.read()).await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_owner_id_with_pagination(
+    pub async fn by_owner_uuid_with_pagination(
         database: &crate::database::Database,
-        owner_id: i32,
+        owner_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -527,19 +525,19 @@ impl Server {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.owner_id = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
-            ORDER BY servers.id ASC
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            WHERE servers.owner_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(owner_id)
+        .bind(owner_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -554,9 +552,9 @@ impl Server {
         })
     }
 
-    pub async fn by_user_id_with_pagination(
+    pub async fn by_user_uuid_with_pagination(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -565,22 +563,22 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.uuid, servers.created) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
-            WHERE (servers.owner_id = $1 OR server_subusers.user_id = $1) AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
-            ORDER BY servers.id ASC
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+            WHERE (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1) AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -595,9 +593,9 @@ impl Server {
         })
     }
 
-    pub async fn by_not_user_id_with_pagination(
+    pub async fn by_not_user_uuid_with_pagination(
         database: &crate::database::Database,
-        user_id: i32,
+        user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -606,25 +604,25 @@ impl Server {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT DISTINCT ON (servers.id) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
+            SELECT DISTINCT ON (servers.uuid, servers.created) {}, server_subusers.permissions, server_subusers.ignored_files, COUNT(*) OVER() AS total_count
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            LEFT JOIN server_subusers ON server_subusers.server_id = servers.id AND server_subusers.user_id = $1
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
             WHERE
-                servers.owner_id != $1
-                AND server_subusers.user_id != $1
+                servers.owner_uuid != $1
+                AND server_subusers.user_uuid != $1
                 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%' OR users.email ILIKE '%' || $2 || '%')
-            ORDER BY servers.id ASC
+            ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(user_id)
+        .bind(user_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -639,9 +637,9 @@ impl Server {
         })
     }
 
-    pub async fn by_node_id_with_pagination(
+    pub async fn by_node_uuid_with_pagination(
         database: &crate::database::Database,
-        node_id: i32,
+        node_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -652,19 +650,19 @@ impl Server {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
-            WHERE servers.node_id = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
-            ORDER BY servers.id ASC
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            WHERE servers.node_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(node_id)
+        .bind(node_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -691,14 +689,14 @@ impl Server {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM servers
-            JOIN nodes ON nodes.id = servers.node_id
-            JOIN locations ON locations.id = nodes.location_id
-            LEFT JOIN server_allocations ON server_allocations.id = servers.allocation_id
-            LEFT JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-            JOIN users ON users.id = servers.owner_id
-            JOIN nest_eggs ON nest_eggs.id = servers.egg_id
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             WHERE $1 IS NULL OR servers.name ILIKE '%' || $1 || '%'
-            ORDER BY servers.id ASC
+            ORDER BY servers.created
             LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
@@ -717,15 +715,18 @@ impl Server {
         })
     }
 
-    pub async fn count_by_user_id(database: &crate::database::Database, user_id: i32) -> i64 {
+    pub async fn count_by_user_uuid(
+        database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
+    ) -> i64 {
         sqlx::query_scalar(
             r#"
             SELECT COUNT(*)
             FROM servers
-            WHERE servers.owner_id = $1
+            WHERE servers.owner_uuid = $1
             "#,
         )
-        .bind(user_id)
+        .bind(user_uuid)
         .fetch_one(database.read())
         .await
         .unwrap_or(0)
@@ -735,8 +736,8 @@ impl Server {
         &self,
         database: &crate::database::Database,
     ) -> Result<Option<super::node::Node>, sqlx::Error> {
-        if let Some(destination_node_id) = self.destination_node_id {
-            super::node::Node::by_id(database, destination_node_id).await
+        if let Some(destination_node_uuid) = self.destination_node_uuid {
+            super::node::Node::by_uuid(database, destination_node_uuid).await
         } else {
             Ok(None)
         }
@@ -748,7 +749,7 @@ impl Server {
         force: bool,
     ) -> Result<(), sqlx::Error> {
         let databases =
-            super::server_database::ServerDatabase::all_by_server_id(database, self.id).await?;
+            super::server_database::ServerDatabase::all_by_server_uuid(database, self.uuid).await?;
 
         for db in databases {
             match db.delete(database).await {
@@ -765,7 +766,7 @@ impl Server {
 
         let mut transaction = database.write().begin().await?;
 
-        sqlx::query!("DELETE FROM servers WHERE servers.id = $1", self.id)
+        sqlx::query!("DELETE FROM servers WHERE servers.uuid = $1", self.uuid)
             .execute(&mut *transaction)
             .await?;
 
@@ -873,33 +874,33 @@ impl Server {
             sqlx::query!(
                 "SELECT nest_egg_variables.env_variable, COALESCE(server_variables.value, nest_egg_variables.default_value) AS value
                 FROM nest_egg_variables
-                LEFT JOIN server_variables ON server_variables.variable_id = nest_egg_variables.id AND server_variables.server_id = $1
-                WHERE nest_egg_variables.egg_id = $2",
-                self.id,
-                self.egg.id
+                LEFT JOIN server_variables ON server_variables.variable_uuid = nest_egg_variables.uuid AND server_variables.server_uuid = $1
+                WHERE nest_egg_variables.egg_uuid = $2",
+                self.uuid,
+                self.egg.uuid
             )
             .fetch_all(database.read()),
             sqlx::query!(
                 "SELECT server_backups.uuid
                 FROM server_backups
-                WHERE server_backups.server_id = $1",
-                self.id
+                WHERE server_backups.server_uuid = $1",
+                self.uuid
             )
             .fetch_all(database.read()),
             sqlx::query!(
                 "SELECT mounts.source, mounts.target, mounts.read_only
                 FROM server_mounts
-                JOIN mounts ON mounts.id = server_mounts.mount_id
-                WHERE server_mounts.server_id = $1",
-                self.id
+                JOIN mounts ON mounts.uuid = server_mounts.mount_uuid
+                WHERE server_mounts.server_uuid = $1",
+                self.uuid
             )
             .fetch_all(database.read()),
             sqlx::query!(
                 "SELECT node_allocations.ip, node_allocations.port
                 FROM server_allocations
-                JOIN node_allocations ON node_allocations.id = server_allocations.allocation_id
-                WHERE server_allocations.server_id = $1",
-                self.id
+                JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                WHERE server_allocations.server_uuid = $1",
+                self.uuid
             )
             .fetch_all(database.read()),
         )
@@ -979,12 +980,7 @@ impl Server {
                     })
                     .collect(),
                 egg: wings_api::ServerConfigurationEgg {
-                    id: uuid::Uuid::from_fields(
-                        self.egg.id as u32,
-                        (self.egg.id >> 16) as u16,
-                        self.egg.id as u16,
-                        &[0; 8],
-                    ),
+                    id: self.egg.uuid,
                     file_denylist: self.egg.file_denylist,
                 },
                 container: wings_api::ServerConfigurationContainer {
@@ -1003,14 +999,13 @@ impl Server {
 
     #[inline]
     pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiServer {
-        let allocation_id = self.allocation.as_ref().map(|a| a.id);
+        let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
 
         AdminApiServer {
-            id: self.id,
             uuid: self.uuid,
             uuid_short: format!("{:08x}", self.uuid_short),
             external_id: self.external_id,
-            allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
+            allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             node: self.node.into_admin_api_object(database),
             owner: self.owner.into_api_object(true),
             egg: self.egg.into_admin_api_object(),
@@ -1041,15 +1036,14 @@ impl Server {
 
     #[inline]
     pub fn into_api_object(self, user: &super::user::User) -> ApiServer {
-        let allocation_id = self.allocation.as_ref().map(|a| a.id);
+        let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
 
         ApiServer {
-            id: self.id,
             uuid: self.uuid,
             uuid_short: format!("{:08x}", self.uuid_short),
-            allocation: self.allocation.map(|a| a.into_api_object(allocation_id)),
+            allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             egg: self.egg.into_api_object(),
-            is_owner: self.owner.id == user.id,
+            is_owner: self.owner.uuid == user.uuid,
             permissions: if user.admin {
                 vec!["*".to_string()]
             } else {
@@ -1135,7 +1129,6 @@ pub struct ApiServerFeatureLimits {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "AdminServer")]
 pub struct AdminApiServer {
-    pub id: i32,
     pub uuid: uuid::Uuid,
     pub uuid_short: String,
     pub external_id: Option<String>,
@@ -1168,7 +1161,6 @@ pub struct AdminApiServer {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "Server")]
 pub struct ApiServer {
-    pub id: i32,
     pub uuid: uuid::Uuid,
     pub uuid_short: String,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,

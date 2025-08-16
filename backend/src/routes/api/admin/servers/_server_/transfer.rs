@@ -17,10 +17,10 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        node_id: i32,
+        node_uuid: uuid::Uuid,
 
-        allocation_id: Option<i32>,
-        allocation_ids: Vec<i32>,
+        allocation_uuid: Option<uuid::Uuid>,
+        allocation_uuids: Vec<uuid::Uuid>,
 
         backups: Vec<uuid::Uuid>,
         delete_source_backups: bool,
@@ -37,9 +37,9 @@ mod post {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -48,19 +48,19 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if server.destination_node_id.is_some() {
+        if server.destination_node_uuid.is_some() {
             return ApiResponse::error("server is already being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
         }
 
-        if data.node_id == server.node.id {
+        if data.node_uuid == server.node.uuid {
             return ApiResponse::error("cannot transfer server to the same node")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
         }
 
-        let destination_node = match Node::by_id(&state.database, data.node_id).await? {
+        let destination_node = match Node::by_uuid(&state.database, data.node_uuid).await? {
             Some(node) => node,
             None => {
                 return ApiResponse::error("node not found")
@@ -71,19 +71,19 @@ mod post {
 
         let mut transaction = state.database.write().begin().await?;
 
-        let destination_allocation_id = if let Some(allocation_id) = data.allocation_id {
+        let destination_allocation_uuid = if let Some(allocation_uuid) = data.allocation_uuid {
             Some(
                 sqlx::query!(
-                    "INSERT INTO server_allocations (server_id, allocation_id)
+                    "INSERT INTO server_allocations (server_uuid, allocation_uuid)
                     VALUES ($1, $2)
                     ON CONFLICT DO NOTHING
-                    RETURNING id",
-                    server.id,
-                    allocation_id
+                    RETURNING uuid",
+                    server.uuid,
+                    allocation_uuid
                 )
                 .fetch_one(&mut *transaction)
                 .await?
-                .id,
+                .uuid,
             )
         } else {
             None
@@ -92,25 +92,25 @@ mod post {
         sqlx::query!(
             r#"
             UPDATE servers
-            SET destination_node_id = $2, destination_allocation_id = $3
-            WHERE servers.id = $1
+            SET destination_node_uuid = $2, destination_allocation_uuid = $3
+            WHERE servers.uuid = $1
             "#,
-            server.id,
-            destination_node.id,
-            destination_allocation_id
+            server.uuid,
+            destination_node.uuid,
+            destination_allocation_uuid
         )
         .execute(&mut *transaction)
         .await?;
 
-        if !data.allocation_ids.is_empty() {
+        if !data.allocation_uuids.is_empty() {
             sqlx::query!(
                 r#"
-                INSERT INTO server_allocations (server_id, allocation_id)
-                SELECT $1, UNNEST($2::int[])
+                INSERT INTO server_allocations (server_uuid, allocation_uuid)
+                SELECT $1, UNNEST($2::uuid[])
                 ON CONFLICT DO NOTHING
                 "#,
-                server.id,
-                &data.allocation_ids
+                server.uuid,
+                &data.allocation_uuids
             )
             .execute(&mut *transaction)
             .await?;
@@ -126,7 +126,7 @@ mod post {
                 expiration_time: Some(chrono::Utc::now().timestamp() + 600),
                 not_before: None,
                 issued_at: Some(chrono::Utc::now().timestamp()),
-                jwt_id: server.node.id.to_string(),
+                jwt_id: server.node.uuid.to_string(),
             },
         )?;
 
@@ -166,10 +166,10 @@ mod post {
             .log(
                 "server:transfer",
                 serde_json::json!({
-                    "server_id": server.id,
-                    "destination_node_id": destination_node.id,
-                    "allocation_id": destination_allocation_id,
-                    "allocation_ids": data.allocation_ids,
+                    "uuid": server.uuid,
+                    "destination_node_uuid": destination_node.uuid,
+                    "allocation_uuid": destination_allocation_uuid,
+                    "allocation_uuids": data.allocation_uuids,
                 }),
             )
             .await;

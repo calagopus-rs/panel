@@ -23,9 +23,9 @@ mod get {
         (status = OK, body = inline(Response)),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "page" = i64, Query,
@@ -49,9 +49,9 @@ mod get {
                 .ok();
         }
 
-        let mounts = ServerMount::by_server_id_with_pagination(
+        let mounts = ServerMount::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
         )
@@ -89,7 +89,7 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        mount_id: i32,
+        mount_uuid: uuid::Uuid,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -102,9 +102,9 @@ mod post {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "server" = i32,
+            "server" = uuid::Uuid,
             description = "The server ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
     pub async fn route(
@@ -113,11 +113,11 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let mount = match Mount::by_node_id_egg_id_id(
+        let mount = match Mount::by_node_uuid_egg_uuid_uuid(
             &state.database,
-            server.node.id,
-            server.egg.id,
-            data.mount_id,
+            server.node.uuid,
+            server.egg.uuid,
+            data.mount_uuid,
         )
         .await?
         {
@@ -135,7 +135,7 @@ mod post {
                 .ok();
         }
 
-        match ServerMount::create(&state.database, server.id, mount.id).await {
+        match ServerMount::create(&state.database, server.uuid, mount.uuid).await {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("mount already exists")
@@ -155,8 +155,8 @@ mod post {
             .log(
                 "server:mount.create",
                 serde_json::json!({
-                    "server_id": server.id,
-                    "mount_id": mount.id,
+                    "server_uuid": server.uuid,
+                    "mount_uuid": mount.uuid,
                 }),
             )
             .await;

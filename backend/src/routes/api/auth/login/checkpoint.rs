@@ -8,7 +8,7 @@ pub struct TwoFactorRequiredJwt {
     #[serde(flatten)]
     pub base: BasePayload,
 
-    pub user_id: i32,
+    pub user_uuid: uuid::Uuid,
     pub user_totp_secret: String,
 }
 
@@ -87,7 +87,7 @@ mod post {
 
                 if let Err(err) = UserActivity::log(
                     &state.database,
-                    payload.user_id,
+                    payload.user_uuid,
                     None,
                     "auth:success",
                     ip.0.into(),
@@ -98,20 +98,23 @@ mod post {
                 .await
                 {
                     tracing::warn!(
-                        user = payload.user_id,
+                        user = %payload.user_uuid,
                         "failed to log user activity: {:#?}",
                         err
                     );
                 }
             }
             10 => {
-                if let Some(code) =
-                    UserRecoveryCode::delete_by_code(&state.database, payload.user_id, &data.code)
-                        .await?
+                if let Some(code) = UserRecoveryCode::delete_by_user_uuid_code(
+                    &state.database,
+                    payload.user_uuid,
+                    &data.code,
+                )
+                .await?
                 {
                     if let Err(err) = UserActivity::log(
                         &state.database,
-                        payload.user_id,
+                        payload.user_uuid,
                         None,
                         "auth:success",
                         ip.0.into(),
@@ -123,7 +126,7 @@ mod post {
                     .await
                     {
                         tracing::warn!(
-                            user = payload.user_id,
+                            user = %payload.user_uuid,
                             "failed to log user activity: {:#?}",
                             err
                         );
@@ -141,7 +144,7 @@ mod post {
             }
         }
 
-        let user = match User::by_id(&state.database, payload.user_id).await? {
+        let user = match User::by_uuid(&state.database, payload.user_uuid).await? {
             Some(user) => user,
             None => {
                 return ApiResponse::error("user not found")
@@ -152,7 +155,7 @@ mod post {
 
         let key = UserSession::create(
             &state.database,
-            user.id,
+            user.uuid,
             ip.0.into(),
             headers
                 .get("User-Agent")

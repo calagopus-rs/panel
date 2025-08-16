@@ -4,7 +4,7 @@ export default async (uuid: string, page: number, search?: string): Promise<Resp
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/client/servers/${uuid}/databases`, {
-        params: { page, search },
+        params: { page, search, include_password: true },
       })
       .then(({ data }) => resolve(data.databases))
       .catch(reject);

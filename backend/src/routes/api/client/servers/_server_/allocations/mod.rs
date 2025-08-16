@@ -5,7 +5,7 @@ mod _allocation_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_allocation::ServerAllocation},
+        models::{Pagination, PaginationParamsWithSearch, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
@@ -38,11 +38,15 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
+        (
+            "search" = Option<String>, Query,
+            description = "Search term for items",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Query(params): Query<PaginationParams>,
+        Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -56,13 +60,16 @@ mod get {
                 .ok();
         }
 
-        let allocations = ServerAllocation::by_server_id_with_pagination(
+        let allocations = ServerAllocation::by_server_uuid_with_pagination(
             &state.database,
-            server.id,
+            server.uuid,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await?;
+
+        let allocation_uuid = server.0.allocation.map(|a| a.uuid);
 
         ApiResponse::json(Response {
             allocations: Pagination {
@@ -72,9 +79,7 @@ mod get {
                 data: allocations
                     .data
                     .into_iter()
-                    .map(|allocation| {
-                        allocation.into_api_object(server.allocation.as_ref().map(|a| a.id))
-                    })
+                    .map(|allocation| allocation.into_api_object(allocation_uuid))
                     .collect(),
             },
         })
@@ -123,7 +128,8 @@ mod post {
                 .ok();
         }
 
-        let allocations = ServerAllocation::count_by_server_id(&state.database, server.id).await;
+        let allocations =
+            ServerAllocation::count_by_server_uuid(&state.database, server.uuid).await;
         if allocations >= server.allocation_limit as i64 {
             return ApiResponse::error("maximum number of allocations reached")
                 .with_status(StatusCode::EXPECTATION_FAILED)
@@ -137,7 +143,7 @@ mod post {
         }
 
         let allocation = match ServerAllocation::create_random(&state.database, &server).await {
-            Ok(allocation_id) => ServerAllocation::by_id(&state.database, allocation_id)
+            Ok(allocation_uuid) => ServerAllocation::by_uuid(&state.database, allocation_uuid)
                 .await?
                 .ok_or_else(|| anyhow::anyhow!("allocation not found after creation"))?,
             Err(err) if err.to_string().contains("null value in column") => {
@@ -166,7 +172,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            allocation: allocation.into_api_object(server.allocation.as_ref().map(|a| a.id)),
+            allocation: allocation.into_api_object(server.0.allocation.map(|a| a.uuid)),
         })
         .ok()
     }

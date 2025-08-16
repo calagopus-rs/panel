@@ -46,9 +46,9 @@ mod get {
                 .ok();
         }
 
-        let activities = UserActivity::by_user_id_with_pagination(
+        let activities = UserActivity::by_user_uuid_with_pagination(
             &state.database,
-            user.id,
+            user.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),

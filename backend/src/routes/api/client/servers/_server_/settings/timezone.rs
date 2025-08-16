@@ -48,9 +48,9 @@ mod put {
         sqlx::query!(
             "UPDATE servers
             SET timezone = $1
-            WHERE id = $2",
+            WHERE servers.uuid = $2",
             data.timezone.map(|tz| tz.name()),
-            server.id
+            server.uuid
         )
         .execute(state.database.write())
         .await?;

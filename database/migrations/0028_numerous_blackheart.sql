@@ -1,1 +1,0 @@
-ALTER TABLE "user_sessions" ADD COLUMN "key_id" char(16) NOT NULL;

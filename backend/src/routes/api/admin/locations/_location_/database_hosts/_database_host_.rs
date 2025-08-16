@@ -23,25 +23,25 @@ mod delete {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "location" = i32,
+            "location" = uuid::Uuid,
             description = "The location ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
-            "database_host" = i32,
+            "database_host" = uuid::Uuid,
             description = "The database host ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         location: GetLocation,
         activity_logger: GetAdminActivityLogger,
-        Path((_location, database_host)): Path<(i32, i32)>,
+        Path((_location, database_host)): Path<(uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
-        let database_host = match LocationDatabaseHost::by_location_id_database_host_id(
+        let database_host = match LocationDatabaseHost::by_location_uuid_database_host_uuid(
             &state.database,
-            location.id,
+            location.uuid,
             database_host,
         )
         .await?
@@ -54,14 +54,15 @@ mod delete {
             }
         };
 
-        LocationDatabaseHost::delete_by_ids(&state.database, location.id, database_host.id).await?;
+        LocationDatabaseHost::delete_by_uuids(&state.database, location.uuid, database_host.uuid)
+            .await?;
 
         activity_logger
             .log(
                 "location:database-host.delete",
                 serde_json::json!({
-                    "location_id": location.id,
-                    "database_host_id": database_host.id,
+                    "location_uuid": location.uuid,
+                    "database_host_uuid": database_host.uuid,
                 }),
             )
             .await;
