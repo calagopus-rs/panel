@@ -18,7 +18,7 @@ export const createSessionsSlice: StateCreator<UserStore, [], [], SessionSlice> 
     set((state) => ({
       sessions: {
         ...state.sessions,
-        data: state.sessions.data.filter((s) => s.id !== sess.id),
+        data: state.sessions.data.filter((s) => s.uuid !== sess.uuid),
         total: state.sessions.total - 1,
       },
     })),

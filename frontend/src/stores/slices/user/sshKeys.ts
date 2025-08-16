@@ -26,7 +26,7 @@ export const createSshKeysSlice: StateCreator<UserStore, [], [], SshKeySlice> = 
     set((state) => ({
       sshKeys: {
         ...state.sshKeys,
-        data: state.sshKeys.data.filter((k) => k.id !== key.id),
+        data: state.sshKeys.data.filter((k) => k.uuid !== key.uuid),
         total: state.sshKeys.total - 1,
       },
     })),

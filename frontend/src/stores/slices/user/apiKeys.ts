@@ -26,7 +26,7 @@ export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = 
     set((state) => ({
       apiKeys: {
         ...state.apiKeys,
-        data: state.apiKeys.data.filter((k) => k.id !== key.id),
+        data: state.apiKeys.data.filter((k) => k.uuid !== key.uuid),
         total: state.apiKeys.total - 1,
       },
     })),

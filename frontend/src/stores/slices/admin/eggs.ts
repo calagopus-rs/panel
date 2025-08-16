@@ -26,7 +26,7 @@ export const createEggsSlice: StateCreator<AdminStore, [], [], EggsSlice> = (set
     set((state) => ({
       eggs: {
         ...state.eggs,
-        data: state.eggs.data.filter((l) => l.id !== egg.id),
+        data: state.eggs.data.filter((e) => e.uuid !== egg.uuid),
         total: state.eggs.total - 1,
       },
     })),

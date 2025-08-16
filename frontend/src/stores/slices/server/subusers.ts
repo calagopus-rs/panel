@@ -28,7 +28,7 @@ export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlic
     set((state) => ({
       subusers: {
         ...state.subusers,
-        data: state.subusers.data.filter((s) => s.user.id !== subuser.user.id),
+        data: state.subusers.data.filter((s) => s.user.uuid !== subuser.user.uuid),
         total: state.subusers.total - 1,
       },
     })),

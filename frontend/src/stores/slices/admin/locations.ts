@@ -26,7 +26,7 @@ export const createLocationsSlice: StateCreator<AdminStore, [], [], LocationsSli
     set((state) => ({
       locations: {
         ...state.locations,
-        data: state.locations.data.filter((l) => l.id !== location.id),
+        data: state.locations.data.filter((l) => l.uuid !== location.uuid),
         total: state.locations.total - 1,
       },
     })),

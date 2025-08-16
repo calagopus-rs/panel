@@ -26,7 +26,7 @@ export const createAllocationsSlice: StateCreator<ServerStore, [], [], Allocatio
     set((state) => ({
       allocations: {
         ...state.allocations,
-        data: state.allocations.data.filter((a) => a.id !== allocation.id),
+        data: state.allocations.data.filter((a) => a.uuid !== allocation.uuid),
         total: state.allocations.total - 1,
       },
     })),

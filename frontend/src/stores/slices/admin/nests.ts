@@ -26,7 +26,7 @@ export const createNestsSlice: StateCreator<AdminStore, [], [], NestsSlice> = (s
     set((state) => ({
       nests: {
         ...state.nests,
-        data: state.nests.data.filter((l) => l.id !== nest.id),
+        data: state.nests.data.filter((n) => n.uuid !== nest.uuid),
         total: state.nests.total - 1,
       },
     })),

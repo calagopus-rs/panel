@@ -26,7 +26,7 @@ export const createDatabasesSlice: StateCreator<ServerStore, [], [], DatabasesSl
     set((state) => ({
       databases: {
         ...state.databases,
-        data: state.databases.data.filter((d) => d.id !== database.id),
+        data: state.databases.data.filter((d) => d.uuid !== database.uuid),
         total: state.databases.total - 1,
       },
     })),
