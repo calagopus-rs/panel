@@ -505,7 +505,7 @@ export const serverBackups = pgTable('server_backups', {
 ])
 
 export const serverDatabases = pgTable('server_databases', {
-	id: serial('id').primaryKey().notNull(),
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	serverUuid: uuid('server_uuid').references(() => servers.uuid).notNull(),
 	databaseHostUuid: uuid('database_host_uuid').references(() => databaseHosts.uuid).notNull(),
 

@@ -145,7 +145,9 @@ mod patch {
             let notes = if notes.is_empty() { None } else { Some(notes) };
 
             sqlx::query!(
-                "UPDATE server_allocations SET notes = $1 WHERE server_allocations.uuid = $2",
+                "UPDATE server_allocations
+                SET notes = $1
+                WHERE server_allocations.uuid = $2",
                 notes,
                 allocation.uuid,
             )
