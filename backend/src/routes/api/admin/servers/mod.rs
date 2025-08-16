@@ -108,8 +108,8 @@ mod post {
         limits: crate::models::server::ApiServerLimits,
         pinned_cpus: Vec<i16>,
 
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
+        #[validate(length(min = 1, max = 1024))]
+        #[schema(min_length = 1, max_length = 1024)]
         startup: String,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]

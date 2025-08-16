@@ -298,7 +298,7 @@ export const nestEggs = pgTable('nest_eggs', {
 	config_script: jsonb('config_script').notNull(),
 	config_allocations: jsonb('config_allocations').default({}).notNull(),
 
-	startup: varchar('startup', { length: 255 }).notNull(),
+	startup: text('startup').notNull(),
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
 
 	features: text('features').array().notNull(),
@@ -389,7 +389,7 @@ export const servers = pgTable('servers', {
 	cpu: integer('cpu').notNull(),
 	pinnedCpus: smallint('pinned_cpus').array().notNull(),
 
-	startup: varchar('startup', { length: 255 }).notNull(),
+	startup: text('startup').notNull(),
 	image: varchar('image', { length: 255 }).notNull(),
 	autoKill: jsonb('auto_kill').default({ enabled: false, seconds: 30 }).notNull(),
 	timezone: varchar('timezone', { length: 255 }),
