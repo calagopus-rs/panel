@@ -6,22 +6,21 @@ import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faBriefcase,
-  faCloud,
-  faGraduationCap,
-  faKey,
-  faMagnifyingGlass,
-  faServer,
-  faUser,
-  faUserSecret,
-} from '@fortawesome/free-solid-svg-icons';
+import { faGraduationCap, faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/providers/AuthProvider';
 import routes from './routes';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 
 export default () => {
   const { user } = useAuth();
+
+  const to = (value: string) => {
+    const base = '/account';
+    if (value === '/') {
+      return base;
+    }
+    return `${base.replace(/\/*$/, '')}/${value.replace(/^\/+/, '')}`;
+  };
 
   return (
     <div className={'lg:flex'}>
@@ -46,26 +45,14 @@ export default () => {
           )}
         </Sidebar.Section>
         <Sidebar.Section>
-          <Sidebar.Link to={'/account'} end>
-            <FontAwesomeIcon icon={faUser} />
-            <span>Account</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/account/api'} end>
-            <FontAwesomeIcon icon={faCloud} />
-            <span>API Credentials</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/account/ssh'} end>
-            <FontAwesomeIcon icon={faKey} />
-            <span>SSH Keys</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/account/activity'} end>
-            <FontAwesomeIcon icon={faBriefcase} />
-            <span>Activity</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/account/sessions'} end>
-            <FontAwesomeIcon icon={faUserSecret} />
-            <span>Sessions</span>
-          </Sidebar.Link>
+          {routes.server
+            .filter((route) => !!route.name)
+            .map((route) => (
+              <Sidebar.Link key={route.path} to={to(route.path)} end={route.exact}>
+                <FontAwesomeIcon icon={route.icon} />
+                <span>{route.name}</span>
+              </Sidebar.Link>
+            ))}
         </Sidebar.Section>
         <Sidebar.User />
       </Sidebar>
