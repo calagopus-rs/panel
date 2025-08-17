@@ -1,3 +1,5 @@
+import { Code } from '@mantine/core';
+
 export default ({ children }: { children: React.ReactNode }) => {
-  return <code className={'font-mono bg-gray-800 rounded py-1 px-2 inline-block'}>{children}</code>;
+  return <Code>{children}</Code>;
 };

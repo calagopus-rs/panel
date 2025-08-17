@@ -2,6 +2,7 @@ import { Button } from '@/elements/button';
 import { Dialog } from '@/elements/dialog';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
@@ -24,9 +25,9 @@ export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button style={Button.Styles.Gray} size={Button.Sizes.Small} onClick={() => setOpen(true)}>
+      <ActionIcon onClick={() => setOpen(true)}>
         <FontAwesomeIcon icon={faInfo} />
-      </Button>
+      </ActionIcon>
     </>
   );
 };
