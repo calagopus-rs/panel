@@ -8,19 +8,11 @@ import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap, faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/providers/AuthProvider';
-import routes from './routes';
+import routes, { to } from './routes';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 
 export default () => {
   const { user } = useAuth();
-
-  const to = (value: string) => {
-    const base = '/account';
-    if (value === '/') {
-      return base;
-    }
-    return `${base.replace(/\/*$/, '')}/${value.replace(/^\/+/, '')}`;
-  };
 
   return (
     <div className={'lg:flex'}>
@@ -45,10 +37,10 @@ export default () => {
           )}
         </Sidebar.Section>
         <Sidebar.Section>
-          {routes.server
+          {routes.account
             .filter((route) => !!route.name)
             .map((route) => (
-              <Sidebar.Link key={route.path} to={to(route.path)} end={route.exact}>
+              <Sidebar.Link key={route.path} to={to(route.path, '/account')} end={route.exact}>
                 <FontAwesomeIcon icon={route.icon} />
                 <span>{route.name}</span>
               </Sidebar.Link>
@@ -60,7 +52,7 @@ export default () => {
         <ErrorBoundary>
           <Routes>
             <Route path={''} element={<DashboardHome />} />
-            {routes.server.map(({ path, element: Element }) => (
+            {routes.account.map(({ path, element: Element }) => (
               <Route key={path} path={path} element={<Element />} />
             ))}
             <Route path={'*'} element={<NotFound />} />

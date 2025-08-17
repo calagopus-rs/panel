@@ -1,3 +1,9 @@
+import AdminActivity from '@/pages/admin/activity/AdminActivity';
+import AdminHome from '@/pages/admin/AdminHome';
+import AdminLocations from '@/pages/admin/locations/AdminLocations';
+import AdminNests from '@/pages/admin/nests/AdminNests';
+import AdminSettings from '@/pages/admin/settings/AdminSettings';
+import AdminUsers from '@/pages/admin/users/AdminUsers';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardApiKeys from '@/pages/dashboard/DashboardApiKeys';
@@ -18,9 +24,12 @@ import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 import {
   faBoxArchive,
   faBriefcase,
+  faBuilding,
   faCloud,
   faCog,
+  faCrow,
   faDatabase,
+  faDungeon,
   faFolderOpen,
   faKey,
   faNetworkWired,
@@ -30,6 +39,7 @@ import {
   faUser,
   faUsers,
   faUserSecret,
+  faWrench,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
@@ -48,8 +58,21 @@ interface ServerRouteDefinition extends RouteDefinition {
 
 interface Routes {
   account: RouteDefinition[];
+  admin: RouteDefinition[];
   server: ServerRouteDefinition[];
 }
+
+export const to = (value: string, base: string = '') => {
+  if (value === '/') {
+    return base;
+  }
+
+  const clean = value
+    .replace(/^\/+/, '') // remove leading slashes
+    .replace(/\/\*$/, ''); // remove /*
+
+  return `${base.replace(/\/+$/, '')}/${clean}`;
+};
 
 const routes: Routes = {
   account: [
@@ -65,28 +88,63 @@ const routes: Routes = {
       icon: faCloud,
       path: '/api',
       element: DashboardApiKeys,
-      exact: true,
     },
     {
       name: 'SSH Keys',
       icon: faKey,
       path: '/ssh',
       element: DashboardSshKeys,
-      exact: true,
     },
     {
       name: 'Activity',
       icon: faBriefcase,
       path: '/activity',
       element: DashboardActivity,
-      exact: true,
     },
     {
       name: 'Sessions',
       icon: faUserSecret,
       path: '/sessions',
       element: DashboardSessions,
+    },
+  ],
+  admin: [
+    {
+      name: 'Overview',
+      icon: faBuilding,
+      path: '/',
+      element: AdminHome,
       exact: true,
+    },
+    {
+      name: 'Settings',
+      icon: faWrench,
+      path: '/settings/*',
+      element: AdminSettings,
+    },
+    {
+      name: 'Users',
+      icon: faUsers,
+      path: '/users/*',
+      element: AdminUsers,
+    },
+    {
+      name: 'Locations',
+      icon: faDungeon,
+      path: '/locations/*',
+      element: AdminLocations,
+    },
+    {
+      name: 'Nests',
+      icon: faCrow,
+      path: '/nests/*',
+      element: AdminNests,
+    },
+    {
+      name: 'Activity',
+      icon: faBriefcase,
+      path: '/activity',
+      element: AdminActivity,
     },
   ],
   server: [

@@ -3,21 +3,8 @@ import { Route, Routes } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faBriefcase,
-  faBuilding,
-  faCrow,
-  faDungeon,
-  faReply,
-  faUsers,
-  faWrench,
-} from '@fortawesome/free-solid-svg-icons';
-import AdminSettings from '@/pages/admin/settings/AdminSettings';
-import AdminHome from '@/pages/admin/AdminHome';
-import AdminLocations from '@/pages/admin/locations/AdminLocations';
-import AdminNests from '@/pages/admin/nests/AdminNests';
-import AdminActivity from '@/pages/admin/activity/AdminActivity';
-import AdminUsers from '@/pages/admin/users/AdminUsers';
+import { faReply } from '@fortawesome/free-solid-svg-icons';
+import routes, { to } from './routes';
 
 export default () => {
   return (
@@ -33,45 +20,22 @@ export default () => {
           </Sidebar.Link>
         </Sidebar.Section>
         <Sidebar.Section>
-          <Sidebar.Link to={'/admin'} end>
-            <FontAwesomeIcon icon={faBuilding} />
-            <span>Overview</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/admin/settings'}>
-            <FontAwesomeIcon icon={faWrench} />
-            <span>Settings</span>
-          </Sidebar.Link>
-        </Sidebar.Section>
-        <Sidebar.Section>
-          <Sidebar.Link to={'/admin/users'}>
-            <FontAwesomeIcon icon={faUsers} />
-            <span>Users</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/admin/locations'}>
-            <FontAwesomeIcon icon={faDungeon} />
-            <span>Locations</span>
-          </Sidebar.Link>
-          <Sidebar.Link to={'/admin/nests'}>
-            <FontAwesomeIcon icon={faCrow} />
-            <span>Nests</span>
-          </Sidebar.Link>
-        </Sidebar.Section>
-        <Sidebar.Section>
-          <Sidebar.Link to={'/admin/activity'}>
-            <FontAwesomeIcon icon={faBriefcase} />
-            <span>Activity</span>
-          </Sidebar.Link>
+          {routes.admin
+            .filter((route) => !!route.name)
+            .map((route) => (
+              <Sidebar.Link key={route.path} to={to(route.path, '/admin')} end={route.exact}>
+                <FontAwesomeIcon icon={route.icon} />
+                <span>{route.name}</span>
+              </Sidebar.Link>
+            ))}
         </Sidebar.Section>
         <Sidebar.User />
       </Sidebar>
       <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         <Routes>
-          <Route path={''} element={<AdminHome />} />
-          <Route path={'/settings/*'} element={<AdminSettings />} />
-          <Route path={'/users/*'} element={<AdminUsers />} />
-          <Route path={'/locations/*'} element={<AdminLocations />} />
-          <Route path={'/nests/*'} element={<AdminNests />} />
-          <Route path={'/activity'} element={<AdminActivity />} />
+          {routes.admin.map(({ path, element: Element }) => (
+            <Route key={path} path={path} element={<Element />} />
+          ))}
           <Route path={'*'} element={<NotFound />} />
         </Routes>
       </div>

@@ -13,7 +13,7 @@ import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import getServer from '@/api/server/getServer';
-import routes from './routes';
+import routes, { to } from './routes';
 import Can from '@/elements/Can';
 
 export default () => {
@@ -35,14 +35,6 @@ export default () => {
       setLoading(false);
     });
   }, [params.id]);
-
-  const to = (value: string) => {
-    const base = `/server/${params.id}`;
-    if (value === '/') {
-      return base;
-    }
-    return `${base.replace(/\/*$/, '')}/${value.replace(/^\/+/, '')}`;
-  };
 
   return (
     <div className={'lg:flex'}>
@@ -66,13 +58,13 @@ export default () => {
             .map((route) =>
               route.permission ? (
                 <Can key={route.path} action={route.permission} matchAny>
-                  <Sidebar.Link to={to(route.path)} end={route.exact}>
+                  <Sidebar.Link to={to(route.path, `/server/${params.id}`)} end={route.exact}>
                     <FontAwesomeIcon icon={route.icon} />
                     <span>{route.name}</span>
                   </Sidebar.Link>
                 </Can>
               ) : (
-                <Sidebar.Link key={route.path} to={to(route.path)} end={route.exact}>
+                <Sidebar.Link key={route.path} to={to(route.path, `/server/${params.id}`)} end={route.exact}>
                   <FontAwesomeIcon icon={route.icon} />
                   <span>{route.name}</span>
                 </Sidebar.Link>
