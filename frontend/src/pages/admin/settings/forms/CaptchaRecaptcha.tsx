@@ -33,7 +33,7 @@ export default ({
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'V3'}
+          label={'V3'}
           name={'v3'}
           defaultChecked={settings.v3}
           onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.target.checked }))}

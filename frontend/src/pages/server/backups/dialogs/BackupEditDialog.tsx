@@ -21,7 +21,7 @@ export default ({ backup, onUpdate, open, onClose }: Props) => {
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Locked'}
+          label={'Locked'}
           name={'locked'}
           defaultChecked={locked}
           onChange={(e) => setLocked(e.target.checked)}

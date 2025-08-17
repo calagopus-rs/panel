@@ -107,7 +107,7 @@ export default ({ schedule, onUpdate }: { schedule?: any; onUpdate?: (schedule: 
 
         <Input.Label htmlFor={'runOnline'}>Run Online</Input.Label>
         <Input.Switch
-          description={'Only execute this schedule when the server is in a running state.'}
+          label={'Only execute this schedule when the server is in a running state.'}
           name={'runOnline'}
           defaultChecked={runOnline}
           onChange={(e) => setRunOnline(e.target.checked)}
@@ -115,7 +115,7 @@ export default ({ schedule, onUpdate }: { schedule?: any; onUpdate?: (schedule: 
 
         <Input.Label htmlFor={'enabled'}>Enabled</Input.Label>
         <Input.Switch
-          description={'Enable or disable this schedule.'}
+          label={'Enable or disable this schedule.'}
           name={'enabled'}
           defaultChecked={enabled}
           onChange={(e) => setEnabled(e.target.checked)}

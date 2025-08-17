@@ -71,7 +71,7 @@ export default ({ schedule, task, onSubmit }: { schedule: any; task?: any; onSub
 
         <Input.Label htmlFor={'taskContinueOnFailure'}>Continue On Failure</Input.Label>
         <Input.Switch
-          description={'Future tasks will be run when this task fails.'}
+          label={'Future tasks will be run when this task fails.'}
           name={'taskContinueOnFailure'}
           defaultChecked={taskContinueOnFailure}
           onChange={(e) => setTaskContinueOnFailure(e.target.checked)}

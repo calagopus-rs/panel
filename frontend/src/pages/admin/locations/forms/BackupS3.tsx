@@ -65,7 +65,7 @@ export default ({
         <Input.Label htmlFor={'pathStyle'}>Path Style</Input.Label>
         <Input.Switch
           name={'pathStyle'}
-          description={backupConfig?.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
+          label={backupConfig?.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
           defaultChecked={backupConfig?.pathStyle || false}
           onChange={(e) => setBackupConfigs({ ...backupConfig, pathStyle: e.target.checked })}
         />

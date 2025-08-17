@@ -5,6 +5,7 @@ import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faReply } from '@fortawesome/free-solid-svg-icons';
 import routes, { to } from './routes';
+import ErrorBoundary from '@/elements/ErrorBoundary';
 
 export default () => {
   return (
@@ -32,12 +33,14 @@ export default () => {
         <Sidebar.User />
       </Sidebar>
       <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
-        <Routes>
-          {routes.admin.map(({ path, element: Element }) => (
-            <Route key={path} path={path} element={<Element />} />
-          ))}
-          <Route path={'*'} element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            {routes.admin.map(({ path, element: Element }) => (
+              <Route key={path} path={path} element={<Element />} />
+            ))}
+            <Route path={'*'} element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </div>
   );

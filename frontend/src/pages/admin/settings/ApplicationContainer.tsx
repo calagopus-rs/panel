@@ -57,7 +57,7 @@ export default () => {
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Enable Telemetry'}
+          label={'Enable Telemetry'}
           name={'telemetryEnabled'}
           defaultChecked={appSettings.telemetryEnabled}
           onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}

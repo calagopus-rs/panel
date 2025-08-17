@@ -7,16 +7,20 @@ interface AdminActivity {
   created: Date;
 }
 
-interface AdminDatabaseHost {
-  uuid: string;
+interface AdminUpdateDatabaseHost {
   name: string;
   username: string;
+  password: string;
   host: string;
   port: number;
   public: boolean;
   publicHost: string | null;
   publicPort: number | null;
   type: DatabaseType;
+}
+
+interface AdminDatabaseHost extends AdminUpdateDatabaseHost {
+  uuid: string;
   databases: number;
   locations: number;
   created: Date;

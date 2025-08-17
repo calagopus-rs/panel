@@ -21,7 +21,7 @@ export default ({ allocation, onUpdate, open, onClose }: Props) => {
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Primary'}
+          label={'Primary'}
           name={'primary'}
           defaultChecked={primary}
           onChange={(e) => setPrimary(e.target.checked)}

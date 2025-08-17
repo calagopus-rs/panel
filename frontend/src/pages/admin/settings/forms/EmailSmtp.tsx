@@ -54,7 +54,7 @@ export default ({
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Use TLS'}
+          label={'Use TLS'}
           name={'useTls'}
           defaultChecked={settings.useTls}
           onChange={(e) => setSettings((settings) => ({ ...settings, useTls: e.target.checked }))}

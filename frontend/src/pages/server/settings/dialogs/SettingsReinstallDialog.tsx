@@ -14,7 +14,7 @@ export default ({ onReinstall, open, onClose }: Props) => {
     <Dialog title={'Reinstall Server'} onClose={onClose} open={open} hideCloseIcon>
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Do you want to empty the filesystem of this server before reinstallation?'}
+          label={'Do you want to empty the filesystem of this server before reinstallation?'}
           name={'truncate'}
           defaultChecked={truncate}
           onChange={(e) => setTruncate(e.target.checked)}

@@ -38,7 +38,7 @@ export default () => {
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Allow Overwriting Custom Docker Image'}
+          label={'Allow Overwriting Custom Docker Image'}
           name={'allow-overwriting-custom-docker-image'}
           defaultChecked={serverSettings.allowOverwritingCustomDockerImage}
           onChange={(e) =>
@@ -49,7 +49,7 @@ export default () => {
 
       <div className={'mt-4'}>
         <Input.Switch
-          description={'Allow Editing Startup Command'}
+          label={'Allow Editing Startup Command'}
           name={'allow-editing-startup-command'}
           defaultChecked={serverSettings.allowEditingStartupCommand}
           onChange={(e) => setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.target.checked })}

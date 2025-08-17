@@ -1,5 +1,6 @@
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
 import AdminHome from '@/pages/admin/AdminHome';
+import AdminDatabaseHosts from '@/pages/admin/databasehosts/AdminDatabaseHosts';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminNests from '@/pages/admin/nests/AdminNests';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
@@ -133,6 +134,12 @@ const routes: Routes = {
       icon: faDungeon,
       path: '/locations/*',
       element: AdminLocations,
+    },
+    {
+      name: 'Database Hosts',
+      icon: faDatabase,
+      path: '/database-hosts/*',
+      element: AdminDatabaseHosts,
     },
     {
       name: 'Nests',
