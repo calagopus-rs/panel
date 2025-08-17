@@ -16,12 +16,9 @@ import {
   faUser,
   faUserSecret,
 } from '@fortawesome/free-solid-svg-icons';
-import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
-import DashboardApi from '@/pages/dashboard/DashboardApiKeys';
-import DashboardSsh from '@/pages/dashboard/DashboardSshKeys';
-import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import { useAuth } from '@/providers/AuthProvider';
-import DashboardSessions from '@/pages/dashboard/DashboardSessions';
+import routes from './routes';
+import ErrorBoundary from '@/elements/ErrorBoundary';
 
 export default () => {
   const { user } = useAuth();
@@ -73,15 +70,15 @@ export default () => {
         <Sidebar.User />
       </Sidebar>
       <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
-        <Routes>
-          <Route path={''} element={<DashboardHome />} />
-          <Route path={'/account'} element={<DashboardAccount />} />
-          <Route path={'/account/api'} element={<DashboardApi />} />
-          <Route path={'/account/ssh'} element={<DashboardSsh />} />
-          <Route path={'/account/activity'} element={<DashboardActivity />} />
-          <Route path={'/account/sessions'} element={<DashboardSessions />} />
-          <Route path={'*'} element={<NotFound />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path={''} element={<DashboardHome />} />
+            {routes.server.map(({ path, element: Element }) => (
+              <Route key={path} path={path} element={<Element />} />
+            ))}
+            <Route path={'*'} element={<NotFound />} />
+          </Routes>
+        </ErrorBoundary>
       </div>
     </div>
   );

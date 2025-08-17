@@ -1,3 +1,8 @@
+import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
+import DashboardActivity from '@/pages/dashboard/DashboardActivity';
+import DashboardApiKeys from '@/pages/dashboard/DashboardApiKeys';
+import DashboardSessions from '@/pages/dashboard/DashboardSessions';
+import DashboardSshKeys from '@/pages/dashboard/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
 import ServerBackups from '@/pages/server/backups/ServerBackups';
 import ServerConsole from '@/pages/server/console/ServerConsole';
@@ -13,21 +18,25 @@ import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 import {
   faBoxArchive,
   faBriefcase,
+  faCloud,
   faCog,
   faDatabase,
   faFolderOpen,
+  faKey,
   faNetworkWired,
   faPlay,
   faStopwatch,
   faTerminal,
+  faUser,
   faUsers,
+  faUserSecret,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 
 interface RouteDefinition {
   name: string | undefined;
-  icon: IconDefinition | undefined;
+  icon?: IconDefinition;
   path: string;
   element: React.FC;
   exact?: boolean;
@@ -38,10 +47,48 @@ interface ServerRouteDefinition extends RouteDefinition {
 }
 
 interface Routes {
+  account: RouteDefinition[];
   server: ServerRouteDefinition[];
 }
 
-export default {
+const routes: Routes = {
+  account: [
+    {
+      name: 'Account',
+      icon: faUser,
+      path: '/',
+      element: DashboardAccount,
+      exact: true,
+    },
+    {
+      name: 'API Credentials',
+      icon: faCloud,
+      path: '/api',
+      element: DashboardApiKeys,
+      exact: true,
+    },
+    {
+      name: 'SSH Keys',
+      icon: faKey,
+      path: '/ssh',
+      element: DashboardSshKeys,
+      exact: true,
+    },
+    {
+      name: 'Activity',
+      icon: faBriefcase,
+      path: '/activity',
+      element: DashboardActivity,
+      exact: true,
+    },
+    {
+      name: 'Sessions',
+      icon: faUserSecret,
+      path: '/sessions',
+      element: DashboardSessions,
+      exact: true,
+    },
+  ],
   server: [
     {
       name: 'Console',
@@ -127,4 +174,6 @@ export default {
       permission: 'activity.*',
     },
   ],
-} as Routes;
+};
+
+export default routes;
