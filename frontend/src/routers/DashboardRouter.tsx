@@ -53,7 +53,7 @@ export default () => {
           <Routes>
             <Route path={''} element={<DashboardHome />} />
             {routes.account.map(({ path, element: Element }) => (
-              <Route key={path} path={path} element={<Element />} />
+              <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
             ))}
             <Route path={'*'} element={<NotFound />} />
           </Routes>
