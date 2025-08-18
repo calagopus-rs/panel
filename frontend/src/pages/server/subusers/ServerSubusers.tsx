@@ -1,6 +1,5 @@
 import getSubusers from '@/api/server/subusers/getSubusers';
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
@@ -57,7 +56,7 @@ export default () => {
   };
 
   return (
-    <Container>
+    <>
       <SubuserCreateOrUpdateDialog
         onCreate={doCreate}
         open={openDialog === 'create'}
@@ -97,6 +96,6 @@ export default () => {
           </Pagination>
         </ContentWrapper>
       </Table>
-    </Container>
+    </>
   );
 };

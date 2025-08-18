@@ -1,5 +1,4 @@
 import getVariables from '@/api/server/startup/getVariables';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { NoItems } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
@@ -63,7 +62,7 @@ export default () => {
   }, [dockerImage]);
 
   return (
-    <Container>
+    <>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Startup</h1>
       </div>
@@ -103,6 +102,6 @@ export default () => {
         ))}
         {loading ? <Spinner.Centered /> : variables.length === 0 ? <NoItems /> : null}
       </div>
-    </Container>
+    </>
   );
 };

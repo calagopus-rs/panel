@@ -1,5 +1,4 @@
 import { httpErrorToHuman } from '@/api/axios';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
@@ -10,6 +9,9 @@ import getDatabaseHosts from '@/api/admin/databaseHosts/getDatabaseHosts';
 import DatabaseHostRow from './DatabaseHostRow';
 import { Group, TextInput, Title } from '@mantine/core';
 import TableNew from '@/elements/table/TableNew';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import NewButton from '@/elements/button/NewButton';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();
@@ -42,17 +44,23 @@ const DatabaseHostsContainer = () => {
   }, [page, search]);
 
   return (
-    <Container>
+    <>
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
           Database Hosts
         </Title>
-        <TextInput
-          placeholder={'Search activities...'}
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-          w={250}
-        />
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => navigate('/admin/database-hosts/new')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
       </Group>
 
       {loading ? (
@@ -68,18 +76,16 @@ const DatabaseHostsContainer = () => {
           ))}
         </TableNew>
       )}
-    </Container>
+    </>
   );
 };
 
 export default () => {
   return (
-    <Container>
-      <Routes>
-        <Route path={'/'} element={<DatabaseHostsContainer />} />
-        <Route path={'/new'} element={<DatabaseHostCreateOrUpdate />} />
-        <Route path={'/:id'} element={<DatabaseHostCreateOrUpdate />} />
-      </Routes>
-    </Container>
+    <Routes>
+      <Route path={'/'} element={<DatabaseHostsContainer />} />
+      <Route path={'/new'} element={<DatabaseHostCreateOrUpdate />} />
+      <Route path={'/:id'} element={<DatabaseHostCreateOrUpdate />} />
+    </Routes>
   );
 };

@@ -1,6 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
@@ -81,12 +80,10 @@ const UsersContainer = () => {
 
 export default () => {
   return (
-    <Container>
-      <Routes>
-        <Route path={'/'} element={<UsersContainer />} />
-        <Route path={'/new'} element={<UserCreateOrUpdate />} />
-        <Route path={'/:id'} element={<UserCreateOrUpdate />} />
-      </Routes>
-    </Container>
+    <Routes>
+      <Route path={'/'} element={<UsersContainer />} />
+      <Route path={'/new'} element={<UserCreateOrUpdate />} />
+      <Route path={'/:id'} element={<UserCreateOrUpdate />} />
+    </Routes>
   );
 };

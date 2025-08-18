@@ -1,5 +1,4 @@
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useEffect, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
@@ -104,7 +103,7 @@ export default () => {
   };
 
   return (
-    <Container>
+    <>
       <DirectoryNameDialog
         onDirectoryName={(name: string) => makeDirectory(name)}
         open={openDialog === 'nameDirectory'}
@@ -168,6 +167,6 @@ export default () => {
           </Pagination>
         </ContentWrapper>
       </Table>
-    </Container>
+    </>
   );
 };

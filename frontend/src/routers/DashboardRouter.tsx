@@ -10,6 +10,7 @@ import { faGraduationCap, faMagnifyingGlass, faServer } from '@fortawesome/free-
 import { useAuth } from '@/providers/AuthProvider';
 import routes, { to } from './routes';
 import ErrorBoundary from '@/elements/ErrorBoundary';
+import Container from '@/elements/Container';
 
 export default () => {
   const { user } = useAuth();
@@ -49,15 +50,17 @@ export default () => {
         <Sidebar.User />
       </Sidebar>
       <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
-        <ErrorBoundary>
-          <Routes>
-            <Route path={''} element={<DashboardHome />} />
-            {routes.account.map(({ path, element: Element }) => (
-              <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
-            ))}
-            <Route path={'*'} element={<NotFound />} />
-          </Routes>
-        </ErrorBoundary>
+        <Container>
+          <ErrorBoundary>
+            <Routes>
+              <Route path={''} element={<DashboardHome />} />
+              {routes.account.map(({ path, element: Element }) => (
+                <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
+              ))}
+              <Route path={'*'} element={<NotFound />} />
+            </Routes>
+          </ErrorBoundary>
+        </Container>
       </div>
     </div>
   );

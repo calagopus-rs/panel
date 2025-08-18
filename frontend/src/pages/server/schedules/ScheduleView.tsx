@@ -1,4 +1,3 @@
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
@@ -62,7 +61,7 @@ export default () => {
       <Spinner.Centered />
     </div>
   ) : (
-    <Container>
+    <>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>{schedule.name}</h1>
         <div className={'flex gap-2'}>
@@ -154,6 +153,6 @@ export default () => {
           {schedule.tasks.length === 0 ? <NoItems /> : null}
         </div>
       </Table>
-    </Container>
+    </>
   );
 };

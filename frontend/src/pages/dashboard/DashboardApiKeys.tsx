@@ -1,6 +1,5 @@
 import getApiKeys from '@/api/me/api-keys/getApiKeys';
 import Code from '@/elements/Code';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, {
   ContentWrapper,
@@ -44,7 +43,7 @@ export default () => {
   }, [page, search]);
 
   return (
-    <Container>
+    <>
       <div className={'justify-between flex items-center mb-2'}>
         <h1 className={'text-4xl font-bold text-white'}>API Keys</h1>
         <ApiKeyCreateButton />
@@ -105,6 +104,6 @@ export default () => {
           </ContentWrapper>
         </Table>
       )}
-    </Container>
+    </>
   );
 };

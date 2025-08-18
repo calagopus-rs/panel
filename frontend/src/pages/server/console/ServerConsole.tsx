@@ -1,4 +1,3 @@
-import Container from '@/elements/Container';
 import Console from './Console';
 import Spinner from '@/elements/Spinner';
 import ServerDetails from './ServerDetails';
@@ -11,7 +10,7 @@ export default () => {
   const server = useServerStore((state) => state.server);
 
   return (
-    <Container>
+    <>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>{server.name}</h1>
         <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
@@ -32,6 +31,6 @@ export default () => {
       <div className={'h-48'}>
         <ServerStats />
       </div>
-    </Container>
+    </>
   );
 };

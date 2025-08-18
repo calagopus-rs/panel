@@ -1,11 +1,11 @@
 import getAdminActivity from '@/api/admin/getAdminActivity';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Group, TextInput, Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import TableNew from '@/elements/table/TableNew';
 import ActivityRow from './ActivityRow';
+import TextInput from '@/elements/inputnew/TextInput';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -32,13 +32,13 @@ export default () => {
   }, [page, search]);
 
   return (
-    <Container>
+    <>
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
           Activity
         </Title>
         <TextInput
-          placeholder={'Search activities...'}
+          placeholder={'Search...'}
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
           w={250}
@@ -54,6 +54,6 @@ export default () => {
           ))}
         </TableNew>
       )}
-    </Container>
+    </>
   );
 };

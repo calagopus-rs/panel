@@ -1,5 +1,4 @@
 import getSchedules from '@/api/server/schedules/getSchedules';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
@@ -21,7 +20,7 @@ export default () => {
   }, []);
 
   return (
-    <Container>
+    <>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Schedules</h1>
         <div className={'flex gap-2'}>
@@ -51,6 +50,6 @@ export default () => {
           </div>
         </ContentWrapper>
       </Table>
-    </Container>
+    </>
   );
 };

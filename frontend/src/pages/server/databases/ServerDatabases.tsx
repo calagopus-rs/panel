@@ -1,5 +1,4 @@
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
@@ -52,7 +51,7 @@ export default () => {
   };
 
   return (
-    <Container>
+    <>
       <DatabaseCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
 
       <div className={'mb-4 flex justify-between'}>
@@ -87,6 +86,6 @@ export default () => {
           </Pagination>
         </ContentWrapper>
       </Table>
-    </Container>
+    </>
   );
 };

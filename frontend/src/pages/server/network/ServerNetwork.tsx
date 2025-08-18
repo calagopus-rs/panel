@@ -2,7 +2,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import createAllocation from '@/api/server/allocations/createAllocation';
 import getAllocations from '@/api/server/allocations/getAllocations';
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
@@ -49,7 +48,7 @@ export default () => {
   };
 
   return (
-    <Container>
+    <>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>Network</h1>
         <div className={'flex gap-2'}>
@@ -83,6 +82,6 @@ export default () => {
           </Pagination>
         </ContentWrapper>
       </Table>
-    </Container>
+    </>
   );
 };

@@ -1,4 +1,3 @@
-import Container from '@/elements/Container';
 import { useEffect, useState } from 'react';
 import { useAdminStore } from '@/stores/admin';
 import getSettings from '@/api/admin/settings/getSettings';
@@ -29,7 +28,7 @@ export default () => {
   }, []);
 
   return (
-    <Container>
+    <>
       <div className={'mb-4'}>
         <h1 className={'text-4xl font-bold text-white'}>Settings</h1>
       </div>
@@ -51,6 +50,6 @@ export default () => {
           <Route path={'/server'} element={<ServerContainer />} />
         </Routes>
       )}
-    </Container>
+    </>
   );
 };

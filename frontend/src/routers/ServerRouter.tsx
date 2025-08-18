@@ -15,6 +15,7 @@ import WebsocketListener from '@/pages/server/WebsocketListener';
 import getServer from '@/api/server/getServer';
 import routes, { to } from './routes';
 import Can from '@/elements/Can';
+import Container from '@/elements/Container';
 
 export default () => {
   const params = useParams<'id'>();
@@ -83,14 +84,16 @@ export default () => {
             <WebsocketHandler />
             <WebsocketListener />
 
-            <ErrorBoundary>
-              <Routes>
-                {routes.server.map(({ path, element: Element }) => (
-                  <Route key={path} path={path} element={<Element />} />
-                ))}
-                <Route path={'*'} element={<NotFound />} />
-              </Routes>
-            </ErrorBoundary>
+            <Container>
+              <ErrorBoundary>
+                <Routes>
+                  {routes.server.map(({ path, element: Element }) => (
+                    <Route key={path} path={path} element={<Element />} />
+                  ))}
+                  <Route path={'*'} element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </Container>
           </>
         )}
       </div>

@@ -1,6 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { Button } from '@/elements/button';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
@@ -84,12 +83,10 @@ const NestsContainer = () => {
 
 export default () => {
   return (
-    <Container>
-      <Routes>
-        <Route path={'/'} element={<NestsContainer />} />
-        <Route path={'/new'} element={<NestCreate />} />
-        <Route path={'/:id/*'} element={<NestUpdate />} />
-      </Routes>
-    </Container>
+    <Routes>
+      <Route path={'/'} element={<NestsContainer />} />
+      <Route path={'/new'} element={<NestCreate />} />
+      <Route path={'/:id/*'} element={<NestUpdate />} />
+    </Routes>
   );
 };

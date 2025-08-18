@@ -1,7 +1,6 @@
 import getUserActivity from '@/api/me/getUserActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
-import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
 import Table, {
   ContentWrapper,
@@ -42,7 +41,7 @@ export default () => {
   }, [page, search]);
 
   return (
-    <Container>
+    <>
       <div className={'justify-between flex items-center mb-2'}>
         <h1 className={'text-4xl font-bold text-white'}>Activity</h1>
       </div>
@@ -97,6 +96,6 @@ export default () => {
           </ContentWrapper>
         </Table>
       )}
-    </Container>
+    </>
   );
 };

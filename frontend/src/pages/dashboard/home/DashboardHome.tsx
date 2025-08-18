@@ -1,4 +1,3 @@
-import Container from '@/elements/Container';
 import { faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -22,7 +21,7 @@ export default () => {
   }, []);
 
   return (
-    <Container>
+    <>
       <div className={'justify-between flex items-center mb-2'}>
         <h1 className={'text-4xl font-bold text-white'}>Servers</h1>
         <div className={'flex gap-2'}>
@@ -55,6 +54,6 @@ export default () => {
           ))}
         </div>
       )}
-    </Container>
+    </>
   );
 };
