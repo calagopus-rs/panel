@@ -1,17 +1,18 @@
 import { httpErrorToHuman } from '@/api/axios';
-import AdminSettingContainer from '@/elements/AdminSettingContainer';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { Dialog } from '@/elements/dialog';
 import Code from '@/elements/Code';
-import classNames from 'classnames';
 import getUser from '@/api/admin/users/getUser';
 import updateUser from '@/api/admin/users/updateUser';
 import createUser from '@/api/admin/users/createUser';
 import deleteUser from '@/api/admin/users/deleteUser';
+import { Divider, Group, Title } from '@mantine/core';
+import NewButton from '@/elements/button/NewButton';
+import { load } from '@/lib/debounce';
+import TextInput from '@/elements/inputnew/TextInput';
+import Switch from '@/elements/inputnew/Switch';
 
 export default () => {
   const params = useParams<'id'>();
@@ -19,6 +20,7 @@ export default () => {
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User>({
     username: '',
     email: '',
@@ -41,6 +43,7 @@ export default () => {
   }, [params.id]);
 
   const doCreateOrUpdate = () => {
+    load(true, setLoading);
     if (user?.uuid) {
       updateUser(user.uuid, user)
         .then(() => {
@@ -48,6 +51,9 @@ export default () => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     } else {
       createUser(user)
@@ -57,11 +63,15 @@ export default () => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     }
   };
 
   const doDelete = () => {
+    load(true, setLoading);
     deleteUser(user.uuid)
       .then(() => {
         addToast('User deleted.', 'success');
@@ -69,14 +79,16 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
     <>
       <Dialog.Confirm
-        open={openDialog === 'delete'}
-        hideCloseIcon
+        opened={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
         title={'Confirm User Deletion'}
         confirm={'Delete'}
@@ -85,74 +97,70 @@ export default () => {
         Are you sure you want to delete <Code>{user?.username}</Code>?
       </Dialog.Confirm>
 
-      <div className={'mb-4'}>
-        <h1 className={'text-4xl font-bold text-white'}>{params.id ? 'Update' : 'Create'} User</h1>
-      </div>
-      <AdminSettingContainer title={'User Settings'}>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'username'}>Username</Input.Label>
-          <Input.Text
-            id={'username'}
-            placeholder={'Username'}
-            value={user.username || ''}
-            onChange={(e) => setUser({ ...user, username: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'email'}>Email</Input.Label>
-          <Input.Text
-            id={'email'}
-            placeholder={'Email'}
-            type={'email'}
-            value={user.email || ''}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'nameFirst'}>First Name</Input.Label>
-          <Input.Text
-            id={'nameFirst'}
-            placeholder={'First Name'}
-            value={user.nameFirst || ''}
-            onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'nameLast'}>Last Name</Input.Label>
-          <Input.Text
-            id={'nameLast'}
-            placeholder={'Last Name'}
-            value={user.nameLast || ''}
-            onChange={(e) => setUser({ ...user, nameLast: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'password'}>Password</Input.Label>
-          <Input.Text
-            id={'password'}
-            placeholder={'Password'}
-            value={user.password || ''}
-            onChange={(e) => setUser({ ...user, password: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Switch
-            name={'admin'}
-            label={'Admin'}
-            checked={user.admin || false}
-            onChange={(e) => setUser({ ...user, admin: e.target.checked })}
-          />
-        </div>
+      <Title order={1}>{params.id ? 'Update' : 'Create'} User</Title>
+      <Divider my={'sm'} />
 
-        <div className={classNames('mt-4 flex', params.id ? 'justify-between' : 'justify-end')}>
-          {params.id && (
-            <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
-              Delete
-            </Button>
-          )}
-          <Button onClick={doCreateOrUpdate}>Save</Button>
-        </div>
-      </AdminSettingContainer>
+      <Group grow>
+        <TextInput
+          label={'Username'}
+          placeholder={'Username'}
+          value={user.username || ''}
+          onChange={(e) => setUser({ ...user, username: e.target.value })}
+          mt={'sm'}
+        />
+        <TextInput
+          label={'Email'}
+          placeholder={'Email'}
+          type={'email'}
+          value={user.email || ''}
+          onChange={(e) => setUser({ ...user, email: e.target.value })}
+          mt={'sm'}
+        />
+      </Group>
+
+      <Group grow>
+        <TextInput
+          label={'First Name'}
+          placeholder={'First Name'}
+          value={user.nameFirst || ''}
+          onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
+          mt={'sm'}
+        />
+        <TextInput
+          label={'Last Name'}
+          placeholder={'Last Name'}
+          value={user.nameLast || ''}
+          onChange={(e) => setUser({ ...user, nameLast: e.target.value })}
+          mt={'sm'}
+        />
+      </Group>
+
+      <TextInput
+        label={'Password'}
+        placeholder={'Password'}
+        type={'password'}
+        value={user.password || ''}
+        onChange={(e) => setUser({ ...user, password: e.target.value })}
+        mt={'sm'}
+      />
+
+      <Switch
+        label={'Admin'}
+        checked={user.admin}
+        onChange={(e) => setUser({ ...user, admin: e.target.checked })}
+        mt={'sm'}
+      />
+
+      <Group mt={'md'}>
+        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+          Save
+        </NewButton>
+        {params.id && (
+          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+            Delete
+          </NewButton>
+        )}
+      </Group>
     </>
   );
 };

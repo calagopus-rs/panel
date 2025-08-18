@@ -1,5 +1,5 @@
 import Code from '@/elements/Code';
-import { TableRow } from '@/elements/table/Table';
+import { TableData, TableRow } from '@/elements/table/TableNew';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { faCrown, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
@@ -9,15 +9,15 @@ import { NavLink } from 'react-router';
 export default ({ user }: { user: User }) => {
   return (
     <TableRow>
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <NavLink to={`/admin/users/${user.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
           <Code>{user.uuid}</Code>
         </NavLink>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <span className={'flex gap-2 items-center'}>
-          {user.username}{' '}
+          {user.username}&nbsp;
           {user.admin && (
             <Tooltip content={'Admin'}>
               <FontAwesomeIcon icon={faCrown} className={'text-yellow-400'} />
@@ -33,11 +33,11 @@ export default ({ user }: { user: User }) => {
             </Tooltip>
           )}
         </span>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <Tooltip content={formatDateTime(user.created)}>{formatTimestamp(user.created)}</Tooltip>
-      </td>
+      </TableData>
     </TableRow>
   );
 };

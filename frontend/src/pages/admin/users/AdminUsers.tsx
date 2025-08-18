@@ -1,15 +1,18 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import UserRow from './UserRow';
 import UserCreateOrUpdate from './UserCreateOrUpdate';
 import getUsers from '@/api/admin/users/getUsers';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
 
 const UsersContainer = () => {
   const navigate = useNavigate();
@@ -43,37 +46,33 @@ const UsersContainer = () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Users</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => navigate('/admin/users/new')}>New User</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={users} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Username'} />
-                  <TableHeader name={'Created'} />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Users
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => navigate('/admin/users/new')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {users.data.map((user) => (
-                      <UserRow key={user.uuid} user={user} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : users.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <TableNew columns={['ID', 'Username', 'Created']} pagination={users} onPageSelect={setPage}>
+          {users.data.map((user) => (
+            <UserRow key={user.uuid} user={user} />
+          ))}
+        </TableNew>
+      )}
     </>
   );
 };
