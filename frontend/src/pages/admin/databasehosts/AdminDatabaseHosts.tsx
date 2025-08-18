@@ -1,16 +1,15 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
 import getDatabaseHosts from '@/api/admin/databaseHosts/getDatabaseHosts';
 import DatabaseHostRow from './DatabaseHostRow';
+import { Group, TextInput, Title } from '@mantine/core';
+import TableNew from '@/elements/table/TableNew';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();
@@ -43,42 +42,33 @@ const DatabaseHostsContainer = () => {
   }, [page, search]);
 
   return (
-    <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Database Hosts</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => navigate('/admin/database-hosts/new')}>New Database Host</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={databaseHosts} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Type'} />
-                  <TableHeader name={'Address'} />
-                  <TableHeader name={'Databases'} />
-                  <TableHeader name={'Locations'} />
-                </TableHead>
+    <Container>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Database Hosts
+        </Title>
+        <TextInput
+          placeholder={'Search activities...'}
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          w={250}
+        />
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {databaseHosts.data.map((dh) => (
-                      <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : databaseHosts.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
-    </>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <TableNew
+          columns={['ID', 'Name', 'Type', 'Address', 'Databases', 'Locations']}
+          pagination={databaseHosts}
+          onPageSelect={setPage}
+        >
+          {databaseHosts.data.map((dh) => (
+            <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
+          ))}
+        </TableNew>
+      )}
+    </Container>
   );
 };
 

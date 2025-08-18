@@ -84,7 +84,7 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
 export const NoItems = () => {
   return (
     <Center py={'lg'}>
-      <Text c={'dimmed'}>No activity found</Text>
+      <Text c={'dimmed'}>No items could be found, it&apos;s almost like they are hiding.</Text>
     </Center>
   );
 };
@@ -98,13 +98,23 @@ interface TableProps {
 
 export default ({ columns, pagination, onPageSelect, children }: TableProps) => {
   return (
-    <Table striped highlightOnHover withTableBorder>
+    <Table striped highlightOnHover={pagination.total > 0} withTableBorder>
       <TableHead>
         {columns.map((column) => (
           <TableHeader name={column} key={column} />
         ))}
       </TableHead>
-      <Table.Tbody>{pagination.total === 0 ? <NoItems /> : children}</Table.Tbody>
+      <Table.Tbody>
+        {pagination.total === 0 ? (
+          <Table.Tr>
+            <Table.Td colSpan={columns.length}>
+              <NoItems />
+            </Table.Td>
+          </Table.Tr>
+        ) : (
+          children
+        )}
+      </Table.Tbody>
       <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
     </Table>
   );
