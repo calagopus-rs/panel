@@ -1,14 +1,11 @@
 import getAdminActivity from '@/api/admin/getAdminActivity';
-import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
-import Code from '@/elements/Code';
 import Container from '@/elements/Container';
 import Spinner from '@/elements/Spinner';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Group, TextInput, Title } from '@mantine/core';
-import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
+import TableNew from '@/elements/table/TableNew';
+import ActivityRow from './ActivityRow';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -53,27 +50,7 @@ export default () => {
       ) : (
         <TableNew columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
           {activities.data.map((activity) => (
-            <TableRow key={activity.created.toString()}>
-              <TableData>
-                {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
-              </TableData>
-
-              <TableData>
-                <Code>{activity.event}</Code>
-              </TableData>
-
-              <TableData>{activity.ip && <Code>{activity.ip}</Code>}</TableData>
-
-              <TableData>
-                <Tooltip content={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
-              </TableData>
-
-              <TableData>
-                <Group gap={4} justify={'right'} wrap={'nowrap'}>
-                  {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
-                </Group>
-              </TableData>
-            </TableRow>
+            <ActivityRow key={activity.created.toString()} activity={activity} />
           ))}
         </TableNew>
       )}
