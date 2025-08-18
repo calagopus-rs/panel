@@ -1,28 +1,26 @@
 import Code from '@/elements/Code';
-import { TableRow } from '@/elements/table/Table';
+import { TableData, TableRow } from '@/elements/table/TableNew';
 import { NavLink } from 'react-router';
 
 export default ({ location }: { location: Location }) => {
   return (
     <TableRow>
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <NavLink
           to={`/admin/locations/${location.uuid}`}
           className={'text-blue-400 hover:text-blue-200 hover:underline'}
         >
           <Code>{location.uuid}</Code>
         </NavLink>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.shortName}</td>
+      <TableData>{location.shortName}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={location.name}>
-        {location.name}
-      </td>
+      <TableData>{location.name}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.backupDisk}</td>
+      <TableData>{location.backupDisk}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{location.nodes}</td>
+      <TableData>{location.nodes}</TableData>
     </TableRow>
   );
 };

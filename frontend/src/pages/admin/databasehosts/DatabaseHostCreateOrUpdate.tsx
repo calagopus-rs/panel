@@ -106,7 +106,7 @@ export default () => {
       <TextInput
         label={'Name'}
         placeholder={'Name'}
-        value={databaseHost.name}
+        value={databaseHost.name || ''}
         onChange={(e) => setDatabaseHost({ ...databaseHost, name: e.target.value })}
         mt={'sm'}
       />
@@ -114,7 +114,7 @@ export default () => {
       <TextInput
         label={'Username'}
         placeholder={'Username'}
-        value={databaseHost.username}
+        value={databaseHost.username || ''}
         onChange={(e) => setDatabaseHost({ ...databaseHost, username: e.target.value })}
         mt={'sm'}
       />
@@ -131,7 +131,7 @@ export default () => {
       <TextInput
         label={'Host'}
         placeholder={'Host'}
-        value={databaseHost.host}
+        value={databaseHost.host || ''}
         onChange={(e) => setDatabaseHost({ ...databaseHost, host: e.target.value })}
         mt={'sm'}
       />
@@ -140,15 +140,15 @@ export default () => {
         label={'Port'}
         placeholder={'Port'}
         min={0}
-        value={databaseHost.port}
+        value={databaseHost.port || 3306}
         onChange={(value) => setDatabaseHost({ ...databaseHost, port: Number(value) || 0 })}
         mt={'sm'}
       />
 
       <Switch
         label={'Public'}
-        checked={databaseHost.public}
-        onChange={(event) => setDatabaseHost({ ...databaseHost, public: event.currentTarget.checked })}
+        checked={databaseHost.public || false}
+        onChange={(e) => setDatabaseHost({ ...databaseHost, public: e.currentTarget.checked })}
         mt={'sm'}
       />
 
@@ -175,7 +175,7 @@ export default () => {
           { value: 'mysql', label: 'MySQL' },
           { value: 'postgres', label: 'PostgreSQL' },
         ]}
-        value={databaseHost.type}
+        value={databaseHost.type || 'mysql'}
         onChange={(value) => setDatabaseHost({ ...databaseHost, type: value as DatabaseType })}
         mt={'sm'}
       />

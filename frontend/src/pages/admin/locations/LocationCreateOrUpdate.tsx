@@ -1,9 +1,6 @@
 import createLocation from '@/api/admin/locations/createLocation';
 import updateLocation from '@/api/admin/locations/updateLocation';
 import { httpErrorToHuman } from '@/api/axios';
-import AdminSettingContainer from '@/elements/AdminSettingContainer';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -12,8 +9,11 @@ import getLocation from '@/api/admin/locations/getLocation';
 import { Dialog } from '@/elements/dialog';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
-import classNames from 'classnames';
 import BackupRestic from './forms/BackupRestic';
+import { Divider, Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import Select from '@/elements/inputnew/Select';
+import NewButton from '@/elements/button/NewButton';
 
 export default () => {
   const params = useParams<'id'>();
@@ -74,8 +74,7 @@ export default () => {
   return (
     <>
       <Dialog.Confirm
-        open={openDialog === 'delete'}
-        hideCloseIcon
+        opened={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
         title={'Confirm Location Deletion'}
         confirm={'Delete'}
@@ -84,100 +83,90 @@ export default () => {
         Are you sure you want to delete <Code>{location?.name}</Code>?
       </Dialog.Confirm>
 
-      <div className={'mb-4'}>
-        <h1 className={'text-4xl font-bold text-white'}>{params.id ? 'Update' : 'Create'} Location</h1>
-      </div>
-      <AdminSettingContainer title={'Location Settings'}>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'shortName'}>Short Name</Input.Label>
-          <Input.Text
-            id={'shortName'}
-            placeholder={'Short Name'}
-            value={location.shortName || ''}
-            onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'name'}>Name</Input.Label>
-          <Input.Text
-            id={'name'}
-            placeholder={'Name'}
-            value={location.name || ''}
-            onChange={(e) => setLocation({ ...location, name: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'description'}>Description</Input.Label>
-          <Input.Text
-            id={'description'}
-            placeholder={'Description'}
-            value={location.description || ''}
-            onChange={(e) => setLocation({ ...location, description: e.target.value })}
-          />
-        </div>
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'type'}>Backup Disk</Input.Label>
-          <Input.Dropdown
-            id={'type'}
-            options={[
-              { label: 'Local', value: 'local' },
-              { label: 'S3', value: 's3' },
-              { label: 'DdupBak', value: 'ddup-bak' },
-              { label: 'Btrfs', value: 'btrfs' },
-              { label: 'Zfs', value: 'zfs' },
-              { label: 'Restic', value: 'restic' },
-            ]}
-            selected={location.backupDisk || 'local'}
-            onChange={(e) => setLocation({ ...location, backupDisk: e.target.value as LocationConfigBackupDisk })}
-          />
-        </div>
+      <Title order={1}>{params.id ? 'Update' : 'Create'} Location</Title>
+      <Divider my={'sm'} />
 
-        <div className={classNames('mt-4 flex', params.id ? 'justify-between' : 'justify-end')}>
-          {params.id && (
-            <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
-              Delete
-            </Button>
-          )}
-          <Button onClick={doCreateOrUpdate}>Save</Button>
-        </div>
-      </AdminSettingContainer>
+      <TextInput
+        label={'Short Name'}
+        placeholder={'Short Name'}
+        value={location.shortName || ''}
+        onChange={(e) => setLocation({ ...location, name: e.target.value })}
+        mt={'sm'}
+      />
+
+      <TextInput
+        label={'Name'}
+        placeholder={'Name'}
+        value={location.name || ''}
+        onChange={(e) => setLocation({ ...location, name: e.target.value })}
+        mt={'sm'}
+      />
+
+      <TextInput
+        label={'Description'}
+        placeholder={'Description'}
+        value={location.description || ''}
+        onChange={(e) => setLocation({ ...location, description: e.target.value })}
+        mt={'sm'}
+      />
+
+      <Select
+        label={'Backup Disk'}
+        placeholder={'Backup Disk'}
+        value={location.backupDisk || 'local'}
+        onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
+        data={[
+          { label: 'Local', value: 'local' },
+          { label: 'S3', value: 's3' },
+          { label: 'DdupBak', value: 'ddup-bak' },
+          { label: 'Btrfs', value: 'btrfs' },
+          { label: 'Zfs', value: 'zfs' },
+          { label: 'Restic', value: 'restic' },
+        ]}
+        mt={'sm'}
+      />
+
+      <Group mt={'md'}>
+        <NewButton onClick={doCreateOrUpdate}>Save</NewButton>
+        {params.id && (
+          <NewButton color={'red'} onClick={() => setOpenDialog('delete')}>
+            Delete
+          </NewButton>
+        )}
+      </Group>
 
       {location.backupDisk === 's3' || location.backupConfigs?.s3 ? (
-        <AdminSettingContainer title={'Location S3 Settings'} className={'mt-4'}>
-          <BackupS3
-            backupConfig={
-              location.backupConfigs?.s3 ?? {
-                accessKey: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-                endpoint: '',
-                pathStyle: false,
-                partSize: 512 * 1024 * 1024,
-              }
+        <BackupS3
+          backupConfig={
+            location.backupConfigs?.s3 ?? {
+              accessKey: '',
+              secretKey: '',
+              bucket: '',
+              region: '',
+              endpoint: '',
+              pathStyle: false,
+              partSize: 512 * 1024 * 1024,
             }
-            setBackupConfigs={(config) =>
-              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
-            }
-          />
-        </AdminSettingContainer>
+          }
+          setBackupConfigs={(config) =>
+            setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
+          }
+        />
       ) : null}
 
       {location.backupDisk === 'restic' || location.backupConfigs?.restic ? (
-        <AdminSettingContainer title={'Location Restic Settings'} className={'mt-4'}>
-          <BackupRestic
-            backupConfig={
-              location.backupConfigs?.restic ?? {
-                repository: '',
-                retryLockSeconds: 60,
-                environment: {},
-              }
+        <BackupRestic
+          backupConfig={
+            location.backupConfigs?.restic ?? {
+              repository: '',
+              retryLockSeconds: 60,
+              environment: {},
             }
-            setBackupConfigs={(config) =>
-              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, restic: config } })
-            }
-          />
-        </AdminSettingContainer>
+          }
+          setBackupConfigs={(config) =>
+            setLocation({ ...location, backupConfigs: { ...location.backupConfigs, restic: config } })
+          }
+        />
       ) : null}
     </>
   );

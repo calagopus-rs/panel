@@ -62,22 +62,20 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
   const isLastPage = data.page >= totalPages;
 
   return (
-    <Table.Tfoot>
-      <Table.Tr>
-        <Table.Td colSpan={columns.length}>
-          <Group justify={'space-between'}>
-            <p className={'text-sm leading-5 text-gray-400'}>
-              Showing&nbsp;
-              <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
-              &nbsp;to&nbsp;
-              <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
-              &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
-            </p>
-            {isFirstPage && isLastPage ? null : <MantinePagination total={totalPages} withEdges onChange={setPage} />}
-          </Group>
-        </Table.Td>
-      </Table.Tr>
-    </Table.Tfoot>
+    <Table.Tr>
+      <Table.Td colSpan={columns.length}>
+        <Group justify={'space-between'}>
+          <p className={'text-sm leading-5 text-gray-400'}>
+            Showing&nbsp;
+            <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
+            &nbsp;to&nbsp;
+            <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
+            &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
+          </p>
+          {isFirstPage && isLastPage ? null : <MantinePagination total={totalPages} withEdges onChange={setPage} />}
+        </Group>
+      </Table.Td>
+    </Table.Tr>
   );
 }
 
@@ -115,7 +113,9 @@ export default ({ columns, pagination, onPageSelect, children }: TableProps) => 
           children
         )}
       </Table.Tbody>
-      <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
+      <Table.Tfoot>
+        <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
+      </Table.Tfoot>
     </Table>
   );
 };

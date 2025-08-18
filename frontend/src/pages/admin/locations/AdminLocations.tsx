@@ -1,15 +1,18 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import getLocations from '@/api/admin/locations/getLocations';
 import LocationRow from './LocationRow';
 import LocationCreateOrUpdate from './LocationCreateOrUpdate';
+import { Group, Title } from '@mantine/core';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
+import TextInput from '@/elements/inputnew/TextInput';
 
 const LocationsContainer = () => {
   const navigate = useNavigate();
@@ -43,39 +46,37 @@ const LocationsContainer = () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Locations</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => navigate('/admin/locations/new')}>New Location</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={locations} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Short Name'} />
-                  <TableHeader name={'Long Name'} />
-                  <TableHeader name={'Backup Disk'} />
-                  <TableHeader name={'Nodes'} />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Locations
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => navigate('/admin/locations/new')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {locations.data.map((location) => (
-                      <LocationRow key={location.uuid} location={location} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : locations.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <TableNew
+          columns={['Id', 'Short Name', 'Long Name', 'Backup Disk', 'Nodes']}
+          pagination={locations}
+          onPageSelect={setPage}
+        >
+          {locations.data.map((location) => (
+            <LocationRow key={location.uuid} location={location} />
+          ))}
+        </TableNew>
+      )}
     </>
   );
 };
