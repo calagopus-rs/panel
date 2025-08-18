@@ -1,16 +1,20 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect, useRef } from 'react';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
+import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import EggRow from './EggRow';
 import getEggs from '@/api/admin/eggs/getEggs';
 import EggCreateOrUpdate from './EggCreateOrUpdate';
 import importEgg from '@/api/admin/eggs/importEgg';
+import getNest from '@/api/admin/nests/getNest';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
@@ -67,11 +71,25 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Eggs</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => fileInputRef.current?.click()}>Upload</Button>
-          <Button onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)}>New Egg</Button>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Eggs
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => fileInputRef.current?.click()} color={'blue'}>
+            <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+            Upload
+          </NewButton>
+          <NewButton onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
 
           <input
             type={'file'}
@@ -80,41 +98,42 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
             className={'hidden'}
             onChange={handleFileUpload}
           />
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={eggs} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Author'} />
-                  <TableHeader name={'Description'} />
-                  <TableHeader name={'Servers'} />
-                </TableHead>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {eggs.data.map((egg) => (
-                      <EggRow key={egg.uuid} nest={nest} egg={egg} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : eggs.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <TableNew columns={['ID', 'Name', 'Author', 'Description', 'Servers']} pagination={eggs} onPageSelect={setPage}>
+          {eggs.data.map((egg) => (
+            <EggRow key={egg.uuid} nest={nest} egg={egg} />
+          ))}
+        </TableNew>
+      )}
     </>
   );
 };
 
-export default ({ nest }: { nest: Nest }) => {
-  return (
+export default () => {
+  const params = useParams<'nestId'>();
+  const { addToast } = useToast();
+  const [nest, setNest] = useState<Nest | null>(null);
+
+  useEffect(() => {
+    if (params.nestId) {
+      getNest(params.nestId)
+        .then((nest) => {
+          setNest(nest);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    }
+  }, [params.nestId]);
+
+  return !nest ? (
+    <Spinner.Centered />
+  ) : (
     <Routes>
       <Route path={'/'} element={<EggsContainer nest={nest} />} />
       <Route path={'/new'} element={<EggCreateOrUpdate nest={nest} />} />

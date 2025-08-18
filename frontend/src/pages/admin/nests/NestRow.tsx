@@ -1,25 +1,23 @@
 import Code from '@/elements/Code';
-import { TableRow } from '@/elements/table/Table';
+import { TableData, TableRow } from '@/elements/table/TableNew';
 import { NavLink } from 'react-router';
 
 export default ({ nest }: { nest: Nest }) => {
   return (
     <TableRow>
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <NavLink to={`/admin/nests/${nest.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
           <Code>{nest.uuid}</Code>
         </NavLink>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{nest.name}</td>
+      <TableData>{nest.name}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{nest.author}</td>
+      <TableData>{nest.author}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={nest.description}>
-        {nest.description}
-      </td>
+      <TableData>{nest.description}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{nest.eggs}</td>
+      <TableData>{nest.eggs}</TableData>
     </TableRow>
   );
 };

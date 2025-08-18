@@ -1,16 +1,19 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
 import NestRow from './NestRow';
 import getNests from '@/api/admin/nests/getNests';
-import NestCreate from './NestCreate';
-import NestUpdate from './NestUpdate';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
+import NestCreateOrUpdate from './NestCreateOrUpdate';
+import NestView from './NestView';
 
 const NestsContainer = () => {
   const navigate = useNavigate();
@@ -44,39 +47,33 @@ const NestsContainer = () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Nests</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => navigate('/admin/nests/new')}>New Nest</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={nests} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'ID'} />
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Author'} />
-                  <TableHeader name={'Description'} />
-                  <TableHeader name={'Eggs'} />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Nests
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => navigate('/admin/nests/new')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {nests.data.map((nest) => (
-                      <NestRow key={nest.uuid} nest={nest} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : nests.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <TableNew columns={['ID', 'Name', 'Author', 'Description', 'Eggs']} pagination={nests} onPageSelect={setPage}>
+          {nests.data.map((nest) => (
+            <NestRow key={nest.uuid} nest={nest} />
+          ))}
+        </TableNew>
+      )}
     </>
   );
 };
@@ -85,8 +82,8 @@ export default () => {
   return (
     <Routes>
       <Route path={'/'} element={<NestsContainer />} />
-      <Route path={'/new'} element={<NestCreate />} />
-      <Route path={'/:id/*'} element={<NestUpdate />} />
+      <Route path={'/new'} element={<NestCreateOrUpdate />} />
+      <Route path={'/:nestId/*'} element={<NestView />} />
     </Routes>
   );
 };
