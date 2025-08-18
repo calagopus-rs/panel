@@ -1,8 +1,7 @@
 import { MultiKeyValueInput } from '@/elements/inputnew/MultiKeyValueInput';
 import NumberInput from '@/elements/inputnew/NumberInput';
 import TextInput from '@/elements/inputnew/TextInput';
-import { Input } from '@/elements/inputs';
-import { Divider, Title } from '@mantine/core';
+import { Divider, Group, Title } from '@mantine/core';
 import { Dispatch } from 'react';
 
 export default ({
@@ -19,21 +18,22 @@ export default ({
       </Title>
       <Divider my={'sm'} />
 
-      <TextInput
-        label={'Repository'}
-        placeholder={'Repository'}
-        value={backupConfig?.repository || ''}
-        onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
-        mt={'sm'}
-      />
-
-      <NumberInput
-        label={'Retry Lock Seconds'}
-        placeholder={'Retry Lock Seconds'}
-        value={backupConfig?.retryLockSeconds || 0}
-        onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
-        mt={'sm'}
-      />
+      <Group grow>
+        <TextInput
+          label={'Repository'}
+          placeholder={'Repository'}
+          value={backupConfig?.repository || ''}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
+          mt={'sm'}
+        />
+        <NumberInput
+          label={'Retry Lock Seconds'}
+          placeholder={'Retry Lock Seconds'}
+          value={backupConfig?.retryLockSeconds || 0}
+          onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
+          mt={'sm'}
+        />
+      </Group>
 
       <TextInput
         label={'Password'}
@@ -49,15 +49,12 @@ export default ({
         mt={'sm'}
       />
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'environment'}>Environment</Input.Label>
-        <MultiKeyValueInput
-          options={backupConfig.environment || {}}
-          onChange={(e) => setBackupConfigs({ ...backupConfig, environment: e })}
-          transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
-          hideKey={(key) => key === 'RESTIC_PASSWORD'}
-        />
-      </div>
+      <MultiKeyValueInput
+        options={backupConfig.environment || {}}
+        onChange={(e) => setBackupConfigs({ ...backupConfig, environment: e })}
+        transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
+        hideKey={(key) => key === 'RESTIC_PASSWORD'}
+      />
     </>
   );
 };

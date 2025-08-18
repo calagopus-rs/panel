@@ -14,6 +14,7 @@ import { Divider, Group, Title } from '@mantine/core';
 import TextInput from '@/elements/inputnew/TextInput';
 import Select from '@/elements/inputnew/Select';
 import NewButton from '@/elements/button/NewButton';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const params = useParams<'id'>();
@@ -21,6 +22,7 @@ export default () => {
   const navigate = useNavigate();
 
   const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<Location>({
     shortName: '',
     name: '',
@@ -40,6 +42,7 @@ export default () => {
   }, [params.id]);
 
   const doCreateOrUpdate = () => {
+    load(true, setLoading);
     if (location?.uuid) {
       updateLocation(location.uuid, location)
         .then(() => {
@@ -47,6 +50,9 @@ export default () => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     } else {
       createLocation(location)
@@ -56,11 +62,15 @@ export default () => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     }
   };
 
   const doDelete = () => {
+    load(true, setLoading);
     deleteLocation(location.uuid)
       .then(() => {
         addToast('Location deleted.', 'success');
@@ -68,6 +78,9 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
@@ -86,50 +99,54 @@ export default () => {
       <Title order={1}>{params.id ? 'Update' : 'Create'} Location</Title>
       <Divider my={'sm'} />
 
-      <TextInput
-        label={'Short Name'}
-        placeholder={'Short Name'}
-        value={location.shortName || ''}
-        onChange={(e) => setLocation({ ...location, name: e.target.value })}
-        mt={'sm'}
-      />
+      <Group grow>
+        <TextInput
+          label={'Short Name'}
+          placeholder={'Short Name'}
+          value={location.shortName || ''}
+          onChange={(e) => setLocation({ ...location, name: e.target.value })}
+          mt={'sm'}
+        />
+        <TextInput
+          label={'Name'}
+          placeholder={'Name'}
+          value={location.name || ''}
+          onChange={(e) => setLocation({ ...location, name: e.target.value })}
+          mt={'sm'}
+        />
+      </Group>
 
-      <TextInput
-        label={'Name'}
-        placeholder={'Name'}
-        value={location.name || ''}
-        onChange={(e) => setLocation({ ...location, name: e.target.value })}
-        mt={'sm'}
-      />
-
-      <TextInput
-        label={'Description'}
-        placeholder={'Description'}
-        value={location.description || ''}
-        onChange={(e) => setLocation({ ...location, description: e.target.value })}
-        mt={'sm'}
-      />
-
-      <Select
-        label={'Backup Disk'}
-        placeholder={'Backup Disk'}
-        value={location.backupDisk || 'local'}
-        onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
-        data={[
-          { label: 'Local', value: 'local' },
-          { label: 'S3', value: 's3' },
-          { label: 'DdupBak', value: 'ddup-bak' },
-          { label: 'Btrfs', value: 'btrfs' },
-          { label: 'Zfs', value: 'zfs' },
-          { label: 'Restic', value: 'restic' },
-        ]}
-        mt={'sm'}
-      />
+      <Group grow>
+        <TextInput
+          label={'Description'}
+          placeholder={'Description'}
+          value={location.description || ''}
+          onChange={(e) => setLocation({ ...location, description: e.target.value })}
+          mt={'sm'}
+        />
+        <Select
+          label={'Backup Disk'}
+          placeholder={'Backup Disk'}
+          value={location.backupDisk || 'local'}
+          onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
+          data={[
+            { label: 'Local', value: 'local' },
+            { label: 'S3', value: 's3' },
+            { label: 'DdupBak', value: 'ddup-bak' },
+            { label: 'Btrfs', value: 'btrfs' },
+            { label: 'Zfs', value: 'zfs' },
+            { label: 'Restic', value: 'restic' },
+          ]}
+          mt={'sm'}
+        />
+      </Group>
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate}>Save</NewButton>
+        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+          Save
+        </NewButton>
         {params.id && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')}>
+          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
             Delete
           </NewButton>
         )}
