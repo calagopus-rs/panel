@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT server_schedules.uuid, server_schedules.triggers, server_schedules.condition\n                FROM server_schedules\n                WHERE server_schedules.server_uuid = $1 AND server_schedules.enabled",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "triggers",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 2,
+        "name": "condition",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "52e285a4006f02ed2847d266b48b9e3e699f76855db88b462db016a71ce3ff77"
+}
