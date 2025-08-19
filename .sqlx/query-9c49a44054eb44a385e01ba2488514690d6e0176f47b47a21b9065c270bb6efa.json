@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_schedules\n                        SET last_failure = $2, last_run = $2\n                        WHERE server_schedules.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9c49a44054eb44a385e01ba2488514690d6e0176f47b47a21b9065c270bb6efa"
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "server_schedules_server_uuid_name_idx" ON "server_schedules" USING btree ("server_uuid","name");

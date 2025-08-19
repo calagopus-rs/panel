@@ -2,8 +2,9 @@ use crate::env::RedisMode;
 use colored::Colorize;
 use rustis::{
     client::Client,
-    commands::{GenericCommands, SetCondition, SetExpiration, StringCommands},
-    resp::cmd,
+    commands::{
+        GenericCommands, InfoSection, ServerCommands, SetCondition, SetExpiration, StringCommands,
+    },
 };
 use serde::{Serialize, de::DeserializeOwned};
 use std::future::Future;
@@ -27,22 +28,10 @@ impl Cache {
             },
         };
 
-        let version = String::from_utf8(
-            instance
-                .client
-                .send(cmd("INFO"), None)
-                .await
-                .unwrap()
-                .as_bytes()
-                .into(),
-        )
-        .unwrap()
-        .lines()
-        .find(|line| line.starts_with("redis_version:"))
-        .unwrap()
-        .split(':')
-        .collect::<Vec<&str>>()[1]
-            .to_string();
+        let version = instance
+            .version()
+            .await
+            .unwrap_or_else(|_| "unknown".to_string());
 
         tracing::info!(
             "{} connected {}",
@@ -51,6 +40,19 @@ impl Cache {
         );
 
         instance
+    }
+
+    pub async fn version(&self) -> Result<String, rustis::Error> {
+        let version: String = self.client.info([InfoSection::Server]).await?;
+        let version = version
+            .lines()
+            .find(|line| line.starts_with("redis_version:"))
+            .unwrap()
+            .split(':')
+            .collect::<Vec<&str>>()[1]
+            .to_string();
+
+        Ok(version)
     }
 
     #[inline]

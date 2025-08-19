@@ -2,7 +2,7 @@ use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use utoipa::ToSchema;
 use validator::Validate;
 
@@ -50,6 +50,7 @@ pub struct Server {
     pub allocation_limit: i32,
     pub database_limit: i32,
     pub backup_limit: i32,
+    pub schedule_limit: i32,
 
     pub subuser_permissions: Option<Vec<String>>,
     pub subuser_ignored_files: Option<Vec<String>>,
@@ -111,6 +112,10 @@ impl BaseModel for Server {
             (
                 format!("{table}.backup_limit"),
                 format!("{prefix}backup_limit"),
+            ),
+            (
+                format!("{table}.schedule_limit"),
+                format!("{prefix}schedule_limit"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
         ]);
@@ -174,6 +179,7 @@ impl BaseModel for Server {
             allocation_limit: row.get(format!("{prefix}allocation_limit").as_str()),
             database_limit: row.get(format!("{prefix}database_limit").as_str()),
             backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
+            schedule_limit: row.get(format!("{prefix}schedule_limit").as_str()),
             subuser_permissions: row.try_get::<Vec<String>, _>("permissions").ok(),
             subuser_ignored_files: row.try_get::<Vec<String>, _>("ignored_files").ok(),
             subuser_ignored_files_overrides: None,
@@ -869,8 +875,8 @@ impl Server {
     pub async fn into_remote_api_object(
         self,
         database: &crate::database::Database,
-    ) -> RemoteApiServer {
-        let (variables, backups, mounts, allocations) = tokio::try_join!(
+    ) -> Result<RemoteApiServer, anyhow::Error> {
+        let (variables, backups, schedules, mounts, allocations) = tokio::try_join!(
             sqlx::query!(
                 "SELECT nest_egg_variables.env_variable, COALESCE(server_variables.value, nest_egg_variables.default_value) AS value
                 FROM nest_egg_variables
@@ -884,6 +890,13 @@ impl Server {
                 "SELECT server_backups.uuid
                 FROM server_backups
                 WHERE server_backups.server_uuid = $1",
+                self.uuid
+            )
+            .fetch_all(database.read()),
+            sqlx::query!(
+                "SELECT server_schedules.uuid, server_schedules.triggers, server_schedules.condition
+                FROM server_schedules
+                WHERE server_schedules.server_uuid = $1 AND server_schedules.enabled",
                 self.uuid
             )
             .fetch_all(database.read()),
@@ -903,10 +916,33 @@ impl Server {
                 self.uuid
             )
             .fetch_all(database.read()),
-        )
-        .unwrap();
+        )?;
 
-        RemoteApiServer {
+        let mut futures = Vec::new();
+        futures.reserve_exact(schedules.len());
+
+        for schedule in &schedules {
+            futures.push(
+                sqlx::query!(
+                    "SELECT server_schedule_steps.uuid, server_schedule_steps.schedule_uuid, server_schedule_steps.action
+                    FROM server_schedule_steps
+                    WHERE server_schedule_steps.schedule_uuid = $1
+                    ORDER BY server_schedule_steps.order_, server_schedule_steps.created",
+                    schedule.uuid
+                )
+                .fetch_all(database.read()),
+            );
+        }
+
+        let results = futures_util::future::try_join_all(futures).await?;
+        let mut schedule_steps = HashMap::new();
+        schedule_steps.reserve(schedules.len());
+
+        for (i, steps) in results.into_iter().enumerate() {
+            schedule_steps.insert(schedules[i].uuid, steps);
+        }
+
+        Ok(RemoteApiServer {
             settings: wings_api::ServerConfiguration {
                 uuid: self.uuid,
                 start_on_completion: None,
@@ -928,6 +964,26 @@ impl Server {
                     .collect(),
                 labels: IndexMap::new(),
                 backups: backups.into_iter().map(|b| b.uuid).collect(),
+                schedules: schedules
+                    .into_iter()
+                    .map(|s| wings_api::Schedule {
+                        uuid: s.uuid,
+                        triggers: s.triggers,
+                        condition: s.condition,
+                        actions: schedule_steps
+                            .remove(&s.uuid)
+                            .unwrap_or_default()
+                            .into_iter()
+                            .map(|step| {
+                                serde_json::to_value(wings_api::ScheduleAction {
+                                    uuid: step.uuid,
+                                    inner: serde_json::from_value(step.action).unwrap(),
+                                })
+                                .unwrap()
+                            })
+                            .collect(),
+                    })
+                    .collect(),
                 allocations: wings_api::ServerConfigurationAllocations {
                     force_outgoing_ip: self.egg.force_outgoing_ip,
                     default: self.allocation.map(|a| {
@@ -994,7 +1050,7 @@ impl Server {
                 stop: self.egg.config_stop,
                 configs: self.egg.config_files,
             },
-        }
+        })
     }
 
     #[inline]

@@ -68,7 +68,7 @@ mod get {
                 api_servers.reserve_exact(servers.data.len());
 
                 for server in servers.data {
-                    api_servers.push(server.into_remote_api_object(&state.database).await);
+                    api_servers.push(server.into_remote_api_object(&state.database).await?);
                 }
 
                 api_servers

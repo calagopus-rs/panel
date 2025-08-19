@@ -1,0 +1,75 @@
+use super::State;
+use utoipa_axum::{router::OpenApiRouter, routes};
+
+mod get {
+    use crate::{
+        response::{ApiResponse, ApiResponseResult},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+        },
+    };
+    use axum::http::StatusCode;
+    use serde::Serialize;
+    use utoipa::ToSchema;
+
+    #[derive(ToSchema, Serialize)]
+    struct Response {
+        status: wings_api::ScheduleStatus,
+    }
+
+    #[utoipa::path(get, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = BAD_REQUEST, body = ApiError),
+        (status = UNAUTHORIZED, body = ApiError),
+    ), params(
+        (
+            "server" = uuid::Uuid,
+            description = "The server ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+        (
+            "schedule" = uuid::Uuid,
+            description = "The schedule ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+    ))]
+    pub async fn route(
+        state: GetState,
+        server: GetServer,
+        schedule: GetServerSchedule,
+    ) -> ApiResponseResult {
+        if let Err(error) = server.has_permission("schedules.update") {
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::UNAUTHORIZED)
+                .ok();
+        }
+
+        let schedule_status = match server
+            .node
+            .api_client(&state.database)
+            .get_servers_server_schedule_schedule(server.uuid, schedule.uuid)
+            .await
+        {
+            Ok(data) => data,
+            Err((_, err)) => {
+                tracing::error!(server = %server.uuid, "failed to get server schedule status: {:#?}", err);
+
+                return ApiResponse::error("failed to get server schedule status")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
+            }
+        };
+
+        ApiResponse::json(Response {
+            status: schedule_status.status,
+        })
+        .ok()
+    }
+}
+
+pub fn router(state: &State) -> OpenApiRouter<State> {
+    OpenApiRouter::new()
+        .routes(routes!(get::route))
+        .with_state(state.clone())
+}

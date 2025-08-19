@@ -115,6 +115,30 @@ pub static PERMISSIONS: LazyLock<IndexMap<&'static str, Permission>> = LazyLock:
             ),
         ),
         (
+            "schedules",
+            (
+                "Permissions that control a user's ability to manage server schedules.",
+                IndexMap::from([
+                    (
+                        "create",
+                        "Allows a user to create a new schedule for the server.",
+                    ),
+                    (
+                        "read",
+                        "Allows a user to view existing schedules for the server.",
+                    ),
+                    (
+                        "update",
+                        "Allows a user to update an existing schedule for the server.",
+                    ),
+                    (
+                        "delete",
+                        "Allows a user to delete a schedule for the server.",
+                    ),
+                ]),
+            ),
+        ),
+        (
             "allocations",
             (
                 "Permissions that control a user's ability to modify the port allocations for this server.",

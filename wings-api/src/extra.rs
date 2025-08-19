@@ -84,3 +84,157 @@ impl std::fmt::Display for Game {
         )
     }
 }
+
+#[derive(ToSchema, Deserialize, Serialize)]
+pub struct ScheduleAction {
+    pub uuid: uuid::Uuid,
+
+    #[serde(flatten)]
+    pub inner: ScheduleActionInner,
+}
+
+#[derive(ToSchema, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case", tag = "type")]
+#[schema(rename_all = "snake_case")]
+pub enum ScheduleActionInner {
+    Sleep {
+        duration: u64,
+    },
+    SendPower {
+        ignore_failure: bool,
+
+        action: super::ServerPowerAction,
+    },
+    SendCommand {
+        ignore_failure: bool,
+
+        command: String,
+    },
+    CreateBackup {
+        ignore_failure: bool,
+        foreground: bool,
+
+        name: Option<String>,
+        ignored_files: Vec<String>,
+    },
+    CreateDirectory {
+        ignore_failure: bool,
+
+        root: String,
+        name: String,
+    },
+    WriteFile {
+        ignore_failure: bool,
+
+        file: String,
+        content: String,
+    },
+    CopyFile {
+        ignore_failure: bool,
+        foreground: bool,
+
+        file: String,
+        destination: String,
+    },
+    DeleteFiles {
+        root: String,
+        files: Vec<String>,
+    },
+    RenameFiles {
+        root: String,
+        #[schema(inline)]
+        files: Vec<super::servers_server_files_rename::put::RequestBodyFiles>,
+    },
+    CompressFiles {
+        ignore_failure: bool,
+        foreground: bool,
+
+        root: String,
+        files: Vec<String>,
+        format: super::ArchiveFormat,
+        name: String,
+    },
+    DecompressFile {
+        ignore_failure: bool,
+        foreground: bool,
+
+        root: String,
+        file: String,
+    },
+    UpdateStartupVariable {
+        ignore_failure: bool,
+
+        env_variable: String,
+        value: String,
+    },
+    UpdateStartupCommand {
+        ignore_failure: bool,
+
+        command: String,
+    },
+    UpdateStartupDockerImage {
+        ignore_failure: bool,
+
+        image: String,
+    },
+}
+
+#[derive(ToSchema, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case", tag = "type")]
+#[schema(rename_all = "snake_case")]
+pub enum ScheduleTrigger {
+    Cron {
+        #[schema(value_type = String, example = "* * * * * *")]
+        schedule: Box<cron::Schedule>,
+    },
+    PowerAction {
+        action: super::ServerPowerAction,
+    },
+    ServerState {
+        state: super::ServerState,
+    },
+    Crash,
+}
+
+#[derive(ToSchema, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case")]
+#[schema(rename_all = "snake_case")]
+pub enum ScheduleComparator {
+    SmallerThan,
+    SmallerThanOrEquals,
+    Equal,
+    GreaterThan,
+    GreaterThanOrEquals,
+}
+
+#[derive(ToSchema, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case", tag = "type")]
+#[schema(rename_all = "snake_case", no_recursion)]
+pub enum ScheduleCondition {
+    None,
+    And {
+        conditions: Vec<ScheduleCondition>,
+    },
+    Or {
+        conditions: Vec<ScheduleCondition>,
+    },
+    ServerState {
+        state: super::ServerState,
+    },
+    Uptime {
+        comparator: ScheduleComparator,
+        value: u64,
+    },
+    CpuUsage {
+        comparator: ScheduleComparator,
+        value: f64,
+    },
+    MemoryUsage {
+        comparator: ScheduleComparator,
+        value: u64,
+    },
+    DiskUsage {
+        comparator: ScheduleComparator,
+        value: u64,
+    },
+}

@@ -1,13 +1,16 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _backup_;
+mod _step_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParamsWithSearch, server_backup::ServerBackup},
+        models::{Pagination, PaginationParams, server_schedule_step::ServerScheduleStep},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -16,7 +19,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        backups: Pagination<crate::models::server_backup::ApiServerBackup>,
+        schedule_steps: Pagination<crate::models::server_schedule_step::ApiServerScheduleStep>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -29,6 +32,11 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
+            "schedule" = uuid::Uuid,
+            description = "The schedule ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+        (
             "page" = i64, Query,
             description = "The page number",
             example = "1",
@@ -38,15 +46,12 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
-        (
-            "search" = Option<String>, Query,
-            description = "Search term for items",
-        ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Query(params): Query<PaginationParamsWithSearch>,
+        schedule: GetServerSchedule,
+        Query(params): Query<PaginationParams>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -54,30 +59,29 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("backups.read") {
+        if let Err(error) = server.has_permission("schedules.read") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
 
-        let backups = ServerBackup::by_server_uuid_with_pagination(
+        let schedule_steps = ServerScheduleStep::by_schedule_uuid_with_pagination(
             &state.database,
-            server.uuid,
+            schedule.uuid,
             params.page,
             params.per_page,
-            params.search.as_deref(),
         )
         .await?;
 
         ApiResponse::json(Response {
-            backups: Pagination {
-                total: backups.total,
-                per_page: backups.per_page,
-                page: backups.page,
-                data: backups
+            schedule_steps: Pagination {
+                total: schedule_steps.total,
+                per_page: schedule_steps.per_page,
+                page: schedule_steps.page,
+                data: schedule_steps
                     .data
                     .into_iter()
-                    .map(|backup| backup.into_api_object())
+                    .map(|schedule_step| schedule_step.into_api_object())
                     .collect(),
             },
         })
@@ -87,11 +91,13 @@ mod get {
 
 mod post {
     use crate::{
-        models::server_backup::ServerBackup,
+        models::server_schedule_step::ServerScheduleStep,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::servers::_server_::{
+                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -101,16 +107,13 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
-        name: String,
-
-        ignored_files: Vec<String>,
+        action: wings_api::ScheduleActionInner,
+        order: i16,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        backup: crate::models::server_backup::ApiServerBackup,
+        schedule_step: crate::models::server_schedule_step::ApiServerScheduleStep,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -123,11 +126,17 @@ mod post {
             description = "The server ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
+        (
+            "schedule" = uuid::Uuid,
+            description = "The schedule ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
+        schedule: GetServerSchedule,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -136,46 +145,73 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("backups.create") {
+        if let Err(error) = server.has_permission("schedules.update") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
 
-        let backups = ServerBackup::count_by_server_uuid(&state.database, server.uuid).await;
-        if backups >= server.backup_limit as i64 {
-            return ApiResponse::error("maximum number of backups reached")
+        let schedule_steps =
+            ServerScheduleStep::count_by_schedule_uuid(&state.database, schedule.uuid).await;
+        if schedule_steps >= 100 {
+            return ApiResponse::error("maximum number of schedule steps reached")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
 
-        let backup =
-            match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
-                .await
-            {
-                Ok(backup) => backup,
-                Err(err) => {
-                    tracing::error!(name = %data.name, "failed to create backup: {:#?}", err);
+        let schedule_step = match ServerScheduleStep::create(
+            &state.database,
+            schedule.uuid,
+            data.action,
+            data.order,
+        )
+        .await
+        {
+            Ok(schedule_step) => schedule_step,
+            Err(err) => {
+                tracing::error!("failed to create schedule step: {:#?}", err);
 
-                    return ApiResponse::error("failed to create backup")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
-            };
+                return ApiResponse::error("failed to create schedule step")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
+            }
+        };
 
         activity_logger
             .log(
-                "server:backup.create",
+                "server:schedule.step.create",
                 serde_json::json!({
-                    "uuid": backup.uuid,
-                    "name": backup.name,
-                    "ignored_files": backup.ignored_files,
+                    "uuid": schedule_step.uuid,
+                    "action": schedule_step.action,
+                    "order": schedule_step.order,
                 }),
             )
             .await;
 
+        state
+            .database
+            .batch_action("sync_server", server.uuid, {
+                let state = state.clone();
+
+                async move {
+                    match server
+                        .node
+                        .api_client(&state.database)
+                        .post_servers_server_sync(server.uuid)
+                        .await
+                    {
+                        Ok(_) => {}
+                        Err((_, err)) => {
+                            tracing::warn!(server = %server.uuid, "failed to post server sync: {:#?}", err);
+
+                        }
+                    }
+                }
+            })
+            .await;
+
         ApiResponse::json(Response {
-            backup: backup.into_api_object(),
+            schedule_step: schedule_step.into_api_object(),
         })
         .ok()
     }
@@ -185,6 +221,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{backup}", _backup_::router(state))
+        .nest("/{step}", _step_::router(state))
         .with_state(state.clone())
 }

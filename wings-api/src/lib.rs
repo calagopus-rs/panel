@@ -154,6 +154,28 @@ nestify::nest! {
 }
 
 nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Schedule {
+        #[schema(inline)]
+        pub uuid: uuid::Uuid,
+        #[schema(inline)]
+        pub triggers: serde_json::Value,
+        #[schema(inline)]
+        pub condition: serde_json::Value,
+        #[schema(inline)]
+        pub actions: Vec<serde_json::Value>,
+    }
+}
+
+nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ScheduleStatus {
+        #[schema(inline)]
+        pub running: bool,
+        #[schema(inline)]
+        pub step: Option<uuid::Uuid>,
+    }
+}
+
+nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Server {
         #[schema(inline)]
         pub state: ServerState,
@@ -192,6 +214,8 @@ nestify::nest! {
         pub labels: IndexMap<String, String>,
         #[schema(inline)]
         pub backups: Vec<uuid::Uuid>,
+        #[schema(inline)]
+        pub schedules: Vec<Schedule>,
         #[schema(inline)]
         pub allocations: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAllocations {
             #[schema(inline)]
@@ -744,9 +768,9 @@ pub mod servers_server_files_rename {
                 #[schema(inline)]
                 pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyFiles {
                     #[schema(inline)]
-                    pub to: String,
-                    #[schema(inline)]
                     pub from: String,
+                    #[schema(inline)]
+                    pub to: String,
                 }>,
             }
         }
@@ -864,6 +888,50 @@ pub mod servers_server_reinstall {
         }
 
         pub type Response409 = ApiError;
+    }
+}
+pub mod servers_server_schedule_schedule {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub status: ScheduleStatus,
+            }
+        }
+
+        pub type Response404 = ApiError;
+    }
+}
+pub mod servers_server_schedule_schedule_abort {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        pub type Response404 = ApiError;
+    }
+}
+pub mod servers_server_schedule_schedule_trigger {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        pub type Response404 = ApiError;
     }
 }
 pub mod servers_server_script {

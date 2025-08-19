@@ -52,17 +52,17 @@ impl Database {
             batch_actions: Arc::new(Mutex::new(HashMap::new())),
         };
 
-        let version: (String,) = sqlx::query_as("SELECT split_part(version(), ' ', 4)")
-            .fetch_one(instance.read())
+        let version = instance
+            .version()
             .await
-            .unwrap();
+            .unwrap_or_else(|_| "unknown".to_string());
 
         tracing::info!(
             "{} connected {}",
             "database".bright_cyan(),
             format!(
                 "(postgres@{}, {}ms)",
-                version.0[..version.0.len() - 1].bright_black(),
+                version.bright_black(),
                 start.elapsed().as_millis()
             )
             .bright_black()
@@ -89,6 +89,14 @@ impl Database {
         });
 
         instance
+    }
+
+    pub async fn version(&self) -> Result<String, sqlx::Error> {
+        let version: (String,) = sqlx::query_as("SELECT split_part(version(), ' ', 2)")
+            .fetch_one(self.read())
+            .await?;
+
+        Ok(version.0)
     }
 
     pub async fn migrate(&self) -> Result<(), sqlx::Error> {

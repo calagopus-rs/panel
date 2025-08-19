@@ -12,4 +12,5 @@ chrono = { workspace = true }
 uuid = { workspace = true }
 indexmap = { workspace = true }
 urlencoding = { workspace = true }
+cron = { workspace = true }
 nestify = "0.3.3"

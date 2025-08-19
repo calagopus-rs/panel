@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_schedules\n            SET name = $1, enabled = $2, triggers = $3, condition = $4\n            WHERE server_schedules.uuid = $5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Bool",
+        "Jsonb",
+        "Jsonb",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a6265b1a7de1209d01a20d1dced78f0de6b1c985419dac948b324cfc98985768"
+}

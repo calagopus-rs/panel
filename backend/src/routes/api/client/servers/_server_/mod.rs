@@ -26,6 +26,7 @@ mod files;
 mod mounts;
 mod power;
 mod resources;
+mod schedules;
 mod settings;
 mod startup;
 mod subusers;
@@ -179,6 +180,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/allocations", allocations::router(state))
         .nest("/databases", databases::router(state))
         .nest("/mounts", mounts::router(state))
+        .nest("/schedules", schedules::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

@@ -1,11 +1,11 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _backup_;
+mod _schedule_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParamsWithSearch, server_backup::ServerBackup},
+        models::{Pagination, PaginationParamsWithSearch, server_schedule::ServerSchedule},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
     };
@@ -16,7 +16,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        backups: Pagination<crate::models::server_backup::ApiServerBackup>,
+        schedules: Pagination<crate::models::server_schedule::ApiServerSchedule>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -54,13 +54,13 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("backups.read") {
+        if let Err(error) = server.has_permission("schedules.read") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
 
-        let backups = ServerBackup::by_server_uuid_with_pagination(
+        let schedules = ServerSchedule::by_server_uuid_with_pagination(
             &state.database,
             server.uuid,
             params.page,
@@ -70,14 +70,14 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            backups: Pagination {
-                total: backups.total,
-                per_page: backups.per_page,
-                page: backups.page,
-                data: backups
+            schedules: Pagination {
+                total: schedules.total,
+                per_page: schedules.per_page,
+                page: schedules.page,
+                data: schedules
                     .data
                     .into_iter()
-                    .map(|backup| backup.into_api_object())
+                    .map(|schedule| schedule.into_api_object())
                     .collect(),
             },
         })
@@ -87,7 +87,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::server_backup::ServerBackup,
+        models::server_schedule::ServerSchedule,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -104,13 +104,15 @@ mod post {
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
         name: String,
+        enabled: bool,
 
-        ignored_files: Vec<String>,
+        triggers: Vec<wings_api::ScheduleTrigger>,
+        condition: wings_api::ScheduleCondition,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        backup: crate::models::server_backup::ApiServerBackup,
+        schedule: crate::models::server_schedule::ApiServerSchedule,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -136,46 +138,59 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("backups.create") {
+        if let Err(error) = server.has_permission("schedules.create") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
 
-        let backups = ServerBackup::count_by_server_uuid(&state.database, server.uuid).await;
-        if backups >= server.backup_limit as i64 {
-            return ApiResponse::error("maximum number of backups reached")
+        let schedules = ServerSchedule::count_by_server_uuid(&state.database, server.uuid).await;
+        if schedules >= server.schedule_limit as i64 {
+            return ApiResponse::error("maximum number of schedules reached")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
 
-        let backup =
-            match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
-                .await
-            {
-                Ok(backup) => backup,
-                Err(err) => {
-                    tracing::error!(name = %data.name, "failed to create backup: {:#?}", err);
+        let schedule = match ServerSchedule::create(
+            &state.database,
+            server.uuid,
+            &data.name,
+            data.enabled,
+            data.triggers,
+            data.condition,
+        )
+        .await
+        {
+            Ok(schedule) => schedule,
+            Err(err) if err.to_string().contains("unique constraint") => {
+                return ApiResponse::error("schedule with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
+            }
+            Err(err) => {
+                tracing::error!(name = %data.name, "failed to create schedule: {:#?}", err);
 
-                    return ApiResponse::error("failed to create backup")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
-            };
+                return ApiResponse::error("failed to create schedule")
+                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                    .ok();
+            }
+        };
 
         activity_logger
             .log(
-                "server:backup.create",
+                "server:schedule.create",
                 serde_json::json!({
-                    "uuid": backup.uuid,
-                    "name": backup.name,
-                    "ignored_files": backup.ignored_files,
+                    "uuid": schedule.uuid,
+                    "name": schedule.name,
+                    "enabled": schedule.enabled,
+                    "triggers": schedule.triggers,
+                    "condition": schedule.condition,
                 }),
             )
             .await;
 
         ApiResponse::json(Response {
-            backup: backup.into_api_object(),
+            schedule: schedule.into_api_object(),
         })
         .ok()
     }
@@ -185,6 +200,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{backup}", _backup_::router(state))
+        .nest("/{schedule}", _schedule_::router(state))
         .with_state(state.clone())
 }

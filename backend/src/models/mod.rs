@@ -22,6 +22,8 @@ pub mod server_allocation;
 pub mod server_backup;
 pub mod server_database;
 pub mod server_mount;
+pub mod server_schedule;
+pub mod server_schedule_step;
 pub mod server_subuser;
 pub mod server_variable;
 pub mod user;

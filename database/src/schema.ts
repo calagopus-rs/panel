@@ -394,9 +394,10 @@ export const servers = pgTable('servers', {
 	autoKill: jsonb('auto_kill').default({ enabled: false, seconds: 30 }).notNull(),
 	timezone: varchar('timezone', { length: 255 }),
 
-	allocationLimit: integer('allocation_limit').notNull(),
-	databaseLimit: integer('database_limit').notNull(),
-	backupLimit: integer('backup_limit').notNull(),
+	allocationLimit: integer('allocation_limit').default(0).notNull(),
+	databaseLimit: integer('database_limit').default(0).notNull(),
+	backupLimit: integer('backup_limit').default(0).notNull(),
+	scheduleLimit: integer('schedule_limit').default(0).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (servers) => [
@@ -517,4 +518,36 @@ export const serverDatabases = pgTable('server_databases', {
 }, (serverDatabases) => [
 	index('server_databases_server_uuid_idx').on(serverDatabases.serverUuid),
 	uniqueIndex('server_databases_server_uuid_database_idx').on(serverDatabases.serverUuid, serverDatabases.name)
+])
+
+export const serverSchedules = pgTable('server_schedules', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid).notNull(),
+
+	name: varchar('name', { length: 255 }).notNull(),
+	enabled: boolean('enabled').notNull(),
+
+	triggers: jsonb('triggers').notNull(),
+	condition: jsonb('condition').notNull(),
+
+	lastRun: timestamp('last_run'),
+	lastFailure: timestamp('last_failure'),
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (serverSchedules) => [
+	index('server_schedules_server_uuid_idx').on(serverSchedules.serverUuid),
+	index('server_schedules_uuid_enabled_idx').on(serverSchedules.uuid, serverSchedules.enabled),
+	uniqueIndex('server_schedules_server_uuid_name_idx').on(serverSchedules.serverUuid, serverSchedules.name)
+])
+
+export const serverScheduleSteps = pgTable('server_schedule_steps', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	scheduleUuid: uuid('schedule_uuid').references(() => serverSchedules.uuid).notNull(),
+
+	action: jsonb('action').notNull(),
+	order: smallint('order_').default(0).notNull(),
+	error: text('error'),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (serverScheduleSteps) => [
+	index('server_schedule_steps_schedule_uuid_idx').on(serverScheduleSteps.scheduleUuid)
 ])

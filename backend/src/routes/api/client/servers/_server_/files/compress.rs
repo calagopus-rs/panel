@@ -96,9 +96,9 @@ mod post {
                 .log(
                     "server:file.compress",
                     serde_json::json!({
-                        "files": request_body.files.iter().collect::<Vec<_>>(),
                         "directory": request_body.root,
                         "name": entry.name,
+                        "files": request_body.files.iter().collect::<Vec<_>>(),
                     }),
                 )
                 .await;

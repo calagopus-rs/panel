@@ -176,6 +176,31 @@ impl ServerBackup {
         Ok(Self::map(None, &row))
     }
 
+    pub async fn create_raw(
+        database: &Arc<crate::database::Database>,
+        server: &super::server::Server,
+        name: &str,
+        ignored_files: Vec<String>,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING {}
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(server.uuid)
+        .bind(server.node.uuid)
+        .bind(name)
+        .bind(&ignored_files)
+        .bind(0i64)
+        .bind(server.node.location.backup_disk)
+        .fetch_one(database.write())
+        .await?;
+
+        Ok(Self::map(None, &row))
+    }
+
     pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
@@ -500,6 +525,36 @@ impl ServerBackup {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn delete_oldest_by_server_uuid(
+        database: &crate::database::Database,
+        server: &super::server::Server,
+    ) -> Result<(), sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_backups
+            WHERE server_backups.server_uuid = $1
+                AND server_backups.locked = false
+                AND server_backups.completed IS NOT NULL
+                AND server_backups.deleted IS NULL
+            ORDER BY server_backups.created ASC
+            LIMIT 1
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(server.uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        if let Some(row) = row {
+            let backup = Self::map(None, &row);
+
+            backup.delete(database, server).await
+        } else {
+            Err(sqlx::Error::RowNotFound)
+        }
     }
 
     #[inline]

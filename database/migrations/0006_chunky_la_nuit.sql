@@ -1,0 +1,1 @@
+ALTER TABLE "server_schedules" ADD COLUMN "last_failure" timestamp;

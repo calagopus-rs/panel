@@ -540,6 +540,60 @@ impl WingsClient {
         .await
     }
 
+    pub async fn get_servers_server_schedule_schedule(
+        &self,
+        server: uuid::Uuid,
+        schedule: uuid::Uuid,
+    ) -> Result<
+        super::servers_server_schedule_schedule::get::Response200,
+        (StatusCode, super::ApiError),
+    > {
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}/schedule/{schedule}"),
+            None::<&usize>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_schedule_schedule_abort(
+        &self,
+        server: uuid::Uuid,
+        schedule: uuid::Uuid,
+    ) -> Result<
+        super::servers_server_schedule_schedule_abort::post::Response200,
+        (StatusCode, super::ApiError),
+    > {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/schedule/{schedule}/abort"),
+            None::<&usize>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn post_servers_server_schedule_schedule_trigger(
+        &self,
+        server: uuid::Uuid,
+        schedule: uuid::Uuid,
+    ) -> Result<
+        super::servers_server_schedule_schedule_trigger::post::Response200,
+        (StatusCode, super::ApiError),
+    > {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/schedule/{schedule}/trigger"),
+            None::<&usize>,
+            None,
+        )
+        .await
+    }
+
     pub async fn post_servers_server_script(
         &self,
         server: uuid::Uuid,

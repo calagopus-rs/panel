@@ -1,0 +1,1 @@
+ALTER TABLE "server_schedules" ALTER COLUMN "name" SET DATA TYPE varchar(255);
