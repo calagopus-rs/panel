@@ -1,9 +1,10 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateEmail from '@/api/me/account/updateEmail';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
+import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/inputnew/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
+import { Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
@@ -13,7 +14,7 @@ export default () => {
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
     updateEmail(email, password)
       .then(() => {
         addToast('Email updated.', 'success');
@@ -24,35 +25,32 @@ export default () => {
   };
 
   return (
-    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
-      <h1 className={'text-4xl font-bold text-white'}>Update Email</h1>
+    <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+      <Title order={2} c={'white'}>
+        Email
+      </Title>
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'newEmail'}>New Email</Input.Label>
-        <Input.Text
-          id={'newEmail'}
-          placeholder={'New Email'}
-          type={'email'}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </div>
+      <TextInput
+        label={'New Email'}
+        placeholder={'New Email'}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        mt={'sm'}
+      />
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'currentPassword'}>Current Password</Input.Label>
-        <Input.Text
-          id={'currentPassword'}
-          placeholder={'Current Password'}
-          type={'password'}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
+      <TextInput
+        label={'Current Password'}
+        placeholder={'Current Password'}
+        type={'password'}
+        onChange={(e) => setPassword(e.target.value)}
+        mt={'sm'}
+      />
 
-      <div className={'mt-4 flex justify-end'}>
-        <Button disabled={!password} onClick={handleUpdate}>
+      <Group mt={'md'}>
+        <NewButton disabled={!email || !password} onClick={doUpdate}>
           Update Email
-        </Button>
-      </div>
-    </div>
+        </NewButton>
+      </Group>
+    </Grid.Col>
   );
 };

@@ -1,15 +1,6 @@
 import getApiKeys from '@/api/me/api-keys/getApiKeys';
 import Code from '@/elements/Code';
 import Spinner from '@/elements/Spinner';
-import Table, {
-  ContentWrapper,
-  TableHead,
-  TableHeader,
-  TableBody,
-  NoItems,
-  TableRow,
-  Pagination,
-} from '@/elements/table/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
@@ -17,6 +8,9 @@ import ApiKeyCreateButton from './actions/ApiKeyCreateButton';
 import { useUserStore } from '@/stores/user';
 import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 import { useSearchParams } from 'react-router';
+import { Group, Title } from '@mantine/core';
+import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
+import TextInput from '@/elements/inputnew/TextInput';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -44,65 +38,59 @@ export default () => {
 
   return (
     <>
-      <div className={'justify-between flex items-center mb-2'}>
-        <h1 className={'text-4xl font-bold text-white'}>API Keys</h1>
-        <ApiKeyCreateButton />
-      </div>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          API Keys
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <ApiKeyCreateButton />
+        </Group>
+      </Group>
+
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table>
-          <ContentWrapper onSearch={setSearch}>
-            <Pagination data={apiKeys} onPageSelect={setPage}>
-              <div className={'overflow-x-auto'}>
-                <table className={'w-full table-auto'}>
-                  <TableHead>
-                    <TableHeader name={'Name'} />
-                    <TableHeader name={'Key'} />
-                    <TableHeader name={'Permissions'} />
-                    <TableHeader name={'Last Used'} />
-                    <TableHeader name={'Created'} />
-                    <TableHeader />
-                  </TableHead>
+        <TableNew
+          columns={['Name', 'Key', 'Permissions', 'Last Used', 'Created', '']}
+          pagination={apiKeys}
+          onPageSelect={setPage}
+        >
+          {apiKeys.data.map((key) => (
+            <TableRow key={key.uuid}>
+              <TableData>{key.name}</TableData>
 
-                  <TableBody>
-                    {apiKeys.data.map((key) => (
-                      <TableRow key={key.uuid}>
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{key.name}</td>
+              <TableData>
+                <Code>{key.keyStart}</Code>
+              </TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Code>{key.keyStart}</Code>
-                        </td>
+              <TableData>{key.permissions.length}</TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {key.permissions.length}
-                        </td>
+              <TableData>
+                {!key.lastUsed ? (
+                  'N/A'
+                ) : (
+                  <Tooltip content={formatDateTime(key.lastUsed)}>{formatTimestamp(key.lastUsed)}</Tooltip>
+                )}
+              </TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {!key.lastUsed ? (
-                            'N/A'
-                          ) : (
-                            <Tooltip content={formatDateTime(key.lastUsed)}>{formatTimestamp(key.lastUsed)}</Tooltip>
-                          )}
-                        </td>
+              <TableData>
+                <Tooltip content={formatDateTime(key.created)}>{formatTimestamp(key.created)}</Tooltip>
+              </TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Tooltip content={formatDateTime(key.created)}>{formatTimestamp(key.created)}</Tooltip>
-                        </td>
-
-                        <td className={'relative'}>
-                          <ApiKeyDeleteButton apiKey={key} />
-                        </td>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </table>
-
-                {apiKeys.data.length === 0 ? <NoItems /> : null}
-              </div>
-            </Pagination>
-          </ContentWrapper>
-        </Table>
+              <TableData>
+                <Group gap={4} justify={'right'} wrap={'nowrap'}>
+                  <ApiKeyDeleteButton apiKey={key} />
+                </Group>
+              </TableData>
+            </TableRow>
+          ))}
+        </TableNew>
       )}
     </>
   );

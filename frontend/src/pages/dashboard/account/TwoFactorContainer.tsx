@@ -1,3 +1,4 @@
+import { Grid, Title } from '@mantine/core';
 import TwoFactorDisableButton from './actions/TwoFactorDisableButton';
 import TwoFactorSetupButton from './actions/TwoFactorSetupButton';
 import { useAuth } from '@/providers/AuthProvider';
@@ -6,8 +7,10 @@ export default () => {
   const { user } = useAuth();
 
   return (
-    <div className={'bg-gray-700/50 rounded-md p-4 h-fit'}>
-      <h1 className={'text-4xl font-bold text-white'}>Two-Step Verification</h1>
+    <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+      <Title order={2} c={'white'}>
+        Two-Step Verification
+      </Title>
 
       <div className={'mt-4'}>
         {user.totpEnabled ? (
@@ -23,6 +26,6 @@ export default () => {
       <div className={'mt-4 flex justify-end'}>
         {user.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}
       </div>
-    </div>
+    </Grid.Col>
   );
 };

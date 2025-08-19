@@ -1,6 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import { Button } from '@/elements/button';
+import NewButton from '@/elements/button/NewButton';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import { useAuth } from '@/providers/AuthProvider';
@@ -69,9 +70,9 @@ export default () => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button style={Button.Styles.Red} onClick={() => setOpen(true)}>
+      <NewButton color={'red'} onClick={() => setOpen(true)}>
         Disable Two-Step
-      </Button>
+      </NewButton>
     </>
   );
 };

@@ -1,10 +1,13 @@
 import { httpErrorToHuman } from '@/api/axios';
 import createApiKey from '@/api/me/api-keys/createApiKey';
 import { Button } from '@/elements/button';
+import NewButton from '@/elements/button/NewButton';
 import { Dialog } from '@/elements/dialog';
 import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
 
 export default () => {
@@ -49,7 +52,10 @@ export default () => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button onClick={() => setOpen(true)}>Create API Key</Button>
+      <NewButton onClick={() => setOpen(true)} color={'blue'}>
+        <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+        Create
+      </NewButton>
     </>
   );
 };

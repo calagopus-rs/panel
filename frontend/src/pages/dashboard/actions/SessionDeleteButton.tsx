@@ -6,6 +6,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { faSignOut } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ session }: { session: UserSession }) => {
@@ -40,9 +41,9 @@ export default ({ session }: { session: UserSession }) => {
           </Button>
         </Dialog.Footer>
       </Dialog>
-      <Button style={Button.Styles.Red} size={Button.Sizes.Small} onClick={() => setOpen(true)}>
+      <ActionIcon color={'red'} onClick={() => setOpen(true)}>
         <FontAwesomeIcon icon={faSignOut} />
-      </Button>
+      </ActionIcon>
     </>
   );
 };

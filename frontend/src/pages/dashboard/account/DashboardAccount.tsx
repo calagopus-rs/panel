@@ -1,13 +1,14 @@
 import PasswordContainer from './PasswordContainer';
 import EmailContainer from './EmailContainer';
 import TwoFactorContainer from './TwoFactorContainer';
+import { Grid } from '@mantine/core';
 
 export default () => {
   return (
-    <div className={'grid lg:grid-cols-2 xl:grid-cols-3 gap-4'}>
+    <Grid grow>
       <PasswordContainer />
       <EmailContainer />
       <TwoFactorContainer />
-    </div>
+    </Grid>
   );
 };

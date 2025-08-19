@@ -2,6 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import enableTwoFactor from '@/api/me/account/enableTwoFactor';
 import getTwoFactor from '@/api/me/account/getTwoFactor';
 import { Button } from '@/elements/button';
+import NewButton from '@/elements/button/NewButton';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
 import { Dialog } from '@/elements/dialog';
@@ -147,7 +148,7 @@ export default () => {
           </>
         )}
       </Dialog>
-      <Button onClick={() => setOpen(true)}>Enable Two-Step</Button>
+      <NewButton onClick={() => setOpen(true)}>Enable Two-Step</NewButton>
     </>
   );
 };
