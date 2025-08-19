@@ -8,43 +8,55 @@ import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
 import EmailSmtp from './forms/EmailSmtp';
 import AdminSettingContainer from '@/elements/AdminSettingContainer';
+import { load } from '@/lib/debounce';
+import { Group, Title } from '@mantine/core';
+import NewButton from '@/elements/button/NewButton';
+import Select from '@/elements/inputnew/Select';
 
 export default () => {
   const { addToast } = useToast();
   const { mailMode } = useAdminStore();
 
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<MailMode>(mailMode);
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
+    load(true, setLoading);
     updateEmailSettings(transformKeysToSnakeCase({ ...settings } as MailMode))
       .then(() => {
         addToast('Email settings updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
-    <AdminSettingContainer title={'Email Settings'}>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'type'}>Type</Input.Label>
-        <Input.Dropdown
-          id={'type'}
-          options={[
-            { label: 'None', value: 'none' },
-            { label: 'SMTP', value: 'smtp' },
-          ]}
-          selected={settings.type}
-          onChange={(e) => setSettings((settings: any) => ({ ...settings, type: e.target.value }))}
-        />
-      </div>
+    <>
+      <Title mt={'md'} order={2}>
+        Email Settings
+      </Title>
+
+      <Select
+        label={'Provider'}
+        value={settings.type}
+        onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
+        data={[
+          { label: 'None', value: 'none' },
+          { label: 'SMTP', value: 'smtp' },
+        ]}
+      />
 
       {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
 
-      <div className={'mt-4 flex justify-end'}>
-        <Button onClick={handleUpdate}>Update Email Settings</Button>
-      </div>
-    </AdminSettingContainer>
+      <Group mt={'md'}>
+        <NewButton onClick={doUpdate} loading={loading}>
+          Save
+        </NewButton>
+      </Group>
+    </>
   );
 };

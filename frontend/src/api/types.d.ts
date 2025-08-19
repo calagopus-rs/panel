@@ -383,10 +383,8 @@ interface UserSshKey {
 
 type AuthenticationType = 'password' | 'public_key';
 
-type CaptchaProviderType = 'none' | 'turnstile' | 'recaptcha';
-
-interface CaptchaProviderBase {
-  type: Exclude<CaptchaProviderType, 'turnstile' | 'recaptcha'>;
+interface CaptchaProviderNone {
+  type: 'none';
 }
 
 interface CaptchaProviderTurnstile {
@@ -402,7 +400,7 @@ interface CaptchaProviderRecaptcha {
   v3: boolean;
 }
 
-type CaptchaProvider = CaptchaProviderBase | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
+type CaptchaProvider = CaptchaProviderNone | CaptchaProviderTurnstile | CaptchaProviderRecaptcha;
 
 type CompressionLevel = 'best_speed' | 'good_speed' | 'good_compression' | 'best_compression';
 
@@ -453,8 +451,8 @@ interface LocationConfigBackupConfigs {
 
 type MailModeType = 'none' | 'smtp';
 
-interface MailModeBase {
-  type: Exclude<MailModeType, 'smtp'>;
+interface MailModeNone {
+  type: 'none';
 }
 
 interface MailModeSmtp {
@@ -468,7 +466,7 @@ interface MailModeSmtp {
   fromName: string | null;
 }
 
-type MailMode = MailModeBase | MailModeSmtp;
+type MailMode = MailModeNone | MailModeSmtp;
 
 type ProcessConfigurationConfigParser = 'file' | 'yaml' | 'properties' | 'ini' | 'json' | 'xml';
 
@@ -492,10 +490,8 @@ interface ProcessConfiguration {
   }[];
 }
 
-type PublicCaptchaProviderType = 'none' | 'turnstile' | 'recaptcha';
-
-interface PublicCaptchaProviderBase {
-  type: Exclude<PublicCaptchaProviderType, 'turnstile' | 'recaptcha'>;
+interface PublicCaptchaProviderNone {
+  type: 'none';
 }
 
 interface PublicCaptchaProviderTurnstile {
@@ -510,7 +506,7 @@ interface PublicCaptchaProviderRecaptcha {
 }
 
 type PublicCaptchaProvider =
-  | PublicCaptchaProviderBase
+  | PublicCaptchaProviderNone
   | PublicCaptchaProviderTurnstile
   | PublicCaptchaProviderRecaptcha;
 

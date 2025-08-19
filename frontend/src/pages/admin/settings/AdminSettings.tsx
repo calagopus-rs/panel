@@ -11,6 +11,7 @@ import Spinner from '@/elements/Spinner';
 import ApplicationContainer from './ApplicationContainer';
 import ServerContainer from './ServerContainer';
 import CaptchaContainer from './CaptchaContainer';
+import { Title } from '@mantine/core';
 
 export default () => {
   const { addToast } = useToast();
@@ -29,9 +30,7 @@ export default () => {
 
   return (
     <>
-      <div className={'mb-4'}>
-        <h1 className={'text-4xl font-bold text-white'}>Settings</h1>
-      </div>
+      <Title order={1}>Settings</Title>
 
       <SubNavigation>
         <SubNavigationLink to={'/admin/settings'} name={'Application'} icon={faLayerGroup} />

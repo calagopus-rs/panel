@@ -1,4 +1,7 @@
-import { Input } from '@/elements/inputs';
+import NumberInput from '@/elements/inputnew/NumberInput';
+import Switch from '@/elements/inputnew/Switch';
+import TextInput from '@/elements/inputnew/TextInput';
+import { Group } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 
 export default ({
@@ -10,76 +13,65 @@ export default ({
 }) => {
   return (
     <>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'host'}>Host</Input.Label>
-        <Input.Text
-          id={'host'}
+      <Group grow>
+        <TextInput
+          label={'Host'}
           placeholder={'Host'}
-          value={settings.host}
+          value={settings.host || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, host: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'port'}>Port</Input.Label>
-        <Input.Text
-          id={'port'}
+        <NumberInput
+          label={'Port'}
           placeholder={'Port'}
-          type={'number'}
-          value={settings.port}
-          onChange={(e) => setSettings((settings) => ({ ...settings, port: Number(e.target.value) }))}
+          min={0}
+          value={settings.port || 543}
+          onChange={(e) => setSettings((settings) => ({ ...settings, port: Number(e) }))}
+          mt={'sm'}
         />
-      </div>
+      </Group>
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'username'}>Username</Input.Label>
-        <Input.Text
-          id={'username'}
+      <Switch
+        label={'Use TLS'}
+        checked={settings.useTls}
+        onChange={(e) => setSettings((settings) => ({ ...settings, useTls: e.target.checked }))}
+        mt={'sm'}
+      />
+
+      <Group grow>
+        <TextInput
+          label={'Username'}
           placeholder={'Username'}
-          value={settings.username}
+          value={settings.username || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, username: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'password'}>Password</Input.Label>
-        <Input.Text
-          id={'password'}
+        <TextInput
+          label={'Password'}
           placeholder={'Password'}
           type={'password'}
-          value={settings.password}
+          value={settings.password || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, password: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
+      </Group>
 
-      <div className={'mt-4'}>
-        <Input.Switch
-          label={'Use TLS'}
-          name={'useTls'}
-          defaultChecked={settings.useTls}
-          onChange={(e) => setSettings((settings) => ({ ...settings, useTls: e.target.checked }))}
-        />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'fromAddress'}>From Address</Input.Label>
-        <Input.Text
-          id={'fromAddress'}
+      <Group grow>
+        <TextInput
+          label={'From Address'}
           placeholder={'From Address'}
-          value={settings.fromAddress}
+          value={settings.fromAddress || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromAddress: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'fromName'}>From Name</Input.Label>
-        <Input.Text
-          id={'fromName'}
+        <TextInput
+          label={'From Name'}
           placeholder={'From Name'}
-          value={settings.fromName}
+          value={settings.fromName || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromName: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
+      </Group>
     </>
   );
 };

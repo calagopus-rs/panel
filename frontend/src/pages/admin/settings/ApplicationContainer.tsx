@@ -1,72 +1,79 @@
-import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
-import { Input } from '@/elements/inputs';
 import { httpErrorToHuman } from '@/api/axios';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
-import AdminSettingContainer from '@/elements/AdminSettingContainer';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import Switch from '@/elements/inputnew/Switch';
+import { load } from '@/lib/debounce';
+import NewButton from '@/elements/button/NewButton';
 
 export default () => {
   const { addToast } = useToast();
   const { app } = useAdminStore();
 
+  const [loading, setLoading] = useState(false);
   const [appSettings, setAppSettings] = useState<AdminSettings['app']>(app);
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
+    load(true, setLoading);
     updateApplicationSettings(appSettings)
       .then(() => {
         addToast('Application settings updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
-    <AdminSettingContainer title={'Application Settings'}>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'type'}>Name</Input.Label>
-        <Input.Text
-          id={'name'}
+    <>
+      <Title mt={'md'} order={2}>
+        Application Settings
+      </Title>
+
+      <Group grow>
+        <TextInput
+          label={'Name'}
           placeholder={'Name'}
           value={appSettings.name || ''}
           onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
+          mt={'sm'}
         />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'icon'}>Icon</Input.Label>
-        <Input.Text
-          id={'icon'}
-          placeholder={'Icon'}
-          value={appSettings.icon || ''}
-          onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
-        />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'url'}>URL</Input.Label>
-        <Input.Text
-          id={'url'}
+        <TextInput
+          label={'URL'}
           placeholder={'URL'}
           value={appSettings.url || ''}
           onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
+          mt={'sm'}
         />
-      </div>
+      </Group>
 
-      <div className={'mt-4'}>
-        <Input.Switch
-          label={'Enable Telemetry'}
-          name={'telemetryEnabled'}
-          defaultChecked={appSettings.telemetryEnabled}
-          onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
-        />
-      </div>
+      <TextInput
+        label={'Icon'}
+        placeholder={'Icon'}
+        value={appSettings.icon || ''}
+        onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
+        mt={'sm'}
+      />
 
-      <div className={'mt-4 flex justify-end'}>
-        <Button onClick={handleUpdate}>Update Application Settings</Button>
-      </div>
-    </AdminSettingContainer>
+      <Switch
+        label={'Enable Telemetry'}
+        name={'telemetryEnabled'}
+        defaultChecked={appSettings.telemetryEnabled}
+        onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
+        mt={'sm'}
+      />
+
+      <Group mt={'md'}>
+        <NewButton onClick={doUpdate} loading={loading}>
+          Save
+        </NewButton>
+      </Group>
+    </>
   );
 };

@@ -1,5 +1,4 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
@@ -15,12 +14,16 @@ import TagsInput from '@/elements/inputnew/TagsInput';
 import Switch from '@/elements/inputnew/Switch';
 import NumberInput from '@/elements/inputnew/NumberInput';
 import { MultiKeyValueInput } from '@/elements/inputnew/MultiKeyValueInput';
+import NewButton from '@/elements/button/NewButton';
+import { load } from '@/lib/debounce';
 
 export default ({ nest }: { nest: Nest }) => {
   const params = useParams<'eggId'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
+  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [loading, setLoading] = useState(false);
   const [egg, setEgg] = useState<AdminNestEgg>({
     author: '',
     name: '',
@@ -51,7 +54,6 @@ export default ({ nest }: { nest: Nest }) => {
     dockerImages: {},
     fileDenylist: [],
   } as AdminNestEgg);
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
 
   useEffect(() => {
     if (params.eggId) {
@@ -66,6 +68,7 @@ export default ({ nest }: { nest: Nest }) => {
   }, [params.eggId]);
 
   const doCreateOrUpdate = () => {
+    load(true, setLoading);
     if (egg?.uuid) {
       updateEgg(nest.uuid, egg.uuid, egg)
         .then(() => {
@@ -73,6 +76,9 @@ export default ({ nest }: { nest: Nest }) => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     } else {
       createEgg(nest.uuid, egg)
@@ -82,11 +88,15 @@ export default ({ nest }: { nest: Nest }) => {
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
         });
     }
   };
 
   const doDelete = () => {
+    load(true, setLoading);
     deleteEgg(nest.uuid, egg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
@@ -94,6 +104,9 @@ export default ({ nest }: { nest: Nest }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
@@ -276,14 +289,16 @@ export default ({ nest }: { nest: Nest }) => {
         mt={'sm'}
       />
 
-      <div className={'mt-4 flex justify-between'}>
+      <Group mt={'md'}>
+        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+          Save
+        </NewButton>
         {params.eggId && (
-          <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
+          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
             Delete
-          </Button>
+          </NewButton>
         )}
-        <Button onClick={doCreateOrUpdate}>Save</Button>
-      </div>
+      </Group>
     </>
   );
 };

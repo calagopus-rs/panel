@@ -72,7 +72,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
   return (
     <>
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+        <Title order={2} c={'white'}>
           Eggs
         </Title>
         <Group>

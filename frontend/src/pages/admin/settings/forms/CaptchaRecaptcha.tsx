@@ -1,4 +1,6 @@
-import { Input } from '@/elements/inputs';
+import Switch from '@/elements/inputnew/Switch';
+import TextInput from '@/elements/inputnew/TextInput';
+import { Group } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 
 export default ({
@@ -10,35 +12,30 @@ export default ({
 }) => {
   return (
     <>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'siteKey'}>Site Key</Input.Label>
-        <Input.Text
-          id={'siteKey'}
+      <Group grow>
+        <TextInput
+          label={'Site Key'}
           placeholder={'Site Key'}
-          value={settings.siteKey}
+          value={settings.siteKey || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'secretKey'}>Secret Key</Input.Label>
-        <Input.Text
-          id={'secretKey'}
+        <TextInput
+          label={'Secret Key'}
           placeholder={'Secret Key'}
           type={'password'}
-          value={settings.secretKey}
+          value={settings.secretKey || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, secretKey: e.target.value }))}
+          mt={'sm'}
         />
-      </div>
+      </Group>
 
-      <div className={'mt-4'}>
-        <Input.Switch
-          label={'V3'}
-          name={'v3'}
-          defaultChecked={settings.v3}
-          onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.target.checked }))}
-        />
-      </div>
+      <Switch
+        label={'V3'}
+        checked={settings.v3}
+        onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.currentTarget.checked }))}
+        mt={'sm'}
+      />
     </>
   );
 };

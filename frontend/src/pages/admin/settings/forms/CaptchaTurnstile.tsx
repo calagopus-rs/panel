@@ -1,4 +1,5 @@
-import { Input } from '@/elements/inputs';
+import TextInput from '@/elements/inputnew/TextInput';
+import { Group } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 
 export default ({
@@ -9,27 +10,22 @@ export default ({
   setSettings: Dispatch<SetStateAction<CaptchaProviderTurnstile>>;
 }) => {
   return (
-    <>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'siteKey'}>Site Key</Input.Label>
-        <Input.Text
-          id={'siteKey'}
-          placeholder={'Site Key'}
-          value={settings.siteKey}
-          onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
-        />
-      </div>
-
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'secretKey'}>Secret Key</Input.Label>
-        <Input.Text
-          id={'secretKey'}
-          placeholder={'Secret Key'}
-          type={'password'}
-          value={settings.secretKey}
-          onChange={(e) => setSettings((settings) => ({ ...settings, secretKey: e.target.value }))}
-        />
-      </div>
-    </>
+    <Group grow>
+      <TextInput
+        label={'Site Key'}
+        placeholder={'Site Key'}
+        value={settings.siteKey || ''}
+        onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
+        mt={'sm'}
+      />
+      <TextInput
+        label={'Secret Key'}
+        placeholder={'Secret Key'}
+        type={'password'}
+        value={settings.secretKey || ''}
+        onChange={(e) => setSettings((settings) => ({ ...settings, secretKey: e.target.value }))}
+        mt={'sm'}
+      />
+    </Group>
   );
 };
