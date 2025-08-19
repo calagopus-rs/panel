@@ -114,6 +114,7 @@ impl AppSettingsApp {
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsServer {
     pub max_file_manager_view_size: u64,
+    pub max_schedules_step_count: u64,
 
     pub allow_overwriting_custom_docker_image: bool,
     pub allow_editing_startup_command: bool,
@@ -126,6 +127,8 @@ impl AppSettingsServer {
 
         keys.push("server::max_file_manager_view_size");
         values.push(self.max_file_manager_view_size.to_string());
+        keys.push("server::max_schedules_step_count");
+        values.push(self.max_schedules_step_count.to_string());
         keys.push("server::allow_overwriting_custom_docker_image");
         values.push(self.allow_overwriting_custom_docker_image.to_string());
         keys.push("server::allow_editing_startup_command");
@@ -140,6 +143,10 @@ impl AppSettingsServer {
                 .remove("server::max_file_manager_view_size")
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(10 * 1024 * 1024),
+            max_schedules_step_count: map
+                .remove("server::max_schedules_step_count")
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(100),
 
             allow_overwriting_custom_docker_image: map
                 .remove("server::allow_overwriting_custom_docker_image")
