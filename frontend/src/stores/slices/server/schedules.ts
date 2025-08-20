@@ -3,15 +3,15 @@ import { ServerStore } from '@/stores/server';
 import { StateCreator } from 'zustand';
 
 export interface SchedulesSlice {
-  schedules: ResponseMeta<any>;
+  schedules: ResponseMeta<ServerSchedule>;
 
-  setSchedules: (schedules: ResponseMeta<any>) => void;
-  addSchedule: (schedules: any) => void;
-  removeSchedule: (schedules: any) => void;
+  setSchedules: (schedules: ResponseMeta<ServerSchedule>) => void;
+  addSchedule: (schedules: ServerSchedule) => void;
+  removeSchedule: (schedules: ServerSchedule) => void;
 }
 
 export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSlice> = (set): SchedulesSlice => ({
-  schedules: getEmptyPaginationSet<any>(),
+  schedules: getEmptyPaginationSet<ServerSchedule>(),
 
   setSchedules: (value) => set((state) => ({ ...state, schedules: value })),
   addSchedule: (schedule) =>
@@ -26,7 +26,7 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
     set((state) => ({
       schedules: {
         ...state.schedules,
-        data: state.schedules.data.filter((s) => s.id !== schedule.id),
+        data: state.schedules.data.filter((s) => s.uuid !== schedule.uuid),
         total: state.schedules.total - 1,
       },
     })),

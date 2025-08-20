@@ -335,6 +335,221 @@ interface ServerVariable {
   created: Date;
 }
 
+interface ScheduleTriggerCron {
+  type: 'cron';
+  schedule: string;
+}
+
+interface ScheduleTriggerPowerAction {
+  type: 'power_action';
+  action: ServerPowerAction;
+}
+
+interface ScheduleTriggerServerState {
+  type: 'server_state';
+  state: ServerPowerState;
+}
+
+interface ScheduleTriggerCrash {
+  type: 'crash';
+}
+
+type ScheduleTrigger =
+  | ScheduleTriggerCron
+  | ScheduleTriggerPowerAction
+  | ScheduleTriggerServerState
+  | ScheduleTriggerCrash;
+
+type ScheduleComparator = 'smaller_than' | 'smaller_than_or_equal' | 'equal' | 'greater_than' | 'greater_than_or_equal';
+
+interface ScheduleConditionNone {
+  type: 'none';
+}
+
+interface ScheduleConditionAnd {
+  type: 'and';
+  conditions: ScheduleCondition[];
+}
+
+interface ScheduleConditionOr {
+  type: 'or';
+  conditions: ScheduleCondition[];
+}
+
+interface ScheduleConditionServerState {
+  type: 'server_state';
+  state: ServerPowerState;
+}
+
+interface ScheduleConditionUptime {
+  type: 'uptime';
+  comparator: ScheduleComparator;
+  value: number;
+}
+
+interface ScheduleConditionCpuUsage {
+  type: 'cpu_usage';
+  comparator: ScheduleComparator;
+  value: number;
+}
+
+interface ScheduleConditionMemoryUsage {
+  type: 'memory_usage';
+  comparator: ScheduleComparator;
+  value: number;
+}
+
+interface ScheduleConditionDiskUsage {
+  type: 'disk_usage';
+  comparator: ScheduleComparator;
+  value: number;
+}
+
+type ScheduleCondition =
+  | ScheduleConditionNone
+  | ScheduleConditionAnd
+  | ScheduleConditionOr
+  | ScheduleConditionServerState
+  | ScheduleConditionUptime
+  | ScheduleConditionCpuUsage
+  | ScheduleConditionMemoryUsage
+  | ScheduleConditionDiskUsage;
+
+interface ServerSchedule {
+  uuid: string;
+  name: string;
+  enabled: boolean;
+  triggers: ScheduleTrigger[];
+  condition: ScheduleCondition;
+  steps: number;
+  lastRun: Date | null;
+  lastFailure: Date | null;
+  created: Date;
+}
+
+interface ScheduleActionSleep {
+  type: 'sleep';
+  duration: number;
+}
+
+interface ScheduleActionSendPower {
+  type: 'send_power';
+  ignoreFailure: boolean;
+  action: ServerPowerAction;
+}
+
+interface ScheduleActionSendCommand {
+  type: 'send_command';
+  ignoreFailure: boolean;
+  command: string;
+}
+
+interface ScheduleActionCreateBackup {
+  type: 'create_backup';
+  ignoreFailure: boolean;
+  foreground: boolean;
+  name: string | null;
+  ignoredFiles: string[];
+}
+
+interface ScheduleActionCreateDirectory {
+  type: 'create_directory';
+  ignoreFailure: boolean;
+  root: string;
+  name: string;
+}
+
+interface ScheduleActionWriteFile {
+  type: 'write_file';
+  ignoreFailure: boolean;
+  file: string;
+  content: string;
+}
+
+interface ScheduleActionCopyFile {
+  type: 'copy_file';
+  ignoreFailure: boolean;
+  foreground: boolean;
+  file: string;
+  destination: string;
+}
+
+interface ScheduleActionDeleteFiles {
+  type: 'delete_files';
+  root: string;
+  files: string[];
+}
+
+interface ScheduleActionRenameFiles {
+  type: 'rename_files';
+  root: string;
+  files: {
+    from: string;
+    to: string;
+  }[];
+}
+
+interface ScheduleActionCompressFiles {
+  type: 'compress_files';
+  ignoreFailure: boolean;
+  foreground: boolean;
+  root: string;
+  files: string[];
+  format: ArchiveFormat;
+  name: string;
+}
+
+interface ScheduleActionDecompressFile {
+  type: 'decompress_file';
+  ignoreFailure: boolean;
+  foreground: boolean;
+  root: string;
+  file: string;
+}
+
+interface ScheduleActionUpdateStartupVariable {
+  type: 'update_startup_variable';
+  ignoreFailure: boolean;
+  envVariable: string;
+  value: string;
+}
+
+interface ScheduleActionUpdateStartupCommand {
+  type: 'update_startup_command';
+  ignoreFailure: boolean;
+  command: string;
+}
+
+interface ScheduleActionUpdateStartupDockerImage {
+  type: 'update_startup_docker_image';
+  ignoreFailure: boolean;
+  image: string;
+}
+
+type ScheduleAction =
+  | ScheduleActionSleep
+  | ScheduleActionSendPower
+  | ScheduleActionSendCommand
+  | ScheduleActionCreateBackup
+  | ScheduleActionCreateDirectory
+  | ScheduleActionWriteFile
+  | ScheduleActionCopyFile
+  | ScheduleActionDeleteFiles
+  | ScheduleActionRenameFiles
+  | ScheduleActionCompressFiles
+  | ScheduleActionDecompressFile
+  | ScheduleActionUpdateStartupVariable
+  | ScheduleActionUpdateStartupCommand
+  | ScheduleActionUpdateStartupDockerImage;
+
+interface ScheduleStep {
+  uuid: string;
+  action: ScheduleAction;
+  order: number;
+  error: string | null;
+  created: Date;
+}
+
 interface User {
   uuid: string;
   avatar?: string;

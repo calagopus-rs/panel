@@ -11,10 +11,7 @@ import AnimatedHourglass from '@/elements/AnimatedHourglass';
 import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/elements/table/Table';
 import Code from '@/elements/Code';
 import { Button } from '@/elements/button';
-import runSchedule from '@/api/server/schedules/runSchedule';
-import ScheduleCreateOrUpdateButton from './actions/ScheduleCreateOrUpdateButton';
-import ScheduleDeleteButton from './actions/ScheduleDeleteButton';
-import ScheduleTaskCreateOrUpdateButton from './actions/ScheduleTaskCreateOrUpdateButton';
+import runSchedule from '@/api/server/schedules/triggerSchedule';
 
 function DetailCard({
   icon,
@@ -47,11 +44,11 @@ export default () => {
   const [schedule, setSchedule] = useState<any | null>(null);
 
   useEffect(() => {
-    getSchedule(server.uuid, Number(params.id)).then(setSchedule);
+    getSchedule(server.uuid, params.id).then(setSchedule);
   }, [params.id]);
 
   const doRunSchedule = () => {
-    runSchedule(server.uuid, Number(params.id)).then(() => {
+    runSchedule(server.uuid, params.id).then(() => {
       setSchedule((schedule) => ({ ...schedule, isProcessing: true }));
     });
   };
@@ -61,7 +58,8 @@ export default () => {
       <Spinner.Centered />
     </div>
   ) : (
-    <>
+    {
+      /*<>
       <div className={'mb-4 flex justify-between'}>
         <h1 className={'text-4xl font-bold text-white'}>{schedule.name}</h1>
         <div className={'flex gap-2'}>
@@ -70,11 +68,6 @@ export default () => {
               Run
             </Button>
           )}
-          <ScheduleCreateOrUpdateButton
-            schedule={schedule}
-            onUpdate={(updatedSchedule) => setSchedule(updatedSchedule)}
-          />
-          <ScheduleDeleteButton schedule={schedule} />
         </div>
       </div>
 
@@ -106,12 +99,6 @@ export default () => {
         />
       </div>
 
-      <div className={'mb-2 flex justify-end'}>
-        <ScheduleTaskCreateOrUpdateButton
-          schedule={schedule}
-          onSubmit={(task) => setSchedule({ ...schedule, tasks: [...schedule.tasks, task] })}
-        />
-      </div>
       <Table>
         <div className={'overflow-x-auto'}>
           <table className={'w-full table-auto'}>
@@ -153,6 +140,7 @@ export default () => {
           {schedule.tasks.length === 0 ? <NoItems /> : null}
         </div>
       </Table>
-    </>
+    </>*/
+    }
   );
 };
