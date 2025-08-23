@@ -1,4 +1,5 @@
-import { Button } from '@/elements/button';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import { useServerStore } from '@/stores/server';
 import {
   faBoxArchive,
@@ -16,6 +17,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon, Checkbox, Group, Title } from '@mantine/core';
 import { useState } from 'react';
 
 const categoryIcons: { [key: string]: IconDefinition } = {
@@ -100,37 +102,31 @@ export default ({
           const selectionState = getCategorySelectionState(category);
 
           return (
-            <div key={category} className={'bg-gray-500 rounded-lg overflow-hidden'}>
-              <div className={'p-4'}>
-                <div className={'flex items-center justify-between gap-1'}>
-                  <div className={'flex items-center gap-3'}>
-                    <FontAwesomeIcon icon={categoryIcons[category]} className={'w-5 h-5 text-gray-50'} />
-                    <div>
-                      <h3 className={'font-semibold text-gray-50 capitalize'}>{category}</h3>
-                      <p className={'text-sm text-gray-200 mt-1'}>{description}</p>
-                    </div>
+            <Card key={category}>
+              <div className={'flex items-center justify-between gap-1'}>
+                <div className={'flex items-center gap-3'}>
+                  <FontAwesomeIcon icon={categoryIcons[category]} className={'w-5 h-5 text-gray-50'} />
+                  <div>
+                    <Title order={5} c={'white'} className={'uppercase'}>
+                      {category}
+                    </Title>
+                    <p className={'text-sm text-gray-200 mt-1'}>{description}</p>
                   </div>
-                  <div className={'flex items-center gap-2'}>
-                    <button
-                      onClick={() => toggleAllInCategory(category)}
-                      className={`px-3 py-1 rounded text-sm font-medium transition-colors cursor-pointer ${
-                        selectionState === 'all'
-                          ? 'bg-blue-600 text-white'
-                          : selectionState === 'partial'
-                            ? 'bg-cyan-600 text-white'
-                            : 'bg-gray-600 text-gray-200 hover:bg-gray-700'
-                      }`}
-                    >
-                      {selectionState === 'all' ? 'All' : selectionState === 'partial' ? 'Some' : 'None'}
-                    </button>
-                    <button onClick={() => toggleCategory(category)} className={'p-1 hover:bg-gray-600 rounded'}>
-                      {isExpanded ? (
-                        <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
-                      ) : (
-                        <FontAwesomeIcon icon={faChevronDown} className={'w-4 h-4 text-gray-200'} />
-                      )}
-                    </button>
-                  </div>
+                </div>
+                <div className={'flex items-center gap-2'}>
+                  <Button
+                    onClick={() => toggleAllInCategory(category)}
+                    color={selectionState === 'all' ? 'green' : selectionState === 'partial' ? 'yellow' : ''}
+                  >
+                    {selectionState === 'all' ? 'All' : selectionState === 'partial' ? 'Some' : 'None'}
+                  </Button>
+                  <button onClick={() => toggleCategory(category)} className={'p-1 hover:bg-gray-600 rounded'}>
+                    {isExpanded ? (
+                      <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
+                    ) : (
+                      <FontAwesomeIcon icon={faChevronDown} className={'w-4 h-4 text-gray-200'} />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -142,67 +138,63 @@ export default ({
                       const isSelected = selectedPermissions.has(permissionKey);
 
                       return (
-                        <div key={permission} className={'flex items-start gap-3'}>
-                          <input
-                            type={'checkbox'}
-                            id={permissionKey}
-                            checked={isSelected}
-                            onChange={() => togglePermission(permissionKey)}
-                            className={'mt-1 w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500'}
-                          />
-                          <label htmlFor={permissionKey} className={'flex-1 cursor-pointer'}>
-                            <div className={'text-gray-50 font-bold'}>{permission}</div>
-                            <div className={'text-sm text-gray-200 mt-1'}>{permDescription}</div>
-                          </label>
-                        </div>
+                        <Checkbox.Card
+                          key={permission}
+                          checked={isSelected}
+                          onChange={() => togglePermission(permissionKey)}
+                          color={isSelected ? 'green' : ''}
+                          bd={'0'}
+                        >
+                          <Group wrap={'nowrap'} align={'flex-start'}>
+                            <Checkbox.Indicator />
+                            <div>
+                              <div className={'text-gray-50 font-bold'}>{permission}</div>
+                              <div className={'text-sm text-gray-200 mt-1'}>{permDescription}</div>
+                            </div>
+                          </Group>
+                        </Checkbox.Card>
                       );
                     })}
                   </div>
                 </div>
               )}
-            </div>
+            </Card>
           );
         })}
       </div>
 
-      <div>
-        <div className={'bg-gray-500 rounded-lg p-4'}>
-          <h3 className={'font-semibold text-gray-50 mb-3'}>Selected Permissions ({selectedPermissions.size})</h3>
-          <div className={'max-h-96 overflow-y-auto'}>
-            {selectedPermissions.size === 0 ? (
-              <p className={'text-gray-200 text-sm'}>No permissions selected</p>
-            ) : (
-              <div className={'space-y-1'}>
-                {getSelectedPermissionsList().map((permission) => (
-                  <div
-                    key={permission}
-                    className={'flex items-center justify-between bg-gray-600 px-3 py-2 rounded border border-gray-400'}
-                  >
+      <Card>
+        <Title order={3} c={'white'}>
+          Selected Permissions ({selectedPermissions.size})
+        </Title>
+        <div className={'max-h-96 overflow-y-auto'}>
+          {selectedPermissions.size === 0 ? (
+            <p className={'text-gray-200 text-sm'}>No permissions selected</p>
+          ) : (
+            <div className={'space-y-1'}>
+              {getSelectedPermissionsList().map((permission) => (
+                <Card key={permission} className={'border border-neutral-600'} padding={'xs'}>
+                  <Group justify={'space-between'}>
                     <span className={'text-sm font-mono text-white'}>{permission}</span>
-                    <Button
-                      style={Button.Styles.Red}
-                      shape={Button.Shapes.IconSquare}
-                      size={Button.Sizes.Small}
-                      onClick={() => togglePermission(permission)}
-                      className={'w-6! h-6!'}
-                    >
-                      <FontAwesomeIcon icon={faX} />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          {selectedPermissions.size > 0 && (
-            <div className={'mt-4'}>
-              <Button onClick={() => setSelectedPermissions(new Set())} className={'w-full'}>
-                Clear All
-              </Button>
+                    <ActionIcon color={'red'} onClick={() => togglePermission(permission)}>
+                      <FontAwesomeIcon icon={faX} />
+                    </ActionIcon>
+                  </Group>
+                </Card>
+              ))}
             </div>
           )}
         </div>
-      </div>
+
+        {selectedPermissions.size > 0 && (
+          <div className={'mt-4'}>
+            <Button onClick={() => setSelectedPermissions(new Set())} className={'w-full'}>
+              Clear All
+            </Button>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };

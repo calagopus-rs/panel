@@ -10,11 +10,11 @@ import EggCreateOrUpdate from './EggCreateOrUpdate';
 import importEgg from '@/api/admin/eggs/importEgg';
 import getNest from '@/api/admin/nests/getNest';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
@@ -82,14 +82,14 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => fileInputRef.current?.click()} color={'blue'}>
+          <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
             <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
             Upload
-          </NewButton>
-          <NewButton onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)} color={'blue'}>
+          </Button>
+          <Button onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
 
           <input
             type={'file'}
@@ -104,11 +104,11 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['ID', 'Name', 'Author', 'Description', 'Servers']} pagination={eggs} onPageSelect={setPage}>
+        <Table columns={['ID', 'Name', 'Author', 'Description', 'Servers']} pagination={eggs} onPageSelect={setPage}>
           {eggs.data.map((egg) => (
             <EggRow key={egg.uuid} nest={nest} egg={egg} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

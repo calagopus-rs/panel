@@ -1,11 +1,11 @@
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import resetPassword from '@/api/auth/resetPassword';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 
 export default () => {
   const { addToast } = useToast();
@@ -22,9 +22,7 @@ export default () => {
     }
   }, []);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submit = () => {
     resetPassword(token, password)
       .then(() => {
         addToast('Password has been reset.', 'success');
@@ -37,32 +35,25 @@ export default () => {
 
   return (
     <AuthWrapper title={'Reset Password'}>
-      <form onSubmit={submit}>
-        <div className={'mb-4'}>
-          <Input.Text
-            id={'password'}
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Password'}
-            type={'password'}
-            className={'bg-gray-700!'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className={'mb-4'}>
-          <Input.Text
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Confirm Password'}
-            type={'password'}
-            className={'bg-gray-700!'}
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
-        </div>
-        <Button type={'submit'} className={'w-full'} disabled={password !== confirmPassword}>
+      <div>
+        <TextInput
+          placeholder={'Password'}
+          type={'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <TextInput
+          placeholder={'Confirm Password'}
+          type={'password'}
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          mt={'sm'}
+        />
+
+        <Button fullWidth onClick={submit} disabled={password !== confirmPassword} mt={'md'}>
           Reset Password
         </Button>
-      </form>
+      </div>
     </AuthWrapper>
   );
 };

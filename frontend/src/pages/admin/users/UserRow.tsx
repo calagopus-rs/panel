@@ -1,5 +1,5 @@
 import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/table/TableNew';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { faCrown, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';

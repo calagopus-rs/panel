@@ -7,8 +7,8 @@ import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
 import CaptchaTurnstile from './forms/CaptchaTurnstile';
 import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
 import { Group, Title } from '@mantine/core';
-import Select from '@/elements/inputnew/Select';
-import NewButton from '@/elements/button/NewButton';
+import Select from '@/elements/input/Select';
+import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 
 export default () => {
@@ -56,9 +56,9 @@ export default () => {
       ) : null}
 
       <Group mt={'md'}>
-        <NewButton onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
       </Group>
     </>
   );

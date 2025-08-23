@@ -1,7 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updatePassword from '@/api/me/account/updatePassword';
-import NewButton from '@/elements/button/NewButton';
-import TextInput from '@/elements/inputnew/TextInput';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
@@ -54,12 +54,12 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton
+        <Button
           disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
           onClick={doUpdate}
         >
           Update Password
-        </NewButton>
+        </Button>
       </Group>
     </Grid.Col>
   );

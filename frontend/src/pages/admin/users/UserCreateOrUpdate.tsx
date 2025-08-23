@@ -2,24 +2,24 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Dialog } from '@/elements/dialog';
 import Code from '@/elements/Code';
 import getUser from '@/api/admin/users/getUser';
 import updateUser from '@/api/admin/users/updateUser';
 import createUser from '@/api/admin/users/createUser';
 import deleteUser from '@/api/admin/users/deleteUser';
 import { Divider, Group, Title } from '@mantine/core';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
-import TextInput from '@/elements/inputnew/TextInput';
-import Switch from '@/elements/inputnew/Switch';
+import TextInput from '@/elements/input/TextInput';
+import Switch from '@/elements/input/Switch';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 
 export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User>({
     username: '',
@@ -87,15 +87,15 @@ export default () => {
 
   return (
     <>
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm User Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{user?.username}</Code>?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Title order={1}>{params.id ? 'Update' : 'Create'} User</Title>
       <Divider my={'sm'} />
@@ -152,13 +152,13 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
         {params.id && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
-          </NewButton>
+          </Button>
         )}
       </Group>
     </>

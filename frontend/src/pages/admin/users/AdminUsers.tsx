@@ -8,11 +8,11 @@ import UserRow from './UserRow';
 import UserCreateOrUpdate from './UserCreateOrUpdate';
 import getUsers from '@/api/admin/users/getUsers';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 
 const UsersContainer = () => {
   const navigate = useNavigate();
@@ -57,21 +57,21 @@ const UsersContainer = () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => navigate('/admin/users/new')} color={'blue'}>
+          <Button onClick={() => navigate('/admin/users/new')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['ID', 'Username', 'Created']} pagination={users} onPageSelect={setPage}>
+        <Table columns={['ID', 'Username', 'Created']} pagination={users} onPageSelect={setPage}>
           {users.data.map((user) => (
             <UserRow key={user.uuid} user={user} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

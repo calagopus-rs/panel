@@ -1,10 +1,10 @@
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useGlobalStore } from '@/stores/global';
 import { useAuth } from '@/providers/AuthProvider';
+import Button from '@/elements/Button';
+import NumberInput from '@/elements/input/NumberInput';
 
 export default () => {
   const navigate = useNavigate();
@@ -19,32 +19,24 @@ export default () => {
 
   const [faToken, setFaToken] = useState('');
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submit = () => {
     doCheckpointLogin(faToken, twoFactorToken!);
   };
 
   return (
     <AuthWrapper title={'Two Factor Authentication'}>
-      <form onSubmit={submit}>
-        <div className={'mb-4'}>
-          <Input.Text
-            autoFocus
-            id={'token'}
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Token'}
-            type={'text'}
-            autoComplete={'one-time-code'}
-            className={'bg-gray-700!'}
-            value={faToken}
-            onChange={(e) => setFaToken(e.target.value)}
-          />
-        </div>
-        <Button type={'submit'} className={'w-full'}>
+      <div>
+        <NumberInput
+          placeholder={'Token'}
+          value={faToken}
+          autoComplete={'one-time-code'}
+          onChange={(value) => setFaToken(String(value))}
+        />
+
+        <Button fullWidth onClick={submit} mt={'md'}>
           Login
         </Button>
-      </form>
+      </div>
     </AuthWrapper>
   );
 };

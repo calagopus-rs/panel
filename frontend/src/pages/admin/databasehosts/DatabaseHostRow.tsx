@@ -1,5 +1,5 @@
 import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/table/TableNew';
+import { TableData, TableRow } from '@/elements/Table';
 import { NavLink } from 'react-router';
 
 export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {

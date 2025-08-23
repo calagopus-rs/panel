@@ -1,15 +1,16 @@
 import { httpErrorToHuman } from '@/api/axios';
 import enableTwoFactor from '@/api/me/account/enableTwoFactor';
 import getTwoFactor from '@/api/me/account/getTwoFactor';
-import { Button } from '@/elements/button';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
-import { Dialog } from '@/elements/dialog';
-import { Input } from '@/elements/inputs';
+import NumberInput from '@/elements/input/NumberInput';
+import TextInput from '@/elements/input/TextInput';
+import Modal from '@/elements/modals/Modal';
 import Spinner from '@/elements/Spinner';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
+import { Group, Modal as MantineModal, useModalsStack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -22,8 +23,7 @@ export default () => {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
-  const [open, setOpen] = useState(false);
-  const [stage, setStage] = useState<'setup' | 'recovery'>('setup');
+  const stageStack = useModalsStack(['setup', 'recovery']);
 
   const [token, setToken] = useState<TwoFactorSetupResponse | null>(null);
   const [code, setCode] = useState('');
@@ -32,7 +32,7 @@ export default () => {
 
   useEffect(() => {
     if (!open) {
-      setStage('setup');
+      stageStack.open('setup');
       setCode('');
       setPassword('');
       setRecoveryCodes([]);
@@ -48,12 +48,12 @@ export default () => {
       });
   }, [open]);
 
-  const submit = () => {
+  const doEnable = () => {
     enableTwoFactor(code, password)
       .then(({ recoveryCodes }) => {
         setRecoveryCodes(recoveryCodes);
         addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
-        setStage('recovery');
+        stageStack.open('recovery');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -62,93 +62,76 @@ export default () => {
 
   return (
     <>
-      <Dialog
-        title={'Enable Two-Step Verification'}
-        onClose={() => setOpen(false)}
-        open={open}
-        preventExternalClose
-        hideCloseIcon
-      >
-        {stage === 'setup' ? (
-          <>
-            <p>
-              Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
-              time you sign in.
-            </p>
-            {!token ? (
-              <Spinner.Centered />
-            ) : (
-              <div className={'flex flex-col items-center justify-center my-4'}>
-                <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
-                  <QRCode title={'QR Code'} value={token.otpUrl} />
-                </div>
-                <div className={'mt-2'}>
-                  <CopyOnClick content={token.secret}>
-                    <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
-                  </CopyOnClick>
-                </div>
+      <MantineModal.Stack>
+        <Modal {...stageStack.register('setup')} title={'Enable Two-Step Verification'}>
+          <p>
+            Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
+            time you sign in.
+          </p>
+          {!token ? (
+            <Spinner.Centered />
+          ) : (
+            <div className={'flex flex-col items-center justify-center my-4'}>
+              <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
+                <QRCode title={'QR Code'} value={token.otpUrl} />
               </div>
-            )}
-            <p>
-              Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code
-              generated into the field below.
-            </p>
+              <div className={'mt-2'}>
+                <CopyOnClick content={token.secret}>
+                  <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
+                </CopyOnClick>
+              </div>
+            </div>
+          )}
+          <p>
+            Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code
+            generated into the field below.
+          </p>
 
-            <Input.Label htmlFor={'totpCode'}>Code</Input.Label>
-            <Input.Text
-              id={'code'}
-              name={'code'}
-              type={'number'}
-              placeholder={'000000'}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-            />
+          <NumberInput
+            label={'Code'}
+            placeholder={'000000'}
+            value={code}
+            onChange={(value) => setCode(String(value))}
+            mt={'sm'}
+          />
 
-            <Input.Label htmlFor={'password'}>Password</Input.Label>
-            <Input.Text
-              id={'password'}
-              name={'password'}
-              type={'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+          <TextInput
+            label={'Password'}
+            placeholder={'Password'}
+            type={'password'}
+            onChange={(e) => setPassword(e.target.value)}
+            mt={'sm'}
+          />
 
-            <Dialog.Footer>
-              <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
-                Close
-              </Button>
-              <Button onClick={submit} disabled={!code || !password}>
-                Enable
-              </Button>
-            </Dialog.Footer>
-          </>
-        ) : (
-          <>
-            <p>Recovery codes:</p>
-            <CopyOnClick content={recoveryCodes.join('\n')}>
-              <Code>
-                {recoveryCodes.map((code, index) => (
-                  <span key={index} className={'block'}>
-                    {code}
-                  </span>
-                ))}
-              </Code>
-            </CopyOnClick>
-            <Dialog.Footer>
-              <Button
-                style={Button.Styles.Gray}
-                onClick={() => {
-                  setOpen(false);
-                  setUser({ ...user!, totpEnabled: true });
-                }}
-              >
-                Close
-              </Button>
-            </Dialog.Footer>
-          </>
-        )}
-      </Dialog>
-      <NewButton onClick={() => setOpen(true)}>Enable Two-Step</NewButton>
+          <Group mt={'md'}>
+            <Button onClick={doEnable} disabled={!code || !password}>
+              Enable
+            </Button>
+            <Button variant={'default'} onClick={() => stageStack.closeAll()}>
+              Close
+            </Button>
+          </Group>
+        </Modal>
+        <Modal {...stageStack.register('recovery')} title={'Recovery Codes'}>
+          <p>Recovery codes:</p>
+          <CopyOnClick content={recoveryCodes.join('\n')}>
+            <Code block>{recoveryCodes.join('\n')}</Code>
+          </CopyOnClick>
+          <Group mt={'md'}>
+            <Button
+              variant={'default'}
+              onClick={() => {
+                setUser({ ...user!, totpEnabled: true });
+                stageStack.closeAll();
+              }}
+            >
+              Close
+            </Button>
+          </Group>
+        </Modal>
+      </MantineModal.Stack>
+
+      <Button onClick={() => stageStack.open('setup')}>Enable Two-Step</Button>
     </>
   );
 };

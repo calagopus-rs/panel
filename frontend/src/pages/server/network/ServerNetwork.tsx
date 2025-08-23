@@ -9,11 +9,11 @@ import { useSearchParams } from 'react-router';
 import AllocationRow from './AllocationRow';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -64,10 +64,10 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={doAdd} color={'blue'}>
+          <Button onClick={doAdd} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Add
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
@@ -75,11 +75,11 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <TableNew columns={['Hostname', 'Port', 'Note', '', '']} pagination={allocations} onPageSelect={setPage}>
+          <Table columns={['Hostname', 'Port', 'Note', '', '']} pagination={allocations} onPageSelect={setPage}>
             {allocations.data.map((allocation) => (
               <AllocationRow key={allocation.uuid} allocation={allocation} />
             ))}
-          </TableNew>
+          </Table>
         </ContextMenuProvider>
       )}
     </>

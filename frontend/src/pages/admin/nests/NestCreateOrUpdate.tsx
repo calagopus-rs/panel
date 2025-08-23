@@ -2,22 +2,22 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Dialog } from '@/elements/dialog';
 import Code from '@/elements/Code';
 import updateNest from '@/api/admin/nests/updateNest';
 import deleteNest from '@/api/admin/nests/deleteNest';
 import createNest from '@/api/admin/nests/createNest';
 import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
-import NewButton from '@/elements/button/NewButton';
-import TextInput from '@/elements/inputnew/TextInput';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 
 export default ({ contextNest }: { contextNest?: Nest }) => {
   const params = useParams<'nestId'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [nest, setNest] = useState<Nest>({
     author: contextNest?.author || '',
@@ -70,15 +70,15 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
 
   return (
     <>
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Nest Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{nest?.name}</Code>?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Title order={2}>{params.nestId ? 'Update' : 'Create'} Nest</Title>
 
@@ -108,13 +108,13 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
         {params.nestId && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
-          </NewButton>
+          </Button>
         )}
       </Group>
     </>

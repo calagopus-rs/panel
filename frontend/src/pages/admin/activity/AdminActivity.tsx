@@ -3,9 +3,9 @@ import Spinner from '@/elements/Spinner';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 import ActivityRow from './ActivityRow';
-import TextInput from '@/elements/inputnew/TextInput';
+import TextInput from '@/elements/input/TextInput';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,11 +48,11 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
+        <Table columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
           {activities.data.map((activity) => (
             <ActivityRow key={activity.created.toString()} activity={activity} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

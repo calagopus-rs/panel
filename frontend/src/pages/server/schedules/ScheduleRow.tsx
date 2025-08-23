@@ -1,4 +1,4 @@
-import { TableRow } from '@/elements/table/Table';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
@@ -21,25 +21,21 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
       className={'cursor-pointer'}
       onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}`)}
     >
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={schedule.name}>
-        {schedule.name}
-      </td>
+      <TableData>{schedule.name}</TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <Tooltip content={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'N/A'}>
           {schedule.lastRun ? formatTimestamp(schedule.lastRun) : 'N/A'}
         </Tooltip>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+      <TableData>
         <Tooltip content={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'N/A'}>
           {schedule.lastFailure ? formatTimestamp(schedule.lastFailure) : 'N/A'}
         </Tooltip>
-      </td>
+      </TableData>
 
-      <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-        {schedule.enabled ? <ActiveBadge /> : <InactiveBadge />}
-      </td>
+      <TableData>{schedule.enabled ? <ActiveBadge /> : <InactiveBadge />}</TableData>
     </TableRow>
   );
 };

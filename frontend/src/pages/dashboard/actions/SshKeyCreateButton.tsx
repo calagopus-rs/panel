@@ -1,37 +1,37 @@
 import { httpErrorToHuman } from '@/api/axios';
 import createSshKey from '@/api/me/ssh-keys/createSshKey';
-import { Button } from '@/elements/button';
-import NewButton from '@/elements/button/NewButton';
-import { Dialog } from '@/elements/dialog';
-import { Input } from '@/elements/inputs';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
   const { addSshKey } = useUserStore();
 
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<'create'>(null);
 
   const [name, setName] = useState('');
   const [pubKey, setPubKey] = useState('');
 
   useEffect(() => {
-    if (!open) {
+    if (!openModal) {
       setName('');
       setPubKey('');
       return;
     }
-  }, [open]);
+  }, [openModal]);
 
-  const submit = () => {
+  const doCreate = () => {
     createSshKey(name, pubKey)
       .then((key) => {
         addToast('SSH key created.', 'success');
-        setOpen(false);
+        setOpenModal(null);
         addSshKey(key);
       })
       .catch((msg) => {
@@ -41,26 +41,31 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Create SSH Key'} onClose={() => setOpen(false)} open={open}>
-        <Input.Label htmlFor={'name'}>Name</Input.Label>
-        <Input.Text id={'name'} name={'name'} value={name} onChange={(e) => setName(e.target.value)} />
+      <Modal title={'Create API Key'} opened={openModal === 'create'} onClose={() => setOpenModal(null)}>
+        <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-        <Input.Label htmlFor={'pubKey'}>Public Key</Input.Label>
-        <Input.Text id={'pubKey'} name={'pubKey'} value={pubKey} onChange={(e) => setPubKey(e.target.value)} />
+        <TextInput
+          label={'Public Key'}
+          placeholder={'Public Key'}
+          value={pubKey}
+          onChange={(e) => setPubKey(e.target.value)}
+          mt={'sm'}
+        />
 
-        <Dialog.Footer>
-          <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
-            Close
-          </Button>
-          <Button onClick={submit} disabled={!name}>
+        <Group mt={'md'}>
+          <Button onClick={doCreate} disabled={!name}>
             Create
           </Button>
-        </Dialog.Footer>
-      </Dialog>
-      <NewButton onClick={() => setOpen(true)} color={'blue'}>
+          <Button variant={'default'} onClick={() => setOpenModal(null)}>
+            Close
+          </Button>
+        </Group>
+      </Modal>
+
+      <Button onClick={() => setOpenModal('create')} color={'blue'}>
         <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
         Create
-      </NewButton>
+      </Button>
     </>
   );
 };

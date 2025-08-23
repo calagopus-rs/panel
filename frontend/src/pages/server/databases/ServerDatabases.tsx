@@ -1,29 +1,25 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import DatabaseRow from './DatabaseRow';
-import DatabaseCreateDialog from './dialogs/DatabaseCreateDialog';
 import getDatabases from '@/api/server/databases/getDatabases';
-import createDatabase from '@/api/server/databases/createDatabase';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
+import DatabaseCreateModal from './modals/DatabaseCreateModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
-  const { server, databases, setDatabases, addDatabase } = useServerStore();
+  const { server, databases, setDatabases } = useServerStore();
 
   const [loading, setLoading] = useState(databases.data.length === 0);
   const [search, setSearch] = useState('');
-  const [openDialog, setOpenDialog] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -42,25 +38,13 @@ export default () => {
     });
   }, [page, search]);
 
-  const doCreate = (name: string) => {
-    createDatabase(server.uuid, { name })
-      .then((database) => {
-        addDatabase(database);
-        addToast('Database created.', 'success');
-        setOpenDialog(null);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
-      <DatabaseCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
+      <DatabaseCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
-          Backups
+          Databases
         </Title>
         <Group>
           <TextInput
@@ -69,10 +53,10 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => setOpenDialog('create')} color={'blue'}>
+          <Button onClick={() => setOpenModal('create')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
@@ -80,11 +64,11 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <TableNew columns={['Name', 'Address', 'Username', '']} pagination={databases} onPageSelect={setPage}>
+          <Table columns={['Name', 'Address', 'Username', '']} pagination={databases} onPageSelect={setPage}>
             {databases.data.map((database) => (
               <DatabaseRow database={database} key={database.uuid} />
             ))}
-          </TableNew>
+          </Table>
         </ContextMenuProvider>
       )}
     </>

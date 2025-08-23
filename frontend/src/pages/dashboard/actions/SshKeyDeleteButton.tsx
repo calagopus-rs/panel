@@ -1,8 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
-import { Button } from '@/elements/button';
 import Code from '@/elements/Code';
-import { Dialog } from '@/elements/dialog';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -14,13 +13,13 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
   const { addToast } = useToast();
   const { removeSshKey } = useUserStore();
 
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const submit = () => {
+  const doDelete = () => {
     deleteSshKey(encodeURIComponent(sshKey.fingerprint))
       .then(() => {
         addToast('SSH key deleted.', 'success');
-        setOpen(false);
+        setOpenModal(null);
         removeSshKey(sshKey);
       })
       .catch((msg) => {
@@ -30,21 +29,16 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
 
   return (
     <>
-      <Dialog title={'Delete API Key'} onClose={() => setOpen(false)} open={open}>
-        <p>
-          Removing the <Code>{sshKey.name}</Code> SSH key will invalidate its usage across the Panel.
-        </p>
-
-        <Dialog.Footer>
-          <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
-            Close
-          </Button>
-          <Button style={Button.Styles.Red} onClick={submit}>
-            Delete
-          </Button>
-        </Dialog.Footer>
-      </Dialog>
-      <ActionIcon color={'red'} onClick={() => setOpen(true)}>
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
+        title={'Confirm SSH Key Deletion'}
+        confirm={'Delete'}
+        onConfirmed={doDelete}
+      >
+        Removing the <Code>{sshKey.name}</Code> SSH key will invalidate its usage across the Panel.
+      </ConfirmationModal>
+      <ActionIcon color={'red'} onClick={() => setOpenModal('delete')}>
         <FontAwesomeIcon icon={faTrash} />
       </ActionIcon>
     </>

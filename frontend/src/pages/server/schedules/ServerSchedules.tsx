@@ -1,20 +1,15 @@
 import getSchedules from '@/api/server/schedules/getSchedules';
-import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
 import { useSearchParams } from 'react-router';
-import { useToast } from '@/providers/ToastProvider';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { server, schedules, setSchedules } = useServerStore();
 
   const [loading, setLoading] = useState(schedules.data.length === 0);
   const [search, setSearch] = useState('');
-  const [openDialog, setOpenDialog] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -39,7 +34,7 @@ export default () => {
         <h1 className={'text-4xl font-bold text-white'}>Schedules</h1>
         <div className={'flex gap-2'}>{/* todo */}</div>
       </div>
-      <Table>
+      {/* <Table>
         <ContentWrapper onSearch={setSearch}>
           <Pagination data={schedules} onPageSelect={setPage}>
             <div className={'overflow-x-auto'}>
@@ -62,7 +57,7 @@ export default () => {
             </div>
           </Pagination>
         </ContentWrapper>
-      </Table>
+      </Table> */}
     </>
   );
 };

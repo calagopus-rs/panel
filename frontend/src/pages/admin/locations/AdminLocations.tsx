@@ -8,11 +8,11 @@ import getLocations from '@/api/admin/locations/getLocations';
 import LocationRow from './LocationRow';
 import LocationCreateOrUpdate from './LocationCreateOrUpdate';
 import { Group, Title } from '@mantine/core';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
-import TextInput from '@/elements/inputnew/TextInput';
+import Table from '@/elements/Table';
+import TextInput from '@/elements/input/TextInput';
 
 const LocationsContainer = () => {
   const navigate = useNavigate();
@@ -57,17 +57,17 @@ const LocationsContainer = () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => navigate('/admin/locations/new')} color={'blue'}>
+          <Button onClick={() => navigate('/admin/locations/new')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew
+        <Table
           columns={['Id', 'Short Name', 'Long Name', 'Backup Disk', 'Nodes']}
           pagination={locations}
           onPageSelect={setPage}
@@ -75,7 +75,7 @@ const LocationsContainer = () => {
           {locations.data.map((location) => (
             <LocationRow key={location.uuid} location={location} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

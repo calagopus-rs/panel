@@ -1,17 +1,14 @@
-import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
-import { Input } from '@/elements/inputs';
 import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
 import EmailSmtp from './forms/EmailSmtp';
-import AdminSettingContainer from '@/elements/AdminSettingContainer';
 import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
-import NewButton from '@/elements/button/NewButton';
-import Select from '@/elements/inputnew/Select';
+import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
 
 export default () => {
   const { addToast } = useToast();
@@ -53,9 +50,9 @@ export default () => {
       {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
 
       <Group mt={'md'}>
-        <NewButton onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
       </Group>
     </>
   );

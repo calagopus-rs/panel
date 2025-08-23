@@ -3,7 +3,7 @@ import Code from '@/elements/Code';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { Group } from '@mantine/core';
-import { TableData, TableRow } from '@/elements/table/TableNew';
+import { TableData, TableRow } from '@/elements/Table';
 
 export default ({ activity }: { activity: AdminActivity }) => {
   return (

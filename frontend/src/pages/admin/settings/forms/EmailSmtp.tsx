@@ -1,6 +1,6 @@
-import NumberInput from '@/elements/inputnew/NumberInput';
-import Switch from '@/elements/inputnew/Switch';
-import TextInput from '@/elements/inputnew/TextInput';
+import NumberInput from '@/elements/input/NumberInput';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
 import { Group } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 

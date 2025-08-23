@@ -1,10 +1,10 @@
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useAuth } from '@/providers/AuthProvider';
 import Captcha from '@/elements/Captcha';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 
 export default () => {
   const { doLogin } = useAuth();
@@ -13,9 +13,7 @@ export default () => {
   const [password, setPassword] = useState('');
   const captchaRef = useRef(null);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submit = () => {
     captchaRef.current?.getToken().then((token) => {
       doLogin(username, password, token);
     });
@@ -23,35 +21,24 @@ export default () => {
 
   return (
     <AuthWrapper title={'Login'}>
-      <form onSubmit={submit}>
-        <div className={'mb-4'}>
-          <Input.Text
-            id={'username'}
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Username'}
-            type={'text'}
-            className={'bg-gray-700!'}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </div>
-        <div className={'mb-4'}>
-          <Input.Text
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Password'}
-            type={'password'}
-            className={'bg-gray-700!'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+      <div>
+        <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />
+        <TextInput
+          placeholder={'Password'}
+          type={'password'}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          mt={'sm'}
+        />
+
         <div className={'mb-4'}>
           <Captcha ref={captchaRef} />
         </div>
-        <Button type={'submit'} className={'w-full'}>
+        <Button fullWidth onClick={submit}>
           Login
         </Button>
-      </form>
+      </div>
+
       <div className={'mt-4'}>
         <p className={'text-sm text-gray-400'}>
           Don&apos;t have an account?{' '}

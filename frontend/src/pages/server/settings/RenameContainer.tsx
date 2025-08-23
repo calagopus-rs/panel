@@ -1,8 +1,8 @@
 import { httpErrorToHuman } from '@/api/axios';
 import renameServer from '@/api/server/settings/renameServer';
-import NewButton from '@/elements/button/NewButton';
-import TextArea from '@/elements/inputnew/TextArea';
-import TextInput from '@/elements/inputnew/TextInput';
+import Button from '@/elements/Button';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -56,9 +56,9 @@ export default () => {
         />
 
         <Group mt={'md'}>
-          <NewButton disabled={!name} onClick={doUpdate} loading={loading}>
+          <Button disabled={!name} onClick={doUpdate} loading={loading}>
             Save
-          </NewButton>
+          </Button>
         </Group>
       </Card>
     </Grid.Col>

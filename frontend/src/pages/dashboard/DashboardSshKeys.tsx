@@ -9,8 +9,8 @@ import SshKeyDeleteButton from './actions/SshKeyDeleteButton';
 import SshKeyCreateButton from './actions/SshKeyCreateButton';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
+import TextInput from '@/elements/input/TextInput';
+import Table, { TableData, TableRow } from '@/elements/Table';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,7 +56,7 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['Name', 'Fingerprint', 'Created', '']} pagination={sshKeys} onPageSelect={setPage}>
+        <Table columns={['Name', 'Fingerprint', 'Created', '']} pagination={sshKeys} onPageSelect={setPage}>
           {sshKeys.data.map((key) => (
             <TableRow key={key.uuid}>
               <TableData>{key.name}</TableData>
@@ -76,7 +76,7 @@ export default () => {
               </TableData>
             </TableRow>
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

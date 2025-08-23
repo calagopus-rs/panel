@@ -1,6 +1,6 @@
-import { Button } from '@/elements/button';
+import Button from '@/elements/Button';
 import Can from '@/elements/Can';
-import { Dialog } from '@/elements/dialog';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 
@@ -33,30 +33,29 @@ export default () => {
 
   return (
     <div className={'flex gap-2'}>
-      <Dialog.Confirm
-        open={open}
-        hideCloseIcon
+      <ConfirmationModal
+        opened={open}
         onClose={() => setOpen(false)}
         title={'Forcibly Stop Process'}
         confirm={'Continue'}
         onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
       >
         Forcibly stopping a server can lead to data corruption.
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Can action={'control.start'}>
-        <Button style={Button.Styles.Green} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
+        <Button color={'green'} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
           Start
         </Button>
       </Can>
       <Can action={'control.restart'}>
-        <Button style={Button.Styles.Gray} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
+        <Button color={'gray'} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
           Restart
         </Button>
       </Can>
       <Can action={'control.stop'}>
         <Button
-          style={Button.Styles.Red}
+          color={'red'}
           disabled={state === 'offline'}
           onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
         >

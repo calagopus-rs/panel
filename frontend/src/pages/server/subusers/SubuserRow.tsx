@@ -1,29 +1,29 @@
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import SubuserCreateOrUpdateDialog from './dialogs/SubuserCreateOrUpdateDialog';
 import updateSubuser from '@/api/server/subusers/updateSubuser';
-import { Dialog } from '@/elements/dialog';
 import deleteSubuser from '@/api/server/subusers/deleteSubuser';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
+import { TableData, TableRow } from '@/elements/Table';
 
 export default ({ subuser }: { subuser: ServerSubuser }) => {
   const { addToast } = useToast();
   const { server, removeSubuser } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'update' | 'remove'>(null);
+  const [openModal, setOpenModal] = useState<'update' | 'remove'>(null);
 
   const doUpdate = (permissions: string[], ignoredFiles: string[]) => {
     updateSubuser(server.uuid, subuser.user.username, { permissions, ignoredFiles })
       .then(() => {
         subuser.permissions = permissions;
         subuser.ignoredFiles = ignoredFiles;
-        setOpenDialog(null);
+        setOpenModal(null);
         addToast('Subuser updated.', 'success');
       })
       .catch((msg) => {
@@ -44,27 +44,26 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
 
   return (
     <>
-      <SubuserCreateOrUpdateDialog
+      <SubuserCreateOrUpdateModal
         subuser={subuser}
         onUpdate={doUpdate}
-        open={openDialog === 'update'}
-        onClose={() => setOpenDialog(null)}
+        opened={openModal === 'update'}
+        onClose={() => setOpenModal(null)}
       />
-      <Dialog.Confirm
-        open={openDialog === 'remove'}
-        hideCloseIcon
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'remove'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Subuser Removal'}
         confirm={'Remove'}
         onConfirmed={doRemove}
       >
         Are you sure you want to remove <Code>{subuser.user.username}</Code> from this server?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('update'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenDialog('remove'), color: 'red' },
+          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('update'), color: 'gray' },
+          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('remove'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
@@ -74,25 +73,19 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={subuser.user.username}>
-              {subuser.user.username}
-            </td>
+            <TableData>{subuser.user.username}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               {subuser.user.totpEnabled ? (
                 <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
               ) : (
                 <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
               )}
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {subuser.permissions.length}
-            </td>
+            <TableData>{subuser.permissions.length}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {subuser.ignoredFiles.length}
-            </td>
+            <TableData>{subuser.ignoredFiles.length}</TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

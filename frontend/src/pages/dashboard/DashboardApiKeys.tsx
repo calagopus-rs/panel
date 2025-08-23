@@ -9,8 +9,8 @@ import { useUserStore } from '@/stores/user';
 import ApiKeyDeleteButton from './actions/ApiKeyDeleteButton';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
-import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
-import TextInput from '@/elements/inputnew/TextInput';
+import Table, { TableData, TableRow } from '@/elements/Table';
+import TextInput from '@/elements/input/TextInput';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,7 +56,7 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew
+        <Table
           columns={['Name', 'Key', 'Permissions', 'Last Used', 'Created', '']}
           pagination={apiKeys}
           onPageSelect={setPage}
@@ -90,7 +90,7 @@ export default () => {
               </TableData>
             </TableRow>
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

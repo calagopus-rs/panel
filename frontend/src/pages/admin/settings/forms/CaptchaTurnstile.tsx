@@ -1,4 +1,4 @@
-import TextInput from '@/elements/inputnew/TextInput';
+import TextInput from '@/elements/input/TextInput';
 import { Group } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 

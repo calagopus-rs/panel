@@ -1,13 +1,13 @@
 import classNames from 'classnames';
 import styles from './sidebar.module.css';
 import { NavLink } from 'react-router';
-import { Button } from '../button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRightFromBracket, faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/providers/AuthProvider';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { Fragment } from 'react';
+import { ActionIcon } from '@mantine/core';
 
 type SidebarProps = {
   collapsed?: boolean;
@@ -24,14 +24,9 @@ function Sidebar({ collapsed = false, children }: SidebarProps) {
   return (
     <>
       <div className={'lg:hidden my-4 ml-4'}>
-        <Button
-          style={Button.Styles.Gray}
-          shape={Button.Shapes.IconSquare}
-          variant={Button.Variants.Secondary}
-          onClick={() => setIsMobileMenuOpen(true)}
-        >
+        <ActionIcon onClick={() => setIsMobileMenuOpen(true)}>
           <FontAwesomeIcon icon={faBars} />
-        </Button>
+        </ActionIcon>
       </div>
 
       <Transition show={isMobileMenuOpen} as={Fragment}>
@@ -66,14 +61,9 @@ function Sidebar({ collapsed = false, children }: SidebarProps) {
                   <DialogPanel className={'pointer-events-auto w-screen max-w-md'}>
                     <div className={'flex h-full flex-col bg-neutral-900'}>
                       <div className={'flex items-center justify-end px-4 py-3 border-b border-neutral-700'}>
-                        <Button
-                          style={Button.Styles.Gray}
-                          shape={Button.Shapes.IconSquare}
-                          variant={Button.Variants.Secondary}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                        >
+                        <ActionIcon onClick={() => setIsMobileMenuOpen(false)}>
                           <FontAwesomeIcon icon={faXmark} />
-                        </Button>
+                        </ActionIcon>
                       </div>
                       {children}
                     </div>
@@ -138,14 +128,9 @@ function User() {
           )}
         </div>
       </div>
-      <Button
-        style={Button.Styles.Red}
-        shape={Button.Shapes.IconSquare}
-        variant={Button.Variants.Secondary}
-        onClick={doLogout}
-      >
+      <ActionIcon color={'red'} onClick={doLogout}>
         <FontAwesomeIcon icon={faArrowRightFromBracket} />
-      </Button>
+      </ActionIcon>
     </div>
   );
 }

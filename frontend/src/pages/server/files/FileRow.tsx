@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import ContextMenu from '@/elements/ContextMenu';
-import Checkbox from '@/elements/inputnew/Checkbox';
+import Checkbox from '@/elements/input/Checkbox';
 import Tooltip from '@/elements/Tooltip';
 import { isArchiveType, isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
@@ -22,33 +22,21 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
 import { useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
-import FileDeleteDialog from './dialogs/FileDeleteDialog';
-import deleteFiles from '@/api/server/files/deleteFiles';
-import compressFiles from '@/api/server/files/compressFiles';
 import decompressFile from '@/api/server/files/decompressFile';
-import FilePermissionsDialog from './dialogs/FilePermissionsDialog';
-import chmodFiles from '@/api/server/files/chmodFiles';
 import downloadFiles from '@/api/server/files/downloadFiles';
-import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 import { useGlobalStore } from '@/stores/global';
-import FileCopyDialog from './dialogs/FileCopyDialog';
-import copyFile from '@/api/server/files/copyFile';
-import { TableData, TableRow } from '@/elements/table/TableNew';
+import { TableData, TableRow } from '@/elements/Table';
+import ArchiveCreateModal from './modals/ArchiveCreateModal';
+import FileCopyModal from './modals/FileCopyModal';
+import FileDeleteModal from './modals/FileDeleteModal';
+import FilePermissionsModal from './modals/FilePermissionsModal';
 
 export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirectory: () => void }) => {
   const { addToast } = useToast();
-  const {
-    server,
-    browsingDirectory,
-    browsingBackup,
-    addBrowsingEntry,
-    removeBrowsingEntry,
-    selectedFiles,
-    addSelectedFile,
-    removeSelectedFile,
-  } = useServerStore();
+  const { server, browsingDirectory, browsingBackup, selectedFiles, addSelectedFile, removeSelectedFile } =
+    useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
 
   const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
@@ -110,34 +98,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
     );
   }
 
-  const doCopy = (name: string) => {
-    copyFile(server.uuid, join(browsingDirectory, file.name), name || null)
-      .then((entry) => {
-        addToast('File has been copied.', 'success');
-        setOpenDialog(null);
-        addBrowsingEntry(entry);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   const doMove = () => {};
-
-  const doChmod = (mode: number) => {
-    chmodFiles({
-      uuid: server.uuid,
-      root: browsingDirectory,
-      files: [{ file: file.name, mode: mode.toString() }],
-    })
-      .then(() => {
-        setOpenDialog(null);
-        addToast('Permissions have been updated.', 'success');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
 
   const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name)
@@ -147,24 +108,6 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const doArchive = (name: string, format: ArchiveFormat) => {
-    compressFiles(server.uuid, {
-      name,
-      format,
-      root: browsingDirectory,
-      files: [file.name],
-    })
-      .then((entry) => {
-        addToast('Archive has been created.', 'success');
-        setOpenDialog(null);
-        addBrowsingEntry(entry);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-        setOpenDialog(null);
       });
   };
 
@@ -179,42 +122,12 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
       });
   };
 
-  const doDelete = () => {
-    deleteFiles(server.uuid, browsingDirectory, [file.name])
-      .then(() => {
-        addToast('File has been deleted.', 'success');
-        setOpenDialog(null);
-        removeBrowsingEntry(file);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
-      <FileCopyDialog
-        open={openDialog === 'copy'}
-        onClose={() => setOpenDialog(null)}
-        fileName={file.name}
-        onFileCopy={(name) => {
-          doCopy(name);
-          setOpenDialog(null);
-        }}
-      />
-      <FilePermissionsDialog
-        file={file}
-        onChange={doChmod}
-        open={openDialog === 'permissions'}
-        onClose={() => setOpenDialog(null)}
-      />
-      <ArchiveCreateDialog open={openDialog === 'archive'} onClose={() => setOpenDialog(null)} onCreate={doArchive} />
-      <FileDeleteDialog
-        files={[file]}
-        onDelete={doDelete}
-        open={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
-      />
+      <FileCopyModal file={file} opened={openModal === 'copy'} onClose={() => setOpenModal(null)} />
+      <FilePermissionsModal file={file} opened={openModal === 'permissions'} onClose={() => setOpenModal(null)} />
+      <ArchiveCreateModal files={[file]} opened={openModal === 'archive'} onClose={() => setOpenModal(null)} />
+      <FileDeleteModal files={[file]} opened={openModal === 'delete'} onClose={() => setOpenModal(null)} />
 
       <ContextMenu
         items={[
@@ -222,21 +135,21 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
             icon: faCopy,
             label: 'Copy',
             hidden: !!browsingBackup || file.directory,
-            onClick: () => setOpenDialog('copy'),
+            onClick: () => setOpenModal('copy'),
             color: 'gray',
           },
           {
             icon: faAnglesUp,
             label: 'Move',
             hidden: !!browsingBackup,
-            onClick: () => setOpenDialog('move'),
+            onClick: () => setOpenModal('move'),
             color: 'gray',
           },
           {
             icon: faFileShield,
             label: 'Permissions',
             hidden: !!browsingBackup,
-            onClick: () => setOpenDialog('permissions'),
+            onClick: () => setOpenModal('permissions'),
             color: 'gray',
           },
           isArchiveType(file.mime) && !browsingBackup
@@ -251,7 +164,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
                 icon: faFileZipper,
                 label: 'Archive',
                 hidden: !!browsingBackup,
-                onClick: () => setOpenDialog('archive'),
+                onClick: () => setOpenModal('archive'),
                 color: 'gray',
               },
           {
@@ -264,7 +177,7 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
             icon: faTrash,
             label: 'Delete',
             hidden: !!browsingBackup,
-            onClick: () => setOpenDialog('delete'),
+            onClick: () => setOpenModal('delete'),
             color: 'red',
           },
         ]}

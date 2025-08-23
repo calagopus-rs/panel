@@ -1,8 +1,8 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateTimezone from '@/api/server/settings/updateTimezone';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import Card from '@/elements/Card';
-import Select from '@/elements/inputnew/Select';
+import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -63,15 +63,16 @@ export default () => {
           value={timezone}
           onChange={(value) => setTimezone(value)}
           data={timezones}
+          searchable
           mt={'sm'}
         />
 
         <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
 
         <Group mt={'md'}>
-          <NewButton onClick={doUpdate} loading={loading}>
+          <Button onClick={doUpdate} loading={loading}>
             Save
-          </NewButton>
+          </Button>
         </Group>
       </Card>
     </Grid.Col>

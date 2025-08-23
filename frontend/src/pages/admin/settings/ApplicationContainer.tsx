@@ -4,10 +4,10 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import Switch from '@/elements/inputnew/Switch';
+import TextInput from '@/elements/input/TextInput';
+import Switch from '@/elements/input/Switch';
 import { load } from '@/lib/debounce';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 
 export default () => {
   const { addToast } = useToast();
@@ -70,9 +70,9 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
       </Group>
     </>
   );

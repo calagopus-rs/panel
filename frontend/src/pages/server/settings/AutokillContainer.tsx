@@ -1,9 +1,9 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateAutokill from '@/api/server/settings/updateAutokill';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import Card from '@/elements/Card';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import Switch from '@/elements/inputnew/Switch';
+import NumberInput from '@/elements/input/NumberInput';
+import Switch from '@/elements/input/Switch';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -51,9 +51,9 @@ export default () => {
         />
 
         <Group mt={'md'}>
-          <NewButton onClick={doUpdate} loading={loading}>
+          <Button onClick={doUpdate} loading={loading}>
             Save
-          </NewButton>
+          </Button>
         </Group>
       </Card>
     </Grid.Col>

@@ -1,5 +1,3 @@
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
 import { useRef, useState } from 'react';
 import { NavLink } from 'react-router';
 import AuthWrapper from './AuthWrapper';
@@ -7,6 +5,8 @@ import forgotPassword from '@/api/auth/forgotPassword';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import Captcha from '@/elements/Captcha';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
 
 export default () => {
   const { addToast } = useToast();
@@ -15,9 +15,7 @@ export default () => {
   const [requested, setRequested] = useState(false);
   const captchaRef = useRef(null);
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const submit = () => {
     captchaRef.current?.getToken().then((token) => {
       forgotPassword(email, token)
         .then(() => {
@@ -32,25 +30,16 @@ export default () => {
 
   return (
     <AuthWrapper title={'Forgot Password'}>
-      <form onSubmit={submit}>
-        <div className={'mb-4'}>
-          <Input.Text
-            id={'email'}
-            variant={Input.Text.Variants.Loose}
-            placeholder={'Email'}
-            type={'email'}
-            className={'bg-gray-700!'}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+      <div>
+        <TextInput placeholder={'Email'} value={email} onChange={(e) => setEmail(e.target.value)} />
         <div className={'mb-4'}>
           <Captcha ref={captchaRef} />
         </div>
-        <Button type={'submit'} className={'w-full'} disabled={requested}>
+        <Button fullWidth onClick={submit} disabled={requested}>
           Request Password Reset
         </Button>
-      </form>
+      </div>
+
       <div className={'mt-4'}>
         <p className={'text-sm text-gray-400'}>
           <NavLink to={'/auth/login'} className={'text-cyan-200 hover:underline'}>

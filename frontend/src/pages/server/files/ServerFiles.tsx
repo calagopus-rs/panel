@@ -4,9 +4,6 @@ import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import loadDirectory from '@/api/server/files/loadDirectory';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
-import DirectoryNameDialog from './dialogs/DirectoryNameDialog';
-import createDirectory from '@/api/server/files/createDirectory';
-import { join } from 'pathe';
 import Spinner from '@/elements/Spinner';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { httpErrorToHuman } from '@/api/axios';
@@ -14,10 +11,11 @@ import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
 import { Card, Group, Title } from '@mantine/core';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFileCirclePlus, faFolderPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
+import DirectoryNameModal from './modals/DirectoryNameModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,7 +32,7 @@ export default () => {
     setSelectedFiles,
   } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'nameDirectory'>(null);
+  const [openModal, setOpenModal] = useState<'nameDirectory'>(null);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
 
@@ -89,24 +87,9 @@ export default () => {
     }
   }, [browsingDirectory, browsingBackup, loading]);
 
-  const makeDirectory = (name: string) => {
-    createDirectory(server.uuid, browsingDirectory, name)
-      .then(() => {
-        setOpenDialog(null);
-        setSearchParams({ directory: join(browsingDirectory, name) });
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
-      <DirectoryNameDialog
-        onDirectoryName={(name: string) => makeDirectory(name)}
-        open={openDialog === 'nameDirectory'}
-        onClose={() => setOpenDialog(null)}
-      />
+      <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
 
       <FileActionBar />
 
@@ -116,15 +99,15 @@ export default () => {
         </Title>
         {!browsingBackup && (
           <Group>
-            <NewButton onClick={() => setOpenDialog('nameDirectory')} color={'blue'}>
+            <Button onClick={() => setOpenModal('nameDirectory')} color={'blue'}>
               <FontAwesomeIcon icon={faFolderPlus} className={'mr-2'} />
               New Directory
-            </NewButton>
-            <NewButton onClick={() => console.log('#Soon')} color={'blue'}>
+            </Button>
+            <Button onClick={() => console.log('#Soon')} color={'blue'}>
               <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
               Upload
-            </NewButton>
-            <NewButton
+            </Button>
+            <Button
               onClick={() =>
                 navigate(
                   `/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`,
@@ -134,7 +117,7 @@ export default () => {
             >
               <FontAwesomeIcon icon={faFileCirclePlus} className={'mr-2'} />
               New File
-            </NewButton>
+            </Button>
           </Group>
         )}
       </Group>
@@ -147,7 +130,7 @@ export default () => {
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
           <ContextMenuProvider>
-            <TableNew
+            <Table
               columns={['', 'Name', 'Size', 'Modified', '']}
               pagination={browsingEntries}
               onPageSelect={onPageSelect}
@@ -155,7 +138,7 @@ export default () => {
               {browsingEntries.data.map((file) => (
                 <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
               ))}
-            </TableNew>
+            </Table>
           </ContextMenuProvider>
         </>
       )}

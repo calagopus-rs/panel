@@ -14,37 +14,22 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import { Dialog } from '@/elements/dialog';
 import deleteBackup from '@/api/server/backups/deleteBackup';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
-import BackupEditDialog from './dialogs/BackupEditDialog';
-import updateBackup from '@/api/server/backups/updateBackup';
 import downloadBackup from '@/api/server/backups/downloadBackup';
-import restoreBackup from '@/api/server/backups/restoreBackup';
-import BackupRestoreDialog from './dialogs/BackupRestoreDialog';
 import { createSearchParams, useNavigate } from 'react-router';
-import { TableData, TableRow } from '@/elements/table/TableNew';
+import { TableData, TableRow } from '@/elements/Table';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import BackupEditModal from './modals/BackupEditModal';
+import BackupRestoreModal from './modals/BackupRestoreModal';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'edit' | 'restore' | 'delete'>(null);
-
-  const doUpdate = (name: string, locked: boolean) => {
-    updateBackup(server.uuid, backup.uuid, { name, locked })
-      .then(() => {
-        backup.name = name;
-        backup.isLocked = locked;
-        setOpenDialog(null);
-        addToast('Backup updated.', 'success');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
+  const [openModal, setOpenModal] = useState<'edit' | 'restore' | 'delete'>(null);
 
   const doDownload = () => {
     downloadBackup(server.uuid, backup.uuid)
@@ -57,24 +42,11 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       });
   };
 
-  const doRestore = (truncateDirectory: boolean) => {
-    restoreBackup(server.uuid, backup.uuid, { truncateDirectory })
-      .then(() => {
-        setOpenDialog(null);
-        addToast('Restoring backup...', 'success');
-
-        navigate(`/server/${server.uuidShort}`);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   const doDelete = () => {
     deleteBackup(server.uuid, backup.uuid)
       .then(() => {
         addToast('Backup deleted.', 'success');
-        setOpenDialog(null);
+        setOpenModal(null);
         removeBackup(backup);
       })
       .catch((msg) => {
@@ -84,26 +56,21 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
 
   return (
     <>
-      <BackupEditDialog
-        backup={backup}
-        onUpdate={doUpdate}
-        open={openDialog === 'edit'}
-        onClose={() => setOpenDialog(null)}
-      />
-      <BackupRestoreDialog onRestore={doRestore} open={openDialog === 'restore'} onClose={() => setOpenDialog(null)} />
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <BackupEditModal backup={backup} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
+      <BackupRestoreModal backup={backup} opened={openModal === 'restore'} onClose={() => setOpenModal(null)} />
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Backup Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{backup.name}</Code> from this server?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenDialog('edit'), color: 'gray' },
+          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
           {
             icon: faShare,
             label: 'Browse',
@@ -125,14 +92,14 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
           {
             icon: faRotateLeft,
             label: 'Restore',
-            onClick: () => setOpenDialog('restore'),
+            onClick: () => setOpenModal('restore'),
             color: 'gray',
           },
           {
             icon: faTrash,
             label: 'Delete',
             hidden: backup.isLocked,
-            onClick: () => setOpenDialog('delete'),
+            onClick: () => setOpenModal('delete'),
             color: 'red',
           },
         ]}
@@ -148,13 +115,13 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
 
             <TableData>{backup.checksum && <Code>{backup.checksum}</Code>}</TableData>
 
-            <TableData>
-              {backup.completed
-                ? bytesToString(backup.bytes)
-                : backup.progress
-                ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
-                : null}
-            </TableData>
+            {backup.completed ? (
+              <TableData>{bytesToString(backup.bytes)}</TableData>
+            ) : backup.progress ? (
+              <TableData>{((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%</TableData>
+            ) : (
+              <TableData>-</TableData>
+            )}
 
             <TableData>{backup.completed ? backup.files : null}</TableData>
 

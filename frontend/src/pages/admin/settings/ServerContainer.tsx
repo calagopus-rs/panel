@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings';
 import { Group, Title } from '@mantine/core';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import Switch from '@/elements/inputnew/Switch';
-import NewButton from '@/elements/button/NewButton';
+import NumberInput from '@/elements/input/NumberInput';
+import Switch from '@/elements/input/Switch';
+import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 
 export default () => {
@@ -61,9 +61,9 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
       </Group>
     </>
   );

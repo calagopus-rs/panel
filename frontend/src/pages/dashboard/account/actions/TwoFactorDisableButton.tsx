@@ -1,18 +1,19 @@
 import { httpErrorToHuman } from '@/api/axios';
 import disableTwoFactor from '@/api/me/account/disableTwoFactor';
-import { Button } from '@/elements/button';
-import NewButton from '@/elements/button/NewButton';
-import { Dialog } from '@/elements/dialog';
-import { Input } from '@/elements/inputs';
+import Button from '@/elements/Button';
+import NumberInput from '@/elements/input/NumberInput';
+import TextInput from '@/elements/input/TextInput';
+import Modal from '@/elements/modals/Modal';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
+import { Group } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<'disable'>(null);
 
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +26,11 @@ export default () => {
     }
   }, [open]);
 
-  const submit = () => {
+  const doDisable = () => {
     disableTwoFactor(code, password)
       .then(() => {
         addToast('Two-factor authentication disabled.', 'success');
-        setOpen(false);
+        setOpenModal(null);
         setUser({ ...user!, totpEnabled: false });
       })
       .catch((msg) => {
@@ -39,40 +40,43 @@ export default () => {
 
   return (
     <>
-      <Dialog title={'Disable Two-Step Verification'} onClose={() => setOpen(false)} open={open}>
+      <Modal
+        title={'Disable Two-Step Verification'}
+        onClose={() => setOpenModal(null)}
+        opened={openModal === 'disable'}
+      >
         <p>Disabling two-step verification will make your account less secure.</p>
 
-        <Input.Label htmlFor={'totpCode'}>Code</Input.Label>
-        <Input.Text
-          id={'code'}
-          name={'code'}
-          type={'number'}
+        <NumberInput
+          label={'Code'}
           placeholder={'000000'}
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(value) => setCode(String(value))}
+          mt={'sm'}
         />
 
-        <Input.Label htmlFor={'password'}>Password</Input.Label>
-        <Input.Text
-          id={'password'}
-          name={'password'}
+        <TextInput
+          label={'Password'}
+          placeholder={'Password'}
           type={'password'}
-          value={password}
           onChange={(e) => setPassword(e.target.value)}
+          mt={'sm'}
         />
 
-        <Dialog.Footer>
-          <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
+        <Group mt={'md'}>
+          <Button variant={'default'} onClick={() => setOpenModal(null)}>
             Close
           </Button>
-          <Button style={Button.Styles.Red} onClick={submit} disabled={!password}>
+
+          <Button color={'red'} onClick={doDisable} disabled={!password}>
             Disable
           </Button>
-        </Dialog.Footer>
-      </Dialog>
-      <NewButton color={'red'} onClick={() => setOpen(true)}>
+        </Group>
+      </Modal>
+
+      <Button color={'red'} onClick={() => setOpenModal('disable')}>
         Disable Two-Step
-      </NewButton>
+      </Button>
     </>
   );
 };

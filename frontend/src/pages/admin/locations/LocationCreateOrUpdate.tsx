@@ -6,22 +6,22 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import BackupS3 from './forms/BackupS3';
 import getLocation from '@/api/admin/locations/getLocation';
-import { Dialog } from '@/elements/dialog';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import BackupRestic from './forms/BackupRestic';
 import { Divider, Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import Select from '@/elements/inputnew/Select';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Select from '@/elements/input/Select';
+import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 
 export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<Location>({
     shortName: '',
@@ -86,15 +86,15 @@ export default () => {
 
   return (
     <>
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Location Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{location?.name}</Code>?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Title order={1}>{params.id ? 'Update' : 'Create'} Location</Title>
       <Divider my={'sm'} />
@@ -104,7 +104,7 @@ export default () => {
           label={'Short Name'}
           placeholder={'Short Name'}
           value={location.shortName || ''}
-          onChange={(e) => setLocation({ ...location, name: e.target.value })}
+          onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
           mt={'sm'}
         />
         <TextInput
@@ -142,13 +142,13 @@ export default () => {
       </Group>
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
         {params.id && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
-          </NewButton>
+          </Button>
         )}
       </Group>
 

@@ -1,11 +1,11 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateVariable from '@/api/server/startup/updateVariable';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 import Card from '@/elements/Card';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import Select from '@/elements/inputnew/Select';
-import Switch from '@/elements/inputnew/Switch';
-import TextInput from '@/elements/inputnew/TextInput';
+import NumberInput from '@/elements/input/NumberInput';
+import Select from '@/elements/input/Select';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -82,13 +82,13 @@ export default ({ variable }: { variable: ServerVariable }) => {
         </div>
 
         <Group mt={'md'}>
-          <NewButton
+          <Button
             disabled={(variable.rules.includes('required') && !value) || value === serverValue}
             onClick={doUpdate}
             loading={loading}
           >
             Save
-          </NewButton>
+          </Button>
         </Group>
       </Card>
     </Grid.Col>

@@ -2,27 +2,27 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { Dialog } from '@/elements/dialog';
 import Code from '@/elements/Code';
 import getEgg from '@/api/admin/eggs/getEgg';
 import deleteEgg from '@/api/admin/eggs/deleteEgg';
 import updateEgg from '@/api/admin/eggs/updateEgg';
 import createEgg from '@/api/admin/eggs/createEgg';
 import { Group } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import TagsInput from '@/elements/inputnew/TagsInput';
-import Switch from '@/elements/inputnew/Switch';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import { MultiKeyValueInput } from '@/elements/inputnew/MultiKeyValueInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import TagsInput from '@/elements/input/TagsInput';
+import Switch from '@/elements/input/Switch';
+import NumberInput from '@/elements/input/NumberInput';
+import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
+import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 
 export default ({ nest }: { nest: Nest }) => {
   const params = useParams<'eggId'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [egg, setEgg] = useState<AdminNestEgg>({
     author: '',
@@ -112,15 +112,15 @@ export default ({ nest }: { nest: Nest }) => {
 
   return (
     <>
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Egg Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{egg?.name}</Code>?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Group grow>
         <TextInput
@@ -291,13 +291,13 @@ export default ({ nest }: { nest: Nest }) => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
         {params.eggId && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
-          </NewButton>
+          </Button>
         )}
       </Group>
     </>

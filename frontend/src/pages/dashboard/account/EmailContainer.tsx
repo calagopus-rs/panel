@@ -1,7 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateEmail from '@/api/me/account/updateEmail';
-import NewButton from '@/elements/button/NewButton';
-import TextInput from '@/elements/inputnew/TextInput';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Title } from '@mantine/core';
@@ -47,9 +47,9 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton disabled={!email || !password} onClick={doUpdate}>
+        <Button disabled={!email || !password} onClick={doUpdate}>
           Update Email
-        </NewButton>
+        </Button>
       </Group>
     </Grid.Col>
   );

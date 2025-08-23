@@ -1,29 +1,25 @@
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
 import getBackups from '@/api/server/backups/getBackups';
 import BackupRow from './BackupRow';
-import BackupCreateDialog from './dialogs/BackupCreateDialog';
-import createBackup from '@/api/server/backups/createBackup';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 import Spinner from '@/elements/Spinner';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import BackupCreateModal from './modals/BackupCreateModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
-  const { server, backups, setBackups, addBackup } = useServerStore();
+  const { server, backups, setBackups } = useServerStore();
 
   const [loading, setLoading] = useState(backups.data.length === 0);
   const [search, setSearch] = useState('');
-  const [openDialog, setOpenDialog] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -42,21 +38,9 @@ export default () => {
     });
   }, [page, search]);
 
-  const doCreate = (name: string, ignoredFiles: string[]) => {
-    createBackup(server.uuid, { name, ignoredFiles })
-      .then((backup) => {
-        addBackup(backup);
-        addToast('Backup created.', 'success');
-        setOpenDialog(null);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
-      <BackupCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
+      <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
@@ -69,10 +53,10 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => setOpenDialog('create')} color={'blue'}>
+          <Button onClick={() => setOpenModal('create')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
@@ -80,7 +64,7 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <TableNew
+          <Table
             columns={['Name', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
             pagination={backups}
             onPageSelect={setPage}
@@ -88,7 +72,7 @@ export default () => {
             {backups.data.map((backup) => (
               <BackupRow backup={backup} key={backup.uuid} />
             ))}
-          </TableNew>
+          </Table>
         </ContextMenuProvider>
       )}
     </>

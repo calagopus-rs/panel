@@ -1,17 +1,21 @@
 import getSubusers from '@/api/server/subusers/getSubusers';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import SubuserRow from './SubuserRow';
-import SubuserCreateOrUpdateDialog from './dialogs/SubuserCreateOrUpdateDialog';
 import createSubuser from '@/api/server/subusers/createSubuser';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import getPermissions from '@/api/getPermissions';
+import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/input/TextInput';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import Button from '@/elements/Button';
+import Table from '@/elements/Table';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,7 +24,7 @@ export default () => {
 
   const [loading, setLoading] = useState(subusers.data.length === 0);
   const [search, setSearch] = useState('');
-  const [openDialog, setOpenDialog] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -48,7 +52,7 @@ export default () => {
       .then((subuser) => {
         addSubuser(subuser);
         addToast('Subuser created.', 'success');
-        setOpenDialog(null);
+        setOpenModal(null);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -57,45 +61,45 @@ export default () => {
 
   return (
     <>
-      <SubuserCreateOrUpdateDialog
+      <SubuserCreateOrUpdateModal
         onCreate={doCreate}
-        open={openDialog === 'create'}
-        onClose={() => setOpenDialog(null)}
+        opened={openModal === 'create'}
+        onClose={() => setOpenModal(null)}
       />
 
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Users</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => setOpenDialog('create')}>Add</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={subusers} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'Username'} />
-                  <TableHeader name={'2FA Enabled'} />
-                  <TableHeader name={'Permissions'} />
-                  <TableHeader name={'Ignored Files'} />
-                  <TableHeader />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Users
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <Button onClick={() => setOpenModal('create')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </Button>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {subusers.data.map((su) => (
-                      <SubuserRow subuser={su} key={su.user.uuid} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : subusers.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <ContextMenuProvider>
+          <Table
+            columns={['Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
+            pagination={subusers}
+            onPageSelect={setPage}
+          >
+            {subusers.data.map((su) => (
+              <SubuserRow subuser={su} key={su.user.uuid} />
+            ))}
+          </Table>
+        </ContextMenuProvider>
+      )}
     </>
   );
 };

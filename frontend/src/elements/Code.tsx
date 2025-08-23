@@ -1,5 +1,10 @@
-import { Code } from '@mantine/core';
+import { forwardRef } from 'react';
+import { Code, CodeProps } from '@mantine/core';
 
-export default ({ children }: { children: React.ReactNode }) => {
-  return <Code>{children}</Code>;
-};
+export default forwardRef<HTMLPreElement, CodeProps>(({ children, className, ...rest }, ref) => {
+  return (
+    <Code ref={ref} className={className} {...rest}>
+      {children}
+    </Code>
+  );
+});

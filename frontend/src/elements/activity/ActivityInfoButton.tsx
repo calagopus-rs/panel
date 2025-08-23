@@ -1,31 +1,27 @@
-import { Button } from '@/elements/button';
-import { Dialog } from '@/elements/dialog';
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon } from '@mantine/core';
+import { ActionIcon, Group } from '@mantine/core';
 import { useState } from 'react';
+import Modal from '../modals/Modal';
+import Code from '../Code';
+import Button from '../Button';
 
 export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<'view'>(null);
 
   return (
     <>
-      <Dialog title={'Activity Details'} onClose={() => setOpen(false)} open={open}>
-        <pre
-          className={
-            'font-mono bg-gray-800 rounded py-1 px-2 text-sm leading-relaxed overflow-x-scroll whitespace-pre-wrap'
-          }
-        >
-          {JSON.stringify(activity.data, null, 2)}
-        </pre>
+      <Modal title={'Activity Details'} onClose={() => setOpenModal(null)} opened={openModal === 'view'}>
+        <Code block>{JSON.stringify(activity.data, null, 2)}</Code>
 
-        <Dialog.Footer>
-          <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
+        <Group mt={'md'}>
+          <Button variant={'default'} onClick={() => setOpenModal(null)}>
             Close
           </Button>
-        </Dialog.Footer>
-      </Dialog>
-      <ActionIcon onClick={() => setOpen(true)}>
+        </Group>
+      </Modal>
+
+      <ActionIcon onClick={() => setOpenModal('view')}>
         <FontAwesomeIcon icon={faInfo} />
       </ActionIcon>
     </>

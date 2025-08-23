@@ -1,32 +1,21 @@
-import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faArchive, faFileDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
-import FileDeleteDialog from './dialogs/FileDeleteDialog';
 import { useState } from 'react';
-import deleteFiles from '@/api/server/files/deleteFiles';
 import { httpErrorToHuman } from '@/api/axios';
-import compressFiles from '@/api/server/files/compressFiles';
 import downloadFiles from '@/api/server/files/downloadFiles';
-import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
+import ArchiveCreateModal from './modals/ArchiveCreateModal';
+import FileDeleteModal from './modals/FileDeleteModal';
+import Button from '@/elements/Button';
 
 export default () => {
   const { addToast } = useToast();
-  const {
-    server,
-    browsingDirectory,
-    browsingBackup,
-    browsingEntries,
-    setBrowsingEntries,
-    addBrowsingEntry,
-    selectedFiles,
-    setSelectedFiles,
-  } = useServerStore();
+  const { server, browsingDirectory, browsingBackup, selectedFiles } = useServerStore();
 
-  const [openDialog, setOpenDialog] = useState<'archive' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'archive' | 'delete'>(null);
 
   const doDownload = () => {
     downloadFiles(
@@ -44,58 +33,19 @@ export default () => {
       });
   };
 
-  const doArchive = (name: string, format: ArchiveFormat) => {
-    compressFiles(server.uuid, {
-      name,
-      format,
-      root: browsingDirectory,
-      files: selectedFiles.map((f) => f.name),
-    })
-      .then((entry) => {
-        addToast('Files have been archived.', 'success');
-        setOpenDialog(null);
-        setSelectedFiles([]);
-        addBrowsingEntry(entry);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const doDelete = () => {
-    deleteFiles(
-      server.uuid,
-      browsingDirectory,
-      selectedFiles.map((f) => f.name),
-    )
-      .then(() => {
-        addToast('Files have been deleted.', 'success');
-        setOpenDialog(null);
-        setSelectedFiles([]);
-        setBrowsingEntries({
-          ...browsingEntries,
-          data: browsingEntries.data.filter((f) => !selectedFiles.find((s) => s.name === f.name)),
-        });
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return createPortal(
     <AnimatePresence>
-      <ArchiveCreateDialog
-        key={'ArchiveCreateDialog'}
-        open={openDialog === 'archive'}
-        onClose={() => setOpenDialog(null)}
-        onCreate={doArchive}
-      />
-      <FileDeleteDialog
-        key={'FileDeleteDialog'}
+      <ArchiveCreateModal
+        key={'ArchiveCreateModal'}
         files={selectedFiles}
-        onDelete={doDelete}
-        open={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+        opened={openModal === 'archive'}
+        onClose={() => setOpenModal(null)}
+      />
+      <FileDeleteModal
+        key={'FileDeleteModal'}
+        files={selectedFiles}
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
       />
       {selectedFiles.length > 0 && (
         <motion.div
@@ -111,10 +61,10 @@ export default () => {
             </Button>
             {!browsingBackup && (
               <>
-                <Button onClick={() => setOpenDialog('archive')}>
+                <Button onClick={() => setOpenModal('archive')}>
                   <FontAwesomeIcon icon={faArchive} className={'mr-2'} /> Archive
                 </Button>
-                <Button style={Button.Styles.Red} onClick={() => setOpenDialog('delete')}>
+                <Button color={'red'} onClick={() => setOpenModal('delete')}>
                   <FontAwesomeIcon icon={faTrash} className={'mr-2'} />
                   Delete
                 </Button>

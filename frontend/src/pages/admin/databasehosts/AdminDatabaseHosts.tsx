@@ -8,10 +8,10 @@ import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
 import getDatabaseHosts from '@/api/admin/databaseHosts/getDatabaseHosts';
 import DatabaseHostRow from './DatabaseHostRow';
 import { Group, TextInput, Title } from '@mantine/core';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import NewButton from '@/elements/button/NewButton';
+import Button from '@/elements/Button';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();
@@ -56,17 +56,17 @@ const DatabaseHostsContainer = () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => navigate('/admin/database-hosts/new')} color={'blue'}>
+          <Button onClick={() => navigate('/admin/database-hosts/new')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew
+        <Table
           columns={['ID', 'Name', 'Type', 'Address', 'Databases', 'Locations']}
           pagination={databaseHosts}
           onPageSelect={setPage}
@@ -74,7 +74,7 @@ const DatabaseHostsContainer = () => {
           {databaseHosts.data.map((dh) => (
             <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

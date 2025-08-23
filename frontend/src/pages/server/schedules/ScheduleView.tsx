@@ -3,14 +3,6 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClock, faClockRotateLeft, faHourglass } from '@fortawesome/free-solid-svg-icons';
-import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
-import { getNextCronRun } from '@/lib/server';
-import AnimatedHourglass from '@/elements/AnimatedHourglass';
-import Table, { TableHead, TableHeader, TableBody, NoItems, TableRow } from '@/elements/table/Table';
-import Code from '@/elements/Code';
-import { Button } from '@/elements/button';
 import runSchedule from '@/api/server/schedules/triggerSchedule';
 
 function DetailCard({

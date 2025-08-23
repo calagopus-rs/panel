@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSession from '@/api/me/sessions/deleteSession';
-import { Button } from '@/elements/button';
-import { Dialog } from '@/elements/dialog';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { faSignOut } from '@fortawesome/free-solid-svg-icons';
@@ -13,13 +12,13 @@ export default ({ session }: { session: UserSession }) => {
   const { addToast } = useToast();
   const { removeSession } = useUserStore();
 
-  const [open, setOpen] = useState(false);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const submit = () => {
+  const doDelete = () => {
     deleteSession(session.uuid)
       .then(() => {
         addToast('Session signed out.', 'success');
-        setOpen(false);
+        setOpenModal(null);
         removeSession(session);
       })
       .catch((msg) => {
@@ -29,19 +28,16 @@ export default ({ session }: { session: UserSession }) => {
 
   return (
     <>
-      <Dialog title={'Sign Out'} onClose={() => setOpen(false)} open={open}>
-        <p>Signing out will invalidate the session.</p>
-
-        <Dialog.Footer>
-          <Button style={Button.Styles.Gray} onClick={() => setOpen(false)}>
-            Close
-          </Button>
-          <Button style={Button.Styles.Red} onClick={submit}>
-            Sign Out
-          </Button>
-        </Dialog.Footer>
-      </Dialog>
-      <ActionIcon color={'red'} onClick={() => setOpen(true)}>
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
+        title={'Confirm Session Sign Out'}
+        confirm={'Delete'}
+        onConfirmed={doDelete}
+      >
+        Signing out will invalidate the session.
+      </ConfirmationModal>
+      <ActionIcon color={'red'} onClick={() => setOpenModal('delete')}>
         <FontAwesomeIcon icon={faSignOut} />
       </ActionIcon>
     </>

@@ -1,9 +1,9 @@
 import getUserActivity from '@/api/me/getUserActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
-import TextInput from '@/elements/inputnew/TextInput';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
-import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
+import Table, { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { Group, Title } from '@mantine/core';
@@ -53,7 +53,7 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
+        <Table columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
           {activities.data.map((activity) => (
             <TableRow key={activity.created.toString()}>
               <TableData>{activity.isApi ? 'API' : 'Web'}</TableData>
@@ -77,7 +77,7 @@ export default () => {
               </TableData>
             </TableRow>
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

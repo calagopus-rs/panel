@@ -1,6 +1,6 @@
-import { MultiKeyValueInput } from '@/elements/inputnew/MultiKeyValueInput';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import TextInput from '@/elements/inputnew/TextInput';
+import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
+import NumberInput from '@/elements/input/NumberInput';
+import TextInput from '@/elements/input/TextInput';
 import { Divider, Group, Title } from '@mantine/core';
 import { Dispatch } from 'react';
 

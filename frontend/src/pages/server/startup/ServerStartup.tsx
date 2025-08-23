@@ -1,6 +1,4 @@
 import getVariables from '@/api/server/startup/getVariables';
-import Spinner from '@/elements/Spinner';
-import { NoItems } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useCallback, useEffect, useState } from 'react';
 import VariableContainer from './VariableContainer';
@@ -12,15 +10,14 @@ import updateCommand from '@/api/server/startup/updateCommand';
 import debounce from 'debounce';
 import { Grid, Group, Title } from '@mantine/core';
 import Card from '@/elements/Card';
-import TextArea from '@/elements/inputnew/TextArea';
-import Select from '@/elements/inputnew/Select';
+import TextArea from '@/elements/input/TextArea';
+import Select from '@/elements/input/Select';
 
 export default () => {
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
   const { server, updateServer, variables, setVariables } = useServerStore();
 
-  const [loading, setLoading] = useState(variables.length === 0);
   const [command, setCommand] = useState(server.startup);
   const [dockerImage, setDockerImage] = useState(server.image);
 
@@ -41,7 +38,6 @@ export default () => {
   useEffect(() => {
     getVariables(server.uuid).then((data) => {
       setVariables(data);
-      setLoading(false);
     });
   }, []);
 
@@ -110,7 +106,6 @@ export default () => {
         {variables.map((variable) => (
           <VariableContainer key={variable.envVariable} variable={variable} />
         ))}
-        {loading ? <Spinner.Centered /> : variables.length === 0 ? <NoItems /> : null}
       </Grid>
     </>
   );

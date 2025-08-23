@@ -6,12 +6,12 @@ import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
-import { Button } from '@/elements/button';
 import saveFileContent from '@/api/server/files/saveFileContent';
-import FileNameDialog from './dialogs/FileNameDialog';
 import { join } from 'pathe';
 import NotFound from '@/pages/NotFound';
 import { createPortal } from 'react-dom';
+import FileNameModal from './modals/FileNameModal';
+import Button from '@/elements/Button';
 
 export default () => {
   const params = useParams<'action'>();
@@ -25,7 +25,7 @@ export default () => {
   const { browsingDirectory, setBrowsingDirectory, browsingBackup } = useServerStore();
 
   const [loading, setLoading] = useState(false);
-  const [nameDialogOpen, setNameDialogOpen] = useState(false);
+  const [nameModalOpen, setNameModalOpen] = useState(false);
   const [fileName, setFileName] = useState('');
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('plaintext');
@@ -62,7 +62,7 @@ export default () => {
 
     saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
       setLoading(false);
-      setNameDialogOpen(false);
+      setNameModalOpen(false);
 
       if (name) {
         navigate(
@@ -83,10 +83,10 @@ export default () => {
     createPortal(
       <>
         <div className={'flex flex-col w-full h-full'}>
-          <FileNameDialog
+          <FileNameModal
             onFileName={(name: string) => saveFile(name)}
-            open={nameDialogOpen}
-            onClose={() => setNameDialogOpen(false)}
+            opened={nameModalOpen}
+            onClose={() => setNameModalOpen(false)}
           />
 
           <div className={'flex justify-between w-full p-4'}>
@@ -96,13 +96,9 @@ export default () => {
             />
             <div hidden={!!browsingBackup}>
               {params.action === 'edit' ? (
-                <Button style={Button.Styles.Green} onClick={() => saveFile()}>
-                  Save
-                </Button>
+                <Button onClick={() => saveFile()}>Save</Button>
               ) : (
-                <Button style={Button.Styles.Green} onClick={() => setNameDialogOpen(true)}>
-                  Create
-                </Button>
+                <Button onClick={() => setNameModalOpen(true)}>Create</Button>
               )}
             </div>
           </div>
@@ -121,7 +117,7 @@ export default () => {
 
               editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
                 if (params.action === 'new') {
-                  setNameDialogOpen(true);
+                  setNameModalOpen(true);
                 } else {
                   saveFile();
                 }

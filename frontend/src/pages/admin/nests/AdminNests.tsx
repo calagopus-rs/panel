@@ -7,11 +7,11 @@ import { useAdminStore } from '@/stores/admin';
 import NestRow from './NestRow';
 import getNests from '@/api/admin/nests/getNests';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/inputnew/TextInput';
-import NewButton from '@/elements/button/NewButton';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import TableNew from '@/elements/table/TableNew';
+import Table from '@/elements/Table';
 import NestCreateOrUpdate from './NestCreateOrUpdate';
 import NestView from './NestView';
 
@@ -58,21 +58,21 @@ const NestsContainer = () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <NewButton onClick={() => navigate('/admin/nests/new')} color={'blue'}>
+          <Button onClick={() => navigate('/admin/nests/new')} color={'blue'}>
             <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
             Create
-          </NewButton>
+          </Button>
         </Group>
       </Group>
 
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <TableNew columns={['ID', 'Name', 'Author', 'Description', 'Eggs']} pagination={nests} onPageSelect={setPage}>
+        <Table columns={['ID', 'Name', 'Author', 'Description', 'Eggs']} pagination={nests} onPageSelect={setPage}>
           {nests.data.map((nest) => (
             <NestRow key={nest.uuid} nest={nest} />
           ))}
-        </TableNew>
+        </Table>
       )}
     </>
   );

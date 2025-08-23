@@ -8,21 +8,21 @@ import updateDatabaseHost from '@/api/admin/databaseHosts/updateDatabaseHost';
 import createDatabaseHost from '@/api/admin/databaseHosts/createDatabaseHost';
 import deleteDatabaseHost from '@/api/admin/databaseHosts/deleteDatabaseHost';
 import testDatabaseHost from '@/api/admin/databaseHosts/testDatabaseHost';
-import NewButton from '@/elements/button/NewButton';
-import { Dialog } from '@/elements/dialog';
+import Button from '@/elements/Button';
 import Code from '@/elements/Code';
-import TextInput from '@/elements/inputnew/TextInput';
-import NumberInput from '@/elements/inputnew/NumberInput';
-import Switch from '@/elements/inputnew/Switch';
-import Select from '@/elements/inputnew/Select';
+import TextInput from '@/elements/input/TextInput';
+import NumberInput from '@/elements/input/NumberInput';
+import Switch from '@/elements/input/Switch';
+import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 
 export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openDialog, setOpenDialog] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [databaseHost, setDatabaseHost] = useState<AdminUpdateDatabaseHost>({
     name: '',
@@ -107,15 +107,15 @@ export default () => {
 
   return (
     <>
-      <Dialog.Confirm
-        opened={openDialog === 'delete'}
-        onClose={() => setOpenDialog(null)}
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
         title={'Confirm Database Host Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{databaseHost?.name}</Code>?
-      </Dialog.Confirm>
+      </ConfirmationModal>
 
       <Title order={1}>{params.id ? 'Update' : 'Create'} Database Host</Title>
       <Divider my={'sm'} />
@@ -203,18 +203,18 @@ export default () => {
       />
 
       <Group mt={'md'}>
-        <NewButton onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
-        </NewButton>
+        </Button>
         {params.id && (
-          <NewButton variant={'outline'} onClick={doTest} loading={loading}>
+          <Button variant={'outline'} onClick={doTest} loading={loading}>
             Test
-          </NewButton>
+          </Button>
         )}
         {params.id && (
-          <NewButton color={'red'} onClick={() => setOpenDialog('delete')} loading={loading}>
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
-          </NewButton>
+          </Button>
         )}
       </Group>
     </>
