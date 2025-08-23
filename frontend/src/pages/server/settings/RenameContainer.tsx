@@ -1,19 +1,24 @@
 import { httpErrorToHuman } from '@/api/axios';
 import renameServer from '@/api/server/settings/renameServer';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
+import NewButton from '@/elements/button/NewButton';
+import TextArea from '@/elements/inputnew/TextArea';
+import TextInput from '@/elements/inputnew/TextInput';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import { Card, Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
 
+  const [loading, setLoading] = useState(false);
   const [name, setName] = useState(server.name);
   const [description, setDescription] = useState(server.description || '');
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
+    load(true, setLoading);
     renameServer(server.uuid, { name, description })
       .then(() => {
         addToast('Server renamed.', 'success');
@@ -21,42 +26,41 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
-    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
-      <div>
-        <h1 className={'text-4xl font-bold text-white'}>Rename Server</h1>
-
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'name'}>Name</Input.Label>
-          <Input.Text
-            id={'name'}
-            placeholder={'Name'}
-            type={'text'}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'description'}>Description</Input.Label>
-          <Input.Textarea
-            id={'description'}
-            placeholder={'Description'}
-            value={description}
-            rows={3}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div className={'mt-4 flex justify-end'}>
-        <Button disabled={!name} onClick={handleUpdate}>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+      <Card>
+        <Title order={2} c={'white'}>
           Rename Server
-        </Button>
-      </div>
-    </div>
+        </Title>
+
+        <TextInput
+          label={'Server Name'}
+          placeholder={'Server Name'}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          mt={'sm'}
+        />
+
+        <TextArea
+          label={'Description'}
+          placeholder={'Description'}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          mt={'sm'}
+        />
+
+        <Group mt={'md'}>
+          <NewButton disabled={!name} onClick={doUpdate} loading={loading}>
+            Save
+          </NewButton>
+        </Group>
+      </Card>
+    </Grid.Col>
   );
 };

@@ -24,7 +24,7 @@ export default () => {
   };
 
   return (
-    <Grid.Col span={{ base: 12, md: 6, lg: 3 }}>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Title order={2} c={'white'}>
         Password
       </Title>

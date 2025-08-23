@@ -2,19 +2,23 @@ import RenameContainer from './RenameContainer';
 import TimezoneContainer from './TimezoneContainer';
 import AutokillContainer from './AutokillContainer';
 import ReinstallContainer from './ReinstallContainer';
+import { Grid, Group, Title } from '@mantine/core';
 
 export default () => {
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Settings</h1>
-      </div>
-      <div className={'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4'}>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Settings
+        </Title>
+      </Group>
+
+      <Grid grow>
         <RenameContainer />
         <AutokillContainer />
         <TimezoneContainer />
         <ReinstallContainer />
-      </div>
+      </Grid>
     </>
   );
 };

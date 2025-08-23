@@ -1,19 +1,13 @@
 import getServerActivity from '@/api/server/getServerActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
+import TextInput from '@/elements/inputnew/TextInput';
 import Spinner from '@/elements/Spinner';
-import Table, {
-  ContentWrapper,
-  TableHead,
-  TableHeader,
-  TableBody,
-  NoItems,
-  TableRow,
-  Pagination,
-} from '@/elements/table/Table';
+import TableNew, { TableData, TableRow } from '@/elements/table/TableNew';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useServerStore } from '@/stores/server';
+import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
@@ -44,59 +38,46 @@ export default () => {
 
   return (
     <>
-      <div className={'justify-between flex items-center mb-2'}>
-        <h1 className={'text-4xl font-bold text-white'}>Activity</h1>
-      </div>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Activity
+        </Title>
+        <TextInput
+          placeholder={'Search...'}
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          w={250}
+        />
+      </Group>
+
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table>
-          <ContentWrapper onSearch={setSearch}>
-            <Pagination data={activities} onPageSelect={setPage}>
-              <div className={'overflow-x-auto'}>
-                <table className={'w-full table-auto'}>
-                  <TableHead>
-                    <TableHeader name={'Actor'} />
-                    <TableHeader name={'Event'} />
-                    <TableHeader name={'IP'} />
-                    <TableHeader name={'When'} />
-                    <TableHeader />
-                  </TableHead>
+        <TableNew columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
+          {activities.data.map((activity) => (
+            <TableRow key={activity.created.toString()}>
+              <TableData>
+                {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
+              </TableData>
 
-                  <TableBody>
-                    {activities.data.map((activity) => (
-                      <TableRow key={activity.created.toString()}>
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
-                        </td>
+              <TableData>
+                <Code>{activity.event}</Code>
+              </TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Code>{activity.event}</Code>
-                        </td>
+              <TableData>{activity.ip && <Code>{activity.ip}</Code>}</TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          {activity.ip && <Code>{activity.ip}</Code>}
-                        </td>
+              <TableData>
+                <Tooltip content={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
+              </TableData>
 
-                        <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                          <Tooltip content={formatDateTime(activity.created)}>
-                            {formatTimestamp(activity.created)}
-                          </Tooltip>
-                        </td>
-
-                        <td className={'relative'}>
-                          {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
-                        </td>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </table>
-
-                {activities.data.length === 0 ? <NoItems /> : null}
-              </div>
-            </Pagination>
-          </ContentWrapper>
-        </Table>
+              <TableData>
+                <Group gap={4} justify={'right'} wrap={'nowrap'}>
+                  {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
+                </Group>
+              </TableData>
+            </TableRow>
+          ))}
+        </TableNew>
       )}
     </>
   );

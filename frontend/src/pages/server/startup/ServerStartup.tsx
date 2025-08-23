@@ -5,12 +5,15 @@ import { useServerStore } from '@/stores/server';
 import { useCallback, useEffect, useState } from 'react';
 import VariableContainer from './VariableContainer';
 import { useGlobalStore } from '@/stores/global';
-import { Input } from '@/elements/inputs';
 import { useToast } from '@/providers/ToastProvider';
 import updateDockerImage from '@/api/server/startup/updateDockerImage';
 import { httpErrorToHuman } from '@/api/axios';
 import updateCommand from '@/api/server/startup/updateCommand';
 import debounce from 'debounce';
+import { Grid, Group, Title } from '@mantine/core';
+import Card from '@/elements/Card';
+import TextArea from '@/elements/inputnew/TextArea';
+import Select from '@/elements/inputnew/Select';
 
 export default () => {
   const { addToast } = useToast();
@@ -63,45 +66,52 @@ export default () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Startup</h1>
-      </div>
-      <div className={'grid lg:grid-cols-3 gap-4'}>
-        <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full lg:col-span-2'}>
-          <Input.Textarea
-            id={'startup-command'}
-            placeholder={'Startup Command'}
-            className={'h-full'}
-            disabled={!settings.server.allowEditingStartupCommand}
-            value={command}
-            onChange={(e) => setCommand(e.target.value)}
-          />
-        </div>
-        <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
-          <Input.Dropdown
-            id={'docker-image'}
-            options={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
-              value,
-              label: key,
-            }))}
-            selected={dockerImage}
-            onChange={(e) => setDockerImage(e.target.value)}
-          />
-          <p className={'text-gray-400 mt-2'}>
-            The Docker image used to run this server.{' '}
-            {Object.values(server.egg.dockerImages).includes(server.image) ||
-            settings.server.allowOverwritingCustomDockerImage
-              ? 'This can be changed to use a different image.'
-              : 'This has been set by an administrator and cannot be changed.'}
-          </p>
-        </div>
-      </div>
-      <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Startup
+        </Title>
+      </Group>
+
+      <Grid grow>
+        <Grid.Col span={8}>
+          <Card>
+            <TextArea
+              label={'Startup Command'}
+              placeholder={'Startup Command'}
+              value={command}
+              onChange={(e) => setCommand(e.target.value)}
+              disabled={!settings.server.allowEditingStartupCommand}
+            />
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={4}>
+          <Card>
+            <Select
+              label={'Docker Image'}
+              value={dockerImage}
+              onChange={(value) => setDockerImage(value)}
+              data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
+                value,
+                label: key,
+              }))}
+              disabled={!settings.server.allowOverwritingCustomDockerImage}
+            />
+            <p className={'text-gray-400 mt-2'}>
+              The Docker image used to run this server.{' '}
+              {Object.values(server.egg.dockerImages).includes(server.image) ||
+              settings.server.allowOverwritingCustomDockerImage
+                ? 'This can be changed to use a different image.'
+                : 'This has been set by an administrator and cannot be changed.'}
+            </p>
+          </Card>
+        </Grid.Col>
+      </Grid>
+      <Grid>
         {variables.map((variable) => (
           <VariableContainer key={variable.envVariable} variable={variable} />
         ))}
         {loading ? <Spinner.Centered /> : variables.length === 0 ? <NoItems /> : null}
-      </div>
+      </Grid>
     </>
   );
 };

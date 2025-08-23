@@ -1,5 +1,7 @@
 import { Button } from '@/elements/button';
 import { Dialog, DialogProps } from '@/elements/dialog';
+import TagsInput from '@/elements/inputnew/TagsInput';
+import TextInput from '@/elements/inputnew/TextInput';
 import { Input } from '@/elements/inputs';
 import { generateBackupName } from '@/lib/server';
 import { useState } from 'react';
@@ -14,15 +16,15 @@ export default ({ onCreate, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Create Backup'} onClose={onClose} open={open} hideCloseIcon>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'name'}>Name</Input.Label>
-        <Input.Text id={'name'} name={'name'} value={name} onChange={(e) => setName(e.target.value)} />
-      </div>
+      <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} mt={'sm'} />
 
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'ignoredFiles'}>Ignored Files</Input.Label>
-        <Input.MultiInput placeholder={'Path or file'} options={ignoredFiles} onChange={setIgnoredFiles} />
-      </div>
+      <TagsInput
+        label={'Ignored Files'}
+        placeholder={'Ignored Files'}
+        value={ignoredFiles}
+        onChange={setIgnoredFiles}
+        mt={'sm'}
+      />
 
       <Dialog.Footer>
         <Button style={Button.Styles.Gray} onClick={onClose}>

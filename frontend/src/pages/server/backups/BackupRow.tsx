@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import {
@@ -25,6 +24,7 @@ import downloadBackup from '@/api/server/backups/downloadBackup';
 import restoreBackup from '@/api/server/backups/restoreBackup';
 import BackupRestoreDialog from './dialogs/BackupRestoreDialog';
 import { createSearchParams, useNavigate } from 'react-router';
+import { TableData, TableRow } from '@/elements/table/TableNew';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
@@ -92,8 +92,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       />
       <BackupRestoreDialog onRestore={doRestore} open={openDialog === 'restore'} onClose={() => setOpenDialog(null)} />
       <Dialog.Confirm
-        open={openDialog === 'delete'}
-        hideCloseIcon
+        opened={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
         title={'Confirm Backup Deletion'}
         confirm={'Delete'}
@@ -145,37 +144,29 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={backup.name}>
-              {backup.name}
-            </td>
+            <TableData>{backup.name}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {backup.checksum && <Code>{backup.checksum}</Code>}
-            </td>
+            <TableData>{backup.checksum && <Code>{backup.checksum}</Code>}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               {backup.completed
                 ? bytesToString(backup.bytes)
                 : backup.progress
-                  ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
-                  : null}
-            </td>
+                ? `${((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%`
+                : null}
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {backup.completed ? backup.files : null}
-            </td>
+            <TableData>{backup.completed ? backup.files : null}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {formatTimestamp(backup.created)}
-            </td>
+            <TableData>{formatTimestamp(backup.created)}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               {backup.isLocked ? (
                 <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
               ) : (
                 <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
               )}
-            </td>
+            </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

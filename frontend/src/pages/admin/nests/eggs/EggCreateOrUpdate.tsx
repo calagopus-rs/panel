@@ -154,6 +154,7 @@ export default ({ nest }: { nest: Nest }) => {
         placeholder={'Startup Done'}
         value={egg.configStartup?.done || []}
         onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, done: e } })}
+        mt={'sm'}
       />
 
       <Switch

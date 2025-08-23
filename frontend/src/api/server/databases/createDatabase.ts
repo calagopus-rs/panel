@@ -5,7 +5,7 @@ interface Data {
   name: string;
 }
 
-export default async (uuid: string, data: Data): Promise<any> => {
+export default async (uuid: string, data: Data): Promise<ServerDatabase> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/databases`, {

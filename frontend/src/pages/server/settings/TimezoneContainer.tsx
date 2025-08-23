@@ -1,9 +1,12 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateTimezone from '@/api/server/settings/updateTimezone';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
+import NewButton from '@/elements/button/NewButton';
+import Card from '@/elements/Card';
+import Select from '@/elements/inputnew/Select';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import { Grid, Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
 
@@ -18,16 +21,21 @@ export default () => {
   const { addToast } = useToast();
   const { server } = useServerStore();
 
+  const [loading, setLoading] = useState(false);
   const [timezone, setTimezone] = useState(server.timezone || '');
   const [time, setTime] = useState('');
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
+    load(true, setLoading);
     updateTimezone(server.uuid, { timezone })
       .then(() => {
         addToast('Server timezone updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
@@ -44,27 +52,28 @@ export default () => {
   }, [timezone]);
 
   return (
-    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
-      <div>
-        <h1 className={'text-4xl font-bold text-white'}>Update Timezone</h1>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+      <Card>
+        <Title order={2} c={'white'}>
+          Timezone
+        </Title>
 
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'timezone'}>Timezone</Input.Label>
-          <Input.Dropdown
-            id={'timezone'}
-            options={timezones}
-            selected={timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-          />
-          <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
-        </div>
-      </div>
+        <Select
+          label={'Timezone'}
+          value={timezone}
+          onChange={(value) => setTimezone(value)}
+          data={timezones}
+          mt={'sm'}
+        />
 
-      <div className={'mt-4 flex justify-end'}>
-        <Button disabled={!timezone} onClick={handleUpdate}>
-          Update Timezone
-        </Button>
-      </div>
-    </div>
+        <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
+
+        <Group mt={'md'}>
+          <NewButton onClick={doUpdate} loading={loading}>
+            Save
+          </NewButton>
+        </Group>
+      </Card>
+    </Grid.Col>
   );
 };

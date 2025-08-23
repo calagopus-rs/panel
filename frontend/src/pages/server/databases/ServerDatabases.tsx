@@ -1,6 +1,4 @@
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
@@ -11,6 +9,12 @@ import DatabaseRow from './DatabaseRow';
 import DatabaseCreateDialog from './dialogs/DatabaseCreateDialog';
 import getDatabases from '@/api/server/databases/getDatabases';
 import createDatabase from '@/api/server/databases/createDatabase';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,38 +58,35 @@ export default () => {
     <>
       <DatabaseCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
 
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Databases</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => setOpenDialog('create')}>Create</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={databases} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Address'} />
-                  <TableHeader name={'Username'} />
-                  <TableHeader />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Backups
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => setOpenDialog('create')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {databases.data.map((database) => (
-                      <DatabaseRow database={database} key={database.uuid} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : databases.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <ContextMenuProvider>
+          <TableNew columns={['Name', 'Address', 'Username', '']} pagination={databases} onPageSelect={setPage}>
+            {databases.data.map((database) => (
+              <DatabaseRow database={database} key={database.uuid} />
+            ))}
+          </TableNew>
+        </ContextMenuProvider>
+      )}
     </>
   );
 };

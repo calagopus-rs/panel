@@ -3,23 +3,24 @@ import deleteDatabase from '@/api/server/databases/deleteDatabase';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import CopyOnClick from '@/elements/CopyOnClick';
-import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import DatabaseDeleteDialog from './dialogs/DatabaseDeleteDialog';
 import DatabaseDetailsDialog from './dialogs/DatabaseDetailsDialog';
+import { TableData, TableRow } from '@/elements/table/TableNew';
 
-export default ({ database }: { database: any }) => {
+export default ({ database }: { database: ServerDatabase }) => {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
   const { removeDatabase } = useServerStore();
 
   const [openDialog, setOpenDialog] = useState<'details' | 'delete'>(null);
+  const host = `${database.host}:${database.port}`;
 
   const doDeleteDatabase = () => {
-    deleteDatabase(server.uuid, database.id)
+    deleteDatabase(server.uuid, database.uuid)
       .then(() => {
         setOpenDialog(null);
         setTimeout(() => removeDatabase(database), 150);
@@ -54,19 +55,15 @@ export default ({ database }: { database: any }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={database.name}>
-              {database.name}
-            </td>
+            <TableData>{database.name}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'}>
-              <CopyOnClick content={database.connectionString}>
-                <Code>{database.connectionString}</Code>
+            <TableData>
+              <CopyOnClick content={host}>
+                <Code>{host}</Code>
               </CopyOnClick>
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={database.username}>
-              {database.username}
-            </td>
+            <TableData>{database.username}</TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

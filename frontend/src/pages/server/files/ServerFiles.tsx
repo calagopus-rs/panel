@@ -1,5 +1,3 @@
-import { Button } from '@/elements/button';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useEffect, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
@@ -15,6 +13,11 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
+import { Card, Group, Title } from '@mantine/core';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileCirclePlus, faFolderPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,7 +31,6 @@ export default () => {
     setBrowsingBackup,
     browsingEntries,
     setBrowsingEntries,
-    selectedFiles,
     setSelectedFiles,
   } = useServerStore();
 
@@ -87,10 +89,6 @@ export default () => {
     }
   }, [browsingDirectory, browsingBackup, loading]);
 
-  const onSelectAllClick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSelectedFiles(e.currentTarget.checked ? browsingEntries.data || [] : []);
-  };
-
   const makeDirectory = (name: string) => {
     createDirectory(server.uuid, browsingDirectory, name)
       .then(() => {
@@ -112,61 +110,55 @@ export default () => {
 
       <FileActionBar />
 
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Files</h1>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Files
+        </Title>
         {!browsingBackup && (
-          <div className={'flex gap-2'}>
-            <Button style={Button.Styles.Gray} onClick={() => setOpenDialog('nameDirectory')}>
-              New directory
-            </Button>
-            <Button>Upload</Button>
-            <Button
+          <Group>
+            <NewButton onClick={() => setOpenDialog('nameDirectory')} color={'blue'}>
+              <FontAwesomeIcon icon={faFolderPlus} className={'mr-2'} />
+              New Directory
+            </NewButton>
+            <NewButton onClick={() => console.log('#Soon')} color={'blue'}>
+              <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+              Upload
+            </NewButton>
+            <NewButton
               onClick={() =>
                 navigate(
                   `/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`,
                 )
               }
+              color={'blue'}
             >
+              <FontAwesomeIcon icon={faFileCirclePlus} className={'mr-2'} />
               New File
-            </Button>
-          </div>
+            </NewButton>
+          </Group>
         )}
-      </div>
-      <Table>
-        <ContentWrapper
-          header={<FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />}
-          checked={selectedFiles.length > 0}
-          onSelectAllClick={onSelectAllClick}
-        >
-          <Pagination data={browsingEntries} onPageSelect={onPageSelect}>
-            <div className={'overflow-x-auto'}>
-              {loading ? (
-                <Spinner.Centered />
-              ) : browsingEntries.data.length === 0 ? (
-                <NoItems />
-              ) : (
-                <table className={'w-full table-auto'}>
-                  <TableHead>
-                    <TableHeader />
-                    <TableHeader name={'Name'} />
-                    <TableHeader name={'Size'} />
-                    <TableHeader name={'Modified'} />
-                    <TableHeader />
-                  </TableHead>
+      </Group>
 
-                  <ContextMenuProvider>
-                    <TableBody>
-                      {browsingEntries.data.map((file) => (
-                        <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
-                      ))}
-                    </TableBody>
-                  </ContextMenuProvider>
-                </table>
-              )}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <>
+          <Card>
+            <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
+          </Card>
+          <ContextMenuProvider>
+            <TableNew
+              columns={['', 'Name', 'Size', 'Modified', '']}
+              pagination={browsingEntries}
+              onPageSelect={onPageSelect}
+            >
+              {browsingEntries.data.map((file) => (
+                <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
+              ))}
+            </TableNew>
+          </ContextMenuProvider>
+        </>
+      )}
     </>
   );
 };

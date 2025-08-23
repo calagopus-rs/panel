@@ -1,59 +1,61 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateAutokill from '@/api/server/settings/updateAutokill';
-import { Button } from '@/elements/button';
-import { Input } from '@/elements/inputs';
+import NewButton from '@/elements/button/NewButton';
+import Card from '@/elements/Card';
+import NumberInput from '@/elements/inputnew/NumberInput';
+import Switch from '@/elements/inputnew/Switch';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import { Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
   const { server } = useServerStore();
 
+  const [loading, setLoading] = useState(false);
   const [enabled, setEnabled] = useState(server.autoKill.enabled);
   const [seconds, setSeconds] = useState(server.autoKill.seconds);
 
-  const handleUpdate = () => {
+  const doUpdate = () => {
+    load(true, setLoading);
     updateAutokill(server.uuid, { enabled, seconds })
       .then(() => {
         addToast('Server auto-kill updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
-    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
-      <div>
-        <h1 className={'text-4xl font-bold text-white'}>Update Auto-Kill</h1>
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+      <Card>
+        <Title order={2} c={'white'}>
+          Auto-Kill
+        </Title>
 
-        <div className={'mt-4'}>
-          <Input.Switch
-            name={'enabled'}
-            defaultChecked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-            label={'Enabled'}
-          />
-        </div>
+        <Switch label={'Enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} mt={'sm'} />
 
-        <div className={'mt-4'}>
-          <Input.Label htmlFor={'seconds'}>Seconds</Input.Label>
-          <Input.Text
-            id={'seconds'}
-            placeholder={'Seconds until auto-kill'}
-            type={'number'}
-            min={0}
-            max={3600}
-            value={seconds}
-            onChange={(e) => setSeconds(Number(e.target.value))}
-          />
-        </div>
-      </div>
+        <NumberInput
+          label={'Seconds until auto-kill'}
+          value={seconds}
+          min={0}
+          max={3600}
+          onChange={(value) => setSeconds(Number(value))}
+          mt={'sm'}
+        />
 
-      <div className={'mt-4 flex justify-end'}>
-        <Button onClick={handleUpdate}>Update Auto-Kill</Button>
-      </div>
-    </div>
+        <Group mt={'md'}>
+          <NewButton onClick={doUpdate} loading={loading}>
+            Save
+          </NewButton>
+        </Group>
+      </Card>
+    </Grid.Col>
   );
 };

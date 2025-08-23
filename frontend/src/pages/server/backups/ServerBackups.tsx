@@ -1,16 +1,20 @@
-import { Button } from '@/elements/button';
-import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchParams } from 'react-router';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import getBackups from '@/api/server/backups/getBackups';
 import BackupRow from './BackupRow';
 import BackupCreateDialog from './dialogs/BackupCreateDialog';
 import createBackup from '@/api/server/backups/createBackup';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
+import Spinner from '@/elements/Spinner';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,41 +58,39 @@ export default () => {
     <>
       <BackupCreateDialog onCreate={doCreate} open={openDialog === 'create'} onClose={() => setOpenDialog(null)} />
 
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Backups</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={() => setOpenDialog('create')}>Create</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={backups} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Checksum'} />
-                  <TableHeader name={'Size'} />
-                  <TableHeader name={'Files'} />
-                  <TableHeader name={'Created At'} />
-                  <TableHeader name={'Locked?'} />
-                  <TableHeader />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Backups
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={() => setOpenDialog('create')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {backups.data.map((backup) => (
-                      <BackupRow backup={backup} key={backup.uuid} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : backups.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <ContextMenuProvider>
+          <TableNew
+            columns={['Name', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
+            pagination={backups}
+            onPageSelect={setPage}
+          >
+            {backups.data.map((backup) => (
+              <BackupRow backup={backup} key={backup.uuid} />
+            ))}
+          </TableNew>
+        </ContextMenuProvider>
+      )}
     </>
   );
 };

@@ -4,12 +4,13 @@ import updateAllocation from '@/api/server/allocations/updateAllocation';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import { Dialog } from '@/elements/dialog';
-import { TableRow } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import AllocationEditDialog from './dialogs/AllocationEditDialog';
+import { TableData, TableRow } from '@/elements/table/TableNew';
+import Badge from '@/elements/Badge';
 
 export default ({ allocation }: { allocation: ServerAllocation }) => {
   const { addToast } = useToast();
@@ -50,8 +51,7 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
         onClose={() => setOpenDialog(null)}
       />
       <Dialog.Confirm
-        open={openDialog === 'delete'}
-        hideCloseIcon
+        opened={openDialog === 'delete'}
         onClose={() => setOpenDialog(null)}
         title={'Confirm Allocation Removal'}
         confirm={'Remove'}
@@ -77,21 +77,17 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               <Code>{allocation.ipAlias ?? allocation.ip}</Code>
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               <Code>{allocation.port}</Code>
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'} title={allocation.notes}>
-              {allocation.notes ?? 'No notes'}
-            </td>
+            <TableData>{allocation.notes ?? 'No notes'}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-              {allocation.isPrimary ? 'Primary' : 'Custom'}
-            </td>
+            <TableData>{allocation.isPrimary ? <Badge>Primary</Badge> : <Badge color={'gray'}>Other</Badge>}</TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

@@ -1,15 +1,19 @@
 import { httpErrorToHuman } from '@/api/axios';
 import createAllocation from '@/api/server/allocations/createAllocation';
 import getAllocations from '@/api/server/allocations/getAllocations';
-import { Button } from '@/elements/button';
 import Spinner from '@/elements/Spinner';
-import Table, { ContentWrapper, NoItems, Pagination, TableBody, TableHead, TableHeader } from '@/elements/table/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 import AllocationRow from './AllocationRow';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/inputnew/TextInput';
+import NewButton from '@/elements/button/NewButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import TableNew from '@/elements/table/TableNew';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,39 +53,35 @@ export default () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Network</h1>
-        <div className={'flex gap-2'}>
-          <Button onClick={doAdd}>Add new</Button>
-        </div>
-      </div>
-      <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={allocations} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'Hostname'} />
-                  <TableHeader name={'Port'} />
-                  <TableHeader name={'Note'} />
-                  <TableHeader />
-                  <TableHeader />
-                </TableHead>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Network
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <NewButton onClick={doAdd} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Add
+          </NewButton>
+        </Group>
+      </Group>
 
-                <ContextMenuProvider>
-                  <TableBody>
-                    {allocations.data.map((allocation) => (
-                      <AllocationRow key={allocation.uuid} allocation={allocation} />
-                    ))}
-                  </TableBody>
-                </ContextMenuProvider>
-              </table>
-
-              {loading ? <Spinner.Centered /> : allocations.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table>
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <ContextMenuProvider>
+          <TableNew columns={['Hostname', 'Port', 'Note', '', '']} pagination={allocations} onPageSelect={setPage}>
+            {allocations.data.map((allocation) => (
+              <AllocationRow key={allocation.uuid} allocation={allocation} />
+            ))}
+          </TableNew>
+        </ContextMenuProvider>
+      )}
     </>
   );
 };

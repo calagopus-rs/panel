@@ -1,6 +1,7 @@
 import { Button } from '@/elements/button';
 import { Dialog, DialogProps } from '@/elements/dialog';
-import { Input } from '@/elements/inputs';
+import Switch from '@/elements/inputnew/Switch';
+import TextArea from '@/elements/inputnew/TextArea';
 import { useState } from 'react';
 
 type Props = DialogProps & {
@@ -14,19 +15,15 @@ export default ({ allocation, onUpdate, open, onClose }: Props) => {
 
   return (
     <Dialog title={'Edit Allocation'} onClose={onClose} open={open} hideCloseIcon>
-      <div className={'mt-4'}>
-        <Input.Label htmlFor={'notes'}>Notes</Input.Label>
-        <Input.Textarea id={'notes'} name={'notes'} value={notes} onChange={(e) => setNotes(e.target.value)} />
-      </div>
+      <TextArea
+        label={'Notes'}
+        placeholder={'Notes'}
+        value={notes}
+        onChange={(e) => setNotes(e.target.value)}
+        mt={'sm'}
+      />
 
-      <div className={'mt-4'}>
-        <Input.Switch
-          label={'Primary'}
-          name={'primary'}
-          defaultChecked={primary}
-          onChange={(e) => setPrimary(e.target.checked)}
-        />
-      </div>
+      <Switch label={'Primary'} checked={primary} onChange={(e) => setPrimary(e.target.checked)} mt={'sm'} />
 
       <Dialog.Footer>
         <Button style={Button.Styles.Gray} onClick={onClose}>

@@ -11,6 +11,7 @@ import saveFileContent from '@/api/server/files/saveFileContent';
 import FileNameDialog from './dialogs/FileNameDialog';
 import { join } from 'pathe';
 import NotFound from '@/pages/NotFound';
+import { createPortal } from 'react-dom';
 
 export default () => {
   const params = useParams<'action'>();
@@ -79,49 +80,57 @@ export default () => {
       <Spinner size={75} />
     </div>
   ) : (
-    <div className={'flex flex-col w-full h-full'}>
-      <FileNameDialog
-        onFileName={(name: string) => saveFile(name)}
-        open={nameDialogOpen}
-        onClose={() => setNameDialogOpen(false)}
-      />
+    createPortal(
+      <>
+        <div className={'flex flex-col w-full h-full'}>
+          <FileNameDialog
+            onFileName={(name: string) => saveFile(name)}
+            open={nameDialogOpen}
+            onClose={() => setNameDialogOpen(false)}
+          />
 
-      <div className={'flex justify-between w-full p-4'}>
-        <FileBreadcrumbs path={join(decodeURIComponent(browsingDirectory), fileName)} browsingBackup={browsingBackup} />
-        <div hidden={!!browsingBackup}>
-          {params.action === 'edit' ? (
-            <Button style={Button.Styles.Green} onClick={() => saveFile()}>
-              Save
-            </Button>
-          ) : (
-            <Button style={Button.Styles.Green} onClick={() => setNameDialogOpen(true)}>
-              Create
-            </Button>
-          )}
+          <div className={'flex justify-between w-full p-4'}>
+            <FileBreadcrumbs
+              path={join(decodeURIComponent(browsingDirectory), fileName)}
+              browsingBackup={browsingBackup}
+            />
+            <div hidden={!!browsingBackup}>
+              {params.action === 'edit' ? (
+                <Button style={Button.Styles.Green} onClick={() => saveFile()}>
+                  Save
+                </Button>
+              ) : (
+                <Button style={Button.Styles.Green} onClick={() => setNameDialogOpen(true)}>
+                  Create
+                </Button>
+              )}
+            </div>
+          </div>
+          <Editor
+            height={'100%'}
+            theme={'vs-dark'}
+            defaultLanguage={language}
+            defaultValue={content}
+            onChange={setContent}
+            onMount={(editor, monaco) => {
+              editorRef.current = editor;
+
+              editor.onDidChangeModelContent(() => {
+                contentRef.current = editor.getValue();
+              });
+
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                if (params.action === 'new') {
+                  setNameDialogOpen(true);
+                } else {
+                  saveFile();
+                }
+              });
+            }}
+          />
         </div>
-      </div>
-      <Editor
-        height={'100%'}
-        theme={'vs-dark'}
-        defaultLanguage={language}
-        defaultValue={content}
-        onChange={setContent}
-        onMount={(editor, monaco) => {
-          editorRef.current = editor;
-
-          editor.onDidChangeModelContent(() => {
-            contentRef.current = editor.getValue();
-          });
-
-          editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-            if (params.action === 'new') {
-              setNameDialogOpen(true);
-            } else {
-              saveFile();
-            }
-          });
-        }}
-      />
-    </div>
+      </>,
+      document.getElementById('server-root')!,
+    )
   );
 };

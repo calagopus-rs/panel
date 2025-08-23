@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import ContextMenu from '@/elements/ContextMenu';
-import Checkbox from '@/elements/inputs/Checkbox';
-import { TableRow } from '@/elements/table/Table';
+import Checkbox from '@/elements/inputnew/Checkbox';
 import Tooltip from '@/elements/Tooltip';
 import { isArchiveType, isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
@@ -34,47 +33,7 @@ import ArchiveCreateDialog from './dialogs/ArchiveCreateDialog';
 import { useGlobalStore } from '@/stores/global';
 import FileCopyDialog from './dialogs/FileCopyDialog';
 import copyFile from '@/api/server/files/copyFile';
-
-function FileTableRow({
-  file,
-  onContextMenu,
-  children,
-}: {
-  file: DirectoryEntry;
-  onContextMenu: (e: any) => void;
-  children: React.ReactNode;
-}) {
-  const navigate = useNavigate();
-  const [_, setSearchParams] = useSearchParams();
-  const server = useServerStore((state) => state.server);
-  const { browsingDirectory } = useServerStore();
-  const { settings } = useGlobalStore();
-
-  return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
-    <TableRow
-      className={'cursor-pointer'}
-      onContextMenu={onContextMenu}
-      onClick={() => {
-        if (file.directory) {
-          setSearchParams({
-            directory: join(browsingDirectory, file.name),
-          });
-        } else {
-          navigate(
-            `/server/${server.uuidShort}/files/edit?${createSearchParams({
-              directory: browsingDirectory,
-              file: file.name,
-            })}`,
-          );
-        }
-      }}
-    >
-      {children}
-    </TableRow>
-  ) : (
-    <TableRow onContextMenu={onContextMenu}>{children}</TableRow>
-  );
-}
+import { TableData, TableRow } from '@/elements/table/TableNew';
 
 export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirectory: () => void }) => {
   const { addToast } = useToast();
@@ -93,23 +52,63 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
 
   const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
-      <div className={'flex items-center'}>
-        <Checkbox
-          id={file.name}
-          checked={selectedFiles.includes(file)}
-          onChange={(e) => {
-            e.stopPropagation();
-            if (e.currentTarget.checked) {
-              addSelectedFile(file);
-            } else {
-              removeSelectedFile(file);
-            }
-          }}
-          onClick={(e) => e.stopPropagation()}
-        />
-      </div>
+      <Checkbox
+        id={file.name}
+        checked={selectedFiles.includes(file)}
+        onChange={(e) => {
+          e.preventDefault();
+          if (e.currentTarget.checked) {
+            addSelectedFile(file);
+          } else {
+            removeSelectedFile(file);
+          }
+        }}
+        onClick={(e) => e.stopPropagation()}
+      />
     );
   };
+
+  function FileTableRow({
+    file,
+    onContextMenu,
+    children,
+  }: {
+    file: DirectoryEntry;
+    onContextMenu: (e: any) => void;
+    children: React.ReactNode;
+  }) {
+    const navigate = useNavigate();
+    const [_, setSearchParams] = useSearchParams();
+    const server = useServerStore((state) => state.server);
+    const { browsingDirectory } = useServerStore();
+    const { settings } = useGlobalStore();
+
+    return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
+      <TableRow
+        className={'cursor-pointer'}
+        bg={selectedFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        onContextMenu={onContextMenu}
+        onClick={() => {
+          if (file.directory) {
+            setSearchParams({
+              directory: join(browsingDirectory, file.name),
+            });
+          } else {
+            navigate(
+              `/server/${server.uuidShort}/files/edit?${createSearchParams({
+                directory: browsingDirectory,
+                file: file.name,
+              })}`,
+            );
+          }
+        }}
+      >
+        {children}
+      </TableRow>
+    ) : (
+      <TableRow onContextMenu={onContextMenu}>{children}</TableRow>
+    );
+  }
 
   const doCopy = (name: string) => {
     copyFile(server.uuid, join(browsingDirectory, file.name), name || null)
@@ -278,24 +277,24 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <td className={'pl-6'}>
+            <TableData>
               <RowCheckbox file={file} />
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-100 text-left whitespace-nowrap'} title={file.name}>
+            <TableData>
               {file.file ? (
                 <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFile} />
               ) : (
                 <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFolder} />
               )}
               {file.name}
-            </td>
+            </TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{bytesToString(file.size)}</td>
+            <TableData>{bytesToString(file.size)}</TableData>
 
-            <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
+            <TableData>
               <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
-            </td>
+            </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </FileTableRow>

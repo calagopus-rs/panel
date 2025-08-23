@@ -1,11 +1,14 @@
 import { httpErrorToHuman } from '@/api/axios';
-import { Button } from '@/elements/button';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useState } from 'react';
 import SettingsReinstallDialog from './dialogs/SettingsReinstallDialog';
 import reinstallServer from '@/api/server/settings/reinstallServer';
 import { useNavigate } from 'react-router';
+import { Grid, Group, Title } from '@mantine/core';
+import { load } from '@/lib/debounce';
+import Card from '@/elements/Card';
+import NewButton from '@/elements/button/NewButton';
 
 export default () => {
   const { addToast } = useToast();
@@ -13,8 +16,10 @@ export default () => {
   const navigate = useNavigate();
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleReinstall = (truncateDirectory: boolean) => {
+  const doReinstall = (truncateDirectory: boolean) => {
+    load(true, setLoading);
     reinstallServer(server.uuid, { truncateDirectory })
       .then(() => {
         addToast('Reinstalling server...', 'success');
@@ -23,20 +28,27 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   return (
-    <div className={'bg-gray-700/50 flex flex-col justify-between rounded-md p-4 h-full'}>
-      <SettingsReinstallDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onReinstall={handleReinstall} />
+    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
+      <Card>
+        <SettingsReinstallDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onReinstall={doReinstall} />
 
-      <h1 className={'text-4xl font-bold text-white'}>Reinstall Server</h1>
-
-      <div className={'mt-4 flex justify-end'}>
-        <Button style={Button.Styles.Red} onClick={() => setDialogOpen(true)}>
+        <Title order={2} c={'white'}>
           Reinstall Server
-        </Button>
-      </div>
-    </div>
+        </Title>
+
+        <Group mt={'md'}>
+          <NewButton color={'red'} onClick={() => setDialogOpen(true)} loading={loading}>
+            Reinstall Server
+          </NewButton>
+        </Group>
+      </Card>
+    </Grid.Col>
   );
 };

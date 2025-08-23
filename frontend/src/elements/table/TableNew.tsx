@@ -1,4 +1,5 @@
-import { Center, Group, Pagination as MantinePagination, Table, Text } from '@mantine/core';
+import { Center, Group, Pagination as MantinePagination, Table, TableTrProps, Text } from '@mantine/core';
+import { forwardRef } from 'react';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
@@ -20,22 +21,13 @@ export const TableBody = ({ children }: { children: React.ReactNode }) => {
   return <Table.Tbody>{children}</Table.Tbody>;
 };
 
-export const TableRow = ({
-  onClick,
-  onContextMenu,
-  children,
-}: {
-  onClick?: (e: React.MouseEvent) => void;
-  className?: string;
-  onContextMenu?: (e: React.MouseEvent) => void;
-  children: React.ReactNode;
-}) => {
+export const TableRow = forwardRef<HTMLTableRowElement, TableTrProps>(({ className, children, ...rest }, ref) => {
   return (
-    <Table.Tr onClick={onClick} onContextMenu={onContextMenu}>
+    <Table.Tr ref={ref} className={className} {...rest}>
       {children}
     </Table.Tr>
   );
-};
+});
 
 export const TableData = ({ children }: { children: React.ReactNode }) => {
   return <Table.Td>{children}</Table.Td>;
@@ -98,8 +90,8 @@ export default ({ columns, pagination, onPageSelect, children }: TableProps) => 
   return (
     <Table striped highlightOnHover={pagination.total > 0} withTableBorder>
       <TableHead>
-        {columns.map((column) => (
-          <TableHeader name={column} key={column} />
+        {columns.map((column, index) => (
+          <TableHeader name={column} key={`column-${index}`} />
         ))}
       </TableHead>
       <Table.Tbody>

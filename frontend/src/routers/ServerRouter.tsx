@@ -74,7 +74,7 @@ export default () => {
         </Sidebar.Section>
         <Sidebar.User />
       </Sidebar>
-      <div className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
+      <div id={'server-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         {loading ? (
           <div className={'w-full h-screen flex items-center justify-center'}>
             <Spinner size={75} />
