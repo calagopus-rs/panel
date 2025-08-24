@@ -50,7 +50,9 @@ export default ({ opened, onClose }: ModalProps) => {
         nothingFoundMessage={'No hosts found'}
         data={Object.values(
           databaseHosts.reduce(
-            (acc, { name, type }) => ((acc[type] ??= { group: type, items: [] }).items.push(name), acc),
+            (acc, { uuid, name, type }) => (
+              (acc[type] ??= { group: type, items: [] }).items.push({ value: uuid, label: name }), acc
+            ),
             {},
           ),
         )}

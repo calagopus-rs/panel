@@ -5,6 +5,11 @@ import { useState } from 'react';
 import Modal from '../modals/Modal';
 import Code from '../Code';
 import Button from '../Button';
+import hljs from 'highlight.js/lib/core';
+import json from 'highlight.js/lib/languages/json';
+import 'highlight.js/styles/a11y-dark.min.css';
+
+hljs.registerLanguage('json', json);
 
 export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
   const [openModal, setOpenModal] = useState<'view'>(null);
@@ -12,7 +17,12 @@ export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
   return (
     <>
       <Modal title={'Activity Details'} onClose={() => setOpenModal(null)} opened={openModal === 'view'}>
-        <Code block>{JSON.stringify(activity.data, null, 2)}</Code>
+        <Code
+          block
+          dangerouslySetInnerHTML={{
+            __html: hljs.highlight(JSON.stringify(activity.data, null, 2), { language: 'json' }).value,
+          }}
+        />
 
         <Group mt={'md'}>
           <Button variant={'default'} onClick={() => setOpenModal(null)}>

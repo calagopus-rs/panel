@@ -25,7 +25,7 @@ export default ({ files, opened, onClose }: Props) => {
 
   const doArchive = () => {
     compressFiles(server.uuid, {
-      name: fileName,
+      name: fileName || null,
       format,
       root: browsingDirectory,
       files: files.map((f) => f.name),
@@ -76,9 +76,7 @@ export default ({ files, opened, onClose }: Props) => {
       </p>
 
       <Group mt={'md'}>
-        <Button onClick={doArchive} disabled={!fileName}>
-          Create
-        </Button>
+        <Button onClick={doArchive}>Create</Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

@@ -93,9 +93,7 @@ export default ({ file, opened, onClose }: Props) => {
       </p>
 
       <Group mt={'md'}>
-        <Button onClick={doCopy} disabled={!newFileName}>
-          Copy
-        </Button>
+        <Button onClick={doCopy}>Copy</Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

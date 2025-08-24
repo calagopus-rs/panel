@@ -64,7 +64,11 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <Table columns={['Name', 'Address', 'Username', '']} pagination={databases} onPageSelect={setPage}>
+          <Table
+            columns={['Name', 'Type', 'Address', 'Username', 'Size', '']}
+            pagination={databases}
+            onPageSelect={setPage}
+          >
             {databases.data.map((database) => (
               <DatabaseRow database={database} key={database.uuid} />
             ))}

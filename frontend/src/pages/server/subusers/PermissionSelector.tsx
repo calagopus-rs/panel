@@ -2,6 +2,7 @@ import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import { useServerStore } from '@/stores/server';
 import {
+  faStopwatch,
   faBoxArchive,
   faBriefcase,
   faChevronDown,
@@ -26,6 +27,7 @@ const categoryIcons: { [key: string]: IconDefinition } = {
   databases: faDatabase,
   subusers: faUsers,
   backups: faBoxArchive,
+  schedules: faStopwatch,
   allocations: faNetworkWired,
   startup: faPlay,
   settings: faCog,
@@ -114,12 +116,11 @@ export default ({
                   </div>
                 </div>
                 <div className={'flex items-center gap-2'}>
-                  <Button
+                  <Checkbox
                     onClick={() => toggleAllInCategory(category)}
-                    color={selectionState === 'all' ? 'green' : selectionState === 'partial' ? 'yellow' : ''}
-                  >
-                    {selectionState === 'all' ? 'All' : selectionState === 'partial' ? 'Some' : 'None'}
-                  </Button>
+                    indeterminate={selectionState === 'partial'}
+                    checked={selectionState === 'all'}
+                  />
                   <button onClick={() => toggleCategory(category)} className={'p-1 hover:bg-gray-600 rounded'}>
                     {isExpanded ? (
                       <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
@@ -148,7 +149,10 @@ export default ({
                           <Group wrap={'nowrap'} align={'flex-start'}>
                             <Checkbox.Indicator />
                             <div>
-                              <div className={'text-gray-50 font-bold'}>{permission}</div>
+                              <div className={'text-gray-50 font-bold'}>
+                                {permission[0].toUpperCase()}
+                                {permission.slice(1)}
+                              </div>
                               <div className={'text-sm text-gray-200 mt-1'}>{permDescription}</div>
                             </div>
                           </Group>

@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Data {
-  name: string;
+  name: string | null;
   format: ArchiveFormat;
   root: string;
   files: string[];
