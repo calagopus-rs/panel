@@ -31,7 +31,7 @@ mod get {
             .get_servers_server(server.uuid)
             .await
         {
-            Ok(wings_api::servers_server::get::Response::Ok(data)) => data,
+            Ok(data) => data,
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to get server details: {:#?}", err);
 

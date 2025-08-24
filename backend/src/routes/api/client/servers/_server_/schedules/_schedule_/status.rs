@@ -51,7 +51,7 @@ mod get {
             .get_servers_server_schedule_schedule(server.uuid, schedule.uuid)
             .await
         {
-            Ok(wings_api::servers_server_schedule_schedule::get::Response::Ok(data)) => data,
+            Ok(data) => data,
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to get server schedule status: {:#?}", err);
 

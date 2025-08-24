@@ -67,7 +67,7 @@ mod put {
             .put_servers_server_files_rename(server.uuid, &request_body)
             .await
         {
-            Ok(wings_api::servers_server_files_rename::put::Response::Ok(data)) => data,
+            Ok(data) => data,
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)

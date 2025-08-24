@@ -165,17 +165,21 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             }
         }
 
-        output.write('        #[derive(Deserialize)]\n')
-        output.write('        #[serde(untagged)]\n')
-        output.write('        pub enum Response {\n')
+        if (Object.keys(data.responses ?? []).filter((code) => code.startsWith('2')).length > 1) {
+            output.write('        #[derive(Deserialize)]\n')
+            output.write('        #[serde(untagged)]\n')
+            output.write('        pub enum Response {\n')
 
-        for (const [code, _] of Object.entries(data.responses ?? [])) {
-            if (!code.startsWith('2')) continue
+            for (const [code, _] of Object.entries(data.responses ?? [])) {
+                if (!code.startsWith('2')) continue
 
-            output.write(`            ${pascalCase(http.STATUS_CODES[parseInt(code)]!)}(Response${code}),\n`)
+                output.write(`            ${pascalCase(http.STATUS_CODES[parseInt(code)]!)}(Response${code}),\n`)
+            }
+
+            output.write('        }\n')
+        } else {
+            output.write(`        pub type Response = Response${Object.keys(data.responses ?? []).find((code) => code.startsWith('2'))};\n`)
         }
-
-        output.write('        }\n')
 
         {
             const params: string[] = []

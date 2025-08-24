@@ -51,7 +51,7 @@ mod delete {
             .delete_servers_server_files_operations_operation(server.uuid, operation)
             .await
         {
-            Ok(wings_api::servers_server_files_operations_operation::delete::Response::Ok(_)) => {}
+            Ok(_) => {}
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)

@@ -331,11 +331,7 @@ pub mod backups_backup {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod extensions {
@@ -351,11 +347,7 @@ pub mod extensions {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers {
@@ -366,11 +358,7 @@ pub mod servers {
 
         pub type Response200 = Vec<Server>;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 
     pub mod post {
@@ -394,11 +382,7 @@ pub mod servers {
 
         pub type Response409 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server {
@@ -409,11 +393,7 @@ pub mod servers_server {
 
         pub type Response200 = Server;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 
     pub mod delete {
@@ -424,11 +404,7 @@ pub mod servers_server {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_backup {
@@ -455,11 +431,7 @@ pub mod servers_server_backup {
 
         pub type Response409 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_backup_backup {
@@ -475,11 +447,7 @@ pub mod servers_server_backup_backup {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_backup_backup_restore {
@@ -506,11 +474,7 @@ pub mod servers_server_backup_backup_restore {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_commands {
@@ -533,11 +497,7 @@ pub mod servers_server_commands {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_chmod {
@@ -571,11 +531,7 @@ pub mod servers_server_files_chmod {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_compress {
@@ -634,11 +590,7 @@ pub mod servers_server_files_contents {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_copy {
@@ -662,11 +614,7 @@ pub mod servers_server_files_copy {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_create_directory {
@@ -693,11 +641,7 @@ pub mod servers_server_files_create_directory {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_decompress {
@@ -767,11 +711,7 @@ pub mod servers_server_files_delete {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_fingerprints {
@@ -787,11 +727,7 @@ pub mod servers_server_files_fingerprints {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_list {
@@ -813,11 +749,7 @@ pub mod servers_server_files_list {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_list_directory {
@@ -832,11 +764,7 @@ pub mod servers_server_files_list_directory {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_operations_operation {
@@ -852,11 +780,7 @@ pub mod servers_server_files_operations_operation {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_pull {
@@ -872,11 +796,7 @@ pub mod servers_server_files_pull {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 
     pub mod post {
@@ -932,11 +852,7 @@ pub mod servers_server_files_pull_pull {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_rename {
@@ -968,11 +884,7 @@ pub mod servers_server_files_rename {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_search {
@@ -1005,11 +917,7 @@ pub mod servers_server_files_search {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_files_write {
@@ -1029,11 +937,7 @@ pub mod servers_server_files_write {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_logs {
@@ -1049,11 +953,7 @@ pub mod servers_server_logs {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_power {
@@ -1076,11 +976,7 @@ pub mod servers_server_power {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_reinstall {
@@ -1103,11 +999,7 @@ pub mod servers_server_reinstall {
 
         pub type Response409 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_schedule_schedule {
@@ -1125,11 +1017,7 @@ pub mod servers_server_schedule_schedule {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_schedule_schedule_abort {
@@ -1145,11 +1033,7 @@ pub mod servers_server_schedule_schedule_abort {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_schedule_schedule_trigger {
@@ -1165,11 +1049,7 @@ pub mod servers_server_schedule_schedule_trigger {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_script {
@@ -1198,11 +1078,7 @@ pub mod servers_server_script {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_sync {
@@ -1216,11 +1092,7 @@ pub mod servers_server_sync {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_transfer {
@@ -1236,11 +1108,7 @@ pub mod servers_server_transfer {
 
         pub type Response417 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 
     pub mod post {
@@ -1270,11 +1138,7 @@ pub mod servers_server_transfer {
 
         pub type Response409 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Accepted(Response202),
-        }
+        pub type Response = Response202;
     }
 }
 pub mod servers_server_version {
@@ -1292,11 +1156,7 @@ pub mod servers_server_version {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_ws_deny {
@@ -1317,11 +1177,7 @@ pub mod servers_server_ws_deny {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod servers_server_ws_permissions {
@@ -1349,11 +1205,7 @@ pub mod servers_server_ws_permissions {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod stats {
@@ -1413,11 +1265,7 @@ pub mod stats {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod system {
@@ -1441,11 +1289,7 @@ pub mod system {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod transfers {
@@ -1463,11 +1307,7 @@ pub mod transfers {
 
         pub type Response409 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod transfers_server {
@@ -1483,11 +1323,7 @@ pub mod transfers_server {
 
         pub type Response404 = ApiError;
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
 pub mod update {
@@ -1546,10 +1382,6 @@ pub mod update {
             }
         }
 
-        #[derive(Deserialize)]
-        #[serde(untagged)]
-        pub enum Response {
-            Ok(Response200),
-        }
+        pub type Response = Response200;
     }
 }
