@@ -16,7 +16,7 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const doDelete = () => {
-    deleteApiKey(apiKey.keyStart)
+    deleteApiKey(apiKey.uuid)
       .then(() => {
         addToast('API key deleted.', 'success');
         setOpenModal(null);
