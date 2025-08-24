@@ -8,6 +8,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { Group, Modal as MantineModal, useModalsStack } from '@mantine/core';
@@ -29,6 +30,7 @@ export default () => {
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -49,6 +51,8 @@ export default () => {
   }, [open]);
 
   const doEnable = () => {
+    load(true, setLoading);
+
     enableTwoFactor(code, password)
       .then(({ recoveryCodes }) => {
         setRecoveryCodes(recoveryCodes);
@@ -57,6 +61,9 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
@@ -104,7 +111,7 @@ export default () => {
           />
 
           <Group mt={'md'}>
-            <Button onClick={doEnable} disabled={!code || !password}>
+            <Button onClick={doEnable} loading={loading} disabled={!code || !password}>
               Enable
             </Button>
             <Button variant={'default'} onClick={() => stageStack.closeAll()}>

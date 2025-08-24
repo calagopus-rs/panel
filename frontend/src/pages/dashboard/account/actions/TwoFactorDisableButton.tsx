@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { Group } from '@mantine/core';
@@ -17,6 +18,7 @@ export default () => {
 
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) {
@@ -27,6 +29,8 @@ export default () => {
   }, [open]);
 
   const doDisable = () => {
+    load(true, setLoading);
+
     disableTwoFactor(code, password)
       .then(() => {
         addToast('Two-factor authentication disabled.', 'success');
@@ -35,6 +39,9 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
@@ -64,12 +71,11 @@ export default () => {
         />
 
         <Group mt={'md'}>
+          <Button color={'red'} onClick={doDisable} loading={loading} disabled={!password}>
+            Disable
+          </Button>
           <Button variant={'default'} onClick={() => setOpenModal(null)}>
             Close
-          </Button>
-
-          <Button color={'red'} onClick={doDisable} disabled={!password}>
-            Disable
           </Button>
         </Group>
       </Modal>
