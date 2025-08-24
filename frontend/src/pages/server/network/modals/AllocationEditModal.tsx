@@ -23,8 +23,8 @@ export default ({ allocation, opened, onClose }: Props) => {
   const doUpdate = () => {
     updateAllocation(server.uuid, allocation.uuid, { notes, primary })
       .then(() => {
-        allocation.notes = notes;
-        allocation.isPrimary = primary;
+        allocation.notes = notes || null;
+
         if (primary) {
           setAllocations({
             ...allocations,
