@@ -1,6 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import createSshKey from '@/api/me/ssh-keys/createSshKey';
 import Button from '@/elements/Button';
+import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
@@ -41,14 +42,16 @@ export default () => {
 
   return (
     <>
-      <Modal title={'Create API Key'} opened={openModal === 'create'} onClose={() => setOpenModal(null)}>
+      <Modal title={'Create SSH Key'} opened={openModal === 'create'} onClose={() => setOpenModal(null)}>
         <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-        <TextInput
+        <TextArea
           label={'Public Key'}
           placeholder={'Public Key'}
           value={pubKey}
           onChange={(e) => setPubKey(e.target.value)}
+          rows={3}
+          resize={'none'}
           mt={'sm'}
         />
 
