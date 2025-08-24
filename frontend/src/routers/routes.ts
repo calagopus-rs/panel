@@ -215,7 +215,7 @@ const routes: Routes = {
       icon: faNetworkWired,
       path: '/network',
       element: ServerNetwork,
-      permission: 'network.*',
+      permission: 'allocations.*',
     },
     {
       name: 'Startup',

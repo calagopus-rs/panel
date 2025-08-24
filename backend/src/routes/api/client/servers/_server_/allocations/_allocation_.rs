@@ -217,7 +217,7 @@ mod patch {
                     .execute(&mut *transaction)
                     .await?;
                 }
-            } else if server.allocation.is_none() && primary {
+            } else if primary {
                 sqlx::query!(
                     "UPDATE servers
                     SET allocation_uuid = $1
