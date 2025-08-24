@@ -21,7 +21,7 @@ export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsi
         checked={selectedFiles.length >= browsingEntries.data.length}
         indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
         className={'mr-4'}
-        onClick={() => {
+        onChange={() => {
           if (selectedFiles.length >= browsingEntries.data.length) {
             setSelectedFiles([]);
           } else {
