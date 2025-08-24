@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Menu } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
@@ -35,28 +35,24 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const showMenu = (x: number, y: number, items: Item[]) => {
-    const menuWidth = 200; // same as Menu width
-    const menuHeight = items.length * 36; // ~36px per item (Mantine default)
-
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    let adjustedX = x;
-    let adjustedY = y;
-
-    if (x + menuWidth > viewportWidth) {
-      adjustedX = viewportWidth - menuWidth - 8; // 8px margin
-    }
-    if (y + menuHeight > viewportHeight) {
-      adjustedY = viewportHeight - menuHeight - 8;
-    }
-
-    setState({ visible: true, x: adjustedX, y: adjustedY, items });
+    setState({ visible: true, x, y, items });
   };
 
   const hideMenu = () => {
     setState((prev) => ({ ...prev, visible: false }));
   };
+
+  useEffect(() => {
+    const handleScroll = () => {
+      hideMenu();
+    };
+
+    if (state.visible) {
+      document.addEventListener('scroll', handleScroll);
+    }
+
+    return () => document.removeEventListener('scroll', handleScroll);
+  }, [state.visible]);
 
   return (
     <ContextMenuContext.Provider value={{ state, showMenu, hideMenu }}>
@@ -67,15 +63,20 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
         withinPortal
         closeOnClickOutside
         transitionProps={{ transition: 'scale-y', duration: 200 }}
-        styles={{
-          dropdown: {
-            position: 'absolute',
-            top: state.y,
-            left: state.x,
-            zIndex: 999,
-          },
-        }}
       >
+        <Menu.Target>
+          <div
+            style={{
+              position: 'fixed',
+              top: state.y,
+              left: state.x,
+              width: 1,
+              height: 1,
+              pointerEvents: 'none',
+            }}
+          />
+        </Menu.Target>
+
         {children}
 
         <Menu.Dropdown>
@@ -122,18 +123,16 @@ const ContextMenu = ({
 
 ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }) => {
   return (
-    <Menu.Target>
-      <td
-        className={'relative cursor-pointer w-10 text-center'}
-        onClick={(e) => {
-          e.stopPropagation();
-          const rect = e.currentTarget.getBoundingClientRect();
-          openMenu(rect.left, rect.bottom);
-        }}
-      >
-        <FontAwesomeIcon icon={faEllipsis} />
-      </td>
-    </Menu.Target>
+    <td
+      className={'relative cursor-pointer w-10 text-center'}
+      onClick={(e) => {
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        openMenu(rect.left, rect.bottom);
+      }}
+    >
+      <FontAwesomeIcon icon={faEllipsis} />
+    </td>
   );
 };
 
