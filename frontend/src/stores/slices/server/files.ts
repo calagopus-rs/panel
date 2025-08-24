@@ -19,6 +19,10 @@ export interface FilesSlice {
   addSelectedFile: (file: DirectoryEntry) => void;
   removeSelectedFile: (file: DirectoryEntry) => void;
 
+  movingFiles: DirectoryEntry[];
+  movingFilesDirectory: string | null;
+  setMovingFiles: (files: DirectoryEntry[]) => void;
+
   fileOperations: Map<string, FileOperation>;
   setFileOperation: (uuid: string, operation: FileOperation) => void;
   removeFileOperation: (uuid: string) => void;
@@ -55,6 +59,11 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
   addSelectedFile: (value) => set((state) => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
   removeSelectedFile: (value) =>
     set((state) => ({ ...state, selectedFiles: state.selectedFiles.filter((file) => file.name !== value.name) })),
+
+  movingFiles: [],
+  movingFilesDirectory: null,
+  setMovingFiles: (files) =>
+    set((state) => ({ ...state, movingFiles: files, movingFilesDirectory: state.browsingDirectory })),
 
   fileOperations: new Map<string, FileOperation>(),
   setFileOperation: (uuid, operation) =>

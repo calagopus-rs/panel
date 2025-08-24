@@ -124,22 +124,22 @@ export default ({ file, opened, onClose }: Props) => {
   return (
     <Modal title={'File Permissions'} onClose={onClose} opened={opened}>
       <Card>
-        <Group>
+        <div className={'flex flex-row justify-between'}>
           <Title order={3} c={'white'}>
             Symbolic:
           </Title>
           <Badge variant={'light'} color={'blue'} size={'xl'} className={'lowercase!'}>
             {getPermissionString()}
           </Badge>
-        </Group>
-        <Group>
+        </div>
+        <div className={'mt-2 flex flex-row justify-between'}>
           <Title order={3} c={'white'}>
             Octal:
           </Title>
           <Badge variant={'light'} color={'green'} size={'xl'}>
             {getOctalValue()}
           </Badge>
-        </Group>
+        </div>
       </Card>
 
       <Group mt={'md'} grow>

@@ -85,7 +85,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
             .filter((item) => !item.hidden)
             .map((item, idx) =>
               item.items?.length > 0 ? (
-                <Menu.Sub>
+                <Menu.Sub key={idx}>
                   <Menu.Sub.Target>
                     <Menu.Sub.Item
                       key={idx}
@@ -103,7 +103,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                   <Menu.Sub.Dropdown>
                     {item.items.map((subItem, subIdx) => (
                       <Menu.Item
-                        key={subIdx}
+                        key={idx.toString() + subIdx.toString()}
                         leftSection={<FontAwesomeIcon icon={subItem.icon} />}
                         color={subItem.color === 'red' ? 'red' : undefined}
                         onClick={() => {

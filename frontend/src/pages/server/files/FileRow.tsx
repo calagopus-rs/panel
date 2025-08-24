@@ -17,6 +17,7 @@ import {
   faFileZipper,
   faEnvelopesBulk,
   faFileArrowDown,
+  faFilePen,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
@@ -30,13 +31,21 @@ import ArchiveCreateModal from './modals/ArchiveCreateModal';
 import FileCopyModal from './modals/FileCopyModal';
 import FileDeleteModal from './modals/FileDeleteModal';
 import FilePermissionsModal from './modals/FilePermissionsModal';
+import FileRenameModal from './modals/FileRenameModal';
 
 export default ({ file }: { file: DirectoryEntry }) => {
   const { addToast } = useToast();
-  const { server, browsingDirectory, browsingBackup, selectedFiles, addSelectedFile, removeSelectedFile } =
-    useServerStore();
+  const {
+    server,
+    browsingDirectory,
+    browsingBackup,
+    selectedFiles,
+    addSelectedFile,
+    removeSelectedFile,
+    setMovingFiles,
+  } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'copy' | 'move' | 'permissions' | 'archive' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
 
   const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
     return (
@@ -103,8 +112,6 @@ export default ({ file }: { file: DirectoryEntry }) => {
     );
   }
 
-  const doMove = () => {};
-
   const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {
       addToast(httpErrorToHuman(msg), 'error');
@@ -125,12 +132,19 @@ export default ({ file }: { file: DirectoryEntry }) => {
   return (
     <>
       <FileCopyModal file={file} opened={openModal === 'copy'} onClose={() => setOpenModal(null)} />
+      <FileRenameModal file={file} opened={openModal === 'rename'} onClose={() => setOpenModal(null)} />
       <FilePermissionsModal file={file} opened={openModal === 'permissions'} onClose={() => setOpenModal(null)} />
       <ArchiveCreateModal files={[file]} opened={openModal === 'archive'} onClose={() => setOpenModal(null)} />
       <FileDeleteModal files={[file]} opened={openModal === 'delete'} onClose={() => setOpenModal(null)} />
 
       <ContextMenu
         items={[
+          {
+            icon: faFilePen,
+            label: 'Rename',
+            hidden: !!browsingBackup,
+            onClick: () => setOpenModal('rename'),
+          },
           {
             icon: faCopy,
             label: 'Copy',
@@ -142,7 +156,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
             icon: faAnglesUp,
             label: 'Move',
             hidden: !!browsingBackup,
-            onClick: () => setOpenModal('move'),
+            onClick: () => setMovingFiles([file]),
             color: 'gray',
           },
           {
