@@ -9,6 +9,7 @@ import register from '@/api/auth/register';
 import checkpointLogin from '@/api/auth/checkpointLogin';
 import getMe from '@/api/me/getMe';
 import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
 
 interface AuthContextType {
   user: User | null;

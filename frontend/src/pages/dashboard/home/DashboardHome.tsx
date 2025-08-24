@@ -6,6 +6,7 @@ import ServerItem from './ServerItem';
 import getServers from '@/api/server/getServers';
 import Spinner from '@/elements/Spinner';
 import { useGlobalStore } from '@/stores/global';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const { serverListDesign, setServerListDesign } = useGlobalStore();

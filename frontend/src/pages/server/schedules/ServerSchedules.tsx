@@ -3,6 +3,7 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
 import { useSearchParams } from 'react-router';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();

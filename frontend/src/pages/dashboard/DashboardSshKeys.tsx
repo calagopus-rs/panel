@@ -11,6 +11,7 @@ import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Table, { TableData, TableRow } from '@/elements/Table';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();

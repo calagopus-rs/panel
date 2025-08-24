@@ -16,6 +16,7 @@ import getServer from '@/api/server/getServer';
 import routes, { to } from './routes';
 import Can from '@/elements/Can';
 import Container from '@/elements/Container';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const params = useParams<'id'>();
