@@ -94,7 +94,12 @@ export default ({ file }: { file: DirectoryEntry }) => {
         {children}
       </TableRow>
     ) : (
-      <TableRow onContextMenu={onContextMenu}>{children}</TableRow>
+      <TableRow
+        bg={selectedFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        onContextMenu={onContextMenu}
+      >
+        {children}
+      </TableRow>
     );
   }
 

@@ -1,10 +1,11 @@
+import Checkbox from '@/elements/input/Checkbox';
 import { useServerStore } from '@/stores/server';
 import classNames from 'classnames';
 import { createSearchParams, NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
 export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsingBackup: ServerBackup | null }) {
-  const server = useServerStore((state) => state.server);
+  const { server, browsingEntries, selectedFiles, setSelectedFiles } = useServerStore();
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
@@ -15,7 +16,19 @@ export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsi
   });
 
   return (
-    <div className={'ml-4 flex items-center text-gray-500'}>
+    <div className={'flex items-center text-gray-500'}>
+      <Checkbox
+        checked={selectedFiles.length >= browsingEntries.data.length}
+        indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
+        className={'mr-4'}
+        onClick={() => {
+          if (selectedFiles.length >= browsingEntries.data.length) {
+            setSelectedFiles([]);
+          } else {
+            setSelectedFiles(browsingEntries.data);
+          }
+        }}
+      />
       /<span className={'px-1 text-gray-300'}>{browsingBackup ? 'backups' : 'home'}</span>/
       <NavLink
         to={
