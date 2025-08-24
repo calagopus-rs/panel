@@ -26,10 +26,8 @@ mod post {
         name: Option<String>,
 
         #[serde(default)]
-        #[schema(default = false)]
         use_header: bool,
         #[serde(default)]
-        #[schema(default = false)]
         foreground: bool,
     }
 

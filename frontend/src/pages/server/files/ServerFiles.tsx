@@ -13,9 +13,10 @@ import getBackup from '@/api/server/backups/getBackup';
 import { Card, Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileCirclePlus, faFolderPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faFileCirclePlus, faFolderPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DirectoryNameModal from './modals/DirectoryNameModal';
+import PullFileModal from './modals/PullFileModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +34,7 @@ export default () => {
     fileOperations,
   } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'nameDirectory'>(null);
+  const [openModal, setOpenModal] = useState<'nameDirectory' | 'pullFile'>(null);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
 
@@ -91,6 +92,7 @@ export default () => {
   return (
     <>
       <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
+      <PullFileModal opened={openModal === 'pullFile'} onClose={() => setOpenModal(null)} />
 
       <FileActionBar />
 
@@ -103,6 +105,10 @@ export default () => {
             <Button onClick={() => setOpenModal('nameDirectory')} color={'blue'}>
               <FontAwesomeIcon icon={faFolderPlus} className={'mr-2'} />
               New Directory
+            </Button>
+            <Button onClick={() => setOpenModal('pullFile')} color={'blue'}>
+              <FontAwesomeIcon icon={faDownload} className={'mr-2'} />
+              Pull
             </Button>
             <Button onClick={() => console.log('#Soon')} color={'blue'}>
               <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
