@@ -9,7 +9,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGraduationCap, faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/providers/AuthProvider';
 import routes, { to } from './routes';
-import ErrorBoundary from '@/elements/ErrorBoundary';
 import Container from '@/elements/Container';
 
 export default () => {
@@ -51,15 +50,13 @@ export default () => {
       </Sidebar>
       <div id={'dashboard-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         <Container>
-          <ErrorBoundary>
-            <Routes>
-              <Route path={''} element={<DashboardHome />} />
-              {routes.account.map(({ path, element: Element }) => (
-                <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
-              ))}
-              <Route path={'*'} element={<NotFound />} />
-            </Routes>
-          </ErrorBoundary>
+          <Routes>
+            <Route path={''} element={<DashboardHome />} />
+            {routes.account.map(({ path, element: Element }) => (
+              <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
+            ))}
+            <Route path={'*'} element={<NotFound />} />
+          </Routes>
         </Container>
       </div>
     </div>

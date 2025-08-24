@@ -1,4 +1,3 @@
-import ErrorBoundary from '@/elements/ErrorBoundary';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
@@ -10,16 +9,14 @@ import { Route, Routes } from 'react-router';
 export default () => {
   return (
     <>
-      <ErrorBoundary>
-        <Routes>
-          <Route path={'/login'} element={<Login />} />
-          <Route path={'/register'} element={<Register />} />
-          <Route path={'/forgot-password'} element={<ForgotPassword />} />
-          <Route path={'/reset-password'} element={<ResetPassword />} />
-          <Route path={'/two-factor'} element={<TwoFactor />} />
-          <Route path={'*'} element={<NotFound />} />
-        </Routes>
-      </ErrorBoundary>
+      <Routes>
+        <Route path={'/login'} element={<Login />} />
+        <Route path={'/register'} element={<Register />} />
+        <Route path={'/forgot-password'} element={<ForgotPassword />} />
+        <Route path={'/reset-password'} element={<ResetPassword />} />
+        <Route path={'/two-factor'} element={<TwoFactor />} />
+        <Route path={'*'} element={<NotFound />} />
+      </Routes>
     </>
   );
 };

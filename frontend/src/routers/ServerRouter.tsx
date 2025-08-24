@@ -10,7 +10,6 @@ import { faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
-import ErrorBoundary from '@/elements/ErrorBoundary';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import getServer from '@/api/server/getServer';
 import routes, { to } from './routes';
@@ -86,14 +85,12 @@ export default () => {
             <WebsocketListener />
 
             <Container>
-              <ErrorBoundary>
-                <Routes>
-                  {routes.server.map(({ path, element: Element }) => (
-                    <Route key={path} path={path} element={<Element />} />
-                  ))}
-                  <Route path={'*'} element={<NotFound />} />
-                </Routes>
-              </ErrorBoundary>
+              <Routes>
+                {routes.server.map(({ path, element: Element }) => (
+                  <Route key={path} path={path} element={<Element />} />
+                ))}
+                <Route path={'*'} element={<NotFound />} />
+              </Routes>
             </Container>
           </>
         )}

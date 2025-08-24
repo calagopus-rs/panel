@@ -14,6 +14,7 @@ import getSettings from './api/getSettings';
 import Spinner from './elements/Spinner';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
+import ErrorBoundary from './elements/ErrorBoundary';
 
 export default function App() {
   const { settings, setSettings } = useGlobalStore();
@@ -23,28 +24,30 @@ export default function App() {
   }, []);
 
   return settings ? (
-    <MantineProvider forceColorScheme='dark'>
-      <ToastProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              <Route element={<UnauthenticatedRoute />}>
-                <Route path={'/auth/*'} element={<AuthenticationRouter />} />
-              </Route>
-
-              <Route element={<AuthenticatedRoute />}>
-                <Route path={'/server/:id/*'} element={<ServerRouter />} />
-                <Route path={'/*'} element={<DashboardRouter />} />
-
-                <Route element={<AdminRoute />}>
-                  <Route path={'/admin/*'} element={<AdminRouter />} />
+    <ErrorBoundary>
+      <MantineProvider forceColorScheme={'dark'}>
+        <ToastProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <Routes>
+                <Route element={<UnauthenticatedRoute />}>
+                  <Route path={'/auth/*'} element={<AuthenticationRouter />} />
                 </Route>
-              </Route>
-            </Routes>
-          </AuthProvider>
-        </BrowserRouter>
-      </ToastProvider>
-    </MantineProvider>
+
+                <Route element={<AuthenticatedRoute />}>
+                  <Route path={'/server/:id/*'} element={<ServerRouter />} />
+                  <Route path={'/*'} element={<DashboardRouter />} />
+
+                  <Route element={<AdminRoute />}>
+                    <Route path={'/admin/*'} element={<AdminRouter />} />
+                  </Route>
+                </Route>
+              </Routes>
+            </AuthProvider>
+          </BrowserRouter>
+        </ToastProvider>
+      </MantineProvider>
+    </ErrorBoundary>
   ) : (
     <Spinner.Centered />
   );
