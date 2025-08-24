@@ -355,18 +355,18 @@ impl ServerDatabase {
     pub async fn delete(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
         match self.database_host.get_connection(database).await? {
             crate::models::database_host::DatabasePool::Mysql(pool) => {
-                sqlx::query(&format!("DROP USER IF EXISTS '{}'@'%'", self.username))
+                sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", self.name))
                     .execute(pool.as_ref())
                     .await?;
-                sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", self.name))
+                sqlx::query(&format!("DROP USER IF EXISTS '{}'@'%'", self.username))
                     .execute(pool.as_ref())
                     .await?;
             }
             crate::models::database_host::DatabasePool::Postgres(pool) => {
-                sqlx::query(&format!("DROP USER IF EXISTS \"{}\"", self.username))
+                sqlx::query(&format!("DROP DATABASE IF EXISTS \"{}\"", self.name))
                     .execute(pool.as_ref())
                     .await?;
-                sqlx::query(&format!("DROP DATABASE IF EXISTS \"{}\"", self.name))
+                sqlx::query(&format!("DROP USER IF EXISTS \"{}\"", self.username))
                     .execute(pool.as_ref())
                     .await?;
             }

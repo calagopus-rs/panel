@@ -19,8 +19,11 @@ export default ({ backup, opened, onClose }: Props) => {
 
   const [name, setName] = useState(backup.name);
   const [locked, setLocked] = useState<boolean>(backup.isLocked);
+  const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
+    setLoading(true);
+
     updateBackup(server.uuid, backup.uuid, { name, locked })
       .then(() => {
         backup.name = name;
@@ -30,7 +33,8 @@ export default ({ backup, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -46,7 +50,7 @@ export default ({ backup, opened, onClose }: Props) => {
       />
 
       <Group mt={'md'}>
-        <Button onClick={doUpdate} disabled={!name}>
+        <Button onClick={doUpdate} loading={loading} disabled={!name}>
           Save
         </Button>
         <Button variant={'default'} onClick={onClose}>

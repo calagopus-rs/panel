@@ -19,8 +19,11 @@ export default ({ database, opened, onClose }: Props) => {
   const { removeDatabase } = useServerStore();
 
   const [enteredName, setEnteredName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const doDelete = () => {
+    setLoading(true);
+
     deleteDatabase(server.uuid, database.uuid)
       .then(() => {
         addToast('Database deleted.', 'success');
@@ -30,7 +33,8 @@ export default ({ database, opened, onClose }: Props) => {
       .catch((error) => {
         console.error(error);
         addToast(httpErrorToHuman(error), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -49,7 +53,7 @@ export default ({ database, opened, onClose }: Props) => {
       />
 
       <Group mt={'md'}>
-        <Button color={'red'} onClick={doDelete} disabled={database.name !== enteredName}>
+        <Button color={'red'} onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
           Delete
         </Button>
         <Button variant={'default'} onClick={onClose}>

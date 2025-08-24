@@ -19,8 +19,11 @@ export default ({ allocation, opened, onClose }: Props) => {
 
   const [notes, setNotes] = useState(allocation.notes ?? '');
   const [primary, setPrimary] = useState(allocation.isPrimary);
+  const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
+    setLoading(true);
+
     updateAllocation(server.uuid, allocation.uuid, { notes, primary })
       .then(() => {
         allocation.notes = notes || null;
@@ -38,7 +41,8 @@ export default ({ allocation, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -54,7 +58,9 @@ export default ({ allocation, opened, onClose }: Props) => {
       <Switch label={'Primary'} checked={primary} onChange={(e) => setPrimary(e.target.checked)} mt={'sm'} />
 
       <Group mt={'md'}>
-        <Button onClick={doUpdate}>Edit</Button>
+        <Button onClick={doUpdate} loading={loading}>
+          Edit
+        </Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

@@ -16,8 +16,11 @@ export default ({ opened, onClose }: ModalProps) => {
 
   const [name, setName] = useState(generateBackupName());
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
+    setLoading(true);
+
     createBackup(server.uuid, { name, ignoredFiles })
       .then((backup) => {
         addBackup(backup);
@@ -26,7 +29,8 @@ export default ({ opened, onClose }: ModalProps) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -42,7 +46,7 @@ export default ({ opened, onClose }: ModalProps) => {
       />
 
       <Group mt={'md'}>
-        <Button onClick={doCreate} disabled={!name}>
+        <Button onClick={doCreate} loading={loading} disabled={!name}>
           Create
         </Button>
         <Button variant={'default'} onClick={onClose}>

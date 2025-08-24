@@ -18,8 +18,11 @@ export default ({ backup, opened, onClose }: Props) => {
   const navigate = useNavigate();
 
   const [truncate, setTruncate] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const doRestore = () => {
+    setLoading(true);
+
     restoreBackup(server.uuid, backup.uuid, { truncateDirectory: truncate })
       .then(() => {
         onClose();
@@ -29,7 +32,8 @@ export default ({ backup, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -42,7 +46,7 @@ export default ({ backup, opened, onClose }: Props) => {
       />
 
       <Group mt={'md'}>
-        <Button color={truncate ? 'red' : undefined} onClick={doRestore}>
+        <Button color={truncate ? 'red' : undefined} onClick={doRestore} loading={loading}>
           Restore
         </Button>
         <Button variant={'default'} onClick={onClose}>
