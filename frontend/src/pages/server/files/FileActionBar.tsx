@@ -13,8 +13,10 @@ import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import renameFiles from '@/api/server/files/renameFiles';
 import { join } from 'pathe';
+import { useSearchParams } from 'react-router';
 
 export default () => {
+  const [searchParams, _] = useSearchParams();
   const { addToast } = useToast();
   const {
     server,
@@ -25,6 +27,7 @@ export default () => {
     movingFiles,
     movingFilesDirectory,
     setMovingFiles,
+    refreshFiles,
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'archive' | 'delete'>(null);
@@ -44,6 +47,7 @@ export default () => {
       .then(({ renamed }) => {
         addToast(`${renamed} File${renamed === 1 ? ' has' : 's have'} been moved.`, 'success');
         setMovingFiles([]);
+        refreshFiles(Number(searchParams.get('page')) || 1);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

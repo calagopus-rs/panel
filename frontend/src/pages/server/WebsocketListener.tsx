@@ -3,8 +3,10 @@ import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebs
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 
 export default () => {
+  const [searchParams, _] = useSearchParams();
   const { addToast } = useToast();
   const {
     socketConnected,
@@ -15,6 +17,7 @@ export default () => {
     fileOperations,
     setFileOperation,
     removeFileOperation,
+    refreshFiles,
   } = useServerStore();
 
   useEffect(() => {
@@ -91,8 +94,7 @@ export default () => {
         break;
     }
 
-    // TODO: refresh files
-
+    refreshFiles(Number(searchParams.get('page')) || 1);
     removeFileOperation(uuid);
   });
 
