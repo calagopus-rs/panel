@@ -3,6 +3,7 @@ import reinstallServer from '@/api/server/settings/reinstallServer';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -15,8 +16,11 @@ export default ({ opened, onClose }: ModalProps) => {
   const navigate = useNavigate();
 
   const [truncate, setTruncate] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const doReinstall = () => {
+    load(true, setLoading);
+
     reinstallServer(server.uuid, { truncateDirectory: truncate })
       .then(() => {
         addToast('Reinstalling server...', 'success');
@@ -25,7 +29,8 @@ export default ({ opened, onClose }: ModalProps) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -38,7 +43,7 @@ export default ({ opened, onClose }: ModalProps) => {
       />
 
       <Group mt={'md'}>
-        <Button color={'red'} onClick={doReinstall}>
+        <Button color={'red'} onClick={doReinstall} loading={loading}>
           Reinstall
         </Button>
         <Button variant={'default'} onClick={onClose}>
