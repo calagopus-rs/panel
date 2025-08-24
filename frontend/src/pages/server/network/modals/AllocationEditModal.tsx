@@ -15,7 +15,7 @@ type Props = ModalProps & {
 
 export default ({ allocation, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server, allocations, setAllocations } = useServerStore();
+  const { server, setServer, allocations, setAllocations } = useServerStore();
 
   const [notes, setNotes] = useState(allocation.notes ?? '');
   const [primary, setPrimary] = useState(allocation.isPrimary);
@@ -30,6 +30,7 @@ export default ({ allocation, opened, onClose }: Props) => {
             ...allocations,
             data: allocations.data.map((a) => ({ ...a, isPrimary: a.uuid === allocation.uuid })),
           });
+          setServer({ ...server, allocation });
         }
 
         onClose();
