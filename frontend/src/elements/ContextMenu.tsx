@@ -1,34 +1,59 @@
-import { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'motion/react';
-import classNames from 'classnames';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { Menu } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-
-const ContextMenuContext = createContext(null);
 
 interface Item {
   icon: IconDefinition;
   label: string;
   hidden?: boolean;
   onClick: () => void;
-  color: 'gray' | 'red';
+  color?: 'gray' | 'red';
 }
 
-export const ContextMenuProvider = ({ children }) => {
-  const [state, setState] = useState({
+interface ContextMenuState {
+  visible: boolean;
+  x: number;
+  y: number;
+  items: Item[];
+}
+
+interface ContextMenuContextType {
+  state: ContextMenuState;
+  showMenu: (x: number, y: number, items: Item[]) => void;
+  hideMenu: () => void;
+}
+
+const ContextMenuContext = createContext<ContextMenuContextType | null>(null);
+
+export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
+  const [state, setState] = useState<ContextMenuState>({
     visible: false,
     x: 0,
     y: 0,
-    items: [] as Item[],
+    items: [],
   });
 
-  const [shouldRender, setShouldRender] = useState(false);
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
-  const showMenu = (x, y, items) => {
-    setState({ visible: true, x, y, items });
-    setShouldRender(true);
+  const showMenu = (x: number, y: number, items: Item[]) => {
+    const menuWidth = 200; // same as Menu width
+    const menuHeight = items.length * 36; // ~36px per item (Mantine default)
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    let adjustedX = x;
+    let adjustedY = y;
+
+    if (x + menuWidth > viewportWidth) {
+      adjustedX = viewportWidth - menuWidth - 8; // 8px margin
+    }
+    if (y + menuHeight > viewportHeight) {
+      adjustedY = viewportHeight - menuHeight - 8;
+    }
+
+    setState({ visible: true, x: adjustedX, y: adjustedY, items });
   };
 
   const hideMenu = () => {
@@ -36,8 +61,8 @@ export const ContextMenuProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         hideMenu();
       }
     };
@@ -46,62 +71,62 @@ export const ContextMenuProvider = ({ children }) => {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [state.visible]);
 
   return (
     <ContextMenuContext.Provider value={{ state, showMenu, hideMenu }}>
       {children}
-      {shouldRender &&
-        createPortal(
-          <AnimatePresence
-            onExitComplete={() => {
-              setShouldRender(false);
-            }}
-          >
-            {state.visible && (
-              <motion.ul
-                ref={menuRef}
-                className={'p-2 absolute z-50 bg-gray-600 border border-gray-500 shadow-md rounded w-fit'}
-                style={{ top: state.y, left: state.x }}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.07 }}
-              >
-                {state.items
-                  .filter((item) => !item.hidden)
-                  .map((item, idx) => (
-                    <li
-                      key={idx}
-                      className={classNames(
-                        'px-4 py-2 rounded cursor-pointer',
-                        item.color === 'red' ? 'hover:text-red-100 hover:bg-red-500 ' : 'hover:bg-gray-500',
-                      )}
-                      onClick={() => {
-                        item.onClick();
-                        hideMenu();
-                      }}
-                    >
-                      <FontAwesomeIcon fixedWidth icon={item.icon} className={'mr-2'} />
-                      {item.label}
-                    </li>
-                  ))}
-              </motion.ul>
-            )}
-          </AnimatePresence>,
-          document.body,
-        )}
+
+      <div ref={menuRef}>
+        <Menu
+          opened={state.visible}
+          onClose={hideMenu}
+          width={200}
+          withinPortal={true}
+          transitionProps={{ transition: 'scale-y', duration: 200 }}
+          styles={{
+            dropdown: {
+              position: 'absolute',
+              top: state.y,
+              left: state.x,
+              zIndex: 999,
+            },
+          }}
+        >
+          <Menu.Dropdown>
+            {state.items
+              .filter((item) => !item.hidden)
+              .map((item, idx) => (
+                <Menu.Item
+                  key={idx}
+                  leftSection={<FontAwesomeIcon icon={item.icon} />}
+                  color={item.color === 'red' ? 'red' : undefined}
+                  onClick={() => {
+                    item.onClick();
+                    hideMenu();
+                  }}
+                >
+                  {item.label}
+                </Menu.Item>
+              ))}
+          </Menu.Dropdown>
+        </Menu>
+      </div>
     </ContextMenuContext.Provider>
   );
 };
 
-const ContextMenu = ({ items = [], children }: { items: Item[]; children: any }) => {
+const ContextMenu = ({
+  items = [],
+  children,
+}: {
+  items: Item[];
+  children: (ctx: { openMenu: (x: number, y: number) => void; hideMenu: () => void }) => ReactNode;
+}) => {
   const { showMenu, hideMenu } = useContext(ContextMenuContext);
 
-  const openMenu = (x, y) => {
+  const openMenu = (x: number, y: number) => {
     showMenu(
       x,
       y,
