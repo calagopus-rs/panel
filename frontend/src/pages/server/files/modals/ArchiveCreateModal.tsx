@@ -28,7 +28,9 @@ export default ({ files, opened, onClose }: Props) => {
     setLoading(true);
 
     compressFiles(server.uuid, {
-      name: fileName || null,
+      name: fileName
+        ? fileName.concat(archiveFormatExtensionMapping[format])
+        : generateArchiveName(archiveFormatExtensionMapping[format]),
       format,
       root: browsingDirectory,
       files: files.map((f) => f.name),

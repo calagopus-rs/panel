@@ -129,7 +129,7 @@ export default () => {
         )}
       </Group>
 
-      {fileOperations.entries().map(([uuid, operation]) => (
+      {Object.entries(Object.fromEntries(fileOperations.entries())).map(([uuid, operation]) => (
         <div key={uuid}>{JSON.stringify(operation, null, 2)}</div>
       ))}
 
