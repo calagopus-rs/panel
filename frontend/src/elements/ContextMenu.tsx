@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { Menu } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
@@ -34,8 +34,6 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
     items: [],
   });
 
-  const menuRef = useRef<HTMLDivElement | null>(null);
-
   const showMenu = (x: number, y: number, items: Item[]) => {
     const menuWidth = 200; // same as Menu width
     const menuHeight = items.length * 36; // ~36px per item (Mantine default)
@@ -60,59 +58,44 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
     setState((prev) => ({ ...prev, visible: false }));
   };
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        hideMenu();
-      }
-    };
-
-    if (state.visible) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [state.visible]);
-
   return (
     <ContextMenuContext.Provider value={{ state, showMenu, hideMenu }}>
-      {children}
+      <Menu
+        opened={state.visible}
+        onClose={hideMenu}
+        width={200}
+        withinPortal
+        closeOnClickOutside
+        transitionProps={{ transition: 'scale-y', duration: 200 }}
+        styles={{
+          dropdown: {
+            position: 'absolute',
+            top: state.y,
+            left: state.x,
+            zIndex: 999,
+          },
+        }}
+      >
+        {children}
 
-      <div ref={menuRef}>
-        <Menu
-          opened={state.visible}
-          onClose={hideMenu}
-          width={200}
-          withinPortal={true}
-          transitionProps={{ transition: 'scale-y', duration: 200 }}
-          styles={{
-            dropdown: {
-              position: 'absolute',
-              top: state.y,
-              left: state.x,
-              zIndex: 999,
-            },
-          }}
-        >
-          <Menu.Dropdown>
-            {state.items
-              .filter((item) => !item.hidden)
-              .map((item, idx) => (
-                <Menu.Item
-                  key={idx}
-                  leftSection={<FontAwesomeIcon icon={item.icon} />}
-                  color={item.color === 'red' ? 'red' : undefined}
-                  onClick={() => {
-                    item.onClick();
-                    hideMenu();
-                  }}
-                >
-                  {item.label}
-                </Menu.Item>
-              ))}
-          </Menu.Dropdown>
-        </Menu>
-      </div>
+        <Menu.Dropdown>
+          {state.items
+            .filter((item) => !item.hidden)
+            .map((item, idx) => (
+              <Menu.Item
+                key={idx}
+                leftSection={<FontAwesomeIcon icon={item.icon} />}
+                color={item.color === 'red' ? 'red' : undefined}
+                onClick={() => {
+                  item.onClick();
+                  hideMenu();
+                }}
+              >
+                {item.label}
+              </Menu.Item>
+            ))}
+        </Menu.Dropdown>
+      </Menu>
     </ContextMenuContext.Provider>
   );
 };
@@ -139,16 +122,18 @@ const ContextMenu = ({
 
 ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }) => {
   return (
-    <td
-      className={'relative cursor-pointer w-10 text-center'}
-      onClick={(e) => {
-        e.stopPropagation();
-        const rect = e.currentTarget.getBoundingClientRect();
-        openMenu(rect.left, rect.bottom);
-      }}
-    >
-      <FontAwesomeIcon icon={faEllipsis} />
-    </td>
+    <Menu.Target>
+      <td
+        className={'relative cursor-pointer w-10 text-center'}
+        onClick={(e) => {
+          e.stopPropagation();
+          const rect = e.currentTarget.getBoundingClientRect();
+          openMenu(rect.left, rect.bottom);
+        }}
+      >
+        <FontAwesomeIcon icon={faEllipsis} />
+      </td>
+    </Menu.Target>
   );
 };
 
