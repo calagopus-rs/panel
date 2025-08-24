@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 import { createSearchParams } from 'react-router';
 
-export default async (uuid: string, root: string, paths: string[], isDirectory: boolean): Promise<{ url: string }> => {
+export default async (uuid: string, root: string, paths: string[], isDirectory: boolean, archiveFormat: ArchiveFormat): Promise<{ url: string }> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(
@@ -9,6 +9,7 @@ export default async (uuid: string, root: string, paths: string[], isDirectory: 
           root,
           files: paths,
           directory: isDirectory.toString(),
+          archive_format: archiveFormat,
         })}`,
       )
       .then(({ data }) => resolve(data))

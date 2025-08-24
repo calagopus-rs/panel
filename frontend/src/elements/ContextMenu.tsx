@@ -9,6 +9,7 @@ interface Item {
   hidden?: boolean;
   onClick: () => void;
   color?: 'gray' | 'red';
+  items?: Omit<Item, 'items'>[];
 }
 
 interface ContextMenuState {
@@ -82,19 +83,53 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
         <Menu.Dropdown>
           {state.items
             .filter((item) => !item.hidden)
-            .map((item, idx) => (
-              <Menu.Item
-                key={idx}
-                leftSection={<FontAwesomeIcon icon={item.icon} />}
-                color={item.color === 'red' ? 'red' : undefined}
-                onClick={() => {
-                  item.onClick();
-                  hideMenu();
-                }}
-              >
-                {item.label}
-              </Menu.Item>
-            ))}
+            .map((item, idx) =>
+              item.items?.length > 0 ? (
+                <Menu.Sub>
+                  <Menu.Sub.Target>
+                    <Menu.Sub.Item
+                      key={idx}
+                      leftSection={<FontAwesomeIcon icon={item.icon} />}
+                      color={item.color === 'red' ? 'red' : undefined}
+                      onClick={() => {
+                        item.onClick();
+                        hideMenu();
+                      }}
+                    >
+                      {item.label}
+                    </Menu.Sub.Item>
+                  </Menu.Sub.Target>
+
+                  <Menu.Sub.Dropdown>
+                    {item.items.map((subItem, subIdx) => (
+                      <Menu.Item
+                        key={subIdx}
+                        leftSection={<FontAwesomeIcon icon={subItem.icon} />}
+                        color={subItem.color === 'red' ? 'red' : undefined}
+                        onClick={() => {
+                          subItem.onClick();
+                          hideMenu();
+                        }}
+                      >
+                        {subItem.label}
+                      </Menu.Item>
+                    ))}
+                  </Menu.Sub.Dropdown>
+                </Menu.Sub>
+              ) : (
+                <Menu.Item
+                  key={idx}
+                  leftSection={<FontAwesomeIcon icon={item.icon} />}
+                  color={item.color === 'red' ? 'red' : undefined}
+                  onClick={() => {
+                    item.onClick();
+                    hideMenu();
+                  }}
+                >
+                  {item.label}
+                </Menu.Item>
+              ),
+            )}
         </Menu.Dropdown>
       </Menu>
     </ContextMenuContext.Provider>

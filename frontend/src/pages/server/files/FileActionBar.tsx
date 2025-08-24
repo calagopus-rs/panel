@@ -23,6 +23,7 @@ export default () => {
       browsingDirectory,
       selectedFiles.map((f) => f.name),
       false,
+      'zip',
     )
       .then(({ url }) => {
         addToast('Download started.', 'success');
