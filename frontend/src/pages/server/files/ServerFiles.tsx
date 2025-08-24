@@ -20,6 +20,8 @@ import PullFileModal from './modals/PullFileModal';
 import { load } from '@/lib/debounce';
 import RingProgress from '@/elements/RingProgress';
 import { Text } from '@mantine/core';
+import classNames from 'classnames';
+import cancelOperation from '@/api/server/files/cancelOperation';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,6 +65,16 @@ export default () => {
         addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => load(false, setLoading));
+  };
+
+  const doCancelOperation = (uuid: string) => {
+    cancelOperation(server.uuid, uuid)
+      .then(() => {
+        addToast('Operation cancelled', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   useEffect(() => {
@@ -138,23 +150,29 @@ export default () => {
                     />
                   </UnstyledButton>
                 </Popover.Target>
-                <Popover.Dropdown>
+                <Popover.Dropdown className={'min-w-md'}>
                   {Array.from(fileOperations).map(([uuid, operation], index) => {
                     const progress = (operation.progress / operation.total) * 100;
+
                     return (
-                      <div key={uuid} className={index === 0 ? '' : 'mt-2'}>
-                        {operation.type === 'compress' ? (
-                          <Text>Compressing {operation.path}</Text>
-                        ) : operation.type === 'decompress' ? (
-                          <Text>Decompressing {operation.path}</Text>
-                        ) : operation.type === 'pull' ? (
-                          <Text>Pulling {operation.path}</Text>
-                        ) : null}
-                        <Progress.Root size={'xl'}>
-                          <Progress.Section value={progress} color={'blue'}>
-                            <Progress.Label>{progress.toFixed(1)}%</Progress.Label>
-                          </Progress.Section>
-                        </Progress.Root>
+                      <div key={uuid} className={classNames(index === 0 ? '' : 'mt-2', 'flex flex-row items-center')}>
+                        <div className={'flex flex-col flex-grow'}>
+                          {operation.type === 'compress' ? (
+                            <Text>Compressing {operation.path}</Text>
+                          ) : operation.type === 'decompress' ? (
+                            <Text>Decompressing {operation.path}</Text>
+                          ) : operation.type === 'pull' ? (
+                            <Text>Pulling {operation.path}</Text>
+                          ) : null}
+                          <Progress.Root size={'xl'}>
+                            <Progress.Section value={progress} color={'blue'}>
+                              <Progress.Label>{progress.toFixed(1)}%</Progress.Label>
+                            </Progress.Section>
+                          </Progress.Root>
+                        </div>
+                        <Button variant={'default'} className={'ml-2'} onClick={() => doCancelOperation(uuid)}>
+                          Cancel
+                        </Button>
                       </div>
                     );
                   })}
