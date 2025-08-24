@@ -19,7 +19,7 @@ export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsi
     <div className={'flex items-center text-gray-500'}>
       <Checkbox
         disabled={movingFiles.length > 0}
-        checked={selectedFiles.length >= browsingEntries.data.length}
+        checked={selectedFiles.length > 0 && selectedFiles.length >= browsingEntries.data.length}
         indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
         className={'mr-4'}
         onChange={() => {

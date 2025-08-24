@@ -85,7 +85,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
     return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
       <TableRow
         className={'cursor-pointer'}
-        bg={selectedFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
         onContextMenu={onContextMenu}
         onClick={() => {
           if (file.directory) {
@@ -106,7 +106,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
       </TableRow>
     ) : (
       <TableRow
-        bg={selectedFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
         onContextMenu={onContextMenu}
       >
         {children}
