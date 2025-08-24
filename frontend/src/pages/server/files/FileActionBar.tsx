@@ -96,7 +96,7 @@ export default () => {
           <div className={'flex items-center space-x-4 pointer-events-auto rounded p-4 bg-black/50'}>
             {movingFiles.length > 0 ? (
               <>
-                <Button onClick={doMove}>
+                <Button onClick={doMove} loading={loading}>
                   <FontAwesomeIcon icon={faAnglesDown} className={'mr-2'} /> Move {movingFiles.length} File
                   {movingFiles.length === 1 ? '' : 's'} Here
                 </Button>

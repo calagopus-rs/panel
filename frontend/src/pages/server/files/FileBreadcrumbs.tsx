@@ -5,7 +5,7 @@ import { createSearchParams, NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
 export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsingBackup: ServerBackup | null }) {
-  const { server, browsingEntries, selectedFiles, setSelectedFiles } = useServerStore();
+  const { server, browsingEntries, selectedFiles, setSelectedFiles, movingFiles } = useServerStore();
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
@@ -18,6 +18,7 @@ export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsi
   return (
     <div className={'flex items-center text-gray-500'}>
       <Checkbox
+        disabled={movingFiles.length > 0}
         checked={selectedFiles.length >= browsingEntries.data.length}
         indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
         className={'mr-4'}

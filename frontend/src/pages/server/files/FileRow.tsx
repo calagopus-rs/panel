@@ -42,15 +42,17 @@ export default ({ file }: { file: DirectoryEntry }) => {
     selectedFiles,
     addSelectedFile,
     removeSelectedFile,
+    movingFiles,
     setMovingFiles,
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
 
-  const RowCheckbox = ({ file }: { file: DirectoryEntry }) => {
+  const RowCheckbox = ({ file, disabled }: { file: DirectoryEntry; disabled: boolean }) => {
     return (
       <Checkbox
         id={file.name}
+        disabled={disabled}
         checked={selectedFiles.includes(file)}
         onChange={(e) => {
           e.preventDefault();
@@ -215,7 +217,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
             }}
           >
             <TableData>
-              <RowCheckbox file={file} />
+              <RowCheckbox file={file} disabled={movingFiles.length > 0} />
             </TableData>
 
             <TableData>
