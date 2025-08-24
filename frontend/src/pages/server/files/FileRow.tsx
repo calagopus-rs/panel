@@ -216,9 +216,9 @@ export default ({ file }: { file: DirectoryEntry }) => {
               openMenu(e.clientX, e.clientY);
             }}
           >
-            <TableData>
+            <td className={'pl-4 relative cursor-pointer w-10 text-center'}>
               <RowCheckbox file={file} disabled={movingFiles.length > 0} />
-            </TableData>
+            </td>
 
             <TableData>
               {file.file ? (
