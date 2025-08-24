@@ -12,6 +12,7 @@ import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
+import { load } from '@/lib/debounce';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();

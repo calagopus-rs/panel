@@ -14,6 +14,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import NestCreateOrUpdate from './NestCreateOrUpdate';
 import NestView from './NestView';
+import { load } from '@/lib/debounce';
 
 const NestsContainer = () => {
   const navigate = useNavigate();

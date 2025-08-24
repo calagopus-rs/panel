@@ -12,6 +12,7 @@ import ApplicationContainer from './ApplicationContainer';
 import ServerContainer from './ServerContainer';
 import CaptchaContainer from './CaptchaContainer';
 import { Title } from '@mantine/core';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const { addToast } = useToast();

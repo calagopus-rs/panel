@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 
 const LocationsContainer = () => {
   const navigate = useNavigate();

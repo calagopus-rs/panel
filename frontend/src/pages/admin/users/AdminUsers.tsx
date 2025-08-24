@@ -13,6 +13,7 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
+import { load } from '@/lib/debounce';
 
 const UsersContainer = () => {
   const navigate = useNavigate();

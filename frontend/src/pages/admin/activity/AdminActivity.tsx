@@ -6,6 +6,7 @@ import { Group, Title } from '@mantine/core';
 import Table from '@/elements/Table';
 import ActivityRow from './ActivityRow';
 import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
