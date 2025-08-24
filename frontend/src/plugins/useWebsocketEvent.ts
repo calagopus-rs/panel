@@ -15,6 +15,8 @@ export enum SocketEvent {
   BACKUP_PROGRESS = 'backup progress',
   BACKUP_COMPLETED = 'backup completed',
   BACKUP_RESTORE_COMPLETED = 'backup restore completed',
+  OPERATION_PROGRESS = 'operation progress',
+  OPERATION_COMPLETED = 'operation completed',
 }
 
 export enum SocketRequest {

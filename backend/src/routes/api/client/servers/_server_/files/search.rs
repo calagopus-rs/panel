@@ -70,7 +70,7 @@ mod post {
             .post_servers_server_files_search(server.uuid, &request_body)
             .await
         {
-            Ok(data) => data.results,
+            Ok(wings_api::servers_server_files_search::post::Response::Ok(data)) => data.results,
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)

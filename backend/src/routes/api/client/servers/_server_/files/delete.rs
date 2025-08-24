@@ -66,7 +66,7 @@ mod post {
             .post_servers_server_files_delete(server.uuid, &request_body)
             .await
         {
-            Ok(data) => data,
+            Ok(wings_api::servers_server_files_delete::post::Response::Ok(data)) => data,
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)

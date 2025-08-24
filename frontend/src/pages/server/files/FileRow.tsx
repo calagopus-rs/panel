@@ -31,7 +31,7 @@ import FileCopyModal from './modals/FileCopyModal';
 import FileDeleteModal from './modals/FileDeleteModal';
 import FilePermissionsModal from './modals/FilePermissionsModal';
 
-export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirectory: () => void }) => {
+export default ({ file }: { file: DirectoryEntry }) => {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingBackup, selectedFiles, addSelectedFile, removeSelectedFile } =
     useServerStore();
@@ -101,14 +101,9 @@ export default ({ file, reloadDirectory }: { file: DirectoryEntry; reloadDirecto
   const doMove = () => {};
 
   const doUnarchive = () => {
-    decompressFile(server.uuid, browsingDirectory, file.name)
-      .then(() => {
-        addToast('Archive has been decompressed.', 'success');
-        reloadDirectory();
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+    decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {
+      addToast(httpErrorToHuman(msg), 'error');
+    });
   };
 
   const doDownload = () => {

@@ -7,7 +7,7 @@ interface Data {
   files: string[];
 }
 
-export default async (uuid: string, data: Data): Promise<DirectoryEntry> => {
+export default async (uuid: string, data: Data): Promise<string> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(
@@ -19,7 +19,7 @@ export default async (uuid: string, data: Data): Promise<DirectoryEntry> => {
             'It looks like this archive is taking a long time to generate. It will appear once completed.',
         },
       )
-      .then(({ data }) => resolve(data.entry))
+      .then(({ data }) => resolve(data.identifier))
       .catch(reject);
   });
 };

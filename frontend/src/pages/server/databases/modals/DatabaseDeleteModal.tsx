@@ -49,7 +49,7 @@ export default ({ database, opened, onClose }: Props) => {
       />
 
       <Group mt={'md'}>
-        <Button variant={'red'} onClick={doDelete} disabled={database.name !== enteredName}>
+        <Button color={'red'} onClick={doDelete} disabled={database.name !== enteredName}>
           Delete
         </Button>
         <Button variant={'default'} onClick={onClose}>

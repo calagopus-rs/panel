@@ -6,6 +6,7 @@ import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
+import { useState } from 'react';
 
 type Props = ModalProps & {
   files: DirectoryEntry[];
@@ -15,7 +16,11 @@ export default ({ files, opened, onClose }: Props) => {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingEntries, setBrowsingEntries, setSelectedFiles } = useServerStore();
 
+  const [loading, setLoading] = useState(false);
+
   const doDelete = () => {
+    setLoading(true);
+
     deleteFiles(
       server.uuid,
       browsingDirectory,
@@ -32,7 +37,8 @@ export default ({ files, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
   return (
     <Modal title={'Delete File'} onClose={onClose} opened={opened}>
@@ -56,7 +62,7 @@ export default ({ files, opened, onClose }: Props) => {
       )}
 
       <Group mt={'md'}>
-        <Button variant={'red'} onClick={doDelete}>
+        <Button color={'red'} onClick={doDelete} loading={loading}>
           Delete
         </Button>
         <Button variant={'default'} onClick={onClose}>

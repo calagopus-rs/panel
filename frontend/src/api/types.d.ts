@@ -550,6 +550,33 @@ interface ScheduleStep {
   created: Date;
 }
 
+interface FileOperationCompress {
+  type: 'compress';
+  path: string;
+
+  progress: number;
+  total: number;
+}
+
+interface FileOperationDecompress {
+  type: 'decompress';
+  path: string;
+  destination: string;
+
+  progress: number;
+  total: number;
+}
+
+interface FileOperationPull {
+  type: 'pull';
+  path: string;
+
+  progress: number;
+  total: number;
+}
+
+type FileOperation = FileOperationCompress | FileOperationDecompress | FileOperationPull;
+
 interface User {
   uuid: string;
   avatar?: string;

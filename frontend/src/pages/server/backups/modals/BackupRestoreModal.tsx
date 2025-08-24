@@ -42,7 +42,9 @@ export default ({ backup, opened, onClose }: Props) => {
       />
 
       <Group mt={'md'}>
-        <Button onClick={doRestore}>Restore</Button>
+        <Button color={truncate ? 'red' : undefined} onClick={doRestore}>
+          Restore
+        </Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

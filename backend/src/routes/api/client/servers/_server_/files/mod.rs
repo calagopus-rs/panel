@@ -10,7 +10,8 @@ mod decompress;
 mod delete;
 mod download;
 mod list;
-mod pulls;
+mod operations;
+mod pull;
 mod rename;
 mod search;
 mod upload;
@@ -31,6 +32,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/create-directory", create_directory::router(state))
         .nest("/chmod", chmod::router(state))
         .nest("/search", search::router(state))
-        .nest("/pulls", pulls::router(state))
+        .nest("/pull", pull::router(state))
+        .nest("/operations", operations::router(state))
         .with_state(state.clone())
 }

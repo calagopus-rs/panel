@@ -330,6 +330,12 @@ pub mod backups_backup {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod extensions {
@@ -344,6 +350,12 @@ pub mod extensions {
                 pub extensions: Vec<ExtensionInfo>,
             }
         }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers {
@@ -353,6 +365,12 @@ pub mod servers {
         use super::*;
 
         pub type Response200 = Vec<Server>;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 
     pub mod post {
@@ -375,6 +393,12 @@ pub mod servers {
         }
 
         pub type Response409 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server {
@@ -384,6 +408,12 @@ pub mod servers_server {
         use super::*;
 
         pub type Response200 = Server;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 
     pub mod delete {
@@ -392,6 +422,12 @@ pub mod servers_server {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -418,6 +454,12 @@ pub mod servers_server_backup {
         }
 
         pub type Response409 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_backup_backup {
@@ -432,6 +474,12 @@ pub mod servers_server_backup_backup {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_backup_backup_restore {
@@ -457,6 +505,12 @@ pub mod servers_server_backup_backup_restore {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_commands {
@@ -478,6 +532,12 @@ pub mod servers_server_commands {
         }
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_chmod {
@@ -510,6 +570,12 @@ pub mod servers_server_files_chmod {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_compress {
@@ -528,14 +594,30 @@ pub mod servers_server_files_compress {
                 pub root: String,
                 #[schema(inline)]
                 pub files: Vec<String>,
+                #[schema(inline)]
+                pub foreground: bool,
             }
         }
 
         pub type Response200 = DirectoryEntry;
 
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
+                #[schema(inline)]
+                pub identifier: uuid::Uuid,
+            }
+        }
+
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_files_contents {
@@ -551,6 +633,12 @@ pub mod servers_server_files_contents {
         pub type Response413 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_copy {
@@ -573,6 +661,12 @@ pub mod servers_server_files_copy {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_create_directory {
@@ -598,6 +692,12 @@ pub mod servers_server_files_create_directory {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_decompress {
@@ -612,6 +712,8 @@ pub mod servers_server_files_decompress {
                 pub root: String,
                 #[schema(inline)]
                 pub file: String,
+                #[schema(inline)]
+                pub foreground: bool,
             }
         }
 
@@ -620,9 +722,23 @@ pub mod servers_server_files_decompress {
             }
         }
 
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
+                #[schema(inline)]
+                pub identifier: uuid::Uuid,
+            }
+        }
+
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_files_delete {
@@ -650,6 +766,12 @@ pub mod servers_server_files_delete {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_fingerprints {
@@ -663,6 +785,12 @@ pub mod servers_server_files_fingerprints {
                 #[schema(inline)]
                 pub fingerprints: IndexMap<String, String>,
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -684,6 +812,12 @@ pub mod servers_server_files_list {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_list_directory {
@@ -697,6 +831,32 @@ pub mod servers_server_files_list_directory {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
+    }
+}
+pub mod servers_server_files_operations_operation {
+    use super::*;
+
+    pub mod delete {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_pull {
@@ -710,6 +870,12 @@ pub mod servers_server_files_pull {
                 #[schema(inline)]
                 pub downloads: Vec<Download>,
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 
@@ -733,12 +899,24 @@ pub mod servers_server_files_pull {
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
                 #[schema(inline)]
                 pub identifier: uuid::Uuid,
             }
         }
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_files_pull_pull {
@@ -753,6 +931,12 @@ pub mod servers_server_files_pull_pull {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_rename {
@@ -783,6 +967,12 @@ pub mod servers_server_files_rename {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_search {
@@ -814,6 +1004,12 @@ pub mod servers_server_files_search {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_files_write {
@@ -832,6 +1028,12 @@ pub mod servers_server_files_write {
         pub type Response404 = ApiError;
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_logs {
@@ -845,6 +1047,12 @@ pub mod servers_server_logs {
                 #[schema(inline)]
                 pub data: String,
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -867,6 +1075,12 @@ pub mod servers_server_power {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
             }
         }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_reinstall {
@@ -888,6 +1102,12 @@ pub mod servers_server_reinstall {
         }
 
         pub type Response409 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_schedule_schedule {
@@ -904,6 +1124,12 @@ pub mod servers_server_schedule_schedule {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_schedule_schedule_abort {
@@ -918,6 +1144,12 @@ pub mod servers_server_schedule_schedule_abort {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_schedule_schedule_trigger {
@@ -932,6 +1164,12 @@ pub mod servers_server_schedule_schedule_trigger {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_script {
@@ -959,6 +1197,12 @@ pub mod servers_server_script {
                 pub stderr: String,
             }
         }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_sync {
@@ -970,6 +1214,12 @@ pub mod servers_server_sync {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -985,6 +1235,12 @@ pub mod servers_server_transfer {
         }
 
         pub type Response417 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 
     pub mod post {
@@ -1013,6 +1269,12 @@ pub mod servers_server_transfer {
         }
 
         pub type Response409 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Accepted(Response202),
+        }
     }
 }
 pub mod servers_server_version {
@@ -1029,6 +1291,12 @@ pub mod servers_server_version {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod servers_server_ws_deny {
@@ -1047,6 +1315,12 @@ pub mod servers_server_ws_deny {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -1073,6 +1347,12 @@ pub mod servers_server_ws_permissions {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }
@@ -1132,6 +1412,12 @@ pub mod stats {
 
             }
         }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod system {
@@ -1154,6 +1440,12 @@ pub mod system {
                 pub version: String,
             }
         }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod transfers {
@@ -1170,6 +1462,12 @@ pub mod transfers {
         pub type Response401 = ApiError;
 
         pub type Response409 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod transfers_server {
@@ -1184,6 +1482,12 @@ pub mod transfers_server {
         }
 
         pub type Response404 = ApiError;
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
+        }
     }
 }
 pub mod update {
@@ -1240,6 +1544,12 @@ pub mod update {
                 #[schema(inline)]
                 pub applied: bool,
             }
+        }
+
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        pub enum Response {
+            Ok(Response200),
         }
     }
 }

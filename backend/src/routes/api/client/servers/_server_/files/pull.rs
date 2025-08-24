@@ -1,7 +1,7 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod put {
+mod post {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
         routes::{
@@ -12,26 +12,39 @@ mod put {
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
+    use validator::Validate;
 
-    #[derive(ToSchema, Deserialize)]
+    #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
         root: String,
 
-        #[schema(inline)]
-        files: Vec<wings_api::servers_server_files_rename::put::RequestBodyFiles>,
+        #[validate(url)]
+        #[schema(format = "uri")]
+        url: String,
+        name: Option<String>,
+
+        #[serde(default)]
+        #[schema(default = false)]
+        use_header: bool,
+        #[serde(default)]
+        #[schema(default = false)]
+        foreground: bool,
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {
-        renamed: u64,
+    struct Response {}
+
+    #[derive(ToSchema, Serialize)]
+    struct ResponseAccepted {
+        identifier: uuid::Uuid,
     }
 
-    #[utoipa::path(put, path = "/", responses(
+    #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = ACCEPTED, body = inline(ResponseAccepted)),
         (status = UNAUTHORIZED, body = ApiError),
-        (status = NOT_FOUND, body = ApiError),
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
@@ -46,28 +59,38 @@ mod put {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("files.update") {
+        if let Err(error) = server.has_permission("files.create") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
 
-        let request_body = wings_api::servers_server_files_rename::put::RequestBody {
+        if let Some(name) = &data.name
+            && server.is_ignored(name, false)
+        {
+            return ApiResponse::error("root directory not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok();
+        }
+
+        let request_body = wings_api::servers_server_files_pull::post::RequestBody {
             root: data.root,
-            files: data
-                .files
-                .into_iter()
-                .filter(|f| !server.is_ignored(&f.from, false) && !server.is_ignored(&f.to, false))
-                .collect(),
+            url: data.url,
+            file_name: data.name,
+            use_header: data.use_header,
+            foreground: data.foreground,
         };
 
-        let data = match server
+        let identifier = match server
             .node
             .api_client(&state.database)
-            .put_servers_server_files_rename(server.uuid, &request_body)
+            .post_servers_server_files_pull(server.uuid, &request_body)
             .await
         {
-            Ok(wings_api::servers_server_files_rename::put::Response::Ok(data)) => data,
+            Ok(wings_api::servers_server_files_pull::post::Response::Ok(_)) => None,
+            Ok(wings_api::servers_server_files_pull::post::Response::Accepted(data)) => {
+                Some(data.identifier)
+            }
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
@@ -79,9 +102,9 @@ mod put {
                     .ok();
             }
             Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to rename server files: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to pull server file: {:#?}", err);
 
-                return ApiResponse::error("failed to rename server files")
+                return ApiResponse::error("failed to pull server file")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
@@ -89,23 +112,26 @@ mod put {
 
         activity_logger
             .log(
-                "server:file.rename",
+                "server:file.pull",
                 serde_json::json!({
                     "directory": request_body.root,
-                    "files": request_body.files,
+                    "url": request_body.url,
                 }),
             )
             .await;
 
-        ApiResponse::json(Response {
-            renamed: data.renamed,
-        })
-        .ok()
+        if let Some(identifier) = identifier {
+            ApiResponse::json(ResponseAccepted { identifier })
+                .with_status(StatusCode::ACCEPTED)
+                .ok()
+        } else {
+            ApiResponse::json(Response {}).ok()
+        }
     }
 }
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
-        .routes(routes!(put::route))
+        .routes(routes!(post::route))
         .with_state(state.clone())
 }

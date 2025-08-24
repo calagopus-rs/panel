@@ -17,8 +17,11 @@ export default ({ opened, onClose }: ModalProps) => {
   const { server, browsingDirectory } = useServerStore();
 
   const [dirName, setDirName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const makeDirectory = () => {
+    setLoading(true);
+
     createDirectory(server.uuid, browsingDirectory, dirName)
       .then(() => {
         onClose();
@@ -26,7 +29,8 @@ export default ({ opened, onClose }: ModalProps) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -47,7 +51,7 @@ export default ({ opened, onClose }: ModalProps) => {
       </p>
 
       <Group mt={'md'}>
-        <Button onClick={makeDirectory} disabled={!dirName}>
+        <Button onClick={makeDirectory} loading={loading} disabled={!dirName}>
           Create
         </Button>
         <Button variant={'default'} onClick={onClose}>

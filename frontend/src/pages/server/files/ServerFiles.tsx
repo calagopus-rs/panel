@@ -30,6 +30,7 @@ export default () => {
     browsingEntries,
     setBrowsingEntries,
     setSelectedFiles,
+    fileOperations,
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'nameDirectory'>(null);
@@ -122,6 +123,10 @@ export default () => {
         )}
       </Group>
 
+      {fileOperations.entries().map(([uuid, operation]) => (
+        <div key={uuid}>{JSON.stringify(operation, null, 2)}</div>
+      ))}
+
       {loading ? (
         <Spinner.Centered />
       ) : (
@@ -136,7 +141,7 @@ export default () => {
               onPageSelect={onPageSelect}
             >
               {browsingEntries.data.map((file) => (
-                <FileRow key={file.name} file={file} reloadDirectory={loadDirectoryData} />
+                <FileRow key={file.name} file={file} />
               ))}
             </Table>
           </ContextMenuProvider>

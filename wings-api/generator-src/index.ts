@@ -1,7 +1,8 @@
 import fs from "fs"
+import http from "http"
 import { oas31 } from "openapi3-ts"
 import generateSchemaObject from "@/generate-schema-object"
-import { snakeCase } from "change-case"
+import { pascalCase, snakeCase } from "change-case"
 import { convertType } from "@/generate-schema-property"
 
 const openapi: oas31.OpenAPIObject = JSON.parse(fs.readFileSync('../openapi.json', 'utf-8'))
@@ -164,6 +165,18 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             }
         }
 
+        output.write('        #[derive(Deserialize)]\n')
+        output.write('        #[serde(untagged)]\n')
+        output.write('        pub enum Response {\n')
+
+        for (const [code, _] of Object.entries(data.responses ?? [])) {
+            if (!code.startsWith('2')) continue
+
+            output.write(`            ${pascalCase(http.STATUS_CODES[parseInt(code)]!)}(Response${code}),\n`)
+        }
+
+        output.write('        }\n')
+
         {
             const params: string[] = []
 
@@ -174,12 +187,12 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
 
             const body = data.requestBody
                 ? (Object.values((data.requestBody as oas31.RequestBodyObject).content)[0].schema as oas31.SchemaObject).type === 'string'
-                    ? 'None::<&usize>, Some(data)'
+                    ? 'None::<&()>, Some(data)'
                     : 'Some(data), None'
-                : 'None::<&usize>, None'
+                : 'None::<&()>, None'
 
             if (data.requestBody) {
-                if (body === 'None::<&usize>, Some(data)') {
+                if (body === 'None::<&()>, Some(data)') {
                     params.push(`data: super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
                 } else {
                     params.push(`data: &super::${snakeCase(path).slice(4)}::${method}::RequestBody`)
@@ -187,7 +200,7 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             }
 
             clientOutput.write(`    pub async fn ${method}_${snakeCase(path).slice(4)}(&self${params.length ? `, ${params.join(', ')}` : ''})`)
-            clientOutput.write(` -> Result<super::${snakeCase(path).slice(4)}::${method}::Response${Object.keys(data.responses ?? []).find((code) => code[0] === '2')}, (StatusCode, super::ApiError)> {\n`)
+            clientOutput.write(` -> Result<super::${snakeCase(path).slice(4)}::${method}::Response, (StatusCode, super::ApiError)> {\n`)
 
             let query = ""
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {

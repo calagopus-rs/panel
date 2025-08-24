@@ -65,7 +65,7 @@ mod get {
             )
             .await
         {
-            Ok(data) => data,
+            Ok(wings_api::servers_server_files_contents::get::Response::Ok(data)) => data,
             Err((StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)

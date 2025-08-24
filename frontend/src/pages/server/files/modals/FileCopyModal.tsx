@@ -19,6 +19,7 @@ export default ({ file, opened, onClose }: Props) => {
   const { server, browsingDirectory, browsingEntries, addBrowsingEntry } = useServerStore();
 
   const [newFileName, setNewFileName] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const generateNewName = () => {
     const lastDotIndex = file.name.lastIndexOf('.');
@@ -62,6 +63,8 @@ export default ({ file, opened, onClose }: Props) => {
   };
 
   const doCopy = () => {
+    setLoading(true);
+
     copyFile(server.uuid, join(browsingDirectory, file.name), newFileName || null)
       .then((entry) => {
         addToast('File has been copied.', 'success');
@@ -70,7 +73,8 @@ export default ({ file, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -93,7 +97,9 @@ export default ({ file, opened, onClose }: Props) => {
       </p>
 
       <Group mt={'md'}>
-        <Button onClick={doCopy}>Copy</Button>
+        <Button onClick={doCopy} loading={loading}>
+          Copy
+        </Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

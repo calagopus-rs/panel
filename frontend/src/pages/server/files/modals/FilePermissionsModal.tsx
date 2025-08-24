@@ -3,6 +3,7 @@ import chmodFiles from '@/api/server/files/chmodFiles';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
+import Code from '@/elements/Code';
 import Checkbox from '@/elements/input/Checkbox';
 import Modal from '@/elements/modals/Modal';
 import { permissionStringToNumber } from '@/lib/files';
@@ -24,6 +25,7 @@ export default ({ file, opened, onClose }: Props) => {
     group: { read: false, write: false, execute: false },
     other: { read: false, write: false, execute: false },
   });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (file.mode) {
@@ -101,6 +103,8 @@ export default ({ file, opened, onClose }: Props) => {
   const doChmod = () => {
     const newPermissions = getOctalValue();
 
+    setLoading(true);
+
     chmodFiles({
       uuid: server.uuid,
       root: browsingDirectory,
@@ -112,7 +116,8 @@ export default ({ file, opened, onClose }: Props) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -148,19 +153,21 @@ export default ({ file, opened, onClose }: Props) => {
         </Title>
         <div className={'text-sm space-y-1'}>
           <div>
-            <strong>r</strong> - Read permission (4)
+            <Code className={'font-bold'}>r</Code> - Read permission (4)
           </div>
           <div>
-            <strong>w</strong> - Write permission (2)
+            <Code className={'font-bold'}>w</Code> - Write permission (2)
           </div>
           <div>
-            <strong>x</strong> - Execute permission (1)
+            <Code className={'font-bold'}>x</Code> - Execute permission (1)
           </div>
         </div>
       </Card>
 
       <Group mt={'md'}>
-        <Button onClick={doChmod}>Save</Button>
+        <Button onClick={doChmod} loading={loading}>
+          Save
+        </Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>

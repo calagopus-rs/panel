@@ -38,7 +38,7 @@ export default ({ opened, onClose }: ModalProps) => {
       />
 
       <Group mt={'md'}>
-        <Button variant={'red'} onClick={doReinstall}>
+        <Button color={'red'} onClick={doReinstall}>
           Reinstall
         </Button>
         <Button variant={'default'} onClick={onClose}>

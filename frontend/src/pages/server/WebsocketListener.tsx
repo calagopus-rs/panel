@@ -1,10 +1,21 @@
 import { transformKeysToCamelCase } from '@/api/transformers';
 import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
+import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
 
 export default () => {
-  const { socketConnected, socketInstance, setStats, setBackupProgress, updateBackup } = useServerStore();
+  const { addToast } = useToast();
+  const {
+    socketConnected,
+    socketInstance,
+    setStats,
+    setBackupProgress,
+    updateBackup,
+    fileOperations,
+    setFileOperation,
+    removeFileOperation,
+  } = useServerStore();
 
   useEffect(() => {
     if (!socketConnected || !socketInstance) {
@@ -51,6 +62,38 @@ export default () => {
       files: wsData.files,
       completed: new Date(),
     });
+  });
+
+  useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    setFileOperation(uuid, wsData);
+  });
+
+  useWebsocketEvent(SocketEvent.OPERATION_COMPLETED, (uuid) => {
+    const fileOperation = fileOperations.get(uuid);
+    switch (fileOperation.type) {
+      case 'compress':
+        addToast(`Compressed files to ${fileOperation.path} successfully.`, 'success');
+        break;
+      case 'decompress':
+        addToast(`Decompressed ${fileOperation.path} to ${fileOperation.destination || '/'} successfully.`, 'success');
+        break;
+      case 'pull':
+        addToast(`Pulled ${fileOperation.path} successfully.`, 'success');
+        break;
+      default:
+        break;
+    }
+
+    // TODO: refresh files
+
+    removeFileOperation(uuid);
   });
 
   return null;

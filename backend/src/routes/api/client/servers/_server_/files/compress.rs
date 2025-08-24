@@ -21,8 +21,10 @@ mod post {
         #[serde(default)]
         #[schema(default = "/")]
         root: String,
-
         files: Vec<String>,
+
+        #[serde(default)]
+        foreground: bool,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -30,8 +32,14 @@ mod post {
         entry: wings_api::DirectoryEntry,
     }
 
+    #[derive(ToSchema, Serialize)]
+    struct ResponseAccepted {
+        identifier: uuid::Uuid,
+    }
+
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = ACCEPTED, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
         (status = EXPECTATION_FAILED, body = ApiError),
@@ -63,16 +71,24 @@ mod post {
                 .into_iter()
                 .filter(|f| !server.is_ignored(f, false))
                 .collect(),
+            foreground: data.foreground,
         };
 
         tokio::spawn(async move {
-            let entry = match server
+            let response = match server
                 .node
                 .api_client(&state.database)
                 .post_servers_server_files_compress(server.uuid, &request_body)
                 .await
             {
-                Ok(data) => data,
+                Ok(wings_api::servers_server_files_compress::post::Response::Ok(data)) => {
+                    ApiResponse::json(Response { entry: data }).ok()
+                }
+                Ok(wings_api::servers_server_files_compress::post::Response::Accepted(data)) => {
+                    ApiResponse::json(ResponseAccepted { identifier: data.identifier })
+                        .with_status(StatusCode::ACCEPTED)
+                        .ok()
+                }
                 Err((StatusCode::NOT_FOUND, err)) => {
                     return ApiResponse::json(ApiError::new_wings_value(err))
                         .with_status(StatusCode::NOT_FOUND)
@@ -97,13 +113,13 @@ mod post {
                     "server:file.compress",
                     serde_json::json!({
                         "directory": request_body.root,
-                        "name": entry.name,
+                        "name": request_body.name,
                         "files": request_body.files.iter().collect::<Vec<_>>(),
                     }),
                 )
                 .await;
 
-            ApiResponse::json(Response { entry }).ok()
+            response
         })
         .await?
     }

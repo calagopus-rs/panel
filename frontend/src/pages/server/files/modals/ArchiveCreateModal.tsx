@@ -18,26 +18,29 @@ type Props = ModalProps & {
 
 export default ({ files, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server, browsingDirectory, addBrowsingEntry } = useServerStore();
+  const { server, browsingDirectory } = useServerStore();
 
   const [fileName, setFileName] = useState('');
   const [format, setFormat] = useState<ArchiveFormat>('tar_gz');
+  const [loading, setLoading] = useState(false);
 
   const doArchive = () => {
+    setLoading(true);
+
     compressFiles(server.uuid, {
       name: fileName || null,
       format,
       root: browsingDirectory,
       files: files.map((f) => f.name),
     })
-      .then((entry) => {
+      .then(() => {
         addToast('Archive has been created.', 'success');
         onClose();
-        addBrowsingEntry(entry);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -76,7 +79,9 @@ export default ({ files, opened, onClose }: Props) => {
       </p>
 
       <Group mt={'md'}>
-        <Button onClick={doArchive}>Create</Button>
+        <Button onClick={doArchive} loading={loading}>
+          Create
+        </Button>
         <Button variant={'default'} onClick={onClose}>
           Close
         </Button>
