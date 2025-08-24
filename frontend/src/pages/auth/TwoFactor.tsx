@@ -4,7 +4,7 @@ import AuthWrapper from './AuthWrapper';
 import { useGlobalStore } from '@/stores/global';
 import { useAuth } from '@/providers/AuthProvider';
 import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
+import TextInput from '@/elements/input/TextInput';
 
 export default () => {
   const navigate = useNavigate();
@@ -26,11 +26,11 @@ export default () => {
   return (
     <AuthWrapper title={'Two Factor Authentication'}>
       <div>
-        <NumberInput
+        <TextInput
           placeholder={'Token'}
           value={faToken}
           autoComplete={'one-time-code'}
-          onChange={(value) => setFaToken(String(value))}
+          onChange={(e) => setFaToken(e.currentTarget.value)}
         />
 
         <Button fullWidth onClick={submit} mt={'md'}>
