@@ -12,6 +12,7 @@ import NotFound from '@/pages/NotFound';
 import { createPortal } from 'react-dom';
 import FileNameModal from './modals/FileNameModal';
 import Button from '@/elements/Button';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const params = useParams<'action'>();
@@ -42,11 +43,11 @@ export default () => {
     if (!browsingDirectory || !fileName) return;
     if (params.action === 'new') return;
 
-    setLoading(true);
+    load(true, setLoading);
     getFileContent(server.uuid, join(browsingDirectory, fileName)).then((content) => {
       setContent(content);
       setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [fileName]);
 
@@ -58,10 +59,10 @@ export default () => {
     if (!editorRef.current) return;
 
     const currentContent = editorRef.current.getValue();
-    setLoading(true);
+    load(true, setLoading);
 
     saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
-      setLoading(false);
+      load(false, setLoading);
       setNameModalOpen(false);
 
       if (name) {

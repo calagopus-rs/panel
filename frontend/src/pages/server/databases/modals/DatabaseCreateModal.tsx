@@ -5,6 +5,7 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -17,12 +18,15 @@ export default ({ opened, onClose }: ModalProps) => {
   const [databaseHosts, setDatabaseHosts] = useState<DatabaseHost[]>([]);
   const [name, setName] = useState('');
   const [host, setHost] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getDatabaseHosts(server.uuid).then((data) => setDatabaseHosts(data));
   }, []);
 
   const doCreate = () => {
+    load(true, setLoading);
+
     createDatabase(server.uuid, { databaseHostUuid: host, name })
       .then((database) => {
         addToast('Database created.', 'success');
@@ -31,7 +35,8 @@ export default ({ opened, onClose }: ModalProps) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -62,7 +67,7 @@ export default ({ opened, onClose }: ModalProps) => {
       />
 
       <Group mt={'md'}>
-        <Button onClick={doCreate} disabled={!name || !host}>
+        <Button onClick={doCreate} loading={loading} disabled={!name || !host}>
           Create
         </Button>
         <Button variant={'default'} onClick={onClose}>

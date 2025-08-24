@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -22,7 +23,7 @@ export default ({ backup, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     updateBackup(server.uuid, backup.uuid, { name, locked })
       .then(() => {
@@ -34,7 +35,7 @@ export default ({ backup, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

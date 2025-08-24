@@ -3,6 +3,7 @@ import rotateDatabasePassword from '@/api/server/databases/rotateDatabasePasswor
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -23,7 +24,7 @@ export default ({ database, opened, onClose }: Props) => {
   }@${host}/${database.name}`;
 
   const onRotatePassword = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     rotateDatabasePassword(server.uuid, database.uuid)
       .then((password) => {
@@ -37,7 +38,7 @@ export default ({ database, opened, onClose }: Props) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => {
-        setLoading(false);
+        load(false, setLoading);
       });
   };
 

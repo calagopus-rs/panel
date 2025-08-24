@@ -25,7 +25,7 @@ export default () => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   }, []);
 
   return (

@@ -2,6 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import restoreBackup from '@/api/server/backups/restoreBackup';
 import Button from '@/elements/Button';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps, Switch } from '@mantine/core';
@@ -21,7 +22,7 @@ export default ({ backup, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doRestore = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     restoreBackup(server.uuid, backup.uuid, { truncateDirectory: truncate })
       .then(() => {
@@ -33,7 +34,7 @@ export default ({ backup, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

@@ -32,7 +32,7 @@ export default () => {
   useEffect(() => {
     getSshKeys(page, search).then((data) => {
       setSshKeys(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

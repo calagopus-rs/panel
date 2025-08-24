@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -63,7 +64,7 @@ export default ({ file, opened, onClose }: Props) => {
   };
 
   const doCopy = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     copyFile(server.uuid, join(browsingDirectory, file.name), newFileName || null)
       .then((entry) => {
@@ -74,7 +75,7 @@ export default ({ file, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

@@ -32,7 +32,7 @@ export default () => {
   useEffect(() => {
     getApiKeys(page, search).then((data) => {
       setApiKeys(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

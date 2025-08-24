@@ -36,7 +36,7 @@ const DatabaseHostsContainer = () => {
     getDatabaseHosts(page, search)
       .then((data) => {
         setDatabaseHosts(data);
-        setLoading(false);
+        load(false, setLoading);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

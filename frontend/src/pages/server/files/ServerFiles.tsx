@@ -17,6 +17,7 @@ import { faDownload, faFileCirclePlus, faFolderPlus, faUpload } from '@fortaweso
 import Table from '@/elements/Table';
 import DirectoryNameModal from './modals/DirectoryNameModal';
 import PullFileModal from './modals/PullFileModal';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -49,7 +50,7 @@ export default () => {
   };
 
   const loadDirectoryData = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     loadDirectory(server.uuid, browsingDirectory, page)
       .then((data) => {
@@ -58,7 +59,7 @@ export default () => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   useEffect(() => {
@@ -69,7 +70,7 @@ export default () => {
 
   useEffect(() => {
     if (browsingDirectory?.startsWith('/.backups/') && !browsingBackup && !loading) {
-      setLoading(true);
+      load(true, setLoading);
 
       let backupUuid = browsingDirectory.slice('/.backups/'.length);
       if (backupUuid.includes('/')) {
@@ -83,7 +84,7 @@ export default () => {
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         })
-        .finally(() => setLoading(false));
+        .finally(() => load(false, setLoading));
     } else if (!browsingDirectory?.startsWith('/.backups/') && browsingBackup) {
       setBrowsingBackup(null);
     }

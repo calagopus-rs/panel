@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -22,7 +23,7 @@ export default ({ allocation, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     updateAllocation(server.uuid, allocation.uuid, { notes, primary })
       .then(() => {
@@ -42,7 +43,7 @@ export default ({ allocation, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

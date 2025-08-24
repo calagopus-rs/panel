@@ -38,7 +38,7 @@ const NestsContainer = () => {
     getNests(page, search)
       .then((data) => {
         setNests(data);
-        setLoading(false);
+        load(false, setLoading);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

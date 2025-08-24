@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -20,7 +21,7 @@ export default ({ opened, onClose }: ModalProps) => {
   const [loading, setLoading] = useState(false);
 
   const makeDirectory = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     createDirectory(server.uuid, browsingDirectory, dirName)
       .then(() => {
@@ -30,7 +31,7 @@ export default ({ opened, onClose }: ModalProps) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

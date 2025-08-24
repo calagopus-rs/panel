@@ -14,6 +14,7 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,7 +37,7 @@ export default () => {
   useEffect(() => {
     getAllocations(server.uuid, page, search).then((data) => {
       setAllocations(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

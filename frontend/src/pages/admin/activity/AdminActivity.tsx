@@ -27,7 +27,7 @@ export default () => {
   useEffect(() => {
     getAdminActivity(page, search).then((data) => {
       setActivities(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

@@ -34,7 +34,7 @@ export default () => {
   useEffect(() => {
     getDatabases(server.uuid, page, search).then((data) => {
       setDatabases(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

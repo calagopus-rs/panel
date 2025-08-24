@@ -3,6 +3,7 @@ import deleteFiles from '@/api/server/files/deleteFiles';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -19,7 +20,7 @@ export default ({ files, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doDelete = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     deleteFiles(
       server.uuid,
@@ -38,7 +39,7 @@ export default ({ files, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
   return (
     <Modal title={'Delete File'} onClose={onClose} opened={opened}>

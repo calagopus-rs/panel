@@ -32,7 +32,7 @@ export default () => {
   useEffect(() => {
     getServerActivity(server.uuid, page, search).then((data) => {
       setActivities(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

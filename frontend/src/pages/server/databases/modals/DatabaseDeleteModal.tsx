@@ -4,6 +4,7 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
@@ -22,7 +23,7 @@ export default ({ database, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doDelete = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     deleteDatabase(server.uuid, database.uuid)
       .then(() => {
@@ -34,7 +35,7 @@ export default ({ database, opened, onClose }: Props) => {
         console.error(error);
         addToast(httpErrorToHuman(error), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

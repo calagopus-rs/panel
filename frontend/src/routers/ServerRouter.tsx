@@ -33,7 +33,7 @@ export default () => {
   useEffect(() => {
     getServer(params.id).then((data) => {
       setServer(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [params.id]);
 

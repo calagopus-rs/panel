@@ -41,7 +41,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
     getEggs(nest.uuid, page, search)
       .then((data) => {
         setEggs(data);
-        setLoading(false);
+        load(false, setLoading);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

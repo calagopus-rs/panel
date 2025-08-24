@@ -15,7 +15,7 @@ export default () => {
 
   useEffect(() => {
     getServers().then((response) => {
-      setLoading(false);
+      load(false, setLoading);
       setServers(response.data);
     });
   }, []);

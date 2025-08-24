@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -43,7 +44,7 @@ export default () => {
   useEffect(() => {
     getSubusers(server.uuid, page, search).then((data) => {
       setSubusers(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

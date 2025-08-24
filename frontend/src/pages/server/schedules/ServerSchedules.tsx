@@ -24,7 +24,7 @@ export default () => {
   useEffect(() => {
     getSchedules(server.uuid, page, search).then((data) => {
       setSchedules(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

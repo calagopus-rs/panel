@@ -35,7 +35,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .catch(() => {
         setUser(null);
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   }, []);
 
   const doLogin = (username: string, password: string, token: string | null) => {

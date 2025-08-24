@@ -37,7 +37,7 @@ const UsersContainer = () => {
     getUsers(page, search)
       .then((data) => {
         setUsers(data);
-        setLoading(false);
+        load(false, setLoading);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

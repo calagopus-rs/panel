@@ -12,6 +12,7 @@ import Table from '@/elements/Table';
 import Spinner from '@/elements/Spinner';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import BackupCreateModal from './modals/BackupCreateModal';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -34,7 +35,7 @@ export default () => {
   useEffect(() => {
     getBackups(server.uuid, page, search).then((data) => {
       setBackups(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 

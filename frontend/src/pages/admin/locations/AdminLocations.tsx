@@ -37,7 +37,7 @@ const LocationsContainer = () => {
     getLocations(page, search)
       .then((data) => {
         setLocations(data);
-        setLoading(false);
+        load(false, setLoading);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

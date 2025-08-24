@@ -5,6 +5,7 @@ import Code from '@/elements/Code';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { archiveFormatExtensionMapping, generateArchiveName } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -25,7 +26,7 @@ export default ({ files, opened, onClose }: Props) => {
   const [loading, setLoading] = useState(false);
 
   const doArchive = () => {
-    setLoading(true);
+    load(true, setLoading);
 
     compressFiles(server.uuid, {
       name: fileName
@@ -42,7 +43,7 @@ export default ({ files, opened, onClose }: Props) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => setLoading(false));
+      .finally(() => load(false, setLoading));
   };
 
   return (

@@ -31,7 +31,7 @@ export default () => {
   useEffect(() => {
     getSessions(page, search).then((data) => {
       setSessions(data);
-      setLoading(false);
+      load(false, setLoading);
     });
   }, [page, search]);
 
