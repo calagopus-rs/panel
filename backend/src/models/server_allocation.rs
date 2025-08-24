@@ -75,7 +75,7 @@ impl ServerAllocation {
         let row = sqlx::query(
             r#"
             INSERT INTO server_allocations (server_uuid, allocation_uuid)
-            VALUES ($1, (1
+            VALUES ($1, (
                 SELECT node_allocations.uuid FROM node_allocations
                 LEFT JOIN server_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
                 WHERE
