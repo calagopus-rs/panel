@@ -37,6 +37,7 @@ export default () => {
     setBrowsingEntries,
     setSelectedFiles,
     fileOperations,
+    removeFileOperation,
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'nameDirectory' | 'pullFile'>(null);
@@ -68,6 +69,8 @@ export default () => {
   };
 
   const doCancelOperation = (uuid: string) => {
+    removeFileOperation(uuid);
+
     cancelOperation(server.uuid, uuid)
       .then(() => {
         addToast('Operation cancelled', 'success');
