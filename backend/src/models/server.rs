@@ -739,9 +739,6 @@ impl Server {
     }
 
     pub async fn sync(self, database: &crate::database::Database) -> Result<(), anyhow::Error> {
-        let uuid = self.uuid;
-        let node_uuid = self.node.uuid;
-
         match self
             .node
             .api_client(database)
@@ -754,10 +751,7 @@ impl Server {
             .await
         {
             Ok(_) => {}
-            Err((_, err)) => {
-                tracing::error!(server = %uuid, node = %node_uuid, "failed to sync server: {:#?}", err);
-                return Err(anyhow::anyhow!(err.error));
-            }
+            Err((_, err)) => return Err(anyhow::anyhow!(err.error)),
         }
 
         Ok(())

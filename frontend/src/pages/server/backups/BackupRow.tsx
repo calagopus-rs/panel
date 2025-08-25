@@ -124,7 +124,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
               </TableData>
             )}
 
-            <TableData hidden={!!backup.progress}>{backup.completed ? backup.files : null}</TableData>
+            <TableData hidden={!backup.completed}>{backup.completed ? backup.files : null}</TableData>
 
             <TableData>{formatTimestamp(backup.created)}</TableData>
 
