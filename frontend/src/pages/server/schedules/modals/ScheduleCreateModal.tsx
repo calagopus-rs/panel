@@ -17,10 +17,10 @@ const maxConditionDepth = 3;
 
 const comparatorOptions = [
   { value: 'smaller_than', label: 'Smaller Than' },
-  { value: 'smaller_than_or_equal', label: 'Smaller Than or Equal' },
+  { value: 'smaller_than_or_equals', label: 'Smaller Than or Equal' },
   { value: 'equal', label: 'Equals' },
   { value: 'greater_than', label: 'Greater Than' },
-  { value: 'greater_than_or_equal', label: 'Greater Than or Equal' },
+  { value: 'greater_than_or_equals', label: 'Greater Than or Equal' },
 ];
 
 const serverStateOptions = [
@@ -66,13 +66,13 @@ const ConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionBuilderPr
         onChange({ type: 'uptime', comparator: 'greater_than', value: 0 });
         break;
       case 'cpu_usage':
-        onChange({ type: 'cpu_usage', comparator: 'smaller_than', value: 80 });
+        onChange({ type: 'cpu_usage', comparator: 'greater_than', value: 0 });
         break;
       case 'memory_usage':
-        onChange({ type: 'memory_usage', comparator: 'smaller_than', value: 80 });
+        onChange({ type: 'memory_usage', comparator: 'greater_than', value: 0 });
         break;
       case 'disk_usage':
-        onChange({ type: 'disk_usage', comparator: 'smaller_than', value: 80 });
+        onChange({ type: 'disk_usage', comparator: 'greater_than', value: 0 });
         break;
     }
   };
@@ -138,17 +138,16 @@ const ConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionBuilderPr
             <NumberInput
               label={
                 condition.type === 'uptime'
-                  ? 'Value (minutes)'
+                  ? 'Value (seconds)'
                   : condition.type === 'cpu_usage'
                     ? 'Value (%)'
-                    : condition.type === 'memory_usage'
-                      ? 'Value (%)'
-                      : 'Value (%)'
+                    : condition.type === 'memory_usage' || condition.type === 'disk_usage'
+                      ? 'Value (MiB)'
+                      : ''
               }
               value={condition.value}
               onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
               min={0}
-              max={condition.type === 'uptime' ? undefined : 100}
             />
           </Group>
         )}
@@ -331,10 +330,7 @@ export default ({ opened, onClose }: ModalProps) => {
                       ...triggers.slice(index + 1),
                     ]);
                   }}
-                  data={[
-                    { value: 'running', label: 'Running' },
-                    { value: 'offline', label: 'Offline' },
-                  ]}
+                  data={serverStateOptions}
                 />
               ) : null}
             </Group>

@@ -362,7 +362,12 @@ type ScheduleTrigger =
 
 type ScheduleTriggerType = ScheduleTrigger['type'];
 
-type ScheduleComparator = 'smaller_than' | 'smaller_than_or_equal' | 'equal' | 'greater_than' | 'greater_than_or_equal';
+type ScheduleComparator =
+  | 'smaller_than'
+  | 'smaller_than_or_equals'
+  | 'equal'
+  | 'greater_than'
+  | 'greater_than_or_equals';
 
 interface ScheduleConditionNone {
   type: 'none';
