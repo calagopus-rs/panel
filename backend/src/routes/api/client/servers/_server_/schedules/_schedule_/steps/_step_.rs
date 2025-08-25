@@ -111,16 +111,12 @@ mod patch {
                 let state = state.clone();
 
                 async move {
-                    match server
-                        .node
-                        .api_client(&state.database)
-                        .post_servers_server_sync(server.uuid)
-                        .await
-                    {
-                        Ok(_) => {}
-                        Err((_, err)) => {
-                            tracing::warn!(server = %server.uuid, "failed to post server sync: {:#?}", err);
+                    let uuid = server.uuid;
 
+                    match server.0.sync(&state.database).await {
+                        Ok(_) => {}
+                        Err(err) => {
+                            tracing::warn!(server = %uuid, "failed to post server sync: {:#?}", err);
                         }
                     }
                 }
@@ -218,16 +214,12 @@ mod delete {
                 let state = state.clone();
 
                 async move {
-                    match server
-                        .node
-                        .api_client(&state.database)
-                        .post_servers_server_sync(server.uuid)
-                        .await
-                    {
-                        Ok(_) => {}
-                        Err((_, err)) => {
-                            tracing::warn!(server = %server.uuid, "failed to post server sync: {:#?}", err);
+                    let uuid = server.uuid;
 
+                    match server.0.sync(&state.database).await {
+                        Ok(_) => {}
+                        Err(err) => {
+                            tracing::warn!(server = %uuid, "failed to post server sync: {:#?}", err);
                         }
                     }
                 }

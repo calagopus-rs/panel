@@ -738,6 +738,31 @@ impl Server {
         .unwrap_or(0)
     }
 
+    pub async fn sync(self, database: &crate::database::Database) -> Result<(), anyhow::Error> {
+        let uuid = self.uuid;
+        let node_uuid = self.node.uuid;
+
+        match self
+            .node
+            .api_client(database)
+            .post_servers_server_sync(
+                self.uuid,
+                &wings_api::servers_server_sync::post::RequestBody {
+                    server: serde_json::to_value(self.into_remote_api_object(database).await?)?,
+                },
+            )
+            .await
+        {
+            Ok(_) => {}
+            Err((_, err)) => {
+                tracing::error!(server = %uuid, node = %node_uuid, "failed to sync server: {:#?}", err);
+                return Err(anyhow::anyhow!(err.error));
+            }
+        }
+
+        Ok(())
+    }
+
     pub async fn destination_node(
         &self,
         database: &crate::database::Database,

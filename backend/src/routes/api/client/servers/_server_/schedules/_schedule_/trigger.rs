@@ -12,8 +12,14 @@ mod post {
         },
     };
     use axum::http::StatusCode;
-    use serde::Serialize;
+    use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
+
+    #[derive(ToSchema, Deserialize)]
+    pub struct Payload {
+        #[serde(default)]
+        skip_condition: bool,
+    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -33,12 +39,13 @@ mod post {
             description = "The schedule ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
-    ))]
+    ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
+        axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("schedules.update") {
             return ApiResponse::error(&error)
@@ -46,14 +53,9 @@ mod post {
                 .ok();
         }
 
-        match server
-            .node
-            .api_client(&state.database)
-            .post_servers_server_sync(server.uuid)
-            .await
-        {
+        match server.clone().sync(&state.database).await {
             Ok(_) => {}
-            Err((_, err)) => {
+            Err(err) => {
                 tracing::error!(server = %server.uuid, "failed to post server sync: {:#?}", err);
 
                 return ApiResponse::error("failed to send sync signal to server")
@@ -65,7 +67,13 @@ mod post {
         match server
             .node
             .api_client(&state.database)
-            .post_servers_server_schedule_schedule_trigger(server.uuid, schedule.uuid)
+            .post_servers_server_schedules_schedule_trigger(
+                server.uuid,
+                schedule.uuid,
+                &wings_api::servers_server_schedules_schedule_trigger::post::RequestBody {
+                    skip_condition: data.skip_condition,
+                },
+            )
             .await
         {
             Ok(_) => {}
@@ -84,6 +92,7 @@ mod post {
                 serde_json::json!({
                     "uuid": schedule.uuid,
                     "name": schedule.name,
+                    "skip_condition": data.skip_condition,
                 }),
             )
             .await;

@@ -367,12 +367,7 @@ mod patch {
             .await;
 
         tokio::spawn(async move {
-            if let Err(err) = server
-                .node
-                .api_client(&state.database)
-                .post_servers_server_sync(server.uuid)
-                .await
-            {
+            if let Err(err) = server.0.sync(&state.database).await {
                 tracing::error!("failed to sync server on node: {:#?}", err);
             }
         });

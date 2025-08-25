@@ -550,53 +550,56 @@ impl WingsClient {
         .await
     }
 
-    pub async fn get_servers_server_schedule_schedule(
+    pub async fn get_servers_server_schedules_schedule(
         &self,
         server: uuid::Uuid,
         schedule: uuid::Uuid,
-    ) -> Result<super::servers_server_schedule_schedule::get::Response, (StatusCode, super::ApiError)>
-    {
+    ) -> Result<
+        super::servers_server_schedules_schedule::get::Response,
+        (StatusCode, super::ApiError),
+    > {
         request_impl(
             self,
             Method::GET,
-            format!("/api/servers/{server}/schedule/{schedule}"),
+            format!("/api/servers/{server}/schedules/{schedule}"),
             None::<&()>,
             None,
         )
         .await
     }
 
-    pub async fn post_servers_server_schedule_schedule_abort(
+    pub async fn post_servers_server_schedules_schedule_abort(
         &self,
         server: uuid::Uuid,
         schedule: uuid::Uuid,
     ) -> Result<
-        super::servers_server_schedule_schedule_abort::post::Response,
+        super::servers_server_schedules_schedule_abort::post::Response,
         (StatusCode, super::ApiError),
     > {
         request_impl(
             self,
             Method::POST,
-            format!("/api/servers/{server}/schedule/{schedule}/abort"),
+            format!("/api/servers/{server}/schedules/{schedule}/abort"),
             None::<&()>,
             None,
         )
         .await
     }
 
-    pub async fn post_servers_server_schedule_schedule_trigger(
+    pub async fn post_servers_server_schedules_schedule_trigger(
         &self,
         server: uuid::Uuid,
         schedule: uuid::Uuid,
+        data: &super::servers_server_schedules_schedule_trigger::post::RequestBody,
     ) -> Result<
-        super::servers_server_schedule_schedule_trigger::post::Response,
+        super::servers_server_schedules_schedule_trigger::post::Response,
         (StatusCode, super::ApiError),
     > {
         request_impl(
             self,
             Method::POST,
-            format!("/api/servers/{server}/schedule/{schedule}/trigger"),
-            None::<&()>,
+            format!("/api/servers/{server}/schedules/{schedule}/trigger"),
+            Some(data),
             None,
         )
         .await
@@ -620,12 +623,13 @@ impl WingsClient {
     pub async fn post_servers_server_sync(
         &self,
         server: uuid::Uuid,
+        data: &super::servers_server_sync::post::RequestBody,
     ) -> Result<super::servers_server_sync::post::Response, (StatusCode, super::ApiError)> {
         request_impl(
             self,
             Method::POST,
             format!("/api/servers/{server}/sync"),
-            None::<&()>,
+            Some(data),
             None,
         )
         .await

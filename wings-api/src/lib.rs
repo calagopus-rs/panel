@@ -1002,7 +1002,7 @@ pub mod servers_server_reinstall {
         pub type Response = Response202;
     }
 }
-pub mod servers_server_schedule_schedule {
+pub mod servers_server_schedules_schedule {
     use super::*;
 
     pub mod get {
@@ -1020,7 +1020,7 @@ pub mod servers_server_schedule_schedule {
         pub type Response = Response200;
     }
 }
-pub mod servers_server_schedule_schedule_abort {
+pub mod servers_server_schedules_schedule_abort {
     use super::*;
 
     pub mod post {
@@ -1036,11 +1036,18 @@ pub mod servers_server_schedule_schedule_abort {
         pub type Response = Response200;
     }
 }
-pub mod servers_server_schedule_schedule_trigger {
+pub mod servers_server_schedules_schedule_trigger {
     use super::*;
 
     pub mod post {
         use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub skip_condition: bool,
+            }
+        }
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
@@ -1086,6 +1093,13 @@ pub mod servers_server_sync {
 
     pub mod post {
         use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub server: serde_json::Value,
+            }
+        }
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
