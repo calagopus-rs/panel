@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router';
 
 export default ({ opened, onClose }: ModalProps) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
 
   const [truncate, setTruncate] = useState(false);
@@ -26,6 +26,7 @@ export default ({ opened, onClose }: ModalProps) => {
         addToast('Reinstalling server...', 'success');
 
         navigate(`/server/${server.uuidShort}`);
+        updateServer({ status: 'installing' });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

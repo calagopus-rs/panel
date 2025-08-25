@@ -11,8 +11,10 @@ export default () => {
   const {
     socketConnected,
     socketInstance,
+    updateServer,
     setStats,
     setBackupProgress,
+    setBackupRestoreProgress,
     updateBackup,
     fileOperations,
     setFileOperation,
@@ -65,6 +67,25 @@ export default () => {
       files: wsData.files,
       completed: new Date(),
     });
+  });
+
+  useWebsocketEvent(SocketEvent.BACKUP_RESTORE_PROGRESS, (data) => {
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    setBackupRestoreProgress((wsData.progress / wsData.total) * 100);
+  });
+
+  useWebsocketEvent(SocketEvent.BACKUP_RESTORE_COMPLETED, () => {
+    updateServer({ status: null });
+  });
+
+  useWebsocketEvent(SocketEvent.INSTALL_COMPLETED, () => {
+    updateServer({ status: null });
   });
 
   useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {

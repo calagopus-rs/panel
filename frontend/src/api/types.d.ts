@@ -753,6 +753,7 @@ type PublicCaptchaProvider =
   | PublicCaptchaProviderRecaptcha;
 
 interface PublicSettings {
+  version: string;
   captchaProvider: PublicCaptchaProvider;
   app: {
     name: string;

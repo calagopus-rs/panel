@@ -23,6 +23,7 @@ import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import BackupEditModal from './modals/BackupEditModal';
 import BackupRestoreModal from './modals/BackupRestoreModal';
+import Progress from '@/elements/Progress';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
@@ -117,13 +118,13 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
 
             {backup.completed ? (
               <TableData>{bytesToString(backup.bytes)}</TableData>
-            ) : backup.progress ? (
-              <TableData>{((backup.progress.progress / backup.progress.total) * 100).toFixed(2)}%</TableData>
             ) : (
-              <TableData>-</TableData>
+              <TableData colSpan={2}>
+                <Progress value={((backup.progress?.progress || 0) / (backup.progress?.total || 0)) * 100} />
+              </TableData>
             )}
 
-            <TableData>{backup.completed ? backup.files : null}</TableData>
+            <TableData hidden={!!backup.progress}>{backup.completed ? backup.files : null}</TableData>
 
             <TableData>{formatTimestamp(backup.created)}</TableData>
 

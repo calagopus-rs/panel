@@ -45,6 +45,11 @@ export default () => {
       })),
     })
       .then(({ renamed }) => {
+        if (renamed < 1) {
+          addToast('Files could not be moved.', 'error');
+          return;
+        }
+
         addToast(`${renamed} File${renamed === 1 ? ' has' : 's have'} been moved.`, 'success');
         setMovingFiles([]);
         refreshFiles(Number(searchParams.get('page')) || 1);

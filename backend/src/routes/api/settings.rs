@@ -25,8 +25,10 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response<'a> {
-        captcha_provider: crate::settings::PublicCaptchaProvider<'a>,
+        version: &'a str,
 
+        #[schema(inline)]
+        captcha_provider: crate::settings::PublicCaptchaProvider<'a>,
         #[schema(inline)]
         app: ResponseApp<'a>,
         #[schema(inline)]
@@ -40,6 +42,7 @@ mod get {
         let settings = state.settings.get().await;
 
         ApiResponse::json(Response {
+            version: &state.version,
             captcha_provider: settings.captcha_provider.to_public_provider(),
             app: ResponseApp {
                 name: &settings.app.name,

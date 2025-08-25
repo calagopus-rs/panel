@@ -29,8 +29,20 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableTrProps>(({ classNa
   );
 });
 
-export const TableData = ({ children }: { children: React.ReactNode }) => {
-  return <Table.Td>{children}</Table.Td>;
+export const TableData = ({
+  children,
+  colSpan,
+  hidden,
+}: {
+  children: React.ReactNode;
+  colSpan?: number;
+  hidden?: boolean;
+}) => {
+  return (
+    <Table.Td colSpan={colSpan} hidden={hidden}>
+      {children}
+    </Table.Td>
+  );
 };
 
 interface PaginationProps<T> {

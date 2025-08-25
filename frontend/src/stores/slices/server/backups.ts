@@ -10,6 +10,10 @@ export interface BackupsSlice {
   removeBackup: (backups: ServerBackupWithProgress) => void;
   updateBackup: (uuid: string, updatedProps: Partial<ServerBackupWithProgress>) => void;
   setBackupProgress: (uuid: string, progress: number, total: number) => void;
+
+  backupRestoreProgress: number;
+
+  setBackupRestoreProgress: (progress: number) => void;
 }
 
 export const createBackupsSlice: StateCreator<ServerStore, [], [], BackupsSlice> = (set): BackupsSlice => ({
@@ -46,4 +50,8 @@ export const createBackupsSlice: StateCreator<ServerStore, [], [], BackupsSlice>
         data: state.backups.data.map((b) => (b.uuid === uuid ? { ...b, progress: { progress, total } } : b)),
       },
     })),
+
+  backupRestoreProgress: 0,
+
+  setBackupRestoreProgress: (progress) => set((state) => ({ ...state, backupRestoreProgress: progress })),
 });

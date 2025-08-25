@@ -34,7 +34,12 @@ export default ({ file, opened, onClose }: Props) => {
         },
       ],
     })
-      .then(() => {
+      .then(({ renamed }) => {
+        if (renamed < 1) {
+          addToast('File could not be renamed.', 'error');
+          return;
+        }
+
         addToast('File has been renamed.', 'success');
         onClose();
       })

@@ -15,7 +15,7 @@ type Props = ModalProps & {
 
 export default ({ backup, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
 
   const [truncate, setTruncate] = useState(false);
@@ -30,6 +30,7 @@ export default ({ backup, opened, onClose }: Props) => {
         addToast('Restoring backup...', 'success');
 
         navigate(`/server/${server.uuidShort}`);
+        updateServer({ status: 'restoring_backup' });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

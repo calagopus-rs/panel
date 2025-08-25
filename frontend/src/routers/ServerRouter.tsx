@@ -16,11 +16,15 @@ import routes, { to } from './routes';
 import Can from '@/elements/Can';
 import Container from '@/elements/Container';
 import { load } from '@/lib/debounce';
+import Notification from '@/elements/Notification';
+import Progress from '@/elements/Progress';
 
 export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
+  const server = useServerStore((state) => state.server);
+  const backupRestoreProgress = useServerStore((state) => state.backupRestoreProgress);
   const resetState = useServerStore((state) => state.reset);
   const setServer = useServerStore((state) => state.setServer);
 
@@ -31,10 +35,9 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    getServer(params.id).then((data) => {
-      setServer(data);
-      load(false, setLoading);
-    });
+    getServer(params.id)
+      .then((data) => setServer(data))
+      .finally(() => load(false, setLoading));
   }, [params.id]);
 
   return (
@@ -79,12 +82,23 @@ export default () => {
           <div className={'w-full h-screen flex items-center justify-center'}>
             <Spinner size={75} />
           </div>
-        ) : (
+        ) : server ? (
           <>
             <WebsocketHandler />
             <WebsocketListener />
 
             <Container>
+              {server.status === 'restoring_backup' ? (
+                <Notification className={'mb-4'} loading>
+                  Your Server is currently restoring from a backup. Please wait...
+                  <Progress value={backupRestoreProgress} />
+                </Notification>
+              ) : server.status === 'installing' ? (
+                <Notification className={'mb-4'} loading>
+                  Your Server is currently being installed. Please wait...
+                </Notification>
+              ) : null}
+
               <Routes>
                 {routes.server.map(({ path, element: Element }) => (
                   <Route key={path} path={path} element={<Element />} />
@@ -93,6 +107,8 @@ export default () => {
               </Routes>
             </Container>
           </>
+        ) : (
+          <NotFound />
         )}
       </div>
     </div>

@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
@@ -54,11 +53,11 @@ export default () => {
       >
         <p>Disabling two-step verification will make your account less secure.</p>
 
-        <NumberInput
+        <TextInput
           label={'Code'}
           placeholder={'000000'}
           value={code}
-          onChange={(value) => setCode(String(value))}
+          onChange={(e) => setCode(e.currentTarget.value)}
           mt={'sm'}
         />
 
