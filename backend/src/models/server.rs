@@ -239,12 +239,13 @@ impl Server {
                     timezone,
                     allocation_limit,
                     database_limit,
-                    backup_limit
+                    backup_limit,
+                    schedule_limit
                 )
                 VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8,
                     $9, $10, $11, $12, $13, $14, $15,
-                    $16, $17, $18, $19, $20, $21
+                    $16, $17, $18, $19, $20, $21, $22
                 )
                 RETURNING uuid
                 "#,
@@ -274,6 +275,7 @@ impl Server {
             .bind(feature_limits.allocations)
             .bind(feature_limits.databases)
             .bind(feature_limits.backups)
+            .bind(feature_limits.schedules)
             .fetch_one(&mut *transaction)
             .await
             {
@@ -1100,6 +1102,7 @@ impl Server {
                 allocations: self.allocation_limit,
                 databases: self.database_limit,
                 backups: self.backup_limit,
+                schedules: self.schedule_limit,
             },
             startup: self.startup,
             image: self.image,
@@ -1152,6 +1155,7 @@ impl Server {
                 allocations: self.allocation_limit,
                 databases: self.database_limit,
                 backups: self.backup_limit,
+                schedules: self.schedule_limit,
             },
             startup: self.startup,
             image: self.image,
@@ -1199,6 +1203,9 @@ pub struct ApiServerFeatureLimits {
     #[validate(range(min = 0))]
     #[schema(minimum = 0)]
     pub backups: i32,
+    #[validate(range(min = 0))]
+    #[schema(minimum = 0)]
+    pub schedules: i32,
 }
 
 #[derive(ToSchema, Serialize)]

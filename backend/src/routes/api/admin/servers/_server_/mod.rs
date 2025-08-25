@@ -301,6 +301,7 @@ mod patch {
             server.allocation_limit = feature_limits.allocations;
             server.backup_limit = feature_limits.backups;
             server.database_limit = feature_limits.databases;
+            server.schedule_limit = feature_limits.schedules;
         }
 
         match sqlx::query!(
@@ -310,8 +311,8 @@ mod patch {
                 name = $5, description = $6, cpu = $7, memory = $8,
                 swap = $9, disk = $10, io_weight = $11, pinned_cpus = $12,
                 startup = $13, image = $14, timezone = $15, allocation_limit = $16,
-                backup_limit = $17, database_limit = $18
-            WHERE servers.uuid = $19",
+                backup_limit = $17, database_limit = $18, schedule_limit = $19
+            WHERE servers.uuid = $20",
             server.owner.uuid,
             server.egg.uuid,
             server.suspended,
@@ -330,6 +331,7 @@ mod patch {
             server.allocation_limit,
             server.backup_limit,
             server.database_limit,
+            server.schedule_limit,
             server.uuid,
         )
         .execute(state.database.write())
