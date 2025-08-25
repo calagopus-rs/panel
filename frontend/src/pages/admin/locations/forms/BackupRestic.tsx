@@ -1,7 +1,7 @@
 import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
 import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
-import { Divider, Group, Title } from '@mantine/core';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import { Dispatch } from 'react';
 
 export default ({
@@ -12,42 +12,41 @@ export default ({
   setBackupConfigs: Dispatch<LocationConfigBackupConfigsRestic>;
 }) => {
   return (
-    <>
-      <Title mt={'md'} order={2}>
-        Restic Settings
-      </Title>
-      <Divider my={'sm'} />
+    <Stack gap={'xs'}>
+      <Stack gap={0}>
+        <Title order={2}>Restic Settings</Title>
+        <Divider />
+      </Stack>
 
-      <Group grow>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Repository'}
+            placeholder={'Repository'}
+            value={backupConfig?.repository || ''}
+            onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
+          />
+          <NumberInput
+            label={'Retry Lock Seconds'}
+            placeholder={'Retry Lock Seconds'}
+            value={backupConfig?.retryLockSeconds || 0}
+            onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
+          />
+        </Group>
+
         <TextInput
-          label={'Repository'}
-          placeholder={'Repository'}
-          value={backupConfig?.repository || ''}
-          onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
-          mt={'sm'}
+          label={'Password'}
+          placeholder={'Password'}
+          type={'password'}
+          value={backupConfig?.environment?.RESTIC_PASSWORD || ''}
+          onChange={(e) =>
+            setBackupConfigs({
+              ...backupConfig,
+              environment: { ...backupConfig.environment, RESTIC_PASSWORD: e.target.value },
+            })
+          }
         />
-        <NumberInput
-          label={'Retry Lock Seconds'}
-          placeholder={'Retry Lock Seconds'}
-          value={backupConfig?.retryLockSeconds || 0}
-          onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
-          mt={'sm'}
-        />
-      </Group>
-
-      <TextInput
-        label={'Password'}
-        placeholder={'Password'}
-        type={'password'}
-        value={backupConfig?.environment?.RESTIC_PASSWORD || ''}
-        onChange={(e) =>
-          setBackupConfigs({
-            ...backupConfig,
-            environment: { ...backupConfig.environment, RESTIC_PASSWORD: e.target.value },
-          })
-        }
-        mt={'sm'}
-      />
+      </Stack>
 
       <MultiKeyValueInput
         options={backupConfig.environment || {}}
@@ -55,6 +54,6 @@ export default ({
         transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
         hideKey={(key) => key === 'RESTIC_PASSWORD'}
       />
-    </>
+    </Stack>
   );
 };

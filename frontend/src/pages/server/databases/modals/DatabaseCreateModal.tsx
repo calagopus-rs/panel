@@ -8,7 +8,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 export default ({ opened, onClose }: ModalProps) => {
@@ -41,39 +41,40 @@ export default ({ opened, onClose }: ModalProps) => {
 
   return (
     <Modal title={'Create Database'} onClose={onClose} opened={opened}>
-      <TextInput
-        label={'Database Name'}
-        placeholder={'Database Name'}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      <Stack>
+        <TextInput
+          label={'Database Name'}
+          placeholder={'Database Name'}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-      <Select
-        label={'Database Host'}
-        placeholder={'Database Host'}
-        searchable
-        nothingFoundMessage={'No hosts found'}
-        data={Object.values(
-          databaseHosts.reduce(
-            (acc, { uuid, name, type }) => (
-              (acc[type] ??= { group: type, items: [] }).items.push({ value: uuid, label: name }), acc
+        <Select
+          label={'Database Host'}
+          placeholder={'Database Host'}
+          searchable
+          nothingFoundMessage={'No hosts found'}
+          data={Object.values(
+            databaseHosts.reduce(
+              (acc, { uuid, name, type }) => (
+                (acc[type] ??= { group: type, items: [] }).items.push({ value: uuid, label: name }), acc
+              ),
+              {},
             ),
-            {},
-          ),
-        )}
-        value={host}
-        onChange={setHost}
-        mt={'sm'}
-      />
+          )}
+          value={host}
+          onChange={setHost}
+        />
 
-      <Group mt={'md'}>
-        <Button onClick={doCreate} loading={loading} disabled={!name || !host}>
-          Create
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button onClick={doCreate} loading={loading} disabled={!name || !host}>
+            Create
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

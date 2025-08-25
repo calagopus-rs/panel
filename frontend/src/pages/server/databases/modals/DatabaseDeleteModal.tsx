@@ -7,7 +7,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack, Text } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
@@ -40,27 +40,28 @@ export default ({ database, opened, onClose }: Props) => {
 
   return (
     <Modal title={'Confirm Database Deletion'} onClose={onClose} opened={opened}>
-      <p>
-        Deleting a database is a permanent action, it cannot be undone. This will permanently delete the
-        <Code>{database.name}</Code> database and remove all associated data.
-      </p>
+      <Stack>
+        <Text>
+          Deleting a database is a permanent action, it cannot be undone. This will permanently delete the
+          <Code>{database.name}</Code> database and remove all associated data.
+        </Text>
 
-      <TextInput
-        label={'Database Name'}
-        placeholder={'Database Name'}
-        value={enteredName}
-        onChange={(e) => setEnteredName(e.target.value)}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Database Name'}
+          placeholder={'Database Name'}
+          value={enteredName}
+          onChange={(e) => setEnteredName(e.target.value)}
+        />
 
-      <Group mt={'md'}>
-        <Button color={'red'} onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
-          Delete
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button color={'red'} onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
+            Delete
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

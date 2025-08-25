@@ -6,7 +6,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Group } from '@mantine/core';
+import { Group, Stack, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 export default () => {
@@ -51,32 +51,32 @@ export default () => {
         onClose={() => setOpenModal(null)}
         opened={openModal === 'disable'}
       >
-        <p>Disabling two-step verification will make your account less secure.</p>
+        <Stack>
+          <Text>Disabling two-step verification will make your account less secure.</Text>
 
-        <TextInput
-          label={'Code'}
-          placeholder={'000000'}
-          value={code}
-          onChange={(e) => setCode(e.currentTarget.value)}
-          mt={'sm'}
-        />
+          <TextInput
+            label={'Code'}
+            placeholder={'000000'}
+            value={code}
+            onChange={(e) => setCode(e.currentTarget.value)}
+          />
 
-        <TextInput
-          label={'Password'}
-          placeholder={'Password'}
-          type={'password'}
-          onChange={(e) => setPassword(e.target.value)}
-          mt={'sm'}
-        />
+          <TextInput
+            label={'Password'}
+            placeholder={'Password'}
+            type={'password'}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-        <Group mt={'md'}>
-          <Button color={'red'} onClick={doDisable} loading={loading} disabled={!password}>
-            Disable
-          </Button>
-          <Button variant={'default'} onClick={() => setOpenModal(null)}>
-            Close
-          </Button>
-        </Group>
+          <Group>
+            <Button color={'red'} onClick={doDisable} loading={loading} disabled={!password}>
+              Disable
+            </Button>
+            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
       <Button color={'red'} onClick={() => setOpenModal('disable')}>

@@ -7,7 +7,7 @@ import Switch from '@/elements/input/Switch';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Title } from '@mantine/core';
+import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
@@ -35,26 +35,26 @@ export default () => {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card>
-        <Title order={2} c={'white'}>
-          Auto-Kill
-        </Title>
+        <Stack>
+          <Title order={2} c={'white'}>
+            Auto-Kill
+          </Title>
 
-        <Switch label={'Enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} mt={'sm'} />
+          <Switch label={'Enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+          <NumberInput
+            label={'Seconds until auto-kill'}
+            value={seconds}
+            min={0}
+            max={3600}
+            onChange={(value) => setSeconds(Number(value))}
+          />
 
-        <NumberInput
-          label={'Seconds until auto-kill'}
-          value={seconds}
-          min={0}
-          max={3600}
-          onChange={(value) => setSeconds(Number(value))}
-          mt={'sm'}
-        />
-
-        <Group mt={'md'}>
-          <Button onClick={doUpdate} loading={loading}>
-            Save
-          </Button>
-        </Group>
+          <Group>
+            <Button onClick={doUpdate} loading={loading}>
+              Save
+            </Button>
+          </Group>
+        </Stack>
       </Card>
     </Grid.Col>
   );

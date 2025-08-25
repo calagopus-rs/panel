@@ -6,6 +6,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import resetPassword from '@/api/auth/resetPassword';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
+import { Stack } from '@mantine/core';
 
 export default () => {
   const { addToast } = useToast();
@@ -35,7 +36,7 @@ export default () => {
 
   return (
     <AuthWrapper title={'Reset Password'}>
-      <div>
+      <Stack>
         <TextInput
           placeholder={'Password'}
           type={'password'}
@@ -47,13 +48,12 @@ export default () => {
           type={'password'}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          mt={'sm'}
         />
 
-        <Button fullWidth onClick={submit} disabled={password !== confirmPassword} mt={'md'}>
+        <Button fullWidth onClick={submit} disabled={password !== confirmPassword}>
           Reset Password
         </Button>
-      </div>
+      </Stack>
     </AuthWrapper>
   );
 };

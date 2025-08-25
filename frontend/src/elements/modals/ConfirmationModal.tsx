@@ -1,7 +1,7 @@
 import React from 'react';
 import { Group, ModalProps } from '@mantine/core';
-import Button from '../Button';
 import Modal from './Modal';
+import Button from '../Button';
 
 type ConfirmationProps = Omit<ModalProps, 'children'> & {
   children: React.ReactNode;

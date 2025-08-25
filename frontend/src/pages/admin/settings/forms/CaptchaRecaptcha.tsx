@@ -1,6 +1,6 @@
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Group } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { Dispatch, SetStateAction } from 'react';
 
 export default ({
@@ -11,14 +11,13 @@ export default ({
   setSettings: Dispatch<SetStateAction<CaptchaProviderRecaptcha>>;
 }) => {
   return (
-    <>
+    <Stack>
       <Group grow>
         <TextInput
           label={'Site Key'}
           placeholder={'Site Key'}
           value={settings.siteKey || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
-          mt={'sm'}
         />
         <TextInput
           label={'Secret Key'}
@@ -26,7 +25,6 @@ export default ({
           type={'password'}
           value={settings.secretKey || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, secretKey: e.target.value }))}
-          mt={'sm'}
         />
       </Group>
 
@@ -34,8 +32,7 @@ export default ({
         label={'V3'}
         checked={settings.v3}
         onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.currentTarget.checked }))}
-        mt={'sm'}
       />
-    </>
+    </Stack>
   );
 };

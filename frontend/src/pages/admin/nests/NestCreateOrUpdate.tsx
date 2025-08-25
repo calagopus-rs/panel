@@ -7,7 +7,7 @@ import updateNest from '@/api/admin/nests/updateNest';
 import deleteNest from '@/api/admin/nests/deleteNest';
 import createNest from '@/api/admin/nests/createNest';
 import { load } from '@/lib/debounce';
-import { Group, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
@@ -82,30 +82,29 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
 
       <Title order={2}>{params.nestId ? 'Update' : 'Create'} Nest</Title>
 
-      <Group grow>
-        <TextInput
-          label={'Author'}
-          placeholder={'Author'}
-          value={nest.author || ''}
-          onChange={(e) => setNest({ ...nest, author: e.target.value })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'Name'}
-          placeholder={'Name'}
-          value={nest.name || ''}
-          onChange={(e) => setNest({ ...nest, name: e.target.value })}
-          mt={'sm'}
-        />
-      </Group>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Author'}
+            placeholder={'Author'}
+            value={nest.author || ''}
+            onChange={(e) => setNest({ ...nest, author: e.target.value })}
+          />
+          <TextInput
+            label={'Name'}
+            placeholder={'Name'}
+            value={nest.name || ''}
+            onChange={(e) => setNest({ ...nest, name: e.target.value })}
+          />
+        </Group>
 
-      <TextInput
-        label={'Description'}
-        placeholder={'Description'}
-        value={nest.description || ''}
-        onChange={(e) => setNest({ ...nest, description: e.target.value })}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Description'}
+          placeholder={'Description'}
+          value={nest.description || ''}
+          onChange={(e) => setNest({ ...nest, description: e.target.value })}
+        />
+      </Stack>
 
       <Group mt={'md'}>
         <Button onClick={doCreateOrUpdate} loading={loading}>

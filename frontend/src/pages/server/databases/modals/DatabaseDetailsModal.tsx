@@ -6,7 +6,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
@@ -44,30 +44,27 @@ export default ({ database, opened, onClose }: Props) => {
 
   return (
     <Modal title={'Database connection details'} onClose={onClose} opened={opened}>
-      <TextInput label={'Database Name'} placeholder={'Database Name'} value={database.name} disabled />
+      <Stack>
+        <TextInput label={'Database Name'} placeholder={'Database Name'} value={database.name} disabled />
+        <TextInput label={'Host'} placeholder={'Host'} value={host} disabled />
+        <TextInput label={'Username'} placeholder={'Username'} value={database.username} disabled />
+        <TextInput label={'Password'} placeholder={'Password'} value={database.password} disabled />
+        <TextInput
+          label={'JDBC Connection String'}
+          placeholder={'JDBC Connection String'}
+          value={jdbcConnectionString}
+          disabled
+        />
 
-      <TextInput label={'Host'} placeholder={'Host'} value={host} disabled mt={'sm'} />
-
-      <TextInput label={'Username'} placeholder={'Username'} value={database.username} disabled mt={'sm'} />
-
-      <TextInput label={'Password'} placeholder={'Password'} value={database.password} disabled mt={'sm'} />
-
-      <TextInput
-        label={'JDBC Connection String'}
-        placeholder={'JDBC Connection String'}
-        value={jdbcConnectionString}
-        disabled
-        mt={'sm'}
-      />
-
-      <Group mt={'md'}>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-        <Button color={'red'} onClick={onRotatePassword} loading={loading}>
-          Rotate Password
-        </Button>
-      </Group>
+        <Group>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+          <Button color={'red'} onClick={onRotatePassword} loading={loading}>
+            Rotate Password
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

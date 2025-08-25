@@ -6,7 +6,7 @@ import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Title } from '@mantine/core';
+import { Grid, Group, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
 
@@ -54,26 +54,28 @@ export default () => {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card>
-        <Title order={2} c={'white'}>
-          Timezone
-        </Title>
+        <Stack>
+          <Title order={2} c={'white'}>
+            Timezone
+          </Title>
 
-        <Select
-          label={'Timezone'}
-          value={timezone}
-          onChange={(value) => setTimezone(value)}
-          data={timezones}
-          searchable
-          mt={'sm'}
-        />
+          <Stack gap={'xs'}>
+            <Select
+              label={'Timezone'}
+              value={timezone}
+              onChange={(value) => setTimezone(value)}
+              data={timezones}
+              searchable
+            />
+            <Text>{time}</Text>
+          </Stack>
 
-        <p className={'text-gray-400 text-sm mt-1'}>{time}</p>
-
-        <Group mt={'md'}>
-          <Button onClick={doUpdate} loading={loading}>
-            Save
-          </Button>
-        </Group>
+          <Group>
+            <Button onClick={doUpdate} loading={loading}>
+              Save
+            </Button>
+          </Group>
+        </Stack>
       </Card>
     </Grid.Col>
   );

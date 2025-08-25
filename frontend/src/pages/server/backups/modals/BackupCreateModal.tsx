@@ -8,7 +8,7 @@ import { load } from '@/lib/debounce';
 import { generateBackupName } from '@/lib/server';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ opened, onClose }: ModalProps) => {
@@ -36,24 +36,25 @@ export default ({ opened, onClose }: ModalProps) => {
 
   return (
     <Modal title={'Create Backup'} onClose={onClose} opened={opened}>
-      <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} mt={'sm'} />
+      <Stack>
+        <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-      <TagsInput
-        label={'Ignored Files'}
-        placeholder={'Ignored Files'}
-        value={ignoredFiles}
-        onChange={setIgnoredFiles}
-        mt={'sm'}
-      />
+        <TagsInput
+          label={'Ignored Files'}
+          placeholder={'Ignored Files'}
+          value={ignoredFiles}
+          onChange={setIgnoredFiles}
+        />
 
-      <Group mt={'md'}>
-        <Button onClick={doCreate} loading={loading} disabled={!name}>
-          Create
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button onClick={doCreate} loading={loading} disabled={!name}>
+            Create
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

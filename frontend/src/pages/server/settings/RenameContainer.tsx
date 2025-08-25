@@ -6,7 +6,7 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Card, Grid, Group, Title } from '@mantine/core';
+import { Card, Grid, Group, Stack, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
@@ -35,31 +35,31 @@ export default () => {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card>
-        <Title order={2} c={'white'}>
-          Rename Server
-        </Title>
+        <Stack>
+          <Title order={2} c={'white'}>
+            Rename Server
+          </Title>
 
-        <TextInput
-          label={'Server Name'}
-          placeholder={'Server Name'}
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          mt={'sm'}
-        />
+          <TextInput
+            label={'Server Name'}
+            placeholder={'Server Name'}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
 
-        <TextArea
-          label={'Description'}
-          placeholder={'Description'}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          mt={'sm'}
-        />
+          <TextArea
+            label={'Description'}
+            placeholder={'Description'}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-        <Group mt={'md'}>
-          <Button disabled={!name} onClick={doUpdate} loading={loading}>
-            Save
-          </Button>
-        </Group>
+          <Group>
+            <Button disabled={!name} onClick={doUpdate} loading={loading}>
+              Save
+            </Button>
+          </Group>
+        </Stack>
       </Card>
     </Grid.Col>
   );

@@ -9,7 +9,7 @@ import { load } from '@/lib/debounce';
 import { archiveFormatExtensionMapping, generateArchiveName } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { join } from 'pathe';
 import { useState } from 'react';
 
@@ -48,47 +48,48 @@ export default ({ files, opened, onClose }: Props) => {
 
   return (
     <Modal title={'Create Archive'} onClose={onClose} opened={opened}>
-      <TextInput
-        label={'Archive Name'}
-        placeholder={'Archive Name'}
-        value={fileName}
-        onChange={(e) => setFileName(e.target.value)}
-      />
+      <Stack>
+        <TextInput
+          label={'Archive Name'}
+          placeholder={'Archive Name'}
+          value={fileName}
+          onChange={(e) => setFileName(e.target.value)}
+        />
 
-      <Select
-        label={'Format'}
-        data={Object.entries(archiveFormatExtensionMapping).map(([format, extension]) => ({
-          label: extension,
-          value: format,
-        }))}
-        value={format}
-        onChange={(value) => setFormat(value as ArchiveFormat)}
-        mt={'sm'}
-      />
+        <Select
+          label={'Format'}
+          data={Object.entries(archiveFormatExtensionMapping).map(([format, extension]) => ({
+            label: extension,
+            value: format,
+          }))}
+          value={format}
+          onChange={(value) => setFormat(value as ArchiveFormat)}
+        />
 
-      <p className={'mt-2 text-sm md:text-base break-all'}>
-        <span className={'text-neutral-200'}>This archive will be created as&nbsp;</span>
-        <Code>
-          /home/container/
-          <span className={'text-cyan-200'}>
-            {join(
-              browsingDirectory,
-              fileName
-                ? `${fileName}${archiveFormatExtensionMapping[format]}`
-                : generateArchiveName(archiveFormatExtensionMapping[format]),
-            ).replace(/^(\.\.\/|\/)+/, '')}
-          </span>
-        </Code>
-      </p>
+        <p className={'text-sm md:text-base break-all'}>
+          <span className={'text-neutral-200'}>This archive will be created as&nbsp;</span>
+          <Code>
+            /home/container/
+            <span className={'text-cyan-200'}>
+              {join(
+                browsingDirectory,
+                fileName
+                  ? `${fileName}${archiveFormatExtensionMapping[format]}`
+                  : generateArchiveName(archiveFormatExtensionMapping[format]),
+              ).replace(/^(\.\.\/|\/)+/, '')}
+            </span>
+          </Code>
+        </p>
 
-      <Group mt={'md'}>
-        <Button onClick={doArchive} loading={loading}>
-          Create
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button onClick={doArchive} loading={loading}>
+            Create
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

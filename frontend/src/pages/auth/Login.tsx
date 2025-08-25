@@ -5,6 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import Captcha from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
+import { Stack } from '@mantine/core';
 
 export default () => {
   const { doLogin } = useAuth();
@@ -21,23 +22,21 @@ export default () => {
 
   return (
     <AuthWrapper title={'Login'}>
-      <div>
+      <Stack>
         <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />
         <TextInput
           placeholder={'Password'}
           type={'password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          mt={'sm'}
         />
 
-        <div className={'mb-4'}>
-          <Captcha ref={captchaRef} />
-        </div>
+        <Captcha ref={captchaRef} />
+
         <Button fullWidth onClick={submit}>
           Login
         </Button>
-      </div>
+      </Stack>
 
       <div className={'mt-4'}>
         <p className={'text-sm text-gray-400'}>

@@ -7,7 +7,7 @@ import getUser from '@/api/admin/users/getUser';
 import updateUser from '@/api/admin/users/updateUser';
 import createUser from '@/api/admin/users/createUser';
 import deleteUser from '@/api/admin/users/deleteUser';
-import { Divider, Group, Title } from '@mantine/core';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import TextInput from '@/elements/input/TextInput';
@@ -98,58 +98,50 @@ export default () => {
       </ConfirmationModal>
 
       <Title order={1}>{params.id ? 'Update' : 'Create'} User</Title>
-      <Divider my={'sm'} />
+      <Divider />
 
-      <Group grow>
-        <TextInput
-          label={'Username'}
-          placeholder={'Username'}
-          value={user.username || ''}
-          onChange={(e) => setUser({ ...user, username: e.target.value })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'Email'}
-          placeholder={'Email'}
-          type={'email'}
-          value={user.email || ''}
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
-          mt={'sm'}
-        />
-      </Group>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Username'}
+            placeholder={'Username'}
+            value={user.username || ''}
+            onChange={(e) => setUser({ ...user, username: e.target.value })}
+          />
+          <TextInput
+            label={'Email'}
+            placeholder={'Email'}
+            type={'email'}
+            value={user.email || ''}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+          />
+        </Group>
 
-      <Group grow>
-        <TextInput
-          label={'First Name'}
-          placeholder={'First Name'}
-          value={user.nameFirst || ''}
-          onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'Last Name'}
-          placeholder={'Last Name'}
-          value={user.nameLast || ''}
-          onChange={(e) => setUser({ ...user, nameLast: e.target.value })}
-          mt={'sm'}
-        />
-      </Group>
+        <Group grow>
+          <TextInput
+            label={'First Name'}
+            placeholder={'First Name'}
+            value={user.nameFirst || ''}
+            onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
+          />
+          <TextInput
+            label={'Last Name'}
+            placeholder={'Last Name'}
+            value={user.nameLast || ''}
+            onChange={(e) => setUser({ ...user, nameLast: e.target.value })}
+          />
+        </Group>
 
-      <TextInput
-        label={'Password'}
-        placeholder={'Password'}
-        type={'password'}
-        value={user.password || ''}
-        onChange={(e) => setUser({ ...user, password: e.target.value })}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Password'}
+          placeholder={'Password'}
+          type={'password'}
+          value={user.password || ''}
+          onChange={(e) => setUser({ ...user, password: e.target.value })}
+        />
 
-      <Switch
-        label={'Admin'}
-        checked={user.admin}
-        onChange={(e) => setUser({ ...user, admin: e.target.checked })}
-        mt={'sm'}
-      />
+        <Switch label={'Admin'} checked={user.admin} onChange={(e) => setUser({ ...user, admin: e.target.checked })} />
+      </Stack>
 
       <Group mt={'md'}>
         <Button onClick={doCreateOrUpdate} loading={loading}>

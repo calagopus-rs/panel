@@ -3,7 +3,7 @@ import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings';
-import { Group, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import Button from '@/elements/Button';
@@ -36,29 +36,30 @@ export default () => {
         Server Settings
       </Title>
 
-      <NumberInput
-        label={'Max File Manager View Size'}
-        placeholder={'Max File Manager View Size'}
-        value={serverSettings.maxFileManagerViewSize}
-        onChange={(e) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: Number(e) })}
-        mt={'sm'}
-      />
+      <Stack>
+        <NumberInput
+          label={'Max File Manager View Size'}
+          placeholder={'Max File Manager View Size'}
+          value={serverSettings.maxFileManagerViewSize}
+          onChange={(e) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: Number(e) })}
+        />
 
-      <Switch
-        label={'Allow Overwriting Custom Docker Image'}
-        checked={serverSettings.allowOverwritingCustomDockerImage}
-        onChange={(e) =>
-          setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.currentTarget.checked })
-        }
-        mt={'sm'}
-      />
+        <Switch
+          label={'Allow Overwriting Custom Docker Image'}
+          checked={serverSettings.allowOverwritingCustomDockerImage}
+          onChange={(e) =>
+            setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.currentTarget.checked })
+          }
+        />
 
-      <Switch
-        label={'Allow Editing Startup Command'}
-        checked={serverSettings.allowEditingStartupCommand}
-        onChange={(e) => setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.currentTarget.checked })}
-        mt={'sm'}
-      />
+        <Switch
+          label={'Allow Editing Startup Command'}
+          checked={serverSettings.allowEditingStartupCommand}
+          onChange={(e) =>
+            setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.currentTarget.checked })
+          }
+        />
+      </Stack>
 
       <Group mt={'md'}>
         <Button onClick={doUpdate} loading={loading}>

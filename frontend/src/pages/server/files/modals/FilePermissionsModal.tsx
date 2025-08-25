@@ -10,7 +10,7 @@ import { load } from '@/lib/debounce';
 import { permissionStringToNumber } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Title } from '@mantine/core';
+import { Group, ModalProps, Stack, Title } from '@mantine/core';
 import { useState, useEffect } from 'react';
 
 type Props = ModalProps & {
@@ -95,9 +95,11 @@ export default ({ file, opened, onClose }: Props) => {
       <Title order={3} c={'white'}>
         {title}
       </Title>
-      {Object.entries(perms).map(([type, value]: [string, boolean]) => (
-        <Checkbox key={type} label={type} checked={value} onChange={() => togglePermission(category, type)} mt={'sm'} />
-      ))}
+      <Stack>
+        {Object.entries(perms).map(([type, value]: [string, boolean]) => (
+          <Checkbox key={type} label={type} checked={value} onChange={() => togglePermission(category, type)} />
+        ))}
+      </Stack>
     </Card>
   );
 

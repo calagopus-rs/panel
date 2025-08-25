@@ -7,7 +7,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
@@ -40,24 +40,20 @@ export default ({ backup, opened, onClose }: Props) => {
 
   return (
     <Modal title={'Edit Backup'} onClose={onClose} opened={opened}>
-      <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+      <Stack>
+        <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-      <Switch
-        label={'Locked'}
-        name={'locked'}
-        checked={locked}
-        onChange={(e) => setLocked(e.target.checked)}
-        mt={'sm'}
-      />
+        <Switch label={'Locked'} name={'locked'} checked={locked} onChange={(e) => setLocked(e.target.checked)} />
 
-      <Group mt={'md'}>
-        <Button onClick={doUpdate} loading={loading} disabled={!name}>
-          Save
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button onClick={doUpdate} loading={loading} disabled={!name}>
+            Save
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

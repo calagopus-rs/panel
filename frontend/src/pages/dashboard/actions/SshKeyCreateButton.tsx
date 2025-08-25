@@ -8,7 +8,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 
 export default () => {
@@ -43,26 +43,27 @@ export default () => {
   return (
     <>
       <Modal title={'Create SSH Key'} opened={openModal === 'create'} onClose={() => setOpenModal(null)}>
-        <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+        <Stack>
+          <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
 
-        <TextArea
-          label={'Public Key'}
-          placeholder={'Public Key'}
-          value={pubKey}
-          onChange={(e) => setPubKey(e.target.value)}
-          rows={3}
-          resize={'none'}
-          mt={'sm'}
-        />
+          <TextArea
+            label={'Public Key'}
+            placeholder={'Public Key'}
+            value={pubKey}
+            onChange={(e) => setPubKey(e.target.value)}
+            rows={3}
+            resize={'none'}
+          />
 
-        <Group mt={'md'}>
-          <Button onClick={doCreate} disabled={!name}>
-            Create
-          </Button>
-          <Button variant={'default'} onClick={() => setOpenModal(null)}>
-            Close
-          </Button>
-        </Group>
+          <Group>
+            <Button onClick={doCreate} disabled={!name}>
+              Create
+            </Button>
+            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
       <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>

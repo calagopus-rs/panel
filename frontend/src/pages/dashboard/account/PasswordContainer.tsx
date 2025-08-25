@@ -3,7 +3,7 @@ import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
-import { Grid, Group, Title } from '@mantine/core';
+import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
@@ -29,38 +29,37 @@ export default () => {
         Password
       </Title>
 
-      <TextInput
-        label={'Current Password'}
-        placeholder={'Current Password'}
-        type={'password'}
-        onChange={(e) => setCurrentPassword(e.target.value)}
-        mt={'sm'}
-      />
+      <Stack>
+        <TextInput
+          label={'Current Password'}
+          placeholder={'Current Password'}
+          type={'password'}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+        />
 
-      <TextInput
-        label={'New Password'}
-        placeholder={'New Password'}
-        type={'password'}
-        onChange={(e) => setNewPassword(e.target.value)}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'New Password'}
+          placeholder={'New Password'}
+          type={'password'}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
 
-      <TextInput
-        label={'Confirm New Password'}
-        placeholder={'Confirm New Password'}
-        type={'password'}
-        onChange={(e) => setConfirmNewPassword(e.target.value)}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Confirm New Password'}
+          placeholder={'Confirm New Password'}
+          type={'password'}
+          onChange={(e) => setConfirmNewPassword(e.target.value)}
+        />
 
-      <Group mt={'md'}>
-        <Button
-          disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
-          onClick={doUpdate}
-        >
-          Update Password
-        </Button>
-      </Group>
+        <Group>
+          <Button
+            disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
+            onClick={doUpdate}
+          >
+            Update Password
+          </Button>
+        </Group>
+      </Stack>
     </Grid.Col>
   );
 };

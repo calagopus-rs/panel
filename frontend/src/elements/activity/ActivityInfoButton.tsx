@@ -1,6 +1,6 @@
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon, Group } from '@mantine/core';
+import { ActionIcon, Group, Stack } from '@mantine/core';
 import { useState } from 'react';
 import Modal from '../modals/Modal';
 import Code from '../Code';
@@ -17,18 +17,20 @@ export default ({ activity }: { activity: ServerActivity | UserActivity }) => {
   return (
     <>
       <Modal title={'Activity Details'} onClose={() => setOpenModal(null)} opened={openModal === 'view'}>
-        <Code
-          block
-          dangerouslySetInnerHTML={{
-            __html: hljs.highlight(JSON.stringify(activity.data, null, 2), { language: 'json' }).value,
-          }}
-        />
+        <Stack>
+          <Code
+            block
+            dangerouslySetInnerHTML={{
+              __html: hljs.highlight(JSON.stringify(activity.data, null, 2), { language: 'json' }).value,
+            }}
+          />
 
-        <Group mt={'md'}>
-          <Button variant={'default'} onClick={() => setOpenModal(null)}>
-            Close
-          </Button>
-        </Group>
+          <Group>
+            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
 
       <ActionIcon onClick={() => setOpenModal('view')}>

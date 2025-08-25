@@ -1,7 +1,7 @@
 import Captcha from '@/elements/Captcha';
 import { useRef, useState } from 'react';
 import PermissionSelector from '../PermissionSelector';
-import { Group, ModalProps, TagsInput } from '@mantine/core';
+import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
 import Modal from '@/elements/modals/Modal';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
@@ -31,42 +31,42 @@ export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
 
   return (
     <Modal title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} opened={opened} size={'xl'}>
-      {subuser ? (
-        <TextInput label={'Username'} placeholder={'Username'} value={subuser.user.username} disabled />
-      ) : (
-        <TextInput
-          label={'Email'}
-          placeholder={'Enter the email that this subuser should be saved as.'}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      )}
+      <Stack>
+        {subuser ? (
+          <TextInput label={'Username'} placeholder={'Username'} value={subuser.user.username} disabled />
+        ) : (
+          <TextInput
+            label={'Email'}
+            placeholder={'Enter the email that this subuser should be saved as.'}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        )}
 
-      <div className={'mt-4'}>
-        <label>Permissions</label>
-        <PermissionSelector selectedPermissions={selectedPermissions} setSelectedPermissions={setSelectedPermissions} />
-      </div>
-
-      <TagsInput
-        label={'Ignored Files'}
-        placeholder={'Ignored Files'}
-        value={ignoredFiles || []}
-        onChange={(e) => setIgnoredFiles(e)}
-        mt={'sm'}
-      />
-
-      {!subuser && (
-        <div className={'mt-4'}>
-          <Captcha ref={captchaRef} />
+        <div>
+          <label>Permissions</label>
+          <PermissionSelector
+            selectedPermissions={selectedPermissions}
+            setSelectedPermissions={setSelectedPermissions}
+          />
         </div>
-      )}
 
-      <Group mt={'md'}>
-        <Button onClick={doCreateOrUpdate}>{subuser ? 'Update' : 'Create'}</Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <TagsInput
+          label={'Ignored Files'}
+          placeholder={'Ignored Files'}
+          value={ignoredFiles || []}
+          onChange={(e) => setIgnoredFiles(e)}
+        />
+
+        {!subuser && <Captcha ref={captchaRef} />}
+
+        <Group>
+          <Button onClick={doCreateOrUpdate}>{subuser ? 'Update' : 'Create'}</Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

@@ -7,7 +7,7 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
@@ -48,24 +48,19 @@ export default ({ allocation, opened, onClose }: Props) => {
 
   return (
     <Modal title={'Edit Allocation'} onClose={onClose} opened={opened}>
-      <TextArea
-        label={'Notes'}
-        placeholder={'Notes'}
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        mt={'sm'}
-      />
+      <Stack>
+        <TextArea label={'Notes'} placeholder={'Notes'} value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Switch label={'Primary'} checked={primary} onChange={(e) => setPrimary(e.target.checked)} />
 
-      <Switch label={'Primary'} checked={primary} onChange={(e) => setPrimary(e.target.checked)} mt={'sm'} />
-
-      <Group mt={'md'}>
-        <Button onClick={doUpdate} loading={loading}>
-          Edit
-        </Button>
-        <Button variant={'default'} onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group>
+          <Button onClick={doUpdate} loading={loading}>
+            Edit
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
     </Modal>
   );
 };

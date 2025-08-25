@@ -5,6 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import Captcha from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
+import { Stack } from '@mantine/core';
 
 export default () => {
   const { doRegister } = useAuth();
@@ -24,30 +25,22 @@ export default () => {
 
   return (
     <AuthWrapper title={'Register'}>
-      <div>
+      <Stack>
         <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />
-        <TextInput placeholder={'Email'} value={email} onChange={(e) => setEmail(e.target.value)} mt={'sm'} />
-        <TextInput
-          placeholder={'First Name'}
-          value={nameFirst}
-          onChange={(e) => setNameFirst(e.target.value)}
-          mt={'sm'}
-        />
-        <TextInput placeholder={'Last Name'} value={nameLast} onChange={(e) => setNameLast(e.target.value)} mt={'sm'} />
+        <TextInput placeholder={'Email'} value={email} onChange={(e) => setEmail(e.target.value)} />
+        <TextInput placeholder={'First Name'} value={nameFirst} onChange={(e) => setNameFirst(e.target.value)} />
+        <TextInput placeholder={'Last Name'} value={nameLast} onChange={(e) => setNameLast(e.target.value)} />
         <TextInput
           placeholder={'Password'}
           type={'password'}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          mt={'sm'}
         />
-        <div className={'mb-4'}>
-          <Captcha ref={captchaRef} />
-        </div>
+        <Captcha ref={captchaRef} />
         <Button fullWidth onClick={submit}>
           Register
         </Button>
-      </div>
+      </Stack>
       <div className={'mt-4'}>
         <p className={'text-sm text-gray-400'}>
           Already have an account?{' '}

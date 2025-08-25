@@ -4,7 +4,7 @@ import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Grid, Group, Title } from '@mantine/core';
+import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default () => {
@@ -30,27 +30,27 @@ export default () => {
         Email
       </Title>
 
-      <TextInput
-        label={'New Email'}
-        placeholder={'New Email'}
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        mt={'sm'}
-      />
+      <Stack>
+        <TextInput
+          label={'New Email'}
+          placeholder={'New Email'}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-      <TextInput
-        label={'Current Password'}
-        placeholder={'Current Password'}
-        type={'password'}
-        onChange={(e) => setPassword(e.target.value)}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Current Password'}
+          placeholder={'Current Password'}
+          type={'password'}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-      <Group mt={'md'}>
-        <Button disabled={!email || !password} onClick={doUpdate}>
-          Update Email
-        </Button>
-      </Group>
+        <Group>
+          <Button disabled={!email || !password} onClick={doUpdate}>
+            Update Email
+          </Button>
+        </Group>
+      </Stack>
     </Grid.Col>
   );
 };

@@ -9,7 +9,7 @@ import getLocation from '@/api/admin/locations/getLocation';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import BackupRestic from './forms/BackupRestic';
-import { Divider, Group, Title } from '@mantine/core';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';
@@ -97,94 +97,92 @@ export default () => {
       </ConfirmationModal>
 
       <Title order={1}>{params.id ? 'Update' : 'Create'} Location</Title>
-      <Divider my={'sm'} />
+      <Divider />
 
-      <Group grow>
-        <TextInput
-          label={'Short Name'}
-          placeholder={'Short Name'}
-          value={location.shortName || ''}
-          onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'Name'}
-          placeholder={'Name'}
-          value={location.name || ''}
-          onChange={(e) => setLocation({ ...location, name: e.target.value })}
-          mt={'sm'}
-        />
-      </Group>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Short Name'}
+            placeholder={'Short Name'}
+            value={location.shortName || ''}
+            onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
+          />
+          <TextInput
+            label={'Name'}
+            placeholder={'Name'}
+            value={location.name || ''}
+            onChange={(e) => setLocation({ ...location, name: e.target.value })}
+          />
+        </Group>
 
-      <Group grow>
-        <TextInput
-          label={'Description'}
-          placeholder={'Description'}
-          value={location.description || ''}
-          onChange={(e) => setLocation({ ...location, description: e.target.value })}
-          mt={'sm'}
-        />
-        <Select
-          label={'Backup Disk'}
-          placeholder={'Backup Disk'}
-          value={location.backupDisk || 'local'}
-          onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
-          data={[
-            { label: 'Local', value: 'local' },
-            { label: 'S3', value: 's3' },
-            { label: 'DdupBak', value: 'ddup-bak' },
-            { label: 'Btrfs', value: 'btrfs' },
-            { label: 'Zfs', value: 'zfs' },
-            { label: 'Restic', value: 'restic' },
-          ]}
-          mt={'sm'}
-        />
-      </Group>
+        <Group grow>
+          <TextInput
+            label={'Description'}
+            placeholder={'Description'}
+            value={location.description || ''}
+            onChange={(e) => setLocation({ ...location, description: e.target.value })}
+          />
+          <Select
+            label={'Backup Disk'}
+            placeholder={'Backup Disk'}
+            value={location.backupDisk || 'local'}
+            onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
+            data={[
+              { label: 'Local', value: 'local' },
+              { label: 'S3', value: 's3' },
+              { label: 'DdupBak', value: 'ddup-bak' },
+              { label: 'Btrfs', value: 'btrfs' },
+              { label: 'Zfs', value: 'zfs' },
+              { label: 'Restic', value: 'restic' },
+            ]}
+          />
+        </Group>
 
-      <Group mt={'md'}>
-        <Button onClick={doCreateOrUpdate} loading={loading}>
-          Save
-        </Button>
-        {params.id && (
-          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-            Delete
+        <Group>
+          <Button onClick={doCreateOrUpdate} loading={loading}>
+            Save
           </Button>
-        )}
-      </Group>
+          {params.id && (
+            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
+        </Group>
 
-      {location.backupDisk === 's3' || location.backupConfigs?.s3 ? (
-        <BackupS3
-          backupConfig={
-            location.backupConfigs?.s3 ?? {
-              accessKey: '',
-              secretKey: '',
-              bucket: '',
-              region: '',
-              endpoint: '',
-              pathStyle: false,
-              partSize: 512 * 1024 * 1024,
+        {location.backupDisk === 's3' || location.backupConfigs?.s3 ? (
+          <BackupS3
+            backupConfig={
+              location.backupConfigs?.s3 ?? {
+                accessKey: '',
+                secretKey: '',
+                bucket: '',
+                region: '',
+                endpoint: '',
+                pathStyle: false,
+                partSize: 512 * 1024 * 1024,
+              }
             }
-          }
-          setBackupConfigs={(config) =>
-            setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
-          }
-        />
-      ) : null}
+            setBackupConfigs={(config) =>
+              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, s3: config } })
+            }
+          />
+        ) : null}
 
-      {location.backupDisk === 'restic' || location.backupConfigs?.restic ? (
-        <BackupRestic
-          backupConfig={
-            location.backupConfigs?.restic ?? {
-              repository: '',
-              retryLockSeconds: 60,
-              environment: {},
+        {location.backupDisk === 'restic' || location.backupConfigs?.restic ? (
+          <BackupRestic
+            backupConfig={
+              location.backupConfigs?.restic ?? {
+                repository: '',
+                retryLockSeconds: 60,
+                environment: {},
+              }
             }
-          }
-          setBackupConfigs={(config) =>
-            setLocation({ ...location, backupConfigs: { ...location.backupConfigs, restic: config } })
-          }
-        />
-      ) : null}
+            setBackupConfigs={(config) =>
+              setLocation({ ...location, backupConfigs: { ...location.backupConfigs, restic: config } })
+            }
+          />
+        ) : null}
+      </Stack>
     </>
   );
 };

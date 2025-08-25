@@ -3,7 +3,7 @@ import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
-import { Group, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Switch from '@/elements/input/Switch';
 import { load } from '@/lib/debounce';
@@ -36,38 +36,36 @@ export default () => {
         Application Settings
       </Title>
 
-      <Group grow>
-        <TextInput
-          label={'Name'}
-          placeholder={'Name'}
-          value={appSettings.name || ''}
-          onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'URL'}
-          placeholder={'URL'}
-          value={appSettings.url || ''}
-          onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
-          mt={'sm'}
-        />
-      </Group>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Name'}
+            placeholder={'Name'}
+            value={appSettings.name || ''}
+            onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
+          />
+          <TextInput
+            label={'URL'}
+            placeholder={'URL'}
+            value={appSettings.url || ''}
+            onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
+          />
+        </Group>
 
-      <TextInput
-        label={'Icon'}
-        placeholder={'Icon'}
-        value={appSettings.icon || ''}
-        onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Icon'}
+          placeholder={'Icon'}
+          value={appSettings.icon || ''}
+          onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
+        />
 
-      <Switch
-        label={'Enable Telemetry'}
-        name={'telemetryEnabled'}
-        defaultChecked={appSettings.telemetryEnabled}
-        onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
-        mt={'sm'}
-      />
+        <Switch
+          label={'Enable Telemetry'}
+          name={'telemetryEnabled'}
+          defaultChecked={appSettings.telemetryEnabled}
+          onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
+        />
+      </Stack>
 
       <Group mt={'md'}>
         <Button onClick={doUpdate} loading={loading}>

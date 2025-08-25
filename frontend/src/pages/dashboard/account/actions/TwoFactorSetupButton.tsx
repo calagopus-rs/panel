@@ -11,7 +11,7 @@ import Spinner from '@/elements/Spinner';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Modal as MantineModal, useModalsStack } from '@mantine/core';
+import { Group, Modal as MantineModal, Stack, Text, useModalsStack } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 
@@ -71,70 +71,72 @@ export default () => {
     <>
       <MantineModal.Stack>
         <Modal {...stageStack.register('setup')} title={'Enable Two-Step Verification'}>
-          <p>
-            Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
-            time you sign in.
-          </p>
-          {!token ? (
-            <Spinner.Centered />
-          ) : (
-            <div className={'flex flex-col items-center justify-center my-4'}>
-              <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
-                <QRCode title={'QR Code'} value={token.otpUrl} />
+          <Stack>
+            <Text>
+              Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
+              time you sign in.
+            </Text>
+            {!token ? (
+              <Spinner.Centered />
+            ) : (
+              <div className={'flex flex-col items-center justify-center my-4'}>
+                <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
+                  <QRCode title={'QR Code'} value={token.otpUrl} />
+                </div>
+                <div className={'mt-2'}>
+                  <CopyOnClick content={token.secret}>
+                    <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
+                  </CopyOnClick>
+                </div>
               </div>
-              <div className={'mt-2'}>
-                <CopyOnClick content={token.secret}>
-                  <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
-                </CopyOnClick>
-              </div>
-            </div>
-          )}
-          <p>
-            Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code
-            generated into the field below.
-          </p>
+            )}
+            <Text>
+              Scan the QR code above using the two-step authentication app of your choice. Then, enter the 6-digit code
+              generated into the field below.
+            </Text>
 
-          <NumberInput
-            label={'Code'}
-            placeholder={'000000'}
-            value={code}
-            onChange={(value) => setCode(String(value))}
-            mt={'sm'}
-          />
+            <NumberInput
+              label={'Code'}
+              placeholder={'000000'}
+              value={code}
+              onChange={(value) => setCode(String(value))}
+            />
 
-          <TextInput
-            label={'Password'}
-            placeholder={'Password'}
-            type={'password'}
-            onChange={(e) => setPassword(e.target.value)}
-            mt={'sm'}
-          />
+            <TextInput
+              label={'Password'}
+              placeholder={'Password'}
+              type={'password'}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-          <Group mt={'md'}>
-            <Button onClick={doEnable} loading={loading} disabled={!code || !password}>
-              Enable
-            </Button>
-            <Button variant={'default'} onClick={() => stageStack.closeAll()}>
-              Close
-            </Button>
-          </Group>
+            <Group>
+              <Button onClick={doEnable} loading={loading} disabled={!code || !password}>
+                Enable
+              </Button>
+              <Button variant={'default'} onClick={() => stageStack.closeAll()}>
+                Close
+              </Button>
+            </Group>
+          </Stack>
         </Modal>
         <Modal {...stageStack.register('recovery')} title={'Recovery Codes'}>
-          <p>Recovery codes:</p>
-          <CopyOnClick content={recoveryCodes.join('\n')}>
-            <Code block>{recoveryCodes.join('\n')}</Code>
-          </CopyOnClick>
-          <Group mt={'md'}>
-            <Button
-              variant={'default'}
-              onClick={() => {
-                setUser({ ...user!, totpEnabled: true });
-                stageStack.closeAll();
-              }}
-            >
-              Close
-            </Button>
-          </Group>
+          <Stack>
+            <Text>Recovery codes:</Text>
+            <CopyOnClick content={recoveryCodes.join('\n')}>
+              <Code block>{recoveryCodes.join('\n')}</Code>
+            </CopyOnClick>
+            <Group>
+              <Button
+                variant={'default'}
+                onClick={() => {
+                  setUser({ ...user!, totpEnabled: true });
+                  stageStack.closeAll();
+                }}
+              >
+                Close
+              </Button>
+            </Group>
+          </Stack>
         </Modal>
       </MantineModal.Stack>
 

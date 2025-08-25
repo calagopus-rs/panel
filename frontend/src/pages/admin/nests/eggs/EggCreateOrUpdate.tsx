@@ -7,7 +7,7 @@ import getEgg from '@/api/admin/eggs/getEgg';
 import deleteEgg from '@/api/admin/eggs/deleteEgg';
 import updateEgg from '@/api/admin/eggs/updateEgg';
 import createEgg from '@/api/admin/eggs/createEgg';
-import { Group } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import TagsInput from '@/elements/input/TagsInput';
 import Switch from '@/elements/input/Switch';
@@ -122,173 +122,159 @@ export default ({ nest }: { nest: Nest }) => {
         Are you sure you want to delete <Code>{egg?.name}</Code>?
       </ConfirmationModal>
 
-      <Group grow>
+      <Stack>
+        <Group grow>
+          <TextInput
+            label={'Author'}
+            placeholder={'Author'}
+            value={egg.author || ''}
+            onChange={(e) => setEgg({ ...egg, author: e.target.value })}
+          />
+          <TextInput
+            label={'Name'}
+            placeholder={'Name'}
+            value={egg.name || ''}
+            onChange={(e) => setEgg({ ...egg, name: e.target.value })}
+          />
+        </Group>
+
         <TextInput
-          label={'Author'}
-          placeholder={'Author'}
-          value={egg.author || ''}
-          onChange={(e) => setEgg({ ...egg, author: e.target.value })}
-          mt={'sm'}
+          label={'Description'}
+          placeholder={'Description'}
+          value={egg.description || ''}
+          onChange={(e) => setEgg({ ...egg, description: e.target.value })}
         />
+
+        {/* TODO: configFiles */}
+
+        <TagsInput
+          label={'Startup Done'}
+          placeholder={'Startup Done'}
+          value={egg.configStartup?.done || []}
+          onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, done: e } })}
+        />
+
+        <Switch
+          label={'Strip ansi from startup messages'}
+          checked={egg.configStartup?.stripAnsi || false}
+          onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
+        />
+
+        {/* TODO: configStop */}
+
+        <Group grow>
+          <TextInput
+            label={'Script Container'}
+            placeholder={'Script Container'}
+            value={egg.configScript?.container || ''}
+            onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
+          />
+          <TextInput
+            label={'Script Entrypoint'}
+            placeholder={'Script Entrypoint'}
+            value={egg.configScript?.entrypoint || ''}
+            onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, entrypoint: e.target.value } })}
+          />
+        </Group>
+
         <TextInput
-          label={'Name'}
-          placeholder={'Name'}
-          value={egg.name || ''}
-          onChange={(e) => setEgg({ ...egg, name: e.target.value })}
-          mt={'sm'}
+          label={'Script Content'}
+          placeholder={'Script Content'}
+          value={egg.configScript?.content || ''}
+          onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, content: e.target.value } })}
         />
-      </Group>
 
-      <TextInput
-        label={'Description'}
-        placeholder={'Description'}
-        value={egg.description || ''}
-        onChange={(e) => setEgg({ ...egg, description: e.target.value })}
-        mt={'sm'}
-      />
-
-      {/* TODO: configFiles */}
-
-      <TagsInput
-        label={'Startup Done'}
-        placeholder={'Startup Done'}
-        value={egg.configStartup?.done || []}
-        onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, done: e } })}
-        mt={'sm'}
-      />
-
-      <Switch
-        label={'Strip ansi from startup messages'}
-        checked={egg.configStartup?.stripAnsi || false}
-        onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
-        mt={'sm'}
-      />
-
-      {/* TODO: configStop */}
-
-      <Group grow>
-        <TextInput
-          label={'Script Container'}
-          placeholder={'Script Container'}
-          value={egg.configScript?.container || ''}
-          onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
-          mt={'sm'}
-        />
-        <TextInput
-          label={'Script Entrypoint'}
-          placeholder={'Script Entrypoint'}
-          value={egg.configScript?.entrypoint || ''}
-          onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, entrypoint: e.target.value } })}
-          mt={'sm'}
-        />
-      </Group>
-
-      <TextInput
-        label={'Script Content'}
-        placeholder={'Script Content'}
-        value={egg.configScript?.content || ''}
-        onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, content: e.target.value } })}
-        mt={'sm'}
-      />
-
-      <Switch
-        label={'Allocation Self Assign'}
-        checked={egg.configAllocations?.userSelfAssign?.enabled || false}
-        onChange={(e) =>
-          setEgg({
-            ...egg,
-            configAllocations: {
-              ...egg.configAllocations,
-              userSelfAssign: { ...egg.configAllocations.userSelfAssign, enabled: e.target.checked },
-            },
-          })
-        }
-        mt={'sm'}
-      />
-
-      <Switch
-        label={'Require Primary Allocation'}
-        checked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
-        onChange={(e) =>
-          setEgg({
-            ...egg,
-            configAllocations: {
-              ...egg.configAllocations,
-              userSelfAssign: {
-                ...egg.configAllocations.userSelfAssign,
-                requirePrimaryAllocation: e.target.checked,
-              },
-            },
-          })
-        }
-        mt={'sm'}
-      />
-
-      <Group grow>
-        <NumberInput
-          label={'Automatic Allocation Start'}
-          placeholder={'Automatic Allocation Start'}
-          value={egg.configAllocations?.userSelfAssign?.startPort || 0}
+        <Switch
+          label={'Allocation Self Assign'}
+          checked={egg.configAllocations?.userSelfAssign?.enabled || false}
           onChange={(e) =>
             setEgg({
               ...egg,
               configAllocations: {
                 ...egg.configAllocations,
-                userSelfAssign: { ...egg.configAllocations.userSelfAssign, startPort: Number(e) },
+                userSelfAssign: { ...egg.configAllocations.userSelfAssign, enabled: e.target.checked },
               },
             })
           }
-          mt={'sm'}
         />
-        <NumberInput
-          label={'Automatic Allocation End'}
-          placeholder={'Automatic Allocation End'}
-          value={egg.configAllocations?.userSelfAssign?.endPort || 0}
+
+        <Switch
+          label={'Require Primary Allocation'}
+          checked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
           onChange={(e) =>
             setEgg({
               ...egg,
               configAllocations: {
                 ...egg.configAllocations,
-                userSelfAssign: { ...egg.configAllocations.userSelfAssign, endPort: Number(e) },
+                userSelfAssign: {
+                  ...egg.configAllocations.userSelfAssign,
+                  requirePrimaryAllocation: e.target.checked,
+                },
               },
             })
           }
-          mt={'sm'}
         />
-      </Group>
 
-      <TextInput
-        label={'Startup'}
-        placeholder={'Startup'}
-        value={egg.startup || ''}
-        onChange={(e) => setEgg({ ...egg, startup: e.target.value })}
-        mt={'sm'}
-      />
+        <Group grow>
+          <NumberInput
+            label={'Automatic Allocation Start'}
+            placeholder={'Automatic Allocation Start'}
+            value={egg.configAllocations?.userSelfAssign?.startPort || 0}
+            onChange={(e) =>
+              setEgg({
+                ...egg,
+                configAllocations: {
+                  ...egg.configAllocations,
+                  userSelfAssign: { ...egg.configAllocations.userSelfAssign, startPort: Number(e) },
+                },
+              })
+            }
+          />
+          <NumberInput
+            label={'Automatic Allocation End'}
+            placeholder={'Automatic Allocation End'}
+            value={egg.configAllocations?.userSelfAssign?.endPort || 0}
+            onChange={(e) =>
+              setEgg({
+                ...egg,
+                configAllocations: {
+                  ...egg.configAllocations,
+                  userSelfAssign: { ...egg.configAllocations.userSelfAssign, endPort: Number(e) },
+                },
+              })
+            }
+          />
+        </Group>
 
-      <Switch
-        label={'Force Outgoing IP'}
-        checked={egg.forceOutgoingIp || false}
-        onChange={(e) => setEgg({ ...egg, forceOutgoingIp: e.target.checked })}
-        mt={'sm'}
-      />
+        <TextInput
+          label={'Startup'}
+          placeholder={'Startup'}
+          value={egg.startup || ''}
+          onChange={(e) => setEgg({ ...egg, startup: e.target.value })}
+        />
 
-      <TagsInput
-        label={'Features'}
-        placeholder={'Feature'}
-        value={egg.features || []}
-        onChange={(e) => setEgg({ ...egg, features: e })}
-        mt={'sm'}
-      />
+        <Switch
+          label={'Force Outgoing IP'}
+          checked={egg.forceOutgoingIp || false}
+          onChange={(e) => setEgg({ ...egg, forceOutgoingIp: e.target.checked })}
+        />
 
-      <MultiKeyValueInput options={egg.dockerImages || {}} onChange={(e) => setEgg({ ...egg, dockerImages: e })} />
+        <TagsInput
+          label={'Features'}
+          placeholder={'Feature'}
+          value={egg.features || []}
+          onChange={(e) => setEgg({ ...egg, features: e })}
+        />
 
-      <TagsInput
-        label={'File Deny List'}
-        placeholder={'File Deny List'}
-        value={egg.fileDenylist || []}
-        onChange={(e) => setEgg({ ...egg, fileDenylist: e })}
-        mt={'sm'}
-      />
+        <MultiKeyValueInput options={egg.dockerImages || {}} onChange={(e) => setEgg({ ...egg, dockerImages: e })} />
+
+        <TagsInput
+          label={'File Deny List'}
+          placeholder={'File Deny List'}
+          value={egg.fileDenylist || []}
+          onChange={(e) => setEgg({ ...egg, fileDenylist: e })}
+        />
+      </Stack>
 
       <Group mt={'md'}>
         <Button onClick={doCreateOrUpdate} loading={loading}>
