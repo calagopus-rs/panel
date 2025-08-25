@@ -30,7 +30,7 @@ export default ({ file, opened, onClose }: Props) => {
       files: [
         {
           from: file.name,
-          to: join(browsingDirectory, newFileName),
+          to: newFileName,
         },
       ],
     })
