@@ -7,7 +7,6 @@ import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps } from '@mantine/core';
-import { join } from 'pathe';
 import { useState } from 'react';
 
 type Props = ModalProps & {
@@ -16,7 +15,7 @@ type Props = ModalProps & {
 
 export default ({ file, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server, browsingDirectory } = useServerStore();
+  const { server, browsingDirectory, browsingEntries, setBrowsingEntries } = useServerStore();
 
   const [newFileName, setNewFileName] = useState(file.name);
   const [loading, setLoading] = useState(false);
@@ -41,6 +40,12 @@ export default ({ file, opened, onClose }: Props) => {
         }
 
         addToast('File has been renamed.', 'success');
+        setBrowsingEntries({
+          ...browsingEntries,
+          data: browsingEntries.data.map((entry) =>
+            entry.name === file.name ? { ...entry, name: newFileName } : entry,
+          ),
+        });
         onClose();
       })
       .catch((msg) => {
