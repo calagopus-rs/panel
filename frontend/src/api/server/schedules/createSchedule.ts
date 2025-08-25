@@ -16,7 +16,7 @@ export default async (uuid: string, data: Data): Promise<ServerSchedule> => {
         triggers: data.triggers,
         condition: data.condition,
       })
-      .then(({ data }) => resolve(data.subuser))
+      .then(({ data }) => resolve(data.schedule))
       .catch(reject);
   });
 };

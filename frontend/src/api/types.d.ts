@@ -231,7 +231,7 @@ interface Server {
   name: string;
   description: string | null;
   limits: ApiServerLimits;
-  feature_limits: ApiServerFeatureLimits;
+  featureLimits: ApiServerFeatureLimits;
   startup: string;
   image: string;
   autoKill: {
@@ -360,6 +360,8 @@ type ScheduleTrigger =
   | ScheduleTriggerServerState
   | ScheduleTriggerCrash;
 
+type ScheduleTriggerType = ScheduleTrigger['type'];
+
 type ScheduleComparator = 'smaller_than' | 'smaller_than_or_equal' | 'equal' | 'greater_than' | 'greater_than_or_equal';
 
 interface ScheduleConditionNone {
@@ -425,6 +427,11 @@ interface ServerSchedule {
   lastRun: Date | null;
   lastFailure: Date | null;
   created: Date;
+}
+
+interface ScheduleStatus {
+  running: boolean;
+  step: string | null;
 }
 
 interface ScheduleActionSleep {

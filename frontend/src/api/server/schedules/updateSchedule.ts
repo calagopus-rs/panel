@@ -7,10 +7,10 @@ interface Data {
   condition: ScheduleCondition;
 }
 
-export default async (uuid: string, schedule: string, data: Data): Promise<void> => {
+export default async (serverUuid: string, scheduleUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/client/servers/${uuid}/schedules/${schedule}`, {
+      .patch(`/api/client/servers/${serverUuid}/schedules/${scheduleUuid}`, {
         name: data.name,
         enabled: data.enabled,
         triggers: data.triggers,

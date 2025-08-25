@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
 import { useSearchParams } from 'react-router';
 import { load } from '@/lib/debounce';
+import { Group, Title } from '@mantine/core';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import ScheduleCreateModal from './modals/ScheduleCreateModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,6 +19,7 @@ export default () => {
 
   const [loading, setLoading] = useState(schedules.data.length === 0);
   const [search, setSearch] = useState('');
+  const [openModal, setOpenModal] = useState<'create'>(null);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -31,34 +40,39 @@ export default () => {
 
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>Schedules</h1>
-        <div className={'flex gap-2'}>{/* todo */}</div>
-      </div>
-      {/* <Table>
-        <ContentWrapper onSearch={setSearch}>
-          <Pagination data={schedules} onPageSelect={setPage}>
-            <div className={'overflow-x-auto'}>
-              <table className={'w-full table-auto'}>
-                <TableHead>
-                  <TableHeader name={'Name'} />
-                  <TableHeader name={'Last Run'} />
-                  <TableHeader name={'Last Failure'} />
-                  <TableHeader name={'Status'} />
-                </TableHead>
+      <ScheduleCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-                <TableBody>
-                  {schedules.data.map((schedule) => (
-                    <ScheduleRow key={schedule.uuid} schedule={schedule} />
-                  ))}
-                </TableBody>
-              </table>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          Schedules
+        </Title>
+        <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
+          <Button onClick={() => setOpenModal('create')} color={'blue'}>
+            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+            Create
+          </Button>
+        </Group>
+      </Group>
 
-              {loading ? <Spinner.Centered /> : schedules.data.length === 0 ? <NoItems /> : null}
-            </div>
-          </Pagination>
-        </ContentWrapper>
-      </Table> */}
+      {loading ? (
+        <Spinner.Centered />
+      ) : (
+        <Table
+          columns={['Name', 'Last Run', 'Last Failure', 'Status', '']}
+          pagination={schedules}
+          onPageSelect={setPage}
+        >
+          {schedules.data.map((schedule) => (
+            <ScheduleRow key={schedule.uuid} schedule={schedule} />
+          ))}
+        </Table>
+      )}
     </>
   );
 };
