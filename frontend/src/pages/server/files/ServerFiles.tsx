@@ -180,16 +180,25 @@ export default () => {
                 </Popover.Dropdown>
               </Popover>
             )}
-            <Button onClick={() => setOpenModal('nameDirectory')} color={'blue'}>
-              <FontAwesomeIcon icon={faFolderPlus} className={'mr-2'} />
+            <Button
+              onClick={() => setOpenModal('nameDirectory')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faFolderPlus} />}
+            >
               New Directory
             </Button>
-            <Button onClick={() => setOpenModal('pullFile')} color={'blue'}>
-              <FontAwesomeIcon icon={faDownload} className={'mr-2'} />
+            <Button
+              onClick={() => setOpenModal('pullFile')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faDownload} />}
+            >
               Pull
             </Button>
-            <Button onClick={() => console.log('#Soon')} color={'blue'}>
-              <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+            <Button
+              onClick={() => console.log('#Soon')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faUpload} />}
+            >
               Upload
             </Button>
             <Button
@@ -199,8 +208,8 @@ export default () => {
                 )
               }
               color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faFileCirclePlus} />}
             >
-              <FontAwesomeIcon icon={faFileCirclePlus} className={'mr-2'} />
               New File
             </Button>
           </Group>

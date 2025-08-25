@@ -57,8 +57,11 @@ const DatabaseHostsContainer = () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <Button onClick={() => navigate('/admin/database-hosts/new')} color={'blue'}>
-            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+          <Button
+            onClick={() => navigate('/admin/database-hosts/new')}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
+          >
             Create
           </Button>
         </Group>

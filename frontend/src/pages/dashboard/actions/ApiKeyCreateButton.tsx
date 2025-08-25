@@ -52,8 +52,7 @@ export default () => {
         </Group>
       </Modal>
 
-      <Button onClick={() => setOpenModal('create')} color={'blue'}>
-        <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+      <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
         Create
       </Button>
     </>

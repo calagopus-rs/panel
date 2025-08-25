@@ -87,8 +87,11 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
             <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
             Upload
           </Button>
-          <Button onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)} color={'blue'}>
-            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+          <Button
+            onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
+          >
             Create
           </Button>
 

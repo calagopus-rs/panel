@@ -54,8 +54,11 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <Button onClick={() => setOpenModal('create')} color={'blue'}>
-            <FontAwesomeIcon icon={faPlus} className={'mr-2'} />
+          <Button
+            onClick={() => setOpenModal('create')}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
+          >
             Create
           </Button>
         </Group>
