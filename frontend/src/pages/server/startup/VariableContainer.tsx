@@ -66,7 +66,10 @@ export default ({ variable }: { variable: ServerVariable }) => {
               onChange={(value) => setValue(value)}
               disabled={loading || !variable.isEditable}
             />
-          ) : variable.rules.includes('number') ? (
+          ) : variable.rules.includes('integer') ||
+            variable.rules.includes('int') ||
+            variable.rules.includes('numeric') ||
+            variable.rules.includes('num') ? (
             <NumberInput
               id={variable.envVariable}
               placeholder={variable.defaultValue}

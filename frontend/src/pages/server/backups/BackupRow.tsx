@@ -24,7 +24,7 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import BackupEditModal from './modals/BackupEditModal';
 import BackupRestoreModal from './modals/BackupRestoreModal';
 import Progress from '@/elements/Progress';
-import { streamingArchiveFormatExtensionMapping } from '@/lib/files';
+import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
 export default ({ backup }: { backup: ServerBackupWithProgress }) => {
   const { addToast } = useToast();
@@ -91,9 +91,9 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
             onClick: backup.isStreaming ? () => doDownload('tar_gz') : undefined,
             color: 'gray',
             items: backup.isStreaming
-              ? Object.entries(streamingArchiveFormatExtensionMapping).map(([mime, ext]) => ({
+              ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({
                   icon: faFileArrowDown,
-                  label: `Download as ${ext}`,
+                  label: `Download as ${label}`,
                   onClick: () => doDownload(mime as StreamingArchiveFormat),
                   color: 'gray',
                 }))

@@ -10,6 +10,7 @@ import { bytesToString } from '@/lib/size';
 import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
+import { databaseTypeLabelMapping } from '@/lib/enums';
 
 export default ({ database }: { database: ServerDatabase }) => {
   const [openModal, setOpenModal] = useState<'details' | 'delete'>(null);
@@ -44,7 +45,7 @@ export default ({ database }: { database: ServerDatabase }) => {
           >
             <TableData>{database.name}</TableData>
 
-            <TableData>{database.type}</TableData>
+            <TableData>{databaseTypeLabelMapping[database.type]}</TableData>
 
             <TableData>
               <CopyOnClick content={host}>

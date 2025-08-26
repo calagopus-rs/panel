@@ -6,6 +6,7 @@ import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
+import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps, Stack } from '@mantine/core';
@@ -57,7 +58,11 @@ export default ({ opened, onClose }: ModalProps) => {
           data={Object.values(
             databaseHosts.reduce(
               (acc, { uuid, name, type }) => (
-                (acc[type] ??= { group: type, items: [] }).items.push({ value: uuid, label: name }), acc
+                (acc[type] ??= { group: databaseTypeLabelMapping[type], items: [] }).items.push({
+                  value: uuid,
+                  label: name,
+                }),
+                acc
               ),
               {},
             ),

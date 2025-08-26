@@ -2,7 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/input/Checkbox';
 import Tooltip from '@/elements/Tooltip';
-import { isArchiveType, isEditableFile, streamingArchiveFormatExtensionMapping } from '@/lib/files';
+import { isArchiveType, isEditableFile } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
@@ -32,6 +32,7 @@ import FileCopyModal from './modals/FileCopyModal';
 import FileDeleteModal from './modals/FileDeleteModal';
 import FilePermissionsModal from './modals/FilePermissionsModal';
 import FileRenameModal from './modals/FileRenameModal';
+import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
 export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableRowElement> }) => {
   const { addToast } = useToast();
@@ -43,6 +44,7 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
     addSelectedFile,
     removeSelectedFile,
     movingFiles,
+    movingFilesDirectory,
     setMovingFiles,
   } = useServerStore();
 
@@ -87,10 +89,15 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
     return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
       <TableRow
         className={'cursor-pointer select-none'}
-        bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={
+          selectedFiles.includes(file) ||
+          (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+            ? 'var(--mantine-color-blue-light)'
+            : undefined
+        }
         onContextMenu={onContextMenu}
         onClick={(e) => {
-          if (e.shiftKey) {
+          if (e.shiftKey && movingFiles.length === 0) {
             addSelectedFile(file);
             return;
           }
@@ -114,8 +121,19 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
       </TableRow>
     ) : (
       <TableRow
-        bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={
+          selectedFiles.includes(file) ||
+          (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+            ? 'var(--mantine-color-blue-light)'
+            : undefined
+        }
         onContextMenu={onContextMenu}
+        onClick={(e) => {
+          if (e.shiftKey && movingFiles.length === 0) {
+            addSelectedFile(file);
+            return;
+          }
+        }}
         ref={ref}
       >
         {children}
@@ -198,9 +216,9 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
             onClick: file.file ? () => doDownload('tar_gz') : undefined,
             color: 'gray',
             items: file.directory
-              ? Object.entries(streamingArchiveFormatExtensionMapping).map(([mime, ext]) => ({
+              ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({
                   icon: faFileArrowDown,
-                  label: `Download as ${ext}`,
+                  label: `Download as ${label}`,
                   onClick: () => doDownload(mime as StreamingArchiveFormat),
                   color: 'gray',
                 }))

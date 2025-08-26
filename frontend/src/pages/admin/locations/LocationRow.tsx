@@ -1,5 +1,6 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
+import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
 import { NavLink } from 'react-router';
 
 export default ({ location }: { location: Location }) => {
@@ -18,7 +19,7 @@ export default ({ location }: { location: Location }) => {
 
       <TableData>{location.name}</TableData>
 
-      <TableData>{location.backupDisk}</TableData>
+      <TableData>{locationConfigBackupDiskLabelMapping[location.backupDisk]}</TableData>
 
       <TableData>{location.nodes}</TableData>
     </TableRow>

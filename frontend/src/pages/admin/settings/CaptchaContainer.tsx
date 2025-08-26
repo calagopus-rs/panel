@@ -10,6 +10,7 @@ import { Group, Title } from '@mantine/core';
 import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
+import { captchaProviderTypeLabelMapping } from '@/lib/enums';
 
 export default () => {
   const { addToast } = useToast();
@@ -42,11 +43,10 @@ export default () => {
         label={'Provider'}
         value={settings.type}
         onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
-        data={[
-          { label: 'None', value: 'none' },
-          { label: 'Turnstile', value: 'turnstile' },
-          { label: 'reCAPTCHA', value: 'recaptcha' },
-        ]}
+        data={Object.entries(captchaProviderTypeLabelMapping).map(([value, label]) => ({
+          value,
+          label,
+        }))}
       />
 
       {settings.type === 'turnstile' ? (

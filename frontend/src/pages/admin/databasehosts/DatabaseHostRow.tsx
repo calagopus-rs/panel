@@ -1,5 +1,6 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
+import { databaseTypeLabelMapping } from '@/lib/enums';
 import { NavLink } from 'react-router';
 
 export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
@@ -15,7 +16,7 @@ export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
       </TableData>
 
       <TableData>{databaseHost.name}</TableData>
-      <TableData>{databaseHost.type}</TableData>
+      <TableData>{databaseTypeLabelMapping[databaseHost.type]}</TableData>
       <TableData>
         <Code>
           {databaseHost.host}:{databaseHost.port}

@@ -6,7 +6,8 @@ import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
-import { archiveFormatExtensionMapping, generateArchiveName } from '@/lib/files';
+import { archiveFormatLabelMapping } from '@/lib/enums';
+import { generateArchiveName } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps, Stack } from '@mantine/core';
@@ -30,8 +31,8 @@ export default ({ files, opened, onClose }: Props) => {
 
     compressFiles(server.uuid, {
       name: fileName
-        ? fileName.concat(archiveFormatExtensionMapping[format])
-        : generateArchiveName(archiveFormatExtensionMapping[format]),
+        ? fileName.concat(archiveFormatLabelMapping[format])
+        : generateArchiveName(archiveFormatLabelMapping[format]),
       format,
       root: browsingDirectory,
       files: files.map((f) => f.name),
@@ -58,7 +59,7 @@ export default ({ files, opened, onClose }: Props) => {
 
         <Select
           label={'Format'}
-          data={Object.entries(archiveFormatExtensionMapping).map(([format, extension]) => ({
+          data={Object.entries(archiveFormatLabelMapping).map(([format, extension]) => ({
             label: extension,
             value: format,
           }))}
@@ -74,8 +75,8 @@ export default ({ files, opened, onClose }: Props) => {
               {join(
                 browsingDirectory,
                 fileName
-                  ? `${fileName}${archiveFormatExtensionMapping[format]}`
-                  : generateArchiveName(archiveFormatExtensionMapping[format]),
+                  ? `${fileName}${archiveFormatLabelMapping[format]}`
+                  : generateArchiveName(archiveFormatLabelMapping[format]),
               ).replace(/^(\.\.\/|\/)+/, '')}
             </span>
           </Code>

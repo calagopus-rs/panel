@@ -4,7 +4,15 @@ import classNames from 'classnames';
 import { createSearchParams, NavLink } from 'react-router';
 import { Fragment } from 'react/jsx-runtime';
 
-export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsingBackup: ServerBackup | null }) {
+export function FileBreadcrumbs({
+  path,
+  browsingBackup,
+  hideSelectAll,
+}: {
+  path: string;
+  browsingBackup: ServerBackup | null;
+  hideSelectAll?: boolean;
+}) {
   const { server, browsingEntries, selectedFiles, setSelectedFiles, movingFiles } = useServerStore();
 
   const splittedPath = path.split('/').filter(Boolean);
@@ -22,6 +30,7 @@ export function FileBreadcrumbs({ path, browsingBackup }: { path: string; browsi
         checked={selectedFiles.length > 0 && selectedFiles.length >= browsingEntries.data.length}
         indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
         className={'mr-4'}
+        hidden={hideSelectAll}
         onChange={() => {
           if (selectedFiles.length >= browsingEntries.data.length) {
             setSelectedFiles([]);

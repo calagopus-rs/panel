@@ -16,6 +16,7 @@ import Switch from '@/elements/input/Switch';
 import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { databaseTypeLabelMapping } from '@/lib/enums';
 
 export default () => {
   const params = useParams<'id'>();
@@ -130,10 +131,10 @@ export default () => {
           />
           <Select
             label={'Type'}
-            data={[
-              { value: 'mysql', label: 'MySQL' },
-              { value: 'postgres', label: 'PostgreSQL' },
-            ]}
+            data={Object.entries(databaseTypeLabelMapping).map(([value, label]) => ({
+              value,
+              label,
+            }))}
             value={databaseHost.type || 'mysql'}
             onChange={(value) => setDatabaseHost({ ...databaseHost, type: value as DatabaseType })}
             disabled={params.id ? true : false}

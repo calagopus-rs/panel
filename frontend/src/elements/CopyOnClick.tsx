@@ -11,12 +11,14 @@ export default ({ content, children }: { content: string; children: React.ReactN
       return;
     }
 
-    try {
-      navigator.clipboard.writeText(content);
-      addToast('Copied to clipboard');
-    } catch (err) {
-      console.log(err);
-    }
+    navigator.clipboard
+      .writeText(content)
+      .then(() => {
+        addToast('Copied to clipboard');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   return (
     <button onClick={handleCopy} className={'cursor-pointer'}>

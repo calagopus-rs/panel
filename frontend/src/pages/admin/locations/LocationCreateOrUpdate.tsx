@@ -15,6 +15,7 @@ import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
 
 export default () => {
   const params = useParams<'id'>();
@@ -127,14 +128,10 @@ export default () => {
             placeholder={'Backup Disk'}
             value={location.backupDisk || 'local'}
             onChange={(value) => setLocation({ ...location, backupDisk: value as LocationConfigBackupDisk })}
-            data={[
-              { label: 'Local', value: 'local' },
-              { label: 'S3', value: 's3' },
-              { label: 'DdupBak', value: 'ddup-bak' },
-              { label: 'Btrfs', value: 'btrfs' },
-              { label: 'Zfs', value: 'zfs' },
-              { label: 'Restic', value: 'restic' },
-            ]}
+            data={Object.entries(locationConfigBackupDiskLabelMapping).map(([value, label]) => ({
+              value,
+              label,
+            }))}
           />
         </Group>
 

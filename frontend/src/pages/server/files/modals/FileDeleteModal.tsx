@@ -50,7 +50,7 @@ export default ({ files, opened, onClose }: Props) => {
       ) : (
         <>
           <p>You will not be able to recover the contents of the following files once deleted.</p>
-          <Code block>
+          <Code block className={'mt-1'}>
             <ul>
               {files.map((file) => (
                 <li key={file.name}>

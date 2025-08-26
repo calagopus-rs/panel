@@ -40,6 +40,7 @@ export default () => {
     setBrowsingEntries,
     selectedFiles,
     setSelectedFiles,
+    movingFiles,
     fileOperations,
     removeFileOperation,
   } = useServerStore();
@@ -234,7 +235,12 @@ export default () => {
           <Card>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
-          <SelectionArea onSelectedStart={onSelectedStart} onSelected={onSelected} className={'h-full'}>
+          <SelectionArea
+            onSelectedStart={onSelectedStart}
+            onSelected={onSelected}
+            className={'h-full'}
+            disabled={movingFiles.length > 0}
+          >
             <ContextMenuProvider>
               <Table
                 columns={['', 'Name', 'Size', 'Modified', '']}

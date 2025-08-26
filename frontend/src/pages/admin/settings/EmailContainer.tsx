@@ -9,6 +9,7 @@ import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
+import { mailModeTypeLabelMapping } from '@/lib/enums';
 
 export default () => {
   const { addToast } = useToast();
@@ -41,10 +42,10 @@ export default () => {
         label={'Provider'}
         value={settings.type}
         onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
-        data={[
-          { label: 'None', value: 'none' },
-          { label: 'SMTP', value: 'smtp' },
-        ]}
+        data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
+          value,
+          label,
+        }))}
       />
 
       {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}

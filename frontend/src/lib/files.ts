@@ -351,27 +351,6 @@ export function permissionStringToNumber(mode: string) {
   return parseInt(result, 10);
 }
 
-export const archiveFormatExtensionMapping: Record<ArchiveFormat, string> = {
-  tar: '.tar',
-  tar_gz: '.tar.gz',
-  tar_xz: '.tar.xz',
-  tar_bz2: '.tar.bz2',
-  tar_lz4: '.tar.lz4',
-  tar_zstd: '.tar.zst',
-  zip: '.zip',
-  seven_zip: '.7z',
-};
-
-export const streamingArchiveFormatExtensionMapping: Record<StreamingArchiveFormat, string> = {
-  tar: '.tar',
-  tar_gz: '.tar.gz',
-  tar_xz: '.tar.xz',
-  tar_bz2: '.tar.bz2',
-  tar_lz4: '.tar.lz4',
-  tar_zstd: '.tar.zst',
-  zip: '.zip',
-};
-
 export function generateArchiveName(extension: string) {
   // Get current date
   const now = new Date();
