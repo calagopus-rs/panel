@@ -33,7 +33,7 @@ import FileDeleteModal from './modals/FileDeleteModal';
 import FilePermissionsModal from './modals/FilePermissionsModal';
 import FileRenameModal from './modals/FileRenameModal';
 
-export default ({ file }: { file: DirectoryEntry }) => {
+export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableRowElement> }) => {
   const { addToast } = useToast();
   const {
     server,
@@ -71,10 +71,12 @@ export default ({ file }: { file: DirectoryEntry }) => {
     file,
     onContextMenu,
     children,
+    ref,
   }: {
     file: DirectoryEntry;
     onContextMenu: (e: any) => void;
     children: React.ReactNode;
+    ref: React.Ref<HTMLTableRowElement>;
   }) {
     const navigate = useNavigate();
     const [_, setSearchParams] = useSearchParams();
@@ -84,10 +86,15 @@ export default ({ file }: { file: DirectoryEntry }) => {
 
     return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
       <TableRow
-        className={'cursor-pointer'}
+        className={'cursor-pointer select-none'}
         bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
         onContextMenu={onContextMenu}
-        onClick={() => {
+        onClick={(e) => {
+          if (e.shiftKey) {
+            addSelectedFile(file);
+            return;
+          }
+
           if (file.directory) {
             setSearchParams({
               directory: join(browsingDirectory, file.name),
@@ -101,6 +108,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
             );
           }
         }}
+        ref={ref}
       >
         {children}
       </TableRow>
@@ -108,6 +116,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
       <TableRow
         bg={selectedFiles.includes(file) || movingFiles.includes(file) ? 'var(--mantine-color-blue-light)' : undefined}
         onContextMenu={onContextMenu}
+        ref={ref}
       >
         {children}
       </TableRow>
@@ -213,6 +222,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
               e.preventDefault();
               openMenu(e.clientX, e.clientY);
             }}
+            ref={ref}
           >
             <td className={'pl-4 relative cursor-pointer w-10 text-center'}>
               <RowCheckbox file={file} disabled={movingFiles.length > 0} />

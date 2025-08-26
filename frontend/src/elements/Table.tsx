@@ -100,7 +100,7 @@ interface TableProps {
 
 export default ({ columns, pagination, onPageSelect, children }: TableProps) => {
   return (
-    <Table stickyHeader withTableBorder highlightOnHover={pagination.total > 0}>
+    <Table stickyHeader withTableBorder highlightOnHover={pagination.total > 0} className={'select-none'}>
       <TableHead>
         {columns.map((column, index) => (
           <TableHeader name={column} key={`column-${index}`} />

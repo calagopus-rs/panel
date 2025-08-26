@@ -24,6 +24,7 @@ import classNames from 'classnames';
 import cancelOperation from '@/api/server/files/cancelOperation';
 import CloseButton from '@/elements/CloseButton';
 import Progress from '@/elements/Progress';
+import SelectionArea from '@/elements/SelectionArea';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,6 +38,7 @@ export default () => {
     setBrowsingBackup,
     browsingEntries,
     setBrowsingEntries,
+    selectedFiles,
     setSelectedFiles,
     fileOperations,
     removeFileOperation,
@@ -45,6 +47,7 @@ export default () => {
   const [openModal, setOpenModal] = useState<'nameDirectory' | 'pullFile'>(null);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
+  const [selectedFilesPrevious, setSelectedFilesPrevious] = useState(selectedFiles);
   const [averageOperationProgress, setAverageOperationProgress] = useState(0);
 
   useEffect(() => {
@@ -80,6 +83,14 @@ export default () => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
+  };
+
+  const onSelectedStart = (event: React.MouseEvent | MouseEvent) => {
+    setSelectedFilesPrevious(event.shiftKey ? selectedFiles : []);
+  };
+
+  const onSelected = (selected: DirectoryEntry[]) => {
+    setSelectedFiles([...new Set([...selectedFilesPrevious, ...selected])]);
   };
 
   useEffect(() => {
@@ -223,17 +234,21 @@ export default () => {
           <Card>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
-          <ContextMenuProvider>
-            <Table
-              columns={['', 'Name', 'Size', 'Modified', '']}
-              pagination={browsingEntries}
-              onPageSelect={onPageSelect}
-            >
-              {browsingEntries.data.map((file) => (
-                <FileRow key={file.name} file={file} />
-              ))}
-            </Table>
-          </ContextMenuProvider>
+          <SelectionArea onSelectedStart={onSelectedStart} onSelected={onSelected} className={'h-full'}>
+            <ContextMenuProvider>
+              <Table
+                columns={['', 'Name', 'Size', 'Modified', '']}
+                pagination={browsingEntries}
+                onPageSelect={onPageSelect}
+              >
+                {browsingEntries.data.map((file) => (
+                  <SelectionArea.Selectable key={file.name} item={file}>
+                    {(innerRef) => <FileRow key={file.name} file={file} ref={innerRef} />}
+                  </SelectionArea.Selectable>
+                ))}
+              </Table>
+            </ContextMenuProvider>
+          </SelectionArea>
         </>
       )}
     </>

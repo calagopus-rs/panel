@@ -59,7 +59,11 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
 
   selectedFiles: [],
   setSelectedFiles: (value) => set((state) => ({ ...state, selectedFiles: value })),
-  addSelectedFile: (value) => set((state) => ({ ...state, selectedFiles: [...state.selectedFiles, value] })),
+  addSelectedFile: (value) =>
+    set((state) => ({
+      ...state,
+      selectedFiles: [...state.selectedFiles.filter((file) => file.name !== value.name), value],
+    })),
   removeSelectedFile: (value) =>
     set((state) => ({ ...state, selectedFiles: state.selectedFiles.filter((file) => file.name !== value.name) })),
 
