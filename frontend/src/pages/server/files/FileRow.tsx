@@ -2,7 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import ContextMenu from '@/elements/ContextMenu';
 import Checkbox from '@/elements/input/Checkbox';
 import Tooltip from '@/elements/Tooltip';
-import { archiveFormatExtensionMapping, isArchiveType, isEditableFile } from '@/lib/files';
+import { isArchiveType, isEditableFile, streamingArchiveFormatExtensionMapping } from '@/lib/files';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
@@ -120,7 +120,7 @@ export default ({ file }: { file: DirectoryEntry }) => {
     });
   };
 
-  const doDownload = (archiveFormat: ArchiveFormat) => {
+  const doDownload = (archiveFormat: StreamingArchiveFormat) => {
     downloadFiles(server.uuid, browsingDirectory, [file.name], file.directory, archiveFormat)
       .then(({ url }) => {
         addToast('Download started.', 'success');
@@ -189,14 +189,12 @@ export default ({ file }: { file: DirectoryEntry }) => {
             onClick: file.file ? () => doDownload('tar_gz') : undefined,
             color: 'gray',
             items: file.directory
-              ? Object.entries(archiveFormatExtensionMapping)
-                  .filter(([mime, _]) => mime !== 'seven_zip')
-                  .map(([mime, ext]) => ({
-                    icon: faFileArrowDown,
-                    label: `Download as ${ext}`,
-                    onClick: () => doDownload(mime as ArchiveFormat),
-                    color: 'gray',
-                  }))
+              ? Object.entries(streamingArchiveFormatExtensionMapping).map(([mime, ext]) => ({
+                  icon: faFileArrowDown,
+                  label: `Download as ${ext}`,
+                  onClick: () => doDownload(mime as StreamingArchiveFormat),
+                  color: 'gray',
+                }))
               : [],
           },
           {
