@@ -9,7 +9,7 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ variable }: { variable: ServerVariable }) => {
@@ -36,8 +36,8 @@ export default ({ variable }: { variable: ServerVariable }) => {
   };
 
   return (
-    <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Card>
+    <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
+      <div>
         <Title order={2} c={'white'}>
           {variable.name}
         </Title>
@@ -50,6 +50,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
               name={variable.envVariable}
               defaultChecked={value === '1' || value === 'true'}
               onChange={(e) => setValue(e.target.checked ? '1' : '0')}
+              disabled={loading || !variable.isEditable}
               label={variable.name}
             />
           ) : variable.rules.includes('string') && variable.rules.some((rule) => rule.startsWith('in:')) ? (
@@ -62,6 +63,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
                 .map((option) => ({ value: option, label: option }))}
               value={value}
               onChange={(value) => setValue(value)}
+              disabled={loading || !variable.isEditable}
             />
           ) : variable.rules.includes('number') ? (
             <NumberInput
@@ -69,6 +71,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
               placeholder={variable.defaultValue}
               value={value}
               onChange={(value) => setValue(String(value))}
+              disabled={loading || !variable.isEditable}
             />
           ) : (
             <TextInput
@@ -76,21 +79,22 @@ export default ({ variable }: { variable: ServerVariable }) => {
               placeholder={variable.defaultValue}
               value={value}
               onChange={(e) => setValue(e.target.value)}
+              disabled={loading || !variable.isEditable}
             />
           )}
-          <p className={'text-gray-400 text-sm mt-1'}>{variable.description}</p>
+          <p className={'text-gray-400 text-sm mt-2'}>{variable.description}</p>
         </div>
 
         <Group mt={'md'}>
           <Button
-            disabled={(variable.rules.includes('required') && !value) || value === serverValue}
+            disabled={!variable.isEditable || (variable.rules.includes('required') && !value) || value === serverValue}
             onClick={doUpdate}
             loading={loading}
           >
             Save
           </Button>
         </Group>
-      </Card>
-    </Grid.Col>
+      </div>
+    </Card>
   );
 };

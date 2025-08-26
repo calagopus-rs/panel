@@ -8,7 +8,7 @@ import updateDockerImage from '@/api/server/startup/updateDockerImage';
 import { httpErrorToHuman } from '@/api/axios';
 import updateCommand from '@/api/server/startup/updateCommand';
 import debounce from 'debounce';
-import { Grid, Group, Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import Card from '@/elements/Card';
 import TextArea from '@/elements/input/TextArea';
 import Select from '@/elements/input/Select';
@@ -68,45 +68,42 @@ export default () => {
         </Title>
       </Group>
 
-      <Grid grow>
-        <Grid.Col span={8}>
-          <Card>
-            <TextArea
-              label={'Startup Command'}
-              placeholder={'Startup Command'}
-              value={command}
-              onChange={(e) => setCommand(e.target.value)}
-              disabled={!settings.server.allowEditingStartupCommand}
-            />
-          </Card>
-        </Grid.Col>
-        <Grid.Col span={4}>
-          <Card>
-            <Select
-              label={'Docker Image'}
-              value={dockerImage}
-              onChange={(value) => setDockerImage(value)}
-              data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
-                value,
-                label: key,
-              }))}
-              disabled={!settings.server.allowOverwritingCustomDockerImage}
-            />
-            <p className={'text-gray-400 mt-2'}>
-              The Docker image used to run this server.{' '}
-              {Object.values(server.egg.dockerImages).includes(server.image) ||
-              settings.server.allowOverwritingCustomDockerImage
-                ? 'This can be changed to use a different image.'
-                : 'This has been set by an administrator and cannot be changed.'}
-            </p>
-          </Card>
-        </Grid.Col>
-      </Grid>
-      <Grid>
+      <div className={'grid grid-cols-3 gap-4'}>
+        <Card className={'flex flex-col justify-between rounded-md p-4 h-full col-span-2'}>
+          <TextArea
+            label={'Startup Command'}
+            placeholder={'Startup Command'}
+            value={command}
+            onChange={(e) => setCommand(e.target.value)}
+            disabled={!settings.server.allowEditingStartupCommand}
+            autosize
+          />
+        </Card>
+        <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
+          <Select
+            label={'Docker Image'}
+            value={dockerImage}
+            onChange={(value) => setDockerImage(value)}
+            data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
+              value,
+              label: key,
+            }))}
+            disabled={!settings.server.allowOverwritingCustomDockerImage}
+          />
+          <p className={'text-gray-400 mt-2'}>
+            The Docker image used to run this server.{' '}
+            {Object.values(server.egg.dockerImages).includes(server.image) ||
+            settings.server.allowOverwritingCustomDockerImage
+              ? 'This can be changed to use a different image.'
+              : 'This has been set by an administrator and cannot be changed.'}
+          </p>
+        </Card>
+      </div>
+      <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
         {variables.map((variable) => (
           <VariableContainer key={variable.envVariable} variable={variable} />
         ))}
-      </Grid>
+      </div>
     </>
   );
 };
