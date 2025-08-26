@@ -61,6 +61,7 @@ export default () => {
 
           <Stack gap={'xs'}>
             <Select
+              withAsterisk
               label={'Timezone'}
               value={timezone}
               onChange={(value) => setTimezone(value)}

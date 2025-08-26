@@ -21,12 +21,14 @@ export default ({
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Repository'}
             placeholder={'Repository'}
             value={backupConfig?.repository || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
           />
           <NumberInput
+            withAsterisk
             label={'Retry Lock Seconds'}
             placeholder={'Retry Lock Seconds'}
             value={backupConfig?.retryLockSeconds || 0}
@@ -35,6 +37,7 @@ export default ({
         </Group>
 
         <TextInput
+          withAsterisk
           label={'Password'}
           placeholder={'Password'}
           type={'password'}

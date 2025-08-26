@@ -14,6 +14,7 @@ export default ({ onFileName, opened, onClose }: Props) => {
   return (
     <Modal title={'Create File'} onClose={onClose} opened={opened}>
       <TextInput
+        withAsterisk
         label={'File Name'}
         placeholder={'File Name'}
         value={fileName}

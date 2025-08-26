@@ -1,36 +1,34 @@
 import { httpErrorToHuman } from '@/api/axios';
-import updateBackup from '@/api/server/backups/updateBackup';
+import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
 import Button from '@/elements/Button';
-import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useUserStore } from '@/stores/user';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
-  backup: ServerBackup;
+  sshKey: UserSshKey;
 };
 
-export default ({ backup, opened, onClose }: Props) => {
+export default ({ sshKey, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const { updateSshKey: updateStateSshKey } = useUserStore();
 
-  const [name, setName] = useState(backup.name);
-  const [locked, setLocked] = useState<boolean>(backup.isLocked);
+  const [name, setName] = useState(sshKey.name);
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
     load(true, setLoading);
 
-    updateBackup(server.uuid, backup.uuid, { name, locked })
+    updateSshKey(sshKey.uuid, name)
       .then(() => {
-        backup.name = name;
-        backup.isLocked = locked;
+        updateStateSshKey(sshKey.uuid, { name });
+
         onClose();
-        addToast('Backup updated.', 'success');
+        addToast('SSH Key updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -39,7 +37,7 @@ export default ({ backup, opened, onClose }: Props) => {
   };
 
   return (
-    <Modal title={'Edit Backup'} onClose={onClose} opened={opened}>
+    <Modal title={'Edit SSH Key'} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
@@ -49,11 +47,9 @@ export default ({ backup, opened, onClose }: Props) => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <Switch label={'Locked'} name={'locked'} checked={locked} onChange={(e) => setLocked(e.target.checked)} />
-
         <Group>
-          <Button onClick={doUpdate} loading={loading} disabled={!name}>
-            Save
+          <Button onClick={doUpdate} loading={loading}>
+            Edit
           </Button>
           <Button variant={'default'} onClick={onClose}>
             Close

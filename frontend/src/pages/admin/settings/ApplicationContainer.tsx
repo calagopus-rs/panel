@@ -39,12 +39,14 @@ export default () => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Name'}
             placeholder={'Name'}
             value={appSettings.name || ''}
             onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'URL'}
             placeholder={'URL'}
             value={appSettings.url || ''}
@@ -53,6 +55,7 @@ export default () => {
         </Group>
 
         <TextInput
+          withAsterisk
           label={'Icon'}
           placeholder={'Icon'}
           value={appSettings.icon || ''}

@@ -1,41 +1,43 @@
 import { httpErrorToHuman } from '@/api/axios';
-import createBackup from '@/api/server/backups/createBackup';
+import createSshKey from '@/api/me/ssh-keys/createSshKey';
 import Button from '@/elements/Button';
-import TagsInput from '@/elements/input/TagsInput';
+import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
-import { generateBackupName } from '@/lib/server';
 import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useUserStore } from '@/stores/user';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ opened, onClose }: ModalProps) => {
   const { addToast } = useToast();
-  const { server, addBackup } = useServerStore();
+  const { addSshKey } = useUserStore();
 
-  const [name, setName] = useState(generateBackupName());
-  const [ignoredFiles, setIgnoredFiles] = useState<string[]>([]);
+  const [name, setName] = useState('');
+  const [pubKey, setPubKey] = useState('');
   const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
     load(true, setLoading);
 
-    createBackup(server.uuid, { name, ignoredFiles })
-      .then((backup) => {
-        addBackup(backup);
-        addToast('Backup created.', 'success');
+    createSshKey(name, pubKey)
+      .then((key) => {
+        addToast('SSH key created.', 'success');
+
         onClose();
+        addSshKey(key);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => {
+        load(false, setLoading);
+      });
   };
 
   return (
-    <Modal title={'Create Backup'} onClose={onClose} opened={opened}>
+    <Modal title={'Create SSH Key'} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
@@ -45,15 +47,18 @@ export default ({ opened, onClose }: ModalProps) => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <TagsInput
-          label={'Ignored Files'}
-          placeholder={'Ignored Files'}
-          value={ignoredFiles}
-          onChange={setIgnoredFiles}
+        <TextArea
+          withAsterisk
+          label={'Public Key'}
+          placeholder={'Public Key'}
+          value={pubKey}
+          onChange={(e) => setPubKey(e.target.value)}
+          rows={3}
+          resize={'none'}
         />
 
-        <Group>
-          <Button onClick={doCreate} loading={loading} disabled={!name}>
+        <Group mt={'md'}>
+          <Button onClick={doCreate} loading={loading} disabled={!name || !pubKey}>
             Create
           </Button>
           <Button variant={'default'} onClick={onClose}>

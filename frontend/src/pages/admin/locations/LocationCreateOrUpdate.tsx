@@ -16,6 +16,7 @@ import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
+import TextArea from '@/elements/input/TextArea';
 
 export default () => {
   const params = useParams<'id'>();
@@ -103,12 +104,14 @@ export default () => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Short Name'}
             placeholder={'Short Name'}
             value={location.shortName || ''}
             onChange={(e) => setLocation({ ...location, shortName: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Name'}
             placeholder={'Name'}
             value={location.name || ''}
@@ -116,14 +119,16 @@ export default () => {
           />
         </Group>
 
-        <Group grow>
-          <TextInput
+        <Group grow align={'start'}>
+          <TextArea
             label={'Description'}
             placeholder={'Description'}
             value={location.description || ''}
+            rows={3}
             onChange={(e) => setLocation({ ...location, description: e.target.value })}
           />
           <Select
+            withAsterisk
             label={'Backup Disk'}
             placeholder={'Backup Disk'}
             value={location.backupDisk || 'local'}

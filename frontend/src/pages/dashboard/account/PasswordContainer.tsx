@@ -29,8 +29,9 @@ export default () => {
         Password
       </Title>
 
-      <Stack>
+      <Stack className={'mt-4'}>
         <TextInput
+          withAsterisk
           label={'Current Password'}
           placeholder={'Current Password'}
           type={'password'}
@@ -38,6 +39,7 @@ export default () => {
         />
 
         <TextInput
+          withAsterisk
           label={'New Password'}
           placeholder={'New Password'}
           type={'password'}
@@ -45,6 +47,7 @@ export default () => {
         />
 
         <TextInput
+          withAsterisk
           label={'Confirm New Password'}
           placeholder={'Confirm New Password'}
           type={'password'}

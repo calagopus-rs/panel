@@ -9,7 +9,7 @@ import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardApiKeys from '@/pages/dashboard/DashboardApiKeys';
 import DashboardSessions from '@/pages/dashboard/DashboardSessions';
-import DashboardSshKeys from '@/pages/dashboard/DashboardSshKeys';
+import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
 import ServerBackups from '@/pages/server/backups/ServerBackups';
 import ServerConsole from '@/pages/server/console/ServerConsole';
@@ -97,16 +97,16 @@ const routes: Routes = {
       element: DashboardSshKeys,
     },
     {
-      name: 'Activity',
-      icon: faBriefcase,
-      path: '/activity',
-      element: DashboardActivity,
-    },
-    {
       name: 'Sessions',
       icon: faUserSecret,
       path: '/sessions',
       element: DashboardSessions,
+    },
+    {
+      name: 'Activity',
+      icon: faBriefcase,
+      path: '/activity',
+      element: DashboardActivity,
     },
   ],
   admin: [

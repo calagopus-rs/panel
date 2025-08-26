@@ -103,12 +103,14 @@ export default () => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Username'}
             placeholder={'Username'}
             value={user.username || ''}
             onChange={(e) => setUser({ ...user, username: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Email'}
             placeholder={'Email'}
             type={'email'}
@@ -119,12 +121,14 @@ export default () => {
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'First Name'}
             placeholder={'First Name'}
             value={user.nameFirst || ''}
             onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Last Name'}
             placeholder={'Last Name'}
             value={user.nameLast || ''}
@@ -133,6 +137,7 @@ export default () => {
         </Group>
 
         <TextInput
+          withAsterisk={!params.id}
           label={'Password'}
           placeholder={'Password'}
           type={'password'}

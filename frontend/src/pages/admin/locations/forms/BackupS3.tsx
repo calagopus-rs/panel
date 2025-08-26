@@ -21,12 +21,14 @@ export default ({
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Access Key'}
             placeholder={'Access Key'}
             value={backupConfig?.accessKey || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, accessKey: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Secret Key'}
             placeholder={'Secret Key'}
             type={'password'}
@@ -37,12 +39,14 @@ export default ({
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Bucket'}
             placeholder={'Bucket'}
             value={backupConfig?.bucket || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, bucket: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Region'}
             placeholder={'Region'}
             value={backupConfig?.region || ''}
@@ -52,12 +56,14 @@ export default ({
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Endpoint'}
             placeholder={'Endpoint'}
             value={backupConfig?.endpoint || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, endpoint: e.target.value })}
           />
           <NumberInput
+            withAsterisk
             label={'Part Size'}
             placeholder={'Part Size'}
             value={backupConfig?.partSize || 0}

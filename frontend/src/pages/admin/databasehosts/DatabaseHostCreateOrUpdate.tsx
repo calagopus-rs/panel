@@ -124,12 +124,14 @@ export default () => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Name'}
             placeholder={'Name'}
             value={databaseHost.name || ''}
             onChange={(e) => setDatabaseHost({ ...databaseHost, name: e.target.value })}
           />
           <Select
+            withAsterisk
             label={'Type'}
             data={Object.entries(databaseTypeLabelMapping).map(([value, label]) => ({
               value,
@@ -143,12 +145,14 @@ export default () => {
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Username'}
             placeholder={'Username'}
             value={databaseHost.username || ''}
             onChange={(e) => setDatabaseHost({ ...databaseHost, username: e.target.value })}
           />
           <TextInput
+            withAsterisk={!params.id}
             label={'Password'}
             placeholder={'Password'}
             type={'password'}
@@ -159,12 +163,14 @@ export default () => {
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Host'}
             placeholder={'Host'}
             value={databaseHost.host || ''}
             onChange={(e) => setDatabaseHost({ ...databaseHost, host: e.target.value })}
           />
           <NumberInput
+            withAsterisk
             label={'Port'}
             placeholder={'Port'}
             min={0}

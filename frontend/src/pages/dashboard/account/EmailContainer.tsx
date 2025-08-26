@@ -30,8 +30,9 @@ export default () => {
         Email
       </Title>
 
-      <Stack>
+      <Stack className={'mt-4'}>
         <TextInput
+          withAsterisk
           label={'New Email'}
           placeholder={'New Email'}
           value={email}
@@ -39,6 +40,7 @@ export default () => {
         />
 
         <TextInput
+          withAsterisk
           label={'Current Password'}
           placeholder={'Current Password'}
           type={'password'}

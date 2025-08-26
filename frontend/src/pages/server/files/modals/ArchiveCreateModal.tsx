@@ -58,6 +58,7 @@ export default ({ files, opened, onClose }: Props) => {
         />
 
         <Select
+          withAsterisk
           label={'Format'}
           data={Object.entries(archiveFormatLabelMapping).map(([format, extension]) => ({
             label: extension,

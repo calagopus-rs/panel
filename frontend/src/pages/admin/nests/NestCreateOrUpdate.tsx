@@ -11,6 +11,7 @@ import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import TextArea from '@/elements/input/TextArea';
 
 export default ({ contextNest }: { contextNest?: Nest }) => {
   const params = useParams<'nestId'>();
@@ -85,12 +86,14 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Author'}
             placeholder={'Author'}
             value={nest.author || ''}
             onChange={(e) => setNest({ ...nest, author: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Name'}
             placeholder={'Name'}
             value={nest.name || ''}
@@ -98,10 +101,11 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
           />
         </Group>
 
-        <TextInput
+        <TextArea
           label={'Description'}
           placeholder={'Description'}
           value={nest.description || ''}
+          rows={3}
           onChange={(e) => setNest({ ...nest, description: e.target.value })}
         />
       </Stack>

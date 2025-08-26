@@ -56,6 +56,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
             />
           ) : variable.rules.includes('string') && variable.rules.some((rule) => rule.startsWith('in:')) ? (
             <Select
+              withAsterisk={variable.rules.includes('required')}
               id={variable.envVariable}
               data={variable.rules
                 .find((rule) => rule.startsWith('in:'))
@@ -71,6 +72,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
             variable.rules.includes('numeric') ||
             variable.rules.includes('num') ? (
             <NumberInput
+              withAsterisk={variable.rules.includes('required')}
               id={variable.envVariable}
               placeholder={variable.defaultValue}
               value={value}
@@ -79,6 +81,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
             />
           ) : (
             <TextInput
+              withAsterisk={variable.rules.includes('required')}
               id={variable.envVariable}
               placeholder={variable.defaultValue}
               value={value}

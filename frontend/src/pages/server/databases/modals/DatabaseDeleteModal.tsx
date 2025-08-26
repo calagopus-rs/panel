@@ -47,6 +47,7 @@ export default ({ database, opened, onClose }: Props) => {
         </Text>
 
         <TextInput
+          withAsterisk
           label={'Database Name'}
           placeholder={'Database Name'}
           value={enteredName}

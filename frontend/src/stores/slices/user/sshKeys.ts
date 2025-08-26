@@ -8,6 +8,7 @@ export interface SshKeySlice {
   setSshKeys: (keys: ResponseMeta<UserSshKey>) => void;
   addSshKey: (key: UserSshKey) => void;
   removeSshKey: (key: UserSshKey) => void;
+  updateSshKey: (uuid: string, data: Partial<UserSshKey>) => void;
 }
 
 export const createSshKeysSlice: StateCreator<UserStore, [], [], SshKeySlice> = (set): SshKeySlice => ({
@@ -28,6 +29,13 @@ export const createSshKeysSlice: StateCreator<UserStore, [], [], SshKeySlice> = 
         ...state.sshKeys,
         data: state.sshKeys.data.filter((k) => k.uuid !== key.uuid),
         total: state.sshKeys.total - 1,
+      },
+    })),
+  updateSshKey: (uuid, data) =>
+    set((state) => ({
+      sshKeys: {
+        ...state.sshKeys,
+        data: state.sshKeys.data.map((k) => (k.uuid === uuid ? { ...k, ...data } : k)),
       },
     })),
 });

@@ -57,6 +57,7 @@ export default ({ file, opened, onClose }: Props) => {
   return (
     <Modal title={'Rename File'} onClose={onClose} opened={opened}>
       <TextInput
+        withAsterisk
         label={'File Name'}
         placeholder={'File Name'}
         value={newFileName}

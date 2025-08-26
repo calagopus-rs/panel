@@ -40,7 +40,13 @@ export default () => {
   return (
     <>
       <Modal title={'Create API Key'} opened={openModal === 'create'} onClose={() => setOpenModal(null)}>
-        <TextInput label={'Name'} placeholder={'Name'} value={name} onChange={(e) => setName(e.target.value)} />
+        <TextInput
+          withAsterisk
+          label={'Name'}
+          placeholder={'Name'}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
         <Group mt={'md'}>
           <Button onClick={doCreate} disabled={!name}>

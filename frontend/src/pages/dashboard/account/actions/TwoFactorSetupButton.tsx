@@ -96,6 +96,7 @@ export default () => {
             </Text>
 
             <NumberInput
+              withAsterisk
               label={'Code'}
               placeholder={'000000'}
               value={code}
@@ -103,6 +104,7 @@ export default () => {
             />
 
             <TextInput
+              withAsterisk
               label={'Password'}
               placeholder={'Password'}
               type={'password'}

@@ -16,6 +16,7 @@ import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import TextArea from '@/elements/input/TextArea';
 
 export default ({ nest }: { nest: Nest }) => {
   const params = useParams<'eggId'>();
@@ -125,12 +126,14 @@ export default ({ nest }: { nest: Nest }) => {
       <Stack>
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Author'}
             placeholder={'Author'}
             value={egg.author || ''}
             onChange={(e) => setEgg({ ...egg, author: e.target.value })}
           />
           <TextInput
+            withAsterisk
             label={'Name'}
             placeholder={'Name'}
             value={egg.name || ''}
@@ -138,16 +141,18 @@ export default ({ nest }: { nest: Nest }) => {
           />
         </Group>
 
-        <TextInput
+        <TextArea
           label={'Description'}
           placeholder={'Description'}
           value={egg.description || ''}
+          rows={3}
           onChange={(e) => setEgg({ ...egg, description: e.target.value })}
         />
 
         {/* TODO: configFiles */}
 
         <TagsInput
+          withAsterisk
           label={'Startup Done'}
           placeholder={'Startup Done'}
           value={egg.configStartup?.done || []}
@@ -164,12 +169,14 @@ export default ({ nest }: { nest: Nest }) => {
 
         <Group grow>
           <TextInput
+            withAsterisk
             label={'Script Container'}
             placeholder={'Script Container'}
             value={egg.configScript?.container || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
           />
           <TextInput
+            withAsterisk
             label={'Script Entrypoint'}
             placeholder={'Script Entrypoint'}
             value={egg.configScript?.entrypoint || ''}
@@ -178,6 +185,7 @@ export default ({ nest }: { nest: Nest }) => {
         </Group>
 
         <TextInput
+          withAsterisk
           label={'Script Content'}
           placeholder={'Script Content'}
           value={egg.configScript?.content || ''}
@@ -247,6 +255,7 @@ export default ({ nest }: { nest: Nest }) => {
         </Group>
 
         <TextInput
+          withAsterisk
           label={'Startup'}
           placeholder={'Startup'}
           value={egg.startup || ''}

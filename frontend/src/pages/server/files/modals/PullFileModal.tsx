@@ -38,8 +38,15 @@ export default ({ opened, onClose }: ModalProps) => {
 
   return (
     <Modal title={'Pull File'} onClose={onClose} opened={opened}>
-      <TextInput label={'File URL'} placeholder={'File URL'} value={url} onChange={(e) => setUrl(e.target.value)} />
       <TextInput
+        withAsterisk
+        label={'File URL'}
+        placeholder={'File URL'}
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+      />
+      <TextInput
+        withAsterisk
         label={'File Name'}
         placeholder={'File Name'}
         className={'mt-2'}

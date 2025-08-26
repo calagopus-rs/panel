@@ -71,6 +71,7 @@ export default () => {
       <div className={'grid grid-cols-3 gap-4'}>
         <Card className={'flex flex-col justify-between rounded-md p-4 h-full col-span-2'}>
           <TextArea
+            withAsterisk
             label={'Startup Command'}
             placeholder={'Startup Command'}
             value={command}
@@ -81,6 +82,7 @@ export default () => {
         </Card>
         <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
           <Select
+            withAsterisk
             label={'Docker Image'}
             value={dockerImage}
             onChange={(value) => setDockerImage(value)}

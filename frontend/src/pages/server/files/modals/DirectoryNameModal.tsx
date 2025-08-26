@@ -37,6 +37,7 @@ export default ({ opened, onClose }: ModalProps) => {
   return (
     <Modal title={'Create Directory'} onClose={onClose} opened={opened}>
       <TextInput
+        withAsterisk
         label={'Directory Name'}
         placeholder={'Directory Name'}
         value={dirName}

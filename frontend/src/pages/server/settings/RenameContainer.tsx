@@ -41,6 +41,7 @@ export default () => {
           </Title>
 
           <TextInput
+            withAsterisk
             label={'Server Name'}
             placeholder={'Server Name'}
             value={name}
@@ -51,6 +52,7 @@ export default () => {
             label={'Description'}
             placeholder={'Description'}
             value={description}
+            rows={3}
             onChange={(e) => setDescription(e.target.value)}
           />
 

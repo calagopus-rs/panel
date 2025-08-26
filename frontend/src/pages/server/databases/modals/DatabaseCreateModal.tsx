@@ -44,6 +44,7 @@ export default ({ opened, onClose }: ModalProps) => {
     <Modal title={'Create Database'} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
+          withAsterisk
           label={'Database Name'}
           placeholder={'Database Name'}
           value={name}
@@ -51,6 +52,7 @@ export default ({ opened, onClose }: ModalProps) => {
         />
 
         <Select
+          withAsterisk
           label={'Database Host'}
           placeholder={'Database Host'}
           searchable

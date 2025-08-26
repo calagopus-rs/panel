@@ -11,15 +11,17 @@ export default ({
   setSettings: Dispatch<SetStateAction<CaptchaProviderRecaptcha>>;
 }) => {
   return (
-    <Stack>
+    <Stack mt={'md'}>
       <Group grow>
         <TextInput
+          withAsterisk
           label={'Site Key'}
           placeholder={'Site Key'}
           value={settings.siteKey || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
         />
         <TextInput
+          withAsterisk
           label={'Secret Key'}
           placeholder={'Secret Key'}
           type={'password'}

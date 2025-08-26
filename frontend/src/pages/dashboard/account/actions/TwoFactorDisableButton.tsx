@@ -55,6 +55,7 @@ export default () => {
           <Text>Disabling two-step verification will make your account less secure.</Text>
 
           <TextInput
+            withAsterisk
             label={'Code'}
             placeholder={'000000'}
             value={code}
@@ -62,6 +63,7 @@ export default () => {
           />
 
           <TextInput
+            withAsterisk
             label={'Password'}
             placeholder={'Password'}
             type={'password'}

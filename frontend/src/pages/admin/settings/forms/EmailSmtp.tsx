@@ -12,15 +12,17 @@ export default ({
   setSettings: Dispatch<SetStateAction<MailMode>>;
 }) => {
   return (
-    <Stack>
+    <Stack mt={'md'}>
       <Group grow>
         <TextInput
+          withAsterisk
           label={'Host'}
           placeholder={'Host'}
           value={settings.host || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, host: e.target.value }))}
         />
         <NumberInput
+          withAsterisk
           label={'Port'}
           placeholder={'Port'}
           min={0}
@@ -53,6 +55,7 @@ export default ({
 
       <Group grow>
         <TextInput
+          withAsterisk
           label={'From Address'}
           placeholder={'From Address'}
           value={settings.fromAddress || ''}
