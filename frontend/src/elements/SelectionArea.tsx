@@ -11,7 +11,6 @@ type SelectionAreaProps<T> = {
   children: React.ReactNode;
   onSelectedStart?: (event: React.MouseEvent | MouseEvent) => void;
   onSelected?: (items: T[]) => void;
-  onSelectedClick?: (event: React.MouseEvent | MouseEvent) => void;
   className?: string;
   style?: React.CSSProperties;
   disabled?: boolean;
@@ -24,7 +23,6 @@ interface SelectableProps<T> {
 
 function hasSelectionChanged<T>(oldSelection: T[], newSelection: T[]) {
   if (oldSelection.length !== newSelection.length) return true;
-
   const oldSet = new Set(oldSelection);
   return newSelection.some((item) => !oldSet.has(item));
 }
@@ -33,7 +31,6 @@ function SelectionArea<T>({
   children,
   onSelectedStart,
   onSelected,
-  onSelectedClick,
   className = '',
   style = {},
   disabled = false,
@@ -46,6 +43,9 @@ function SelectionArea<T>({
   const [currentlySelected, setCurrentlySelected] = useState<T[]>([]);
   const [startPoint, setStartPoint] = useState({ x: 0, y: 0 });
   const [endPoint, setEndPoint] = useState({ x: 0, y: 0 });
+  const [mouseDown, setMouseDown] = useState(false);
+
+  const SELECTION_THRESHOLD = 5;
 
   const registerSelectable = useCallback((id: string, element: HTMLElement, item: T) => {
     selectablesMap.current.set(id, { element, item });
@@ -66,25 +66,17 @@ function SelectionArea<T>({
 
   const getSelectedItems = (selectionRect: DOMRect): T[] => {
     const selectedItems: T[] = [];
-
     selectablesMap.current.forEach(({ element, item }) => {
       const elementRect = element.getBoundingClientRect();
       if (doIntersect(selectionRect, elementRect)) {
         selectedItems.push(item);
       }
     });
-
     return selectedItems;
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (disabled || e.button !== 0) return;
-
-    const isJustClick = e.target !== containerRef.current;
-    if (isJustClick && onSelectedClick) {
-      onSelectedClick(e);
-      return;
-    }
 
     const containerRect = containerRef.current!.getBoundingClientRect();
     const x = e.clientX - containerRect.left;
@@ -92,36 +84,61 @@ function SelectionArea<T>({
 
     setStartPoint({ x, y });
     setEndPoint({ x, y });
-    setIsSelecting(true);
-    onSelectedStart?.(e);
+    setMouseDown(true);
   };
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!isSelecting || disabled) return;
+    if (!mouseDown || disabled) return;
 
     const containerRect = containerRef.current!.getBoundingClientRect();
     const x = e.clientX - containerRect.left;
     const y = e.clientY - containerRect.top;
 
-    setEndPoint({ x, y });
+    const dx = Math.abs(x - startPoint.x);
+    const dy = Math.abs(y - startPoint.y);
 
-    const newlySelectedItems = getSelectedItems(selectionBoxRef.current!.getBoundingClientRect());
-    if (hasSelectionChanged(currentlySelected, newlySelectedItems)) {
-      setCurrentlySelected(newlySelectedItems);
-      if (onSelected) {
-        onSelected(newlySelectedItems);
+    if (!isSelecting && (dx > SELECTION_THRESHOLD || dy > SELECTION_THRESHOLD)) {
+      setIsSelecting(true);
+      onSelectedStart?.(e);
+    }
+
+    if (isSelecting) {
+      setEndPoint({ x, y });
+      const newlySelectedItems = getSelectedItems(selectionBoxRef.current!.getBoundingClientRect());
+      if (hasSelectionChanged(currentlySelected, newlySelectedItems)) {
+        setCurrentlySelected(newlySelectedItems);
+        onSelected?.(newlySelectedItems);
       }
     }
   };
 
-  const handleMouseUp = () => {
-    if (!isSelecting || disabled) return;
+  const handleMouseUp = (e: MouseEvent) => {
+    if (disabled) return;
+
+    if (!isSelecting && mouseDown) {
+      const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      if (target) {
+        const newEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          clientX: e.clientX,
+          clientY: e.clientY,
+          shiftKey: e.shiftKey,
+          ctrlKey: e.ctrlKey,
+          altKey: e.altKey,
+          metaKey: e.metaKey,
+          button: e.button,
+        });
+        target.dispatchEvent(newEvent);
+      }
+    }
 
     setIsSelecting(false);
+    setMouseDown(false);
   };
 
   useEffect(() => {
-    if (isSelecting) {
+    if (mouseDown) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     }
@@ -130,7 +147,7 @@ function SelectionArea<T>({
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isSelecting]);
+  }, [mouseDown, isSelecting, startPoint, currentlySelected]);
 
   const getSelectionBoxStyle = (): React.CSSProperties => {
     const left = Math.min(startPoint.x, endPoint.x);
@@ -186,7 +203,6 @@ function Selectable<T>({ item, children }: SelectableProps<T>) {
   const setRef = useCallback(
     (element: HTMLElement | null) => {
       elementRef.current = element;
-
       if (element && context) {
         context.registerSelectable(idRef.current, element, item);
       }
