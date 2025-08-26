@@ -1,5 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateVariable from '@/api/server/startup/updateVariable';
+import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import NumberInput from '@/elements/input/NumberInput';
@@ -82,7 +83,9 @@ export default ({ variable }: { variable: ServerVariable }) => {
               disabled={loading || !variable.isEditable}
             />
           )}
-          <p className={'text-gray-400 text-sm mt-2'}>{variable.description}</p>
+          <p className={'text-gray-400 text-sm mt-2'}>
+            {variable.description} {!variable.isEditable && <Badge>Read Only</Badge>}
+          </p>
         </div>
 
         <Group mt={'md'}>
