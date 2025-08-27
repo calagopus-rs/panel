@@ -8,7 +8,7 @@ import AdminUsers from '@/pages/admin/users/AdminUsers';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardApiKeys from '@/pages/dashboard/DashboardApiKeys';
-import DashboardSessions from '@/pages/dashboard/DashboardSessions';
+import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions';
 import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
 import ServerBackups from '@/pages/server/backups/ServerBackups';

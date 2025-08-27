@@ -1,16 +1,14 @@
-import getSessions from '@/api/me/sessions/getSessions';
-import Code from '@/elements/Code';
 import Spinner from '@/elements/Spinner';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useEffect, useState } from 'react';
-import SessionDeleteButton from './actions/SessionDeleteButton';
 import { useUserStore } from '@/stores/user';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
-import Table, { TableData, TableRow } from '@/elements/Table';
+import Table from '@/elements/Table';
 import { load } from '@/lib/debounce';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import getSessions from '@/api/me/sessions/getSessions';
+import SessionRow from './SessionRow';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,7 +38,7 @@ export default () => {
     <>
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
-          Sessions
+          SSH Keys
         </Title>
         <Group>
           <TextInput
@@ -55,33 +53,17 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
-          pagination={sessions}
-          onPageSelect={setPage}
-        >
-          {sessions.data.map((session) => (
-            <TableRow key={session.uuid}>
-              <TableData>
-                <Code>{session.ip}</Code>
-              </TableData>
-
-              <TableData>{session.isUsing ? 'Yes' : 'No'}</TableData>
-
-              <TableData>{session.userAgent}</TableData>
-
-              <TableData>
-                <Tooltip content={formatDateTime(session.lastUsed)}>{formatTimestamp(session.lastUsed)}</Tooltip>
-              </TableData>
-
-              <TableData>
-                <Group gap={4} justify={'right'} wrap={'nowrap'}>
-                  {!session.isUsing && <SessionDeleteButton session={session} />}
-                </Group>
-              </TableData>
-            </TableRow>
-          ))}
-        </Table>
+        <ContextMenuProvider>
+          <Table
+            columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
+            pagination={sessions}
+            onPageSelect={setPage}
+          >
+            {sessions.data.map((session) => (
+              <SessionRow key={session.uuid} session={session} />
+            ))}
+          </Table>
+        </ContextMenuProvider>
       )}
     </>
   );

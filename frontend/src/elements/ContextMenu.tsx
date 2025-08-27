@@ -7,6 +7,7 @@ interface Item {
   icon: IconDefinition;
   label: string;
   hidden?: boolean;
+  disabled?: boolean;
   onClick: () => void;
   color?: 'gray' | 'red';
   items?: Omit<Item, 'items'>[];
@@ -91,6 +92,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                       key={idx}
                       leftSection={<FontAwesomeIcon icon={item.icon} />}
                       color={item.color === 'red' ? 'red' : undefined}
+                      disabled={item.disabled}
                       onClick={() => {
                         item.onClick();
                         hideMenu();
@@ -106,6 +108,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                         key={idx.toString() + subIdx.toString()}
                         leftSection={<FontAwesomeIcon icon={subItem.icon} />}
                         color={subItem.color === 'red' ? 'red' : undefined}
+                        disabled={subItem.disabled}
                         onClick={() => {
                           subItem.onClick();
                           hideMenu();
@@ -121,6 +124,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                   key={idx}
                   leftSection={<FontAwesomeIcon icon={item.icon} />}
                   color={item.color === 'red' ? 'red' : undefined}
+                  disabled={item.disabled}
                   onClick={() => {
                     item.onClick();
                     hideMenu();

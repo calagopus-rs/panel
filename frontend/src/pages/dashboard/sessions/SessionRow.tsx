@@ -2,26 +2,25 @@ import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import { useToast } from '@/providers/ToastProvider';
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import SshKeyEditModal from './modals/SshKeyEditModal';
 import { useUserStore } from '@/stores/user';
 import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export default ({ sshKey }: { sshKey: UserSshKey }) => {
+export default ({ session }: { session: UserSession }) => {
   const { addToast } = useToast();
-  const { removeSshKey } = useUserStore();
+  const { removeSession } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const doDelete = () => {
-    deleteSshKey(sshKey.uuid)
+    deleteSshKey(session.uuid)
       .then(() => {
-        removeSshKey(sshKey);
+        removeSession(session);
         addToast('SSH key removed.', 'success');
       })
       .catch((msg) => {
@@ -31,23 +30,27 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
 
   return (
     <>
-      <SshKeyEditModal sshKey={sshKey} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm SSH Key Deletion'}
+        title={'Confirm Session Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete
-        <Code>{sshKey.name}</Code>
+        Are you sure you want to delete the session
+        <Code>{session.ip}</Code>
         from your account?
       </ConfirmationModal>
 
       <ContextMenu
         items={[
-          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('delete'), color: 'red' },
+          {
+            icon: faTrash,
+            label: 'Remove',
+            disabled: session.isUsing,
+            onClick: () => setOpenModal('delete'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (
@@ -57,14 +60,13 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
               openMenu(e.pageX, e.pageY);
             }}
           >
-            <TableData>{sshKey.name}</TableData>
-
             <TableData>
-              <Code>{sshKey.fingerprint}</Code>
+              <Code>{session.ip}</Code>
             </TableData>
-
+            <TableData>{session.isUsing ? 'Yes' : 'No'}</TableData>
+            <TableData>{session.userAgent}</TableData>
             <TableData>
-              <Tooltip content={formatDateTime(sshKey.created)}>{formatTimestamp(sshKey.created)}</Tooltip>
+              <Tooltip content={formatDateTime(session.lastUsed)}>{formatTimestamp(session.lastUsed)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
