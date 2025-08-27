@@ -3,14 +3,15 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
     use crate::{
-        models::server_database::ServerDatabase,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::servers::_server_::{
+                GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+            },
         },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -23,6 +24,7 @@ mod post {
         (status = OK, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = NOT_FOUND, body = ApiError),
+        (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
         (
             "server" = uuid::Uuid,
@@ -38,8 +40,8 @@ mod post {
     pub async fn route(
         state: GetState,
         server: GetServer,
+        database: GetServerDatabase,
         activity_logger: GetServerActivityLogger,
-        Path((_server, database)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.update") {
             return ApiResponse::error(&error)
@@ -47,17 +49,11 @@ mod post {
                 .ok();
         }
 
-        let database =
-            match ServerDatabase::by_server_uuid_uuid(&state.database, server.uuid, database)
-                .await?
-            {
-                Some(database) => database,
-                None => {
-                    return ApiResponse::error("database not found")
-                        .with_status(StatusCode::NOT_FOUND)
-                        .ok();
-                }
-            };
+        if database.locked {
+            return ApiResponse::error("database is locked and the password cannot be rotated")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
+        }
 
         let password = match database.rotate_password(&state.database).await {
             Ok(password) => password,

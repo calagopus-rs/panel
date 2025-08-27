@@ -71,6 +71,13 @@
       "when": 1755629541540,
       "tag": "0009_tan_pete_wisdom",
       "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1756279989571,
+      "tag": "0010_abandoned_ricochet",
+      "breakpoints": false
     }
   ]
 }

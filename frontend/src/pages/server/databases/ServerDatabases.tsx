@@ -65,7 +65,7 @@ export default () => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['Name', 'Type', 'Address', 'Username', 'Size', '']}
+            columns={['Name', 'Type', 'Address', 'Username', 'Size', 'Locked?', '']}
             pagination={databases}
             onPageSelect={setPage}
           >

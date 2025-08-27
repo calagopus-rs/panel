@@ -1,7 +1,7 @@
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import CopyOnClick from '@/elements/CopyOnClick';
-import { faEye, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { TableData, TableRow } from '@/elements/Table';
 import DatabaseDetailsModal from './modals/DatabaseDetailsModal';
@@ -11,9 +11,11 @@ import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import DatabaseEditModal from './modals/DatabaseEditModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default ({ database }: { database: ServerDatabase }) => {
-  const [openModal, setOpenModal] = useState<'details' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete'>(null);
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
   const { server } = useServerStore();
@@ -27,13 +29,21 @@ export default ({ database }: { database: ServerDatabase }) => {
 
   return (
     <>
+      <DatabaseEditModal database={database} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
       <DatabaseDetailsModal database={database} opened={openModal === 'details'} onClose={() => setOpenModal(null)} />
       <DatabaseDeleteModal database={database} opened={openModal === 'delete'} onClose={() => setOpenModal(null)} />
 
       <ContextMenu
         items={[
+          { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
           { icon: faEye, label: 'Details', onClick: () => setOpenModal('details'), color: 'gray' },
-          { icon: faTrash, label: 'Delete', onClick: () => setOpenModal('delete'), color: 'red' },
+          {
+            icon: faTrash,
+            label: 'Delete',
+            disabled: database.isLocked,
+            onClick: () => setOpenModal('delete'),
+            color: 'red',
+          },
         ]}
       >
         {({ openMenu }) => (
@@ -56,6 +66,14 @@ export default ({ database }: { database: ServerDatabase }) => {
             <TableData>{database.username}</TableData>
 
             <TableData>{sizeLoading ? <Spinner size={16} /> : bytesToString(size)}</TableData>
+
+            <TableData>
+              {database.isLocked ? (
+                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
+              ) : (
+                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
+              )}
+            </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

@@ -3,11 +3,13 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::server_database::ServerDatabase,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::servers::_server_::{GetServer, databases::_database_::GetServerDatabase},
+        },
     };
-    use axum::{extract::Path, http::StatusCode};
+    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -35,25 +37,13 @@ mod get {
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Path((_server, database)): Path<(String, uuid::Uuid)>,
+        database: GetServerDatabase,
     ) -> ApiResponseResult {
         if let Err(error) = server.has_permission("databases.read") {
             return ApiResponse::error(&error)
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
-
-        let database =
-            match ServerDatabase::by_server_uuid_uuid(&state.database, server.uuid, database)
-                .await?
-            {
-                Some(database) => database,
-                None => {
-                    return ApiResponse::error("database not found")
-                        .with_status(StatusCode::NOT_FOUND)
-                        .ok();
-                }
-            };
 
         let size = match database.get_size(&state.database).await {
             Ok(size) => size,

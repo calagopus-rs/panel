@@ -31,7 +31,7 @@ mod get {
         pub search: Option<String>,
 
         #[serde(default)]
-        include_password: bool,
+        pub include_password: bool,
     }
 
     #[derive(ToSchema, Serialize)]

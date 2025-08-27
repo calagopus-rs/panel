@@ -60,7 +60,7 @@ export default ({ database, opened, onClose }: Props) => {
           <Button variant={'default'} onClick={onClose}>
             Close
           </Button>
-          <Button color={'red'} onClick={onRotatePassword} loading={loading}>
+          <Button color={'red'} onClick={onRotatePassword} loading={loading} disabled={database.isLocked}>
             Rotate Password
           </Button>
         </Group>

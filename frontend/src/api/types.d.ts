@@ -286,6 +286,7 @@ interface ServerBackupWithProgress extends ServerBackup {
 interface ServerDatabase {
   uuid: string;
   name: string;
+  isLocked: boolean;
   username: string;
   password: string;
   host: string;

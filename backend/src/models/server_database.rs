@@ -11,12 +11,14 @@ pub static DB_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"^[a-zA-Z0-9_]+$").expect("Failed to compile database name regex")
 });
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct ServerDatabase {
     pub uuid: uuid::Uuid,
     pub database_host: super::database_host::DatabaseHost,
 
     pub name: String,
+    pub locked: bool,
+
     pub username: String,
     pub password: Vec<u8>,
 
@@ -32,6 +34,7 @@ impl BaseModel for ServerDatabase {
         let mut columns = BTreeMap::from([
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.locked"), format!("{prefix}locked")),
             (format!("{table}.username"), format!("{prefix}username")),
             (format!("{table}.password"), format!("{prefix}password")),
             (format!("{table}.created"), format!("{prefix}created")),
@@ -53,6 +56,7 @@ impl BaseModel for ServerDatabase {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
             name: row.get(format!("{prefix}name").as_str()),
+            locked: row.get(format!("{prefix}locked").as_str()),
             username: row.get(format!("{prefix}username").as_str()),
             password: row.get(format!("{prefix}password").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
@@ -403,6 +407,7 @@ impl ServerDatabase {
                 .public_port
                 .unwrap_or(self.database_host.port),
             name: self.name,
+            is_locked: self.locked,
             username: self.username,
             password: if show_password {
                 Some(database.decrypt(&self.password).unwrap())
@@ -424,6 +429,8 @@ pub struct ApiServerDatabase {
     pub port: i32,
 
     pub name: String,
+    pub is_locked: bool,
+
     pub username: String,
     pub password: Option<String>,
 

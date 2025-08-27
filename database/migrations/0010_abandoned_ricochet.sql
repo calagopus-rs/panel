@@ -1,0 +1,1 @@
+ALTER TABLE "server_databases" ADD COLUMN "locked" boolean DEFAULT false NOT NULL;

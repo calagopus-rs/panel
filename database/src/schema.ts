@@ -511,6 +511,8 @@ export const serverDatabases = pgTable('server_databases', {
 	databaseHostUuid: uuid('database_host_uuid').references(() => databaseHosts.uuid).notNull(),
 
 	name: varchar('name', { length: 31 }).notNull(),
+	locked: boolean('locked').default(false).notNull(),
+
 	username: varchar('username', { length: 31 }).notNull(),
 	password: bytea('password').notNull(),
 
