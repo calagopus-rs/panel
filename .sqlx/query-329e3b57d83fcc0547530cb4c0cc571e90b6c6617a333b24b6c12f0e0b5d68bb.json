@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_databases\n            SET locked = $1\n            WHERE server_databases.uuid = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "329e3b57d83fcc0547530cb4c0cc571e90b6c6617a333b24b6c12f0e0b5d68bb"
+}
