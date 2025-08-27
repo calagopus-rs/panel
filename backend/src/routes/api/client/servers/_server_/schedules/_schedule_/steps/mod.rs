@@ -5,7 +5,7 @@ mod _step_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_schedule_step::ServerScheduleStep},
+        models::{PaginationParams, server_schedule_step::ServerScheduleStep},
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -19,7 +19,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        schedule_steps: Pagination<crate::models::server_schedule_step::ApiServerScheduleStep>,
+        schedule_steps: Vec<crate::models::server_schedule_step::ApiServerScheduleStep>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -35,16 +35,6 @@ mod get {
             "schedule" = uuid::Uuid,
             description = "The schedule ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
-        ),
-        (
-            "page" = i64, Query,
-            description = "The page number",
-            example = "1",
-        ),
-        (
-            "per_page" = i64, Query,
-            description = "The number of items per page",
-            example = "10",
         ),
     ))]
     pub async fn route(
@@ -65,25 +55,14 @@ mod get {
                 .ok();
         }
 
-        let schedule_steps = ServerScheduleStep::by_schedule_uuid_with_pagination(
-            &state.database,
-            schedule.uuid,
-            params.page,
-            params.per_page,
-        )
-        .await?;
+        let schedule_steps =
+            ServerScheduleStep::all_by_schedule_uuid(&state.database, schedule.uuid).await?;
 
         ApiResponse::json(Response {
-            schedule_steps: Pagination {
-                total: schedule_steps.total,
-                per_page: schedule_steps.per_page,
-                page: schedule_steps.page,
-                data: schedule_steps
-                    .data
-                    .into_iter()
-                    .map(|schedule_step| schedule_step.into_api_object())
-                    .collect(),
-            },
+            schedule_steps: schedule_steps
+                .into_iter()
+                .map(|schedule_step| schedule_step.into_api_object())
+                .collect(),
         })
         .ok()
     }

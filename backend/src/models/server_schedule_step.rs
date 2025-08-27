@@ -89,36 +89,24 @@ impl ServerScheduleStep {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_schedule_uuid_with_pagination(
+    pub async fn all_by_schedule_uuid(
         database: &crate::database::Database,
         schedule_uuid: uuid::Uuid,
-        page: i64,
-        per_page: i64,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
-        let offset = (page - 1) * per_page;
-
+    ) -> Result<Vec<Self>, sqlx::Error> {
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
+            SELECT {}
             FROM server_schedule_steps
             WHERE server_schedule_steps.schedule_uuid = $1
             ORDER BY server_schedule_steps.order_, server_schedule_steps.created
-            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None),
         ))
         .bind(schedule_uuid)
-        .bind(per_page)
-        .bind(offset)
         .fetch_all(database.read())
         .await?;
 
-        Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
-            per_page,
-            page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
-        })
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
     }
 
     pub async fn count_by_schedule_uuid(
