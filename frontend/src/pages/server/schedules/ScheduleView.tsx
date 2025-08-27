@@ -31,6 +31,7 @@ import {
   faExpand,
   faGear,
   faMicrochip,
+  faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
 import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
@@ -123,34 +124,24 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
   };
 
   return (
-    <Card withBorder p={'sm'}>
-      <Group gap={'sm'}>
-        <ThemeIcon size={'sm'} color={getTriggerColor(trigger.type)}>
-          <FontAwesomeIcon icon={getTriggerIcon(trigger.type)} size={'xs'} />
+    <Card withBorder>
+      <Group>
+        <ThemeIcon color={getTriggerColor(trigger.type)}>
+          <FontAwesomeIcon icon={getTriggerIcon(trigger.type)} />
         </ThemeIcon>
-        <Text size={'sm'} fw={500}>
-          {getTriggerLabel()}
-        </Text>
+        <Text fw={500}>{getTriggerLabel()}</Text>
       </Group>
     </Card>
   );
 }
 
 function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
-  if (condition.type === 'none') {
-    return (
-      <Badge color={'gray'} variant={'light'}>
-        No conditions
-      </Badge>
-    );
-  }
-
   const renderCondition = (cond: ScheduleCondition, depth = 0): React.ReactNode => {
     switch (cond.type) {
       case 'and':
         return (
           <Stack gap={'xs'} pl={depth * 16}>
-            <Badge color={'blue'} variant={'light'} size={'xs'}>
+            <Badge color={'blue'} variant={'light'}>
               AND
             </Badge>
             {cond.conditions.map((c, i) => (
@@ -161,7 +152,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
       case 'or':
         return (
           <Stack gap={'xs'} pl={depth * 16}>
-            <Badge color={'orange'} variant={'light'} size={'xs'}>
+            <Badge color={'orange'} variant={'light'}>
               OR
             </Badge>
             {cond.conditions.map((c, i) => (
@@ -171,19 +162,19 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'server_state':
         return (
-          <Card withBorder p={'xs'} ml={depth * 16}>
-            <Group gap={'xs'}>
-              <FontAwesomeIcon icon={faServer} size={'sm'} />
-              <Text size={'sm'}>Server State: {cond.state}</Text>
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faServer} />
+              <Text>Server State: {cond.state}</Text>
             </Group>
           </Card>
         );
       case 'uptime':
         return (
-          <Card withBorder p={'xs'} ml={depth * 16}>
-            <Group gap={'xs'}>
-              <FontAwesomeIcon icon={faClock} size={'sm'} />
-              <Text size={'sm'}>
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faClock} />
+              <Text>
                 Uptime&nbsp;
                 <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
@@ -198,10 +189,10 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'cpu_usage':
         return (
-          <Card withBorder p={'xs'} ml={depth * 16}>
-            <Group gap={'xs'}>
-              <FontAwesomeIcon icon={faMicrochip} size={'sm'} />
-              <Text size={'sm'}>
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faMicrochip} />
+              <Text>
                 CPU Usage&nbsp;
                 <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
@@ -215,10 +206,10 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'memory_usage':
         return (
-          <Card withBorder p={'xs'} ml={depth * 16}>
-            <Group gap={'xs'}>
-              <FontAwesomeIcon icon={faMemory} size={'sm'} />
-              <Text size={'sm'}>
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faMemory} />
+              <Text>
                 Memory Usage&nbsp;
                 <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
@@ -232,10 +223,10 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'disk_usage':
         return (
-          <Card withBorder p={'xs'} ml={depth * 16}>
-            <Group gap={'xs'}>
-              <FontAwesomeIcon icon={faHdd} size={'sm'} />
-              <Text size={'sm'}>
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faHdd} />
+              <Text>
                 Disk Usage&nbsp;
                 <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
@@ -533,7 +524,13 @@ export default () => {
             <Title order={3} mb={'md'}>
               Execution Conditions
             </Title>
-            <ConditionRenderer condition={schedule.condition} />
+            {schedule.condition.type === 'none' ? (
+              <Alert icon={<FontAwesomeIcon icon={faInfoCircle} />} color={'blue'}>
+                This schedule does not have any conditions
+              </Alert>
+            ) : (
+              <ConditionRenderer condition={schedule.condition} />
+            )}
           </Card>
         </Tabs.Panel>
 
