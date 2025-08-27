@@ -11,6 +11,7 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import deleteApiKey from '@/api/me/api-keys/deleteApiKey';
 import ApiKeyEditModal from './modals/ApiKeyEditModal';
+import CopyOnClick from '@/elements/CopyOnClick';
 
 export default ({ apiKey }: { apiKey: UserApiKey }) => {
   const { addToast } = useToast();
@@ -60,7 +61,9 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
             <TableData>{apiKey.name}</TableData>
 
             <TableData>
-              <Code>{apiKey.keyStart}</Code>
+              <CopyOnClick content={apiKey.keyStart}>
+                <Code>{apiKey.keyStart}</Code>
+              </CopyOnClick>
             </TableData>
 
             <TableData>{apiKey.permissions.length}</TableData>

@@ -11,6 +11,7 @@ import { useUserStore } from '@/stores/user';
 import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import CopyOnClick from '@/elements/CopyOnClick';
 
 export default ({ sshKey }: { sshKey: UserSshKey }) => {
   const { addToast } = useToast();
@@ -60,7 +61,9 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
             <TableData>{sshKey.name}</TableData>
 
             <TableData>
-              <Code>{sshKey.fingerprint}</Code>
+              <CopyOnClick content={sshKey.fingerprint}>
+                <Code>{sshKey.fingerprint}</Code>
+              </CopyOnClick>
             </TableData>
 
             <TableData>

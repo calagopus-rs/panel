@@ -10,6 +10,7 @@ import { useUserStore } from '@/stores/user';
 import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import CopyOnClick from '@/elements/CopyOnClick';
 
 export default ({ session }: { session: UserSession }) => {
   const { addToast } = useToast();
@@ -61,7 +62,9 @@ export default ({ session }: { session: UserSession }) => {
             }}
           >
             <TableData>
-              <Code>{session.ip}</Code>
+              <CopyOnClick content={session.ip}>
+                <Code>{session.ip}</Code>
+              </CopyOnClick>
             </TableData>
             <TableData>{session.isUsing ? 'Yes' : 'No'}</TableData>
             <TableData>{session.userAgent}</TableData>
