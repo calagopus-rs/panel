@@ -21,7 +21,7 @@ export default ({ session }: { session: UserSession }) => {
     deleteSshKey(session.uuid)
       .then(() => {
         removeSession(session);
-        addToast('SSH key removed.', 'success');
+        addToast('Session deleted.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
