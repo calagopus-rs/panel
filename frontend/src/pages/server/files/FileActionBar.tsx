@@ -4,7 +4,7 @@ import { faAnglesDown, faAnglesUp, faArchive, faFileDownload, faTrash } from '@f
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnimatePresence, motion } from 'motion/react';
 import { createPortal } from 'react-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import downloadFiles from '@/api/server/files/downloadFiles';
 import ArchiveCreateModal from './modals/ArchiveCreateModal';
@@ -79,6 +79,35 @@ export default () => {
       })
       .finally(() => load(false, setLoading));
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'x' && !movingFiles.length) {
+        event.preventDefault();
+        setSelectedFiles([]);
+        setMovingFiles(selectedFiles);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [movingFiles, selectedFiles]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'v' && movingFiles.length > 0 && !loading) {
+        event.preventDefault();
+        doMove();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [movingFiles, loading, selectedFiles]);
 
   return createPortal(
     <AnimatePresence>

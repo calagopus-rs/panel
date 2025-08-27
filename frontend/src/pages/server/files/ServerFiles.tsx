@@ -137,6 +137,20 @@ export default () => {
     setAverageOperationProgress((totalProgress / totalSize) * 100);
   }, [Array.from(fileOperations)]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 'a') {
+        event.preventDefault();
+        setSelectedFiles(browsingEntries.data);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [browsingEntries.data]);
+
   return (
     <>
       <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
