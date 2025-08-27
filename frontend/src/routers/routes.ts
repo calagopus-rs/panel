@@ -7,7 +7,7 @@ import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminUsers from '@/pages/admin/users/AdminUsers';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
-import DashboardApiKeys from '@/pages/dashboard/DashboardApiKeys';
+import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
 import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions';
 import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
@@ -85,7 +85,7 @@ const routes: Routes = {
       exact: true,
     },
     {
-      name: 'API Credentials',
+      name: 'API Keys',
       icon: faCloud,
       path: '/api',
       element: DashboardApiKeys,

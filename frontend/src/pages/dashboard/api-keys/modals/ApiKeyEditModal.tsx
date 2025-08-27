@@ -1,5 +1,5 @@
 import { httpErrorToHuman } from '@/api/axios';
-import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
+import updateApiKey from '@/api/me/api-keys/updateApiKey';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
@@ -10,25 +10,25 @@ import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
 
 type Props = ModalProps & {
-  sshKey: UserSshKey;
+  apiKey: UserApiKey;
 };
 
-export default ({ sshKey, opened, onClose }: Props) => {
+export default ({ apiKey, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { updateSshKey: updateStateSshKey } = useUserStore();
+  const { updateApiKey: updateStateApiKey } = useUserStore();
 
-  const [name, setName] = useState(sshKey.name);
+  const [name, setName] = useState(apiKey.name);
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
     load(true, setLoading);
 
-    updateSshKey(sshKey.uuid, name)
+    updateApiKey(apiKey.uuid, name)
       .then(() => {
-        updateStateSshKey(sshKey.uuid, { name });
+        updateStateApiKey(apiKey.uuid, { name });
 
         onClose();
-        addToast('SSH Key updated.', 'success');
+        addToast('API Key updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -37,7 +37,7 @@ export default ({ sshKey, opened, onClose }: Props) => {
   };
 
   return (
-    <Modal title={'Edit SSH Key'} onClose={onClose} opened={opened}>
+    <Modal title={'Edit API Key'} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk

@@ -8,6 +8,7 @@ export interface ApiKeySlice {
   setApiKeys: (keys: ResponseMeta<UserApiKey>) => void;
   addApiKey: (key: UserApiKey) => void;
   removeApiKey: (key: UserApiKey) => void;
+  updateApiKey: (uuid: string, key: Partial<UserApiKey>) => void;
 }
 
 export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = (set): ApiKeySlice => ({
@@ -28,6 +29,13 @@ export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = 
         ...state.apiKeys,
         data: state.apiKeys.data.filter((k) => k.uuid !== key.uuid),
         total: state.apiKeys.total - 1,
+      },
+    })),
+  updateApiKey: (uuid, key) =>
+    set((state) => ({
+      apiKeys: {
+        ...state.apiKeys,
+        data: state.apiKeys.data.map((k) => (k.uuid === uuid ? { ...k, ...key } : k)),
       },
     })),
 });

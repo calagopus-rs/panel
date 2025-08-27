@@ -7,12 +7,18 @@ import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
 import { load } from '@/lib/debounce';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import getSessions from '@/api/me/sessions/getSessions';
-import SessionRow from './SessionRow';
+import ApiKeyRow from './ApiKeyRow';
+import ApiKeyCreateModal from './modals/ApiKeyCreateModal';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import getApiKeys from '@/api/me/api-keys/getApiKeys';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { sessions, setSessions } = useUserStore();
+  const { apiKeys, setApiKeys } = useUserStore();
+
+  const [openModal, setOpenModal] = useState<'create'>(null);
 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -28,17 +34,19 @@ export default () => {
   }, [page, search]);
 
   useEffect(() => {
-    getSessions(page, search).then((data) => {
-      setSessions(data);
+    getApiKeys(page, search).then((data) => {
+      setApiKeys(data);
       load(false, setLoading);
     });
   }, [page, search]);
 
   return (
     <>
+      <ApiKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
+
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
-          Sessions
+          API Keys
         </Title>
         <Group>
           <TextInput
@@ -47,6 +55,9 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
+          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+            Create
+          </Button>
         </Group>
       </Group>
 
@@ -55,12 +66,12 @@ export default () => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
-            pagination={sessions}
+            columns={['Name', 'Key', 'Permissions', 'Last Used', 'Created', '']}
+            pagination={apiKeys}
             onPageSelect={setPage}
           >
-            {sessions.data.map((session) => (
-              <SessionRow key={session.uuid} session={session} />
+            {apiKeys.data.map((key) => (
+              <ApiKeyRow key={key.uuid} apiKey={key} />
             ))}
           </Table>
         </ContextMenuProvider>
