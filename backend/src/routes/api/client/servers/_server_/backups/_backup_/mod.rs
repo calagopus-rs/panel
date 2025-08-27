@@ -155,6 +155,12 @@ mod delete {
                 .ok();
         }
 
+        if backup.locked {
+            return ApiResponse::error("backup is locked and cannot be deleted")
+                .with_status(StatusCode::EXPECTATION_FAILED)
+                .ok();
+        }
+
         if let Err(err) = backup.delete(&state.database, &server).await {
             tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
 

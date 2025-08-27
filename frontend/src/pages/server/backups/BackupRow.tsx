@@ -108,7 +108,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
           {
             icon: faTrash,
             label: 'Delete',
-            hidden: backup.isLocked,
+            disabled: backup.isLocked,
             onClick: () => setOpenModal('delete'),
             color: 'red',
           },
