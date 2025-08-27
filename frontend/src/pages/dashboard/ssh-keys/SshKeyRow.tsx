@@ -48,7 +48,7 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('delete'), color: 'red' },
+          { icon: faTrash, label: 'Delete', onClick: () => setOpenModal('delete'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (

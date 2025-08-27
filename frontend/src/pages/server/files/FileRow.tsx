@@ -34,112 +34,104 @@ import FilePermissionsModal from './modals/FilePermissionsModal';
 import FileRenameModal from './modals/FileRenameModal';
 import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
+const RowCheckbox = ({ file, disabled }: { file: DirectoryEntry; disabled: boolean }) => {
+  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore();
+
+  return (
+    <Checkbox
+      id={file.name}
+      disabled={disabled}
+      checked={selectedFiles.includes(file)}
+      onChange={(e) => {
+        e.preventDefault();
+        if (e.currentTarget.checked) {
+          addSelectedFile(file);
+        } else {
+          removeSelectedFile(file);
+        }
+      }}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
+};
+
+function FileTableRow({
+  file,
+  onContextMenu,
+  children,
+  ref,
+}: {
+  file: DirectoryEntry;
+  onContextMenu: (e: any) => void;
+  children: React.ReactNode;
+  ref: React.Ref<HTMLTableRowElement>;
+}) {
+  const navigate = useNavigate();
+  const [_, setSearchParams] = useSearchParams();
+  const server = useServerStore((state) => state.server);
+  const { browsingDirectory, selectedFiles, addSelectedFile, movingFiles, movingFilesDirectory } = useServerStore();
+  const { settings } = useGlobalStore();
+
+  return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
+    <TableRow
+      className={'cursor-pointer select-none'}
+      bg={
+        selectedFiles.includes(file) ||
+        (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+          ? 'var(--mantine-color-blue-light)'
+          : undefined
+      }
+      onContextMenu={onContextMenu}
+      onClick={(e) => {
+        if (e.shiftKey && movingFiles.length === 0) {
+          addSelectedFile(file);
+          return;
+        }
+
+        if (file.directory) {
+          setSearchParams({
+            directory: join(browsingDirectory, file.name),
+          });
+        } else {
+          navigate(
+            `/server/${server.uuidShort}/files/edit?${createSearchParams({
+              directory: browsingDirectory,
+              file: file.name,
+            })}`,
+          );
+        }
+      }}
+      ref={ref}
+    >
+      {children}
+    </TableRow>
+  ) : (
+    <TableRow
+      bg={
+        selectedFiles.includes(file) ||
+        (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+          ? 'var(--mantine-color-blue-light)'
+          : undefined
+      }
+      onContextMenu={onContextMenu}
+      onClick={(e) => {
+        if (e.shiftKey && movingFiles.length === 0) {
+          addSelectedFile(file);
+          return;
+        }
+      }}
+      ref={ref}
+    >
+      {children}
+    </TableRow>
+  );
+}
+
 export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableRowElement> }) => {
   const { addToast } = useToast();
-  const {
-    server,
-    browsingDirectory,
-    browsingBackup,
-    selectedFiles,
-    addSelectedFile,
-    removeSelectedFile,
-    movingFiles,
-    movingFilesDirectory,
-    setMovingFiles,
-  } = useServerStore();
+  const { server, browsingDirectory, browsingBackup, movingFiles, setMovingFiles } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
-
-  const RowCheckbox = ({ file, disabled }: { file: DirectoryEntry; disabled: boolean }) => {
-    return (
-      <Checkbox
-        id={file.name}
-        disabled={disabled}
-        checked={selectedFiles.includes(file)}
-        onChange={(e) => {
-          e.preventDefault();
-          if (e.currentTarget.checked) {
-            addSelectedFile(file);
-          } else {
-            removeSelectedFile(file);
-          }
-        }}
-        onClick={(e) => e.stopPropagation()}
-      />
-    );
-  };
-
-  function FileTableRow({
-    file,
-    onContextMenu,
-    children,
-    ref,
-  }: {
-    file: DirectoryEntry;
-    onContextMenu: (e: any) => void;
-    children: React.ReactNode;
-    ref: React.Ref<HTMLTableRowElement>;
-  }) {
-    const navigate = useNavigate();
-    const [_, setSearchParams] = useSearchParams();
-    const server = useServerStore((state) => state.server);
-    const { browsingDirectory } = useServerStore();
-    const { settings } = useGlobalStore();
-
-    return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
-      <TableRow
-        className={'cursor-pointer select-none'}
-        bg={
-          selectedFiles.includes(file) ||
-          (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
-            ? 'var(--mantine-color-blue-light)'
-            : undefined
-        }
-        onContextMenu={onContextMenu}
-        onClick={(e) => {
-          if (e.shiftKey && movingFiles.length === 0) {
-            addSelectedFile(file);
-            return;
-          }
-
-          if (file.directory) {
-            setSearchParams({
-              directory: join(browsingDirectory, file.name),
-            });
-          } else {
-            navigate(
-              `/server/${server.uuidShort}/files/edit?${createSearchParams({
-                directory: browsingDirectory,
-                file: file.name,
-              })}`,
-            );
-          }
-        }}
-        ref={ref}
-      >
-        {children}
-      </TableRow>
-    ) : (
-      <TableRow
-        bg={
-          selectedFiles.includes(file) ||
-          (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
-            ? 'var(--mantine-color-blue-light)'
-            : undefined
-        }
-        onContextMenu={onContextMenu}
-        onClick={(e) => {
-          if (e.shiftKey && movingFiles.length === 0) {
-            addSelectedFile(file);
-            return;
-          }
-        }}
-        ref={ref}
-      >
-        {children}
-      </TableRow>
-    );
-  }
 
   const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {
