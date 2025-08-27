@@ -15,12 +15,12 @@ export interface FilesSlice {
   addBrowsingEntry: (entry: DirectoryEntry) => void;
   removeBrowsingEntry: (entry: DirectoryEntry) => void;
 
-  selectedFiles: DirectoryEntry[];
+  selectedFiles: Set<DirectoryEntry>;
   setSelectedFiles: (files: DirectoryEntry[]) => void;
   addSelectedFile: (file: DirectoryEntry) => void;
   removeSelectedFile: (file: DirectoryEntry) => void;
 
-  movingFiles: DirectoryEntry[];
+  movingFiles: Set<DirectoryEntry>;
   movingFilesDirectory: string | null;
   setMovingFiles: (files: DirectoryEntry[]) => void;
 
@@ -57,20 +57,25 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
       },
     })),
 
-  selectedFiles: [],
-  setSelectedFiles: (value) => set((state) => ({ ...state, selectedFiles: value })),
+  selectedFiles: new Set<DirectoryEntry>(),
+  setSelectedFiles: (value) => set((state) => ({ ...state, selectedFiles: new Set(value) })),
   addSelectedFile: (value) =>
-    set((state) => ({
-      ...state,
-      selectedFiles: [...state.selectedFiles.filter((file) => file.name !== value.name), value],
-    })),
-  removeSelectedFile: (value) =>
-    set((state) => ({ ...state, selectedFiles: state.selectedFiles.filter((file) => file.name !== value.name) })),
+    set((state) => {
+      state.selectedFiles.add(value);
 
-  movingFiles: [],
+      return { ...state };
+    }),
+  removeSelectedFile: (value) =>
+    set((state) => {
+      state.selectedFiles.delete(value);
+
+      return { ...state };
+    }),
+
+  movingFiles: new Set<DirectoryEntry>(),
   movingFilesDirectory: null,
   setMovingFiles: (files) =>
-    set((state) => ({ ...state, movingFiles: files, movingFilesDirectory: state.browsingDirectory })),
+    set((state) => ({ ...state, movingFiles: new Set(files), movingFilesDirectory: state.browsingDirectory })),
 
   fileOperations: new Map<string, FileOperation>(),
   setFileOperation: (uuid, operation) =>

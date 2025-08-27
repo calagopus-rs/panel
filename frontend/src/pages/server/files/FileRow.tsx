@@ -34,59 +34,37 @@ import FilePermissionsModal from './modals/FilePermissionsModal';
 import FileRenameModal from './modals/FileRenameModal';
 import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
-const RowCheckbox = ({ file, disabled }: { file: DirectoryEntry; disabled: boolean }) => {
-  const { selectedFiles, addSelectedFile, removeSelectedFile } = useServerStore();
-
-  return (
-    <Checkbox
-      id={file.name}
-      disabled={disabled}
-      checked={selectedFiles.includes(file)}
-      onChange={(e) => {
-        e.preventDefault();
-        if (e.currentTarget.checked) {
-          addSelectedFile(file);
-        } else {
-          removeSelectedFile(file);
-        }
-      }}
-      onClick={(e) => e.stopPropagation()}
-    />
-  );
-};
-
 function FileTableRow({
   file,
   onContextMenu,
+  onClick,
   children,
   ref,
 }: {
   file: DirectoryEntry;
   onContextMenu: (e: any) => void;
+  onClick: (e: any) => boolean;
   children: React.ReactNode;
   ref: React.Ref<HTMLTableRowElement>;
 }) {
   const navigate = useNavigate();
   const [_, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
-  const { browsingDirectory, selectedFiles, addSelectedFile, movingFiles, movingFilesDirectory } = useServerStore();
+  const { browsingDirectory, selectedFiles, movingFiles, movingFilesDirectory } = useServerStore();
   const { settings } = useGlobalStore();
 
   return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
     <TableRow
       className={'cursor-pointer select-none'}
       bg={
-        selectedFiles.includes(file) ||
-        (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+        selectedFiles.has(file) ||
+        (movingFilesDirectory === browsingDirectory && movingFiles.values().some((f) => f.name === file.name))
           ? 'var(--mantine-color-blue-light)'
           : undefined
       }
       onContextMenu={onContextMenu}
       onClick={(e) => {
-        if (e.ctrlKey && movingFiles.length === 0) {
-          addSelectedFile(file);
-          return;
-        }
+        if (onClick(e)) return;
 
         if (file.directory) {
           setSearchParams({
@@ -108,18 +86,13 @@ function FileTableRow({
   ) : (
     <TableRow
       bg={
-        selectedFiles.includes(file) ||
-        (movingFilesDirectory === browsingDirectory && movingFiles.some((f) => f.name === file.name))
+        selectedFiles.has(file) ||
+        (movingFilesDirectory === browsingDirectory && movingFiles.values().some((f) => f.name === file.name))
           ? 'var(--mantine-color-blue-light)'
           : undefined
       }
       onContextMenu={onContextMenu}
-      onClick={(e) => {
-        if (e.ctrlKey && movingFiles.length === 0) {
-          addSelectedFile(file);
-          return;
-        }
-      }}
+      onClick={onClick}
       ref={ref}
     >
       {children}
@@ -129,7 +102,16 @@ function FileTableRow({
 
 export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableRowElement> }) => {
   const { addToast } = useToast();
-  const { server, browsingDirectory, browsingBackup, movingFiles, setMovingFiles } = useServerStore();
+  const {
+    server,
+    browsingDirectory,
+    browsingBackup,
+    movingFiles,
+    setMovingFiles,
+    selectedFiles,
+    addSelectedFile,
+    removeSelectedFile,
+  } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
 
@@ -232,10 +214,30 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
               e.preventDefault();
               openMenu(e.clientX, e.clientY);
             }}
+            onClick={(e) => {
+              if ((e.ctrlKey || e.metaKey) && movingFiles.size === 0) {
+                addSelectedFile(file);
+                return true;
+              }
+
+              return false;
+            }}
             ref={ref}
           >
             <td className={'pl-4 relative cursor-pointer w-10 text-center'}>
-              <RowCheckbox file={file} disabled={movingFiles.length > 0} />
+              <Checkbox
+                id={file.name}
+                disabled={movingFiles.size > 0}
+                checked={selectedFiles.has(file)}
+                onChange={() => {
+                  if (selectedFiles.has(file)) {
+                    removeSelectedFile(file);
+                  } else {
+                    addSelectedFile(file);
+                  }
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
             </td>
 
             <TableData>

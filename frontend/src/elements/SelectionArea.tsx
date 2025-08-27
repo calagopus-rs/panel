@@ -149,7 +149,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
 
     if (!this.state.isSelecting && this.mouseDown) {
       const target = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
-      if (target) {
+      if (target && !(target instanceof HTMLInputElement)) {
         const newEvent = new MouseEvent('click', {
           bubbles: true,
           cancelable: true,

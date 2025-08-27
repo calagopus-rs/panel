@@ -26,13 +26,13 @@ export function FileBreadcrumbs({
   return (
     <div className={'flex items-center text-gray-500'}>
       <Checkbox
-        disabled={movingFiles.length > 0}
-        checked={selectedFiles.length > 0 && selectedFiles.length >= browsingEntries.data.length}
-        indeterminate={selectedFiles.length > 0 && selectedFiles.length < browsingEntries.data.length}
+        disabled={movingFiles.size > 0}
+        checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
+        indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
         className={'mr-4'}
         hidden={hideSelectAll}
         onChange={() => {
-          if (selectedFiles.length >= browsingEntries.data.length) {
+          if (selectedFiles.size >= browsingEntries.data.length) {
             setSelectedFiles([]);
           } else {
             setSelectedFiles(browsingEntries.data);

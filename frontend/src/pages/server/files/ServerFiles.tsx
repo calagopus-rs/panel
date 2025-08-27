@@ -87,11 +87,11 @@ export default () => {
   };
 
   const onSelectedStart = (event: React.MouseEvent | MouseEvent) => {
-    setSelectedFilesPrevious(event.shiftKey ? selectedFiles : []);
+    setSelectedFilesPrevious(event.shiftKey ? selectedFiles : new Set());
   };
 
   const onSelected = (selected: DirectoryEntry[]) => {
-    setSelectedFiles([...new Set([...selectedFilesPrevious, ...selected])]);
+    setSelectedFiles([...selectedFilesPrevious, ...selected]);
   };
 
   useEffect(() => {
@@ -130,6 +130,8 @@ export default () => {
     let totalProgress = 0;
     let totalSize = 0;
     fileOperations.forEach((operation) => {
+      if (operation.total === 0) return;
+
       totalProgress += operation.progress;
       totalSize += operation.total;
     });
@@ -143,16 +145,7 @@ export default () => {
         event.preventDefault();
         setSelectedFiles([]);
       }
-    };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [browsingEntries.data]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
         event.preventDefault();
         setSelectedFiles(browsingEntries.data);
@@ -267,7 +260,7 @@ export default () => {
             onSelectedStart={onSelectedStart}
             onSelected={onSelected}
             className={'h-full'}
-            disabled={movingFiles.length > 0}
+            disabled={movingFiles.size > 0}
           >
             <ContextMenuProvider>
               <Table

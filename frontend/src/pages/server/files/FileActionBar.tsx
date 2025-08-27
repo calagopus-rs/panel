@@ -39,7 +39,7 @@ export default () => {
     renameFiles({
       uuid: server.uuid,
       root: '/',
-      files: movingFiles.map((f) => ({
+      files: [...movingFiles].map((f) => ({
         from: join(movingFilesDirectory, f.name),
         to: join(browsingDirectory, f.name),
       })),
@@ -66,7 +66,7 @@ export default () => {
     downloadFiles(
       server.uuid,
       browsingDirectory,
-      selectedFiles.map((f) => f.name),
+      Array.from(selectedFiles.values()).map((f) => f.name),
       false,
       'zip',
     )
@@ -82,22 +82,13 @@ export default () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'x' && !movingFiles.length) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'x' && !movingFiles.size) {
         event.preventDefault();
         setSelectedFiles([]);
-        setMovingFiles(selectedFiles);
+        setMovingFiles([...selectedFiles]);
       }
-    };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [movingFiles, selectedFiles]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Delete' && !movingFiles.length) {
+      if (event.key === 'Delete' && !movingFiles.size) {
         event.preventDefault();
         setOpenModal('delete');
       }
@@ -111,7 +102,7 @@ export default () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && movingFiles.length > 0 && !loading) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && movingFiles.size > 0 && !loading) {
         event.preventDefault();
         doMove();
       }
@@ -127,17 +118,17 @@ export default () => {
     <AnimatePresence>
       <ArchiveCreateModal
         key={'ArchiveCreateModal'}
-        files={selectedFiles}
+        files={[...selectedFiles]}
         opened={openModal === 'archive'}
         onClose={() => setOpenModal(null)}
       />
       <FileDeleteModal
         key={'FileDeleteModal'}
-        files={selectedFiles}
+        files={[...selectedFiles]}
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
       />
-      {(selectedFiles.length > 0 || movingFiles.length > 0) && (
+      {(selectedFiles.size > 0 || movingFiles.size > 0) && (
         <motion.div
           className={'pointer-events-none fixed bottom-0 mb-6 flex justify-center w-full z-50'}
           initial={{ opacity: 0 }}
@@ -146,11 +137,11 @@ export default () => {
           transition={{ duration: 0.15 }}
         >
           <div className={'flex items-center space-x-4 pointer-events-auto rounded p-4 bg-black/50'}>
-            {movingFiles.length > 0 ? (
+            {movingFiles.size > 0 ? (
               <>
                 <Button onClick={doMove} loading={loading}>
-                  <FontAwesomeIcon icon={faAnglesDown} className={'mr-2'} /> Move {movingFiles.length} File
-                  {movingFiles.length === 1 ? '' : 's'} Here
+                  <FontAwesomeIcon icon={faAnglesDown} className={'mr-2'} /> Move {movingFiles.size} File
+                  {movingFiles.size === 1 ? '' : 's'} Here
                 </Button>
                 <Button variant={'default'} onClick={() => setMovingFiles([])}>
                   Cancel
@@ -168,7 +159,7 @@ export default () => {
                     </Button>
                     <Button
                       onClick={() => {
-                        setMovingFiles(selectedFiles);
+                        setMovingFiles([...selectedFiles]);
                         setSelectedFiles([]);
                       }}
                     >
