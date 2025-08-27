@@ -1,42 +1,77 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import runSchedule from '@/api/server/schedules/triggerSchedule';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faClockRotateLeft, faPencil } from '@fortawesome/free-solid-svg-icons';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import Table, { TableData, TableRow } from '@/elements/Table';
+import Code from '@/elements/Code';
+import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import { Group, Stack, Text, Title } from '@mantine/core';
+import Card from '@/elements/Card';
 
-function DetailCard({
-  icon,
-  label,
-  value,
-  subtext,
-}: {
+interface DetailCardProps {
   icon: React.ReactNode;
   label: string;
   value: string;
   subtext?: string;
-}) {
+}
+
+export function DetailCard({ icon, label, value, subtext }: DetailCardProps) {
   return (
-    <div className={'bg-gray-700 p-4 rounded flex gap-4'}>
-      <div className={'text-gray-100 bg-gray-600 p-4 rounded-lg'}>{icon}</div>
-      <div className={'flex flex-col'}>
-        <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
-        <span className={'text-lg font-bold'}>
-          {value} {subtext && <span className={'text-sm text-gray-400'}>({subtext})</span>}
-        </span>
-      </div>
-    </div>
+    <Card shadow={'sm'} padding={'lg'} radius={'md'} withBorder>
+      <Group align={'flex-start'} gap={'md'}>
+        <Card
+          padding={'sm'}
+          radius={'md'}
+          withBorder
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          {icon}
+        </Card>
+        <Stack gap={2}>
+          <Text size={'sm'} c={'dimmed'} fw={500}>
+            {label}
+          </Text>
+          <Text size={'lg'} fw={700}>
+            {value}&nbsp;
+            {subtext && (
+              <Text component={'span'} size={'sm'} c={'dimmed'}>
+                ({subtext})
+              </Text>
+            )}
+          </Text>
+        </Stack>
+      </Group>
+    </Card>
   );
 }
 
 export default () => {
   const params = useParams<'id'>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
 
-  const [schedule, setSchedule] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [schedule, setSchedule] = useState<ServerSchedule>(null);
+  const [steps, setSteps] = useState<ResponseMeta<ScheduleStep>>();
+
+  useEffect(() => {
+    setPage(Number(searchParams.get('page')) || 1);
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: page.toString() });
+  }, [page]);
 
   useEffect(() => {
     getSchedule(server.uuid, params.id).then(setSchedule);
+    getScheduleSteps(server.uuid, params.id, page).then(setSteps);
   }, [params.id]);
 
   const doRunSchedule = () => {
@@ -45,94 +80,78 @@ export default () => {
     });
   };
 
-  return !schedule ? (
+  return !schedule || !steps ? (
     <div className={'w-full'}>
       <Spinner.Centered />
     </div>
   ) : (
-    {
-      /*<>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>{schedule.name}</h1>
-        <div className={'flex gap-2'}>
-          {schedule.tasks.length > 0 && (
-            <Button style={Button.Styles.Gray} disabled={schedule.isProcessing} onClick={doRunSchedule}>
+    <Stack>
+      <Group justify={'space-between'}>
+        <Title order={1} c={'white'}>
+          {schedule.name}
+        </Title>
+        <Group>
+          <Button
+            onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit`)}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faPencil} />}
+          >
+            Edit
+          </Button>
+          {/* {steps.data.length > 0 && (
+            <Button disabled={schedule.isProcessing} onClick={doRunSchedule}>
               Run
             </Button>
-          )}
-        </div>
-      </div>
+          )} */}
+        </Group>
+      </Group>
 
-      <div className={'mb-4 grid grid-cols-3 gap-4'}>
-        <DetailCard
+      <Group>
+        {/* <DetailCard
           icon={
             schedule.isProcessing ? (
               <AnimatedHourglass />
-            ) : schedule.isActive ? (
+            ) : schedule.enabled ? (
               <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-green-500'} />
             ) : (
               <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-red-500'} />
             )
           }
           label={'Status'}
-          value={schedule.isProcessing ? 'Processing' : schedule.isActive ? 'Active' : 'Inactive'}
-        />
+          value={schedule.isProcessing ? 'Processing' : schedule.enabled ? 'Active' : 'Inactive'}
+        /> */}
         <DetailCard
           icon={<FontAwesomeIcon size={'xl'} icon={faClockRotateLeft} />}
           label={'Last Run'}
-          value={schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : 'N/A'}
-          subtext={schedule.lastRunAt ? formatTimestamp(schedule.lastRunAt).trim() : 'N/A'}
+          value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'N/A'}
+          subtext={schedule.lastRun ? formatTimestamp(schedule.lastRun).trim() : 'N/A'}
         />
-        <DetailCard
+        {/* <DetailCard
           icon={<FontAwesomeIcon size={'xl'} icon={faClock} />}
           label={'Next Run'}
           value={formatDateTime(getNextCronRun(schedule.cron))}
           subtext={formatTimestamp(getNextCronRun(schedule.cron))}
-        />
-      </div>
+        /> */}
+      </Group>
 
-      <Table>
-        <div className={'overflow-x-auto'}>
-          <table className={'w-full table-auto'}>
-            <TableHead>
-              <TableHeader name={'Sequence #'} />
-              <TableHeader name={'Action'} />
-              <TableHeader name={'Payload'} />
-              <TableHeader name={'Offset'} />
-              <TableHeader name={'Queued'} />
-              <TableHeader name={'Continue on Failure'} />
-            </TableHead>
-
-            <TableBody>
-              {schedule.tasks
-                .sort((a, b) => a.sequenceId - b.sequenceId)
-                .map((task) => (
-                  <TableRow key={task.id}>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      <Code>{task.sequenceId}</Code>
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{task.action}</td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      <Code>{task.payload}</Code>
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {formatMiliseconds(task.timeOffset * 1000)}
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {task.isQueued ? 'Yes' : 'No'}
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {task.continueOnFailure ? 'Yes' : 'No'}
-                    </td>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </table>
-
-          {schedule.tasks.length === 0 ? <NoItems /> : null}
-        </div>
+      <Table columns={['Sequence #', 'Action', 'Payload', 'Offset', 'Queued', 'Continue on Failure']}>
+        {steps.data
+          .sort((a, b) => a.order - b.order)
+          .map((task) => (
+            <TableRow key={task.uuid}>
+              <TableData>
+                <Code>{task.order}</Code>
+              </TableData>
+              {/* <TableData>{task.action}</TableData>
+              <TableData>
+                <Code>{task.payload}</Code>
+              </TableData>
+              <TableData>{formatMiliseconds(task.timeOffset * 1000)}</TableData>
+              <TableData>{task.isQueued ? 'Yes' : 'No'}</TableData>
+              <TableData>{task.continueOnFailure ? 'Yes' : 'No'}</TableData> */}
+            </TableRow>
+          ))}
       </Table>
-    </>*/
-    }
+    </Stack>
   );
 };

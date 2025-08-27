@@ -6,190 +6,13 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
+import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, ModalProps, Text, NumberInput, Stack, Paper, ActionIcon } from '@mantine/core';
+import { Group, ModalProps, Text, Stack } from '@mantine/core';
 import { useState } from 'react';
-
-const maxConditionDepth = 3;
-
-const comparatorOptions = [
-  { value: 'smaller_than', label: 'Smaller Than' },
-  { value: 'smaller_than_or_equals', label: 'Smaller Than or Equal' },
-  { value: 'equal', label: 'Equals' },
-  { value: 'greater_than', label: 'Greater Than' },
-  { value: 'greater_than_or_equals', label: 'Greater Than or Equal' },
-];
-
-const serverStateOptions = [
-  { value: 'running', label: 'Running' },
-  { value: 'offline', label: 'Offline' },
-  { value: 'starting', label: 'Starting' },
-  { value: 'stopping', label: 'Stopping' },
-];
-
-const conditionTypeOptions = [
-  { value: 'none', label: 'None' },
-  { value: 'and', label: 'AND (All must be true)' },
-  { value: 'or', label: 'OR (Any must be true)' },
-  { value: 'server_state', label: 'Server State' },
-  { value: 'uptime', label: 'Uptime' },
-  { value: 'cpu_usage', label: 'CPU Usage' },
-  { value: 'memory_usage', label: 'Memory Usage' },
-  { value: 'disk_usage', label: 'Disk Usage' },
-];
-
-interface ConditionBuilderProps {
-  condition: ScheduleCondition;
-  onChange: (condition: ScheduleCondition) => void;
-  depth?: number;
-}
-
-const ConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionBuilderProps) => {
-  const handleTypeChange = (type: string) => {
-    switch (type) {
-      case 'none':
-        onChange({ type: 'none' });
-        break;
-      case 'and':
-        onChange({ type: 'and', conditions: [] });
-        break;
-      case 'or':
-        onChange({ type: 'or', conditions: [] });
-        break;
-      case 'server_state':
-        onChange({ type: 'server_state', state: 'running' });
-        break;
-      case 'uptime':
-        onChange({ type: 'uptime', comparator: 'greater_than', value: 0 });
-        break;
-      case 'cpu_usage':
-        onChange({ type: 'cpu_usage', comparator: 'greater_than', value: 0 });
-        break;
-      case 'memory_usage':
-        onChange({ type: 'memory_usage', comparator: 'greater_than', value: 0 });
-        break;
-      case 'disk_usage':
-        onChange({ type: 'disk_usage', comparator: 'greater_than', value: 0 });
-        break;
-    }
-  };
-
-  const handleNestedConditionChange = (index: number, newCondition: ScheduleCondition) => {
-    if (condition.type === 'and' || condition.type === 'or') {
-      const newConditions = [...condition.conditions];
-      newConditions[index] = newCondition;
-      onChange({ ...condition, conditions: newConditions });
-    }
-  };
-
-  const addNestedCondition = () => {
-    if (condition.type === 'and' || condition.type === 'or') {
-      onChange({
-        ...condition,
-        conditions: [...condition.conditions, { type: 'none' }],
-      });
-    }
-  };
-
-  const removeNestedCondition = (index: number) => {
-    if (condition.type === 'and' || condition.type === 'or') {
-      const newConditions = condition.conditions.filter((_, i) => i !== index);
-      onChange({ ...condition, conditions: newConditions });
-    }
-  };
-
-  return (
-    <Paper p={'sm'} withBorder style={{ marginLeft: depth * 20 }}>
-      <Stack>
-        <Select
-          label={'Condition Type'}
-          value={condition.type}
-          onChange={(value) => value && handleTypeChange(value)}
-          data={
-            depth >= maxConditionDepth
-              ? conditionTypeOptions.filter((c) => !['and', 'or'].includes(c.value))
-              : conditionTypeOptions
-          }
-        />
-
-        {condition.type === 'server_state' && (
-          <Select
-            label={'Server State'}
-            value={condition.state}
-            onChange={(value) => value && onChange({ ...condition, state: value as ServerPowerState })}
-            data={serverStateOptions}
-          />
-        )}
-
-        {(condition.type === 'uptime' ||
-          condition.type === 'cpu_usage' ||
-          condition.type === 'memory_usage' ||
-          condition.type === 'disk_usage') && (
-          <Group grow>
-            <Select
-              label={'Comparator'}
-              value={condition.comparator}
-              onChange={(value) => value && onChange({ ...condition, comparator: value as ScheduleComparator })}
-              data={comparatorOptions}
-            />
-            <NumberInput
-              label={
-                condition.type === 'uptime'
-                  ? 'Value (seconds)'
-                  : condition.type === 'cpu_usage'
-                    ? 'Value (%)'
-                    : condition.type === 'memory_usage' || condition.type === 'disk_usage'
-                      ? 'Value (MiB)'
-                      : ''
-              }
-              value={condition.value}
-              onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
-              min={0}
-            />
-          </Group>
-        )}
-
-        {(condition.type === 'and' || condition.type === 'or') && (
-          <>
-            {depth < maxConditionDepth && (
-              <Group>
-                <Text size={'sm'}>
-                  {condition.type === 'and' ? 'All conditions must be true:' : 'Any condition must be true:'}
-                </Text>
-                <Button
-                  size={'xs'}
-                  variant={'light'}
-                  leftSection={<FontAwesomeIcon icon={faPlus} />}
-                  onClick={addNestedCondition}
-                >
-                  Add Condition
-                </Button>
-              </Group>
-            )}
-
-            {condition.conditions.map((nestedCondition, index) => (
-              <Group key={index} align={'flex-start'}>
-                <div style={{ flex: 1 }}>
-                  <ConditionBuilder
-                    condition={nestedCondition}
-                    onChange={(newCondition) => handleNestedConditionChange(index, newCondition)}
-                    depth={depth + 1}
-                  />
-                </div>
-                <ActionIcon color={'red'} variant={'light'} onClick={() => removeNestedCondition(index)}>
-                  <FontAwesomeIcon icon={faMinus} />
-                </ActionIcon>
-              </Group>
-            ))}
-          </>
-        )}
-      </Stack>
-    </Paper>
-  );
-};
 
 export default ({ opened, onClose }: ModalProps) => {
   const { addToast } = useToast();
@@ -330,7 +153,10 @@ export default ({ opened, onClose }: ModalProps) => {
                       ...triggers.slice(index + 1),
                     ]);
                   }}
-                  data={serverStateOptions}
+                  data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
+                    value,
+                    label,
+                  }))}
                 />
               ) : null}
             </Group>
@@ -344,11 +170,6 @@ export default ({ opened, onClose }: ModalProps) => {
           >
             Add Trigger
           </Button>
-        </div>
-
-        <div>
-          <Text mb={'sm'}>Conditions</Text>
-          <ConditionBuilder condition={condition} onChange={setCondition} />
         </div>
 
         <Group>

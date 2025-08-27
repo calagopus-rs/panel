@@ -12,6 +12,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import ScheduleCreateModal from './modals/ScheduleCreateModal';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -62,15 +63,17 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Name', 'Last Run', 'Last Failure', 'Status', '']}
-          pagination={schedules}
-          onPageSelect={setPage}
-        >
-          {schedules.data.map((schedule) => (
-            <ScheduleRow key={schedule.uuid} schedule={schedule} />
-          ))}
-        </Table>
+        <ContextMenuProvider>
+          <Table
+            columns={['Name', 'Last Run', 'Last Failure', 'Status', '']}
+            pagination={schedules}
+            onPageSelect={setPage}
+          >
+            {schedules.data.map((schedule) => (
+              <ScheduleRow key={schedule.uuid} schedule={schedule} />
+            ))}
+          </Table>
+        </ContextMenuProvider>
       )}
     </>
   );

@@ -50,3 +50,29 @@ export const streamingArchiveFormatLabelMapping: Record<StreamingArchiveFormat, 
   tar_zstd: '.tar.zst',
   zip: '.zip',
 };
+
+export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], string> = {
+  none: 'None',
+  and: 'AND (All must be true)',
+  or: 'OR (Any must be true)',
+  server_state: 'Server State',
+  uptime: 'Uptime',
+  cpu_usage: 'CPU Usage',
+  memory_usage: 'Memory Usage',
+  disk_usage: 'Disk Usage',
+};
+
+export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> = {
+  smaller_than: 'Smaller Than',
+  smaller_than_or_equals: 'Smaller Than or Equal',
+  equal: 'Equals',
+  greater_than: 'Greater Than',
+  greater_than_or_equals: 'Greater Than or Equal',
+};
+
+export const serverPowerStateLabelMapping: Record<ServerPowerState, string> = {
+  running: 'Running',
+  offline: 'Offline',
+  starting: 'Starting',
+  stopping: 'Stopping',
+};
