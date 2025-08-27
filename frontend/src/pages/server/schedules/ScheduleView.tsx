@@ -6,41 +6,66 @@ import getSchedule from '@/api/server/schedules/getSchedule';
 import runSchedule from '@/api/server/schedules/triggerSchedule';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faClockRotateLeft, faPencil } from '@fortawesome/free-solid-svg-icons';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import Table, { TableData, TableRow } from '@/elements/Table';
-import Code from '@/elements/Code';
+import {
+  faClockRotateLeft,
+  faPencil,
+  faPlay,
+  faClock,
+  faBolt,
+  faServer,
+  faSkull,
+  faHourglass,
+  faMemory,
+  faHdd,
+  faExclamationTriangle,
+  faCode,
+  faPowerOff,
+  faTerminal,
+  faDatabase,
+  faFolder,
+  faFile,
+  faCopy,
+  faTrash,
+  faEdit,
+  faCompress,
+  faExpand,
+  faGear,
+  faMicrochip,
+} from '@fortawesome/free-solid-svg-icons';
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
+import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
-import { Group, Stack, Text, Title } from '@mantine/core';
+import { Group, Stack, Text, Title, Timeline, Tabs, Alert, Grid, ThemeIcon } from '@mantine/core';
+import { scheduleComparatorLabelMapping, ScheduleComparatorOperatorMapping } from '@/lib/enums';
+import { bytesToString } from '@/lib/size';
+import Tooltip from '@/elements/Tooltip';
 import Card from '@/elements/Card';
+import Badge from '@/elements/Badge';
+import Code from '@/elements/Code';
 
 interface DetailCardProps {
   icon: React.ReactNode;
   label: string;
   value: string;
   subtext?: string;
+  color?: string;
 }
 
-export function DetailCard({ icon, label, value, subtext }: DetailCardProps) {
+function DetailCard({ icon, label, value, subtext, color = 'blue' }: DetailCardProps) {
   return (
     <Card shadow={'sm'} padding={'lg'} radius={'md'} withBorder>
       <Group align={'flex-start'} gap={'md'}>
-        <Card
-          padding={'sm'}
-          radius={'md'}
-          withBorder
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
+        <ThemeIcon size={'xl'} radius={'md'} color={color}>
           {icon}
-        </Card>
+        </ThemeIcon>
         <Stack gap={2}>
           <Text size={'sm'} c={'dimmed'} fw={500}>
             {label}
           </Text>
           <Text size={'lg'} fw={700}>
-            {value}&nbsp;
+            {value}
             {subtext && (
-              <Text component={'span'} size={'sm'} c={'dimmed'}>
+              <Text component={'span'} size={'sm'} c={'dimmed'} ml={'xs'}>
                 ({subtext})
               </Text>
             )}
@@ -51,6 +76,335 @@ export function DetailCard({ icon, label, value, subtext }: DetailCardProps) {
   );
 }
 
+function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
+  const getTriggerIcon = (type: string) => {
+    switch (type) {
+      case 'cron':
+        return faClock;
+      case 'power_action':
+        return faBolt;
+      case 'server_state':
+        return faServer;
+      case 'crash':
+        return faSkull;
+      default:
+        return faClock;
+    }
+  };
+
+  const getTriggerColor = (type: string) => {
+    switch (type) {
+      case 'cron':
+        return 'blue';
+      case 'power_action':
+        return 'orange';
+      case 'server_state':
+        return 'green';
+      case 'crash':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getTriggerLabel = () => {
+    switch (trigger.type) {
+      case 'cron':
+        return `Cron: ${trigger.schedule}`;
+      case 'power_action':
+        return `Power Action: ${trigger.action}`;
+      case 'server_state':
+        return `Server State: ${trigger.state}`;
+      case 'crash':
+        return 'Server Crash';
+      default:
+        return 'Unknown Trigger';
+    }
+  };
+
+  return (
+    <Card withBorder p={'sm'}>
+      <Group gap={'sm'}>
+        <ThemeIcon size={'sm'} color={getTriggerColor(trigger.type)}>
+          <FontAwesomeIcon icon={getTriggerIcon(trigger.type)} size={'xs'} />
+        </ThemeIcon>
+        <Text size={'sm'} fw={500}>
+          {getTriggerLabel()}
+        </Text>
+      </Group>
+    </Card>
+  );
+}
+
+function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
+  if (condition.type === 'none') {
+    return (
+      <Badge color={'gray'} variant={'light'}>
+        No conditions
+      </Badge>
+    );
+  }
+
+  const renderCondition = (cond: ScheduleCondition, depth = 0): React.ReactNode => {
+    switch (cond.type) {
+      case 'and':
+        return (
+          <Stack gap={'xs'} pl={depth * 16}>
+            <Badge color={'blue'} variant={'light'} size={'xs'}>
+              AND
+            </Badge>
+            {cond.conditions.map((c, i) => (
+              <div key={i}>{renderCondition(c, depth + 1)}</div>
+            ))}
+          </Stack>
+        );
+      case 'or':
+        return (
+          <Stack gap={'xs'} pl={depth * 16}>
+            <Badge color={'orange'} variant={'light'} size={'xs'}>
+              OR
+            </Badge>
+            {cond.conditions.map((c, i) => (
+              <div key={i}>{renderCondition(c, depth + 1)}</div>
+            ))}
+          </Stack>
+        );
+      case 'server_state':
+        return (
+          <Card withBorder p={'xs'} ml={depth * 16}>
+            <Group gap={'xs'}>
+              <FontAwesomeIcon icon={faServer} size={'sm'} />
+              <Text size={'sm'}>Server State: {cond.state}</Text>
+            </Group>
+          </Card>
+        );
+      case 'uptime':
+        return (
+          <Card withBorder p={'xs'} ml={depth * 16}>
+            <Group gap={'xs'}>
+              <FontAwesomeIcon icon={faClock} size={'sm'} />
+              <Text size={'sm'}>
+                Uptime&nbsp;
+                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;
+                {formatMiliseconds(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'cpu_usage':
+        return (
+          <Card withBorder p={'xs'} ml={depth * 16}>
+            <Group gap={'xs'}>
+              <FontAwesomeIcon icon={faMicrochip} size={'sm'} />
+              <Text size={'sm'}>
+                CPU Usage&nbsp;
+                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{cond.value}%
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'memory_usage':
+        return (
+          <Card withBorder p={'xs'} ml={depth * 16}>
+            <Group gap={'xs'}>
+              <FontAwesomeIcon icon={faMemory} size={'sm'} />
+              <Text size={'sm'}>
+                Memory Usage&nbsp;
+                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{bytesToString(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'disk_usage':
+        return (
+          <Card withBorder p={'xs'} ml={depth * 16}>
+            <Group gap={'xs'}>
+              <FontAwesomeIcon icon={faHdd} size={'sm'} />
+              <Text size={'sm'}>
+                Disk Usage&nbsp;
+                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{bytesToString(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return <>{renderCondition(condition)}</>;
+}
+
+function ActionStep({ step }: { step: ScheduleStep }) {
+  const getActionIcon = (type: string) => {
+    switch (type) {
+      case 'sleep':
+        return faHourglass;
+      case 'send_power':
+        return faPowerOff;
+      case 'send_command':
+        return faTerminal;
+      case 'create_backup':
+        return faDatabase;
+      case 'create_directory':
+        return faFolder;
+      case 'write_file':
+        return faFile;
+      case 'copy_file':
+        return faCopy;
+      case 'delete_files':
+        return faTrash;
+      case 'rename_files':
+        return faEdit;
+      case 'compress_files':
+        return faCompress;
+      case 'decompress_file':
+        return faExpand;
+      case 'update_startup_variable':
+        return faGear;
+      case 'update_startup_command':
+        return faCode;
+      case 'update_startup_docker_image':
+        return faDocker;
+      default:
+        return faGear;
+    }
+  };
+
+  const renderActionDetails = () => {
+    const action = step.action;
+    switch (action.type) {
+      case 'sleep':
+        return <Text size={'sm'}>Sleep for {action.duration}ms</Text>;
+      case 'send_power':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Power Action: <Code>{action.action}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'send_command':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Command: <Code>{action.command}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'create_backup':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>Backup Name: {action.name || 'Auto-generated'}</Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+            {action.ignoredFiles.length > 0 && (
+              <Text size={'xs'} c={'dimmed'}>
+                Ignored Files: {action.ignoredFiles.join(', ')}
+              </Text>
+            )}
+          </Stack>
+        );
+      case 'write_file':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              File: <Code>{action.file}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Content: {action.content.substring(0, 50)}...
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'copy_file':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              From: <Code>{action.file}</Code>
+            </Text>
+            <Text size={'sm'}>
+              To: <Code>{action.destination}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'delete_files':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Root: <Code>{action.root}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Files: {action.files.join(', ')}
+            </Text>
+          </Stack>
+        );
+      default:
+        return (
+          <Text size={'sm'} c={'dimmed'}>
+            Action details not available
+          </Text>
+        );
+    }
+  };
+
+  return (
+    <Timeline.Item
+      bullet={<FontAwesomeIcon icon={getActionIcon(step.action.type)} size={'sm'} />}
+      title={
+        <Group gap={'sm'}>
+          <Text fw={600}>
+            Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}
+          </Text>
+          {step.error && (
+            <Tooltip label={step.error}>
+              <ThemeIcon size={'sm'} color={'red'}>
+                <FontAwesomeIcon icon={faExclamationTriangle} size={'xs'} />
+              </ThemeIcon>
+            </Tooltip>
+          )}
+        </Group>
+      }
+    >
+      <Card withBorder p={'sm'} mt={'xs'}>
+        {renderActionDetails()}
+      </Card>
+    </Timeline.Item>
+  );
+}
+
 export default () => {
   const params = useParams<'id'>();
   const navigate = useNavigate();
@@ -58,7 +412,7 @@ export default () => {
   const server = useServerStore((state) => state.server);
 
   const [page, setPage] = useState(1);
-  const [schedule, setSchedule] = useState<ServerSchedule>(null);
+  const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ResponseMeta<ScheduleStep>>();
 
   useEffect(() => {
@@ -70,27 +424,53 @@ export default () => {
   }, [page]);
 
   useEffect(() => {
-    getSchedule(server.uuid, params.id).then(setSchedule);
-    getScheduleSteps(server.uuid, params.id, page).then(setSteps);
-  }, [params.id]);
+    if (params.id) {
+      getSchedule(server.uuid, params.id).then(setSchedule);
+      getScheduleSteps(server.uuid, params.id, page).then(setSteps);
+    }
+  }, [params.id, page]);
 
   const doRunSchedule = () => {
-    runSchedule(server.uuid, params.id).then(() => {
-      setSchedule((schedule) => ({ ...schedule, isProcessing: true }));
-    });
+    if (params.id) {
+      runSchedule(server.uuid, params.id).then(() => {
+        setSchedule((schedule) => (schedule ? { ...schedule, isProcessing: true } : null));
+      });
+    }
   };
 
-  return !schedule || !steps ? (
-    <div className={'w-full'}>
-      <Spinner.Centered />
-    </div>
-  ) : (
-    <Stack>
+  if (!schedule || !steps) {
+    return (
+      <div className={'w-full'}>
+        <Spinner.Centered />
+      </div>
+    );
+  }
+
+  const sortedSteps = steps.data.sort((a, b) => a.order - b.order);
+
+  return (
+    <Stack gap={'lg'}>
       <Group justify={'space-between'}>
-        <Title order={1} c={'white'}>
-          {schedule.name}
-        </Title>
+        <Group gap={'md'}>
+          <Title order={1} c={'white'}>
+            {schedule.name}
+          </Title>
+          <Badge color={schedule.enabled ? 'green' : 'red'} size={'lg'}>
+            {schedule.enabled ? 'Active' : 'Inactive'}
+          </Badge>
+        </Group>
+
         <Group>
+          {sortedSteps.length > 0 && (
+            <Button
+              disabled={!schedule.enabled}
+              onClick={doRunSchedule}
+              color={'green'}
+              leftSection={<FontAwesomeIcon icon={faPlay} />}
+            >
+              Run Now
+            </Button>
+          )}
           <Button
             onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit`)}
             color={'blue'}
@@ -98,60 +478,84 @@ export default () => {
           >
             Edit
           </Button>
-          {/* {steps.data.length > 0 && (
-            <Button disabled={schedule.isProcessing} onClick={doRunSchedule}>
-              Run
-            </Button>
-          )} */}
         </Group>
       </Group>
 
-      <Group>
-        {/* <DetailCard
-          icon={
-            schedule.isProcessing ? (
-              <AnimatedHourglass />
-            ) : schedule.enabled ? (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-green-500'} />
-            ) : (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-red-500'} />
-            )
-          }
-          label={'Status'}
-          value={schedule.isProcessing ? 'Processing' : schedule.enabled ? 'Active' : 'Inactive'}
-        /> */}
-        <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClockRotateLeft} />}
-          label={'Last Run'}
-          value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'N/A'}
-          subtext={schedule.lastRun ? formatTimestamp(schedule.lastRun).trim() : 'N/A'}
-        />
-        {/* <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClock} />}
-          label={'Next Run'}
-          value={formatDateTime(getNextCronRun(schedule.cron))}
-          subtext={formatTimestamp(getNextCronRun(schedule.cron))}
-        /> */}
-      </Group>
+      <Grid>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <DetailCard
+            icon={<FontAwesomeIcon icon={faClockRotateLeft} />}
+            label={'Last Run'}
+            value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'Never'}
+            subtext={schedule.lastRun ? formatTimestamp(schedule.lastRun).trim() : undefined}
+            color={'blue'}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <DetailCard
+            icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
+            label={'Last Failure'}
+            value={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'None'}
+            subtext={schedule.lastFailure ? formatTimestamp(schedule.lastFailure).trim() : undefined}
+            color={schedule.lastFailure ? 'red' : 'green'}
+          />
+        </Grid.Col>
+      </Grid>
 
-      <Table columns={['Sequence #', 'Action', 'Payload', 'Offset', 'Queued', 'Continue on Failure']}>
-        {steps.data
-          .sort((a, b) => a.order - b.order)
-          .map((task) => (
-            <TableRow key={task.uuid}>
-              <TableData>
-                <Code>{task.order}</Code>
-              </TableData>
-              {/* <TableData>{task.action}</TableData>
-              <TableData>
-                <Code>{task.payload}</Code>
-              </TableData>
-              <TableData>{formatMiliseconds(task.timeOffset * 1000)}</TableData>
-              <TableData>{task.isQueued ? 'Yes' : 'No'}</TableData>
-              <TableData>{task.continueOnFailure ? 'Yes' : 'No'}</TableData> */}
-            </TableRow>
-          ))}
-      </Table>
+      <Tabs defaultValue={'actions'}>
+        <Tabs.List>
+          <Tabs.Tab value={'actions'}>Actions</Tabs.Tab>
+          <Tabs.Tab value={'conditions'}>Conditions</Tabs.Tab>
+          <Tabs.Tab value={'triggers'}>Triggers</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value={'actions'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Title order={3} mb={'md'}>
+              Schedule Actions
+            </Title>
+            {sortedSteps.length === 0 ? (
+              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                No actions configured for this schedule
+              </Alert>
+            ) : (
+              <Timeline active={-1} bulletSize={40} lineWidth={2}>
+                {sortedSteps.map((step) => (
+                  <ActionStep key={step.uuid} step={step} />
+                ))}
+              </Timeline>
+            )}
+          </Card>
+        </Tabs.Panel>
+
+        <Tabs.Panel value={'conditions'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Title order={3} mb={'md'}>
+              Execution Conditions
+            </Title>
+            <ConditionRenderer condition={schedule.condition} />
+          </Card>
+        </Tabs.Panel>
+
+        <Tabs.Panel value={'triggers'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Title order={3} mb={'md'}>
+              Schedule Triggers
+            </Title>
+            {schedule.triggers.length === 0 ? (
+              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                No triggers configured for this schedule
+              </Alert>
+            ) : (
+              <Stack gap={'md'}>
+                {schedule.triggers.map((trigger, index) => (
+                  <TriggerCard key={index} trigger={trigger} />
+                ))}
+              </Stack>
+            )}
+          </Card>
+        </Tabs.Panel>
+      </Tabs>
     </Stack>
   );
 };

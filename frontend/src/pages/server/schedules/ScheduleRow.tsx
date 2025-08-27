@@ -44,13 +44,13 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
           <TableData>{schedule.name}</TableData>
 
           <TableData>
-            <Tooltip content={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'N/A'}>
+            <Tooltip label={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'N/A'}>
               {schedule.lastRun ? formatTimestamp(schedule.lastRun) : 'N/A'}
             </Tooltip>
           </TableData>
 
           <TableData>
-            <Tooltip content={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'N/A'}>
+            <Tooltip label={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'N/A'}>
               {schedule.lastFailure ? formatTimestamp(schedule.lastFailure) : 'N/A'}
             </Tooltip>
           </TableData>

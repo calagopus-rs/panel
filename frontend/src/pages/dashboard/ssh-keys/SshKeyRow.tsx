@@ -67,7 +67,7 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
             </TableData>
 
             <TableData>
-              <Tooltip content={formatDateTime(sshKey.created)}>{formatTimestamp(sshKey.created)}</Tooltip>
+              <Tooltip label={formatDateTime(sshKey.created)}>{formatTimestamp(sshKey.created)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

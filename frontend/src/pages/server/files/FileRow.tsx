@@ -252,7 +252,7 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
             <TableData>{bytesToString(file.size)}</TableData>
 
             <TableData>
-              <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
+              <Tooltip label={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

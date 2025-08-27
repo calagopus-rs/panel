@@ -8,6 +8,9 @@ import {
   scheduleConditionLabelMapping,
   serverPowerStateLabelMapping,
 } from '@/lib/enums';
+import { bytesToString, parseSize } from '@/lib/size';
+import TextInput from '@/elements/input/TextInput';
+import { useState } from 'react';
 
 const maxConditionDepth = 3;
 
@@ -18,6 +21,10 @@ interface ConditionBuilderProps {
 }
 
 const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionBuilderProps) => {
+  const [sizeInput, setSizeInput] = useState(
+    condition.type === 'memory_usage' || condition.type === 'disk_usage' ? bytesToString(condition.value) : '',
+  );
+
   const handleTypeChange = (type: string) => {
     switch (type) {
       case 'none':
@@ -112,20 +119,41 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
                 label,
               }))}
             />
-            <NumberInput
-              label={
-                condition.type === 'uptime'
-                  ? 'Value (seconds)'
-                  : condition.type === 'cpu_usage'
-                    ? 'Value (%)'
-                    : condition.type === 'memory_usage' || condition.type === 'disk_usage'
-                      ? 'Value (MiB)'
-                      : ''
-              }
-              value={condition.value}
-              onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
-              min={0}
-            />
+            {condition.type === 'uptime' && (
+              <NumberInput
+                label={'Value (seconds)'}
+                value={Number(condition.value) / 1000}
+                onChange={(value) => onChange({ ...condition, value: Number(value) * 1000 || 0 })}
+                min={0}
+              />
+            )}
+            {condition.type === 'cpu_usage' && (
+              <NumberInput
+                label={'Value (%)'}
+                value={condition.value}
+                onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
+                min={0}
+              />
+            )}
+            {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
+              <TextInput
+                label={'Value + Unit (e.g. 2GB)'}
+                value={sizeInput}
+                onChange={(e) => {
+                  const input = e.currentTarget.value;
+                  setSizeInput(input);
+
+                  try {
+                    const parsed = parseSize(input);
+                    if (parsed > 0) {
+                      onChange({ ...condition, value: parsed });
+                    }
+                  } catch {
+                    // ignore invalid intermediate states
+                  }
+                }}
+              />
+            )}
           </Group>
         )}
 

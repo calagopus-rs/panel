@@ -64,10 +64,18 @@ export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], st
 
 export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> = {
   smaller_than: 'Smaller Than',
-  smaller_than_or_equals: 'Smaller Than or Equal',
+  smaller_than_or_equals: 'Smaller Than or Equals',
   equal: 'Equals',
   greater_than: 'Greater Than',
-  greater_than_or_equals: 'Greater Than or Equal',
+  greater_than_or_equals: 'Greater Than or Equals',
+};
+
+export const ScheduleComparatorOperatorMapping: Record<ScheduleComparator, string> = {
+  smaller_than: '<',
+  smaller_than_or_equals: '<=',
+  equal: '==',
+  greater_than: '>',
+  greater_than_or_equals: '>=',
 };
 
 export const serverPowerStateLabelMapping: Record<ServerPowerState, string> = {
