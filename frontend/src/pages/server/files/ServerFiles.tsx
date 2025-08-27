@@ -139,7 +139,21 @@ export default () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'a') {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
+        event.preventDefault();
+        setSelectedFiles([]);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [browsingEntries.data]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
         event.preventDefault();
         setSelectedFiles(browsingEntries.data);
       }

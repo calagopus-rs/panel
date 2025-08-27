@@ -83,7 +83,7 @@ function FileTableRow({
       }
       onContextMenu={onContextMenu}
       onClick={(e) => {
-        if (e.shiftKey && movingFiles.length === 0) {
+        if (e.ctrlKey && movingFiles.length === 0) {
           addSelectedFile(file);
           return;
         }
@@ -115,7 +115,7 @@ function FileTableRow({
       }
       onContextMenu={onContextMenu}
       onClick={(e) => {
-        if (e.shiftKey && movingFiles.length === 0) {
+        if (e.ctrlKey && movingFiles.length === 0) {
           addSelectedFile(file);
           return;
         }

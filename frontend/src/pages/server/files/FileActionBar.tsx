@@ -97,7 +97,21 @@ export default () => {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === 'v' && movingFiles.length > 0 && !loading) {
+      if (event.key === 'Delete' && !movingFiles.length) {
+        event.preventDefault();
+        setOpenModal('delete');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [movingFiles, selectedFiles]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && movingFiles.length > 0 && !loading) {
         event.preventDefault();
         doMove();
       }
