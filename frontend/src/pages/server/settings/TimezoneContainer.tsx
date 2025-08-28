@@ -19,7 +19,7 @@ const timezones = Object.keys(zones)
 
 export default () => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   const [loading, setLoading] = useState(false);
   const [timezone, setTimezone] = useState(server.timezone || '');

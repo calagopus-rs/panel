@@ -9,6 +9,11 @@ import { ActionIcon, Alert, Group, Stack, Text, ThemeIcon } from '@mantine/core'
 import { join } from 'pathe';
 import { useState } from 'react';
 import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import deleteScheduleStep from '@/api/server/schedules/steps/deleteScheduleStep';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios';
 
 interface Props {
   schedule: ServerSchedule;
@@ -18,7 +23,21 @@ interface Props {
 }
 
 export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
-  const [openModal, setOpenModal] = useState<'update'>(null);
+  const { addToast } = useToast();
+  const server = useServerStore((state) => state.server);
+
+  const [openModal, setOpenModal] = useState<'update' | 'delete'>(null);
+
+  const doDelete = () => {
+    deleteScheduleStep(server.uuid, schedule.uuid, step.uuid)
+      .then(() => {
+        addToast('Schedule step deleted.', 'success');
+        onStepDelete(step.uuid);
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
 
   return (
     <Card withBorder>
@@ -29,6 +48,15 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
         propStep={step}
         onStepUpdate={onStepUpdate}
       />
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
+        title={'Confirm Schedule Step Deletion'}
+        confirm={'Delete'}
+        onConfirmed={doDelete}
+      >
+        Are you sure you want to delete this schedule step?
+      </ConfirmationModal>
 
       <Group justify={'space-between'} align={'flex-start'}>
         <Group gap={'md'} align={'flex-start'}>
@@ -107,7 +135,7 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
           <ActionIcon color={'blue'} onClick={() => setOpenModal('update')}>
             <FontAwesomeIcon icon={faPencil} />
           </ActionIcon>
-          <ActionIcon color={'red'} onClick={() => onStepDelete(step.uuid)}>
+          <ActionIcon color={'red'} onClick={() => setOpenModal('delete')}>
             <FontAwesomeIcon icon={faTrash} />
           </ActionIcon>
         </Group>

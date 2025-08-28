@@ -10,7 +10,7 @@ export default ({
   action: ScheduleActionUpdateStartupDockerImage;
   setAction: (action: ScheduleActionUpdateStartupDockerImage) => void;
 }) => {
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   return (
     <Stack>

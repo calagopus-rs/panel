@@ -16,7 +16,7 @@ type Props = ModalProps & {
 
 export default ({ backup, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   const [name, setName] = useState(backup.name);
   const [locked, setLocked] = useState<boolean>(backup.isLocked);

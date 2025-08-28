@@ -36,7 +36,7 @@ type Props = ModalProps & {
 
 export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   const [step, setStep] = useState<ScheduleStep>(
     propStep ||

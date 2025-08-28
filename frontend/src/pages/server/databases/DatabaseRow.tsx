@@ -18,7 +18,7 @@ export default ({ database }: { database: ServerDatabase }) => {
   const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete'>(null);
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
   const host = `${database.host}:${database.port}`;
 
   useEffect(() => {

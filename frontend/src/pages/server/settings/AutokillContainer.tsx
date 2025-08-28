@@ -12,7 +12,7 @@ import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   const [loading, setLoading] = useState(false);
   const [enabled, setEnabled] = useState(server.autoKill.enabled);

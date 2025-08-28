@@ -15,7 +15,7 @@ type Props = ModalProps & {
 
 export default ({ database, opened, onClose }: Props) => {
   const { addToast } = useToast();
-  const { server } = useServerStore();
+  const server = useServerStore((state) => state.server);
 
   const [locked, setLocked] = useState<boolean>(database.isLocked);
   const [loading, setLoading] = useState(false);
