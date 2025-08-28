@@ -72,7 +72,7 @@ impl UserSecurityKey {
         ))
         .bind(user_uuid)
         .bind(name)
-        .bind(rand::random_iter().take(16).collect::<Vec<u8>>())
+        .bind(rand::random_iter::<u8>().take(16).collect::<Vec<u8>>())
         .bind(serde_json::to_value(registration).unwrap())
         .fetch_one(database.write())
         .await?;
