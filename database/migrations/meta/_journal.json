@@ -78,6 +78,13 @@
       "when": 1756279989571,
       "tag": "0010_abandoned_ricochet",
       "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1756313888308,
+      "tag": "0011_low_zombie",
+      "breakpoints": false
     }
   ]
 }

@@ -112,6 +112,37 @@ impl AppSettingsApp {
 }
 
 #[derive(ToSchema, Serialize, Deserialize)]
+pub struct AppSettingsWebauthn {
+    pub rp_id: String,
+    pub rp_origin: String,
+}
+
+impl AppSettingsWebauthn {
+    pub fn serialize(&self) -> (Vec<&'static str>, Vec<String>) {
+        let mut keys = Vec::new();
+        let mut values = Vec::new();
+
+        keys.push("webauthn::rp_id");
+        values.push(self.rp_id.clone());
+        keys.push("webauthn::rp_origin");
+        values.push(self.rp_origin.clone());
+
+        (keys, values)
+    }
+
+    pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
+        AppSettingsWebauthn {
+            rp_id: map
+                .remove("webauthn::rp_id")
+                .unwrap_or_else(|| "localhost".to_string()),
+            rp_origin: map
+                .remove("webauthn::rp_origin")
+                .unwrap_or_else(|| "http://localhost".to_string()),
+        }
+    }
+}
+
+#[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsServer {
     pub max_file_manager_view_size: u64,
     pub max_schedules_step_count: u64,
@@ -167,6 +198,8 @@ pub struct AppSettings {
 
     #[schema(inline)]
     pub app: AppSettingsApp,
+    #[schema(inline)]
+    pub webauthn: AppSettingsWebauthn,
     #[schema(inline)]
     pub server: AppSettingsServer,
 }
@@ -261,6 +294,9 @@ impl AppSettings {
         let (keys_app, values_app) = self.app.serialize();
         keys.extend(keys_app);
         values.extend(values_app);
+        let (keys_webauthn, values_webauthn) = self.webauthn.serialize();
+        keys.extend(keys_webauthn);
+        values.extend(values_webauthn);
         let (keys_server, values_server) = self.server.serialize();
         keys.extend(keys_server);
         values.extend(values_server);
@@ -338,6 +374,7 @@ impl AppSettings {
             },
 
             app: AppSettingsApp::deserialize(map),
+            webauthn: AppSettingsWebauthn::deserialize(map),
             server: AppSettingsServer::deserialize(map),
         }
     }
@@ -453,6 +490,17 @@ impl Settings {
         }
 
         self.cached.read().await
+    }
+
+    pub async fn get_webauthn(&self) -> Result<webauthn_rs::Webauthn, anyhow::Error> {
+        let settings = self.get().await;
+
+        Ok(webauthn_rs::WebauthnBuilder::new(
+            &settings.webauthn.rp_id,
+            &settings.webauthn.rp_origin.parse()?,
+        )?
+        .rp_name(&settings.app.name)
+        .build()?)
     }
 
     pub async fn get_mut(&self) -> SettingsGuard<'_> {

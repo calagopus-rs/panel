@@ -21,7 +21,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import decompressFile from '@/api/server/files/decompressFile';
 import downloadFiles from '@/api/server/files/downloadFiles';
@@ -58,7 +58,7 @@ function FileTableRow({
       className={'cursor-pointer select-none'}
       bg={
         selectedFiles.has(file) ||
-        (movingFilesDirectory === browsingDirectory && movingFiles.values().some((f) => f.name === file.name))
+        (movingFilesDirectory === browsingDirectory && [...movingFiles].some((f) => f.name === file.name))
           ? 'var(--mantine-color-blue-light)'
           : undefined
       }
@@ -87,7 +87,7 @@ function FileTableRow({
     <TableRow
       bg={
         selectedFiles.has(file) ||
-        (movingFilesDirectory === browsingDirectory && movingFiles.values().some((f) => f.name === file.name))
+        (movingFilesDirectory === browsingDirectory && [...movingFiles].some((f) => f.name === file.name))
           ? 'var(--mantine-color-blue-light)'
           : undefined
       }
@@ -100,7 +100,15 @@ function FileTableRow({
   );
 }
 
-export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableRowElement> }) => {
+export default ({
+  file,
+  setChildOpenModal,
+  ref,
+}: {
+  file: DirectoryEntry;
+  setChildOpenModal: (open: boolean) => void;
+  ref: React.Ref<HTMLTableRowElement>;
+}) => {
   const { addToast } = useToast();
   const {
     server,
@@ -114,6 +122,10 @@ export default ({ file, ref }: { file: DirectoryEntry; ref: React.Ref<HTMLTableR
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
+
+  useEffect(() => {
+    setChildOpenModal(openModal !== null);
+  }, [openModal]);
 
   const doUnarchive = () => {
     decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {

@@ -46,6 +46,7 @@ export default () => {
   } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'nameDirectory' | 'pullFile'>(null);
+  const [childOpenModal, setChildOpenModal] = useState(false);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
   const [selectedFilesPrevious, setSelectedFilesPrevious] = useState(selectedFiles);
@@ -260,7 +261,7 @@ export default () => {
             onSelectedStart={onSelectedStart}
             onSelected={onSelected}
             className={'h-full'}
-            disabled={movingFiles.size > 0}
+            disabled={movingFiles.size > 0 || !!openModal || childOpenModal}
           >
             <ContextMenuProvider>
               <Table
@@ -270,7 +271,9 @@ export default () => {
               >
                 {browsingEntries.data.map((file) => (
                   <SelectionArea.Selectable key={file.name} item={file}>
-                    {(innerRef) => <FileRow key={file.name} file={file} ref={innerRef} />}
+                    {(innerRef) => (
+                      <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
+                    )}
                   </SelectionArea.Selectable>
                 ))}
               </Table>

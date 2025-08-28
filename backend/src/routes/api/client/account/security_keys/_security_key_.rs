@@ -3,7 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
     use crate::{
-        models::user_ssh_key::UserSshKey,
+        models::user_security_key::UserSecurityKey,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -22,8 +22,8 @@ mod delete {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "ssh_key" = uuid::Uuid,
-            description = "The SSH key ID",
+            "security_key" = uuid::Uuid,
+            description = "The Security key ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
@@ -31,27 +31,28 @@ mod delete {
         state: GetState,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(ssh_key): Path<uuid::Uuid>,
+        Path(security_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
-        let ssh_key =
-            match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {
-                Some(ssh_key) => ssh_key,
+        let security_key =
+            match UserSecurityKey::by_user_uuid_uuid(&state.database, user.uuid, security_key)
+                .await?
+            {
+                Some(security_key) => security_key,
                 None => {
-                    return ApiResponse::json(ApiError::new_value(&["ssh key not found"]))
+                    return ApiResponse::json(ApiError::new_value(&["security key not found"]))
                         .with_status(StatusCode::NOT_FOUND)
                         .ok();
                 }
             };
 
-        UserSshKey::delete_by_uuid(&state.database, ssh_key.uuid).await?;
+        UserSecurityKey::delete_by_uuid(&state.database, security_key.uuid).await?;
 
         activity_logger
             .log(
-                "user:ssh-key.delete",
+                "user:security-key.delete",
                 serde_json::json!({
-                    "uuid": ssh_key.uuid,
-                    "fingerprint": ssh_key.fingerprint,
-                    "name": ssh_key.name,
+                    "uuid": security_key.uuid,
+                    "name": security_key.name,
                 }),
             )
             .await;
@@ -62,7 +63,7 @@ mod delete {
 
 mod patch {
     use crate::{
-        models::user_ssh_key::UserSshKey,
+        models::user_security_key::UserSecurityKey,
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
@@ -91,8 +92,8 @@ mod patch {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "ssh_key" = uuid::Uuid,
-            description = "The SSH key ID",
+            "security_key" = uuid::Uuid,
+            description = "The Security key ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = inline(Payload))]
@@ -100,7 +101,7 @@ mod patch {
         state: GetState,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
-        Path(ssh_key): Path<uuid::Uuid>,
+        Path(security_key): Path<uuid::Uuid>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -109,26 +110,28 @@ mod patch {
                 .ok();
         }
 
-        let mut ssh_key =
-            match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {
-                Some(ssh_key) => ssh_key,
+        let mut security_key =
+            match UserSecurityKey::by_user_uuid_uuid(&state.database, user.uuid, security_key)
+                .await?
+            {
+                Some(security_key) => security_key,
                 None => {
-                    return ApiResponse::error("ssh key not found")
+                    return ApiResponse::error("security key not found")
                         .with_status(StatusCode::NOT_FOUND)
                         .ok();
                 }
             };
 
         if let Some(name) = data.name {
-            ssh_key.name = name;
+            security_key.name = name;
         }
 
         match sqlx::query!(
-            "UPDATE user_ssh_keys
+            "UPDATE user_security_keys
             SET name = $1
-            WHERE user_ssh_keys.uuid = $2",
-            ssh_key.name,
-            ssh_key.uuid,
+            WHERE user_security_keys.uuid = $2",
+            security_key.name,
+            security_key.uuid,
         )
         .execute(state.database.write())
         .await
@@ -140,9 +143,9 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update ssh key: {:#?}", err);
+                tracing::error!("failed to update security key: {:#?}", err);
 
-                return ApiResponse::error("failed to update ssh key")
+                return ApiResponse::error("failed to update security key")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
@@ -150,11 +153,10 @@ mod patch {
 
         activity_logger
             .log(
-                "user:ssh-key.update",
+                "user:security-key.update",
                 serde_json::json!({
-                    "uuid": ssh_key.uuid,
-                    "fingerprint": ssh_key.fingerprint,
-                    "name": ssh_key.name,
+                    "uuid": security_key.uuid,
+                    "name": security_key.name,
                 }),
             )
             .await;

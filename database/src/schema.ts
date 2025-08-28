@@ -140,6 +140,23 @@ export const userPasswordResets = pgTable('user_password_resets', {
 	uniqueIndex('user_password_resets_token_idx').on(userPasswordResets.token)
 ])
 
+export const userSecurityKeys = pgTable('user_security_keys', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
+
+	name: varchar('name', { length: 31 }).notNull(),
+
+	credentialId: bytea('credential_id').notNull(),
+	credential: jsonb('credential').notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull(),
+	lastUsed: timestamp('last_used')
+}, (userSecurityKeys) => [
+	index('user_security_keys_user_uuid_idx').on(userSecurityKeys.userUuid),
+	uniqueIndex('user_security_keys_user_uuid_name_idx').on(userSecurityKeys.userUuid, userSecurityKeys.name),
+	uniqueIndex('user_security_keys_user_uuid_credential_id_idx').on(userSecurityKeys.userUuid, userSecurityKeys.credentialId)
+])
+
 export const userSshKeys = pgTable('user_ssh_keys', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
@@ -147,7 +164,7 @@ export const userSshKeys = pgTable('user_ssh_keys', {
 	name: varchar('name', { length: 31 }).notNull(),
 	fingerprint: char('fingerprint', { length: 50 }).notNull(),
 
-	public_key: bytea('public_key').notNull(),
+	publicKey: bytea('public_key').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userSshKeys) => [

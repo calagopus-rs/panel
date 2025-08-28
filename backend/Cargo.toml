@@ -54,6 +54,7 @@ anyhow = "1.0.98"
 clap = "4.5.37"
 dialoguer = "0.11.0"
 cron = { workspace = true }
+webauthn-rs = "0.5.2"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"

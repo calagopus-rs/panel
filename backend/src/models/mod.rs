@@ -31,6 +31,7 @@ pub mod user_activity;
 pub mod user_api_key;
 pub mod user_password_reset;
 pub mod user_recovery_code;
+pub mod user_security_key;
 pub mod user_session;
 pub mod user_ssh_key;
 
@@ -70,10 +71,12 @@ pub struct Pagination<T: Serialize = serde_json::Value> {
 }
 
 impl Pagination {
+    #[inline]
     pub const fn default_page() -> i64 {
         1
     }
 
+    #[inline]
     pub const fn default_per_page() -> i64 {
         25
     }
