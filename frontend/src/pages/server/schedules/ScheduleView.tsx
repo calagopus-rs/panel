@@ -44,7 +44,7 @@ interface DetailCardProps {
 
 function DetailCard({ icon, label, value, subtext, color = 'blue' }: DetailCardProps) {
   return (
-    <Card shadow={'sm'} padding={'lg'} radius={'md'} withBorder>
+    <Card shadow={'sm'} padding={'lg'} radius={'md'}>
       <Group align={'flex-start'} gap={'md'}>
         <ThemeIcon size={'xl'} radius={'md'} color={color}>
           {icon}
@@ -114,7 +114,7 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
   };
 
   return (
-    <Card withBorder>
+    <Card>
       <Group>
         <ThemeIcon color={getTriggerColor(trigger.type)}>
           <FontAwesomeIcon icon={getTriggerIcon(trigger.type)} />
@@ -152,7 +152,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'server_state':
         return (
-          <Card withBorder ml={depth * 16}>
+          <Card ml={depth * 16}>
             <Group>
               <FontAwesomeIcon icon={faServer} />
               <Text>Server State: {cond.state}</Text>
@@ -161,7 +161,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'uptime':
         return (
-          <Card withBorder ml={depth * 16}>
+          <Card ml={depth * 16}>
             <Group>
               <FontAwesomeIcon icon={faClock} />
               <Text>
@@ -179,7 +179,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'cpu_usage':
         return (
-          <Card withBorder ml={depth * 16}>
+          <Card ml={depth * 16}>
             <Group>
               <FontAwesomeIcon icon={faMicrochip} />
               <Text>
@@ -196,7 +196,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'memory_usage':
         return (
-          <Card withBorder ml={depth * 16}>
+          <Card ml={depth * 16}>
             <Group>
               <FontAwesomeIcon icon={faMemory} />
               <Text>
@@ -213,7 +213,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
         );
       case 'disk_usage':
         return (
-          <Card withBorder ml={depth * 16}>
+          <Card ml={depth * 16}>
             <Group>
               <FontAwesomeIcon icon={faHdd} />
               <Text>
@@ -347,7 +347,7 @@ function ActionStep({ step }: { step: ScheduleStep }) {
         </Group>
       }
     >
-      <Card withBorder p={'sm'} mt={'xs'}>
+      <Card p={'sm'} mt={'xs'}>
         {renderActionDetails()}
       </Card>
     </Timeline.Item>
@@ -459,7 +459,7 @@ export default () => {
         </Tabs.List>
 
         <Tabs.Panel value={'actions'} pt={'md'}>
-          <Card withBorder p={'lg'}>
+          <Card p={'lg'}>
             <Group justify={'space-between'}>
               <Title order={3} mb={'md'}>
                 Schedule Actions
@@ -488,7 +488,7 @@ export default () => {
         </Tabs.Panel>
 
         <Tabs.Panel value={'conditions'} pt={'md'}>
-          <Card withBorder p={'lg'}>
+          <Card p={'lg'}>
             <Title order={3} mb={'md'}>
               Execution Conditions
             </Title>
@@ -503,7 +503,7 @@ export default () => {
         </Tabs.Panel>
 
         <Tabs.Panel value={'triggers'} pt={'md'}>
-          <Card withBorder p={'lg'}>
+          <Card p={'lg'}>
             <Title order={3} mb={'md'}>
               Schedule Triggers
             </Title>

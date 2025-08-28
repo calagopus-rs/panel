@@ -81,7 +81,7 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
   };
 
   return (
-    <Paper p={'sm'} withBorder style={{ marginLeft: depth * 20 }}>
+    <Paper p={'sm'} style={{ marginLeft: depth * 20 }}>
       <Stack>
         <Select
           label={'Condition Type'}

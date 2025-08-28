@@ -40,7 +40,7 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
   };
 
   return (
-    <Card withBorder>
+    <Card>
       <StepCreateOrUpdateModal
         opened={openModal === 'update'}
         onClose={() => setOpenModal(null)}

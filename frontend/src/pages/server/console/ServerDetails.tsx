@@ -31,7 +31,7 @@ function StatCard({
   limit?: string;
 }) {
   return (
-    <Card className={'flex !flex-row items-center'} withBorder>
+    <Card className={'flex !flex-row items-center'}>
       <ThemeIcon size={'xl'} radius={'md'}>
         <FontAwesomeIcon size={'xl'} icon={icon} />
       </ThemeIcon>
