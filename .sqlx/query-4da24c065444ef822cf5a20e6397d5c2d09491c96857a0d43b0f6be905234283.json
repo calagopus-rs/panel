@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_security_keys.credential_id\n            FROM user_security_keys\n            WHERE user_security_keys.user_uuid = $1 AND user_security_keys.passkey IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "credential_id",
+        "type_info": "Bytea"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4da24c065444ef822cf5a20e6397d5c2d09491c96857a0d43b0f6be905234283"
+}

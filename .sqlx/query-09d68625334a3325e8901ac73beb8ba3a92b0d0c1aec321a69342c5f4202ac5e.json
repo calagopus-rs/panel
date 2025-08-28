@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_security_keys\n            SET credential_id = $2, passkey = $3, registration = NULL\n            WHERE user_security_keys.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Bytea",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "09d68625334a3325e8901ac73beb8ba3a92b0d0c1aec321a69342c5f4202ac5e"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_security_keys\n            SET name = $1\n            WHERE user_security_keys.uuid = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "50e4acc76fb5672dcf8e782648e9146007b0a59688d999e772ec59faf71f4d09"
+}
