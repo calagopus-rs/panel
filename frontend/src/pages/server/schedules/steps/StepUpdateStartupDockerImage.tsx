@@ -2,7 +2,6 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import { useServerStore } from '@/stores/server';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -13,18 +12,10 @@ export default ({
 }) => {
   const { server } = useServerStore();
 
-  useEffect(() => {
-    if (!action.image) {
-      setAction({ ...action, image: '' });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <Select
+        withAsterisk
         label={'Docker Image'}
         value={action.image}
         onChange={(value) => setAction({ ...action, image: value })}

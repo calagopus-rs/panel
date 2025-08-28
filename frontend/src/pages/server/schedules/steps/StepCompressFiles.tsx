@@ -4,7 +4,6 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import { archiveFormatLabelMapping } from '@/lib/enums';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -13,30 +12,10 @@ export default ({
   action: ScheduleActionCompressFiles;
   setAction: (action: ScheduleActionCompressFiles) => void;
 }) => {
-  useEffect(() => {
-    if (!action.root) {
-      setAction({ ...action, root: '/' });
-    }
-    if (!action.files) {
-      setAction({ ...action, files: [] });
-    }
-    if (!action.format) {
-      setAction({ ...action, format: 'tar_gz' });
-    }
-    if (!action.name) {
-      setAction({ ...action, name: 'backup.tar.gz' });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-    if (!action.foreground) {
-      setAction({ ...action, foreground: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput
+        withAsterisk
         label={'Root Path'}
         placeholder={'/'}
         value={action.root}
@@ -50,6 +29,7 @@ export default ({
         onChange={(e) => setAction({ ...action, files: e })}
       />
       <Select
+        withAsterisk
         label={'Archive Format'}
         data={Object.entries(archiveFormatLabelMapping).map(([value, label]) => ({
           value,
@@ -59,6 +39,7 @@ export default ({
         onChange={(value) => setAction({ ...action, format: value as ArchiveFormat })}
       />
       <TextInput
+        withAsterisk
         label={'Archive Name'}
         placeholder={'backup.tar.gz'}
         value={action.name}

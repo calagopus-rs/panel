@@ -1,7 +1,6 @@
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -10,18 +9,10 @@ export default ({
   action: ScheduleActionDeleteFiles;
   setAction: (action: ScheduleActionDeleteFiles) => void;
 }) => {
-  useEffect(() => {
-    if (!action.root) {
-      setAction({ ...action, root: '/' });
-    }
-    if (!action.files) {
-      setAction({ ...action, files: [] });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput
+        withAsterisk
         label={'Root Path'}
         placeholder={'/'}
         value={action.root}

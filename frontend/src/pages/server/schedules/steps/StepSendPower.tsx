@@ -2,7 +2,6 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import { serverPowerActionLabelMapping } from '@/lib/enums';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -11,18 +10,10 @@ export default ({
   action: ScheduleActionSendPower;
   setAction: (action: ScheduleActionSendPower) => void;
 }) => {
-  useEffect(() => {
-    if (!action.action) {
-      setAction({ ...action, action: 'start' });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <Select
+        withAsterisk
         label={'Power Action'}
         data={Object.entries(serverPowerActionLabelMapping).map(([value, label]) => ({
           value,

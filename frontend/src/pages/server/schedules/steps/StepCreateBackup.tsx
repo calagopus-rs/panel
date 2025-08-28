@@ -2,7 +2,6 @@ import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -11,21 +10,6 @@ export default ({
   action: ScheduleActionCreateBackup;
   setAction: (action: ScheduleActionCreateBackup) => void;
 }) => {
-  useEffect(() => {
-    if (!action.name) {
-      setAction({ ...action, name: '' });
-    }
-    if (!action.foreground) {
-      setAction({ ...action, foreground: false });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-    if (!action.ignoredFiles) {
-      setAction({ ...action, ignoredFiles: [] });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput

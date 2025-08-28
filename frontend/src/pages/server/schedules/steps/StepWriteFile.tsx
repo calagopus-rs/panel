@@ -2,7 +2,6 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -11,27 +10,17 @@ export default ({
   action: ScheduleActionWriteFile;
   setAction: (action: ScheduleActionWriteFile) => void;
 }) => {
-  useEffect(() => {
-    if (!action.file) {
-      setAction({ ...action, file: '/file.txt' });
-    }
-    if (!action.content) {
-      setAction({ ...action, content: '' });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput
+        withAsterisk
         label={'File Path'}
         placeholder={'/file.txt'}
         value={action.file}
         onChange={(e) => setAction({ ...action, file: e.currentTarget.value })}
       />
       <TextArea
+        withAsterisk
         label={'Content'}
         placeholder={'File content here...'}
         autosize

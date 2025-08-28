@@ -1,7 +1,6 @@
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -10,27 +9,17 @@ export default ({
   action: ScheduleActionUpdateStartupVariable;
   setAction: (action: ScheduleActionUpdateStartupVariable) => void;
 }) => {
-  useEffect(() => {
-    if (!action.envVariable) {
-      setAction({ ...action, envVariable: '' });
-    }
-    if (!action.value) {
-      setAction({ ...action, value: '' });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput
+        withAsterisk
         label={'Environment Variable'}
         placeholder={'JAVA_OPTS'}
         value={action.envVariable}
         onChange={(e) => setAction({ ...action, envVariable: e.currentTarget.value })}
       />
       <TextInput
+        withAsterisk
         label={'Value'}
         placeholder={'-Xmx2G -Xms1G'}
         value={action.value}

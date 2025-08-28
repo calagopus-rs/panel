@@ -127,6 +127,91 @@ export const scheduleStepLabelMapping: Record<ScheduleAction['type'], string> = 
   update_startup_docker_image: 'Update Docker Image',
 };
 
+export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], ScheduleAction> = {
+  sleep: {
+    type: 'sleep',
+    duration: 0,
+  },
+  send_power: {
+    type: 'send_power',
+    ignoreFailure: false,
+    action: 'start',
+  },
+  send_command: {
+    type: 'send_command',
+    ignoreFailure: false,
+    command: '',
+  },
+  create_backup: {
+    type: 'create_backup',
+    ignoreFailure: false,
+    foreground: false,
+    name: '',
+    ignoredFiles: [],
+  },
+  create_directory: {
+    type: 'create_directory',
+    ignoreFailure: false,
+    root: '/',
+    name: '',
+  },
+  write_file: {
+    type: 'write_file',
+    ignoreFailure: false,
+    file: '/file.txt',
+    content: '',
+  },
+  copy_file: {
+    type: 'copy_file',
+    ignoreFailure: false,
+    foreground: false,
+    file: '/source.txt',
+    destination: '/destination.txt',
+  },
+  delete_files: {
+    type: 'delete_files',
+    root: '/',
+    files: [],
+  },
+  rename_files: {
+    type: 'rename_files',
+    root: '/',
+    files: [],
+  },
+  compress_files: {
+    type: 'compress_files',
+    ignoreFailure: false,
+    foreground: false,
+    root: '/',
+    files: [],
+    format: 'tar_gz',
+    name: 'backup.tar.gz',
+  },
+  decompress_file: {
+    type: 'decompress_file',
+    ignoreFailure: false,
+    foreground: false,
+    root: '/',
+    file: 'backup.tar.gz',
+  },
+  update_startup_variable: {
+    type: 'update_startup_variable',
+    ignoreFailure: false,
+    envVariable: '',
+    value: '',
+  },
+  update_startup_command: {
+    type: 'update_startup_command',
+    ignoreFailure: false,
+    command: '',
+  },
+  update_startup_docker_image: {
+    type: 'update_startup_docker_image',
+    ignoreFailure: false,
+    image: '',
+  },
+};
+
 export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinition> = {
   sleep: faHourglass,
   send_power: faPowerOff,

@@ -1,7 +1,6 @@
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { useEffect } from 'react';
 
 export default ({
   action,
@@ -10,30 +9,17 @@ export default ({
   action: ScheduleActionCopyFile;
   setAction: (action: ScheduleActionCopyFile) => void;
 }) => {
-  useEffect(() => {
-    if (!action.file) {
-      setAction({ ...action, file: '/source.txt' });
-    }
-    if (!action.destination) {
-      setAction({ ...action, destination: '/backup/target.txt' });
-    }
-    if (!action.foreground) {
-      setAction({ ...action, foreground: false });
-    }
-    if (!action.ignoreFailure) {
-      setAction({ ...action, ignoreFailure: false });
-    }
-  }, [action, setAction]);
-
   return (
     <Stack>
       <TextInput
+        withAsterisk
         label={'Source File'}
         placeholder={'/source.txt'}
         value={action.file}
         onChange={(e) => setAction({ ...action, file: e.currentTarget.value })}
       />
       <TextInput
+        withAsterisk
         label={'Destination'}
         placeholder={'/backup/target.txt'}
         value={action.destination}

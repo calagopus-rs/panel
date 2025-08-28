@@ -5,7 +5,7 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
-import { scheduleStepLabelMapping } from '@/lib/enums';
+import { scheduleStepDefaultMapping, scheduleStepLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
@@ -39,10 +39,7 @@ export default ({ schedule, propStep, opened, onClose }: Props) => {
   const [step, setStep] = useState<ScheduleStep>(
     propStep ||
       ({
-        action: {
-          type: 'sleep',
-          duration: 1000,
-        },
+        action: scheduleStepDefaultMapping.sleep,
         order: 1,
       } as ScheduleStep),
   );
@@ -52,10 +49,7 @@ export default ({ schedule, propStep, opened, onClose }: Props) => {
       setStep(propStep);
     } else {
       setStep({
-        action: {
-          type: 'sleep',
-          duration: 1000,
-        },
+        action: scheduleStepDefaultMapping.sleep,
         order: 1,
       } as ScheduleStep);
     }
@@ -101,8 +95,7 @@ export default ({ schedule, propStep, opened, onClose }: Props) => {
             label,
           }))}
           value={step.action.type}
-          onChange={(value) => setStep({ ...step, action: { type: value } as ScheduleActionSleep })}
-          allowDeselect={false}
+          onChange={(value) => setStep({ ...step, action: scheduleStepDefaultMapping[value] })}
         />
 
         <Divider />
