@@ -1,3 +1,21 @@
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
+import {
+  faHourglass,
+  faPowerOff,
+  faTerminal,
+  faDatabase,
+  faFolder,
+  faFile,
+  faCopy,
+  faTrash,
+  faEdit,
+  faCompress,
+  faExpand,
+  faGear,
+  faCode,
+} from '@fortawesome/free-solid-svg-icons';
+
 export const captchaProviderTypeLabelMapping: Record<CaptchaProvider['type'], string> = {
   none: 'None',
   turnstile: 'Turnstile',
@@ -49,4 +67,164 @@ export const streamingArchiveFormatLabelMapping: Record<StreamingArchiveFormat, 
   tar_lz4: '.tar.lz4',
   tar_zstd: '.tar.zst',
   zip: '.zip',
+};
+
+export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], string> = {
+  none: 'None',
+  and: 'AND (All must be true)',
+  or: 'OR (Any must be true)',
+  server_state: 'Server State',
+  uptime: 'Uptime',
+  cpu_usage: 'CPU Usage',
+  memory_usage: 'Memory Usage',
+  disk_usage: 'Disk Usage',
+};
+
+export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> = {
+  smaller_than: 'Smaller Than',
+  smaller_than_or_equals: 'Smaller Than or Equals',
+  equal: 'Equals',
+  greater_than: 'Greater Than',
+  greater_than_or_equals: 'Greater Than or Equals',
+};
+
+export const scheduleComparatorOperatorMapping: Record<ScheduleComparator, string> = {
+  smaller_than: '<',
+  smaller_than_or_equals: '<=',
+  equal: '==',
+  greater_than: '>',
+  greater_than_or_equals: '>=',
+};
+
+export const serverPowerStateLabelMapping: Record<ServerPowerState, string> = {
+  running: 'Running',
+  offline: 'Offline',
+  starting: 'Starting',
+  stopping: 'Stopping',
+};
+
+export const serverPowerActionLabelMapping: Record<ServerPowerAction, string> = {
+  start: 'Start',
+  stop: 'Stop',
+  restart: 'Restart',
+  kill: 'Kill',
+};
+
+export const scheduleStepLabelMapping: Record<ScheduleAction['type'], string> = {
+  sleep: 'Sleep',
+  send_power: 'Send Power Signal',
+  send_command: 'Send Command',
+  create_backup: 'Create Backup',
+  create_directory: 'Create Directory',
+  write_file: 'Write File',
+  copy_file: 'Copy File',
+  delete_files: 'Delete Files',
+  rename_files: 'Rename Files',
+  compress_files: 'Compress Files',
+  decompress_file: 'Decompress File',
+  update_startup_variable: 'Update Startup Variable',
+  update_startup_command: 'Update Startup Command',
+  update_startup_docker_image: 'Update Docker Image',
+};
+
+export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], ScheduleAction> = {
+  sleep: {
+    type: 'sleep',
+    duration: 0,
+  },
+  send_power: {
+    type: 'send_power',
+    ignoreFailure: false,
+    action: 'start',
+  },
+  send_command: {
+    type: 'send_command',
+    ignoreFailure: false,
+    command: '',
+  },
+  create_backup: {
+    type: 'create_backup',
+    ignoreFailure: false,
+    foreground: false,
+    name: '',
+    ignoredFiles: [],
+  },
+  create_directory: {
+    type: 'create_directory',
+    ignoreFailure: false,
+    root: '/',
+    name: '',
+  },
+  write_file: {
+    type: 'write_file',
+    ignoreFailure: false,
+    file: '/file.txt',
+    content: '',
+  },
+  copy_file: {
+    type: 'copy_file',
+    ignoreFailure: false,
+    foreground: false,
+    file: '/source.txt',
+    destination: '/destination.txt',
+  },
+  delete_files: {
+    type: 'delete_files',
+    root: '/',
+    files: [],
+  },
+  rename_files: {
+    type: 'rename_files',
+    root: '/',
+    files: [],
+  },
+  compress_files: {
+    type: 'compress_files',
+    ignoreFailure: false,
+    foreground: false,
+    root: '/',
+    files: [],
+    format: 'tar_gz',
+    name: 'backup.tar.gz',
+  },
+  decompress_file: {
+    type: 'decompress_file',
+    ignoreFailure: false,
+    foreground: false,
+    root: '/',
+    file: 'backup.tar.gz',
+  },
+  update_startup_variable: {
+    type: 'update_startup_variable',
+    ignoreFailure: false,
+    envVariable: '',
+    value: '',
+  },
+  update_startup_command: {
+    type: 'update_startup_command',
+    ignoreFailure: false,
+    command: '',
+  },
+  update_startup_docker_image: {
+    type: 'update_startup_docker_image',
+    ignoreFailure: false,
+    image: '',
+  },
+};
+
+export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinition> = {
+  sleep: faHourglass,
+  send_power: faPowerOff,
+  send_command: faTerminal,
+  create_backup: faDatabase,
+  create_directory: faFolder,
+  write_file: faFile,
+  copy_file: faCopy,
+  delete_files: faTrash,
+  rename_files: faEdit,
+  compress_files: faCompress,
+  decompress_file: faExpand,
+  update_startup_variable: faGear,
+  update_startup_command: faCode,
+  update_startup_docker_image: faDocker,
 };

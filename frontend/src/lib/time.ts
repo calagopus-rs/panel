@@ -13,6 +13,16 @@ export function formatMiliseconds(uptime: number) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
+export function formatDateTime(timestamp) {
+  return new Date(timestamp).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+}
+
 export function formatTimestamp(timestamp) {
   const now = new Date();
   const target = new Date(timestamp);
@@ -38,14 +48,4 @@ export function formatTimestamp(timestamp) {
   if (diffMinutes < 60) return format(diffMinutes, 'minute');
   if (diffHours < 24) return format(diffHours, 'hour');
   return format(diffDays, 'day');
-}
-
-export function formatDateTime(timestamp) {
-  return new Date(timestamp).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
 }

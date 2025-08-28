@@ -69,7 +69,7 @@ export default ({ session }: { session: UserSession }) => {
             <TableData>{session.isUsing ? 'Yes' : 'No'}</TableData>
             <TableData>{session.userAgent}</TableData>
             <TableData>
-              <Tooltip content={formatDateTime(session.lastUsed)}>{formatTimestamp(session.lastUsed)}</Tooltip>
+              <Tooltip label={formatDateTime(session.lastUsed)}>{formatTimestamp(session.lastUsed)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

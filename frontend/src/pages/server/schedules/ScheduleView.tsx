@@ -1,138 +1,523 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import runSchedule from '@/api/server/schedules/triggerSchedule';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faClockRotateLeft,
+  faPencil,
+  faPlay,
+  faClock,
+  faBolt,
+  faServer,
+  faSkull,
+  faMemory,
+  faHdd,
+  faExclamationTriangle,
+  faMicrochip,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
+import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import { Group, Stack, Text, Title, Timeline, Tabs, Alert, Grid, ThemeIcon } from '@mantine/core';
+import {
+  scheduleComparatorLabelMapping,
+  scheduleComparatorOperatorMapping,
+  scheduleStepIconMapping,
+} from '@/lib/enums';
+import { bytesToString } from '@/lib/size';
+import Tooltip from '@/elements/Tooltip';
+import Card from '@/elements/Card';
+import Badge from '@/elements/Badge';
+import Code from '@/elements/Code';
 
-function DetailCard({
-  icon,
-  label,
-  value,
-  subtext,
-}: {
+interface DetailCardProps {
   icon: React.ReactNode;
   label: string;
   value: string;
   subtext?: string;
-}) {
+  color?: string;
+}
+
+function DetailCard({ icon, label, value, subtext, color = 'blue' }: DetailCardProps) {
   return (
-    <div className={'bg-gray-700 p-4 rounded flex gap-4'}>
-      <div className={'text-gray-100 bg-gray-600 p-4 rounded-lg'}>{icon}</div>
-      <div className={'flex flex-col'}>
-        <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
-        <span className={'text-lg font-bold'}>
-          {value} {subtext && <span className={'text-sm text-gray-400'}>({subtext})</span>}
-        </span>
-      </div>
-    </div>
+    <Card shadow={'sm'} padding={'lg'} radius={'md'} withBorder>
+      <Group align={'flex-start'} gap={'md'}>
+        <ThemeIcon size={'xl'} radius={'md'} color={color}>
+          {icon}
+        </ThemeIcon>
+        <Stack gap={2}>
+          <Text size={'sm'} c={'dimmed'} fw={500}>
+            {label}
+          </Text>
+          <Text size={'lg'} fw={700}>
+            {value}
+            {subtext && (
+              <Text component={'span'} size={'sm'} c={'dimmed'} ml={'xs'}>
+                ({subtext})
+              </Text>
+            )}
+          </Text>
+        </Stack>
+      </Group>
+    </Card>
+  );
+}
+
+function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
+  const getTriggerIcon = (type: string) => {
+    switch (type) {
+      case 'cron':
+        return faClock;
+      case 'power_action':
+        return faBolt;
+      case 'server_state':
+        return faServer;
+      case 'crash':
+        return faSkull;
+      default:
+        return faClock;
+    }
+  };
+
+  const getTriggerColor = (type: string) => {
+    switch (type) {
+      case 'cron':
+        return 'blue';
+      case 'power_action':
+        return 'orange';
+      case 'server_state':
+        return 'green';
+      case 'crash':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
+  const getTriggerLabel = () => {
+    switch (trigger.type) {
+      case 'cron':
+        return `Cron: ${trigger.schedule}`;
+      case 'power_action':
+        return `Power Action: ${trigger.action}`;
+      case 'server_state':
+        return `Server State: ${trigger.state}`;
+      case 'crash':
+        return 'Server Crash';
+      default:
+        return 'Unknown Trigger';
+    }
+  };
+
+  return (
+    <Card withBorder>
+      <Group>
+        <ThemeIcon color={getTriggerColor(trigger.type)}>
+          <FontAwesomeIcon icon={getTriggerIcon(trigger.type)} />
+        </ThemeIcon>
+        <Text fw={500}>{getTriggerLabel()}</Text>
+      </Group>
+    </Card>
+  );
+}
+
+function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
+  const renderCondition = (cond: ScheduleCondition, depth = 0): React.ReactNode => {
+    switch (cond.type) {
+      case 'and':
+        return (
+          <Stack gap={'xs'} pl={depth * 16}>
+            <Badge color={'blue'} variant={'light'}>
+              AND
+            </Badge>
+            {cond.conditions.map((c, i) => (
+              <div key={i}>{renderCondition(c, depth + 1)}</div>
+            ))}
+          </Stack>
+        );
+      case 'or':
+        return (
+          <Stack gap={'xs'} pl={depth * 16}>
+            <Badge color={'orange'} variant={'light'}>
+              OR
+            </Badge>
+            {cond.conditions.map((c, i) => (
+              <div key={i}>{renderCondition(c, depth + 1)}</div>
+            ))}
+          </Stack>
+        );
+      case 'server_state':
+        return (
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faServer} />
+              <Text>Server State: {cond.state}</Text>
+            </Group>
+          </Card>
+        );
+      case 'uptime':
+        return (
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faClock} />
+              <Text>
+                Uptime&nbsp;
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;
+                {formatMiliseconds(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'cpu_usage':
+        return (
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faMicrochip} />
+              <Text>
+                CPU Usage&nbsp;
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{cond.value}%
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'memory_usage':
+        return (
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faMemory} />
+              <Text>
+                Memory Usage&nbsp;
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{bytesToString(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      case 'disk_usage':
+        return (
+          <Card withBorder ml={depth * 16}>
+            <Group>
+              <FontAwesomeIcon icon={faHdd} />
+              <Text>
+                Disk Usage&nbsp;
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
+                  <Text component={'span'} c={'dimmed'}>
+                    {scheduleComparatorLabelMapping[cond.comparator]}
+                  </Text>
+                </Tooltip>
+                &nbsp;{bytesToString(cond.value)}
+              </Text>
+            </Group>
+          </Card>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return <>{renderCondition(condition)}</>;
+}
+
+function ActionStep({ step }: { step: ScheduleStep }) {
+  const renderActionDetails = () => {
+    const action = step.action;
+    switch (action.type) {
+      case 'sleep':
+        return <Text size={'sm'}>Sleep for {action.duration}ms</Text>;
+      case 'send_power':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Power Action: <Code>{action.action}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'send_command':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Command: <Code>{action.command}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'create_backup':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>Backup Name: {action.name || 'Auto-generated'}</Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+            {action.ignoredFiles.length > 0 && (
+              <Text size={'xs'} c={'dimmed'}>
+                Ignored Files: {action.ignoredFiles.join(', ')}
+              </Text>
+            )}
+          </Stack>
+        );
+      case 'write_file':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              File: <Code>{action.file}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Content: {action.content.substring(0, 50)}...
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'copy_file':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              From: <Code>{action.file}</Code>
+            </Text>
+            <Text size={'sm'}>
+              To: <Code>{action.destination}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
+      case 'delete_files':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Root: <Code>{action.root}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Files: {action.files.join(', ')}
+            </Text>
+          </Stack>
+        );
+      default:
+        return (
+          <Text size={'sm'} c={'dimmed'}>
+            Action details not available
+          </Text>
+        );
+    }
+  };
+
+  return (
+    <Timeline.Item
+      bullet={<FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size={'sm'} />}
+      title={
+        <Group gap={'sm'}>
+          <Text fw={600}>
+            Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}
+          </Text>
+          {step.error && (
+            <Tooltip label={step.error}>
+              <ThemeIcon size={'sm'} color={'red'}>
+                <FontAwesomeIcon icon={faExclamationTriangle} size={'xs'} />
+              </ThemeIcon>
+            </Tooltip>
+          )}
+        </Group>
+      }
+    >
+      <Card withBorder p={'sm'} mt={'xs'}>
+        {renderActionDetails()}
+      </Card>
+    </Timeline.Item>
   );
 }
 
 export default () => {
   const params = useParams<'id'>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
 
-  const [schedule, setSchedule] = useState<any | null>(null);
+  const [page, setPage] = useState(1);
+  const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
+  const [steps, setSteps] = useState<ScheduleStep[]>([]);
 
   useEffect(() => {
-    getSchedule(server.uuid, params.id).then(setSchedule);
-  }, [params.id]);
+    setPage(Number(searchParams.get('page')) || 1);
+  }, []);
+
+  useEffect(() => {
+    setSearchParams({ page: page.toString() });
+  }, [page]);
+
+  useEffect(() => {
+    if (params.id) {
+      getSchedule(server.uuid, params.id).then(setSchedule);
+      getScheduleSteps(server.uuid, params.id).then(setSteps);
+    }
+  }, [params.id, page]);
 
   const doRunSchedule = () => {
-    runSchedule(server.uuid, params.id).then(() => {
-      setSchedule((schedule) => ({ ...schedule, isProcessing: true }));
-    });
+    if (params.id) {
+      runSchedule(server.uuid, params.id).then(() => {
+        setSchedule((schedule) => (schedule ? { ...schedule, isProcessing: true } : null));
+      });
+    }
   };
 
-  return !schedule ? (
-    <div className={'w-full'}>
-      <Spinner.Centered />
-    </div>
-  ) : (
-    {
-      /*<>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>{schedule.name}</h1>
-        <div className={'flex gap-2'}>
-          {schedule.tasks.length > 0 && (
-            <Button style={Button.Styles.Gray} disabled={schedule.isProcessing} onClick={doRunSchedule}>
-              Run
+  if (!schedule || !steps) {
+    return (
+      <div className={'w-full'}>
+        <Spinner.Centered />
+      </div>
+    );
+  }
+
+  const sortedSteps = steps.sort((a, b) => a.order - b.order);
+
+  return (
+    <Stack gap={'lg'}>
+      <Group justify={'space-between'}>
+        <Group gap={'md'}>
+          <Title order={1} c={'white'}>
+            {schedule.name}
+          </Title>
+          <Badge color={schedule.enabled ? 'green' : 'red'} size={'lg'}>
+            {schedule.enabled ? 'Active' : 'Inactive'}
+          </Badge>
+        </Group>
+
+        <Group>
+          {sortedSteps.length > 0 && (
+            <Button
+              disabled={!schedule.enabled}
+              onClick={doRunSchedule}
+              color={'green'}
+              leftSection={<FontAwesomeIcon icon={faPlay} />}
+            >
+              Run Now
             </Button>
           )}
-        </div>
-      </div>
+          <Button
+            onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit`)}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faPencil} />}
+          >
+            Edit
+          </Button>
+        </Group>
+      </Group>
 
-      <div className={'mb-4 grid grid-cols-3 gap-4'}>
-        <DetailCard
-          icon={
-            schedule.isProcessing ? (
-              <AnimatedHourglass />
-            ) : schedule.isActive ? (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-green-500'} />
+      <Grid>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <DetailCard
+            icon={<FontAwesomeIcon icon={faClockRotateLeft} />}
+            label={'Last Run'}
+            value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'Never'}
+            subtext={schedule.lastRun ? formatTimestamp(schedule.lastRun).trim() : undefined}
+            color={'blue'}
+          />
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <DetailCard
+            icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
+            label={'Last Failure'}
+            value={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'None'}
+            subtext={schedule.lastFailure ? formatTimestamp(schedule.lastFailure).trim() : undefined}
+            color={schedule.lastFailure ? 'red' : 'green'}
+          />
+        </Grid.Col>
+      </Grid>
+
+      <Tabs defaultValue={'actions'}>
+        <Tabs.List>
+          <Tabs.Tab value={'actions'}>Actions</Tabs.Tab>
+          <Tabs.Tab value={'conditions'}>Conditions</Tabs.Tab>
+          <Tabs.Tab value={'triggers'}>Triggers</Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value={'actions'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Group justify={'space-between'}>
+              <Title order={3} mb={'md'}>
+                Schedule Actions
+              </Title>
+              <Group>
+                <Button
+                  onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
+                  variant={'outline'}
+                >
+                  Edit
+                </Button>
+              </Group>
+            </Group>
+            {sortedSteps.length === 0 ? (
+              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                No actions configured for this schedule
+              </Alert>
             ) : (
-              <FontAwesomeIcon size={'xl'} icon={faHourglass} className={'text-red-500'} />
-            )
-          }
-          label={'Status'}
-          value={schedule.isProcessing ? 'Processing' : schedule.isActive ? 'Active' : 'Inactive'}
-        />
-        <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClockRotateLeft} />}
-          label={'Last Run'}
-          value={schedule.lastRunAt ? formatDateTime(schedule.lastRunAt) : 'N/A'}
-          subtext={schedule.lastRunAt ? formatTimestamp(schedule.lastRunAt).trim() : 'N/A'}
-        />
-        <DetailCard
-          icon={<FontAwesomeIcon size={'xl'} icon={faClock} />}
-          label={'Next Run'}
-          value={formatDateTime(getNextCronRun(schedule.cron))}
-          subtext={formatTimestamp(getNextCronRun(schedule.cron))}
-        />
-      </div>
-
-      <Table>
-        <div className={'overflow-x-auto'}>
-          <table className={'w-full table-auto'}>
-            <TableHead>
-              <TableHeader name={'Sequence #'} />
-              <TableHeader name={'Action'} />
-              <TableHeader name={'Payload'} />
-              <TableHeader name={'Offset'} />
-              <TableHeader name={'Queued'} />
-              <TableHeader name={'Continue on Failure'} />
-            </TableHead>
-
-            <TableBody>
-              {schedule.tasks
-                .sort((a, b) => a.sequenceId - b.sequenceId)
-                .map((task) => (
-                  <TableRow key={task.id}>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      <Code>{task.sequenceId}</Code>
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>{task.action}</td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      <Code>{task.payload}</Code>
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {formatMiliseconds(task.timeOffset * 1000)}
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {task.isQueued ? 'Yes' : 'No'}
-                    </td>
-                    <td className={'px-6 text-sm text-neutral-200 text-left whitespace-nowrap'}>
-                      {task.continueOnFailure ? 'Yes' : 'No'}
-                    </td>
-                  </TableRow>
+              <Timeline active={-1} bulletSize={40} lineWidth={2}>
+                {sortedSteps.map((step) => (
+                  <ActionStep key={step.uuid} step={step} />
                 ))}
-            </TableBody>
-          </table>
+              </Timeline>
+            )}
+          </Card>
+        </Tabs.Panel>
 
-          {schedule.tasks.length === 0 ? <NoItems /> : null}
-        </div>
-      </Table>
-    </>*/
-    }
+        <Tabs.Panel value={'conditions'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Title order={3} mb={'md'}>
+              Execution Conditions
+            </Title>
+            {schedule.condition.type === 'none' ? (
+              <Alert icon={<FontAwesomeIcon icon={faInfoCircle} />} color={'blue'}>
+                This schedule does not have any conditions
+              </Alert>
+            ) : (
+              <ConditionRenderer condition={schedule.condition} />
+            )}
+          </Card>
+        </Tabs.Panel>
+
+        <Tabs.Panel value={'triggers'} pt={'md'}>
+          <Card withBorder p={'lg'}>
+            <Title order={3} mb={'md'}>
+              Schedule Triggers
+            </Title>
+            {schedule.triggers.length === 0 ? (
+              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                No triggers configured for this schedule
+              </Alert>
+            ) : (
+              <Stack gap={'md'}>
+                {schedule.triggers.map((trigger, index) => (
+                  <TriggerCard key={index} trigger={trigger} />
+                ))}
+              </Stack>
+            )}
+          </Card>
+        </Tabs.Panel>
+      </Tabs>
+    </Stack>
   );
 };

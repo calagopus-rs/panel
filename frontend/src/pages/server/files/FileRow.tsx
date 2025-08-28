@@ -264,7 +264,7 @@ export default ({
             <TableData>{bytesToString(file.size)}</TableData>
 
             <TableData>
-              <Tooltip content={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
+              <Tooltip label={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

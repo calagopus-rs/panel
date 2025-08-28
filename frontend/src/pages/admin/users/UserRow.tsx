@@ -19,16 +19,16 @@ export default ({ user }: { user: User }) => {
         <span className={'flex gap-2 items-center'}>
           {user.username}&nbsp;
           {user.admin && (
-            <Tooltip content={'Admin'}>
+            <Tooltip label={'Admin'}>
               <FontAwesomeIcon icon={faCrown} className={'text-yellow-400'} />
             </Tooltip>
           )}
           {user.totpEnabled ? (
-            <Tooltip content={'2FA Enabled'}>
+            <Tooltip label={'2FA Enabled'}>
               <FontAwesomeIcon icon={faLock} className={'text-green-500'} />
             </Tooltip>
           ) : (
-            <Tooltip content={'2FA Disabled'}>
+            <Tooltip label={'2FA Disabled'}>
               <FontAwesomeIcon icon={faLockOpen} className={'text-red-500'} />
             </Tooltip>
           )}
@@ -36,7 +36,7 @@ export default ({ user }: { user: User }) => {
       </TableData>
 
       <TableData>
-        <Tooltip content={formatDateTime(user.created)}>{formatTimestamp(user.created)}</Tooltip>
+        <Tooltip label={formatDateTime(user.created)}>{formatTimestamp(user.created)}</Tooltip>
       </TableData>
     </TableRow>
   );

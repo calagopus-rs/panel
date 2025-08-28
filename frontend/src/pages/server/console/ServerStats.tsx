@@ -88,10 +88,10 @@ export default () => {
         title={'Network'}
         legend={
           <>
-            <Tooltip content={'Inbound'}>
+            <Tooltip label={'Inbound'}>
               <FontAwesomeIcon icon={faCloudArrowDown} className={'mr-2 h-4 w-4 text-yellow-400'} />
             </Tooltip>
-            <Tooltip content={'Outbound'}>
+            <Tooltip label={'Outbound'}>
               <FontAwesomeIcon icon={faCloudArrowUp} className={'h-4 w-4 text-cyan-400'} />
             </Tooltip>
           </>

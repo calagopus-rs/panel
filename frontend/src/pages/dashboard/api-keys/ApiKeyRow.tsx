@@ -72,12 +72,12 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
               {!apiKey.lastUsed ? (
                 'N/A'
               ) : (
-                <Tooltip content={formatDateTime(apiKey.lastUsed)}>{formatTimestamp(apiKey.lastUsed)}</Tooltip>
+                <Tooltip label={formatDateTime(apiKey.lastUsed)}>{formatTimestamp(apiKey.lastUsed)}</Tooltip>
               )}
             </TableData>
 
             <TableData>
-              <Tooltip content={formatDateTime(apiKey.created)}>{formatTimestamp(apiKey.created)}</Tooltip>
+              <Tooltip label={formatDateTime(apiKey.created)}>{formatTimestamp(apiKey.created)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

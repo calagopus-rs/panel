@@ -1,0 +1,40 @@
+import Switch from '@/elements/input/Switch';
+import TagsInput from '@/elements/input/TagsInput';
+import TextInput from '@/elements/input/TextInput';
+import { Stack } from '@mantine/core';
+
+export default ({
+  action,
+  setAction,
+}: {
+  action: ScheduleActionCreateBackup;
+  setAction: (action: ScheduleActionCreateBackup) => void;
+}) => {
+  return (
+    <Stack>
+      <TextInput
+        label={'Backup Name (optional)'}
+        placeholder={'Auto-generated if empty'}
+        value={action.name}
+        onChange={(e) => setAction({ ...action, name: e.currentTarget.value })}
+      />
+      <Switch
+        label={'Run in Foreground'}
+        checked={action.foreground}
+        onChange={(e) => setAction({ ...action, foreground: e.currentTarget.checked })}
+      />
+      <Switch
+        label={'Ignore Failure'}
+        checked={action.ignoreFailure}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+      />
+      <TagsInput
+        withAsterisk
+        label={'Ignored Files'}
+        placeholder={'Add files to ignore'}
+        value={action.ignoredFiles || []}
+        onChange={(e) => setAction({ ...action, ignoredFiles: e })}
+      />
+    </Stack>
+  );
+};

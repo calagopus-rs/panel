@@ -1,4 +1,4 @@
-import { Center, Group, Pagination as MantinePagination, Table, TableTrProps, Text } from '@mantine/core';
+import { Center, Group, Pagination as MantinePagination, Table, TableTdProps, TableTrProps, Text } from '@mantine/core';
 import { forwardRef } from 'react';
 
 export const TableHeader = ({ name }: { name?: string }) => {
@@ -29,21 +29,13 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableTrProps>(({ classNa
   );
 });
 
-export const TableData = ({
-  children,
-  colSpan,
-  hidden,
-}: {
-  children: React.ReactNode;
-  colSpan?: number;
-  hidden?: boolean;
-}) => {
+export const TableData = forwardRef<HTMLTableCellElement, TableTdProps>(({ className, children, ...rest }, ref) => {
   return (
-    <Table.Td colSpan={colSpan} hidden={hidden}>
+    <Table.Td ref={ref} className={className} {...rest}>
       {children}
     </Table.Td>
   );
-};
+});
 
 interface PaginationProps<T> {
   columns: string[];
@@ -93,21 +85,21 @@ export const NoItems = () => {
 
 interface TableProps {
   columns: string[];
-  pagination: ResponseMeta<unknown>;
-  onPageSelect: (page: number) => void;
+  pagination?: ResponseMeta<unknown>;
+  onPageSelect?: (page: number) => void;
   children: React.ReactNode;
 }
 
 export default ({ columns, pagination, onPageSelect, children }: TableProps) => {
   return (
-    <Table stickyHeader withTableBorder highlightOnHover={pagination.total > 0} className={'select-none'}>
+    <Table stickyHeader withTableBorder highlightOnHover={pagination?.total > 0} className={'select-none'}>
       <TableHead>
         {columns.map((column, index) => (
           <TableHeader name={column} key={`column-${index}`} />
         ))}
       </TableHead>
       <Table.Tbody>
-        {pagination.total === 0 ? (
+        {pagination?.total === 0 ? (
           <Table.Tr>
             <Table.Td colSpan={columns.length}>
               <NoItems />
@@ -117,9 +109,11 @@ export default ({ columns, pagination, onPageSelect, children }: TableProps) => 
           children
         )}
       </Table.Tbody>
-      <Table.Tfoot>
-        <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
-      </Table.Tfoot>
+      {pagination ? (
+        <Table.Tfoot>
+          <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
+        </Table.Tfoot>
+      ) : null}
     </Table>
   );
 };

@@ -17,8 +17,10 @@ import ServerDatabases from '@/pages/server/databases/ServerDatabases';
 import FileEditor from '@/pages/server/files/FileEditor';
 import ServerFiles from '@/pages/server/files/ServerFiles';
 import ServerNetwork from '@/pages/server/network/ServerNetwork';
+import ScheduleEdit from '@/pages/server/schedules/ScheduleEdit';
 import ScheduleView from '@/pages/server/schedules/ScheduleView';
 import ServerSchedules from '@/pages/server/schedules/ServerSchedules';
+import StepsEditor from '@/pages/server/schedules/StepsEditor';
 import ServerSettings from '@/pages/server/settings/ServerSettings';
 import ServerStartup from '@/pages/server/startup/ServerStartup';
 import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
@@ -194,6 +196,18 @@ const routes: Routes = {
       name: undefined,
       path: '/schedules/:id',
       element: ScheduleView,
+      permission: 'schedule.*',
+    },
+    {
+      name: undefined,
+      path: '/schedules/:id/edit',
+      element: ScheduleEdit,
+      permission: 'schedule.*',
+    },
+    {
+      name: undefined,
+      path: '/schedules/:id/edit-steps',
+      element: StepsEditor,
       permission: 'schedule.*',
     },
     {

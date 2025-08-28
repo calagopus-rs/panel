@@ -68,7 +68,7 @@ export default () => {
               </TableData>
 
               <TableData>
-                <Tooltip content={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
+                <Tooltip label={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
               </TableData>
 
               <TableData>
