@@ -1,3 +1,21 @@
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
+import {
+  faHourglass,
+  faPowerOff,
+  faTerminal,
+  faDatabase,
+  faFolder,
+  faFile,
+  faCopy,
+  faTrash,
+  faEdit,
+  faCompress,
+  faExpand,
+  faGear,
+  faCode,
+} from '@fortawesome/free-solid-svg-icons';
+
 export const captchaProviderTypeLabelMapping: Record<CaptchaProvider['type'], string> = {
   none: 'None',
   turnstile: 'Turnstile',
@@ -70,7 +88,7 @@ export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> 
   greater_than_or_equals: 'Greater Than or Equals',
 };
 
-export const ScheduleComparatorOperatorMapping: Record<ScheduleComparator, string> = {
+export const scheduleComparatorOperatorMapping: Record<ScheduleComparator, string> = {
   smaller_than: '<',
   smaller_than_or_equals: '<=',
   equal: '==',
@@ -83,4 +101,45 @@ export const serverPowerStateLabelMapping: Record<ServerPowerState, string> = {
   offline: 'Offline',
   starting: 'Starting',
   stopping: 'Stopping',
+};
+
+export const serverPowerActionLabelMapping: Record<ServerPowerAction, string> = {
+  start: 'Start',
+  stop: 'Stop',
+  restart: 'Restart',
+  kill: 'Kill',
+};
+
+export const scheduleStepLabelMapping: Record<ScheduleAction['type'], string> = {
+  sleep: 'Sleep',
+  send_power: 'Send Power Signal',
+  send_command: 'Send Command',
+  create_backup: 'Create Backup',
+  create_directory: 'Create Directory',
+  write_file: 'Write File',
+  copy_file: 'Copy File',
+  delete_files: 'Delete Files',
+  rename_files: 'Rename Files',
+  compress_files: 'Compress Files',
+  decompress_file: 'Decompress File',
+  update_startup_variable: 'Update Startup Variable',
+  update_startup_command: 'Update Startup Command',
+  update_startup_docker_image: 'Update Docker Image',
+};
+
+export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinition> = {
+  sleep: faHourglass,
+  send_power: faPowerOff,
+  send_command: faTerminal,
+  create_backup: faDatabase,
+  create_directory: faFolder,
+  write_file: faFile,
+  copy_file: faCopy,
+  delete_files: faTrash,
+  rename_files: faEdit,
+  compress_files: faCompress,
+  decompress_file: faExpand,
+  update_startup_variable: faGear,
+  update_startup_command: faCode,
+  update_startup_docker_image: faDocker,
 };

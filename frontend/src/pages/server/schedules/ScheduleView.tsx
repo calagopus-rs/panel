@@ -14,30 +14,20 @@ import {
   faBolt,
   faServer,
   faSkull,
-  faHourglass,
   faMemory,
   faHdd,
   faExclamationTriangle,
-  faCode,
-  faPowerOff,
-  faTerminal,
-  faDatabase,
-  faFolder,
-  faFile,
-  faCopy,
-  faTrash,
-  faEdit,
-  faCompress,
-  faExpand,
-  faGear,
   faMicrochip,
   faInfoCircle,
 } from '@fortawesome/free-solid-svg-icons';
-import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
 import { Group, Stack, Text, Title, Timeline, Tabs, Alert, Grid, ThemeIcon } from '@mantine/core';
-import { scheduleComparatorLabelMapping, ScheduleComparatorOperatorMapping } from '@/lib/enums';
+import {
+  scheduleComparatorLabelMapping,
+  scheduleComparatorOperatorMapping,
+  scheduleStepIconMapping,
+} from '@/lib/enums';
 import { bytesToString } from '@/lib/size';
 import Tooltip from '@/elements/Tooltip';
 import Card from '@/elements/Card';
@@ -176,7 +166,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
               <FontAwesomeIcon icon={faClock} />
               <Text>
                 Uptime&nbsp;
-                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
                     {scheduleComparatorLabelMapping[cond.comparator]}
                   </Text>
@@ -194,7 +184,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
               <FontAwesomeIcon icon={faMicrochip} />
               <Text>
                 CPU Usage&nbsp;
-                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
                     {scheduleComparatorLabelMapping[cond.comparator]}
                   </Text>
@@ -211,7 +201,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
               <FontAwesomeIcon icon={faMemory} />
               <Text>
                 Memory Usage&nbsp;
-                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
                     {scheduleComparatorLabelMapping[cond.comparator]}
                   </Text>
@@ -228,7 +218,7 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
               <FontAwesomeIcon icon={faHdd} />
               <Text>
                 Disk Usage&nbsp;
-                <Tooltip label={ScheduleComparatorOperatorMapping[cond.comparator]}>
+                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
                   <Text component={'span'} c={'dimmed'}>
                     {scheduleComparatorLabelMapping[cond.comparator]}
                   </Text>
@@ -247,41 +237,6 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
 }
 
 function ActionStep({ step }: { step: ScheduleStep }) {
-  const getActionIcon = (type: string) => {
-    switch (type) {
-      case 'sleep':
-        return faHourglass;
-      case 'send_power':
-        return faPowerOff;
-      case 'send_command':
-        return faTerminal;
-      case 'create_backup':
-        return faDatabase;
-      case 'create_directory':
-        return faFolder;
-      case 'write_file':
-        return faFile;
-      case 'copy_file':
-        return faCopy;
-      case 'delete_files':
-        return faTrash;
-      case 'rename_files':
-        return faEdit;
-      case 'compress_files':
-        return faCompress;
-      case 'decompress_file':
-        return faExpand;
-      case 'update_startup_variable':
-        return faGear;
-      case 'update_startup_command':
-        return faCode;
-      case 'update_startup_docker_image':
-        return faDocker;
-      default:
-        return faGear;
-    }
-  };
-
   const renderActionDetails = () => {
     const action = step.action;
     switch (action.type) {
@@ -373,7 +328,7 @@ function ActionStep({ step }: { step: ScheduleStep }) {
 
   return (
     <Timeline.Item
-      bullet={<FontAwesomeIcon icon={getActionIcon(step.action.type)} size={'sm'} />}
+      bullet={<FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size={'sm'} />}
       title={
         <Group gap={'sm'}>
           <Text fw={600}>
@@ -404,7 +359,7 @@ export default () => {
 
   const [page, setPage] = useState(1);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
-  const [steps, setSteps] = useState<ResponseMeta<ScheduleStep>>();
+  const [steps, setSteps] = useState<ScheduleStep[]>([]);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
@@ -417,7 +372,7 @@ export default () => {
   useEffect(() => {
     if (params.id) {
       getSchedule(server.uuid, params.id).then(setSchedule);
-      getScheduleSteps(server.uuid, params.id, page).then(setSteps);
+      getScheduleSteps(server.uuid, params.id).then(setSteps);
     }
   }, [params.id, page]);
 
@@ -437,7 +392,7 @@ export default () => {
     );
   }
 
-  const sortedSteps = steps.data.sort((a, b) => a.order - b.order);
+  const sortedSteps = steps.sort((a, b) => a.order - b.order);
 
   return (
     <Stack gap={'lg'}>
@@ -502,9 +457,19 @@ export default () => {
 
         <Tabs.Panel value={'actions'} pt={'md'}>
           <Card withBorder p={'lg'}>
-            <Title order={3} mb={'md'}>
-              Schedule Actions
-            </Title>
+            <Group justify={'space-between'}>
+              <Title order={3} mb={'md'}>
+                Schedule Actions
+              </Title>
+              <Group>
+                <Button
+                  onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
+                  variant={'outline'}
+                >
+                  Edit
+                </Button>
+              </Group>
+            </Group>
             {sortedSteps.length === 0 ? (
               <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
                 No actions configured for this schedule
