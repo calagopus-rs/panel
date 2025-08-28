@@ -9,6 +9,7 @@ import { Stack, Group, Text, Title, Paper, ThemeIcon } from '@mantine/core';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
 import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
+import StepCard from './StepCard';
 
 export default () => {
   const params = useParams<'id'>();
@@ -26,6 +27,11 @@ export default () => {
     }
   }, [params.id]);
 
+  const onStepDelete = (stepUuid: string) => {
+    const newSteps = steps.filter((step) => step.uuid !== stepUuid);
+    setSteps(newSteps);
+  };
+
   if (!schedule || !steps) {
     return (
       <div className={'w-full'}>
@@ -38,7 +44,12 @@ export default () => {
 
   return (
     <>
-      <StepCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} schedule={schedule} />
+      <StepCreateOrUpdateModal
+        opened={openModal === 'create'}
+        onClose={() => setOpenModal(null)}
+        schedule={schedule}
+        onStepCreate={(step) => setSteps([...steps, step])}
+      />
 
       <Stack>
         <Group justify={'space-between'}>
@@ -79,18 +90,15 @@ export default () => {
           </Paper>
         ) : (
           <Stack gap={'md'}>
-            {/* {sortedSteps.map((step, index) => (
-            <StepCard
-              key={step.uuid}
-              step={step}
-              onEdit={handleEditStep}
-              onDelete={handleDeleteStep}
-              onMoveUp={(step) => handleMoveStep(step, 'up')}
-              onMoveDown={(step) => handleMoveStep(step, 'down')}
-              canMoveUp={index > 0}
-              canMoveDown={index < sortedSteps.length - 1}
-            />
-          ))} */}
+            {sortedSteps.map((step) => (
+              <StepCard
+                key={step.uuid}
+                schedule={schedule}
+                step={step}
+                onStepUpdate={(step) => setSteps(steps.map((s) => (s.uuid === step.uuid ? step : s)))}
+                onStepDelete={onStepDelete}
+              />
+            ))}
           </Stack>
         )}
       </Stack>

@@ -30,9 +30,11 @@ import StepRenameFiles from '../steps/StepRenameFiles';
 type Props = ModalProps & {
   schedule: ServerSchedule;
   propStep?: ScheduleStep;
+  onStepCreate?: (step: ScheduleStep) => void;
+  onStepUpdate?: (step: ScheduleStep) => void;
 };
 
-export default ({ schedule, propStep, opened, onClose }: Props) => {
+export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClose }: Props) => {
   const { addToast } = useToast();
   const { server } = useServerStore();
 
@@ -61,6 +63,7 @@ export default ({ schedule, propStep, opened, onClose }: Props) => {
         .then(() => {
           onClose();
           addToast('Schedule step updated.', 'success');
+          onStepUpdate?.(step);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -70,6 +73,7 @@ export default ({ schedule, propStep, opened, onClose }: Props) => {
         .then(() => {
           onClose();
           addToast('Schedule step created.', 'success');
+          onStepCreate?.(step);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
