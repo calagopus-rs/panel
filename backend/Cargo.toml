@@ -55,6 +55,7 @@ clap = "4.5.37"
 dialoguer = "0.12.0"
 cron = { workspace = true }
 webauthn-rs = { version = "0.5.2", features = ["danger-allow-state-serialisation"] }
+openssl = { version = "0.10.73", features = ["vendored"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"
