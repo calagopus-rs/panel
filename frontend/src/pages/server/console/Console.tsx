@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AnsiUp } from 'ansi_up';
 import { useServerStore } from '@/stores/server';
 import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
@@ -106,23 +106,29 @@ export default function Terminal() {
     [history, historyIndex, socketInstance],
   );
 
+  const MemoizedLines = useMemo(
+    () =>
+      lines.map((line) => (
+        <div
+          key={Math.random() * 100000}
+          className={'whitespace-pre-wrap break-all'}
+          dangerouslySetInnerHTML={{
+            __html:
+              line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m')
+                ? ansiUp.ansi_to_html(TERMINAL_PRELUDE) + line.html
+                : line.html,
+          }}
+        />
+      )),
+    [lines],
+  );
+
   return (
-    <Card className={'h-full flex flex-col font-mono text-sm'}>
+    <Card className={'h-full flex flex-col font-mono text-sm'} withBorder>
       {!socketConnected && <Spinner />}
 
       <div ref={containerRef} className={'flex-1 overflow-auto custom-scrollbar p-2 space-y-1 select-text'}>
-        {lines.map((line) => (
-          <div
-            key={Math.random() * 100000}
-            className={'whitespace-pre-wrap break-all'}
-            dangerouslySetInnerHTML={{
-              __html:
-                line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m')
-                  ? ansiUp.ansi_to_html(TERMINAL_PRELUDE) + line.html
-                  : line.html,
-            }}
-          />
-        ))}
+        {MemoizedLines}
       </div>
 
       <div className={'w-full mt-2'}>
