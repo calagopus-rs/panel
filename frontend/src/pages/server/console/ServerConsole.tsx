@@ -5,32 +5,57 @@ import ServerPowerControls from './ServerPowerControls';
 import ServerStats from './ServerStats';
 import { useServerStore } from '@/stores/server';
 import Can from '@/elements/Can';
+import { Group, Title } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
+import debounce from 'debounce';
 
 export default () => {
   const server = useServerStore((state) => state.server);
 
+  const [maxConsoleHeight, setMaxConsoleHeight] = useState<number | null>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (statsRef.current) {
+      setMaxConsoleHeight(statsRef.current.clientHeight);
+
+      const handleResize = debounce(() => {
+        setMaxConsoleHeight(statsRef.current?.clientHeight || null);
+      }, 100);
+
+      window.addEventListener('resize', handleResize);
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [statsRef.current]);
+
+  console.log(maxConsoleHeight);
+
   return (
     <>
-      <div className={'mb-4 flex justify-between'}>
-        <h1 className={'text-4xl font-bold text-white'}>{server.name}</h1>
+      <Group justify={'space-between'} mb={'md'}>
+        <Title order={1} c={'white'}>
+          {server.name}
+        </Title>
         <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
           <ServerPowerControls />
         </Can>
-      </div>
+      </Group>
+
       <div className={'grid xl:grid-cols-4 gap-4 mb-4'}>
-        <div className={'xl:col-span-3 h-full'}>
+        <div className={'xl:col-span-3'} style={{ maxHeight: maxConsoleHeight }}>
           <Spinner.Suspense>
             <Console />
           </Spinner.Suspense>
         </div>
 
-        <Spinner.Suspense>
+        <div className={'h-fit'} ref={statsRef}>
           <ServerDetails />
-        </Spinner.Suspense>
+        </div>
       </div>
-      <div className={'h-48'}>
-        <ServerStats />
-      </div>
+
+      <ServerStats />
     </>
   );
 };

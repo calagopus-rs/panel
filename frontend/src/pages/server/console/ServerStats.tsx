@@ -4,11 +4,11 @@ import 'chart.js/auto';
 import { useChart, useChartTickLabel } from './chart';
 import { bytesToString } from '@/lib/size';
 import { useEffect, useRef } from 'react';
-import styles from './console.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCloudArrowDown, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@/elements/Tooltip';
 import { hexToRgba } from '@/lib/color';
+import Card from '@/elements/Card';
 
 function ChartBlock({
   title,
@@ -20,13 +20,13 @@ function ChartBlock({
   children: React.ReactNode;
 }) {
   return (
-    <div className={styles.chart_container}>
+    <Card className={'relative'} withBorder>
       <div className={'flex items-center justify-between px-4 py-2'}>
         <h3 className={'transition-colors duration-100'}>{title}</h3>
         {legend && <p className={'text-sm flex items-center'}>{legend}</p>}
       </div>
       <div className={'z-10 ml-2'}>{children}</div>
-    </div>
+    </Card>
   );
 }
 
