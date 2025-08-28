@@ -85,6 +85,20 @@
       "when": 1756313888308,
       "tag": "0011_low_zombie",
       "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1756395653238,
+      "tag": "0012_purple_patriot",
+      "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1756396969220,
+      "tag": "0013_many_outlaw_kid",
+      "breakpoints": false
     }
   ]
 }

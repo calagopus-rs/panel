@@ -29,6 +29,11 @@ export default ({
         onChange={(e) => setAction({ ...action, content: e.currentTarget.value })}
       />
       <Switch
+        label={'Append to File'}
+        checked={action.append}
+        onChange={(e) => setAction({ ...action, append: e.currentTarget.checked })}
+      />
+      <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}

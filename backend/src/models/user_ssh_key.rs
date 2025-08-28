@@ -45,7 +45,6 @@ impl BaseModel for UserSshKey {
 }
 
 impl UserSshKey {
-    #[inline]
     pub async fn create(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,

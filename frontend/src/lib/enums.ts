@@ -78,6 +78,7 @@ export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], st
   cpu_usage: 'CPU Usage',
   memory_usage: 'Memory Usage',
   disk_usage: 'Disk Usage',
+  file_exists: 'File Exists',
 };
 
 export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> = {
@@ -158,6 +159,7 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
   write_file: {
     type: 'write_file',
     ignoreFailure: false,
+    append: false,
     file: '/file.txt',
     content: '',
   },

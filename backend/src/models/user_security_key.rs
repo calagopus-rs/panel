@@ -10,6 +10,8 @@ pub struct UserSecurityKey {
 
     pub name: String,
 
+    pub registration: Option<webauthn_rs::prelude::PasskeyRegistration>,
+
     pub last_used: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
 }
@@ -23,6 +25,10 @@ impl BaseModel for UserSecurityKey {
         BTreeMap::from([
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
+            (
+                format!("{table}.registration"),
+                format!("{prefix}registration"),
+            ),
             (format!("{table}.last_used"), format!("{prefix}last_used")),
             (format!("{table}.created"), format!("{prefix}created")),
         ])
@@ -35,6 +41,14 @@ impl BaseModel for UserSecurityKey {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
+            registration: if row
+                .try_get::<serde_json::Value, _>(format!("{prefix}registration").as_str())
+                .is_ok()
+            {
+                serde_json::from_value(row.get(format!("{prefix}registration").as_str())).ok()
+            } else {
+                None
+            },
             last_used: row.get(format!("{prefix}last_used").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
@@ -42,24 +56,24 @@ impl BaseModel for UserSecurityKey {
 }
 
 impl UserSecurityKey {
-    #[inline]
     pub async fn create(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         name: &str,
-        credential: webauthn_rs::prelude::Passkey,
+        registration: webauthn_rs::prelude::PasskeyRegistration,
     ) -> Result<Self, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO user_security_keys (user_uuid, name, credential, created)
-            VALUES ($1, $2, $3, NOW())
+            INSERT INTO user_security_keys (user_uuid, name, credential_id, registration, created)
+            VALUES ($1, $2, $3, $4, NOW())
             RETURNING {}
             "#,
             Self::columns_sql(None, None)
         ))
         .bind(user_uuid)
         .bind(name)
-        .bind(serde_json::to_value(credential).unwrap())
+        .bind(rand::random_iter().take(16).collect::<Vec<u8>>())
+        .bind(serde_json::to_value(registration).unwrap())
         .fetch_one(database.write())
         .await?;
 
@@ -100,7 +114,7 @@ impl UserSecurityKey {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM user_security_keys
-            WHERE user_security_keys.user_uuid = $1 AND ($2 IS NULL OR user_security_keys.name ILIKE '%' || $2 || '%')
+            WHERE user_security_keys.user_uuid = $1 AND user_security_keys.passkey IS NOT NULL AND ($2 IS NULL OR user_security_keys.name ILIKE '%' || $2 || '%')
             ORDER BY user_security_keys.created
             LIMIT $3 OFFSET $4
             "#,

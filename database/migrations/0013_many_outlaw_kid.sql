@@ -1,0 +1,1 @@
+ALTER TABLE "user_security_keys" RENAME COLUMN "credential" TO "passkey";

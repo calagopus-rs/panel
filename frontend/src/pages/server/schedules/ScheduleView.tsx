@@ -288,6 +288,9 @@ function ActionStep({ step }: { step: ScheduleStep }) {
               Content: {action.content.substring(0, 50)}...
             </Text>
             <Text size={'xs'} c={'dimmed'}>
+              Append: <Code>{action.append ? 'Yes' : 'No'}</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>

@@ -413,6 +413,11 @@ interface ScheduleConditionDiskUsage {
   value: number;
 }
 
+interface ScheduleConditionFileExists {
+  type: 'file_exists';
+  file: string;
+}
+
 type ScheduleCondition =
   | ScheduleConditionNone
   | ScheduleConditionAnd
@@ -421,7 +426,8 @@ type ScheduleCondition =
   | ScheduleConditionUptime
   | ScheduleConditionCpuUsage
   | ScheduleConditionMemoryUsage
-  | ScheduleConditionDiskUsage;
+  | ScheduleConditionDiskUsage
+  | ScheduleConditionFileExists;
 
 interface ServerSchedule {
   uuid: string;
@@ -475,6 +481,7 @@ interface ScheduleActionCreateDirectory {
 interface ScheduleActionWriteFile {
   type: 'write_file';
   ignoreFailure: boolean;
+  append: boolean;
   file: string;
   content: string;
 }
@@ -633,6 +640,13 @@ interface UserSshKey {
   uuid: string;
   name: string;
   fingerprint: string;
+  created: Date;
+}
+
+interface UserSecurityKey {
+  uuid: string;
+  name: string;
+  lastUsed: Date | null;
   created: Date;
 }
 

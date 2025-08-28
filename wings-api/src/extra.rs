@@ -125,6 +125,7 @@ pub enum ScheduleActionInner {
     },
     WriteFile {
         ignore_failure: bool,
+        append: bool,
 
         file: String,
         content: String,
@@ -236,5 +237,8 @@ pub enum ScheduleCondition {
     DiskUsage {
         comparator: ScheduleComparator,
         value: u64,
+    },
+    FileExists {
+        file: String,
     },
 }

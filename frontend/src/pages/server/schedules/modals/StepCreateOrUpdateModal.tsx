@@ -59,7 +59,7 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
 
   const doCreateOrUpdate = () => {
     if (propStep) {
-      updateScheduleStep(server.uuid, schedule.uuid, step.uuid, step)
+      updateScheduleStep(server.uuid, schedule.uuid, propStep.uuid, step)
         .then(() => {
           onClose();
           addToast('Schedule step updated.', 'success');

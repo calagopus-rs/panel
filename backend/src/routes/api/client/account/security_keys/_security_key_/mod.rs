@@ -1,6 +1,8 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod challenge;
+
 mod delete {
     use crate::{
         models::user_security_key::UserSecurityKey,
@@ -47,15 +49,17 @@ mod delete {
 
         UserSecurityKey::delete_by_uuid(&state.database, security_key.uuid).await?;
 
-        activity_logger
-            .log(
-                "user:security-key.delete",
-                serde_json::json!({
-                    "uuid": security_key.uuid,
-                    "name": security_key.name,
-                }),
-            )
-            .await;
+        if security_key.registration.is_none() {
+            activity_logger
+                .log(
+                    "user:security-key.delete",
+                    serde_json::json!({
+                        "uuid": security_key.uuid,
+                        "name": security_key.name,
+                    }),
+                )
+                .await;
+        }
 
         ApiResponse::json(Response {}).ok()
     }
@@ -122,6 +126,12 @@ mod patch {
                 }
             };
 
+        if security_key.registration.is_some() {
+            return ApiResponse::error("security key not setup yet")
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
         if let Some(name) = data.name {
             security_key.name = name;
         }
@@ -169,5 +179,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/challenge", challenge::router(state))
         .with_state(state.clone())
 }

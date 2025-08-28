@@ -2,7 +2,6 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _security_key_;
-mod challenge;
 
 mod get {
     use crate::{
@@ -76,30 +75,28 @@ mod get {
 
 mod post {
     use crate::{
-        models::user_ssh_key::UserSshKey,
+        models::user_security_key::UserSecurityKey,
         response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
-        },
+        routes::{ApiError, GetState, api::client::GetUser},
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
     use validator::Validate;
+    use webauthn_rs::prelude::CreationChallengeResponse;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
         name: String,
-
-        public_key: String,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        ssh_key: crate::models::user_ssh_key::ApiUserSshKey,
+        security_key: crate::models::user_security_key::ApiUserSecurityKey,
+        #[schema(value_type = serde_json::Value)]
+        options: CreationChallengeResponse,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -110,7 +107,6 @@ mod post {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&data) {
@@ -119,45 +115,51 @@ mod post {
                 .ok();
         }
 
-        let public_key = match russh::keys::PublicKey::from_openssh(&data.public_key) {
-            Ok(key) => key,
-            Err(_) => {
-                return ApiResponse::error("invalid public key")
-                    .with_status(StatusCode::BAD_REQUEST)
-                    .ok();
-            }
-        };
+        let webauthn = state.settings.get_webauthn().await?;
 
-        let ssh_key =
-            match UserSshKey::create(&state.database, user.uuid, &data.name, public_key).await {
-                Ok(ssh_key) => ssh_key,
+        let credential_ids = sqlx::query!(
+            "SELECT user_security_keys.credential_id
+            FROM user_security_keys
+            WHERE user_security_keys.user_uuid = $1 AND user_security_keys.passkey IS NOT NULL",
+            user.uuid
+        )
+        .fetch_all(state.database.read())
+        .await?;
+
+        let (options, registration) = webauthn.start_passkey_registration(
+            user.uuid,
+            &user.email,
+            &user.username,
+            Some(
+                credential_ids
+                    .into_iter()
+                    .map(|id| id.credential_id.into())
+                    .collect(),
+            ),
+        )?;
+
+        let security_key =
+            match UserSecurityKey::create(&state.database, user.uuid, &data.name, registration)
+                .await
+            {
+                Ok(security_key) => security_key,
                 Err(err) if err.to_string().contains("unique constraint") => {
-                    return ApiResponse::error("ssh key with name or fingerprint already exists")
+                    return ApiResponse::error("security key with name already exists")
                         .with_status(StatusCode::CONFLICT)
                         .ok();
                 }
                 Err(err) => {
-                    tracing::error!("failed to create ssh key: {:#?}", err);
+                    tracing::error!("failed to create security key: {:#?}", err);
 
-                    return ApiResponse::error("failed to create ssh key")
+                    return ApiResponse::error("failed to create security key")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                         .ok();
                 }
             };
 
-        activity_logger
-            .log(
-                "user:ssh-key.create",
-                serde_json::json!({
-                    "uuid": ssh_key.uuid,
-                    "fingerprint": ssh_key.fingerprint,
-                    "name": ssh_key.name,
-                }),
-            )
-            .await;
-
         ApiResponse::json(Response {
-            ssh_key: ssh_key.into_api_object(),
+            security_key: security_key.into_api_object(),
+            options,
         })
         .ok()
     }
@@ -167,7 +169,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/challenge", challenge::router(state))
         .nest("/{security_key}", _security_key_::router(state))
         .with_state(state.clone())
 }

@@ -147,7 +147,8 @@ export const userSecurityKeys = pgTable('user_security_keys', {
 	name: varchar('name', { length: 31 }).notNull(),
 
 	credentialId: bytea('credential_id').notNull(),
-	credential: jsonb('credential').notNull(),
+	passkey: jsonb('passkey'),
+	registration: jsonb('registration'),
 
 	created: timestamp('created').default(sql`now()`).notNull(),
 	lastUsed: timestamp('last_used')
@@ -541,7 +542,7 @@ export const serverDatabases = pgTable('server_databases', {
 
 export const serverSchedules = pgTable('server_schedules', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
-	serverUuid: uuid('server_uuid').references(() => servers.uuid).notNull(),
+	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
 
 	name: varchar('name', { length: 255 }).notNull(),
 	enabled: boolean('enabled').notNull(),
@@ -560,7 +561,7 @@ export const serverSchedules = pgTable('server_schedules', {
 
 export const serverScheduleSteps = pgTable('server_schedule_steps', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
-	scheduleUuid: uuid('schedule_uuid').references(() => serverSchedules.uuid).notNull(),
+	scheduleUuid: uuid('schedule_uuid').references(() => serverSchedules.uuid, { onDelete: 'cascade' }).notNull(),
 
 	action: jsonb('action').notNull(),
 	order: smallint('order_').default(0).notNull(),

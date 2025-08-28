@@ -51,6 +51,8 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
       case 'disk_usage':
         onChange({ type: 'disk_usage', comparator: 'greater_than', value: 0 });
         break;
+      case 'file_exists':
+        onChange({ type: 'file_exists', file: '' });
     }
   };
 
@@ -155,6 +157,14 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
               />
             )}
           </Group>
+        )}
+
+        {condition.type === 'file_exists' && (
+          <TextInput
+            label={'File Path'}
+            value={condition.file}
+            onChange={(e) => onChange({ ...condition, file: e.currentTarget.value })}
+          />
         )}
 
         {(condition.type === 'and' || condition.type === 'or') && (
