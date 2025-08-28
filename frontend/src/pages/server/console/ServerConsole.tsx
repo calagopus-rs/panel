@@ -23,14 +23,14 @@ export default () => {
         setMaxConsoleHeight(statsRef.current?.clientHeight || null);
       }, 100);
 
-      window.addEventListener('resize', handleResize);
+      const observer = new ResizeObserver(handleResize);
+      observer.observe(statsRef.current);
+
       return () => {
-        window.removeEventListener('resize', handleResize);
+        observer.disconnect();
       };
     }
   }, [statsRef.current]);
-
-  console.log(maxConsoleHeight);
 
   return (
     <>

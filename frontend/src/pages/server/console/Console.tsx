@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AnsiUp } from 'ansi_up';
 import { useServerStore } from '@/stores/server';
@@ -7,6 +5,9 @@ import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
 import Card from '@/elements/Card';
 import Spinner from '@/elements/Spinner';
 import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
 
 const ansiUp = new AnsiUp();
 const MAX_LINES = 1000;
@@ -19,41 +20,119 @@ interface TerminalLine {
 
 export default function Terminal() {
   const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@pterodactyl~ \u001b[0m';
-  const { socketConnected, socketInstance } = useServerStore();
+  const { server, socketConnected, socketInstance } = useServerStore();
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isAtBottom, setIsAtBottom] = useState(true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isAutoScrolling = useRef(false);
+  const isInitialLoad = useRef(true);
+  const initialScrollTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const addLine = useCallback((text: string, prelude = false) => {
-    const processed = text.replace(/(?:\r\n|\r|\n)$/im, '');
-    const html = ansiUp.ansi_to_html(processed);
+  const HISTORY_STORAGE_KEY = `terminal_command_history_${server.uuid}`;
 
-    setLines((prev) => {
-      const newLine: TerminalLine = {
-        html,
-        content: processed,
-        isPrelude: prelude,
-      };
-
-      const updated = [...prev, newLine];
-      return updated.length > MAX_LINES ? updated.slice(-MAX_LINES) : updated;
-    });
+  useEffect(() => {
+    const savedHistory = localStorage.getItem(HISTORY_STORAGE_KEY);
+    if (savedHistory) {
+      try {
+        const parsed = JSON.parse(savedHistory);
+        if (Array.isArray(parsed)) {
+          setHistory(parsed);
+        }
+      } catch (e) {
+        console.error('Failed to parse terminal history:', e);
+      }
+    }
   }, []);
 
   useEffect(() => {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  }, [history]);
+
+  const checkIfAtBottom = useCallback(() => {
+    if (!containerRef.current) return true;
+
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+    const threshold = 50;
+    const atBottom = scrollHeight - scrollTop - clientHeight < threshold;
+    return atBottom;
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    if (isAutoScrolling.current || isInitialLoad.current) return;
+
+    const atBottom = checkIfAtBottom();
+    setIsAtBottom(atBottom);
+  }, [checkIfAtBottom]);
+
+  const scrollToBottom = useCallback(() => {
     if (containerRef.current) {
+      isAutoScrolling.current = true;
       containerRef.current.scrollTop = containerRef.current.scrollHeight;
+      setIsAtBottom(true);
+      setTimeout(() => {
+        isAutoScrolling.current = false;
+      }, 50);
     }
-  }, [lines]);
+  }, []);
+
+  const addLine = useCallback(
+    (text: string, prelude = false) => {
+      const processed = text.replace(/(?:\r\n|\r|\n)$/im, '');
+      const html = ansiUp.ansi_to_html(processed);
+
+      setLines((prev) => {
+        const newLine: TerminalLine = {
+          html,
+          content: processed,
+          isPrelude: prelude,
+        };
+
+        const updated = [...prev, newLine];
+        return updated.length > MAX_LINES ? updated.slice(-MAX_LINES) : updated;
+      });
+
+      if (isInitialLoad.current) {
+        if (initialScrollTimer.current) {
+          clearTimeout(initialScrollTimer.current);
+        }
+
+        initialScrollTimer.current = setTimeout(() => {
+          isInitialLoad.current = false;
+          scrollToBottom();
+          initialScrollTimer.current = null;
+        }, 100);
+      }
+    },
+    [scrollToBottom],
+  );
+
+  useEffect(() => {
+    if (isInitialLoad.current || lines.length === 0) return;
+
+    if (isAtBottom && containerRef.current) {
+      isAutoScrolling.current = true;
+      requestAnimationFrame(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollTop = containerRef.current.scrollHeight;
+          setTimeout(() => {
+            isAutoScrolling.current = false;
+          }, 50);
+        }
+      });
+    }
+  }, [lines, isAtBottom]);
 
   useEffect(() => {
     if (!socketConnected || !socketInstance) return;
 
     setLines([]);
+    isInitialLoad.current = true;
+    setIsAtBottom(true);
 
     const listeners: Record<string, (msg: string) => void> = {
       [SocketEvent.STATUS]: (s) => addLine(`Server marked as ${s}...`, true),
@@ -72,6 +151,9 @@ export default function Terminal() {
 
     return () => {
       Object.entries(listeners).forEach(([k, fn]) => socketInstance.removeListener(k, fn));
+      if (initialScrollTimer.current) {
+        clearTimeout(initialScrollTimer.current);
+      }
     };
   }, [socketConnected, socketInstance, addLine]);
 
@@ -108,9 +190,9 @@ export default function Terminal() {
 
   const MemoizedLines = useMemo(
     () =>
-      lines.map((line) => (
+      lines.map((line, index) => (
         <div
-          key={Math.random() * 100000}
+          key={`line-${index}`}
           className={'whitespace-pre-wrap break-all'}
           dangerouslySetInnerHTML={{
             __html:
@@ -124,14 +206,26 @@ export default function Terminal() {
   );
 
   return (
-    <Card className={'h-full flex flex-col font-mono text-sm'} withBorder>
-      {!socketConnected && <Spinner />}
+    <Card className={'h-full flex flex-col font-mono text-sm relative'} withBorder>
+      {!socketConnected && <Spinner.Centered />}
 
-      <div ref={containerRef} className={'flex-1 overflow-auto custom-scrollbar p-2 space-y-1 select-text'}>
+      <div
+        ref={containerRef}
+        className={'flex-1 overflow-auto custom-scrollbar space-y-1 select-text'}
+        onScroll={handleScroll}
+      >
         {MemoizedLines}
       </div>
 
-      <div className={'w-full mt-2'}>
+      {!isAtBottom && (
+        <div className={'absolute bottom-4 right-4 z-90 w-fit'}>
+          <Button onClick={scrollToBottom} variant={'transparent'}>
+            <FontAwesomeIcon icon={faArrowDown} />
+          </Button>
+        </div>
+      )}
+
+      <div className={'w-full mt-4'}>
         <TextInput
           ref={inputRef}
           placeholder={'Type a command...'}

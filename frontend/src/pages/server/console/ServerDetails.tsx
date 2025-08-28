@@ -1,4 +1,5 @@
 import Card from '@/elements/Card';
+import CopyOnClick from '@/elements/CopyOnClick';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { formatMiliseconds } from '@/lib/time';
@@ -14,25 +15,38 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ThemeIcon } from '@mantine/core';
 
 function StatCard({
   icon,
   label,
   value,
+  copyOnClick,
   limit,
 }: {
   icon: IconDefinition;
   label: string;
   value: string;
+  copyOnClick?: boolean;
   limit?: string;
 }) {
   return (
     <Card className={'flex !flex-row items-center'} withBorder>
-      <FontAwesomeIcon className={'text-gray-100 bg-gray-600 p-4 rounded-lg'} size={'xl'} icon={icon} />
+      <ThemeIcon size={'xl'} radius={'md'}>
+        <FontAwesomeIcon size={'xl'} icon={icon} />
+      </ThemeIcon>
       <div className={'flex flex-col ml-4'}>
         <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
         <span className={'text-lg font-bold'}>
-          {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}
+          {copyOnClick ? (
+            <CopyOnClick content={value}>
+              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}
+            </CopyOnClick>
+          ) : (
+            <>
+              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}
+            </>
+          )}
         </span>
       </div>
     </Card>
@@ -53,6 +67,7 @@ export default () => {
       <StatCard
         icon={faEthernet}
         label={'Address'}
+        copyOnClick
         value={server.allocation ? formatAllocation(server.allocation) : 'N/A'}
       />
       <StatCard

@@ -8,77 +8,58 @@ import {
   LineElement,
   PointElement,
 } from 'chart.js';
-import { DeepPartial } from 'ts-essentials';
+import StreamingPlugin from '@robloche/chartjs-plugin-streaming';
+import 'chartjs-adapter-moment';
 import { useState } from 'react';
 import { deepmerge, deepmergeCustom } from 'deepmerge-ts';
 import { hexToRgba } from '@/lib/color';
 
-ChartJS.register(LineElement, PointElement, Filler, LinearScale);
+ChartJS.register(LineElement, PointElement, Filler, LinearScale, StreamingPlugin);
 
-const options: ChartOptions<'line'> = {
+const defaultOptions: ChartOptions<'line'> = {
   responsive: true,
-  animation: false,
   plugins: {
     legend: { display: false },
     title: { display: false },
-    tooltip: { enabled: false },
-  },
-  layout: {
-    padding: 0,
+    tooltip: { enabled: true },
   },
   scales: {
     x: {
-      min: 0,
-      max: 19,
-      type: 'linear',
-      grid: {
-        display: false,
+      type: 'realtime',
+      realtime: {
+        duration: 20000,
+        delay: 1100,
       },
       ticks: {
         display: false,
       },
+      grid: { display: false },
     },
     y: {
-      min: 0,
       type: 'linear',
-      grid: {
-        display: true,
-        color: '#4b5563', // gray-600
-      },
-      ticks: {
-        display: true,
-        count: 3,
-        color: '#f3f4f6', // gray-100
-        font: {
-          size: 11,
-          weight: 'lighter',
-        },
-      },
+      min: 0,
+      grid: { display: true, color: '#424242' },
+      ticks: { color: '#f3f4f6', count: 3, font: { size: 11, weight: 'lighter' } },
+      border: { color: '#424242' },
     },
   },
   elements: {
-    point: {
-      radius: 0,
-    },
-    line: {
-      tension: 0.15,
-    },
+    point: { radius: 0 },
+    line: { tension: 0.4 },
   },
+  layout: { padding: 0 },
 };
 
-function getOptions(opts?: DeepPartial<ChartOptions<'line'>> | undefined): ChartOptions<'line'> {
-  return deepmerge(options, opts ?? {});
+function getOptions(opts?: Partial<ChartOptions<'line'>>): ChartOptions<'line'> {
+  return deepmerge(defaultOptions, opts ?? {});
 }
 
 type ChartDatasetCallback = (value: ChartDataset<'line'>, index: number) => ChartDataset<'line'>;
 
-function getEmptyData(label: string, sets = 1, callback?: ChartDatasetCallback | undefined): ChartData<'line'> {
-  const next = callback || ((value) => value);
+function getEmptyData(label: string, sets = 1, callback?: ChartDatasetCallback): ChartData<'line'> {
+  const next = callback || ((v) => v);
 
   return {
-    labels: Array(20)
-      .fill(0)
-      .map((_, index) => index),
     datasets: Array(sets)
       .fill(0)
       .map((_, index) =>
@@ -86,9 +67,9 @@ function getEmptyData(label: string, sets = 1, callback?: ChartDatasetCallback |
           {
             fill: true,
             label,
-            data: Array(20).fill(-5),
-            borderColor: '#22d3ee', // cyan-400
-            backgroundColor: hexToRgba('#0e7490', 0.5), // cyan-700
+            data: [],
+            borderColor: '#22d3ee',
+            backgroundColor: hexToRgba('#0e7490', 0.5),
           },
           index,
         ),
@@ -100,34 +81,39 @@ const merge = deepmergeCustom({ mergeArrays: false });
 
 interface UseChartOptions {
   sets: number;
-  options?: DeepPartial<ChartOptions<'line'>> | number | undefined;
-  callback?: ChartDatasetCallback | undefined;
+  options?: Partial<ChartOptions<'line'>> | number;
+  callback?: ChartDatasetCallback;
 }
 
 function useChart(label: string, opts?: UseChartOptions) {
-  const options = getOptions(
-    typeof opts?.options === 'number' ? { scales: { y: { min: 0, suggestedMax: opts.options } } } : opts?.options,
-  );
+  const options =
+    typeof opts?.options === 'number'
+      ? getOptions({ scales: { y: { min: 0, suggestedMax: opts.options } } })
+      : getOptions(opts?.options);
+
   const [data, setData] = useState(getEmptyData(label, opts?.sets || 1, opts?.callback));
 
-  const push = (items: number | null | (number | null)[]) =>
+  const push = (items: number | (number | null)[]) => {
+    const time = Date.now();
     setData((state) =>
       merge(state, {
         datasets: (Array.isArray(items) ? items : [items]).map((item, index) => ({
           ...state.datasets[index],
-          data:
-            state.datasets[index]?.data?.slice(1)?.concat(typeof item === 'number' ? Number(item.toFixed(2)) : item) ??
-            [],
+          data: state.datasets[index]?.data?.concat({
+            x: time,
+            y: typeof item === 'number' ? Number(item.toFixed(2)) : item,
+          }),
         })),
       }),
     );
+  };
 
   const clear = () =>
     setData((state) =>
       merge(state, {
         datasets: state.datasets.map((value) => ({
           ...value,
-          data: Array(20).fill(-5),
+          data: [],
         })),
       }),
     );
@@ -138,7 +124,7 @@ function useChart(label: string, opts?: UseChartOptions) {
 function useChartTickLabel(label: string, max: number, tickLabel: string, roundTo?: number) {
   return useChart(label, {
     sets: 1,
-    options: {
+    options: getOptions({
       scales: {
         y: {
           suggestedMax: max,
@@ -149,7 +135,7 @@ function useChartTickLabel(label: string, max: number, tickLabel: string, roundT
           },
         },
       },
-    },
+    }),
   });
 }
 

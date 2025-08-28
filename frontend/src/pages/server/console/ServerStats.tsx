@@ -23,7 +23,7 @@ function ChartBlock({
     <Card className={'relative'} withBorder>
       <div className={'flex items-center justify-between px-4 py-2'}>
         <h3 className={'transition-colors duration-100'}>{title}</h3>
-        {legend && <p className={'text-sm flex items-center'}>{legend}</p>}
+        {legend && <span className={'text-sm flex items-center'}>{legend}</span>}
       </div>
       <div className={'z-10 ml-2'}>{children}</div>
     </Card>
