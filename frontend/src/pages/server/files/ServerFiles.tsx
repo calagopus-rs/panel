@@ -78,8 +78,10 @@ export default () => {
   const [uploadingFiles, setUploadingFiles] = useState<Map<string, FileUploadProgress>>(new Map());
   const [uploadBatches, setUploadBatches] = useState<Map<string, BatchInfo>>(new Map());
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [activeBatchCount, setActiveBatchCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
+  const fileIndexCounter = useRef(0);
 
   useEffect(() => {
     setSelectedFiles([]);
@@ -130,7 +132,8 @@ export default () => {
 
       setPendingFiles((prev) => [...prev, ...files]);
 
-      const startIndex = uploadingFiles.size;
+      const startIndex = fileIndexCounter.current;
+      fileIndexCounter.current += files.length;
       const initialProgress = new Map<string, FileUploadProgress>();
 
       files.forEach((file, index) => {
@@ -157,6 +160,11 @@ export default () => {
         }
 
         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+          // Wait if we have 4 active batches
+          while (activeBatchCount >= 4) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+
           const batch = batches[batchIndex];
           const batchId = `batch-${Date.now()}-${batchIndex}`;
           const controller = new AbortController();
@@ -192,6 +200,8 @@ export default () => {
           if (batchInfo?.status === 'cancelled') {
             continue;
           }
+
+          setActiveBatchCount((prev) => prev + 1);
 
           setUploadBatches((prev) => {
             const updated = new Map(prev);
@@ -282,9 +292,12 @@ export default () => {
             });
           } catch (error: any) {
             if (error.name === 'CanceledError') {
-              continue;
+              // Don't count cancelled batches
+            } else {
+              throw error;
             }
-            throw error;
+          } finally {
+            setActiveBatchCount((prev) => prev - 1);
           }
         }
 
@@ -312,7 +325,7 @@ export default () => {
         }
       }
     },
-    [server.uuid, browsingDirectory, uploadingFiles],
+    [server.uuid, browsingDirectory, activeBatchCount],
   );
 
   const cancelFileUpload = useCallback(
@@ -350,6 +363,12 @@ export default () => {
           if (key !== fileKey) {
             const fileData = uploadingFiles.get(key);
             if (fileData && fileData.status !== 'completed') {
+              // Remove the old state for this file
+              setUploadingFiles((prev) => {
+                const updated = new Map(prev);
+                updated.delete(key);
+                return updated;
+              });
               filesToReupload.push(pendingFiles[idx]);
             }
           }
@@ -366,7 +385,7 @@ export default () => {
         }
       }
     },
-    [uploadingFiles, uploadBatches, pendingFiles],
+    [uploadingFiles, uploadBatches, pendingFiles, uploadFiles],
   );
 
   const cancelFolderUpload = useCallback(
