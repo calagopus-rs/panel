@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { NavLink } from 'react-router';
+import { useNavigate } from 'react-router';
 import AuthWrapper from './AuthWrapper';
 import { useAuth } from '@/providers/AuthProvider';
 import Captcha from '@/elements/Captcha';
@@ -16,9 +16,11 @@ import PasswordInput from '@/elements/input/PasswordInput';
 import login from '@/api/auth/login';
 import PinInput from '@/elements/input/PinInput';
 import checkpointLogin from '@/api/auth/checkpointLogin';
+import { load } from '@/lib/debounce';
 
 export default () => {
   const { doLogin } = useAuth();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +39,7 @@ export default () => {
       return;
     }
 
-    setLoading(true);
+    load(true, setLoading);
     setError('');
 
     getSecurityKeys(username)
@@ -54,11 +56,13 @@ export default () => {
         setError(err.message);
       })
       .finally(() => {
-        setLoading(false);
+        load(false, setLoading);
       });
   };
 
   const doPasskeyAuth = () => {
+    load(true, setLoading);
+
     window.navigator.credentials
       .get(passkeyOptions)
       .then((credential) => {
@@ -102,10 +106,15 @@ export default () => {
         }
 
         setError(message);
+      })
+      .finally(() => {
+        load(false, setLoading);
       });
   };
 
   const doSubmitPassword = () => {
+    load(true, setLoading);
+
     captchaRef.current?.getToken().then((token) => {
       login({ user: username, password, captcha: token })
         .then((response) => {
@@ -119,18 +128,22 @@ export default () => {
         })
         .catch((msg) => {
           setError(httpErrorToHuman(msg));
-        });
+        })
+        .finally(() => load(false, setLoading));
     });
   };
 
   const doSubmitTotp = () => {
+    load(true, setLoading);
+
     checkpointLogin({ code: totpCode, confirmation_token: twoFactorToken })
       .then((response) => {
         doLogin(response.user);
       })
       .catch((msg) => {
         setError(httpErrorToHuman(msg));
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -169,6 +182,15 @@ export default () => {
 
               <Button onClick={doSubmitUsername} loading={loading} size={'md'} fullWidth>
                 Continue
+              </Button>
+
+              <Divider label={'OR'} labelPosition={'center'} />
+
+              <Button variant={'light'} onClick={() => navigate('/auth/register')} size={'md'} fullWidth>
+                Register
+              </Button>
+              <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
+                Forgot Password
               </Button>
             </Stack>
           ) : step === 'passkey' ? (
@@ -218,6 +240,12 @@ export default () => {
 
               <Button onClick={doSubmitPassword} loading={loading} size={'md'} fullWidth>
                 Sign In
+              </Button>
+
+              <Divider label={'OR'} labelPosition={'center'} />
+
+              <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
+                Forgot Password
               </Button>
             </Stack>
           ) : step === 'totp' ? (
@@ -299,22 +327,6 @@ export default () => {
           ) : null}
         </Card>
       </Stack>
-
-      <div className={'mt-4'}>
-        <p className={'text-sm text-gray-400'}>
-          Don&apos;t have an account?{' '}
-          <NavLink to={'/auth/register'} className={'text-cyan-200 hover:underline'}>
-            Register
-          </NavLink>
-        </p>
-      </div>
-      <div className={'mt-4'}>
-        <p className={'text-sm text-gray-400'}>
-          <NavLink to={'/auth/forgot-password'} className={'text-cyan-200 hover:underline'}>
-            Forgot your password?
-          </NavLink>
-        </p>
-      </div>
     </AuthWrapper>
   );
 };

@@ -3,7 +3,6 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { useToast } from './ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import { useNavigate } from 'react-router';
-import register from '@/api/auth/register';
 import getMe from '@/api/me/getMe';
 import Spinner from '@/elements/Spinner';
 import { load } from '@/lib/debounce';
@@ -13,7 +12,6 @@ interface AuthContextType {
 
   setUser: (user: User | null) => void;
   doLogin: (user: User) => void;
-  doRegister: (username: string, email: string, nameFirst: string, nameLast: string, password: string) => void;
   doLogout: () => void;
 }
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,17 +37,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     navigate('/');
   };
 
-  const doRegister = (username: string, email: string, nameFirst: string, nameLast: string, password: string) => {
-    register({ username, email, name_first: nameFirst, name_last: nameLast, password })
-      .then((response) => {
-        setUser(response.user!);
-        navigate('/');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   const doLogout = () => {
     logout()
       .then(() => {
@@ -61,7 +48,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, doLogin, doRegister, doLogout }}>
+    <AuthContext.Provider value={{ user, setUser, doLogin, doLogout }}>
       {loading ? <Spinner.Centered /> : children}
     </AuthContext.Provider>
   );
