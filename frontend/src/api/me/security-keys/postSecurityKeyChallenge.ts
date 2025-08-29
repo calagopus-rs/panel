@@ -16,7 +16,7 @@ type SerializedCredential = {
   clientExtensionResults?: AuthenticationExtensionsClientOutputs;
 };
 
-function prepareCredentialForTransport(credential: PublicKeyCredential): SerializedCredential {
+export function prepareCredentialForTransport(credential: PublicKeyCredential): SerializedCredential {
   const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
     const bytes = new Uint8Array(buffer);
     let binary = '';
