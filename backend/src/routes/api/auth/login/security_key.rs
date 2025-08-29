@@ -167,13 +167,12 @@ mod post {
                 }
             };
 
-        if passkey.needs_update()
-            && let Some(mut db_passkey) = security_key.passkey
-            && db_passkey.update_credential(&passkey) == Some(true)
-        {
+        if let Some(mut db_passkey) = security_key.passkey {
+            db_passkey.update_credential(&passkey);
+
             sqlx::query!(
                 "UPDATE user_security_keys
-                SET passkey = $2
+                SET passkey = $2, last_used = NOW()
                 WHERE user_security_keys.uuid = $1",
                 security_key.uuid,
                 serde_json::to_value(db_passkey)?

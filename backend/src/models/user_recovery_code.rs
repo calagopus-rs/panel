@@ -35,7 +35,6 @@ impl BaseModel for UserRecoveryCode {
 }
 
 impl UserRecoveryCode {
-    #[inline]
     pub async fn create_all(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,

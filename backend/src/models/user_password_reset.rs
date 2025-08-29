@@ -45,11 +45,10 @@ impl BaseModel for UserPasswordReset {
 }
 
 impl UserPasswordReset {
-    #[inline]
     pub async fn create(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
-    ) -> Result<String, sqlx::Error> {
+    ) -> Result<String, anyhow::Error> {
         let existing = sqlx::query(
             r#"
             SELECT COUNT(*)
@@ -64,7 +63,9 @@ impl UserPasswordReset {
         if let Some(row) = existing
             && row.get::<i64, _>(0) > 0
         {
-            return Err(sqlx::Error::RowNotFound);
+            return Err(anyhow::anyhow!(
+                "a password reset was already requested recently"
+            ));
         }
 
         let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 96);
