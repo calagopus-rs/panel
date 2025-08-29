@@ -26,7 +26,7 @@ export default ({
           label={'Port'}
           placeholder={'Port'}
           min={0}
-          value={settings.port || 543}
+          value={settings.port || 587}
           onChange={(e) => setSettings((settings) => ({ ...settings, port: Number(e) }))}
         />
       </Group>
