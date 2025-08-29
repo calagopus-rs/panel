@@ -99,6 +99,13 @@
       "when": 1756396969220,
       "tag": "0013_many_outlaw_kid",
       "breakpoints": false
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1756486838045,
+      "tag": "0014_silky_klaw",
+      "breakpoints": false
     }
   ]
 }

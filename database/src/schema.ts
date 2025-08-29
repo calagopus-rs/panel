@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm"
-import { index, integer, pgTable, varchar, uniqueIndex, pgEnum, serial, char, boolean, timestamp, text, uuid, smallint, jsonb, inet, bigint, primaryKey, PgColumn, customType, json } from "drizzle-orm/pg-core"
+import { index, integer, pgTable, varchar, uniqueIndex, pgEnum, char, boolean, timestamp, text, uuid, smallint, jsonb, inet, bigint, primaryKey, PgColumn, customType, json } from "drizzle-orm/pg-core"
+
+const UTF8_MAX_SCALAR_SIZE = 4
 
 export const bytea = customType<{ data: string; notNull: false; default: false }>({
   dataType() {
@@ -68,7 +70,7 @@ export const users = pgTable('users', {
 	externalId: varchar('external_id', { length: 255 }),
 
 	avatar: varchar('avatar', { length: 255 }),
-	username: varchar('username', { length: 15 }).notNull(),
+	username: varchar('username', { length: 15 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	email: varchar('email', { length: 255 }).notNull(),
 
 	nameFirst: varchar('name_first', { length: 255 }).notNull(),
@@ -144,7 +146,7 @@ export const userSecurityKeys = pgTable('user_security_keys', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 31 }).notNull(),
+	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 
 	credentialId: bytea('credential_id').notNull(),
 	passkey: jsonb('passkey'),
@@ -162,7 +164,7 @@ export const userSshKeys = pgTable('user_ssh_keys', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 31 }).notNull(),
+	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	fingerprint: char('fingerprint', { length: 50 }).notNull(),
 
 	publicKey: bytea('public_key').notNull(),
@@ -178,7 +180,7 @@ export const userApiKeys = pgTable('user_api_keys', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 31 }).notNull(),
+	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	keyStart: char('key_start', { length: 16 }).notNull(),
 	key: text('key').notNull(),
 	permissions: varchar('permissions', { length: 32 }).array().notNull(),
@@ -213,8 +215,8 @@ export const mounts = pgTable('mounts', {
 export const locations = pgTable('locations', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	shortName: varchar('short_name', { length: 31 }).notNull(),
-	name: varchar('name', { length: 255 }).notNull(),
+	shortName: varchar('short_name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	backup_disk: backupDiskEnum('backup_disk').default('LOCAL').notNull(),
@@ -239,13 +241,13 @@ export const nodes = pgTable('nodes', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	locationUuid: uuid('location_uuid').references(() => locations.uuid).notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	public: boolean('public').notNull(),
 	description: text('description'),
 
-	publicUrl: varchar('public_url', { length: 255 }),
-	url: varchar('url', { length: 255 }).notNull(),
-	sftpHost: varchar('sftp_host', { length: 255 }),
+	publicUrl: varchar('public_url', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
+	url: varchar('url', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	sftpHost: varchar('sftp_host', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
 	sftpPort: integer('sftp_port').notNull(),
 
 	maintenanceMessage: text('maintenance_message'),
@@ -281,7 +283,7 @@ export const nodeAllocations = pgTable('node_allocations', {
 	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
 
 	ip: inet('ip').notNull(),
-	ipAlias: varchar('ip_alias', { length: 255 }),
+	ipAlias: varchar('ip_alias', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
 	port: integer('port').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
@@ -293,8 +295,8 @@ export const nodeAllocations = pgTable('node_allocations', {
 export const nests = pgTable('nests', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	author: varchar('author', { length: 255 }).notNull(),
-	name: varchar('name', { length: 255 }).notNull(),
+	author: varchar('author', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	created: timestamp('created').default(sql`now()`).notNull()
@@ -306,8 +308,8 @@ export const nestEggs = pgTable('nest_eggs', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	nestUuid: uuid('nest_uuid').references(() => nests.uuid).notNull(),
 
-	author: varchar('author', { length: 255 }).notNull(),
-	name: varchar('name', { length: 255 }).notNull(),
+	author: varchar('author', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	config_files: jsonb('config_files').notNull(),
@@ -345,11 +347,11 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 	order: smallint('order_').default(0).notNull(),
 
-	envVariable: varchar('env_variable', { length: 255 }).notNull(),
+	envVariable: varchar('env_variable', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	defaultValue: text('default_value'),
 	userViewable: boolean('user_viewable').default(true).notNull(),
 	userEditable: boolean('user_editable').default(false).notNull(),
@@ -365,16 +367,16 @@ export const nestEggVariables = pgTable('nest_egg_variables', {
 export const databaseHosts = pgTable('database_hosts', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	public: boolean('public').default(false).notNull(),
 	type: databaseTypeEnum('type').notNull(),
 
-	publicHost: varchar('public_host', { length: 255 }),
-	host: varchar('host', { length: 255 }).notNull(),
+	publicHost: varchar('public_host', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
+	host: varchar('host', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	publicPort: integer('public_port'),
 	port: integer('port').notNull(),
 
-	username: varchar('username', { length: 255 }).notNull(),
+	username: varchar('username', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	password: bytea('password').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
@@ -386,7 +388,7 @@ export const databaseHosts = pgTable('database_hosts', {
 export const servers = pgTable('servers', {
 	uuid: uuid('uuid').primaryKey().notNull(),
 	uuidShort: integer('uuid_short').notNull(),
-	externalId: varchar('external_id', { length: 255 }),
+	externalId: varchar('external_id', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
 	allocationUuid: uuid('allocation_uuid').references((): PgColumn => serverAllocations.uuid, { onDelete: 'set null' }),
 	destinationAllocationUuid: uuid('destination_allocation_uuid').references((): PgColumn => serverAllocations.uuid, { onDelete: 'set null' }),
 	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
@@ -394,7 +396,7 @@ export const servers = pgTable('servers', {
 	ownerUuid: uuid('owner_uuid').references(() => users.uuid).notNull(),
 	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid).notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	status: serverStatusEnum('status'),
@@ -502,7 +504,7 @@ export const serverBackups = pgTable('server_backups', {
 	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'set null' }),
 	nodeUuid: uuid('node_uuid').references(() => nodes.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	successful: boolean('successful').default(false).notNull(),
 	locked: boolean('locked').default(false).notNull(),
 
@@ -528,7 +530,7 @@ export const serverDatabases = pgTable('server_databases', {
 	serverUuid: uuid('server_uuid').references(() => servers.uuid).notNull(),
 	databaseHostUuid: uuid('database_host_uuid').references(() => databaseHosts.uuid).notNull(),
 
-	name: varchar('name', { length: 31 }).notNull(),
+	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	locked: boolean('locked').default(false).notNull(),
 
 	username: varchar('username', { length: 31 }).notNull(),
@@ -544,7 +546,7 @@ export const serverSchedules = pgTable('server_schedules', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'cascade' }).notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	enabled: boolean('enabled').notNull(),
 
 	triggers: jsonb('triggers').notNull(),
