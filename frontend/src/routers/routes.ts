@@ -40,6 +40,7 @@ import {
   faPlay,
   faStopwatch,
   faTerminal,
+  faUnlockKeyhole,
   faUser,
   faUsers,
   faUserSecret,
@@ -89,20 +90,20 @@ const routes: Routes = {
     },
     {
       name: 'Security Keys',
-      icon: faCloud,
-      path: '/security',
+      icon: faUnlockKeyhole,
+      path: '/security-keys',
       element: DashboardSecurityKeys,
     },
     {
       name: 'API Keys',
       icon: faCloud,
-      path: '/api',
+      path: '/api-keys',
       element: DashboardApiKeys,
     },
     {
       name: 'SSH Keys',
       icon: faKey,
-      path: '/ssh',
+      path: '/ssh-keys',
       element: DashboardSshKeys,
     },
     {

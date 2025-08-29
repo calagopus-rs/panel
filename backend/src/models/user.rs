@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::{collections::BTreeMap, sync::LazyLock};
 use utoipa::ToSchema;
+use webauthn_rs::prelude::CredentialID;
 
 pub static USERNAME_REGEX: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"^[a-zA-Z0-9_]+$").expect("Failed to compile username regex"));
@@ -182,6 +183,32 @@ impl User {
             (
                 Self::map(None, &row),
                 super::user_api_key::UserApiKey::map(Some("api_key_"), &row),
+            )
+        }))
+    }
+
+    pub async fn by_credential_id(
+        database: &crate::database::Database,
+        credential_id: &CredentialID,
+    ) -> Result<Option<(Self, super::user_security_key::UserSecurityKey)>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}
+            FROM users
+            JOIN user_security_keys ON user_security_keys.user_uuid = users.uuid
+            WHERE user_security_keys.credential_id = $1
+            "#,
+            Self::columns_sql(None, None),
+            super::user_security_key::UserSecurityKey::columns_sql(Some("security_key_"), None)
+        ))
+        .bind(credential_id.to_vec())
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| {
+            (
+                Self::map(None, &row),
+                super::user_security_key::UserSecurityKey::map(Some("security_key_"), &row),
             )
         }))
     }

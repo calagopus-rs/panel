@@ -10,6 +10,7 @@ pub struct UserSecurityKey {
 
     pub name: String,
 
+    pub passkey: Option<webauthn_rs::prelude::Passkey>,
     pub registration: Option<webauthn_rs::prelude::PasskeyRegistration>,
 
     pub last_used: Option<chrono::NaiveDateTime>,
@@ -25,6 +26,7 @@ impl BaseModel for UserSecurityKey {
         BTreeMap::from([
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (format!("{table}.name"), format!("{prefix}name")),
+            (format!("{table}.passkey"), format!("{prefix}passkey")),
             (
                 format!("{table}.registration"),
                 format!("{prefix}registration"),
@@ -41,6 +43,14 @@ impl BaseModel for UserSecurityKey {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
+            passkey: if row
+                .try_get::<serde_json::Value, _>(format!("{prefix}passkey").as_str())
+                .is_ok()
+            {
+                serde_json::from_value(row.get(format!("{prefix}passkey").as_str())).ok()
+            } else {
+                None
+            },
             registration: if row
                 .try_get::<serde_json::Value, _>(format!("{prefix}registration").as_str())
                 .is_ok()

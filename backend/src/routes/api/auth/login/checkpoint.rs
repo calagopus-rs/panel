@@ -34,6 +34,7 @@ mod post {
         #[validate(length(min = 6, max = 10))]
         #[schema(min_length = 6, max_length = 10)]
         code: String,
+
         confirmation_token: String,
     }
 

@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod checkpoint;
+mod security_key;
 
 mod post {
     use crate::{
@@ -164,6 +165,7 @@ mod post {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(post::route))
+        .nest("/security-key", security_key::router(state))
         .nest("/checkpoint", checkpoint::router(state))
         .with_state(state.clone())
 }

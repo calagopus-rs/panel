@@ -35,18 +35,20 @@ export default ({ opened, onClose }: ModalProps) => {
                 console.error(error);
                 addToast(httpErrorToHuman(error), 'error');
                 deleteSecurityKey(key.uuid);
+              })
+              .finally(() => {
+                load(false, setLoading);
               });
           })
           .catch((error) => {
             console.error(error);
-            addToast('Passkey add operation was aborted.', 'error');
+            addToast('Security Key add operation was aborted.', 'error');
             deleteSecurityKey(key.uuid);
+            load(false, setLoading);
           });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
         load(false, setLoading);
       });
   };
