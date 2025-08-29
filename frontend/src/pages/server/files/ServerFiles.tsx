@@ -1,30 +1,54 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
 import loadDirectory from '@/api/server/files/loadDirectory';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import Spinner from '@/elements/Spinner';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import { httpErrorToHuman } from '@/api/axios';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import { httpErrorToHuman, axiosInstance } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
 import { Card, Group, Popover, Title, UnstyledButton } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload, faFileCirclePlus, faFolderPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDownload,
+  faFileCirclePlus,
+  faFolderPlus,
+  faUpload,
+  faFolderOpen,
+  faFileUpload,
+  faChevronDown,
+} from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DirectoryNameModal from './modals/DirectoryNameModal';
 import PullFileModal from './modals/PullFileModal';
 import { load } from '@/lib/debounce';
 import RingProgress from '@/elements/RingProgress';
 import { Text } from '@mantine/core';
-import classNames from 'classnames';
 import cancelOperation from '@/api/server/files/cancelOperation';
 import CloseButton from '@/elements/CloseButton';
 import Progress from '@/elements/Progress';
 import SelectionArea from '@/elements/SelectionArea';
+import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
+import { useDropzone } from 'react-dropzone';
+
+interface FileUploadProgress {
+  fileName: string;
+  progress: number;
+  size: number;
+  uploaded: number;
+  batchId: string;
+  status: 'pending' | 'uploading' | 'completed' | 'cancelled';
+}
+
+interface BatchInfo {
+  controller: AbortController;
+  fileIndices: number[];
+  status: 'pending' | 'uploading' | 'completed' | 'cancelled';
+}
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -51,6 +75,11 @@ export default () => {
   const [page, setPage] = useState(1);
   const [selectedFilesPrevious, setSelectedFilesPrevious] = useState(selectedFiles);
   const [averageOperationProgress, setAverageOperationProgress] = useState(0);
+  const [uploadingFiles, setUploadingFiles] = useState<Map<string, FileUploadProgress>>(new Map());
+  const [uploadBatches, setUploadBatches] = useState<Map<string, BatchInfo>>(new Map());
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setSelectedFiles([]);
@@ -95,6 +124,312 @@ export default () => {
     setSelectedFiles([...selectedFilesPrevious, ...selected]);
   };
 
+  const uploadFiles = useCallback(
+    async (files: File[]) => {
+      if (files.length === 0) return;
+
+      setPendingFiles((prev) => [...prev, ...files]);
+
+      const startIndex = uploadingFiles.size;
+      const initialProgress = new Map<string, FileUploadProgress>();
+
+      files.forEach((file, index) => {
+        const path = (file as any).webkitRelativePath || file.name;
+        const fileKey = `file-${startIndex + index}`;
+        initialProgress.set(fileKey, {
+          fileName: path,
+          progress: 0,
+          size: file.size,
+          uploaded: 0,
+          batchId: '',
+          status: 'pending',
+        });
+      });
+      setUploadingFiles((prev) => new Map([...prev, ...initialProgress]));
+
+      try {
+        const batches: { files: File[]; indices: number[] }[] = [];
+        for (let i = 0; i < files.length; i += 2) {
+          batches.push({
+            files: files.slice(i, i + 2),
+            indices: Array.from({ length: Math.min(2, files.length - i) }, (_, j) => startIndex + i + j),
+          });
+        }
+
+        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+          const batch = batches[batchIndex];
+          const batchId = `batch-${Date.now()}-${batchIndex}`;
+          const controller = new AbortController();
+
+          setUploadBatches(
+            (prev) =>
+              new Map([
+                ...prev,
+                [
+                  batchId,
+                  {
+                    controller,
+                    fileIndices: batch.indices,
+                    status: 'pending',
+                  },
+                ],
+              ]),
+          );
+
+          setUploadingFiles((prev) => {
+            const updated = new Map(prev);
+            batch.indices.forEach((idx) => {
+              const key = `file-${idx}`;
+              const file = updated.get(key);
+              if (file) {
+                updated.set(key, { ...file, batchId });
+              }
+            });
+            return updated;
+          });
+
+          const batchInfo = uploadBatches.get(batchId);
+          if (batchInfo?.status === 'cancelled') {
+            continue;
+          }
+
+          setUploadBatches((prev) => {
+            const updated = new Map(prev);
+            const info = updated.get(batchId);
+            if (info) {
+              updated.set(batchId, { ...info, status: 'uploading' });
+            }
+            return updated;
+          });
+
+          setUploadingFiles((prev) => {
+            const updated = new Map(prev);
+            batch.indices.forEach((idx) => {
+              const key = `file-${idx}`;
+              const file = updated.get(key);
+              if (file) {
+                updated.set(key, { ...file, status: 'uploading' });
+              }
+            });
+            return updated;
+          });
+
+          try {
+            const { url } = await getFileUploadUrl(server.uuid, browsingDirectory);
+
+            const formData = new FormData();
+            batch.files.forEach((file) => {
+              const path = (file as any).webkitRelativePath || file.name;
+              formData.append('files', file, path);
+            });
+
+            const batchTotalSize = batch.files.reduce((sum, file) => sum + file.size, 0);
+
+            await axiosInstance.post(url, formData, {
+              signal: controller.signal,
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+              onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                  const percentComplete = (progressEvent.loaded / progressEvent.total) * 100;
+
+                  setUploadingFiles((prev) => {
+                    const updated = new Map(prev);
+                    batch.indices.forEach((index) => {
+                      const fileKey = `file-${index}`;
+                      const file = batch.files[index - batch.indices[0]];
+                      if (updated.has(fileKey)) {
+                        const fileProgress = updated.get(fileKey)!;
+                        const fileRatio = file.size / batchTotalSize;
+                        updated.set(fileKey, {
+                          ...fileProgress,
+                          progress: percentComplete,
+                          uploaded: progressEvent.loaded * fileRatio,
+                        });
+                      }
+                    });
+                    return updated;
+                  });
+                }
+              },
+            });
+
+            setUploadingFiles((prev) => {
+              const updated = new Map(prev);
+              batch.indices.forEach((index) => {
+                const fileKey = `file-${index}`;
+                if (updated.has(fileKey)) {
+                  const fileProgress = updated.get(fileKey)!;
+                  updated.set(fileKey, {
+                    ...fileProgress,
+                    progress: 100,
+                    uploaded: fileProgress.size,
+                    status: 'completed',
+                  });
+                }
+              });
+              return updated;
+            });
+
+            setUploadBatches((prev) => {
+              const updated = new Map(prev);
+              const info = updated.get(batchId);
+              if (info) {
+                updated.set(batchId, { ...info, status: 'completed' });
+              }
+              return updated;
+            });
+          } catch (error: any) {
+            if (error.name === 'CanceledError') {
+              continue;
+            }
+            throw error;
+          }
+        }
+
+        addToast(`Successfully uploaded ${files.length} file(s)`, 'success');
+        loadDirectoryData();
+      } catch (error: any) {
+        if (error.name !== 'CanceledError') {
+          addToast(`Failed to upload files: ${error.message || error}`, 'error');
+        }
+      } finally {
+        setUploadingFiles((prev) => {
+          const updated = new Map();
+          prev.forEach((file, key) => {
+            if (file.status !== 'completed' && file.status !== 'cancelled') {
+              updated.set(key, file);
+            }
+          });
+          return updated;
+        });
+
+        setUploadBatches(new Map());
+
+        if (uploadingFiles.size === 0) {
+          setPendingFiles([]);
+        }
+      }
+    },
+    [server.uuid, browsingDirectory, uploadingFiles],
+  );
+
+  const cancelFileUpload = useCallback(
+    async (fileKey: string) => {
+      const file = uploadingFiles.get(fileKey);
+      if (!file) return;
+
+      const batch = uploadBatches.get(file.batchId);
+      if (!batch) return;
+
+      if (batch.status === 'pending') {
+        setUploadingFiles((prev) => {
+          const updated = new Map(prev);
+          updated.delete(fileKey);
+          return updated;
+        });
+
+        const fileIndex = parseInt(fileKey.split('-')[1]);
+        setPendingFiles((prev) => prev.filter((_, idx) => idx !== fileIndex));
+        return;
+      }
+
+      if (batch.status === 'uploading') {
+        batch.controller.abort();
+
+        setUploadBatches((prev) => {
+          const updated = new Map(prev);
+          updated.set(file.batchId, { ...batch, status: 'cancelled' });
+          return updated;
+        });
+
+        const filesToReupload: File[] = [];
+        batch.fileIndices.forEach((idx) => {
+          const key = `file-${idx}`;
+          if (key !== fileKey) {
+            const fileData = uploadingFiles.get(key);
+            if (fileData && fileData.status !== 'completed') {
+              filesToReupload.push(pendingFiles[idx]);
+            }
+          }
+        });
+
+        setUploadingFiles((prev) => {
+          const updated = new Map(prev);
+          updated.delete(fileKey);
+          return updated;
+        });
+
+        if (filesToReupload.length > 0) {
+          await uploadFiles(filesToReupload);
+        }
+      }
+    },
+    [uploadingFiles, uploadBatches, pendingFiles],
+  );
+
+  const cancelFolderUpload = useCallback(
+    (folderName: string) => {
+      const filesToCancel: string[] = [];
+      const batchesToCancel = new Set<string>();
+
+      uploadingFiles.forEach((file, key) => {
+        if (file.fileName.startsWith(folderName + '/')) {
+          filesToCancel.push(key);
+          batchesToCancel.add(file.batchId);
+        }
+      });
+
+      batchesToCancel.forEach((batchId) => {
+        const batch = uploadBatches.get(batchId);
+        if (batch && batch.status === 'uploading') {
+          batch.controller.abort();
+        }
+      });
+
+      setUploadingFiles((prev) => {
+        const updated = new Map(prev);
+        filesToCancel.forEach((key) => updated.delete(key));
+        return updated;
+      });
+
+      setUploadBatches((prev) => {
+        const updated = new Map(prev);
+        batchesToCancel.forEach((batchId) => updated.delete(batchId));
+        return updated;
+      });
+
+      addToast(`Cancelled upload of folder: ${folderName}`, 'info');
+    },
+    [uploadingFiles, uploadBatches],
+  );
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      uploadFiles(acceptedFiles);
+    },
+    [uploadFiles],
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: true,
+    noKeyboard: true,
+  });
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    uploadFiles(files);
+    event.target.value = '';
+  };
+
+  const handleFolderSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    uploadFiles(files);
+    event.target.value = '';
+  };
+
   useEffect(() => {
     if (!browsingDirectory) return;
 
@@ -124,21 +459,29 @@ export default () => {
   }, [browsingDirectory, browsingBackup, loading]);
 
   useEffect(() => {
-    if (fileOperations.size === 0) {
+    if (fileOperations.size === 0 && uploadingFiles.size === 0) {
       setAverageOperationProgress(0);
+      return;
     }
 
     let totalProgress = 0;
     let totalSize = 0;
+
     fileOperations.forEach((operation) => {
       if (operation.total === 0) return;
-
       totalProgress += operation.progress;
       totalSize += operation.total;
     });
 
-    setAverageOperationProgress((totalProgress / totalSize) * 100);
-  }, [Array.from(fileOperations)]);
+    uploadingFiles.forEach((file) => {
+      totalProgress += file.uploaded;
+      totalSize += file.size;
+    });
+
+    if (totalSize > 0) {
+      setAverageOperationProgress((totalProgress / totalSize) * 100);
+    }
+  }, [Array.from(fileOperations), uploadingFiles]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -159,8 +502,55 @@ export default () => {
     };
   }, [browsingEntries.data]);
 
+  const getAggregatedUploadProgress = () => {
+    const folderMap = new Map<string, { totalSize: number; uploadedSize: number; fileCount: number }>();
+
+    uploadingFiles.forEach((file) => {
+      const pathParts = file.fileName.split('/');
+      if (pathParts.length > 1) {
+        const folderName = pathParts[0];
+        const existing = folderMap.get(folderName) || { totalSize: 0, uploadedSize: 0, fileCount: 0 };
+        folderMap.set(folderName, {
+          totalSize: existing.totalSize + file.size,
+          uploadedSize: existing.uploadedSize + file.uploaded,
+          fileCount: existing.fileCount + 1,
+        });
+      }
+    });
+
+    return folderMap;
+  };
+
+  const folderProgress = getAggregatedUploadProgress();
+  const hasOperations = fileOperations.size > 0 || uploadingFiles.size > 0;
+
   return (
-    <>
+    <div {...getRootProps()} className={'min-h-screen relative'}>
+      <input {...getInputProps()} />
+
+      <input ref={fileInputRef} type={'file'} multiple style={{ display: 'none' }} onChange={handleFileSelect} />
+      <input
+        ref={folderInputRef}
+        type={'file'}
+        multiple
+        style={{ display: 'none' }}
+        onChange={handleFolderSelect}
+        {...({ webkitdirectory: '', directory: '' } as any)}
+      />
+
+      {isDragActive && (
+        <div
+          className={
+            'fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none'
+          }
+        >
+          <div className={'bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl'}>
+            <FontAwesomeIcon icon={faUpload} className={'text-4xl text-blue-500 mb-4'} />
+            <p className={'text-lg font-semibold'}>Drop files here to upload</p>
+          </div>
+        </div>
+      )}
+
       <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
       <PullFileModal opened={openModal === 'pullFile'} onClose={() => setOpenModal(null)} />
 
@@ -172,29 +562,68 @@ export default () => {
         </Title>
         {!browsingBackup && (
           <Group>
-            {fileOperations.size > 0 && (
+            {hasOperations && (
               <Popover position={'bottom-start'} shadow={'md'}>
                 <Popover.Target>
                   <UnstyledButton>
                     <RingProgress
                       size={50}
-                      sections={[{ value: averageOperationProgress, color: 'blue' }]}
+                      sections={[
+                        {
+                          value: averageOperationProgress,
+                          color: uploadingFiles.size > 0 ? 'green' : 'blue',
+                        },
+                      ]}
                       roundCaps
                       thickness={4}
                       label={
-                        <Text c={'blue'} fw={700} ta={'center'} size={'xs'}>
+                        <Text c={uploadingFiles.size > 0 ? 'green' : 'blue'} fw={700} ta={'center'} size={'xs'}>
                           {averageOperationProgress.toFixed(0)}%
                         </Text>
                       }
                     />
                   </UnstyledButton>
                 </Popover.Target>
-                <Popover.Dropdown className={'md:min-w-xl max-w-screen'}>
-                  {Array.from(fileOperations).map(([uuid, operation], index) => {
+                <Popover.Dropdown className={'md:min-w-xl max-w-screen max-h-96 overflow-y-auto'}>
+                  {Array.from(folderProgress).map(([folderName, { totalSize, uploadedSize, fileCount }]) => {
+                    const progress = (uploadedSize / totalSize) * 100;
+                    return (
+                      <div key={folderName} className={'flex flex-row items-center mb-3'}>
+                        <div className={'flex flex-col flex-grow'}>
+                          <p className={'break-all mb-1'}>
+                            Uploading folder: {folderName} ({fileCount} files)
+                          </p>
+                          <Progress value={progress} />
+                        </div>
+                        <CloseButton className={'ml-3'} onClick={() => cancelFolderUpload(folderName)} />
+                      </div>
+                    );
+                  })}
+
+                  {Array.from(uploadingFiles).map(([key, file]) => {
+                    if (folderProgress.size > 0 && file.fileName.includes('/')) {
+                      return null;
+                    }
+
+                    return (
+                      <div key={key} className={'flex flex-row items-center mb-2'}>
+                        <div className={'flex flex-col flex-grow'}>
+                          <p className={'break-all mb-1 text-sm'}>
+                            {file.status === 'pending' ? 'Waiting: ' : 'Uploading: '}
+                            {file.fileName}
+                          </p>
+                          <Progress value={file.progress} />
+                        </div>
+                        <CloseButton className={'ml-3'} onClick={() => cancelFileUpload(key)} />
+                      </div>
+                    );
+                  })}
+
+                  {Array.from(fileOperations).map(([uuid, operation]) => {
                     const progress = (operation.progress / operation.total) * 100;
 
                     return (
-                      <div key={uuid} className={classNames(index === 0 ? '' : 'mt-2', 'flex flex-row items-center')}>
+                      <div key={uuid} className={'flex flex-row items-center mb-2'}>
                         <div className={'flex flex-col flex-grow'}>
                           <p className={'break-all mb-1'}>
                             {operation.type === 'compress'
@@ -228,13 +657,38 @@ export default () => {
             >
               Pull
             </Button>
-            <Button
-              onClick={() => console.log('#Soon')}
-              color={'blue'}
-              leftSection={<FontAwesomeIcon icon={faUpload} />}
-            >
-              Upload
-            </Button>
+            <ContextMenuProvider>
+              <ContextMenu
+                items={[
+                  {
+                    icon: faFileUpload,
+                    label: 'File',
+                    onClick: () => fileInputRef.current?.click(),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faFolderOpen,
+                    label: 'Directory',
+                    onClick: () => folderInputRef.current?.click(),
+                    color: 'gray',
+                  },
+                ]}
+              >
+                {({ openMenu }) => (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      openMenu(rect.left, rect.bottom);
+                    }}
+                    color={'blue'}
+                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                  >
+                    Upload
+                  </Button>
+                )}
+              </ContextMenu>
+            </ContextMenuProvider>
             <Button
               onClick={() =>
                 navigate(
@@ -281,6 +735,6 @@ export default () => {
           </SelectionArea>
         </>
       )}
-    </>
+    </div>
   );
 };
