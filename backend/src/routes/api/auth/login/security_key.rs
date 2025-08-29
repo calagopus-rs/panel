@@ -27,6 +27,12 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = BAD_REQUEST, body = ApiError),
+    ), params(
+        (
+            "user" = String, Query,
+            description = "The user to get a security key challenge for",
+            example = "/",
+        ),
     ))]
     pub async fn route(state: GetState, Query(data): Query<Params>) -> ApiResponseResult {
         let webauthn = state.settings.get_webauthn().await?;
