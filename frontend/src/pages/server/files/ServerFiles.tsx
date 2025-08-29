@@ -160,7 +160,6 @@ export default () => {
         }
 
         for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-          // Wait if we have 4 active batches
           while (activeBatchCount >= 4) {
             await new Promise((resolve) => setTimeout(resolve, 100));
           }
@@ -234,6 +233,7 @@ export default () => {
             });
 
             const batchTotalSize = batch.files.reduce((sum, file) => sum + file.size, 0);
+            let lastLoaded = 0;
 
             await axiosInstance.post(url, formData, {
               signal: controller.signal,
@@ -242,7 +242,9 @@ export default () => {
               },
               onUploadProgress: (progressEvent) => {
                 if (progressEvent.total) {
-                  const percentComplete = (progressEvent.loaded / progressEvent.total) * 100;
+                  const currentLoaded = progressEvent.loaded;
+                  const deltaLoaded = currentLoaded - lastLoaded;
+                  lastLoaded = currentLoaded;
 
                   setUploadingFiles((prev) => {
                     const updated = new Map(prev);
@@ -252,10 +254,12 @@ export default () => {
                       if (updated.has(fileKey)) {
                         const fileProgress = updated.get(fileKey)!;
                         const fileRatio = file.size / batchTotalSize;
+
+                        const newUploaded = Math.min(fileProgress.uploaded + deltaLoaded * fileRatio, file.size);
                         updated.set(fileKey, {
                           ...fileProgress,
-                          progress: percentComplete,
-                          uploaded: progressEvent.loaded * fileRatio,
+                          progress: (newUploaded / file.size) * 100,
+                          uploaded: newUploaded,
                         });
                       }
                     });
@@ -291,9 +295,7 @@ export default () => {
               return updated;
             });
           } catch (error: any) {
-            if (error.name === 'CanceledError') {
-              // Don't count cancelled batches
-            } else {
+            if (error.name !== 'CanceledError') {
               throw error;
             }
           } finally {
@@ -308,15 +310,17 @@ export default () => {
           addToast(`Failed to upload files: ${error.message || error}`, 'error');
         }
       } finally {
-        setUploadingFiles((prev) => {
-          const updated = new Map();
-          prev.forEach((file, key) => {
-            if (file.status !== 'completed' && file.status !== 'cancelled') {
-              updated.set(key, file);
-            }
+        setTimeout(() => {
+          setUploadingFiles((prev) => {
+            const updated = new Map();
+            prev.forEach((file, key) => {
+              if (file.status !== 'completed' && file.status !== 'cancelled') {
+                updated.set(key, file);
+              }
+            });
+            return updated;
           });
-          return updated;
-        });
+        }, 1000);
 
         setUploadBatches(new Map());
 
@@ -363,7 +367,6 @@ export default () => {
           if (key !== fileKey) {
             const fileData = uploadingFiles.get(key);
             if (fileData && fileData.status !== 'completed') {
-              // Remove the old state for this file
               setUploadingFiles((prev) => {
                 const updated = new Map(prev);
                 updated.delete(key);
@@ -396,7 +399,9 @@ export default () => {
       uploadingFiles.forEach((file, key) => {
         if (file.fileName.startsWith(folderName + '/')) {
           filesToCancel.push(key);
-          batchesToCancel.add(file.batchId);
+          if (file.batchId) {
+            batchesToCancel.add(file.batchId);
+          }
         }
       });
 
@@ -521,24 +526,42 @@ export default () => {
     };
   }, [browsingEntries.data]);
 
-  const getAggregatedUploadProgress = () => {
-    const folderMap = new Map<string, { totalSize: number; uploadedSize: number; fileCount: number }>();
+  const getAggregatedUploadProgress = useCallback(() => {
+    const folderMap = new Map<
+      string,
+      {
+        totalSize: number;
+        uploadedSize: number;
+        fileCount: number;
+        completedCount: number;
+        pendingCount: number;
+      }
+    >();
 
     uploadingFiles.forEach((file) => {
       const pathParts = file.fileName.split('/');
       if (pathParts.length > 1) {
         const folderName = pathParts[0];
-        const existing = folderMap.get(folderName) || { totalSize: 0, uploadedSize: 0, fileCount: 0 };
+        const existing = folderMap.get(folderName) || {
+          totalSize: 0,
+          uploadedSize: 0,
+          fileCount: 0,
+          completedCount: 0,
+          pendingCount: 0,
+        };
+
         folderMap.set(folderName, {
           totalSize: existing.totalSize + file.size,
           uploadedSize: existing.uploadedSize + file.uploaded,
           fileCount: existing.fileCount + 1,
+          completedCount: existing.completedCount + (file.status === 'completed' ? 1 : 0),
+          pendingCount: existing.pendingCount + (file.status === 'pending' ? 1 : 0),
         });
       }
     });
 
     return folderMap;
-  };
+  }, [uploadingFiles]);
 
   const folderProgress = getAggregatedUploadProgress();
   const hasOperations = fileOperations.size > 0 || uploadingFiles.size > 0;
@@ -604,14 +627,19 @@ export default () => {
                   </UnstyledButton>
                 </Popover.Target>
                 <Popover.Dropdown className={'md:min-w-xl max-w-screen max-h-96 overflow-y-auto'}>
-                  {Array.from(folderProgress).map(([folderName, { totalSize, uploadedSize, fileCount }]) => {
-                    const progress = (uploadedSize / totalSize) * 100;
+                  {Array.from(folderProgress).map(([folderName, info]) => {
+                    const progress = info.totalSize > 0 ? (info.uploadedSize / info.totalSize) * 100 : 0;
+                    const statusText =
+                      info.pendingCount > 0
+                        ? `Uploading folder: ${folderName} (${info.fileCount - info.pendingCount}/${
+                            info.fileCount
+                          } files)`
+                        : `Uploading folder: ${folderName} (${info.fileCount} files)`;
+
                     return (
                       <div key={folderName} className={'flex flex-row items-center mb-3'}>
                         <div className={'flex flex-col flex-grow'}>
-                          <p className={'break-all mb-1'}>
-                            Uploading folder: {folderName} ({fileCount} files)
-                          </p>
+                          <p className={'break-all mb-1'}>{statusText}</p>
                           <Progress value={progress} />
                         </div>
                         <CloseButton className={'ml-3'} onClick={() => cancelFolderUpload(folderName)} />
