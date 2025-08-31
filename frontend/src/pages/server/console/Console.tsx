@@ -206,7 +206,7 @@ export default function Terminal() {
   );
 
   return (
-    <Card className={'h-full flex flex-col font-mono text-sm relative'}>
+    <Card className={'h-full flex flex-col font-mono text-sm relative !p-2'}>
       {!socketConnected && <Spinner.Centered />}
 
       <div
@@ -218,7 +218,7 @@ export default function Terminal() {
       </div>
 
       {!isAtBottom && (
-        <div className={'absolute bottom-4 right-4 z-90 w-fit'}>
+        <div className={'absolute bottom-2 right-2 z-90 w-fit'}>
           <Button onClick={scrollToBottom} variant={'transparent'}>
             <FontAwesomeIcon icon={faArrowDown} />
           </Button>

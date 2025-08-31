@@ -121,20 +121,26 @@ export default () => {
             </Group>
           </Stack>
         </Modal>
-        <Modal {...stageStack.register('recovery')} title={'Recovery Codes'}>
+        <Modal
+          {...stageStack.register('recovery')}
+          onClose={() => {
+            stageStack.close('recovery');
+            setUser({ ...user!, totpEnabled: true });
+          }}
+          title={'Recovery Codes'}
+        >
           <Stack>
-            <Text>Recovery codes:</Text>
             <CopyOnClick content={recoveryCodes.join('\n')}>
-              <Code block>{recoveryCodes.join('\n')}</Code>
+              <Code block className={'grid grid-cols-2 w-full gap-x-2'}>
+                {recoveryCodes.map((code, i) => (
+                  <span key={code} className={i % 2 === 0 ? 'text-right' : 'text-left'}>
+                    {code}
+                  </span>
+                ))}
+              </Code>
             </CopyOnClick>
             <Group>
-              <Button
-                variant={'default'}
-                onClick={() => {
-                  setUser({ ...user!, totpEnabled: true });
-                  stageStack.closeAll();
-                }}
-              >
+              <Button variant={'default'} onClick={() => stageStack.closeAll()}>
                 Close
               </Button>
             </Group>

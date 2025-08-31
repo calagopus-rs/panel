@@ -37,6 +37,8 @@ pub struct AppState {
     pub start_time: Instant,
     pub version: String,
 
+    pub client: reqwest::Client,
+
     pub settings: Arc<crate::settings::Settings>,
     pub jwt: Arc<crate::jwt::Jwt>,
     pub captcha: Arc<crate::captcha::Captcha>,

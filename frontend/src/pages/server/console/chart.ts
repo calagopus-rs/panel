@@ -28,7 +28,7 @@ const defaultOptions: ChartOptions<'line'> = {
       type: 'realtime',
       realtime: {
         duration: 20000,
-        delay: 1100,
+        delay: 2000,
       },
       ticks: {
         display: false,

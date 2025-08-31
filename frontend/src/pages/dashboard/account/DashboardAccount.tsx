@@ -1,6 +1,7 @@
 import PasswordContainer from './PasswordContainer';
 import EmailContainer from './EmailContainer';
 import TwoFactorContainer from './TwoFactorContainer';
+import AccountContainer from './AccountContainer';
 import { Grid } from '@mantine/core';
 
 export default () => {
@@ -9,6 +10,7 @@ export default () => {
       <PasswordContainer />
       <EmailContainer />
       <TwoFactorContainer />
+      <AccountContainer />
     </Grid>
   );
 };

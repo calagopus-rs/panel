@@ -253,6 +253,11 @@ async fn main() {
         start_time: Instant::now(),
         version: format!("{VERSION}:{GIT_COMMIT}"),
 
+        client: reqwest::ClientBuilder::new()
+            .user_agent(format!("github.com/pterodactyl-rs/panel {VERSION}"))
+            .build()
+            .unwrap(),
+
         settings: settings.clone(),
         jwt,
         captcha,

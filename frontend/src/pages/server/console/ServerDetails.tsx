@@ -67,7 +67,7 @@ export default () => {
       <StatCard
         icon={faEthernet}
         label={'Address'}
-        copyOnClick
+        copyOnClick={!!server.allocation}
         value={server.allocation ? formatAllocation(server.allocation) : 'N/A'}
       />
       <StatCard

@@ -636,6 +636,8 @@ interface UserSession {
   created: Date;
 }
 
+type SshKeyProvider = 'github' | 'gitlab' | 'launchpad';
+
 interface UserSshKey {
   uuid: string;
   name: string;

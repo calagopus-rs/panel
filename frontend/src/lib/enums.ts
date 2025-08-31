@@ -230,3 +230,9 @@ export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinit
   update_startup_command: faCode,
   update_startup_docker_image: faDocker,
 };
+
+export const sshKeyProviderLabelMapping: Record<SshKeyProvider, string> = {
+  github: 'GitHub',
+  gitlab: 'GitLab',
+  launchpad: 'Launchpad',
+};

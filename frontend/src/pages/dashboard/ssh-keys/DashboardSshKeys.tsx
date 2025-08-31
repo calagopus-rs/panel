@@ -12,13 +12,14 @@ import SshKeyRow from './SshKeyRow';
 import SshKeyCreateModal from './modals/SshKeyCreateModal';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faDownload, faPlus } from '@fortawesome/free-solid-svg-icons';
+import SshKeyImportModal from './modals/SshKeyImportModal';
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { sshKeys, setSshKeys } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | 'import'>(null);
 
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -43,6 +44,7 @@ export default () => {
   return (
     <>
       <SshKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
+      <SshKeyImportModal opened={openModal === 'import'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
@@ -55,6 +57,13 @@ export default () => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
+          <Button
+            onClick={() => setOpenModal('import')}
+            color={'blue'}
+            leftSection={<FontAwesomeIcon icon={faDownload} />}
+          >
+            Import
+          </Button>
           <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>

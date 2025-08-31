@@ -17,6 +17,10 @@ export default () => {
     updatePassword(currentPassword, newPassword)
       .then(() => {
         addToast('Password updated.', 'success');
+
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmNewPassword('');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -35,6 +39,7 @@ export default () => {
           label={'Current Password'}
           placeholder={'Current Password'}
           type={'password'}
+          value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
         />
 
@@ -43,6 +48,7 @@ export default () => {
           label={'New Password'}
           placeholder={'New Password'}
           type={'password'}
+          value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
         />
 
@@ -51,6 +57,7 @@ export default () => {
           label={'Confirm New Password'}
           placeholder={'Confirm New Password'}
           type={'password'}
+          value={confirmNewPassword}
           onChange={(e) => setConfirmNewPassword(e.target.value)}
         />
 

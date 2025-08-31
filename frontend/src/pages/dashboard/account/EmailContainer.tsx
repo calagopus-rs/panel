@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 export default () => {
   const { addToast } = useToast();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
@@ -18,6 +18,9 @@ export default () => {
     updateEmail(email, password)
       .then(() => {
         addToast('Email updated.', 'success');
+
+        setUser({ ...user!, email });
+        setPassword('');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -44,6 +47,7 @@ export default () => {
           label={'Current Password'}
           placeholder={'Current Password'}
           type={'password'}
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
