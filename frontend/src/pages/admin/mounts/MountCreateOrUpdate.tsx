@@ -76,7 +76,7 @@ export default () => {
     deleteMount(params.id)
       .then(() => {
         addToast('Mount deleted.', 'success');
-        navigate('/admin/database-hosts');
+        navigate('/admin/mounts');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
