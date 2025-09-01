@@ -14,6 +14,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
+import LocationView from './LocationView';
 
 const LocationsContainer = () => {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ export default () => {
     <Routes>
       <Route path={'/'} element={<LocationsContainer />} />
       <Route path={'/new'} element={<LocationCreateOrUpdate />} />
-      <Route path={'/:id'} element={<LocationCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<LocationView />} />
     </Routes>
   );
 };

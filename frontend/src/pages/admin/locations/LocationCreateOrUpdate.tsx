@@ -18,18 +18,20 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
 import TextArea from '@/elements/input/TextArea';
 
-export default () => {
+export default ({ contextLocation }: { contextLocation?: Location }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<Location>({
-    shortName: '',
-    name: '',
-    backupDisk: 'local',
-  } as Location);
+  const [location, setLocation] = useState<UpdateLocation>({
+    shortName: contextLocation?.shortName ?? '',
+    name: contextLocation?.name ?? '',
+    description: contextLocation?.description ?? '',
+    backupDisk: contextLocation?.backupDisk ?? 'local',
+    backupConfigs: contextLocation?.backupConfigs ?? {},
+  } as UpdateLocation);
 
   useEffect(() => {
     if (params.id) {
@@ -45,8 +47,8 @@ export default () => {
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
-    if (location?.uuid) {
-      updateLocation(location.uuid, location)
+    if (params?.id) {
+      updateLocation(params.id, location)
         .then(() => {
           addToast('Location updated.', 'success');
         })
@@ -73,7 +75,7 @@ export default () => {
 
   const doDelete = () => {
     load(true, setLoading);
-    deleteLocation(location.uuid)
+    deleteLocation(params.id)
       .then(() => {
         addToast('Location deleted.', 'success');
         navigate('/admin/locations');
@@ -98,7 +100,7 @@ export default () => {
         Are you sure you want to delete <Code>{location?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={1}>{params.id ? 'Update' : 'Create'} Location</Title>
+      <Title order={2}>{params.id ? 'Update' : 'Create'} Location</Title>
       <Divider />
 
       <Stack>

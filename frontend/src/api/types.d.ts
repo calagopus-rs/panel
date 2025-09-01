@@ -205,6 +205,11 @@ interface DatabaseHost {
   type: DatabaseType;
 }
 
+interface LocationDatabaseHost {
+  databaseHost: DatabaseHost;
+  created: string;
+}
+
 interface NestEgg {
   uuid: string;
   name: string;
