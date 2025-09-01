@@ -234,10 +234,6 @@ async fn main() {
     let database = Arc::new(database::Database::new(&env).await);
     let cache = Arc::new(cache::Cache::new(&env).await);
 
-    let settings = Arc::new(settings::Settings::new(database.clone()).await);
-    let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
-    let mail = Arc::new(mail::Mail::new(settings.clone()));
-
     if env.database_migrate {
         tracing::info!("running database migrations...");
         match database.migrate().await {
@@ -248,6 +244,10 @@ async fn main() {
             }
         }
     }
+
+    let settings = Arc::new(settings::Settings::new(database.clone()).await);
+    let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
+    let mail = Arc::new(mail::Mail::new(settings.clone()));
 
     let state = Arc::new(routes::AppState {
         start_time: Instant::now(),
