@@ -106,7 +106,7 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
           placeholder={'Description'}
           value={nest.description || ''}
           rows={3}
-          onChange={(e) => setNest({ ...nest, description: e.target.value })}
+          onChange={(e) => setNest({ ...nest, description: e.target.value || null })}
         />
       </Stack>
 

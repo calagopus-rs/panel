@@ -40,14 +40,17 @@ interface Location extends UpdateLocation {
   created: Date;
 }
 
-interface Mount {
-  uuid: string;
+interface AdminUpdateMount {
   name: string;
   description: string | null;
-  readOnly: boolean;
   source: string;
   target: string;
+  readOnly: boolean;
   userMountable: boolean;
+}
+
+interface Mount extends AdminUpdateMount {
+  uuid: string;
   eggs: number;
   nodes: number;
   servers: number;

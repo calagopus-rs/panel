@@ -40,8 +40,8 @@ export default () => {
   useEffect(() => {
     if (params.id) {
       getDatabaseHost(params.id)
-        .then((user) => {
-          setDatabaseHost(user);
+        .then((databaseHost) => {
+          setDatabaseHost(databaseHost);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -184,7 +184,7 @@ export default () => {
             label={'Public Host'}
             placeholder={'Public Host'}
             value={databaseHost.publicHost || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, publicHost: e.target.value })}
+            onChange={(e) => setDatabaseHost({ ...databaseHost, publicHost: e.target.value || null })}
           />
           <NumberInput
             label={'Public Port'}

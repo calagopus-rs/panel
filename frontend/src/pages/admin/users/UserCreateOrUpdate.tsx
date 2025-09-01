@@ -142,7 +142,7 @@ export default () => {
           placeholder={'Password'}
           type={'password'}
           value={user.password || ''}
-          onChange={(e) => setUser({ ...user, password: e.target.value })}
+          onChange={(e) => setUser({ ...user, password: e.target.value || null })}
         />
 
         <Switch label={'Admin'} checked={user.admin} onChange={(e) => setUser({ ...user, admin: e.target.checked })} />

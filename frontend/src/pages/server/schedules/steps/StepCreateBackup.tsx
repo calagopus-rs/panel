@@ -13,10 +13,10 @@ export default ({
   return (
     <Stack>
       <TextInput
-        label={'Backup Name (optional)'}
+        label={'Backup Name'}
         placeholder={'Auto-generated if empty'}
-        value={action.name}
-        onChange={(e) => setAction({ ...action, name: e.currentTarget.value })}
+        value={action.name || ''}
+        onChange={(e) => setAction({ ...action, name: e.currentTarget.value || null })}
       />
       <Switch
         label={'Run in Foreground'}
@@ -29,7 +29,6 @@ export default ({
         onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
       />
       <TagsInput
-        withAsterisk
         label={'Ignored Files'}
         placeholder={'Add files to ignore'}
         value={action.ignoredFiles || []}

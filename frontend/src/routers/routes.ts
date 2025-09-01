@@ -1,10 +1,11 @@
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
 import AdminHome from '@/pages/admin/AdminHome';
-import AdminDatabaseHosts from '@/pages/admin/databasehosts/AdminDatabaseHosts';
+import AdminDatabaseHosts from '@/pages/admin/database-hosts/AdminDatabaseHosts';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminNests from '@/pages/admin/nests/AdminNests';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminUsers from '@/pages/admin/users/AdminUsers';
+import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys';
@@ -34,6 +35,7 @@ import {
   faCrow,
   faDatabase,
   faDungeon,
+  faExternalLink,
   faFolderOpen,
   faKey,
   faNetworkWired,
@@ -156,6 +158,12 @@ const routes: Routes = {
       icon: faCrow,
       path: '/nests/*',
       element: AdminNests,
+    },
+    {
+      name: 'Mounts',
+      icon: faExternalLink,
+      path: '/mounts/*',
+      element: AdminMounts,
     },
     {
       name: 'Activity',

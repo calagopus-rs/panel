@@ -4,7 +4,8 @@ import { LocationsSlice, createLocationsSlice } from './slices/admin/locations';
 import { NestsSlice, createNestsSlice } from './slices/admin/nests';
 import { SettingsSlice, createSettingsSlice } from './slices/admin/settings';
 import { UsersSlice, createUsersSlice } from './slices/admin/users';
-import { DatabaseHostsSlice, createDatabaseHostsSlice } from './slices/admin/databasehosts';
+import { DatabaseHostsSlice, createDatabaseHostsSlice } from './slices/admin/database-hosts';
+import { MountsSlice, createMountsSlice } from './slices/admin/mounts';
 
 export interface AdminStore
   extends DatabaseHostsSlice,
@@ -12,7 +13,8 @@ export interface AdminStore
     LocationsSlice,
     NestsSlice,
     SettingsSlice,
-    UsersSlice {}
+    UsersSlice,
+    MountsSlice {}
 
 export const useAdminStore = create<AdminStore>()((...a) => ({
   ...createDatabaseHostsSlice(...a),
@@ -21,4 +23,5 @@ export const useAdminStore = create<AdminStore>()((...a) => ({
   ...createNestsSlice(...a),
   ...createSettingsSlice(...a),
   ...createUsersSlice(...a),
+  ...createMountsSlice(...a),
 }));

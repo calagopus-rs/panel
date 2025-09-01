@@ -125,7 +125,7 @@ export default () => {
             placeholder={'Description'}
             value={location.description || ''}
             rows={3}
-            onChange={(e) => setLocation({ ...location, description: e.target.value })}
+            onChange={(e) => setLocation({ ...location, description: e.target.value || null })}
           />
           <Select
             withAsterisk

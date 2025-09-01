@@ -146,7 +146,7 @@ export default ({ nest }: { nest: Nest }) => {
           placeholder={'Description'}
           value={egg.description || ''}
           rows={3}
-          onChange={(e) => setEgg({ ...egg, description: e.target.value })}
+          onChange={(e) => setEgg({ ...egg, description: e.target.value || null })}
         />
 
         {/* TODO: configFiles */}
