@@ -242,6 +242,12 @@ interface Server {
   created: Date;
 }
 
+interface ImagePullProgress {
+  status: 'pulling' | 'extracting';
+  progress: number;
+  total: number;
+}
+
 interface ServerActivity {
   user?: User;
   event: string;

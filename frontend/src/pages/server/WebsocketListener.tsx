@@ -12,6 +12,8 @@ export default () => {
     socketConnected,
     socketInstance,
     updateServer,
+    setImagePull,
+    removeImagePull,
     setStats,
     setBackupProgress,
     setBackupRestoreProgress,
@@ -39,6 +41,21 @@ export default () => {
     }
 
     setStats(transformKeysToCamelCase(wsStats));
+  });
+
+  useWebsocketEvent(SocketEvent.IMAGE_PULL_PROGRESS, (id, data) => {
+    let wsData: any = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    setImagePull(id, wsData);
+  });
+
+  useWebsocketEvent(SocketEvent.IMAGE_PULL_COMPLETED, (id) => {
+    removeImagePull(id);
   });
 
   useWebsocketEvent(SocketEvent.BACKUP_PROGRESS, (uuid, data) => {

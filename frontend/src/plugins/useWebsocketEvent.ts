@@ -7,6 +7,8 @@ export enum SocketEvent {
   INSTALL_OUTPUT = 'install output',
   INSTALL_STARTED = 'install started',
   INSTALL_COMPLETED = 'install completed',
+  IMAGE_PULL_PROGRESS = 'image pull progress',
+  IMAGE_PULL_COMPLETED = 'image pull completed',
   CONSOLE_OUTPUT = 'console output',
   STATUS = 'status',
   STATS = 'stats',
