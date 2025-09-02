@@ -18,6 +18,7 @@ import debounce from 'debounce';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
+import Tooltip from '@/elements/Tooltip';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const params = useParams<'id'>();
@@ -277,11 +278,18 @@ export default ({ contextNode }: { contextNode?: Node }) => {
               Reset Token
             </Button>
           )}
-          {params.id && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
+          {params.id &&
+            (contextNode.servers > 0 ? (
+              <Tooltip label={'Cannot delete node with servers'}>
+                <Button color={'red'} loading={loading} disabled>
+                  Delete
+                </Button>
+              </Tooltip>
+            ) : (
+              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            ))}
         </Group>
       </Stack>
     </>

@@ -16,6 +16,7 @@ import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
 import TextArea from '@/elements/input/TextArea';
+import Tooltip from '@/elements/Tooltip';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const params = useParams<'id'>();
@@ -143,11 +144,18 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
           <Button onClick={doCreateOrUpdate} loading={loading}>
             Save
           </Button>
-          {params.id && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
+          {params.id &&
+            (contextLocation.nodes > 0 ? (
+              <Tooltip label={'Cannot delete location with nodes'}>
+                <Button color={'red'} loading={loading} disabled>
+                  Delete
+                </Button>
+              </Tooltip>
+            ) : (
+              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            ))}
         </Group>
 
         {location.backupDisk === 's3' || location.backupConfigs?.s3 ? (
