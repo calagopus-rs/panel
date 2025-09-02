@@ -5,6 +5,7 @@ import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminNests from '@/pages/admin/nests/AdminNests';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminUsers from '@/pages/admin/users/AdminUsers';
+import AdminNodes from '@/pages/admin/nodes/AdminNodes';
 import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
@@ -40,6 +41,7 @@ import {
   faKey,
   faNetworkWired,
   faPlay,
+  faServer,
   faStopwatch,
   faTerminal,
   faUnlockKeyhole,
@@ -152,6 +154,12 @@ const routes: Routes = {
       icon: faDatabase,
       path: '/database-hosts/*',
       element: AdminDatabaseHosts,
+    },
+    {
+      name: 'Nodes',
+      icon: faServer,
+      path: '/nodes/*',
+      element: AdminNodes,
     },
     {
       name: 'Nests',

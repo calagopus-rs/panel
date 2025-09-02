@@ -12,7 +12,6 @@ export interface EggsSlice {
 
 export const createEggsSlice: StateCreator<AdminStore, [], [], EggsSlice> = (set): EggsSlice => ({
   eggs: getEmptyPaginationSet<AdminNestEgg>(),
-
   setEggs: (value) => set((state) => ({ ...state, eggs: value })),
   addEgg: (egg) =>
     set((state) => ({

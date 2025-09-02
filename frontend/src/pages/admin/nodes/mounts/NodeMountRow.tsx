@@ -8,22 +8,21 @@ import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import deleteLocationDatabaseHost from '@/api/admin/locations/database-hosts/deleteLocationDatabaseHost';
 import { useAdminStore } from '@/stores/admin';
-import { databaseTypeLabelMapping } from '@/lib/enums';
+import deleteNodeMount from '@/api/admin/nodes/mounts/deleteNodeMount';
 import { NavLink } from 'react-router';
 
-export default ({ location, databaseHost }: { location: Location; databaseHost: LocationDatabaseHost }) => {
+export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
   const { addToast } = useToast();
-  const { removeLocationDatabaseHost } = useAdminStore();
+  const { removeNodeMount } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const doDelete = () => {
-    deleteLocationDatabaseHost(location.uuid, databaseHost.databaseHost.uuid)
+    deleteNodeMount(node.uuid, mount.mount.uuid)
       .then(() => {
-        removeLocationDatabaseHost(databaseHost);
-        addToast('Location Database Host deleted.', 'success');
+        removeNodeMount(mount);
+        addToast('Node Mount deleted.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -39,9 +38,9 @@ export default ({ location, databaseHost }: { location: Location; databaseHost: 
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete the database host
-        <Code>{databaseHost.databaseHost.name}</Code>
-        from <Code>{location.name}</Code>?
+        Are you sure you want to delete the mount
+        <Code>{mount.mount.name}</Code>
+        from <Code>{node.name}</Code>?
       </ConfirmationModal>
 
       <ContextMenu
@@ -63,21 +62,21 @@ export default ({ location, databaseHost }: { location: Location; databaseHost: 
           >
             <TableData>
               <NavLink
-                to={`/admin/database-hosts/${databaseHost.databaseHost.uuid}`}
+                to={`/admin/mounts/${mount.mount.uuid}`}
                 className={'text-blue-400 hover:text-blue-200 hover:underline'}
               >
-                <Code>{databaseHost.databaseHost.uuid}</Code>
+                <Code>{mount.mount.uuid}</Code>
               </NavLink>
             </TableData>
-            <TableData>{databaseHost.databaseHost.name}</TableData>
-            <TableData>{databaseTypeLabelMapping[databaseHost.databaseHost.type]}</TableData>
+            <TableData>{mount.mount.name}</TableData>
             <TableData>
-              <Code>
-                {databaseHost.databaseHost.host}:{databaseHost.databaseHost.port}
-              </Code>
+              <Code>{mount.mount.source}</Code>
             </TableData>
             <TableData>
-              <Tooltip label={formatDateTime(databaseHost.created)}>{formatTimestamp(databaseHost.created)}</Tooltip>
+              <Code>{mount.mount.target}</Code>
+            </TableData>
+            <TableData>
+              <Tooltip label={formatDateTime(mount.created)}>{formatTimestamp(mount.created)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

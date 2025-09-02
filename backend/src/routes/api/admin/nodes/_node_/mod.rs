@@ -11,6 +11,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod allocations;
 mod backups;
 mod mounts;
+mod reset_token;
 mod servers;
 
 pub type GetNode = crate::extract::ConsumingExtension<Node>;
@@ -280,8 +281,8 @@ mod patch {
             SET location_uuid = $1, name = $2,
                 public = $3, description = $4, public_url = $5,
                 url = $6, sftp_host = $7, sftp_port = $8,
-                memory = $9, disk = $10
-            WHERE nodes.uuid = $11",
+                maintenance_message = $9, memory = $10, disk = $11
+            WHERE nodes.uuid = $12",
             node.location.uuid,
             node.name,
             node.public,
@@ -290,6 +291,7 @@ mod patch {
             node.url.to_string(),
             node.sftp_host,
             node.sftp_port,
+            node.maintenance_message,
             node.memory,
             node.disk,
             node.uuid,
@@ -326,6 +328,7 @@ mod patch {
                     "url": node.url,
                     "sftp_host": node.sftp_host,
                     "sftp_port": node.sftp_port,
+                    "maintenance_message": node.maintenance_message,
                     "memory": node.memory,
                     "disk": node.disk,
                 }),
@@ -341,6 +344,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/reset-token", reset_token::router(state))
         .nest("/allocations", allocations::router(state))
         .nest("/servers", servers::router(state))
         .nest("/mounts", mounts::router(state))

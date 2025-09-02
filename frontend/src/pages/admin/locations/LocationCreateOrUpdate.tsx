@@ -5,7 +5,6 @@ import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import BackupS3 from './forms/BackupS3';
-import getLocation from '@/api/admin/locations/getLocation';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import BackupRestic from './forms/BackupRestic';
@@ -26,24 +25,22 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState<UpdateLocation>({
-    shortName: contextLocation?.shortName ?? '',
-    name: contextLocation?.name ?? '',
-    description: contextLocation?.description ?? '',
-    backupDisk: contextLocation?.backupDisk ?? 'local',
-    backupConfigs: contextLocation?.backupConfigs ?? {},
+    shortName: '',
+    name: '',
+    description: '',
+    backupDisk: 'local',
+    backupConfigs: null,
   } as UpdateLocation);
 
   useEffect(() => {
-    if (params.id) {
-      getLocation(params.id)
-        .then((location) => {
-          setLocation(location);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.id]);
+    setLocation({
+      shortName: contextLocation?.shortName ?? '',
+      name: contextLocation?.name ?? '',
+      description: contextLocation?.description ?? '',
+      backupDisk: contextLocation?.backupDisk ?? 'local',
+      backupConfigs: contextLocation?.backupConfigs ?? null,
+    });
+  }, [contextLocation]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);

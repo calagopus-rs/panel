@@ -128,6 +128,7 @@ impl Node {
         url: &str,
         sftp_host: Option<&str>,
         sftp_port: i32,
+        maintenance_message: Option<&str>,
         memory: i64,
         disk: i64,
     ) -> Result<uuid::Uuid, sqlx::Error> {
@@ -136,8 +137,8 @@ impl Node {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_uuid, name, public, description, public_url, url, sftp_host, sftp_port, memory, disk, token_id, token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+            INSERT INTO nodes (location_uuid, name, public, description, public_url, url, sftp_host, sftp_port, maintenance_message, memory, disk, token_id, token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
             RETURNING uuid
             "#
         )
@@ -149,6 +150,7 @@ impl Node {
         .bind(url)
         .bind(sftp_host)
         .bind(sftp_port)
+        .bind(maintenance_message)
         .bind(memory)
         .bind(disk)
         .bind(token_id)
@@ -295,6 +297,29 @@ impl Node {
         .await?;
 
         Ok(())
+    }
+
+    pub async fn reset_token(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<(String, String), sqlx::Error> {
+        let token_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
+        let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 64);
+
+        sqlx::query(
+            r#"
+            UPDATE nodes
+            SET token_id = $2, token = $3
+            WHERE nodes.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .bind(&token_id)
+        .bind(database.encrypt(&token).unwrap())
+        .execute(database.write())
+        .await?;
+
+        Ok((token_id, token))
     }
 
     #[inline]

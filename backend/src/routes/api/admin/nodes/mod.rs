@@ -105,6 +105,10 @@ mod post {
         sftp_host: Option<String>,
         sftp_port: u16,
 
+        #[validate(length(max = 1024))]
+        #[schema(max_length = 1024)]
+        maintenance_message: Option<String>,
+
         memory: i64,
         disk: i64,
     }
@@ -150,6 +154,7 @@ mod post {
             &data.url,
             data.sftp_host.as_deref(),
             data.sftp_port as i32,
+            data.maintenance_message.as_deref(),
             data.memory,
             data.disk,
         )
@@ -186,6 +191,7 @@ mod post {
                     "url": node.url,
                     "sftp_host": node.sftp_host,
                     "sftp_port": node.sftp_port,
+                    "maintenance_message": node.maintenance_message,
                     "memory": node.memory,
                     "disk": node.disk,
                 }),

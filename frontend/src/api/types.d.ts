@@ -126,6 +126,20 @@ interface NestEggVariable {
   created: Date;
 }
 
+interface UpdateNode {
+  locationUuid: string;
+  name: string;
+  public: boolean;
+  description: string | null;
+  publicUrl: string | null;
+  url: string;
+  sftpHost: string | null;
+  sftpPort: number;
+  maintenanceMessage: string | null;
+  memory: number;
+  disk: number;
+}
+
 interface Node {
   uuid: string;
   location: Location;
@@ -140,6 +154,7 @@ interface Node {
   memory: number;
   disk: number;
   tokenId: string;
+  token: string;
   servers: number;
   created: Date;
 }

@@ -76,7 +76,7 @@ export default ({ location }: { location: Location }) => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['Id', 'Name', 'Type', 'Address', 'Added']}
+            columns={['Id', 'Name', 'Type', 'Address', 'Added', '']}
             pagination={locationDatabaseHosts}
             onPageSelect={setPage}
           >
