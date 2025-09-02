@@ -3,7 +3,8 @@ import Code from '@/elements/Code';
 import Spinner from '@/elements/Spinner';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { faHeart, faHeartBroken, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { faGlobe, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
@@ -55,11 +56,11 @@ export default ({ node }: { node: Node }) => {
           {node.name}&nbsp;
           {node.public ? (
             <Tooltip label={'Public Node'}>
-              <FontAwesomeIcon icon={faLockOpen} className={'text-green-500'} />
+              <FontAwesomeIcon icon={faGlobe} className={'text-green-500'} />
             </Tooltip>
           ) : (
             <Tooltip label={'Private Node'}>
-              <FontAwesomeIcon icon={faLock} className={'text-red-500'} />
+              <FontAwesomeIcon icon={faGlobe} className={'text-red-500'} />
             </Tooltip>
           )}
         </span>
@@ -72,6 +73,14 @@ export default ({ node }: { node: Node }) => {
         >
           <Code>{node.location.name}</Code>
         </NavLink>
+      </TableData>
+
+      <TableData>
+        <Code>{node.url}</Code>
+      </TableData>
+
+      <TableData>
+        <Tooltip label={formatDateTime(node.created)}>{formatTimestamp(node.created)}</Tooltip>
       </TableData>
 
       <TableData>{node.servers}</TableData>

@@ -49,7 +49,11 @@ export default ({ location }: { location: Location }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['', 'Id', 'Name', 'Location', 'Servers']} pagination={locationNodes} onPageSelect={setPage}>
+        <Table
+          columns={['', 'Id', 'Name', 'Location', 'URL', 'Servers', 'Created']}
+          pagination={locationNodes}
+          onPageSelect={setPage}
+        >
           {locationNodes.data.map((node) => (
             <NodeRow key={node.uuid} node={node} />
           ))}

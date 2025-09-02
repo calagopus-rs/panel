@@ -5,10 +5,19 @@ export interface ButtonProps extends Omit<MantineButtonProps, 'onClick'> {
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
 }
 
-export default forwardRef<HTMLButtonElement, ButtonProps>(({ children, className, onClick, ...rest }, ref) => {
-  return (
-    <MantineButton ref={ref} className={className} onClick={onClick} {...rest}>
-      {children}
-    </MantineButton>
-  );
-});
+export default forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ children, className, onClick, loading, disabled, ...rest }, ref) => {
+    return (
+      <MantineButton
+        ref={ref}
+        className={className}
+        onClick={onClick}
+        loading={disabled ? false : loading}
+        disabled={disabled}
+        {...rest}
+      >
+        {children}
+      </MantineButton>
+    );
+  },
+);
