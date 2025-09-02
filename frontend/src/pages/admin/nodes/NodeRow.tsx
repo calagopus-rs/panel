@@ -79,11 +79,11 @@ export default ({ node }: { node: Node }) => {
         <Code>{node.url}</Code>
       </TableData>
 
+      <TableData>{node.servers}</TableData>
+
       <TableData>
         <Tooltip label={formatDateTime(node.created)}>{formatTimestamp(node.created)}</Tooltip>
       </TableData>
-
-      <TableData>{node.servers}</TableData>
     </TableRow>
   );
 };
