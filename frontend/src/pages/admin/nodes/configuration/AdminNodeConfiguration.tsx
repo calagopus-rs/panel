@@ -6,6 +6,7 @@ import { Group, Stack, Title } from '@mantine/core';
 import hljs from 'highlight.js/lib/core';
 import yaml from 'highlight.js/lib/languages/yaml';
 import 'highlight.js/styles/a11y-dark.min.css';
+import jsYaml from 'js-yaml';
 import { useState } from 'react';
 
 hljs.registerLanguage('yaml', yaml);
@@ -23,19 +24,22 @@ export default ({ node }: { node: Node }) => {
       // ignore
     }
 
-    return `
-uuid: ${node.uuid}
-token_id: ${node.tokenId}
-token: ${node.token}
-api:
-  port: ${apiPort}
-  disable_openapi_docs: true
-  upload_limit: 10240
-system:
-  sftp:
-    bind_port: ${sftpPort}
-remote: ${origin}
-    `.trim();
+    return {
+      uuid: node.uuid,
+      token_id: node.tokenId,
+      token: node.token,
+      api: {
+        port: apiPort,
+        disable_openapi_docs: true,
+        upload_limit: 10240,
+      },
+      system: {
+        sftp: {
+          bind_port: sftpPort,
+        },
+      },
+      remote: origin,
+    };
   };
 
   return (
@@ -51,29 +55,37 @@ remote: ${origin}
           <Code
             block
             dangerouslySetInnerHTML={{
-              __html: hljs.highlight(getNodeConfiguration(), { language: 'yaml' }).value,
+              __html: hljs.highlight(jsYaml.dump(getNodeConfiguration()), { language: 'yaml' }).value,
             }}
           />
 
           <p className={'mt-2'}>
-            Place this into the configuration file at <Code>/etc/pterodactyl/config.yml</Code>.
+            Place this into the configuration file at <Code>/etc/pterodactyl/config.yml</Code> or run{' '}
+            <Code block>
+              wings configure --join-data{' '}
+              {btoa(jsYaml.dump(getNodeConfiguration(), { condenseFlow: true, indent: 1, noArrayIndent: true }))}
+            </Code>
           </p>
         </div>
         <Card>
           <Title className={'text-right'}>Configuration</Title>
 
           <Stack>
-            <TextInput name={'remote'} label={'Remote'} value={remote} onChange={(e) => setRemote(e.target.value)} />
+            <TextInput name={'remote'} label={'Panel URL'} value={remote} onChange={(e) => setRemote(e.target.value)} />
             <NumberInput
               name={'api_port'}
               label={'API Port'}
               value={apiPort}
+              min={1}
+              max={65535}
               onChange={(value) => setApiPort(Number(value))}
             />
             <NumberInput
               name={'sftp_port'}
               label={'SFTP Port'}
               value={sftpPort}
+              min={1}
+              max={65535}
               onChange={(value) => setSftpPort(Number(value))}
             />
           </Stack>
