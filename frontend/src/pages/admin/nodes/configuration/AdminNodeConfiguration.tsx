@@ -38,6 +38,7 @@ export default ({ node }: { node: Node }) => {
           bind_port: sftpPort,
         },
       },
+      allowed_mounts: [],
       remote: origin,
     };
   };

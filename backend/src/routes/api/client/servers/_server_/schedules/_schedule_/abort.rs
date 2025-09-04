@@ -36,6 +36,7 @@ mod post {
     ))]
     pub async fn route(
         state: GetState,
+        ip: crate::GetIp,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
@@ -45,6 +46,16 @@ mod post {
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
+
+        state
+            .cache
+            .ratelimit(
+                format!("client/servers/{}/schedules/abort", server.uuid),
+                10,
+                60,
+                ip.to_string(),
+            )
+            .await?;
 
         match server
             .node

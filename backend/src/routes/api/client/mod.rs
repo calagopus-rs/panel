@@ -63,6 +63,14 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    if let Err(err) = state
+        .cache
+        .ratelimit("client", 720, 60, ip.to_string())
+        .await
+    {
+        return Ok(err.into_response());
+    }
+
     if let Some(session_id) = cookies.get("session") {
         if session_id.value().len() != 81 {
             return Ok(ApiResponse::error("invalid authorization cookie")

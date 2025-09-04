@@ -149,6 +149,16 @@ mod post {
                 .ok();
         }
 
+        state
+            .cache
+            .ratelimit(
+                format!("client/servers/{}/backups/create", server.uuid),
+                4,
+                120,
+                server.uuid,
+            )
+            .await?;
+
         let backup =
             match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
                 .await

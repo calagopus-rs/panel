@@ -63,6 +63,16 @@ mod post {
                 .ok();
         }
 
+        state
+            .cache
+            .ratelimit(
+                format!("client/servers/{}/backups/create", server.uuid),
+                4,
+                120,
+                server.uuid,
+            )
+            .await?;
+
         let name = data.name.unwrap_or_else(|| {
             format!("Backup {}", chrono::Utc::now().format("%Y-%m-%d %H:%M:%S"))
         });

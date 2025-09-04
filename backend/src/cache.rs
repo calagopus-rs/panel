@@ -1,4 +1,5 @@
-use crate::env::RedisMode;
+use crate::{env::RedisMode, response::ApiResponse};
+use axum::http::StatusCode;
 use colored::Colorize;
 use rustis::{
     client::Client,
@@ -55,25 +56,72 @@ impl Cache {
         Ok(version)
     }
 
-    #[inline]
-    pub async fn cached<T, F, Fut>(&self, key: &str, ttl: u64, fn_compute: F) -> T
+    pub async fn ratelimit(
+        &self,
+        limit_identifier: impl AsRef<str>,
+        limit: u64,
+        limit_window: u64,
+        client: impl Into<String>,
+    ) -> Result<(), ApiResponse> {
+        let key = format!(
+            "ratelimit::{}::{}",
+            limit_identifier.as_ref(),
+            client.into()
+        );
+
+        let now = chrono::Utc::now().timestamp();
+        let expiry = self.client.expiretime(&key).await.unwrap_or_default();
+        let expire_unix: u64 = if expiry > now + 2 {
+            expiry as u64
+        } else {
+            now as u64 + limit_window
+        };
+
+        let limit_used = self.client.get::<_, u64>(&key).await.unwrap_or_default() + 1;
+        self.client
+            .set_with_options(
+                key,
+                limit_used,
+                SetCondition::None,
+                SetExpiration::Exat(expire_unix),
+                false,
+            )
+            .await?;
+
+        if limit_used >= limit {
+            return Err(ApiResponse::error(&format!(
+                "you are ratelimited, retry in {}s",
+                expiry - now
+            ))
+            .with_status(StatusCode::TOO_MANY_REQUESTS));
+        }
+
+        Ok(())
+    }
+
+    pub async fn cached<T, F, Fut>(
+        &self,
+        key: &str,
+        ttl: u64,
+        fn_compute: F,
+    ) -> Result<T, anyhow::Error>
     where
         T: Serialize + DeserializeOwned,
         F: FnOnce() -> Fut,
-        Fut: Future<Output = T>,
+        Fut: Future<Output = Result<T, anyhow::Error>>,
     {
-        let cached_value: Option<String> = self.client.get(key).await.unwrap();
+        let cached_value: Option<String> = self.client.get(key).await?;
 
         match cached_value {
             Some(value) => {
-                let result: T = serde_json::from_str(&value).unwrap();
+                let result: T = serde_json::from_str(&value)?;
 
-                result
+                Ok(result)
             }
             None => {
-                let result = fn_compute().await;
+                let result = fn_compute().await?;
 
-                let serialized = serde_json::to_string(&result).unwrap();
+                let serialized = serde_json::to_string(&result)?;
                 self.client
                     .set_with_options(
                         key,
@@ -82,10 +130,9 @@ impl Cache {
                         SetExpiration::Ex(ttl),
                         false,
                     )
-                    .await
-                    .unwrap();
+                    .await?;
 
-                result
+                Ok(result)
             }
         }
     }

@@ -42,6 +42,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        ip: crate::GetIp,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
@@ -52,6 +53,16 @@ mod post {
                 .with_status(StatusCode::UNAUTHORIZED)
                 .ok();
         }
+
+        state
+            .cache
+            .ratelimit(
+                format!("client/servers/{}/schedules/trigger", server.uuid),
+                10,
+                60,
+                ip.to_string(),
+            )
+            .await?;
 
         match server.clone().sync(&state.database).await {
             Ok(_) => {}
