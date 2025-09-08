@@ -70,7 +70,7 @@ mod patch {
 
     #[utoipa::path(patch, path = "/", responses(
         (status = OK, body = inline(Response)),
-    ))]
+    ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
         mut user: GetUser,

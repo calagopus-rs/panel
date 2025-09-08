@@ -30,7 +30,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
     name: '',
     description: '',
     backupDisk: 'local',
-    backupConfigs: null,
+    backupConfigs: { s3: null, restic: null },
   } as UpdateLocation);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       name: contextLocation?.name ?? '',
       description: contextLocation?.description ?? '',
       backupDisk: contextLocation?.backupDisk ?? 'local',
-      backupConfigs: contextLocation?.backupConfigs ?? null,
+      backupConfigs: contextLocation?.backupConfigs ?? { s3: null, restic: null },
     });
   }, [contextLocation]);
 

@@ -31,7 +31,7 @@ interface UpdateLocation {
   name: string;
   description: string | null;
   backupDisk: LocationConfigBackupDisk;
-  backupConfigs: LocationConfigBackupConfigs | null;
+  backupConfigs: LocationConfigBackupConfigs;
 }
 
 interface Location extends UpdateLocation {
