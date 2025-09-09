@@ -23,7 +23,7 @@ export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
-  const { server, imagePulls, backupRestoreProgress } = useServerStore();
+  const { server, backupRestoreProgress } = useServerStore();
   const resetState = useServerStore((state) => state.reset);
   const setServer = useServerStore((state) => state.setServer);
 
@@ -95,16 +95,6 @@ export default () => {
               ) : server.status === 'installing' ? (
                 <Notification className={'mb-4'} loading>
                   Your Server is currently being installed. Please wait...
-                </Notification>
-              ) : imagePulls.size > 0 ? (
-                <Notification className={'mb-4'} loading>
-                  Your Server is currently pulling it&apos;s docker image. Please wait...
-                  {Array.from(imagePulls).map(([id, progress]) => (
-                    <span key={id} className={'flex flex-row w-full items-center'}>
-                      {progress.status === 'pulling' ? 'Pulling' : 'Extracting'} Layer{' '}
-                      <Progress value={(progress.progress / progress.total) * 100} className={'flex-1 ml-2'} />
-                    </span>
-                  ))}
                 </Notification>
               ) : null}
 

@@ -8,6 +8,8 @@ import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import Notification from '@/elements/Notification';
+import Progress from '@/elements/Progress';
 
 const ansiUp = new AnsiUp();
 const MAX_LINES = 1000;
@@ -20,7 +22,7 @@ interface TerminalLine {
 
 export default function Terminal() {
   const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@pterodactyl~ \u001b[0m';
-  const { server, socketConnected, socketInstance } = useServerStore();
+  const { server, imagePulls, socketConnected, socketInstance } = useServerStore();
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [history, setHistory] = useState<string[]>([]);
@@ -216,6 +218,18 @@ export default function Terminal() {
       >
         {MemoizedLines}
       </div>
+
+      {imagePulls.size > 0 && (
+        <span className={'flex flex-col justify-end mt-4'}>
+          Your Server is currently pulling it&apos;s docker image. Please wait...
+          {Array.from(imagePulls).map(([id, progress]) => (
+            <span key={id} className={'flex flex-row w-full items-center whitespace-pre-wrap break-all'}>
+              {progress.status === 'pulling' ? 'Pulling' : 'Extracting'} Layer{' '}
+              <Progress value={(progress.progress / progress.total) * 100} className={'flex-1 ml-2 mr-2'} />
+            </span>
+          ))}
+        </span>
+      )}
 
       {!isAtBottom && (
         <div className={'absolute bottom-2 right-2 z-90 w-fit'}>

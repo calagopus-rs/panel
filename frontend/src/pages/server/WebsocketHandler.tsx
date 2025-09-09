@@ -3,8 +3,6 @@ import { Websocket } from '@/plugins/Websocket';
 import { useServerStore } from '@/stores/server';
 import { useEffect } from 'react';
 
-const reconnectErrors = ['jwt: exp claim is invalid', 'jwt: created too far in past (denylist)'];
-
 export default () => {
   let updatingToken = false;
 
@@ -46,7 +44,7 @@ export default () => {
       setSocketConnectionState(false);
       console.warn('JWT validation error from wings:', error);
 
-      if (reconnectErrors.find((v) => error.toLowerCase().indexOf(v) >= 0)) {
+      if (error.toLowerCase().includes('expired')) {
         updateToken(uuid, socket);
       }
     });
