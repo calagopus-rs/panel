@@ -63,6 +63,11 @@ export default () => {
   const doPasskeyAuth = () => {
     load(true, setLoading);
 
+    if (!window.navigator.credentials) {
+      setError('Your browser does not support passkeys.');
+      return;
+    }
+
     window.navigator.credentials
       .get(passkeyOptions)
       .then((credential) => {
