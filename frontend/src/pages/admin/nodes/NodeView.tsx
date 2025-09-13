@@ -1,5 +1,5 @@
 import { Route, Routes, useParams } from 'react-router';
-import { SubNavigation, SubNavigationLink } from '@/elements/SubNavigation';
+import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faExternalLink, faInfoCircle, faNetworkWired, faPenRuler } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
@@ -36,28 +36,35 @@ export default () => {
     <>
       <Title order={1}>{node.name}</Title>
 
-      <SubNavigation>
-        <SubNavigationLink to={`/admin/nodes/${params.id}`} name={'General'} icon={faCog} />
-        <SubNavigationLink
-          to={`/admin/nodes/${params.id}/configuration`}
-          name={'Configuration'}
-          icon={faPenRuler}
-          end={false}
-        />
-        <SubNavigationLink
-          to={`/admin/nodes/${params.id}/statistics`}
-          name={'Statistics'}
-          icon={faInfoCircle}
-          end={false}
-        />
-        <SubNavigationLink
-          to={`/admin/nodes/${params.id}/allocations`}
-          name={'Allocations'}
-          icon={faNetworkWired}
-          end={false}
-        />
-        <SubNavigationLink to={`/admin/nodes/${params.id}/mounts`} name={'Mounts'} icon={faExternalLink} end={false} />
-      </SubNavigation>
+      <SubNavigation
+        items={[
+          {
+            name: 'General',
+            icon: faCog,
+            link: `/admin/nodes/${params.id}`,
+          },
+          {
+            name: 'Configuration',
+            icon: faPenRuler,
+            link: `/admin/nodes/${params.id}/configuration`,
+          },
+          {
+            name: 'Statistics',
+            icon: faInfoCircle,
+            link: `/admin/nodes/${params.id}/statistics`,
+          },
+          {
+            name: 'Allocations',
+            icon: faNetworkWired,
+            link: `/admin/nodes/${params.id}/allocations`,
+          },
+          {
+            name: 'Mounts',
+            icon: faExternalLink,
+            link: `/admin/nodes/${params.id}/mounts`,
+          },
+        ]}
+      />
 
       <Routes>
         <Route path={'/'} element={<NodeCreateOrUpdate contextNode={node} />} />

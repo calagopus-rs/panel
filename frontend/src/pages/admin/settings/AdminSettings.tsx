@@ -3,7 +3,7 @@ import { useAdminStore } from '@/stores/admin';
 import getSettings from '@/api/admin/settings/getSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { SubNavigation, SubNavigationLink } from '@/elements/SubNavigation';
+import SubNavigation from '@/elements/SubNavigation';
 import { faAt, faLayerGroup, faRobot, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Route, Routes } from 'react-router';
 import EmailContainer from './EmailContainer';
@@ -33,12 +33,30 @@ export default () => {
     <>
       <Title order={1}>Settings</Title>
 
-      <SubNavigation>
-        <SubNavigationLink to={'/admin/settings'} name={'Application'} icon={faLayerGroup} />
-        <SubNavigationLink to={'/admin/settings/mail'} name={'Mail'} icon={faAt} />
-        <SubNavigationLink to={'/admin/settings/captcha'} name={'Captcha'} icon={faRobot} />
-        <SubNavigationLink to={'/admin/settings/server'} name={'Server'} icon={faServer} />
-      </SubNavigation>
+      <SubNavigation
+        items={[
+          {
+            name: 'Application',
+            icon: faLayerGroup,
+            link: '/admin/settings',
+          },
+          {
+            name: 'Mail',
+            icon: faAt,
+            link: '/admin/settings/mail',
+          },
+          {
+            name: 'Captcha',
+            icon: faRobot,
+            link: '/admin/settings/captcha',
+          },
+          {
+            name: 'Server',
+            icon: faServer,
+            link: '/admin/settings/server',
+          },
+        ]}
+      />
 
       {loading ? (
         <Spinner.Centered />

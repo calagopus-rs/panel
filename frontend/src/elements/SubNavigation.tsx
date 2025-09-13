@@ -1,33 +1,29 @@
 import { NavLink } from 'react-router';
-import classNames from 'classnames';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-export const SubNavigation = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <div className={'flex flex-row items-center flex-shrink-0 h-12 mb-4 border-b border-neutral-700'}>{children}</div>
-  );
-};
+import { Tabs } from '@mantine/core';
 
 interface Props {
-  to: string;
-  name: string;
-  icon: IconDefinition;
-  end?: boolean;
+  items: {
+    name: string;
+    icon: IconDefinition;
+    link: string;
+    end?: boolean;
+  }[];
 }
 
-export const SubNavigationLink = ({ to, name, icon, end = true }: Props) => (
-  <NavLink
-    to={to}
-    end={end}
-    className={({ isActive }) =>
-      classNames(
-        isActive && 'text-cyan-300! border-cyan-300!',
-        'flex flex-row items-center h-full px-4 border-b text-neutral-300 text-base whitespace-nowrap border-transparent',
-      )
-    }
-  >
-    <FontAwesomeIcon icon={icon} className={'w-6 h-6 mr-2'} />
-    {name}
-  </NavLink>
-);
+export default ({ items }: Props) => {
+  return (
+    <Tabs my={'xs'} defaultValue={items[0].name}>
+      <Tabs.List>
+        {items.map((item) => (
+          <NavLink to={item.link} end={item.end ?? true}>
+            <Tabs.Tab key={item.name} value={item.name} leftSection={<FontAwesomeIcon icon={item.icon} />}>
+              {item.name}
+            </Tabs.Tab>
+          </NavLink>
+        ))}
+      </Tabs.List>
+    </Tabs>
+  );
+};

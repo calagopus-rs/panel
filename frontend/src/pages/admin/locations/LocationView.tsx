@@ -1,5 +1,5 @@
 import { Route, Routes, useParams } from 'react-router';
-import { SubNavigation, SubNavigationLink } from '@/elements/SubNavigation';
+import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faDatabase, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
@@ -34,16 +34,25 @@ export default () => {
     <>
       <Title order={1}>{location.name}</Title>
 
-      <SubNavigation>
-        <SubNavigationLink to={`/admin/locations/${params.id}`} name={'General'} icon={faCog} />
-        <SubNavigationLink
-          to={`/admin/locations/${params.id}/database-hosts`}
-          name={'Database Hosts'}
-          icon={faDatabase}
-          end={false}
-        />
-        <SubNavigationLink to={`/admin/locations/${params.id}/nodes`} name={'Nodes'} icon={faServer} end={false} />
-      </SubNavigation>
+      <SubNavigation
+        items={[
+          {
+            name: 'General',
+            icon: faCog,
+            link: `/admin/locations/${params.id}`,
+          },
+          {
+            name: 'Database Hosts',
+            icon: faDatabase,
+            link: `/admin/locations/${params.id}/database-hosts`,
+          },
+          {
+            name: 'Nodes',
+            icon: faServer,
+            link: `/admin/locations/${params.id}/nodes`,
+          },
+        ]}
+      />
 
       <Routes>
         <Route path={'/'} element={<LocationCreateOrUpdate contextLocation={location} />} />
