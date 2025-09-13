@@ -28,6 +28,7 @@ import ServerSettings from '@/pages/server/settings/ServerSettings';
 import ServerStartup from '@/pages/server/startup/ServerStartup';
 import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 import {
+  faBicycle,
   faBoxArchive,
   faBriefcase,
   faBuilding,
@@ -52,6 +53,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
+import AdminServers from '@/pages/admin/servers/AdminServers';
 
 interface RouteDefinition {
   name: string | undefined;
@@ -160,6 +162,12 @@ const routes: Routes = {
       icon: faServer,
       path: '/nodes/*',
       element: AdminNodes,
+    },
+    {
+      name: 'Servers',
+      icon: faBicycle,
+      path: '/servers/*',
+      element: AdminServers,
     },
     {
       name: 'Nests',

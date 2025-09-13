@@ -4,6 +4,7 @@ import { StateCreator } from 'zustand';
 
 export interface MountsSlice {
   mounts: ResponseMeta<Mount>;
+
   setMounts: (mounts: ResponseMeta<Mount>) => void;
   addMount: (mount: Mount) => void;
   removeMount: (mount: Mount) => void;
@@ -11,6 +12,7 @@ export interface MountsSlice {
 
 export const createMountsSlice: StateCreator<AdminStore, [], [], MountsSlice> = (set): MountsSlice => ({
   mounts: getEmptyPaginationSet<Mount>(),
+
   setMounts: (value) => set((state) => ({ ...state, mounts: value })),
   addMount: (mount) =>
     set((state) => ({

@@ -4,20 +4,21 @@ import { StateCreator } from 'zustand';
 
 export interface NodesSlice {
   nodes: ResponseMeta<Node>;
+  nodeMounts: ResponseMeta<NodeMount>;
+  nodeAllocations: ResponseMeta<NodeAllocation>;
+  selectedNodeAllocations: Set<NodeAllocation>;
+
   setNodes: (nodes: ResponseMeta<Node>) => void;
   addNode: (node: Node) => void;
   removeNode: (node: Node) => void;
 
-  nodeMounts: ResponseMeta<NodeMount>;
   setNodeMounts: (mounts: ResponseMeta<NodeMount>) => void;
   addNodeMount: (mount: NodeMount) => void;
   removeNodeMount: (mount: NodeMount) => void;
 
-  nodeAllocations: ResponseMeta<NodeAllocation>;
   setNodeAllocations: (allocations: ResponseMeta<NodeAllocation>) => void;
   removeNodeAllocations: (allocations: NodeAllocation[]) => void;
 
-  selectedNodeAllocations: Set<NodeAllocation>;
   setSelectedNodeAllocations: (allocations: NodeAllocation[]) => void;
   addSelectedNodeAllocation: (allocation: NodeAllocation) => void;
   removeSelectedNodeAllocation: (allocation: NodeAllocation) => void;
@@ -25,6 +26,10 @@ export interface NodesSlice {
 
 export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (set): NodesSlice => ({
   nodes: getEmptyPaginationSet<Node>(),
+  nodeMounts: getEmptyPaginationSet<NodeMount>(),
+  nodeAllocations: getEmptyPaginationSet<NodeAllocation>(),
+  selectedNodeAllocations: new Set<NodeAllocation>(),
+
   setNodes: (value) => set((state) => ({ ...state, nodes: value })),
   addNode: (node) =>
     set((state) => ({
@@ -43,7 +48,6 @@ export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (s
       },
     })),
 
-  nodeMounts: getEmptyPaginationSet<NodeMount>(),
   setNodeMounts: (value) => set((state) => ({ ...state, nodeMounts: value })),
   addNodeMount: (mount) =>
     set((state) => ({
@@ -62,7 +66,6 @@ export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (s
       },
     })),
 
-  nodeAllocations: getEmptyPaginationSet<NodeAllocation>(),
   setNodeAllocations: (value) => set((state) => ({ ...state, nodeAllocations: value })),
   removeNodeAllocations: (allocations) =>
     set((state) => ({
@@ -73,7 +76,6 @@ export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (s
       },
     })),
 
-  selectedNodeAllocations: new Set<NodeAllocation>(),
   setSelectedNodeAllocations: (value) => set((state) => ({ ...state, selectedNodeAllocations: new Set(value) })),
   addSelectedNodeAllocation: (value) =>
     set((state) => {

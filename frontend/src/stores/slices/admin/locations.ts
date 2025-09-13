@@ -4,11 +4,12 @@ import { StateCreator } from 'zustand';
 
 export interface LocationsSlice {
   locations: ResponseMeta<Location>;
+  locationDatabaseHosts: ResponseMeta<LocationDatabaseHost>;
+
   setLocations: (locations: ResponseMeta<Location>) => void;
   addLocation: (location: Location) => void;
   removeLocation: (location: Location) => void;
 
-  locationDatabaseHosts: ResponseMeta<LocationDatabaseHost>;
   setLocationDatabaseHosts: (databaseHosts: ResponseMeta<LocationDatabaseHost>) => void;
   addLocationDatabaseHost: (databaseHost: LocationDatabaseHost) => void;
   removeLocationDatabaseHost: (databaseHost: LocationDatabaseHost) => void;
@@ -16,6 +17,8 @@ export interface LocationsSlice {
 
 export const createLocationsSlice: StateCreator<AdminStore, [], [], LocationsSlice> = (set): LocationsSlice => ({
   locations: getEmptyPaginationSet<Location>(),
+  locationDatabaseHosts: getEmptyPaginationSet<LocationDatabaseHost>(),
+
   setLocations: (value) => set((state) => ({ ...state, locations: value })),
   addLocation: (location) =>
     set((state) => ({
@@ -34,7 +37,6 @@ export const createLocationsSlice: StateCreator<AdminStore, [], [], LocationsSli
       },
     })),
 
-  locationDatabaseHosts: getEmptyPaginationSet<LocationDatabaseHost>(),
   setLocationDatabaseHosts: (value) => set((state) => ({ ...state, locationDatabaseHosts: value })),
   addLocationDatabaseHost: (databaseHost) =>
     set((state) => ({

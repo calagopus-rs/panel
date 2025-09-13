@@ -4,6 +4,7 @@ import { StateCreator } from 'zustand';
 
 export interface UsersSlice {
   users: ResponseMeta<User>;
+
   setUsers: (users: ResponseMeta<User>) => void;
   addUser: (user: User) => void;
   removeUser: (user: User) => void;
@@ -11,6 +12,7 @@ export interface UsersSlice {
 
 export const createUsersSlice: StateCreator<AdminStore, [], [], UsersSlice> = (set): UsersSlice => ({
   users: getEmptyPaginationSet<User>(),
+
   setUsers: (value) => set((state) => ({ ...state, users: value })),
   addUser: (user) =>
     set((state) => ({

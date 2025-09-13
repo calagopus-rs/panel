@@ -4,6 +4,7 @@ import { StateCreator } from 'zustand';
 
 export interface NestsSlice {
   nests: ResponseMeta<Nest>;
+
   setNests: (nests: ResponseMeta<Nest>) => void;
   addNest: (nest: Nest) => void;
   removeNest: (nest: Nest) => void;
@@ -11,6 +12,7 @@ export interface NestsSlice {
 
 export const createNestsSlice: StateCreator<AdminStore, [], [], NestsSlice> = (set): NestsSlice => ({
   nests: getEmptyPaginationSet<Nest>(),
+
   setNests: (value) => set((state) => ({ ...state, nests: value })),
   addNest: (nest) =>
     set((state) => ({

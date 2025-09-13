@@ -7,6 +7,7 @@ import { UsersSlice, createUsersSlice } from './slices/admin/users';
 import { DatabaseHostsSlice, createDatabaseHostsSlice } from './slices/admin/database-hosts';
 import { NodesSlice, createNodesSlice } from './slices/admin/nodes';
 import { MountsSlice, createMountsSlice } from './slices/admin/mounts';
+import { createServersSlice, ServersSlice } from './slices/admin/servers';
 
 export interface AdminStore
   extends DatabaseHostsSlice,
@@ -16,6 +17,7 @@ export interface AdminStore
     SettingsSlice,
     UsersSlice,
     NodesSlice,
+    ServersSlice,
     MountsSlice {}
 
 export const useAdminStore = create<AdminStore>()((...a) => ({
@@ -26,5 +28,6 @@ export const useAdminStore = create<AdminStore>()((...a) => ({
   ...createSettingsSlice(...a),
   ...createUsersSlice(...a),
   ...createNodesSlice(...a),
+  ...createServersSlice(...a),
   ...createMountsSlice(...a),
 }));
