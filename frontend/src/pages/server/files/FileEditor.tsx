@@ -83,7 +83,7 @@ export default () => {
   ) : (
     createPortal(
       <>
-        <div className={'flex flex-col w-full h-full'}>
+        <div className={'flex flex-col w-full'}>
           <FileNameModal
             onFileName={(name: string) => saveFile(name)}
             opened={nameModalOpen}
@@ -105,7 +105,7 @@ export default () => {
             </div>
           </div>
           <Editor
-            height={'100%'}
+            height={'85vh'}
             theme={'vs-dark'}
             defaultLanguage={language}
             defaultValue={content}
