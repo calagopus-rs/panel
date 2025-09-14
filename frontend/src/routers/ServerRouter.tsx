@@ -1,6 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import { useEffect, useState } from 'react';
-import { Route, Routes, useParams } from 'react-router';
+import { NavLink, Route, Routes, useParams } from 'react-router';
 import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
@@ -42,9 +42,11 @@ export default () => {
   return (
     <div className={'lg:flex'}>
       <Sidebar collapsed={false}>
-        <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
-          <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
-        </div>
+        <NavLink to={'/'}>
+          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
+            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
+          </div>
+        </NavLink>
         <Sidebar.Section>
           <a className={classNames(styles.navLink, 'cursor-pointer')}>
             <FontAwesomeIcon icon={faMagnifyingGlass} />
