@@ -172,6 +172,25 @@ interface NodeMount {
   created: Date;
 }
 
+interface UpdateAdminServer {
+  externalId: string | null;
+  name: string;
+  description: string | null;
+  startOnCompletion: boolean;
+  skipScripts: boolean;
+  limits: ServerLimits;
+  pinnedCpus: number[];
+  startup: string;
+  image: string;
+  timezone: string;
+  featureLimits: ServerFeatureLimits;
+  nodeUuid: string;
+  ownerUuid: string;
+  eggUuid: string;
+  allocationUuid: string | null;
+  allocationUuids: string[];
+}
+
 interface AdminServer {
   uuid: string;
   uuidShort: string;
@@ -180,23 +199,14 @@ interface AdminServer {
   node: Node;
   owner: User;
   egg: AdminNestEgg;
+  nest: Nest;
   status: ServerStatus | null;
   suspended: boolean;
   name: string;
   description: string | null;
-  limits: {
-    cpu: number;
-    memory: number;
-    swap: number;
-    disk: number;
-    ioWeight: number;
-  };
+  limits: ServerLimits;
   pinnedCpus: number[];
-  feature_limits: {
-    allocations: number;
-    databases: number;
-    backups: number;
-  };
+  featureLimits: ServerFeatureLimits;
   startup: string;
   image: string;
   autoKill: {
@@ -253,8 +263,8 @@ interface Server {
   sftpPort: number;
   name: string;
   description: string | null;
-  limits: ApiServerLimits;
-  featureLimits: ApiServerFeatureLimits;
+  limits: ServerLimits;
+  featureLimits: ServerFeatureLimits;
   startup: string;
   image: string;
   autoKill: {
@@ -324,13 +334,14 @@ interface ServerDatabase {
   created: Date;
 }
 
-interface ApiServerFeatureLimits {
+interface ServerFeatureLimits {
   allocations: number;
   databases: number;
   backups: number;
+  schedules: number;
 }
 
-interface ApiServerLimits {
+interface ServerLimits {
   cpu: number;
   memory: number;
   swap: number;

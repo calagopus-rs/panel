@@ -13,8 +13,10 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import getServers from '@/api/admin/servers/getServers';
 import ServerRow from './ServerRow';
+import ServerCreateOrUpdate from './ServerCreateOrUpdate';
+import ServerView from './ServerView';
 
-const NodesContainer = () => {
+const ServersContainer = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
@@ -87,9 +89,9 @@ const NodesContainer = () => {
 export default () => {
   return (
     <Routes>
-      <Route path={'/'} element={<NodesContainer />} />
-      {/* <Route path={'/new'} element={<NodeCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<NodeView />} /> */}
+      <Route path={'/'} element={<ServersContainer />} />
+      <Route path={'/new'} element={<ServerCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<ServerView />} />
     </Routes>
   );
 };

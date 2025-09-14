@@ -17,7 +17,7 @@ export default ({ items }: Props) => {
     <Tabs my={'xs'} defaultValue={items[0].name}>
       <Tabs.List>
         {items.map((item) => (
-          <NavLink to={item.link} end={item.end ?? true}>
+          <NavLink key={item.name} to={item.link} end={item.end ?? true}>
             <Tabs.Tab key={item.name} value={item.name} leftSection={<FontAwesomeIcon icon={item.icon} />}>
               {item.name}
             </Tabs.Tab>

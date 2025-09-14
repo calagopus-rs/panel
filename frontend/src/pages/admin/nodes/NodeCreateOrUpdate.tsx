@@ -164,10 +164,12 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         Are you sure you want to delete <Code>{node?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2}>{params.id ? 'Update' : 'Create'} Node</Title>
-      <Divider />
-
       <Stack>
+        <Stack gap={0}>
+          <Title order={2}>{params.id ? 'Update' : 'Create'} Node</Title>
+          <Divider />
+        </Stack>
+
         <Group grow>
           <TextInput
             withAsterisk

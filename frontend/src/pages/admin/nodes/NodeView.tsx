@@ -21,8 +21,8 @@ export default () => {
   useEffect(() => {
     if (params.id) {
       getNode(params.id)
-        .then((location) => {
-          setNode(location);
+        .then((node) => {
+          setNode(node);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
