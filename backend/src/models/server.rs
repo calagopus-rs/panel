@@ -27,7 +27,8 @@ pub struct Server {
     pub node: super::node::Node,
     pub destination_node_uuid: Option<uuid::Uuid>,
     pub owner: super::user::User,
-    pub egg: super::nest_egg::NestEgg,
+    pub egg: Box<super::nest_egg::NestEgg>,
+    pub nest: Box<super::nest::Nest>,
 
     pub status: Option<ServerStatus>,
     pub suspended: bool,
@@ -127,6 +128,7 @@ impl BaseModel for Server {
         columns.extend(super::node::Node::columns(Some("node_"), None));
         columns.extend(super::user::User::columns(Some("owner_"), None));
         columns.extend(super::nest_egg::NestEgg::columns(Some("egg_"), None));
+        columns.extend(super::nest::Nest::columns(Some("nest_"), None));
 
         columns
     }
@@ -158,7 +160,8 @@ impl BaseModel for Server {
                 .try_get::<uuid::Uuid, _>(format!("{prefix}destination_node_uuid").as_str())
                 .ok(),
             owner: super::user::User::map(Some("owner_"), row),
-            egg: super::nest_egg::NestEgg::map(Some("egg_"), row),
+            egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)),
+            nest: Box::new(super::nest::Nest::map(Some("nest_"), row)),
             status: row.get(format!("{prefix}status").as_str()),
             suspended: row.get(format!("{prefix}suspended").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
@@ -385,6 +388,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.uuid = $1
             "#,
             Self::columns_sql(None, None)
@@ -411,6 +415,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE (servers.node_uuid = $1 OR servers.destination_node_uuid = $1) AND servers.uuid = $2
             "#,
             Self::columns_sql(None, None)
@@ -437,6 +442,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.external_id = $1
             "#,
             Self::columns_sql(None, None)
@@ -462,6 +468,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.{} = $1
             "#,
             Self::columns_sql(None, None),
@@ -499,6 +506,7 @@ impl Server {
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.{} = $3 AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $2)
             "#,
             Self::columns_sql(None, None),
@@ -539,6 +547,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.owner_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
@@ -579,6 +588,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
             WHERE (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1) AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
             ORDER BY servers.created
@@ -620,6 +630,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
             WHERE
                 servers.owner_uuid != $1
@@ -664,6 +675,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.node_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
@@ -703,6 +715,7 @@ impl Server {
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE $1 IS NULL OR servers.name ILIKE '%' || $1 || '%'
             ORDER BY servers.created
             LIMIT $2 OFFSET $3
@@ -1086,6 +1099,7 @@ impl Server {
             node: self.node.into_admin_api_object(database),
             owner: self.owner.into_api_object(true),
             egg: self.egg.into_admin_api_object(),
+            nest: self.nest.into_admin_api_object(),
             status: self.status,
             suspended: self.suspended,
             name: self.name,
@@ -1218,6 +1232,7 @@ pub struct AdminApiServer {
     pub node: super::node::AdminApiNode,
     pub owner: super::user::ApiUser,
     pub egg: super::nest_egg::AdminApiNestEgg,
+    pub nest: super::nest::AdminApiNest,
 
     pub status: Option<ServerStatus>,
     pub suspended: bool,

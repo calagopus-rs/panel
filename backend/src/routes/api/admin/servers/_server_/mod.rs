@@ -246,7 +246,7 @@ mod patch {
                 }
             };
 
-            server.egg = egg;
+            server.egg = Box::new(egg);
         }
         if let Some(suspended) = data.suspended {
             server.suspended = suspended;
