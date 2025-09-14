@@ -78,9 +78,11 @@ export default () => {
       </Sidebar>
       <div id={'server-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         {loading ? (
-          <div className={'w-full h-screen flex items-center justify-center'}>
-            <Spinner size={75} />
-          </div>
+          <Container>
+            <div className={'w-full h-[90vh] flex items-center justify-center'}>
+              <Spinner size={75} />
+            </div>
+          </Container>
         ) : server ? (
           <>
             <WebsocketHandler />
