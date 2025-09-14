@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Stack, Group, Paper, Title, Divider } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router';
 import TextInput from '@/elements/input/TextInput';
@@ -18,6 +18,8 @@ import { zones } from 'tzdata';
 import { load } from '@/lib/debounce';
 import updateServer from '@/api/admin/servers/updateServer';
 import createServer from '@/api/admin/servers/createServer';
+import deleteServer from "@/api/admin/servers/deleteServer";
+import Modal from "@/elements/modals/Modal";
 
 const timezones = Object.keys(zones)
   .sort()
@@ -33,6 +35,8 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
 
   const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [deleteDoForce, setDeleteDoForce] = useState(false);
+  const [deleteDoDeleteBackups, setDeleteDoDeleteBackups] = useState(false);
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [doNodesRefetch, setDoNodesRefetch] = useState(false);
@@ -278,8 +282,53 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     }
   };
 
+  const doDelete = () => {
+    load(true, setLoading);
+    deleteServer(params.id, {
+      force: deleteDoForce,
+      deleteBackups: deleteDoDeleteBackups,
+    })
+      .then(() => {
+        addToast('Server deleted.', 'success');
+        navigate('/admin/servers');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
+      });
+  };
+
   return (
     <>
+      <Modal title={'Confirm Server Deletion'} onClose={() => setOpenModal(null)} opened={openModal === 'delete'}>
+        <Stack>
+          <Switch
+            label={'Do you want to forcefully delete this server?'}
+            name={'force'}
+            defaultChecked={deleteDoForce}
+            onChange={(e) => setDeleteDoForce(e.target.checked)}
+          />
+
+          <Switch
+            label={'Do you want to delete backups of this server?'}
+            name={'deleteBackups'}
+            defaultChecked={deleteDoDeleteBackups}
+            onChange={(e) => setDeleteDoDeleteBackups(e.target.checked)}
+          />
+        </Stack>
+
+        <Group mt={'md'}>
+          <Button color={'red'} onClick={doDelete}>
+            Okay
+          </Button>
+          <Button variant={'default'} onClick={() => setOpenModal(null)}>
+            Cancel
+          </Button>
+        </Group>
+      </Modal>
+
       <Stack>
         <Stack gap={0}>
           <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
