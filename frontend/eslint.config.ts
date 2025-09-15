@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import globals from "globals";
+import type { Linter } from 'eslint';
 
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
@@ -56,4 +57,4 @@ export default [
       },
     },
   },
-];
+] satisfies Linter.Config[];
