@@ -2,7 +2,7 @@ import { AdminStore } from '@/stores/admin';
 import { StateCreator } from 'zustand';
 
 export interface SettingsSlice extends AdminSettings {
-  setSettings: (settings: any) => void;
+  setSettings: (settings: AdminSettings) => void;
 }
 
 export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice> = (set): SettingsSlice => ({

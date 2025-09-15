@@ -3,7 +3,7 @@ import { EventEmitter } from 'events';
 
 export class Websocket extends EventEmitter {
   // Timer instance for this socket.
-  private timer: any = null;
+  private timer: NodeJS.Timeout | null = null;
 
   // The backoff for the timer, in milliseconds.
   private backoff = 5000;

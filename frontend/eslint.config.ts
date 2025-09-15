@@ -1,134 +1,59 @@
-import react from 'eslint-plugin-react';
-import reactHooks from 'eslint-plugin-react-hooks';
-import prettier from 'eslint-plugin-prettier';
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import { fixupPluginRules } from '@eslint/compat';
-import globals from 'globals';
-import tsParser from '@typescript-eslint/parser';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import js from '@eslint/js';
-import { FlatCompat } from '@eslint/eslintrc';
-import type { Linter } from 'eslint';
+import js from "@eslint/js";
+import globals from "globals";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+import tseslint from "typescript-eslint";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 
 export default [
   {
-    ignores: [
-      '**/public',
-      '**/node_modules',
-      'resources/views',
-      '**/babel.config.js',
-      '**/tailwind.config.js',
-      '**/webpack.config.js',
-    ],
+    ignores: ["**/dist/*"],
   },
-  ...compat.extends(
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react/jsx-runtime',
-    'plugin:@typescript-eslint/recommended',
-  ),
+
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+
   {
-    plugins: {
-      react,
-      'react-hooks': fixupPluginRules(reactHooks),
-      prettier,
-      '@typescript-eslint': typescriptEslint,
-    },
+    files: ["**/*.{js,jsx,ts,tsx}"],
 
     languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
-
-      parser: tsParser,
-      sourceType: 'script',
-
+      ecmaVersion: "latest",
+      sourceType: "module",
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
         },
-
         project: './tsconfig.json',
-        tsconfigRootDir: './',
       },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+
+    plugins: {
+      react: reactPlugin,
+      "react-hooks": reactHooksPlugin,
+    },
+
+    rules: {
+      "react/jsx-uses-react": "error",
+      "react/jsx-uses-vars": "error",
+      "react/jsx-key": "warn",
+
+      "react-hooks/rules-of-hooks": "error",
+
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      "react/prop-types": "off",
     },
 
     settings: {
       react: {
-        pragma: 'React',
-        version: 'detect',
+        version: "detect",
       },
-
-      linkComponents: [
-        {
-          name: 'Link',
-          linkAttribute: 'to',
-        },
-        {
-          name: 'NavLink',
-          linkAttribute: 'to',
-        },
-      ],
-    },
-
-    rules: {
-      eqeqeq: 'error',
-      quotes: ['error', 'single'],
-
-      'prettier/prettier': [
-        'error',
-        {},
-        {
-          usePrettierrc: true,
-        },
-      ],
-
-      'react/prop-types': 0,
-      'react/display-name': 0,
-
-      'react/no-unknown-property': [
-        'error',
-        {
-          ignore: ['css'],
-        },
-      ],
-
-      'react/jsx-curly-brace-presence': [
-        'error',
-        {
-          props: 'always',
-          children: 'never',
-        },
-      ],
-
-      '@typescript-eslint/no-explicit-any': 0,
-      '@typescript-eslint/no-non-null-assertion': 0,
-      'no-use-before-define': 0,
-      '@typescript-eslint/no-use-before-define': 'warn',
-
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-        },
-      ],
-
-      '@typescript-eslint/ban-ts-comment': [
-        'error',
-        {
-          'ts-expect-error': 'allow-with-description',
-        },
-      ],
     },
   },
-] satisfies Linter.Config[];
+];

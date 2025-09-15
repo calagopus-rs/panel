@@ -137,7 +137,7 @@ export default () => {
       const initialProgress = new Map<string, FileUploadProgress>();
 
       files.forEach((file, index) => {
-        const path = (file as any).webkitRelativePath || file.name;
+        const path = file.webkitRelativePath || file.name;
         const fileKey = `file-${startIndex + index}`;
         initialProgress.set(fileKey, {
           fileName: path,
@@ -228,7 +228,7 @@ export default () => {
 
             const formData = new FormData();
             batch.files.forEach((file) => {
-              const path = (file as any).webkitRelativePath || file.name;
+              const path = file.webkitRelativePath || file.name;
               formData.append('files', file, path);
             });
 
@@ -294,7 +294,7 @@ export default () => {
               }
               return updated;
             });
-          } catch (error: any) {
+          } catch (error) {
             if (error.name !== 'CanceledError') {
               throw error;
             }
@@ -305,7 +305,7 @@ export default () => {
 
         addToast(`Successfully uploaded ${files.length} file(s)`, 'success');
         loadDirectoryData();
-      } catch (error: any) {
+      } catch (error) {
         if (error.name !== 'CanceledError') {
           addToast(`Failed to upload files: ${error.message || error}`, 'error');
         }
@@ -577,7 +577,7 @@ export default () => {
         multiple
         style={{ display: 'none' }}
         onChange={handleFolderSelect}
-        {...({ webkitdirectory: '', directory: '' } as any)}
+        {...{ webkitdirectory: '', directory: '' }}
       />
 
       {isDragActive && (

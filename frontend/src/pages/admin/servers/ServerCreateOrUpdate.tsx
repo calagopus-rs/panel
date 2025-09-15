@@ -269,7 +269,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     } else {
       createServer(server)
         .then((server) => {
-          ``;
           addToast('Server created.', 'success');
           navigate(`/admin/servers/${server.uuid}`);
         })

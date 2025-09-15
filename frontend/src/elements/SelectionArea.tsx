@@ -5,7 +5,7 @@ interface SelectionContextType<T> {
   unregisterSelectable: (id: string) => void;
 }
 
-const SelectionContext = createContext<SelectionContextType<any> | null>(null);
+const SelectionContext = createContext<SelectionContextType<unknown> | null>(null);
 
 interface SelectionAreaProps<T> {
   children: React.ReactNode;
@@ -23,7 +23,7 @@ interface SelectionAreaState {
 
 interface SelectableProps<T> {
   item: T;
-  children: (ref: React.Ref<any>) => React.ReactElement;
+  children: (ref: React.Ref<HTMLElement>) => React.ReactElement;
 }
 
 function hasSelectionChanged<T>(oldSelection: T[], newSelection: T[]): boolean {

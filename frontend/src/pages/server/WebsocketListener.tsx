@@ -33,7 +33,7 @@ export default () => {
   }, [socketInstance, socketConnected]);
 
   useWebsocketEvent(SocketEvent.STATS, (data) => {
-    let wsStats: any = {};
+    let wsStats: object = {};
     try {
       wsStats = JSON.parse(data);
     } catch {
@@ -44,7 +44,7 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.IMAGE_PULL_PROGRESS, (id, data) => {
-    let wsData: any = null;
+    let wsData: ImagePullProgress = null;
     try {
       wsData = JSON.parse(data);
     } catch {
@@ -59,7 +59,7 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.BACKUP_PROGRESS, (uuid, data) => {
-    let wsData: any = null;
+    let wsData: { progress: number; total: number } = null;
     try {
       wsData = JSON.parse(data);
     } catch {
@@ -70,7 +70,7 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.BACKUP_COMPLETED, (uuid, data) => {
-    let wsData: any = null;
+    let wsData: { isSuccessful: boolean; checksum_type: string; checksum: string; size: number; files: number } = null;
     try {
       wsData = JSON.parse(data);
     } catch {
@@ -87,7 +87,7 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.BACKUP_RESTORE_PROGRESS, (data) => {
-    let wsData: any = null;
+    let wsData: { progress: number; total: number } = null;
     try {
       wsData = JSON.parse(data);
     } catch {
@@ -106,7 +106,7 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {
-    let wsData: any = null;
+    let wsData: FileOperation = null;
     try {
       wsData = JSON.parse(data);
     } catch {

@@ -21,7 +21,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import decompressFile from '@/api/server/files/decompressFile';
 import downloadFiles from '@/api/server/files/downloadFiles';
@@ -42,8 +42,8 @@ function FileTableRow({
   ref,
 }: {
   file: DirectoryEntry;
-  onContextMenu: (e: any) => void;
-  onClick: (e: any) => boolean;
+  onContextMenu: React.MouseEventHandler<HTMLTableRowElement>;
+  onClick: React.MouseEventHandler<HTMLTableRowElement>;
   children: React.ReactNode;
   ref: React.Ref<HTMLTableRowElement>;
 }) {
@@ -63,9 +63,7 @@ function FileTableRow({
           : undefined
       }
       onContextMenu={onContextMenu}
-      onClick={(e) => {
-        if (onClick(e)) return;
-
+      onClick={() => {
         if (file.directory) {
           setSearchParams({
             directory: join(browsingDirectory, file.name),

@@ -8,7 +8,6 @@ import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
-import Notification from '@/elements/Notification';
 import Progress from '@/elements/Progress';
 
 const ansiUp = new AnsiUp();
