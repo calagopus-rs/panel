@@ -21,7 +21,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiUser,
+        user: crate::models::user::ApiFullUser,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -29,7 +29,7 @@ mod get {
     ))]
     pub async fn route(user: GetUser) -> ApiResponseResult {
         ApiResponse::json(Response {
-            user: user.0.into_api_object(true),
+            user: user.0.into_api_full_object(),
         })
         .ok()
     }

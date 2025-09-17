@@ -10,6 +10,7 @@ use std::ops::{Deref, DerefMut};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod servers;
+mod two_factor;
 
 #[derive(Clone)]
 pub struct ParamUser(pub User);
@@ -62,7 +63,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiUser,
+        user: crate::models::user::ApiFullUser,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -77,7 +78,7 @@ mod get {
     ))]
     pub async fn route(user: GetParamUser) -> ApiResponseResult {
         ApiResponse::json(Response {
-            user: user.0.0.into_api_object(true),
+            user: user.0.0.into_api_full_object(),
         })
         .ok()
     }
@@ -286,6 +287,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/two-factor", two_factor::router(state))
         .nest("/servers", servers::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())

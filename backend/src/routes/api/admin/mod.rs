@@ -21,6 +21,7 @@ mod locations;
 mod mounts;
 mod nests;
 mod nodes;
+mod roles;
 mod servers;
 mod settings;
 mod users;
@@ -95,6 +96,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/database-hosts", database_hosts::router(state))
         .nest("/mounts", mounts::router(state))
         .nest("/users", users::router(state))
+        .nest("/roles", roles::router(state))
         .nest("/activity", activity::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .route_layer(axum::middleware::from_fn_with_state(

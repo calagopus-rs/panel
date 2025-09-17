@@ -12,6 +12,7 @@ pub static USERNAME_REGEX: LazyLock<Regex> =
 #[derive(Serialize, Deserialize, Clone)]
 pub struct User {
     pub uuid: uuid::Uuid,
+    pub role: Option<super::role::Role>,
     pub external_id: Option<String>,
 
     pub avatar: Option<String>,
@@ -34,7 +35,7 @@ impl BaseModel for User {
         let prefix = prefix.unwrap_or_default();
         let table = table.unwrap_or("users");
 
-        BTreeMap::from([
+        let mut columns = BTreeMap::from([
             (format!("{table}.uuid"), format!("{prefix}uuid")),
             (
                 format!("{table}.external_id"),
@@ -56,7 +57,11 @@ impl BaseModel for User {
             ),
             (format!("{table}.created"), format!("{prefix}created")),
             (format!("{table}.created"), format!("{prefix}created")),
-        ])
+        ]);
+
+        columns.extend(super::role::Role::columns(Some("role_"), None));
+
+        columns
     }
 
     #[inline]
@@ -65,6 +70,14 @@ impl BaseModel for User {
 
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
+            role: if row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}role_uuid").as_str())
+                .is_ok()
+            {
+                Some(super::role::Role::map(Some("role_"), row))
+            } else {
+                None
+            },
             external_id: row.get(format!("{prefix}external_id").as_str()),
             avatar: row.get(format!("{prefix}avatar").as_str()),
             username: row.get(format!("{prefix}username").as_str()),
@@ -88,15 +101,14 @@ impl User {
         name_last: &str,
         password: &str,
         admin: bool,
-    ) -> Result<Self, sqlx::Error> {
-        let row = sqlx::query(&format!(
+    ) -> Result<uuid::Uuid, sqlx::Error> {
+        let row = sqlx::query(
             r#"
             INSERT INTO users (username, email, name_first, name_last, password, admin)
             VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf', 8)), $6)
-            RETURNING {}
+            RETURNING users.uuid
             "#,
-            Self::columns_sql(None, None)
-        ))
+        )
         .bind(username)
         .bind(email)
         .bind(name_first)
@@ -106,7 +118,7 @@ impl User {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Ok(row.get("uuid"))
     }
 
     pub async fn by_uuid(
@@ -117,6 +129,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.uuid = $1
             "#,
             Self::columns_sql(None, None)
@@ -141,6 +154,7 @@ impl User {
             r#"
             SELECT {}, {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN user_sessions ON user_sessions.user_uuid = users.uuid
             WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
             "#,
@@ -168,6 +182,7 @@ impl User {
             r#"
             SELECT {}, {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN user_api_keys ON user_api_keys.user_uuid = users.uuid
             WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
             "#,
@@ -195,6 +210,7 @@ impl User {
             r#"
             SELECT {}, {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN user_security_keys ON user_security_keys.user_uuid = users.uuid
             WHERE user_security_keys.credential_id = $1
             "#,
@@ -221,6 +237,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.email = $1
             "#,
             Self::columns_sql(None, None)
@@ -241,6 +258,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.username = $1 AND users.password = crypt($2, users.password)
             "#,
             Self::columns_sql(None, None)
@@ -262,6 +280,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN user_ssh_keys ON user_ssh_keys.user_uuid = users.uuid
             WHERE users.username = $1 AND user_ssh_keys.fingerprint = $2
             "#,
@@ -288,6 +307,7 @@ impl User {
             r#"
             SELECT {}
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.email = $1 AND users.password = crypt($2, users.password)
             "#,
             Self::columns_sql(None, None)
@@ -298,6 +318,41 @@ impl User {
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_role_uuid_with_pagination(
+        database: &crate::database::Database,
+        role_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            WHERE users.role_uuid = $1 AND ($2 IS NULL OR users.username ILIKE '%' || $2 || '%' OR users.email ILIKE '%' || $2 || '%')
+            ORDER BY users.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None, None)
+        ))
+        .bind(role_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
     }
 
     pub async fn all_with_pagination(
@@ -312,6 +367,7 @@ impl User {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE $1 IS NULL OR users.username ILIKE '%' || $1 || '%' OR users.email ILIKE '%' || $1 || '%'
             ORDER BY users.created
             LIMIT $2 OFFSET $3
@@ -354,14 +410,13 @@ impl User {
         database: &crate::database::Database,
         password: &str,
     ) -> Result<bool, sqlx::Error> {
-        let row = sqlx::query(&format!(
+        let row = sqlx::query(
             r#"
-            SELECT {}
+            SELECT 1
             FROM users
             WHERE users.uuid = $1 AND users.password = crypt($2, users.password)
             "#,
-            Self::columns_sql(None, None)
-        ))
+        )
         .bind(self.uuid)
         .bind(password)
         .fetch_optional(database.read())
@@ -391,26 +446,28 @@ impl User {
     }
 
     #[inline]
-    pub fn into_api_object(self, show_personal: bool) -> ApiUser {
+    pub fn into_api_object(self) -> ApiUser {
         ApiUser {
             uuid: self.uuid,
             username: self.username,
+            role: self.role.map(|r| r.name),
             avatar: self.avatar,
-            email: if show_personal {
-                self.email
-            } else {
-                "hidden@email.com".to_string()
-            },
-            name_first: if show_personal {
-                self.name_first
-            } else {
-                "Hidden".to_string()
-            },
-            name_last: if show_personal {
-                self.name_last
-            } else {
-                "User".to_string()
-            },
+            admin: self.admin,
+            totp_enabled: self.totp_enabled,
+            created: self.created.and_utc(),
+        }
+    }
+
+    #[inline]
+    pub fn into_api_full_object(self) -> ApiFullUser {
+        ApiFullUser {
+            uuid: self.uuid,
+            username: self.username,
+            role: self.role.map(|r| r.into_admin_api_object()),
+            avatar: self.avatar,
+            email: self.email,
+            name_first: self.name_first,
+            name_last: self.name_last,
             admin: self.admin,
             totp_enabled: self.totp_enabled,
             created: self.created.and_utc(),
@@ -423,8 +480,24 @@ impl User {
 pub struct ApiUser {
     pub uuid: uuid::Uuid,
 
-    pub avatar: Option<String>,
     pub username: String,
+    pub role: Option<String>,
+    pub avatar: Option<String>,
+
+    pub admin: bool,
+    pub totp_enabled: bool,
+
+    pub created: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "FullUser")]
+pub struct ApiFullUser {
+    pub uuid: uuid::Uuid,
+
+    pub username: String,
+    pub role: Option<super::role::AdminApiRole>,
+    pub avatar: Option<String>,
     pub email: String,
 
     pub name_first: String,

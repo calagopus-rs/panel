@@ -3,10 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
     use crate::{
-        models::{
-            user::{ApiUser, User},
-            user_session::UserSession,
-        },
+        models::{user::User, user_session::UserSession},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
@@ -43,7 +40,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: ApiUser,
+        user: crate::models::user::ApiFullUser,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -70,6 +67,8 @@ mod post {
                 .ok();
         }
 
+        let secure = settings.app.url.starts_with("https://");
+
         drop(settings);
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
@@ -89,7 +88,9 @@ mod post {
         )
         .await
         {
-            Ok(user) => user,
+            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid)
+                .await?
+                .ok_or_else(|| anyhow::anyhow!("user not found after creation"))?,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("user with username or email already exists")
                     .with_status(StatusCode::BAD_REQUEST)
@@ -115,13 +116,11 @@ mod post {
         )
         .await?;
 
-        let settings = state.settings.get().await;
-
         cookies.add(
             Cookie::build(("session", key))
                 .http_only(true)
                 .same_site(tower_cookies::cookie::SameSite::Strict)
-                .secure(settings.app.url.starts_with("https://"))
+                .secure(secure)
                 .path("/")
                 .expires(
                     tower_cookies::cookie::time::OffsetDateTime::now_utc()
@@ -131,7 +130,7 @@ mod post {
         );
 
         ApiResponse::json(Response {
-            user: user.into_api_object(true),
+            user: user.into_api_full_object(),
         })
         .ok()
     }

@@ -106,6 +106,13 @@
       "when": 1756486838045,
       "tag": "0014_silky_klaw",
       "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1758094234420,
+      "tag": "0015_windy_sandman",
+      "breakpoints": false
     }
   ]
 }

@@ -1,11 +1,11 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _user_;
+mod _role_;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParamsWithSearch, user::User},
+        models::{Pagination, PaginationParamsWithSearch, role::Role},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState},
     };
@@ -16,7 +16,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        users: Pagination<crate::models::user::ApiFullUser>,
+        roles: Pagination<crate::models::role::AdminApiRole>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -47,7 +47,7 @@ mod get {
                 .ok();
         }
 
-        let users = User::all_with_pagination(
+        let roles = Role::all_with_pagination(
             &state.database,
             params.page,
             params.per_page,
@@ -56,14 +56,14 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            users: Pagination {
-                total: users.total,
-                per_page: users.per_page,
-                page: users.page,
-                data: users
+            roles: Pagination {
+                total: roles.total,
+                per_page: roles.per_page,
+                page: roles.page,
+                data: roles
                     .data
                     .into_iter()
-                    .map(|user| user.into_api_full_object())
+                    .map(|mount| mount.into_admin_api_object())
                     .collect(),
             },
         })
@@ -73,7 +73,7 @@ mod get {
 
 mod post {
     use crate::{
-        models::user::User,
+        models::role::Role,
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
     };
@@ -84,32 +84,20 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(
-            length(min = 3, max = 15),
-            regex(path = "*crate::models::user::USERNAME_REGEX")
-        )]
-        #[schema(min_length = 3, max_length = 15)]
-        #[schema(pattern = "^[a-zA-Z0-9_]+$")]
-        username: String,
-        #[validate(email)]
-        #[schema(format = "email")]
-        email: String,
-        #[validate(length(min = 2, max = 255))]
-        #[schema(min_length = 2, max_length = 255)]
-        name_first: String,
-        #[validate(length(min = 2, max = 255))]
-        #[schema(min_length = 2, max_length = 255)]
-        name_last: String,
-        #[validate(length(min = 8, max = 512))]
-        #[schema(min_length = 8, max_length = 512)]
-        password: String,
+        #[validate(length(min = 3, max = 255))]
+        #[schema(min_length = 3, max_length = 255)]
+        name: String,
+        #[validate(length(max = 1024))]
+        #[schema(max_length = 1024)]
+        description: Option<String>,
 
-        admin: bool,
+        #[validate(custom(function = "crate::models::role::validate_permissions"))]
+        permissions: Vec<String>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiFullUser,
+        role: crate::models::role::AdminApiRole,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -128,27 +116,24 @@ mod post {
                 .ok();
         }
 
-        let user = match User::create(
+        let role = match Role::create(
             &state.database,
-            &data.username,
-            &data.email,
-            &data.name_first,
-            &data.name_last,
-            &data.password,
-            data.admin,
+            &data.name,
+            data.description.as_deref(),
+            &data.permissions,
         )
         .await
         {
-            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid)
-                .await?
-                .ok_or_else(|| anyhow::anyhow!("user not found after creation"))?,
+            Ok(role) => role,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return ApiResponse::error("user with email/username already exists").ok();
+                return ApiResponse::error("role with name already exists")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create user: {:#?}", err);
+                tracing::error!("failed to create role: {:#?}", err);
 
-                return ApiResponse::error("failed to create user")
+                return ApiResponse::error("failed to create role")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
@@ -156,20 +141,19 @@ mod post {
 
         activity_logger
             .log(
-                "user:create",
+                "role:create",
                 serde_json::json!({
-                    "uuid": user.uuid,
-                    "username": user.username,
-                    "email": user.email,
-                    "name_first": user.name_first,
-                    "name_last": user.name_last,
-                    "admin": user.admin,
+                    "uuid": role.uuid,
+                    "name": role.name,
+                    "description": role.description,
+
+                    "permissions": role.permissions,
                 }),
             )
             .await;
 
         ApiResponse::json(Response {
-            user: user.into_api_full_object(),
+            role: role.into_admin_api_object(),
         })
         .ok()
     }
@@ -179,6 +163,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{user}", _user_::router(state))
+        .nest("/{role}", _role_::router(state))
         .with_state(state.clone())
 }

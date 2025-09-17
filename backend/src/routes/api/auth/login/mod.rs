@@ -7,11 +7,7 @@ mod security_key;
 mod post {
     use crate::{
         jwt::BasePayload,
-        models::{
-            user::{ApiUser, User},
-            user_activity::UserActivity,
-            user_session::UserSession,
-        },
+        models::{user::User, user_activity::UserActivity, user_session::UserSession},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
     };
@@ -34,8 +30,12 @@ mod post {
     #[derive(ToSchema, Serialize)]
     #[serde(tag = "type", rename_all = "snake_case")]
     enum Response {
-        Completed { user: ApiUser },
-        TwoFactorRequired { token: String },
+        Completed {
+            user: Box<crate::models::user::ApiFullUser>,
+        },
+        TwoFactorRequired {
+            token: String,
+        },
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -155,7 +155,7 @@ mod post {
             }
 
             ApiResponse::json(Response::Completed {
-                user: user.into_api_object(true),
+                user: Box::new(user.into_api_full_object()),
             })
             .ok()
         }

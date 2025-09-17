@@ -15,9 +15,7 @@ pub struct TwoFactorRequiredJwt {
 mod post {
     use crate::{
         models::{
-            user::{ApiUser, User},
-            user_activity::UserActivity,
-            user_recovery_code::UserRecoveryCode,
+            user::User, user_activity::UserActivity, user_recovery_code::UserRecoveryCode,
             user_session::UserSession,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -40,7 +38,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: ApiUser,
+        user: crate::models::user::ApiFullUser,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -181,7 +179,7 @@ mod post {
         );
 
         ApiResponse::json(Response {
-            user: user.into_api_object(true),
+            user: user.into_api_full_object(),
         })
         .ok()
     }

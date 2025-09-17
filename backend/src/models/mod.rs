@@ -16,6 +16,7 @@ pub mod nest_egg_variable;
 pub mod node;
 pub mod node_allocation;
 pub mod node_mount;
+pub mod role;
 pub mod server;
 pub mod server_activity;
 pub mod server_allocation;

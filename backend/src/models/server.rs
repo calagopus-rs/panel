@@ -289,10 +289,10 @@ impl Server {
                         if let Some(allocation_uuid) = allocation_uuid {
                             let row = sqlx::query(
                                 r#"
-                            INSERT INTO server_allocations (server_uuid, allocation_uuid)
-                            VALUES ($1, $2)
-                            RETURNING uuid
-                            "#,
+                                INSERT INTO server_allocations (server_uuid, allocation_uuid)
+                                VALUES ($1, $2)
+                                RETURNING uuid
+                                "#,
                             )
                             .bind(uuid)
                             .bind(allocation_uuid)
@@ -387,6 +387,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.uuid = $1
@@ -414,6 +415,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE (servers.node_uuid = $1 OR servers.destination_node_uuid = $1) AND servers.uuid = $2
@@ -441,6 +443,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.external_id = $1
@@ -467,6 +470,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.{} = $1
@@ -504,6 +508,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
@@ -546,6 +551,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.owner_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
@@ -587,6 +593,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
@@ -629,6 +636,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
@@ -674,6 +682,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.node_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
@@ -714,6 +723,7 @@ impl Server {
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE $1 IS NULL OR servers.name ILIKE '%' || $1 || '%'
@@ -1097,7 +1107,7 @@ impl Server {
             external_id: self.external_id,
             allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             node: self.node.into_admin_api_object(database),
-            owner: self.owner.into_api_object(true),
+            owner: self.owner.into_api_full_object(),
             egg: self.egg.into_admin_api_object(),
             nest: self.nest.into_admin_api_object(),
             status: self.status,
@@ -1230,7 +1240,7 @@ pub struct AdminApiServer {
     pub external_id: Option<String>,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,
     pub node: super::node::AdminApiNode,
-    pub owner: super::user::ApiUser,
+    pub owner: super::user::ApiFullUser,
     pub egg: super::nest_egg::AdminApiNestEgg,
     pub nest: super::nest::AdminApiNest,
 

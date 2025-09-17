@@ -122,7 +122,7 @@ impl AdminActivity {
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiAdminActivity {
         AdminApiAdminActivity {
-            user: self.user.map(|user| user.into_api_object(false)),
+            user: self.user.map(|user| user.into_api_object()),
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,

@@ -1,12 +1,10 @@
 use super::BaseModel;
-use crate::models::{user::User, user_password_reset::UserPasswordReset};
 use indexmap::IndexMap;
-use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::{
     collections::{BTreeMap, HashSet},
-    sync::{Arc, LazyLock},
+    sync::LazyLock,
 };
 use utoipa::ToSchema;
 use validator::ValidationError;
@@ -275,37 +273,43 @@ pub fn validate_permissions(permissions: &[String]) -> Result<(), ValidationErro
     Ok(())
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct ServerSubuser {
-    pub user: super::user::User,
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Role {
+    pub uuid: uuid::Uuid,
+
+    pub name: String,
+    pub description: Option<String>,
 
     pub permissions: Vec<String>,
-    pub ignored_files: Vec<String>,
+
+    pub users: i64,
 
     pub created: chrono::NaiveDateTime,
 }
 
-impl BaseModel for ServerSubuser {
+impl BaseModel for Role {
     #[inline]
     fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_subusers");
+        let table = table.unwrap_or("roles");
 
-        let mut columns = BTreeMap::from([
+        BTreeMap::from([
+            (format!("{table}.uuid"), format!("{prefix}uuid")),
+            (format!("{table}.name"), format!("{prefix}name")),
+            (
+                format!("{table}.description"),
+                format!("{prefix}description"),
+            ),
             (
                 format!("{table}.permissions"),
                 format!("{prefix}permissions"),
             ),
             (
-                format!("{table}.ignored_files"),
-                format!("{prefix}ignored_files"),
+                format!("(SELECT COUNT(*) FROM users WHERE users.role_uuid = {table}.uuid)"),
+                format!("{prefix}users"),
             ),
             (format!("{table}.created"), format!("{prefix}created")),
-        ]);
-
-        columns.extend(super::user::User::columns(Some("user_"), None));
-
-        columns
+        ])
     }
 
     #[inline]
@@ -313,141 +317,61 @@ impl BaseModel for ServerSubuser {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            user: super::user::User::map(Some("user_"), row),
+            uuid: row.get(format!("{prefix}uuid").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
             permissions: row.get(format!("{prefix}permissions").as_str()),
-            ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
+            users: row.get(format!("{prefix}users").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
 }
 
-impl ServerSubuser {
+impl Role {
     pub async fn create(
         database: &crate::database::Database,
-        settings: &crate::settings::Settings,
-        mail: &Arc<crate::mail::Mail>,
-        server: &super::server::Server,
-        email: &str,
+        name: &str,
+        description: Option<&str>,
         permissions: &[String],
-        ignored_files: &[String],
-    ) -> Result<String, sqlx::Error> {
-        let user = match super::user::User::by_email(database, email).await? {
-            Some(user) => user,
-            None => {
-                let username = email
-                    .split('@')
-                    .next()
-                    .unwrap_or("unknown")
-                    .chars()
-                    .filter(|c| c.is_alphanumeric() || *c == '.' || *c == '-')
-                    .take(10)
-                    .collect::<String>();
-                let username = format!(
-                    "{username}-{}",
-                    rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 4)
-                );
-                let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);
-
-                let user = match User::create(
-                    database, &username, email, "Server", "Subuser", &password, false,
-                )
-                .await
-                {
-                    Ok(user_uuid) => User::by_uuid(database, user_uuid)
-                        .await?
-                        .ok_or(sqlx::Error::RowNotFound)?,
-                    Err(err) => {
-                        tracing::error!(username = %username, email = %email, "failed to create subuser user: {:#?}", err);
-
-                        return Err(err);
-                    }
-                };
-
-                match UserPasswordReset::create(database, user.uuid).await {
-                    Ok(token) => {
-                        let settings = settings.get().await;
-
-                        let mail_content = crate::mail::MAIL_ACCOUNT_CREATED
-                            .replace("{{app_name}}", &settings.app.name)
-                            .replace("{{user_username}}", &user.username)
-                            .replace(
-                                "{{reset_link}}",
-                                &format!(
-                                    "{}/auth/reset-password?token={}",
-                                    settings.app.url,
-                                    urlencoding::encode(&token),
-                                ),
-                            );
-
-                        mail.send(
-                            user.email.clone(),
-                            format!("{} - Account Created", settings.app.name),
-                            mail_content,
-                        )
-                        .await;
-
-                        user
-                    }
-                    Err(err) => {
-                        tracing::warn!(
-                            user = %user.uuid,
-                            "failed to create subuser password reset token: {:#?}",
-                            err
-                        );
-
-                        user
-                    }
-                }
-            }
-        };
-
-        if server.owner.uuid == user.uuid {
-            return Err(sqlx::Error::InvalidArgument(
-                "cannot create subuser for server owner".into(),
-            ));
-        }
-
-        sqlx::query(
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
             r#"
-            INSERT INTO server_subusers (server_uuid, user_uuid, permissions, ignored_files)
-            VALUES ($1, $2, $3, $4)
+            INSERT INTO roles (name, description, permissions)
+            VALUES ($1, $2, $3)
+            RETURNING {}
             "#,
-        )
-        .bind(server.uuid)
-        .bind(user.uuid)
+            Self::columns_sql(None, None)
+        ))
+        .bind(name)
+        .bind(description)
         .bind(permissions)
-        .bind(ignored_files)
-        .execute(database.write())
+        .fetch_one(database.write())
         .await?;
 
-        Ok(user.username)
+        Ok(Self::map(None, &row))
     }
 
-    pub async fn by_server_uuid_username(
+    pub async fn by_uuid(
         database: &crate::database::Database,
-        server_uuid: uuid::Uuid,
-        username: &str,
+        uuid: uuid::Uuid,
     ) -> Result<Option<Self>, sqlx::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
-            FROM server_subusers
-            JOIN users ON users.uuid = server_subusers.user_uuid
-            WHERE server_subusers.server_uuid = $1 AND users.username = $2
+            FROM roles
+            WHERE roles.uuid = $1
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_uuid)
-        .bind(username)
+        .bind(uuid)
         .fetch_optional(database.read())
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_server_uuid_with_pagination(
+    pub async fn all_with_pagination(
         database: &crate::database::Database,
-        server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -457,15 +381,13 @@ impl ServerSubuser {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
-            FROM server_subusers
-            JOIN users ON users.uuid = server_subusers.user_uuid
-            WHERE server_subusers.server_uuid = $1 AND ($2 IS NULL OR users.username ILIKE '%' || $2 || '%')
-            ORDER BY server_subusers.created
-            LIMIT $3 OFFSET $4
+            FROM roles
+            WHERE ($1 IS NULL OR roles.name ILIKE '%' || $1 || '%')
+            ORDER BY roles.created
+            LIMIT $2 OFFSET $3
             "#,
             Self::columns_sql(None, None)
         ))
-        .bind(server_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -480,19 +402,17 @@ impl ServerSubuser {
         })
     }
 
-    pub async fn delete_by_uuids(
+    pub async fn delete_by_uuid(
         database: &crate::database::Database,
-        server_uuid: uuid::Uuid,
-        user_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            DELETE FROM server_subusers
-            WHERE server_subusers.server_uuid = $1 AND server_subusers.user_uuid = $2
+            DELETE FROM roles
+            WHERE roles.uuid = $1
             "#,
         )
-        .bind(server_uuid)
-        .bind(user_uuid)
+        .bind(uuid)
         .execute(database.write())
         .await?;
 
@@ -500,23 +420,29 @@ impl ServerSubuser {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiServerSubuser {
-        ApiServerSubuser {
-            user: self.user.into_api_object(),
+    pub fn into_admin_api_object(self) -> AdminApiRole {
+        AdminApiRole {
+            uuid: self.uuid,
+            name: self.name,
+            description: self.description,
             permissions: self.permissions,
-            ignored_files: self.ignored_files,
+            users: self.users,
             created: self.created.and_utc(),
         }
     }
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "ServerSubuser")]
-pub struct ApiServerSubuser {
-    pub user: super::user::ApiUser,
+#[schema(title = "Role")]
+pub struct AdminApiRole {
+    pub uuid: uuid::Uuid,
+
+    pub name: String,
+    pub description: Option<String>,
 
     pub permissions: Vec<String>,
-    pub ignored_files: Vec<String>,
+
+    pub users: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

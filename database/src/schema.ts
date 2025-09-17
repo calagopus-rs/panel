@@ -67,6 +67,7 @@ export const adminActivities = pgTable('admin_activities', {
 
 export const users = pgTable('users', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	roleUuid: uuid('role_uuid').references(() => roles.uuid, { onDelete: 'set null' }),
 	externalId: varchar('external_id', { length: 255 }),
 
 	avatar: varchar('avatar', { length: 255 }),
@@ -192,6 +193,19 @@ export const userApiKeys = pgTable('user_api_keys', {
 	uniqueIndex('user_api_keys_user_uuid_name_idx').on(userApiKeys.userUuid, userApiKeys.name),
 	uniqueIndex('user_api_keys_user_uuid_key_start_idx').on(userApiKeys.userUuid, userApiKeys.keyStart),
 	uniqueIndex('user_api_keys_key_idx').on(userApiKeys.key)
+])
+
+export const roles = pgTable('roles', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+
+	name: varchar('name', { length: 255 }).notNull(),
+	description: text('description'),
+
+	permissions: varchar('permissions', { length: 32 }).array().notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (roles) => [
+	uniqueIndex('roles_name_idx').on(roles.name)
 ])
 
 export const mounts = pgTable('mounts', {

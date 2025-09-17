@@ -154,7 +154,7 @@ impl ServerActivity {
     #[inline]
     pub fn into_api_object(self) -> ApiServerActivity {
         ApiServerActivity {
-            user: self.user.map(|user| user.into_api_object(false)),
+            user: self.user.map(|user| user.into_api_object()),
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,
