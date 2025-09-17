@@ -68,7 +68,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     pinnedCpus: [],
     startup: '',
     image: '',
-    timezone: 'UTC',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     featureLimits: {
       allocations: 1,
       databases: 0,
@@ -99,7 +99,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
       pinnedCpus: contextServer?.pinnedCpus ?? [],
       startup: contextServer?.startup ?? '',
       image: contextServer?.image ?? '',
-      timezone: contextServer?.timezone ?? 'UTC',
+      timezone: contextServer?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
       featureLimits: contextServer?.featureLimits ?? {
         allocations: 1,
         databases: 0,
@@ -468,7 +468,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 label={'Swap (MB)'}
                 placeholder={'0'}
                 value={server.limits.swap || 0}
-                min={0}
+                min={-1}
                 onChange={(value) => setServer({ ...server, limits: { ...server.limits, swap: Number(value) } })}
               />
               <NumberInput
@@ -516,18 +516,23 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
               value={server.startup || ''}
               onChange={(event) => setServer({ ...server, startup: event.target.value })}
             />
-            <Switch
-              label='Start on Completion'
-              description='Start server after installation completes'
-              checked={server.startOnCompletion}
-              onChange={(event) => setServer({ ...server, startOnCompletion: event.target.checked })}
-            />
-            <Switch
-              label='Skip Scripts'
-              description='Skip running install scripts'
-              checked={server.skipScripts}
-              onChange={(event) => setServer({ ...server, skipScripts: event.target.checked })}
-            />
+
+            {!contextServer && (
+              <>
+                <Switch
+                  label='Start on Completion'
+                  description='Start server after installation completes'
+                  checked={server.startOnCompletion}
+                  onChange={(event) => setServer({ ...server, startOnCompletion: event.target.checked })}
+                />
+                <Switch
+                  label='Skip Scripts'
+                  description='Skip running install scripts'
+                  checked={server.skipScripts}
+                  onChange={(event) => setServer({ ...server, skipScripts: event.target.checked })}
+                />
+              </>
+            )}
           </Paper>
         </Group>
 
