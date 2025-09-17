@@ -37,6 +37,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [deleteDoForce, setDeleteDoForce] = useState(false);
   const [deleteDoDeleteBackups, setDeleteDoDeleteBackups] = useState(false);
+  const [deleteServerName, setDeleteServerName] = useState('');
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [doNodesRefetch, setDoNodesRefetch] = useState(false);
@@ -316,10 +317,18 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
             defaultChecked={deleteDoDeleteBackups}
             onChange={(e) => setDeleteDoDeleteBackups(e.target.checked)}
           />
+
+          <TextInput
+            withAsterisk
+            label={'Confirm Server Name'}
+            placeholder={'Server Name'}
+            value={deleteServerName}
+            onChange={(e) => setDeleteServerName(e.target.value)}
+          />
         </Stack>
 
         <Group mt={'md'}>
-          <Button color={'red'} onClick={doDelete}>
+          <Button color={'red'} disabled={server.name != deleteServerName} onClick={doDelete}>
             Okay
           </Button>
           <Button variant={'default'} onClick={() => setOpenModal(null)}>
