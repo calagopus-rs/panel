@@ -249,7 +249,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
 
     setServer({
       ...server,
-      image: Object.keys(egg.dockerImages)[0] ?? '',
+      image: Object.values(egg.dockerImages)[0] ?? '',
       startup: egg.startup ?? '',
     })
   }, [server.eggUuid]);
@@ -499,7 +499,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 value={server.image || ''}
                 onChange={(value) => setServer({ ...server, image: value })}
                 data={Object.entries(eggs.find((egg) => egg.uuid === server.eggUuid)?.dockerImages || {}).map(
-                  ([value, label]) => ({
+                  ([label, value]) => ({
                     label,
                     value,
                   }),

@@ -24,7 +24,7 @@ pub async fn service_install(matches: &ArgMatches, env: Option<&crate::env::Env>
         return 1;
     }
 
-    let service_path = Path::new("/etc/systemd/system/wings.service");
+    let service_path = Path::new("/etc/systemd/system/panel.service");
     if tokio::fs::metadata(service_path).await.is_ok() && !r#override {
         eprintln!("{}", "service file already exists".red());
         return 1;

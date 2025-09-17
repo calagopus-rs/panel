@@ -436,7 +436,12 @@ impl ServerBackup {
             _ => {
                 if let Err((status, error)) = node
                     .api_client(database)
-                    .delete_servers_server_backup_backup(server.uuid, self.uuid)
+                    .delete_backups_backup(
+                        self.uuid,
+                        &wings_api::backups_backup::delete::RequestBody {
+                            adapter: self.disk.to_wings_adapter(),
+                        },
+                    )
                     .await
                     && status != StatusCode::NOT_FOUND
                 {
