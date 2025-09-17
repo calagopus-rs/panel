@@ -287,23 +287,22 @@ pub struct ServerSubuser {
 
 impl BaseModel for ServerSubuser {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_subusers");
 
         let mut columns = BTreeMap::from([
             (
-                format!("{table}.permissions"),
+                "server_subusers.permissions",
                 format!("{prefix}permissions"),
             ),
             (
-                format!("{table}.ignored_files"),
+                "server_subusers.ignored_files",
                 format!("{prefix}ignored_files"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_subusers.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::user::User::columns(Some("user_"), None));
+        columns.extend(super::user::User::columns(Some("user_")));
 
         columns
     }
@@ -436,7 +435,7 @@ impl ServerSubuser {
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE server_subusers.server_uuid = $1 AND users.username = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(username)
@@ -465,7 +464,7 @@ impl ServerSubuser {
             ORDER BY server_subusers.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(search)

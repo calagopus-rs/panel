@@ -36,50 +36,42 @@ pub struct Node {
 
 impl BaseModel for Node {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("nodes");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.public"), format!("{prefix}public")),
+            ("nodes.uuid", format!("{prefix}uuid")),
+            ("nodes.name", format!("{prefix}name")),
+            ("nodes.public", format!("{prefix}public")),
+            ("nodes.description", format!("{prefix}description")),
+            ("nodes.public_url", format!("{prefix}public_url")),
+            ("nodes.url", format!("{prefix}url")),
+            ("nodes.sftp_host", format!("{prefix}sftp_host")),
+            ("nodes.sftp_port", format!("{prefix}sftp_port")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (format!("{table}.public_url"), format!("{prefix}public_url")),
-            (format!("{table}.url"), format!("{prefix}url")),
-            (format!("{table}.sftp_host"), format!("{prefix}sftp_host")),
-            (format!("{table}.sftp_port"), format!("{prefix}sftp_port")),
-            (
-                format!("{table}.maintenance_message"),
+                "nodes.maintenance_message",
                 format!("{prefix}maintenance_message"),
             ),
-            (format!("{table}.memory"), format!("{prefix}memory")),
-            (format!("{table}.disk"), format!("{prefix}disk")),
-            (format!("{table}.token_id"), format!("{prefix}token_id")),
-            (format!("{table}.token"), format!("{prefix}token")),
+            ("nodes.memory", format!("{prefix}memory")),
+            ("nodes.disk", format!("{prefix}disk")),
+            ("nodes.token_id", format!("{prefix}token_id")),
+            ("nodes.token", format!("{prefix}token")),
             (
-                format!("(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = {table}.uuid)"),
+                "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = nodes.uuid)",
                 format!("{prefix}servers"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = {table}.uuid AND servers.destination_node_uuid IS NOT NULL)"
-                ),
+                "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = nodes.uuid AND servers.destination_node_uuid IS NOT NULL)",
                 format!("{prefix}outgoing_transfers"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_uuid = nodes.uuid)",
                 format!("{prefix}incoming_transfers"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("nodes.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::location::Location::columns(Some("location_"), None));
+        columns.extend(super::location::Location::columns(Some("location_")));
 
         columns
     }
@@ -172,8 +164,8 @@ impl Node {
             JOIN locations ON locations.uuid = nodes.location_uuid
             WHERE nodes.uuid = $1
             "#,
-            Self::columns_sql(None, None),
-            super::location::Location::columns_sql(Some("location_"), None),
+            Self::columns_sql(None),
+            super::location::Location::columns_sql(Some("location_")),
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -194,7 +186,7 @@ impl Node {
             JOIN locations ON locations.uuid = nodes.location_uuid
             WHERE nodes.token_id = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(token_id)
         .fetch_optional(database.read())
@@ -232,7 +224,7 @@ impl Node {
             ORDER BY nodes.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(location_uuid)
         .bind(search)
@@ -266,7 +258,7 @@ impl Node {
             ORDER BY nodes.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

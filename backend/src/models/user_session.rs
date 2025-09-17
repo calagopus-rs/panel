@@ -20,16 +20,15 @@ pub struct UserSession {
 
 impl BaseModel for UserSession {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_sessions");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.ip"), format!("{prefix}ip")),
-            (format!("{table}.user_agent"), format!("{prefix}user_agent")),
-            (format!("{table}.last_used"), format!("{prefix}last_used")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_sessions.uuid", format!("{prefix}uuid")),
+            ("user_sessions.ip", format!("{prefix}ip")),
+            ("user_sessions.user_agent", format!("{prefix}user_agent")),
+            ("user_sessions.last_used", format!("{prefix}last_used")),
+            ("user_sessions.created", format!("{prefix}created")),
         ])
     }
 
@@ -89,7 +88,7 @@ impl UserSession {
             FROM user_sessions
             WHERE user_sessions.user_uuid = $1 AND user_sessions.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(uuid)
@@ -116,7 +115,7 @@ impl UserSession {
             ORDER BY user_sessions.created DESC
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)

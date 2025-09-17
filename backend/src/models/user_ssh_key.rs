@@ -16,18 +16,14 @@ pub struct UserSshKey {
 
 impl BaseModel for UserSshKey {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_ssh_keys");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (
-                format!("{table}.fingerprint"),
-                format!("{prefix}fingerprint"),
-            ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_ssh_keys.uuid", format!("{prefix}uuid")),
+            ("user_ssh_keys.name", format!("{prefix}name")),
+            ("user_ssh_keys.fingerprint", format!("{prefix}fingerprint")),
+            ("user_ssh_keys.created", format!("{prefix}created")),
         ])
     }
 
@@ -57,7 +53,7 @@ impl UserSshKey {
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(name)
@@ -84,7 +80,7 @@ impl UserSshKey {
             FROM user_ssh_keys
             WHERE user_ssh_keys.user_uuid = $1 AND user_ssh_keys.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(uuid)
@@ -111,7 +107,7 @@ impl UserSshKey {
             ORDER BY user_ssh_keys.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)

@@ -151,31 +151,24 @@ pub struct Location {
 
 impl BaseModel for Location {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("locations");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.short_name"), format!("{prefix}short_name")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("locations.uuid", format!("{prefix}uuid")),
+            ("locations.short_name", format!("{prefix}short_name")),
+            ("locations.name", format!("{prefix}name")),
+            ("locations.description", format!("{prefix}description")),
+            ("locations.backup_disk", format!("{prefix}backup_disk")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (
-                format!("{table}.backup_disk"),
-                format!("{prefix}backup_disk"),
-            ),
-            (
-                format!("{table}.backup_configs"),
+                "locations.backup_configs",
                 format!("{prefix}backup_configs"),
             ),
             (
-                format!("(SELECT COUNT(*) FROM nodes WHERE nodes.location_uuid = {table}.uuid)"),
+                "(SELECT COUNT(*) FROM nodes WHERE nodes.location_uuid = locations.uuid)",
                 format!("{prefix}nodes"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("locations.created", format!("{prefix}created")),
         ])
     }
 
@@ -216,7 +209,7 @@ impl Location {
             VALUES ($1, $2, $3, $4, $5)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(short_name)
         .bind(name)
@@ -239,7 +232,7 @@ impl Location {
             FROM locations
             WHERE locations.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -264,7 +257,7 @@ impl Location {
             ORDER BY locations.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

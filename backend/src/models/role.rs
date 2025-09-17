@@ -289,26 +289,19 @@ pub struct Role {
 
 impl BaseModel for Role {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("roles");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("roles.uuid", format!("{prefix}uuid")),
+            ("roles.name", format!("{prefix}name")),
+            ("roles.description", format!("{prefix}description")),
+            ("roles.permissions", format!("{prefix}permissions")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (
-                format!("{table}.permissions"),
-                format!("{prefix}permissions"),
-            ),
-            (
-                format!("(SELECT COUNT(*) FROM users WHERE users.role_uuid = {table}.uuid)"),
+                "(SELECT COUNT(*) FROM users WHERE users.role_uuid = roles.uuid)",
                 format!("{prefix}users"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("roles.created", format!("{prefix}created")),
         ])
     }
 
@@ -340,7 +333,7 @@ impl Role {
             VALUES ($1, $2, $3)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(name)
         .bind(description)
@@ -361,7 +354,7 @@ impl Role {
             FROM roles
             WHERE roles.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -386,7 +379,7 @@ impl Role {
             ORDER BY roles.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

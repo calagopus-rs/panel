@@ -126,58 +126,39 @@ pub struct NestEgg {
 
 impl BaseModel for NestEgg {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("nest_eggs");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.author"), format!("{prefix}author")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("nest_eggs.uuid", format!("{prefix}uuid")),
+            ("nest_eggs.author", format!("{prefix}author")),
+            ("nest_eggs.name", format!("{prefix}name")),
+            ("nest_eggs.description", format!("{prefix}description")),
+            ("nest_eggs.config_files", format!("{prefix}config_files")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (
-                format!("{table}.config_files"),
-                format!("{prefix}config_files"),
-            ),
-            (
-                format!("{table}.config_startup"),
+                "nest_eggs.config_startup",
                 format!("{prefix}config_startup"),
             ),
+            ("nest_eggs.config_stop", format!("{prefix}config_stop")),
+            ("nest_eggs.config_script", format!("{prefix}config_script")),
             (
-                format!("{table}.config_stop"),
-                format!("{prefix}config_stop"),
-            ),
-            (
-                format!("{table}.config_script"),
-                format!("{prefix}config_script"),
-            ),
-            (
-                format!("{table}.config_allocations"),
+                "nest_eggs.config_allocations",
                 format!("{prefix}config_allocations"),
             ),
-            (format!("{table}.startup"), format!("{prefix}startup")),
+            ("nest_eggs.startup", format!("{prefix}startup")),
             (
-                format!("{table}.force_outgoing_ip"),
+                "nest_eggs.force_outgoing_ip",
                 format!("{prefix}force_outgoing_ip"),
             ),
-            (format!("{table}.features"), format!("{prefix}features")),
+            ("nest_eggs.features", format!("{prefix}features")),
+            ("nest_eggs.docker_images", format!("{prefix}docker_images")),
+            ("nest_eggs.file_denylist", format!("{prefix}file_denylist")),
+            ("nest_eggs.created", format!("{prefix}created")),
             (
-                format!("{table}.docker_images"),
-                format!("{prefix}docker_images"),
-            ),
-            (
-                format!("{table}.file_denylist"),
-                format!("{prefix}file_denylist"),
-            ),
-            (format!("{table}.created"), format!("{prefix}created")),
-            (
-                format!("(SELECT COUNT(*) FROM servers WHERE servers.egg_uuid = {table}.uuid)"),
+                "(SELECT COUNT(*) FROM servers WHERE servers.egg_uuid = nest_eggs.uuid)",
                 format!("{prefix}servers"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("nest_eggs.created", format!("{prefix}created")),
         ])
     }
 
@@ -249,7 +230,7 @@ impl NestEgg {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(nest_uuid)
         .bind(author)
@@ -288,7 +269,7 @@ impl NestEgg {
             ORDER BY nest_eggs.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(nest_uuid)
         .bind(search)
@@ -315,7 +296,7 @@ impl NestEgg {
             FROM nest_eggs
             WHERE nest_eggs.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -335,7 +316,7 @@ impl NestEgg {
             FROM nest_eggs
             WHERE nest_eggs.nest_uuid = $1 AND nest_eggs.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(nest_uuid)
         .bind(uuid)

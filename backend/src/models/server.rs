@@ -63,72 +63,52 @@ pub struct Server {
 
 impl BaseModel for Server {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("servers");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.uuid_short"), format!("{prefix}uuid_short")),
+            ("servers.uuid", format!("{prefix}uuid")),
+            ("servers.uuid_short", format!("{prefix}uuid_short")),
+            ("servers.external_id", format!("{prefix}external_id")),
             (
-                format!("{table}.external_id"),
-                format!("{prefix}external_id"),
-            ),
-            (
-                format!("{table}.destination_allocation_uuid"),
+                "servers.destination_allocation_uuid",
                 format!("{prefix}destination_allocation_uuid"),
             ),
             (
-                format!("{table}.destination_node_uuid"),
+                "servers.destination_node_uuid",
                 format!("{prefix}destination_node_uuid"),
             ),
-            (format!("{table}.status"), format!("{prefix}status")),
-            (format!("{table}.suspended"), format!("{prefix}suspended")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("servers.status", format!("{prefix}status")),
+            ("servers.suspended", format!("{prefix}suspended")),
+            ("servers.name", format!("{prefix}name")),
+            ("servers.description", format!("{prefix}description")),
+            ("servers.memory", format!("{prefix}memory")),
+            ("servers.swap", format!("{prefix}swap")),
+            ("servers.disk", format!("{prefix}disk")),
+            ("servers.io_weight", format!("{prefix}io_weight")),
+            ("servers.cpu", format!("{prefix}cpu")),
+            ("servers.pinned_cpus", format!("{prefix}pinned_cpus")),
+            ("servers.startup", format!("{prefix}startup")),
+            ("servers.image", format!("{prefix}image")),
+            ("servers.auto_kill", format!("{prefix}auto_kill")),
+            ("servers.timezone", format!("{prefix}timezone")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (format!("{table}.memory"), format!("{prefix}memory")),
-            (format!("{table}.swap"), format!("{prefix}swap")),
-            (format!("{table}.disk"), format!("{prefix}disk")),
-            (format!("{table}.io_weight"), format!("{prefix}io_weight")),
-            (format!("{table}.cpu"), format!("{prefix}cpu")),
-            (
-                format!("{table}.pinned_cpus"),
-                format!("{prefix}pinned_cpus"),
-            ),
-            (format!("{table}.startup"), format!("{prefix}startup")),
-            (format!("{table}.image"), format!("{prefix}image")),
-            (format!("{table}.auto_kill"), format!("{prefix}auto_kill")),
-            (format!("{table}.timezone"), format!("{prefix}timezone")),
-            (
-                format!("{table}.allocation_limit"),
+                "servers.allocation_limit",
                 format!("{prefix}allocation_limit"),
             ),
-            (
-                format!("{table}.database_limit"),
-                format!("{prefix}database_limit"),
-            ),
-            (
-                format!("{table}.backup_limit"),
-                format!("{prefix}backup_limit"),
-            ),
-            (
-                format!("{table}.schedule_limit"),
-                format!("{prefix}schedule_limit"),
-            ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("servers.database_limit", format!("{prefix}database_limit")),
+            ("servers.backup_limit", format!("{prefix}backup_limit")),
+            ("servers.schedule_limit", format!("{prefix}schedule_limit")),
+            ("servers.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::server_allocation::ServerAllocation::columns(
-            Some("allocation_"),
-            None,
-        ));
-        columns.extend(super::node::Node::columns(Some("node_"), None));
-        columns.extend(super::user::User::columns(Some("owner_"), None));
-        columns.extend(super::nest_egg::NestEgg::columns(Some("egg_"), None));
-        columns.extend(super::nest::Nest::columns(Some("nest_"), None));
+        columns.extend(super::server_allocation::ServerAllocation::columns(Some(
+            "allocation_",
+        )));
+        columns.extend(super::node::Node::columns(Some("node_")));
+        columns.extend(super::user::User::columns(Some("owner_")));
+        columns.extend(super::nest_egg::NestEgg::columns(Some("egg_")));
+        columns.extend(super::nest::Nest::columns(Some("nest_")));
 
         columns
     }
@@ -392,7 +372,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -420,7 +400,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE (servers.node_uuid = $1 OR servers.destination_node_uuid = $1) AND servers.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(uuid)
@@ -448,7 +428,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.external_id = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(external_id)
         .fetch_optional(database.read())
@@ -475,7 +455,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.{} = $1
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None),
             match identifier.len() {
                 8 => "uuid_short",
                 36 => "uuid",
@@ -514,7 +494,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             WHERE servers.{} = $3 AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $2)
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None),
             match identifier.len() {
                 8 => "uuid_short",
                 36 => "uuid",
@@ -558,7 +538,7 @@ impl Server {
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(owner_uuid)
         .bind(search)
@@ -601,7 +581,7 @@ impl Server {
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)
@@ -647,7 +627,7 @@ impl Server {
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)
@@ -689,7 +669,7 @@ impl Server {
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(search)
@@ -730,7 +710,7 @@ impl Server {
             ORDER BY servers.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)
@@ -1084,8 +1064,12 @@ impl Server {
                     file_denylist: self.egg.file_denylist,
                 },
                 container: wings_api::ServerConfigurationContainer {
+                    privileged: false,
                     image: self.image,
                     timezone: self.timezone,
+                    seccomp: wings_api::ServerConfigurationContainerSeccomp {
+                        remove_allowed: vec![],
+                    },
                 },
                 auto_kill: self.auto_kill,
             },

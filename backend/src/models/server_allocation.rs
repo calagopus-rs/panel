@@ -16,20 +16,18 @@ pub struct ServerAllocation {
 
 impl BaseModel for ServerAllocation {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_allocations");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.notes"), format!("{prefix}notes")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_allocations.uuid", format!("{prefix}uuid")),
+            ("server_allocations.notes", format!("{prefix}notes")),
+            ("server_allocations.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::node_allocation::NodeAllocation::columns(
-            Some("allocation_"),
-            None,
-        ));
+        columns.extend(super::node_allocation::NodeAllocation::columns(Some(
+            "allocation_",
+        )));
 
         columns
     }
@@ -109,7 +107,7 @@ impl ServerAllocation {
             JOIN node_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
             WHERE server_allocations.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -130,7 +128,7 @@ impl ServerAllocation {
             JOIN node_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
             WHERE server_allocations.server_uuid = $1 AND server_allocations.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(allocation_uuid)
@@ -158,7 +156,7 @@ impl ServerAllocation {
             ORDER BY server_allocations.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(search)

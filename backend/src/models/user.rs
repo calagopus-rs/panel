@@ -31,35 +31,25 @@ pub struct User {
 
 impl BaseModel for User {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("users");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (
-                format!("{table}.external_id"),
-                format!("{prefix}external_id"),
-            ),
-            (format!("{table}.avatar"), format!("{prefix}avatar")),
-            (format!("{table}.username"), format!("{prefix}username")),
-            (format!("{table}.email"), format!("{prefix}email")),
-            (format!("{table}.name_first"), format!("{prefix}name_first")),
-            (format!("{table}.name_last"), format!("{prefix}name_last")),
-            (format!("{table}.admin"), format!("{prefix}admin")),
-            (
-                format!("{table}.totp_enabled"),
-                format!("{prefix}totp_enabled"),
-            ),
-            (
-                format!("{table}.totp_secret"),
-                format!("{prefix}totp_secret"),
-            ),
-            (format!("{table}.created"), format!("{prefix}created")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("users.uuid", format!("{prefix}uuid")),
+            ("users.external_id", format!("{prefix}external_id")),
+            ("users.avatar", format!("{prefix}avatar")),
+            ("users.username", format!("{prefix}username")),
+            ("users.email", format!("{prefix}email")),
+            ("users.name_first", format!("{prefix}name_first")),
+            ("users.name_last", format!("{prefix}name_last")),
+            ("users.admin", format!("{prefix}admin")),
+            ("users.totp_enabled", format!("{prefix}totp_enabled")),
+            ("users.totp_secret", format!("{prefix}totp_secret")),
+            ("users.created", format!("{prefix}created")),
+            ("users.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::role::Role::columns(Some("role_"), None));
+        columns.extend(super::role::Role::columns(Some("role_")));
 
         columns
     }
@@ -132,7 +122,7 @@ impl User {
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -158,8 +148,8 @@ impl User {
             JOIN user_sessions ON user_sessions.user_uuid = users.uuid
             WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
             "#,
-            Self::columns_sql(None, None),
-            super::user_session::UserSession::columns_sql(Some("session_"), None)
+            Self::columns_sql(None),
+            super::user_session::UserSession::columns_sql(Some("session_"))
         ))
         .bind(key_id)
         .bind(key)
@@ -186,8 +176,8 @@ impl User {
             JOIN user_api_keys ON user_api_keys.user_uuid = users.uuid
             WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
             "#,
-            Self::columns_sql(None, None),
-            super::user_api_key::UserApiKey::columns_sql(Some("api_key_"), None)
+            Self::columns_sql(None),
+            super::user_api_key::UserApiKey::columns_sql(Some("api_key_"))
         ))
         .bind(&key[0..16])
         .bind(key)
@@ -214,8 +204,8 @@ impl User {
             JOIN user_security_keys ON user_security_keys.user_uuid = users.uuid
             WHERE user_security_keys.credential_id = $1
             "#,
-            Self::columns_sql(None, None),
-            super::user_security_key::UserSecurityKey::columns_sql(Some("security_key_"), None)
+            Self::columns_sql(None),
+            super::user_security_key::UserSecurityKey::columns_sql(Some("security_key_"))
         ))
         .bind(credential_id.to_vec())
         .fetch_optional(database.read())
@@ -240,7 +230,7 @@ impl User {
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.email = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(email)
         .fetch_optional(database.read())
@@ -261,7 +251,7 @@ impl User {
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.username = $1 AND users.password = crypt($2, users.password)
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(username)
         .bind(password)
@@ -284,7 +274,7 @@ impl User {
             JOIN user_ssh_keys ON user_ssh_keys.user_uuid = users.uuid
             WHERE users.username = $1 AND user_ssh_keys.fingerprint = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(username)
         .bind(
@@ -310,7 +300,7 @@ impl User {
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE users.email = $1 AND users.password = crypt($2, users.password)
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(email)
         .bind(password)
@@ -338,7 +328,7 @@ impl User {
             ORDER BY users.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(role_uuid)
         .bind(search)
@@ -372,7 +362,7 @@ impl User {
             ORDER BY users.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

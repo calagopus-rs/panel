@@ -18,6 +18,20 @@ pub enum BackupDisk {
     Restic,
 }
 
+impl BackupDisk {
+    #[inline]
+    pub fn to_wings_adapter(self) -> wings_api::BackupAdapter {
+        match self {
+            BackupDisk::Local => wings_api::BackupAdapter::Wings,
+            BackupDisk::S3 => wings_api::BackupAdapter::S3,
+            BackupDisk::DdupBak => wings_api::BackupAdapter::DdupBak,
+            BackupDisk::Btrfs => wings_api::BackupAdapter::Btrfs,
+            BackupDisk::Zfs => wings_api::BackupAdapter::Zfs,
+            BackupDisk::Restic => wings_api::BackupAdapter::Restic,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerBackup {
     pub uuid: uuid::Uuid,
@@ -44,36 +58,29 @@ pub struct ServerBackup {
 
 impl BaseModel for ServerBackup {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_backups");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
+            ("server_backups.uuid", format!("{prefix}uuid")),
+            ("server_backups.server_uuid", format!("{prefix}server_uuid")),
+            ("server_backups.node_uuid", format!("{prefix}node_uuid")),
+            ("server_backups.name", format!("{prefix}name")),
+            ("server_backups.successful", format!("{prefix}successful")),
+            ("server_backups.locked", format!("{prefix}locked")),
             (
-                format!("{table}.server_uuid"),
-                format!("{prefix}server_uuid"),
-            ),
-            (format!("{table}.node_uuid"), format!("{prefix}node_uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.successful"), format!("{prefix}successful")),
-            (format!("{table}.locked"), format!("{prefix}locked")),
-            (
-                format!("{table}.ignored_files"),
+                "server_backups.ignored_files",
                 format!("{prefix}ignored_files"),
             ),
-            (format!("{table}.checksum"), format!("{prefix}checksum")),
-            (format!("{table}.bytes"), format!("{prefix}bytes")),
-            (format!("{table}.files"), format!("{prefix}files")),
-            (format!("{table}.disk"), format!("{prefix}disk")),
-            (format!("{table}.upload_id"), format!("{prefix}upload_id")),
-            (
-                format!("{table}.upload_path"),
-                format!("{prefix}upload_path"),
-            ),
-            (format!("{table}.completed"), format!("{prefix}completed")),
-            (format!("{table}.deleted"), format!("{prefix}deleted")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_backups.checksum", format!("{prefix}checksum")),
+            ("server_backups.bytes", format!("{prefix}bytes")),
+            ("server_backups.files", format!("{prefix}files")),
+            ("server_backups.disk", format!("{prefix}disk")),
+            ("server_backups.upload_id", format!("{prefix}upload_id")),
+            ("server_backups.upload_path", format!("{prefix}upload_path")),
+            ("server_backups.completed", format!("{prefix}completed")),
+            ("server_backups.deleted", format!("{prefix}deleted")),
+            ("server_backups.created", format!("{prefix}created")),
         ])
     }
 
@@ -114,7 +121,7 @@ impl ServerBackup {
             INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server.uuid)
         .bind(server.node.uuid)
@@ -132,22 +139,13 @@ impl ServerBackup {
             async move {
                 tracing::debug!(backup = %uuid, "creating server backup");
 
-                let adapter = match server.node.location.backup_disk {
-                    BackupDisk::Local => wings_api::BackupAdapter::Wings,
-                    BackupDisk::S3 => wings_api::BackupAdapter::S3,
-                    BackupDisk::DdupBak => wings_api::BackupAdapter::DdupBak,
-                    BackupDisk::Btrfs => wings_api::BackupAdapter::Btrfs,
-                    BackupDisk::Zfs => wings_api::BackupAdapter::Zfs,
-                    BackupDisk::Restic => wings_api::BackupAdapter::Restic,
-                };
-
                 if let Err(err) = server
                     .node
                     .api_client(&database)
                     .post_servers_server_backup(
                         server.uuid,
                         &wings_api::servers_server_backup::post::RequestBody {
-                            adapter,
+                            adapter: server.node.location.backup_disk.to_wings_adapter(),
                             uuid,
                             ignore: ignored_files.join("\n"),
                         },
@@ -187,7 +185,7 @@ impl ServerBackup {
             INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server.uuid)
         .bind(server.node.uuid)
@@ -212,7 +210,7 @@ impl ServerBackup {
             FROM server_backups
             WHERE server_backups.server_uuid = $1 AND server_backups.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(uuid)
@@ -233,7 +231,7 @@ impl ServerBackup {
             FROM server_backups
             WHERE server_backups.node_uuid = $1 AND server_backups.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(uuid)
@@ -263,7 +261,7 @@ impl ServerBackup {
             ORDER BY server_backups.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(search)
@@ -301,7 +299,7 @@ impl ServerBackup {
             ORDER BY server_backups.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(search)
@@ -328,7 +326,7 @@ impl ServerBackup {
             FROM server_backups
             WHERE server_backups.server_uuid = $1 AND server_backups.deleted IS NULL
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .fetch_all(database.read())
@@ -367,14 +365,7 @@ impl ServerBackup {
                 server.uuid,
                 self.uuid,
                 &wings_api::servers_server_backup_backup_restore::post::RequestBody {
-                    adapter: match self.disk {
-                        BackupDisk::Local => wings_api::BackupAdapter::Wings,
-                        BackupDisk::S3 => wings_api::BackupAdapter::S3,
-                        BackupDisk::DdupBak => wings_api::BackupAdapter::DdupBak,
-                        BackupDisk::Btrfs => wings_api::BackupAdapter::Btrfs,
-                        BackupDisk::Zfs => wings_api::BackupAdapter::Zfs,
-                        BackupDisk::Restic => wings_api::BackupAdapter::Restic,
-                    },
+                    adapter: self.disk.to_wings_adapter(),
                     download_url: match self.disk {
                         BackupDisk::S3 => {
                             if let Some(mut s3_configuration) =
@@ -504,7 +495,12 @@ impl ServerBackup {
             _ => {
                 if let Err((status, error)) = node
                     .api_client(database)
-                    .delete_backups_backup(self.uuid)
+                    .delete_backups_backup(
+                        self.uuid,
+                        &wings_api::backups_backup::delete::RequestBody {
+                            adapter: self.disk.to_wings_adapter(),
+                        },
+                    )
                     .await
                     && status != StatusCode::NOT_FOUND
                 {
@@ -542,7 +538,7 @@ impl ServerBackup {
             ORDER BY server_backups.created ASC
             LIMIT 1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server.uuid)
         .fetch_optional(database.read())

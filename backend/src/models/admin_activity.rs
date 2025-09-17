@@ -18,22 +18,21 @@ pub struct AdminActivity {
 
 impl BaseModel for AdminActivity {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("admin_activities");
 
         let mut columns = BTreeMap::from([
             (
-                format!("{table}.api_key_uuid"),
+                "admin_activities.api_key_uuid",
                 format!("{prefix}api_key_uuid"),
             ),
-            (format!("{table}.event"), format!("{prefix}event")),
-            (format!("{table}.ip"), format!("{prefix}ip")),
-            (format!("{table}.data"), format!("{prefix}data")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("admin_activities.event", format!("{prefix}event")),
+            ("admin_activities.ip", format!("{prefix}ip")),
+            ("admin_activities.data", format!("{prefix}data")),
+            ("admin_activities.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::user::User::columns(Some("user_"), None));
+        columns.extend(super::user::User::columns(Some("user_")));
 
         columns
     }
@@ -104,7 +103,7 @@ impl AdminActivity {
             ORDER BY admin_activities.created DESC
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

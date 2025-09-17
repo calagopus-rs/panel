@@ -16,17 +16,16 @@ pub struct UserPasswordReset {
 
 impl BaseModel for UserPasswordReset {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_password_resets");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.token"), format!("{prefix}token")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_password_resets.uuid", format!("{prefix}uuid")),
+            ("user_password_resets.token", format!("{prefix}token")),
+            ("user_password_resets.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::user::User::columns(Some("user_"), None));
+        columns.extend(super::user::User::columns(Some("user_")));
 
         columns
     }
@@ -97,8 +96,8 @@ impl UserPasswordReset {
                 user_password_resets.token = crypt($1, user_password_resets.token)
                 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
             "#,
-            Self::columns_sql(None, None),
-            super::user::User::columns_sql(Some("user_"), None)
+            Self::columns_sql(None),
+            super::user::User::columns_sql(Some("user_"))
         ))
         .bind(token)
         .fetch_optional(database.read())

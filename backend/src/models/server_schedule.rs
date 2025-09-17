@@ -23,28 +23,25 @@ pub struct ServerSchedule {
 
 impl BaseModel for ServerSchedule {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_schedules");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.enabled"), format!("{prefix}enabled")),
-            (format!("{table}.triggers"), format!("{prefix}triggers")),
-            (format!("{table}.condition"), format!("{prefix}condition")),
+            ("server_schedules.uuid", format!("{prefix}uuid")),
+            ("server_schedules.name", format!("{prefix}name")),
+            ("server_schedules.enabled", format!("{prefix}enabled")),
+            ("server_schedules.triggers", format!("{prefix}triggers")),
+            ("server_schedules.condition", format!("{prefix}condition")),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM server_schedule_steps WHERE server_schedule_steps.schedule_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM server_schedule_steps WHERE server_schedule_steps.schedule_uuid = server_schedules.uuid)",
                 format!("{prefix}steps"),
             ),
-            (format!("{table}.last_run"), format!("{prefix}last_run")),
+            ("server_schedules.last_run", format!("{prefix}last_run")),
             (
-                format!("{table}.last_failure"),
+                "server_schedules.last_failure",
                 format!("{prefix}last_failure"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_schedules.created", format!("{prefix}created")),
         ])
     }
 
@@ -83,7 +80,7 @@ impl ServerSchedule {
             VALUES ($1, $2, $3, $4, $5, NOW())
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(name)
@@ -106,7 +103,7 @@ impl ServerSchedule {
             FROM server_schedules
             WHERE server_schedules.uuid = $1
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -126,7 +123,7 @@ impl ServerSchedule {
             FROM server_schedules
             WHERE server_schedules.server_uuid = $1 AND server_schedules.uuid = $2
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(uuid)
@@ -153,7 +150,7 @@ impl ServerSchedule {
             ORDER BY server_schedules.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(search)

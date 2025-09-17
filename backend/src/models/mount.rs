@@ -26,43 +26,30 @@ pub struct Mount {
 
 impl BaseModel for Mount {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("mounts");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("mounts.uuid", format!("{prefix}uuid")),
+            ("mounts.name", format!("{prefix}name")),
+            ("mounts.description", format!("{prefix}description")),
+            ("mounts.source", format!("{prefix}source")),
+            ("mounts.target", format!("{prefix}target")),
+            ("mounts.read_only", format!("{prefix}read_only")),
+            ("mounts.user_mountable", format!("{prefix}user_mountable")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (format!("{table}.source"), format!("{prefix}source")),
-            (format!("{table}.target"), format!("{prefix}target")),
-            (format!("{table}.read_only"), format!("{prefix}read_only")),
-            (
-                format!("{table}.user_mountable"),
-                format!("{prefix}user_mountable"),
-            ),
-            (
-                format!(
-                    "(SELECT COUNT(*) FROM nest_egg_mounts WHERE nest_egg_mounts.mount_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM nest_egg_mounts WHERE nest_egg_mounts.mount_uuid = mounts.uuid)",
                 format!("{prefix}eggs"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM node_mounts WHERE node_mounts.mount_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM node_mounts WHERE node_mounts.mount_uuid = mounts.uuid)",
                 format!("{prefix}nodes"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM server_mounts WHERE server_mounts.mount_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM server_mounts WHERE server_mounts.mount_uuid = mounts.uuid)",
                 format!("{prefix}servers"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("mounts.created", format!("{prefix}created")),
         ])
     }
 
@@ -102,7 +89,7 @@ impl Mount {
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(name)
         .bind(description)
@@ -126,7 +113,7 @@ impl Mount {
             FROM mounts
             WHERE mounts.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -149,7 +136,7 @@ impl Mount {
             JOIN nest_egg_mounts ON mounts.uuid = nest_egg_mounts.mount_uuid
             WHERE node_mounts.node_uuid = $1 AND nest_egg_mounts.egg_uuid = $2 AND mounts.uuid = $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(egg_uuid)
@@ -176,7 +163,7 @@ impl Mount {
             ORDER BY mounts.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

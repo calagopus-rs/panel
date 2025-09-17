@@ -19,25 +19,19 @@ pub struct Nest {
 
 impl BaseModel for Nest {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("nests");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.author"), format!("{prefix}author")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("nests.uuid", format!("{prefix}uuid")),
+            ("nests.author", format!("{prefix}author")),
+            ("nests.name", format!("{prefix}name")),
+            ("nests.description", format!("{prefix}description")),
             (
-                format!("{table}.description"),
-                format!("{prefix}description"),
-            ),
-            (
-                format!(
-                    "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_uuid = nests.uuid)",
                 format!("{prefix}eggs"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("nests.created", format!("{prefix}created")),
         ])
     }
 
@@ -69,7 +63,7 @@ impl Nest {
             VALUES ($1, $2, $3)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(author)
         .bind(name)
@@ -90,7 +84,7 @@ impl Nest {
             FROM nests
             WHERE nests.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -115,7 +109,7 @@ impl Nest {
             ORDER BY nests.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)

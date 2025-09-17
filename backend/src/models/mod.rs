@@ -84,11 +84,11 @@ impl Pagination {
 }
 
 pub trait BaseModel: Serialize + DeserializeOwned {
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String>;
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String>;
 
     #[inline]
-    fn columns_sql(prefix: Option<&str>, table: Option<&str>) -> String {
-        Self::columns(prefix, table)
+    fn columns_sql(prefix: Option<&str>) -> String {
+        Self::columns(prefix)
             .iter()
             .map(|(key, value)| format!("{key} as {value}"))
             .collect::<Vec<String>>()

@@ -13,14 +13,12 @@ pub struct NestEggMount {
 
 impl BaseModel for NestEggMount {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("nest_egg_mounts");
 
-        let mut columns =
-            BTreeMap::from([(format!("{table}.created"), format!("{prefix}created"))]);
+        let mut columns = BTreeMap::from([("nest_egg_mounts.created", format!("{prefix}created"))]);
 
-        columns.extend(super::mount::Mount::columns(Some("mount_"), None));
+        columns.extend(super::mount::Mount::columns(Some("mount_")));
 
         columns
     }
@@ -68,7 +66,7 @@ impl NestEggMount {
             JOIN mounts ON mounts.uuid = nest_egg_mounts.mount_uuid
             WHERE nest_egg_mounts.egg_uuid = $1 AND nest_egg_mounts.mount_uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(egg_uuid)
         .bind(mount_uuid)
@@ -96,7 +94,7 @@ impl NestEggMount {
             ORDER BY nest_egg_mounts.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(egg_uuid)
         .bind(search)

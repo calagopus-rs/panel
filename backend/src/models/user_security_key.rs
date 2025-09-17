@@ -19,20 +19,19 @@ pub struct UserSecurityKey {
 
 impl BaseModel for UserSecurityKey {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_security_keys");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.passkey"), format!("{prefix}passkey")),
+            ("user_security_keys.uuid", format!("{prefix}uuid")),
+            ("user_security_keys.name", format!("{prefix}name")),
+            ("user_security_keys.passkey", format!("{prefix}passkey")),
             (
-                format!("{table}.registration"),
+                "user_security_keys.registration",
                 format!("{prefix}registration"),
             ),
-            (format!("{table}.last_used"), format!("{prefix}last_used")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_security_keys.last_used", format!("{prefix}last_used")),
+            ("user_security_keys.created", format!("{prefix}created")),
         ])
     }
 
@@ -78,7 +77,7 @@ impl UserSecurityKey {
             VALUES ($1, $2, $3, $4, NOW())
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(name)
@@ -101,7 +100,7 @@ impl UserSecurityKey {
             FROM user_security_keys
             WHERE user_security_keys.user_uuid = $1 AND user_security_keys.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(uuid)
@@ -128,7 +127,7 @@ impl UserSecurityKey {
             ORDER BY user_security_keys.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)

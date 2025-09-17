@@ -14,22 +14,23 @@ pub struct LocationDatabaseHost {
 
 impl BaseModel for LocationDatabaseHost {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("location_database_hosts");
 
         let mut columns = BTreeMap::from([
             (
-                format!("{table}.location_uuid"),
+                "location_database_hosts.location_uuid",
                 format!("{prefix}location_uuid"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            (
+                "location_database_hosts.created",
+                format!("{prefix}created"),
+            ),
         ]);
 
-        columns.extend(super::database_host::DatabaseHost::columns(
-            Some("database_host_"),
-            None,
-        ));
+        columns.extend(super::database_host::DatabaseHost::columns(Some(
+            "database_host_",
+        )));
 
         columns
     }
@@ -78,7 +79,7 @@ impl LocationDatabaseHost {
             JOIN database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid
             WHERE location_database_hosts.location_uuid = $1 AND location_database_hosts.database_host_uuid = $2
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(location_uuid)
         .bind(database_host_uuid)
@@ -106,7 +107,7 @@ impl LocationDatabaseHost {
             ORDER BY location_database_hosts.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(location_uuid)
         .bind(search)
@@ -135,7 +136,7 @@ impl LocationDatabaseHost {
             WHERE location_database_hosts.location_uuid = $1 AND database_hosts.public
             ORDER BY location_database_hosts.created DESC
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(location_uuid)
         .fetch_all(database.read())

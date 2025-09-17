@@ -13,13 +13,12 @@ pub struct UserRecoveryCode {
 
 impl BaseModel for UserRecoveryCode {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_recovery_codes");
 
         BTreeMap::from([
-            (format!("{table}.code"), format!("{prefix}code")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_recovery_codes.code", format!("{prefix}code")),
+            ("user_recovery_codes.created", format!("{prefix}created")),
         ])
     }
 
@@ -77,7 +76,7 @@ impl UserRecoveryCode {
             WHERE user_recovery_codes.user_uuid = $1 AND user_recovery_codes.code = $2
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(code)

@@ -13,14 +13,12 @@ pub struct ServerMount {
 
 impl BaseModel for ServerMount {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_mounts");
 
-        let mut columns =
-            BTreeMap::from([(format!("{table}.created"), format!("{prefix}created"))]);
+        let mut columns = BTreeMap::from([("server_mounts.created", format!("{prefix}created"))]);
 
-        columns.extend(super::mount::Mount::columns(Some("mount_"), None));
+        columns.extend(super::mount::Mount::columns(Some("mount_")));
 
         columns
     }
@@ -68,7 +66,7 @@ impl ServerMount {
             JOIN mounts ON mounts.uuid = server_mounts.mount_uuid
             WHERE server_mounts.server_uuid = $1 AND server_mounts.mount_uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(mount_uuid)
@@ -95,7 +93,7 @@ impl ServerMount {
             ORDER BY server_mounts.mount_uuid ASC
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(per_page)
@@ -131,7 +129,7 @@ impl ServerMount {
             ORDER BY mounts.created
             LIMIT $5 OFFSET $6
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server.node.uuid)
         .bind(server.egg.uuid)

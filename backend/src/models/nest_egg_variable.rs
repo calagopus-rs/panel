@@ -23,36 +23,35 @@ pub struct NestEggVariable {
 
 impl BaseModel for NestEggVariable {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("nest_egg_variables");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
+            ("nest_egg_variables.uuid", format!("{prefix}uuid")),
+            ("nest_egg_variables.name", format!("{prefix}name")),
             (
-                format!("{table}.description"),
+                "nest_egg_variables.description",
                 format!("{prefix}description"),
             ),
-            (format!("{table}.order_"), format!("{prefix}order")),
+            ("nest_egg_variables.order_", format!("{prefix}order")),
             (
-                format!("{table}.env_variable"),
+                "nest_egg_variables.env_variable",
                 format!("{prefix}env_variable"),
             ),
             (
-                format!("{table}.default_value"),
+                "nest_egg_variables.default_value",
                 format!("{prefix}default_value"),
             ),
             (
-                format!("{table}.user_viewable"),
+                "nest_egg_variables.user_viewable",
                 format!("{prefix}user_viewable"),
             ),
             (
-                format!("{table}.user_editable"),
+                "nest_egg_variables.user_editable",
                 format!("{prefix}user_editable"),
             ),
-            (format!("{table}.rules"), format!("{prefix}rules")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("nest_egg_variables.rules", format!("{prefix}rules")),
+            ("nest_egg_variables.created", format!("{prefix}created")),
         ])
     }
 
@@ -98,7 +97,7 @@ impl NestEggVariable {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(egg_uuid)
         .bind(name)
@@ -126,7 +125,7 @@ impl NestEggVariable {
             FROM nest_egg_variables
             WHERE nest_egg_variables.egg_uuid = $1 AND nest_egg_variables.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(egg_uuid)
         .bind(uuid)
@@ -147,7 +146,7 @@ impl NestEggVariable {
             WHERE nest_egg_variables.egg_uuid = $1
             ORDER BY nest_egg_variables.order_, nest_egg_variables.created
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(egg_uuid)
         .fetch_all(database.read())

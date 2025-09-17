@@ -17,19 +17,18 @@ pub struct UserActivity {
 
 impl BaseModel for UserActivity {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("user_activities");
 
         BTreeMap::from([
             (
-                format!("{table}.api_key_uuid"),
+                "user_activities.api_key_uuid",
                 format!("{prefix}api_key_uuid"),
             ),
-            (format!("{table}.event"), format!("{prefix}event")),
-            (format!("{table}.ip"), format!("{prefix}ip")),
-            (format!("{table}.data"), format!("{prefix}data")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("user_activities.event", format!("{prefix}event")),
+            ("user_activities.ip", format!("{prefix}ip")),
+            ("user_activities.data", format!("{prefix}data")),
+            ("user_activities.created", format!("{prefix}created")),
         ])
     }
 
@@ -90,7 +89,7 @@ impl UserActivity {
             ORDER BY user_activities.created DESC
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(user_uuid)
         .bind(search)

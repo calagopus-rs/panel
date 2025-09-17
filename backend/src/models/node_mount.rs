@@ -13,14 +13,12 @@ pub struct NodeMount {
 
 impl BaseModel for NodeMount {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("node_mounts");
 
-        let mut columns =
-            BTreeMap::from([(format!("{table}.created"), format!("{prefix}created"))]);
+        let mut columns = BTreeMap::from([("node_mounts.created", format!("{prefix}created"))]);
 
-        columns.extend(super::mount::Mount::columns(Some("mount_"), None));
+        columns.extend(super::mount::Mount::columns(Some("mount_")));
 
         columns
     }
@@ -68,7 +66,7 @@ impl NodeMount {
             JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
             WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(mount_uuid)
@@ -96,7 +94,7 @@ impl NodeMount {
             ORDER BY node_mounts.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(search)

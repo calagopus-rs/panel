@@ -17,16 +17,15 @@ pub struct ServerScheduleStep {
 
 impl BaseModel for ServerScheduleStep {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_schedule_steps");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.action"), format!("{prefix}action")),
-            (format!("{table}.order_"), format!("{prefix}order")),
-            (format!("{table}.error"), format!("{prefix}error")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_schedule_steps.uuid", format!("{prefix}uuid")),
+            ("server_schedule_steps.action", format!("{prefix}action")),
+            ("server_schedule_steps.order_", format!("{prefix}order")),
+            ("server_schedule_steps.error", format!("{prefix}error")),
+            ("server_schedule_steps.created", format!("{prefix}created")),
         ])
     }
 
@@ -57,7 +56,7 @@ impl ServerScheduleStep {
             VALUES ($1, $2, $3, NOW())
             RETURNING {}
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(schedule_uuid)
         .bind(serde_json::to_value(action).unwrap())
@@ -79,7 +78,7 @@ impl ServerScheduleStep {
             FROM server_schedule_steps
             WHERE server_schedule_steps.schedule_uuid = $1 AND server_schedule_steps.uuid = $2
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(schedule_uuid)
         .bind(uuid)
@@ -100,7 +99,7 @@ impl ServerScheduleStep {
             WHERE server_schedule_steps.schedule_uuid = $1
             ORDER BY server_schedule_steps.order_, server_schedule_steps.created
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(schedule_uuid)
         .fetch_all(database.read())

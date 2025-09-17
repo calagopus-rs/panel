@@ -27,23 +27,21 @@ pub struct ServerDatabase {
 
 impl BaseModel for ServerDatabase {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_databases");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.locked"), format!("{prefix}locked")),
-            (format!("{table}.username"), format!("{prefix}username")),
-            (format!("{table}.password"), format!("{prefix}password")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_databases.uuid", format!("{prefix}uuid")),
+            ("server_databases.name", format!("{prefix}name")),
+            ("server_databases.locked", format!("{prefix}locked")),
+            ("server_databases.username", format!("{prefix}username")),
+            ("server_databases.password", format!("{prefix}password")),
+            ("server_databases.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::database_host::DatabaseHost::columns(
-            Some("database_host_"),
-            None,
-        ));
+        columns.extend(super::database_host::DatabaseHost::columns(Some(
+            "database_host_",
+        )));
 
         columns
     }
@@ -191,7 +189,7 @@ impl ServerDatabase {
             JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
             WHERE server_databases.uuid = $1
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -212,7 +210,7 @@ impl ServerDatabase {
             JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
             WHERE server_databases.server_uuid = $1 AND server_databases.uuid = $2
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(uuid)
@@ -240,7 +238,7 @@ impl ServerDatabase {
             ORDER BY server_databases.created
             LIMIT $3 OFFSET $4
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(search)
@@ -268,7 +266,7 @@ impl ServerDatabase {
             JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
             WHERE server_databases.server_uuid = $1
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .fetch_all(database.read())

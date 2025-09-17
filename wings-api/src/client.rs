@@ -94,12 +94,13 @@ impl WingsClient {
     pub async fn delete_backups_backup(
         &self,
         backup: uuid::Uuid,
+        data: &super::backups_backup::delete::RequestBody,
     ) -> Result<super::backups_backup::delete::Response, (StatusCode, super::ApiError)> {
         request_impl(
             self,
             Method::DELETE,
             format!("/api/backups/{backup}"),
-            None::<&()>,
+            Some(data),
             None,
         )
         .await

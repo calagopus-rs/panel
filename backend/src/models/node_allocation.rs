@@ -17,16 +17,15 @@ pub struct NodeAllocation {
 
 impl BaseModel for NodeAllocation {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("node_allocations");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.ip"), format!("{prefix}ip")),
-            (format!("{table}.ip_alias"), format!("{prefix}ip_alias")),
-            (format!("{table}.port"), format!("{prefix}port")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("node_allocations.uuid", format!("{prefix}uuid")),
+            ("node_allocations.ip", format!("{prefix}ip")),
+            ("node_allocations.ip_alias", format!("{prefix}ip_alias")),
+            ("node_allocations.port", format!("{prefix}port")),
+            ("node_allocations.created", format!("{prefix}created")),
         ])
     }
 
@@ -79,7 +78,7 @@ impl NodeAllocation {
             FROM node_allocations
             WHERE node_allocations.node_uuid = $1 AND node_allocations.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(uuid)
@@ -105,7 +104,7 @@ impl NodeAllocation {
             ORDER BY node_allocations.ip, node_allocations.port
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(node_uuid)
         .bind(per_page)

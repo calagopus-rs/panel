@@ -15,19 +15,17 @@ pub struct ServerVariable {
 
 impl BaseModel for ServerVariable {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("server_variables");
 
         let mut columns = BTreeMap::from([
-            (format!("{table}.value"), format!("{prefix}value")),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("server_variables.value", format!("{prefix}value")),
+            ("server_variables.created", format!("{prefix}created")),
         ]);
 
-        columns.extend(super::nest_egg_variable::NestEggVariable::columns(
-            Some("variable_"),
-            None,
-        ));
+        columns.extend(super::nest_egg_variable::NestEggVariable::columns(Some(
+            "variable_",
+        )));
 
         columns
     }
@@ -92,7 +90,7 @@ impl ServerVariable {
             WHERE nest_egg_variables.egg_uuid = $2
             ORDER BY nest_egg_variables.order_, nest_egg_variables.created
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(server_uuid)
         .bind(egg_uuid)

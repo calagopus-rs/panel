@@ -78,40 +78,29 @@ pub struct DatabaseHost {
 
 impl BaseModel for DatabaseHost {
     #[inline]
-    fn columns(prefix: Option<&str>, table: Option<&str>) -> BTreeMap<String, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
-        let table = table.unwrap_or("database_hosts");
 
         BTreeMap::from([
-            (format!("{table}.uuid"), format!("{prefix}uuid")),
-            (format!("{table}.name"), format!("{prefix}name")),
-            (format!("{table}.public"), format!("{prefix}public")),
-            (format!("{table}.type"), format!("{prefix}type")),
+            ("database_hosts.uuid", format!("{prefix}uuid")),
+            ("database_hosts.name", format!("{prefix}name")),
+            ("database_hosts.public", format!("{prefix}public")),
+            ("database_hosts.type", format!("{prefix}type")),
+            ("database_hosts.public_host", format!("{prefix}public_host")),
+            ("database_hosts.host", format!("{prefix}host")),
+            ("database_hosts.public_port", format!("{prefix}public_port")),
+            ("database_hosts.port", format!("{prefix}port")),
+            ("database_hosts.username", format!("{prefix}username")),
+            ("database_hosts.password", format!("{prefix}password")),
             (
-                format!("{table}.public_host"),
-                format!("{prefix}public_host"),
-            ),
-            (format!("{table}.host"), format!("{prefix}host")),
-            (
-                format!("{table}.public_port"),
-                format!("{prefix}public_port"),
-            ),
-            (format!("{table}.port"), format!("{prefix}port")),
-            (format!("{table}.username"), format!("{prefix}username")),
-            (format!("{table}.password"), format!("{prefix}password")),
-            (
-                format!(
-                    "(SELECT COUNT(*) FROM server_databases WHERE server_databases.database_host_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM server_databases WHERE server_databases.database_host_uuid = database_hosts.uuid)",
                 format!("{prefix}databases"),
             ),
             (
-                format!(
-                    "(SELECT COUNT(*) FROM location_database_hosts WHERE location_database_hosts.database_host_uuid = {table}.uuid)"
-                ),
+                "(SELECT COUNT(*) FROM location_database_hosts WHERE location_database_hosts.database_host_uuid = database_hosts.uuid)",
                 format!("{prefix}locations"),
             ),
-            (format!("{table}.created"), format!("{prefix}created")),
+            ("database_hosts.created", format!("{prefix}created")),
         ])
     }
 
@@ -157,7 +146,7 @@ impl DatabaseHost {
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
             RETURNING {}
             "#,
-            Self::columns_sql(None, None),
+            Self::columns_sql(None)
         ))
         .bind(name)
         .bind(public)
@@ -237,7 +226,7 @@ impl DatabaseHost {
             ORDER BY database_hosts.created
             LIMIT $2 OFFSET $3
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(search)
         .bind(per_page)
@@ -263,7 +252,7 @@ impl DatabaseHost {
             FROM database_hosts
             WHERE database_hosts.uuid = $1
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(uuid)
         .fetch_optional(database.read())
@@ -284,7 +273,7 @@ impl DatabaseHost {
             JOIN location_database_hosts ON location_database_hosts.database_host_uuid = database_hosts.uuid AND location_database_hosts.location_uuid = $1
             WHERE database_hosts.uuid = $2
             "#,
-            Self::columns_sql(None, None)
+            Self::columns_sql(None)
         ))
         .bind(location_uuid)
         .bind(uuid)

@@ -262,9 +262,16 @@ nestify::nest! {
         #[schema(inline)]
         pub container: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationContainer {
             #[schema(inline)]
+            pub privileged: bool,
+            #[schema(inline)]
             pub image: String,
             #[schema(inline)]
             pub timezone: Option<String>,
+            #[schema(inline)]
+            pub seccomp: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationContainerSeccomp {
+                #[schema(inline)]
+                pub remove_allowed: Vec<String>,
+            },
         },
 
         #[schema(inline)]
@@ -323,6 +330,13 @@ pub mod backups_backup {
 
     pub mod delete {
         use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub adapter: BackupAdapter,
+            }
+        }
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {

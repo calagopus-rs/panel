@@ -38,8 +38,7 @@ impl S3 {
             crate::logger::LoggerLevel::Info,
             format!(
                 "{} connected {}",
-                "s3".bright_cyan(),
-                format!(
+                "s3".bright_cyan(, format!(
                     "(s3@{}, {}ms)",
                     env.s3_region.bright_black(),
                     start.elapsed().as_millis()
