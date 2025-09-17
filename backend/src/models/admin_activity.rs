@@ -99,6 +99,7 @@ impl AdminActivity {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM admin_activities
             LEFT JOIN users ON users.uuid = admin_activities.user_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE ($1 IS NULL OR admin_activities.event ILIKE '%' || $1 || '%' OR users.username ILIKE '%' || $1 || '%')
             ORDER BY admin_activities.created DESC
             LIMIT $2 OFFSET $3

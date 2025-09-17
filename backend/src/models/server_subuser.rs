@@ -433,6 +433,7 @@ impl ServerSubuser {
             SELECT {}
             FROM server_subusers
             JOIN users ON users.uuid = server_subusers.user_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE server_subusers.server_uuid = $1 AND users.username = $2
             "#,
             Self::columns_sql(None, None)
@@ -459,6 +460,7 @@ impl ServerSubuser {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_subusers
             JOIN users ON users.uuid = server_subusers.user_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE server_subusers.server_uuid = $1 AND ($2 IS NULL OR users.username ILIKE '%' || $2 || '%')
             ORDER BY server_subusers.created
             LIMIT $3 OFFSET $4

@@ -130,6 +130,7 @@ impl ServerActivity {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_activities
             LEFT JOIN users ON users.uuid = server_activities.user_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE server_activities.server_uuid = $1 AND ($2 IS NULL OR server_activities.event ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%')
             ORDER BY server_activities.created DESC
             LIMIT $3 OFFSET $4

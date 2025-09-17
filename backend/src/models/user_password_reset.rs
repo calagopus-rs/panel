@@ -92,6 +92,7 @@ impl UserPasswordReset {
             r#"
             SELECT {}, {} FROM user_password_resets
             JOIN users ON users.uuid = user_password_resets.user_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
             WHERE
                 user_password_resets.token = crypt($1, user_password_resets.token)
                 AND user_password_resets.created > NOW() - INTERVAL '20 minutes'
