@@ -844,6 +844,10 @@ interface AdminSettings {
     url: string;
     telemetryEnabled: boolean;
   };
+  webauthn: {
+    rpId: string;
+    rpOrigin: string;
+  };
   server: {
     maxFileManagerViewSize: number;
     allowOverwritingCustomDockerImage: boolean;

@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (): Promise<User> => {
+export default async (): Promise<AdminSettings> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/admin/settings')

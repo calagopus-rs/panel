@@ -19,6 +19,10 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
     allowOverwritingCustomDockerImage: false,
     allowEditingStartupCommand: false,
   },
+  webauthn: {
+    rpId: '',
+    rpOrigin: '',
+  },
 
   setSettings: (value) =>
     set((state) => {
@@ -26,6 +30,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
       state.captchaProvider = value.captchaProvider;
       state.app = value.app;
       state.server = value.server;
+      state.webauthn = value.webauthn;
       return state;
     }),
 });

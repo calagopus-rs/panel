@@ -2938,7 +2938,7 @@ dependencies = [
 
 [[package]]
 name = "panel-rs"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -3713,7 +3713,7 @@ dependencies = [
 
 [[package]]
 name = "rule-validator"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "chrono",
  "regex",
@@ -6175,7 +6175,7 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "wings-api"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "chrono",
  "cron",

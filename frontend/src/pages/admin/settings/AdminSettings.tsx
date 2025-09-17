@@ -4,11 +4,12 @@ import getSettings from '@/api/admin/settings/getSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import SubNavigation from '@/elements/SubNavigation';
-import { faAt, faLayerGroup, faRobot, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faAt, faLayerGroup, faRobot, faServer, faUserCheck } from '@fortawesome/free-solid-svg-icons';
 import { Route, Routes } from 'react-router';
 import EmailContainer from './EmailContainer';
 import Spinner from '@/elements/Spinner';
 import ApplicationContainer from './ApplicationContainer';
+import WebauthnContainer from './WebauthnContainer';
 import ServerContainer from './ServerContainer';
 import CaptchaContainer from './CaptchaContainer';
 import { Title } from '@mantine/core';
@@ -41,6 +42,11 @@ export default () => {
             link: '/admin/settings',
           },
           {
+            name: 'Webauthn',
+            icon: faUserCheck,
+            link: '/admin/settings/webauthn',
+          },
+          {
             name: 'Mail',
             icon: faAt,
             link: '/admin/settings/mail',
@@ -63,6 +69,7 @@ export default () => {
       ) : (
         <Routes>
           <Route path={'/'} element={<ApplicationContainer />} />
+          <Route path={'/webauthn'} element={<WebauthnContainer />} />
           <Route path={'/mail'} element={<EmailContainer />} />
           <Route path={'/captcha'} element={<CaptchaContainer />} />
           <Route path={'/server'} element={<ServerContainer />} />
