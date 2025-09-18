@@ -81,54 +81,49 @@ export default () => {
       <Spinner size={75} />
     </div>
   ) : (
-    createPortal(
-      <>
-        <div className={'flex flex-col w-full h-full'}>
-          <FileNameModal
-            onFileName={(name: string) => saveFile(name)}
-            opened={nameModalOpen}
-            onClose={() => setNameModalOpen(false)}
-          />
+    <div className={'flex flex-col'}>
+      <FileNameModal
+        onFileName={(name: string) => saveFile(name)}
+        opened={nameModalOpen}
+        onClose={() => setNameModalOpen(false)}
+      />
 
-          <div className={'flex justify-between w-full p-4'}>
-            <FileBreadcrumbs
-              hideSelectAll
-              path={join(decodeURIComponent(browsingDirectory), fileName)}
-              browsingBackup={browsingBackup}
-            />
-            <div hidden={!!browsingBackup}>
-              {params.action === 'edit' ? (
-                <Button onClick={() => saveFile()}>Save</Button>
-              ) : (
-                <Button onClick={() => setNameModalOpen(true)}>Create</Button>
-              )}
-            </div>
-          </div>
-          <Editor
-            height={'100%'}
-            theme={'vs-dark'}
-            defaultLanguage={language}
-            defaultValue={content}
-            onChange={setContent}
-            onMount={(editor, monaco) => {
-              editorRef.current = editor;
-
-              editor.onDidChangeModelContent(() => {
-                contentRef.current = editor.getValue();
-              });
-
-              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-                if (params.action === 'new') {
-                  setNameModalOpen(true);
-                } else {
-                  saveFile();
-                }
-              });
-            }}
-          />
+      <div className={'flex justify-between w-full p-4'}>
+        <FileBreadcrumbs
+          hideSelectAll
+          path={join(decodeURIComponent(browsingDirectory), fileName)}
+          browsingBackup={browsingBackup}
+        />
+        <div hidden={!!browsingBackup}>
+          {params.action === 'edit' ? (
+            <Button onClick={() => saveFile()}>Save</Button>
+          ) : (
+            <Button onClick={() => setNameModalOpen(true)}>Create</Button>
+          )}
         </div>
-      </>,
-      document.getElementById('server-root')!,
-    )
+      </div>
+      <div className='mx-4 rounded-md overflow-hidden'>
+        <Editor
+          height={'82vh'}
+          theme={'vs-dark'}
+          defaultLanguage={language}
+          defaultValue={content}
+          onChange={setContent}
+          onMount={(editor, monaco) => {
+            editorRef.current = editor;
+            editor.onDidChangeModelContent(() => {
+              contentRef.current = editor.getValue();
+            });
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+              if (params.action === 'new') {
+                setNameModalOpen(true);
+              } else {
+                saveFile();
+              }
+            });
+          }}
+        />
+      </div>
+    </div>
   );
 };

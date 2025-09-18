@@ -567,7 +567,7 @@ export default () => {
   const hasOperations = fileOperations.size > 0 || uploadingFiles.size > 0;
 
   return (
-    <div {...getRootProps()} className={'min-h-screen relative'}>
+    <div {...getRootProps()} className={'h-fit relative'}>
       <input {...getInputProps()} />
 
       <input ref={fileInputRef} type={'file'} multiple style={{ display: 'none' }} onChange={handleFileSelect} />
@@ -676,10 +676,10 @@ export default () => {
                             {operation.type === 'compress'
                               ? `Compressing ${operation.path}`
                               : operation.type === 'decompress'
-                                ? `Decompressing ${operation.path}`
-                                : operation.type === 'pull'
-                                  ? `Pulling ${operation.path}`
-                                  : null}
+                              ? `Decompressing ${operation.path}`
+                              : operation.type === 'pull'
+                              ? `Pulling ${operation.path}`
+                              : null}
                           </p>
                           <Progress value={progress} />
                         </div>
