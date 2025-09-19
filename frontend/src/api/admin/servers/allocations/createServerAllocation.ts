@@ -7,10 +7,10 @@ interface Data {
 export default async (serverUuid: string, data: Data): Promise<ServerAllocation> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put(`/api/admin/servers/${serverUuid}/allocations`, {
+      .post(`/api/admin/servers/${serverUuid}/allocations`, {
         allocation_uuid: data.allocationUuid,
       })
-      .then(({ data }) => resolve(data))
+      .then(({ data }) => resolve(data.allocation))
       .catch(reject);
   });
 };

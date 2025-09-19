@@ -1,4 +1,4 @@
-export function formatAllocation(allocation?: ServerAllocation) {
+export function formatAllocation(allocation?: ServerAllocation | NodeAllocation) {
   return allocation ? `${allocation.ipAlias || allocation.ip}:${allocation.port}` : 'None';
 }
 

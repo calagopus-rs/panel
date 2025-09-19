@@ -1,22 +1,19 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { Ref, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import NodeAllocationRow from './ServerAllocationRow';
-import SelectionArea from '@/elements/SelectionArea';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
 import getServerAllocations from "@/api/admin/servers/allocations/getServerAllocations";
 import ServerAllocationRow from "./ServerAllocationRow";
+import ServerAllocationAddModal from "@/pages/admin/servers/allocations/modals/ServerAllocationAddModal";
+import { ContextMenuProvider } from "@/elements/ContextMenu";
 
 export default ({ server }: { server: AdminServer }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -54,12 +51,11 @@ export default ({ server }: { server: AdminServer }) => {
 
   return (
     <>
-      {/*<NodeAllocationsCreateModal*/}
-      {/*  node={node}*/}
-      {/*  loadAllocations={loadAllocations}*/}
-      {/*  opened={openModal === 'create'}*/}
-      {/*  onClose={() => setOpenModal(null)}*/}
-      {/*/>*/}
+      <ServerAllocationAddModal
+        server={server}
+        opened={openModal === 'add'}
+        onClose={() => setOpenModal(null)}
+      />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={2}>
@@ -75,15 +71,17 @@ export default ({ server }: { server: AdminServer }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
+        <ContextMenuProvider>
           <Table
             columns={['Id', 'IP', 'IP Alias', 'Port', 'Created']}
             pagination={serverAllocations}
             onPageSelect={setPage}
           >
             {serverAllocations.data.map((allocation) => (
-                <ServerAllocationRow key={allocation.uuid} allocation={allocation} />
+                <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
             ))}
           </Table>
+        </ContextMenuProvider>
       )}
     </>
   );
