@@ -8,8 +8,8 @@ import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
-import getNodeMounts from "@/api/admin/nodes/mounts/getNodeMounts";
 import createServerMount from "@/api/admin/servers/mounts/createServerMount";
+import getAvailableServerMounts from "@/api/admin/servers/mounts/getAvailableServerMounts";
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
@@ -22,7 +22,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const [loading, setLoading] = useState(false);
 
   const fetchMounts = (search: string) => {
-    getNodeMounts(server.node.uuid, 1, search)
+    getAvailableServerMounts(server.uuid, 1, search)
       .then((response) => {
         setMounts(response.data);
 
@@ -64,7 +64,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
         addToast('Node Mount added.', 'success');
 
         onClose();
-        addServerMount({ ...selectedMount.mount, created: new Date() });
+        addServerMount({ mount: selectedMount.mount, created: new Date() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

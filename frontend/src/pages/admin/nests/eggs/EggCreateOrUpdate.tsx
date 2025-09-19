@@ -1,9 +1,8 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Code from '@/elements/Code';
-import getEgg from '@/api/admin/eggs/getEgg';
 import deleteEgg from '@/api/admin/eggs/deleteEgg';
 import updateEgg from '@/api/admin/eggs/updateEgg';
 import createEgg from '@/api/admin/eggs/createEgg';
@@ -26,47 +25,35 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
   const [egg, setEgg] = useState<AdminNestEgg>({
-    author: '',
-    name: '',
-    description: '',
-    configFiles: [],
+    author: contextEgg?.author || '',
+    name: contextEgg?.name || '',
+    description: contextEgg?.description || '',
+    configFiles: contextEgg?.configFiles || [],
     configStartup: {
-      done: [],
+      done: contextEgg?.configStartup.done || [],
     },
     configStop: {
-      type: '',
+      type: contextEgg?.configStop.type || '',
     },
     configScript: {
-      container: '',
-      entrypoint: '',
-      content: '',
+      container: contextEgg?.configScript.container || '',
+      entrypoint: contextEgg?.configScript.entrypoint || '',
+      content: contextEgg?.configScript.content || '',
     },
     configAllocations: {
       userSelfAssign: {
-        enabled: false,
-        requirePrimaryAllocation: false,
-        startPort: 0,
-        endPort: 0,
+        enabled: contextEgg?.configAllocations.userSelfAssign.enabled || false,
+        requirePrimaryAllocation: contextEgg?.configAllocations.userSelfAssign.requirePrimaryAllocation || false,
+        startPort: contextEgg?.configAllocations.userSelfAssign.startPort || 0,
+        endPort: contextEgg?.configAllocations.userSelfAssign.endPort || 0,
       },
     },
-    startup: '',
-    forceOutgoingIp: false,
-    features: [],
-    dockerImages: {},
-    fileDenylist: [],
+    startup: contextEgg?.startup || '',
+    forceOutgoingIp: contextEgg?.forceOutgoingIp || false,
+    features: contextEgg?.features || [],
+    dockerImages: contextEgg?.dockerImages || {},
+    fileDenylist: contextEgg?.fileDenylist || [],
   } as AdminNestEgg);
-
-  useEffect(() => {
-    if (params.eggId) {
-      getEgg(contextNest.uuid, params.eggId)
-        .then((egg) => {
-          setEgg(egg);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.eggId]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);

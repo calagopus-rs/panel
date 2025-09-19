@@ -12,14 +12,14 @@ import { useAdminStore } from '@/stores/admin';
 import { NavLink } from 'react-router';
 import deleteServerMount from "@/api/admin/servers/mounts/deleteServerMount";
 
-export default ({ server, mount }: { server: AdminServer; mount: ServerMount }) => {
+export default ({ server, mount }: { server: AdminServer; mount: AdminServerMount }) => {
   const { addToast } = useToast();
   const { removeServerMount } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const doDelete = async () => {
-    await deleteServerMount(server.uuid, mount.uuid)
+    await deleteServerMount(server.uuid, mount.mount.uuid)
       .then(() => {
         removeServerMount(mount);
         addToast('Node Mount deleted.', 'success');
@@ -39,7 +39,7 @@ export default ({ server, mount }: { server: AdminServer; mount: ServerMount }) 
         onConfirmed={doDelete}
       >
         Are you sure you want to remove the mount
-        <Code>{mount.name}</Code>
+        <Code>{mount.mount.name}</Code>
         from <Code>{server.name}</Code>?
       </ConfirmationModal>
 
@@ -62,19 +62,18 @@ export default ({ server, mount }: { server: AdminServer; mount: ServerMount }) 
           >
             <TableData>
               <NavLink
-                to={`/admin/mounts/${mount.uuid}`}
+                to={`/admin/mounts/${mount.mount.uuid}`}
                 className={'text-blue-400 hover:text-blue-200 hover:underline'}
               >
-                <Code>{mount.uuid}</Code>
+                <Code>{mount.mount.uuid}</Code>
               </NavLink>
             </TableData>
-            <TableData>{mount.name}</TableData>
-            <TableData>{mount.description}</TableData>
+            <TableData>{mount.mount.name}</TableData>
             <TableData>
-              <Code>{mount.readOnly}</Code>
+              <Code>{mount.mount.source}</Code>
             </TableData>
             <TableData>
-              <Code>{mount.target}</Code>
+              <Code>{mount.mount.target}</Code>
             </TableData>
             <TableData>
               <Tooltip label={formatDateTime(mount.created)}>{formatTimestamp(mount.created)}</Tooltip>

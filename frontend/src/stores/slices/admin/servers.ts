@@ -5,7 +5,7 @@ import { StateCreator } from 'zustand';
 export interface ServersSlice {
   servers: ResponseMeta<AdminServer>;
   serverAllocations: ResponseMeta<ServerAllocation>;
-  serverMounts: ResponseMeta<ServerMount>
+  serverMounts: ResponseMeta<AdminServerMount>
 
   setServers: (servers: ResponseMeta<AdminServer>) => void;
   addServer: (server: AdminServer) => void;
@@ -15,15 +15,15 @@ export interface ServersSlice {
   addServerAllocation: (allocation: ServerAllocation) => void;
   removeServerAllocation: (allocation: ServerAllocation) => void;
 
-  setServerMounts: (mounts: ResponseMeta<ServerMount>) => void;
-  addServerMount: (mount: ServerMount) => void;
-  removeServerMount: (mount: ServerMount) => void;
+  setServerMounts: (mounts: ResponseMeta<AdminServerMount>) => void;
+  addServerMount: (mount: AdminServerMount) => void;
+  removeServerMount: (mount: AdminServerMount) => void;
 }
 
 export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> = (set): ServersSlice => ({
   servers: getEmptyPaginationSet<AdminServer>(),
   serverAllocations: getEmptyPaginationSet<ServerAllocation>(),
-  serverMounts: getEmptyPaginationSet<ServerMount>(),
+  serverMounts: getEmptyPaginationSet<AdminServerMount>(),
 
   setServers: (value) => set((state) => ({ ...state, servers: value })),
   addServer: (server) =>
@@ -74,7 +74,7 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
     set((state) => ({
       serverMounts: {
         ...state.serverMounts,
-        data: state.serverMounts.data.filter((m) => m.uuid !== mount.uuid),
+        data: state.serverMounts.data.filter((m) => m.mount.uuid !== mount.mount.uuid),
         total: state.serverMounts.total - 1,
       }
     })),

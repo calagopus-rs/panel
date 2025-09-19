@@ -68,7 +68,7 @@ export default ({ server }: { server: AdminServer }) => {
             onPageSelect={setPage}
           >
             {serverMounts.data.map((mount) => (
-              <ServerMountRow key={mount.uuid} server={server} mount={mount} />
+              <ServerMountRow key={mount.mount.uuid} server={server} mount={mount} />
             ))}
           </Table>
         </ContextMenuProvider>
