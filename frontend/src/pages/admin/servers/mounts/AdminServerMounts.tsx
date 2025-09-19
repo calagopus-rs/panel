@@ -49,7 +49,7 @@ export default ({ server }: { server: AdminServer }) => {
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={2}>
-          Node Mounts
+          Server Mounts
         </Title>
         <Group>
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
