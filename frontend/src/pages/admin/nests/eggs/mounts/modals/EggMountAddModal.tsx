@@ -1,5 +1,4 @@
 import getMounts from '@/api/admin/mounts/getMounts';
-import createNodeMount from '@/api/admin/nodes/mounts/createNodeMount';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
@@ -10,10 +9,11 @@ import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
+import createEggMount from "@/api/admin/eggs/mounts/createEggMount";
 
-export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
+export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest, egg: AdminNestEgg }) => {
   const { addToast } = useToast();
-  const { addNodeMount } = useAdminStore();
+  const { addEggMount } = useAdminStore();
 
   const [mount, setMount] = useState<Mount | null>(null);
   const [mounts, setMounts] = useState<Mount[]>([]);
@@ -54,15 +54,15 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
     }
   }, [search]);
 
-  const doCreate = () => {
+  const doAdd = () => {
     load(true, setLoading);
 
-    createNodeMount(node.uuid, mount.uuid)
+    createEggMount(nest.uuid, egg.uuid, mount.uuid)
       .then(() => {
-        addToast('Node Mount created.', 'success');
+        addToast('Egg Mount added.', 'success');
 
         onClose();
-        addNodeMount({ mount, created: new Date() });
+        addEggMount({ mount, created: new Date() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -73,7 +73,7 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
   };
 
   return (
-    <Modal title={'Create Node Mount'} onClose={onClose} opened={opened}>
+    <Modal title={'Add Egg Mount'} onClose={onClose} opened={opened}>
       <Stack>
         <Select
           withAsterisk
@@ -91,8 +91,8 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
         />
 
         <Group mt={'md'}>
-          <Button onClick={doCreate} loading={loading} disabled={!mount}>
-            Create
+          <Button onClick={doAdd} loading={loading} disabled={!mount}>
+            Add
           </Button>
           <Button variant={'default'} onClick={onClose}>
             Close

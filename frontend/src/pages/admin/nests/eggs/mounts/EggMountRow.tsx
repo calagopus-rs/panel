@@ -9,20 +9,20 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
-import deleteNodeMount from '@/api/admin/nodes/mounts/deleteNodeMount';
 import { NavLink } from 'react-router';
+import deleteEggMount from "@/api/admin/eggs/mounts/deleteEggMount";
 
-export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
+export default ({ nest, egg, mount }: { nest: Nest, egg: AdminNestEgg, mount: NodeMount }) => {
   const { addToast } = useToast();
-  const { removeNodeMount } = useAdminStore();
+  const { removeEggMount } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'remove'>(null);
 
-  const doRemove = async () => {
-    await deleteNodeMount(node.uuid, mount.mount.uuid)
+  const doRemove = () => {
+    deleteEggMount(nest.uuid, egg.uuid, mount.mount.uuid)
       .then(() => {
-        removeNodeMount(mount);
-        addToast('Node Mount removed.', 'success');
+        removeEggMount(mount);
+        addToast('Egg Mount deleted.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -34,13 +34,13 @@ export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Node Mount Removal'}
-        confirm={'Remove'}
+        title={'Confirm Egg Mount Removal'}
+        confirm={'Delete'}
         onConfirmed={doRemove}
       >
         Are you sure you want to remove the mount
         <Code>{mount.mount.name}</Code>
-        from <Code>{node.name}</Code>?
+        from <Code>{egg.name}</Code>?
       </ConfirmationModal>
 
       <ContextMenu

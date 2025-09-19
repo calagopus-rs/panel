@@ -18,7 +18,7 @@ import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 
-export default ({ nest }: { nest: Nest }) => {
+export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: AdminNestEgg }) => {
   const params = useParams<'eggId'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -58,7 +58,7 @@ export default ({ nest }: { nest: Nest }) => {
 
   useEffect(() => {
     if (params.eggId) {
-      getEgg(nest.uuid, params.eggId)
+      getEgg(contextNest.uuid, params.eggId)
         .then((egg) => {
           setEgg(egg);
         })
@@ -71,7 +71,7 @@ export default ({ nest }: { nest: Nest }) => {
   const doCreateOrUpdate = () => {
     load(true, setLoading);
     if (egg?.uuid) {
-      updateEgg(nest.uuid, egg.uuid, egg)
+      updateEgg(contextNest.uuid, egg.uuid, egg)
         .then(() => {
           addToast('Egg updated.', 'success');
         })
@@ -82,10 +82,10 @@ export default ({ nest }: { nest: Nest }) => {
           load(false, setLoading);
         });
     } else {
-      createEgg(nest.uuid, egg)
+      createEgg(contextNest.uuid, egg)
         .then((egg) => {
           addToast('Egg created.', 'success');
-          navigate(`/admin/nests/${nest.uuid}/eggs/${egg.uuid}`);
+          navigate(`/admin/nests/${contextNest.uuid}/eggs/${egg.uuid}`);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -98,10 +98,10 @@ export default ({ nest }: { nest: Nest }) => {
 
   const doDelete = async () => {
     load(true, setLoading);
-    await deleteEgg(nest.uuid, egg.uuid)
+    await deleteEgg(contextNest.uuid, egg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
-        navigate(`/admin/nests/${nest.uuid}/eggs`);
+        navigate(`/admin/nests/${contextNest.uuid}/eggs`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

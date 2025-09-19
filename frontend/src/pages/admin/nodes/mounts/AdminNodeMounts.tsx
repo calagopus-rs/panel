@@ -14,14 +14,14 @@ import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import NodeMountRow from './NodeMountRow';
 import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
-import NodeMountCreateModal from './modals/NodeMountCreateModal';
+import NodeMountAddModal from './modals/NodeMountAddModal';
 
 export default ({ node }: { node: Node }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
   const { nodeMounts, setNodeMounts } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'add'>(null);
   const [loading, setLoading] = useState(nodeMounts.data.length === 0);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -48,7 +48,7 @@ export default ({ node }: { node: Node }) => {
 
   return (
     <>
-      <NodeMountCreateModal node={node} opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
+      <NodeMountAddModal node={node} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={2}>
@@ -61,8 +61,8 @@ export default ({ node }: { node: Node }) => {
             onChange={(e) => setSearch(e.currentTarget.value)}
             w={250}
           />
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
+          <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+            Add
           </Button>
         </Group>
       </Group>

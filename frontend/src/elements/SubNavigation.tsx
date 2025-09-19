@@ -14,7 +14,9 @@ interface Props {
 
 export default ({ items }: Props) => {
   const location = useLocation();
-  const activeItem = items.find((item) => item.link === location.pathname);
+  const activeItem = items
+      .filter((item) => location.pathname.startsWith(item.link))
+      .sort((a, b) => b.link.length - a.link.length)[0] ?? items[0];
 
   return (
     <Tabs my={'xs'} defaultValue={activeItem?.name ?? items[0].name}>

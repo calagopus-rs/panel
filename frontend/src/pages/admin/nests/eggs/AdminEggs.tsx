@@ -16,6 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import { load } from '@/lib/debounce';
+import EggView from "@/pages/admin/nests/eggs/EggView";
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
@@ -140,8 +141,8 @@ export default () => {
   ) : (
     <Routes>
       <Route path={'/'} element={<EggsContainer nest={nest} />} />
-      <Route path={'/new'} element={<EggCreateOrUpdate nest={nest} />} />
-      <Route path={'/:eggId'} element={<EggCreateOrUpdate nest={nest} />} />
+      <Route path={'/new'} element={<EggCreateOrUpdate contextNest={nest} />} />
+      <Route path={'/:eggId/*'} element={<EggView contextNest={nest} />} />
     </Routes>
   );
 };
