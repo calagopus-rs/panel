@@ -19,6 +19,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
 import Tooltip from '@/elements/Tooltip';
+import getMounts from "@/api/admin/mounts/getMounts";
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const params = useParams<'id'>();
@@ -60,38 +61,37 @@ export default ({ contextNode }: { contextNode?: Node }) => {
     });
   }, [contextNode]);
 
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      getLocations(1, search)
-        .then((data) => {
-          setLocations(data.data);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }, 150),
-    [],
-  );
+  const fetchLocations = (search: string) => {
+    getLocations(1, search)
+      .then((response) => {
+        setLocations(response.data);
 
-  useEffect(() => {
-    getLocations(1)
-      .then((data) => {
-        setLocations(data.data);
-
-        if (data.total > data.data.length) {
+        if (response.total > response.data.length) {
           setDoRefetch(true);
         }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-  }, []);
+  };
+
+  const setDebouncedSearch = useCallback(
+    debounce((search: string) => {
+      fetchLocations(search);
+    }, 150),
+    [],
+  );
 
   useEffect(() => {
     if (doRefetch) {
       setDebouncedSearch(search);
     }
   }, [search]);
+
+  useEffect(() => {
+    fetchLocations('');
+  }, []);
+
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);

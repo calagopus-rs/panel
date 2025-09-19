@@ -15,38 +15,32 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
   const { addToast } = useToast();
   const { addNodeMount } = useAdminStore();
 
-  const [mount, setMount] = useState<Mount | null>(null);
+  const [selectedMount, setSelectedMount] = useState<Mount | null>(null);
   const [mounts, setMounts] = useState<Mount[]>([]);
   const [search, setSearch] = useState('');
   const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      getMounts(1, search)
-        .then((data) => {
-          setMounts(data.data);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }, 150),
-    [],
-  );
+  const fetchMounts = (search: string) => {
+    getMounts(1, search)
+      .then((response) => {
+        setMounts(response.data);
 
-  useEffect(() => {
-    getMounts(1)
-      .then((data) => {
-        setMounts(data.data);
-
-        if (data.total > data.data.length) {
+        if (response.total > response.data.length) {
           setDoRefetch(true);
         }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-  }, []);
+  };
+
+  const setDebouncedSearch = useCallback(
+    debounce((search: string) => {
+      fetchMounts(search);
+    }, 150),
+    [],
+  );
 
   useEffect(() => {
     if (doRefetch) {
@@ -54,15 +48,24 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
     }
   }, [search]);
 
+  useEffect(() => {
+    if (opened) {
+      fetchMounts('');
+    } else {
+      setSearch('');
+      setSelectedMount(null);
+    }
+  }, [opened]);
+
   const doAdd = () => {
     load(true, setLoading);
 
-    createNodeMount(node.uuid, mount.uuid)
+    createNodeMount(node.uuid, selectedMount.uuid)
       .then(() => {
         addToast('Node Mount added.', 'success');
 
         onClose();
-        addNodeMount({ mount, created: new Date() });
+        addNodeMount({ mount: selectedMount, created: new Date() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -79,8 +82,8 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
           withAsterisk
           label={'Mount'}
           placeholder={'Mount'}
-          value={mount?.uuid}
-          onChange={(value) => setMount(mounts.find((m) => m.uuid === value))}
+          value={selectedMount?.uuid}
+          onChange={(value) => setSelectedMount(mounts.find((m) => m.uuid === value))}
           data={mounts.map((mount) => ({
             label: mount.name,
             value: mount.uuid,
@@ -91,7 +94,7 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
         />
 
         <Group mt={'md'}>
-          <Button onClick={doAdd} loading={loading} disabled={!mount}>
+          <Button onClick={doAdd} loading={loading} disabled={!selectedMount}>
             Add
           </Button>
           <Button variant={'default'} onClick={onClose}>
