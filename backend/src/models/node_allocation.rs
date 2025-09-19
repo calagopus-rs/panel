@@ -88,11 +88,12 @@ impl NodeAllocation {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_node_uuid_with_pagination(
+    pub async fn available_by_node_uuid_with_pagination(
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
@@ -100,13 +101,51 @@ impl NodeAllocation {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_allocations
-            WHERE node_allocations.node_uuid = $1
+            LEFT JOIN server_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
+            WHERE
+                ($2 IS NULL OR host(node_allocations.ip) || ':' || node_allocations.port ILIKE '%' || $2 || '%')
+                AND (node_allocations.node_uuid = $1 AND server_allocations.uuid IS NULL)
             ORDER BY node_allocations.ip, node_allocations.port
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None)
         ))
         .bind(node_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn by_node_uuid_with_pagination(
+        database: &crate::database::Database,
+        node_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM node_allocations
+            WHERE node_allocations.node_uuid = $1 AND ($2 IS NULL OR host(node_allocations.ip) || ':' || node_allocations.port ILIKE '%' || $2 || '%')
+            ORDER BY node_allocations.ip, node_allocations.port
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(node_uuid)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
