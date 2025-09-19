@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, Ref } from "react";
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
@@ -772,7 +772,7 @@ export default () => {
               >
                 {browsingEntries.data.map((file) => (
                   <SelectionArea.Selectable key={file.name} item={file}>
-                    {(innerRef) => (
+                    {(innerRef: Ref<HTMLTableRowElement>) => (
                       <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
                     )}
                   </SelectionArea.Selectable>

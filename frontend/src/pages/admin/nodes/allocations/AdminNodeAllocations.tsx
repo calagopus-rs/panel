@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
+import { Ref, useEffect, useState } from "react";
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
@@ -136,7 +136,7 @@ export default ({ node }: { node: Node }) => {
           >
             {nodeAllocations.data.map((allocation) => (
               <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
-                {(innerRef) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
+                {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
               </SelectionArea.Selectable>
             ))}
           </Table>
