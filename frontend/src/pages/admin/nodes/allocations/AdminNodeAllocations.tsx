@@ -102,7 +102,7 @@ export default ({ node }: { node: Node }) => {
       </ConfirmationModal>
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+        <Title order={2}>
           Node Allocations
         </Title>
         <Group>

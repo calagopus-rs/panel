@@ -59,11 +59,9 @@ export default ({ node }: { node: Node }) => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
-          Node Statistics
-        </Title>
-      </Group>
+      <Title order={2}>
+        Node Statistics
+      </Title>
 
       {!statistics ? (
         <Spinner.Centered />

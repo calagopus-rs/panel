@@ -45,11 +45,9 @@ export default ({ node }: { node: Node }) => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
-          Node Configuration
-        </Title>
-      </Group>
+      <Title order={2}>
+        Node Configuration
+      </Title>
 
       <div className={'grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'}>
         <div className={'flex flex-col md:col-span-3'}>

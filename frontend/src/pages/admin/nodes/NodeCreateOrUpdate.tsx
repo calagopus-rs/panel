@@ -165,10 +165,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Stack gap={0}>
-          <Title order={2}>{params.id ? 'Update' : 'Create'} Node</Title>
-          <Divider />
-        </Stack>
+        <Title order={2}>{params.id ? 'Update' : 'Create'} Node</Title>
 
         <Group grow>
           <TextInput

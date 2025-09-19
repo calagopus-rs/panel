@@ -24,10 +24,9 @@ export default ({ server }: { server: AdminServer }) => {
   const {
     serverAllocations,
     setServerAllocations,
-    removeServerAllocation,
   } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'add'>(null);
   const [loading, setLoading] = useState(serverAllocations.data.length === 0);
   const [page, setPage] = useState(1);
 
@@ -40,21 +39,6 @@ export default ({ server }: { server: AdminServer }) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-
-  const doDelete = () => {
-    // removeServerAllocation(
-    // )
-    //   .then(() => {
-    //     removeNodeAllocations(Array.from(selectedNodeAllocations));
-    //
-    //     addToast('Node Mount deleted.', 'success');
-    //     setSelectedNodeAllocations([]);
-    //     setOpenModal(null);
-    //   })
-    //   .catch((msg) => {
-    //     addToast(httpErrorToHuman(msg), 'error');
-    //   });
-  };
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
@@ -76,25 +60,14 @@ export default ({ server }: { server: AdminServer }) => {
       {/*  opened={openModal === 'create'}*/}
       {/*  onClose={() => setOpenModal(null)}*/}
       {/*/>*/}
-      <ConfirmationModal
-        opened={openModal === 'delete'}
-        onClose={() => setOpenModal(null)}
-        title={'Confirm Node Allocations Deletion'}
-        confirm={'Delete'}
-        onConfirmed={doDelete}
-      >
-        Are you sure you want to delete
-        {/*<Code>{selectedNodeAllocations.size}</Code>*/}
-        allocations from <Code>{server.name}</Code>?
-      </ConfirmationModal>
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+        <Title order={2}>
           Node Allocations
         </Title>
         <Group>
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
+          <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+            Add
           </Button>
         </Group>
       </Group>

@@ -98,10 +98,9 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         Are you sure you want to delete <Code>{location?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2}>{params.id ? 'Update' : 'Create'} Location</Title>
-      <Divider />
-
       <Stack>
+        <Title order={2}>{params.id ? 'Update' : 'Create'} Location</Title>
+
         <Group grow>
           <TextInput
             withAsterisk

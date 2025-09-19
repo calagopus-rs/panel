@@ -338,10 +338,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
       </Modal>
 
       <Stack>
-        <Stack gap={0}>
-          <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
-          <Divider />
-        </Stack>
+        <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
 
         <Group grow>
           <Paper withBorder p='md'>

@@ -51,7 +51,7 @@ export default ({ node }: { node: Node }) => {
       <NodeMountCreateModal node={node} opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+        <Title order={2}>
           Node Mounts
         </Title>
         <Group>

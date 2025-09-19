@@ -5,6 +5,7 @@ import type { Linter } from 'eslint';
 import tseslint from "typescript-eslint";
 import reactPlugin from "eslint-plugin-react";
 import reactHooksPlugin from "eslint-plugin-react-hooks";
+import prettier from 'eslint-plugin-prettier';
 
 export default [
   {
@@ -35,6 +36,7 @@ export default [
     plugins: {
       react: reactPlugin,
       "react-hooks": reactHooksPlugin,
+      prettier,
     },
 
     rules: {

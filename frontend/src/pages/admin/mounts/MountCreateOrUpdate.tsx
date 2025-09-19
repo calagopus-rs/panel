@@ -98,10 +98,9 @@ export default () => {
         Are you sure you want to delete <Code>{mount?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={1}>{params.id ? 'Update' : 'Create'} Mount</Title>
-      <Divider />
-
       <Stack>
+        <Title order={2}>{params.id ? 'Update' : 'Create'} Mount</Title>
+
         <Group grow align={'start'}>
           <TextInput
             withAsterisk

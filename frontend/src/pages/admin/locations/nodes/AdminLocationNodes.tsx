@@ -40,11 +40,9 @@ export default ({ location }: { location: Location }) => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
-          Location Nodes
-        </Title>
-      </Group>
+      <Title order={2}>
+        Location Nodes
+      </Title>
 
       {loading ? (
         <Spinner.Centered />
