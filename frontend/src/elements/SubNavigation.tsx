@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router';
+import { NavLink, useLocation } from "react-router";
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tabs } from '@mantine/core';
@@ -13,8 +13,11 @@ interface Props {
 }
 
 export default ({ items }: Props) => {
+  const location = useLocation();
+  const activeItem = items.find((item) => item.link === location.pathname);
+
   return (
-    <Tabs my={'xs'} defaultValue={items[0].name}>
+    <Tabs my={'xs'} defaultValue={activeItem?.name ?? items[0].name}>
       <Tabs.List>
         {items.map((item) => (
           <NavLink key={item.name} to={item.link} end={item.end ?? true}>
