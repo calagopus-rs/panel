@@ -2,10 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _mount_;
+mod available;
 
 mod get {
     use crate::{
-        models::{Pagination, PaginationParams, server_mount::ServerMount},
+        models::{Pagination, PaginationParamsWithSearch, server_mount::ServerMount},
         response::{ApiResponse, ApiResponseResult},
         routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
     };
@@ -37,11 +38,15 @@ mod get {
             description = "The number of items per page",
             example = "10",
         ),
+        (
+            "search" = Option<String>, Query,
+            description = "Search term for items",
+        ),
     ))]
     pub async fn route(
         state: GetState,
         server: GetServer,
-        Query(params): Query<PaginationParams>,
+        Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -54,6 +59,7 @@ mod get {
             server.uuid,
             params.page,
             params.per_page,
+            params.search.as_deref(),
         )
         .await?;
 
@@ -170,5 +176,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(post::route))
         .nest("/{mount}", _mount_::router(state))
+        .nest("/available", available::router(state))
         .with_state(state.clone())
 }

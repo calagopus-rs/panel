@@ -92,9 +92,9 @@ export default () => {
       });
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteDatabaseHost(params.id)
+    await deleteDatabaseHost(params.id)
       .then(() => {
         addToast('Database host deleted.', 'success');
         navigate('/admin/database-hosts');

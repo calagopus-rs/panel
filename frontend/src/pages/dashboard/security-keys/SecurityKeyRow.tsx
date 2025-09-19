@@ -18,8 +18,8 @@ export default ({ securityKey }: { securityKey: UserSecurityKey }) => {
 
   const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
 
-  const doDelete = () => {
-    deleteSecurityKey(securityKey.uuid)
+  const doDelete = async () => {
+    await deleteSecurityKey(securityKey.uuid)
       .then(() => {
         removeSecurityKey(securityKey);
         addToast('Security key removed.', 'success');

@@ -71,9 +71,9 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
     }
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteLocation(params.id)
+    await deleteLocation(params.id)
       .then(() => {
         addToast('Location deleted.', 'success');
         navigate('/admin/locations');

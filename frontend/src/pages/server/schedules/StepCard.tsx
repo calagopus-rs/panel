@@ -28,8 +28,8 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
 
   const [openModal, setOpenModal] = useState<'update' | 'delete'>(null);
 
-  const doDelete = () => {
-    deleteScheduleStep(server.uuid, schedule.uuid, step.uuid)
+  const doDelete = async () => {
+    await deleteScheduleStep(server.uuid, schedule.uuid, step.uuid)
       .then(() => {
         addToast('Schedule step deleted.', 'success');
         onStepDelete(step.uuid);

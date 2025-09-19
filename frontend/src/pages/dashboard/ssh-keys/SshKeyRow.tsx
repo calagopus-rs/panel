@@ -19,8 +19,8 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
 
   const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
 
-  const doDelete = () => {
-    deleteSshKey(sshKey.uuid)
+  const doDelete = async () => {
+    await deleteSshKey(sshKey.uuid)
       .then(() => {
         removeSshKey(sshKey);
         addToast('SSH key removed.', 'success');

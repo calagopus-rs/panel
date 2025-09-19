@@ -44,7 +44,12 @@ export default () => {
       </ConfirmationModal>
 
       <Can action={'control.start'}>
-        <Button color={'green'} disabled={state !== 'offline'} onClick={onButtonClick.bind(this, 'start')}>
+        <Button
+          color={'green'}
+          disabled={state !== 'offline'}
+          loading={state === 'starting'}
+          onClick={onButtonClick.bind(this, 'start')}
+        >
           Start
         </Button>
       </Can>

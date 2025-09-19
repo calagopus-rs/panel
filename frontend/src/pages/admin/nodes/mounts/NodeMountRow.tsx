@@ -18,8 +18,8 @@ export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const doDelete = () => {
-    deleteNodeMount(node.uuid, mount.mount.uuid)
+  const doDelete = async () => {
+    await deleteNodeMount(node.uuid, mount.mount.uuid)
       .then(() => {
         removeNodeMount(mount);
         addToast('Node Mount deleted.', 'success');

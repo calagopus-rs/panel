@@ -21,8 +21,8 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const doDelete = () => {
-    deleteSchedule(server.uuid, schedule.uuid)
+  const doDelete = async () => {
+    await deleteSchedule(server.uuid, schedule.uuid)
       .then(() => {
         addToast('Schedule deleted.', 'success');
         setOpenModal(null);

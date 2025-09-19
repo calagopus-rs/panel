@@ -21,7 +21,7 @@ interface TerminalLine {
 
 export default function Terminal() {
   const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@pterodactyl~ \u001b[0m';
-  const { server, imagePulls, socketConnected, socketInstance } = useServerStore();
+  const { server, imagePulls, socketConnected, socketInstance, state } = useServerStore();
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [history, setHistory] = useState<string[]>([]);
@@ -243,7 +243,7 @@ export default function Terminal() {
           ref={inputRef}
           placeholder={'Type a command...'}
           aria-label={'Console command input.'}
-          disabled={!socketConnected}
+          disabled={!socketConnected || state === 'offline'}
           onKeyDown={handleKeyDown}
           autoCorrect={'off'}
           autoCapitalize={'none'}

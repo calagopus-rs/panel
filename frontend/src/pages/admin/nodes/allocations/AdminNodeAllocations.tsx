@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { Ref, useEffect, useState } from "react";
+import { Ref, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
@@ -17,6 +17,7 @@ import SelectionArea from '@/elements/SelectionArea';
 import Code from '@/elements/Code';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
+import TextInput from '@/elements/input/TextInput';
 
 export default ({ node }: { node: Node }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -30,12 +31,13 @@ export default ({ node }: { node: Node }) => {
   } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'create' | 'delete'>(null);
-  const [loading, setLoading] = useState(nodeAllocations.data.length === 0);
-  const [page, setPage] = useState(1);
   const [selectedNodeAllocationsPrevious, setSelectedNodeAllocationsPrevious] = useState(selectedNodeAllocations);
+  const [loading, setLoading] = useState(nodeAllocations.data.length === 0);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
 
   const loadAllocations = () =>
-    getNodeAllocations(node.uuid, page)
+    getNodeAllocations(node.uuid, page, search)
       .then((data) => {
         setNodeAllocations(data);
         load(false, setLoading);
@@ -52,8 +54,8 @@ export default ({ node }: { node: Node }) => {
     setSelectedNodeAllocations([...selectedNodeAllocationsPrevious, ...selected]);
   };
 
-  const doDelete = () => {
-    deleteNodeAllocations(
+  const doDelete = async () => {
+    await deleteNodeAllocations(
       node.uuid,
       Array.from(selectedNodeAllocations).map((a) => a.uuid),
     )
@@ -71,15 +73,16 @@ export default ({ node }: { node: Node }) => {
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
+    setSearch(searchParams.get('search') || '');
   }, []);
 
   useEffect(() => {
-    setSearchParams({ page: page.toString() });
-  }, [page]);
+    setSearchParams({ page: page.toString(), search });
+  }, [page, search]);
 
   useEffect(() => {
     loadAllocations();
-  }, [page]);
+  }, [page, search]);
 
   return (
     <>
@@ -102,10 +105,14 @@ export default ({ node }: { node: Node }) => {
       </ConfirmationModal>
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={2}>
-          Node Allocations
-        </Title>
+        <Title order={2}>Node Allocations</Title>
         <Group>
+          <TextInput
+            placeholder={'Search...'}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
+            w={250}
+          />
           <Button
             onClick={() => setOpenModal('delete')}
             color={'red'}

@@ -31,8 +31,8 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
       });
   };
 
-  const doRemove = () => {
-    deleteSubuser(server.uuid, subuser.user.username)
+  const doRemove = async () => {
+    await deleteSubuser(server.uuid, subuser.user.username)
       .then(() => {
         addToast('Subuser removed.', 'success');
         removeSubuser(subuser);

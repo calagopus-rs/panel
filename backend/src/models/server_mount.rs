@@ -81,6 +81,7 @@ impl ServerMount {
         server_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
+        search: Option<&str>,
     ) -> Result<super::Pagination<Self>, sqlx::Error> {
         let offset = (page - 1) * per_page;
 
@@ -89,17 +90,58 @@ impl ServerMount {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_mounts
             JOIN mounts ON mounts.uuid = server_mounts.mount_uuid
-            WHERE server_mounts.server_uuid = $1
+            WHERE server_mounts.server_uuid = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
             ORDER BY server_mounts.mount_uuid ASC
-            LIMIT $2 OFFSET $3
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None)
         ))
         .bind(server_uuid)
+        .bind(search)
         .bind(per_page)
         .bind(offset)
         .fetch_all(database.read())
         .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn available_by_server_with_pagination(
+        database: &crate::database::Database,
+        server: &super::server::Server,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM mounts
+            JOIN node_mounts ON mounts.uuid = node_mounts.mount_uuid AND node_mounts.node_uuid = $1
+            JOIN nest_egg_mounts ON mounts.uuid = nest_egg_mounts.mount_uuid AND nest_egg_mounts.egg_uuid = $2
+            LEFT JOIN server_mounts ON server_mounts.mount_uuid = mounts.uuid AND server_mounts.server_uuid = $3
+            WHERE $4 IS NULL OR mounts.name ILIKE '%' || $4 || '%'
+            ORDER BY mounts.created
+            LIMIT $5 OFFSET $6
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(server.node.uuid)
+        .bind(server.egg.uuid)
+        .bind(server.uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await
+        ?;
 
         Ok(super::Pagination {
             total: rows.first().map_or(0, |row| row.get("total_count")),

@@ -18,8 +18,8 @@ export default ({ server, mount }: { server: AdminServer; mount: ServerMount }) 
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const doDelete = () => {
-    deleteServerMount(server.uuid, mount.uuid)
+  const doDelete = async () => {
+    await deleteServerMount(server.uuid, mount.uuid)
       .then(() => {
         removeServerMount(mount);
         addToast('Node Mount deleted.', 'success');

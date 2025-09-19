@@ -137,9 +137,9 @@ export default ({ contextNode }: { contextNode?: Node }) => {
       });
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteNode(params.id)
+    await deleteNode(params.id)
       .then(() => {
         addToast('Node deleted.', 'success');
         navigate('/admin/nodes');

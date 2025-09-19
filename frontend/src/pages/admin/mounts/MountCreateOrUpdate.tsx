@@ -71,9 +71,9 @@ export default () => {
     }
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteMount(params.id)
+    await deleteMount(params.id)
       .then(() => {
         addToast('Mount deleted.', 'success');
         navigate('/admin/mounts');

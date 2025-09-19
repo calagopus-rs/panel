@@ -17,8 +17,8 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
 
   const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
 
-  const doRemove = () => {
-    deleteAllocation(server.uuid, allocation.uuid)
+  const doRemove = async () => {
+    await deleteAllocation(server.uuid, allocation.uuid)
       .then(() => {
         removeAllocation(allocation);
         addToast('Allocation removed.', 'success');

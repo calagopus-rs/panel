@@ -18,8 +18,8 @@ export default ({ session }: { session: UserSession }) => {
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const doDelete = () => {
-    deleteSshKey(session.uuid)
+  const doDelete = async () => {
+    await deleteSshKey(session.uuid)
       .then(() => {
         removeSession(session);
         addToast('Session deleted.', 'success');

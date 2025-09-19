@@ -19,8 +19,8 @@ export default ({ location, databaseHost }: { location: Location; databaseHost: 
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
-  const doDelete = () => {
-    deleteLocationDatabaseHost(location.uuid, databaseHost.databaseHost.uuid)
+  const doDelete = async () => {
+    await deleteLocationDatabaseHost(location.uuid, databaseHost.databaseHost.uuid)
       .then(() => {
         removeLocationDatabaseHost(databaseHost);
         addToast('Location Database Host deleted.', 'success');

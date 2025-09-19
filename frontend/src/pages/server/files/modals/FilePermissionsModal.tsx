@@ -95,9 +95,14 @@ export default ({ file, opened, onClose }: Props) => {
       <Title order={3} c={'white'}>
         {title}
       </Title>
-      <Stack>
+      <Stack mt={'sm'}>
         {Object.entries(perms).map(([type, value]: [string, boolean]) => (
-          <Checkbox key={type} label={type} checked={value} onChange={() => togglePermission(category, type)} />
+          <Checkbox
+            key={type}
+            label={type[0].toUpperCase().concat(type.slice(1))}
+            checked={value}
+            onChange={() => togglePermission(category, type)}
+          />
         ))}
       </Stack>
     </Card>

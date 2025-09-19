@@ -44,8 +44,8 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       });
   };
 
-  const doDelete = () => {
-    deleteBackup(server.uuid, backup.uuid)
+  const doDelete = async () => {
+    await deleteBackup(server.uuid, backup.uuid)
       .then(() => {
         addToast('Backup deleted.', 'success');
         setOpenModal(null);

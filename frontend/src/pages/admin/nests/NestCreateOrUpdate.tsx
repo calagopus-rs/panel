@@ -54,9 +54,9 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
     }
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteNest(nest.uuid)
+    await deleteNest(nest.uuid)
       .then(() => {
         addToast('Nest deleted.', 'success');
         navigate('/admin/nests');

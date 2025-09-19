@@ -1,35 +1,33 @@
-import { httpErrorToHuman } from "@/api/axios";
-import { useToast } from "@/providers/ToastProvider";
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router";
-import Code from "@/elements/Code";
-import getUser from "@/api/admin/users/getUser";
-import updateUser from "@/api/admin/users/updateUser";
-import createUser from "@/api/admin/users/createUser";
-import deleteUser from "@/api/admin/users/deleteUser";
-import { Divider, Group, Stack, Title } from "@mantine/core";
-import Button from "@/elements/Button";
-import { load } from "@/lib/debounce";
-import TextInput from "@/elements/input/TextInput";
-import Switch from "@/elements/input/Switch";
-import ConfirmationModal from "@/elements/modals/ConfirmationModal";
-import disableUserTwoFactor from "@/api/admin/users/disableUserTwoFactor";
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import Code from '@/elements/Code';
+import getUser from '@/api/admin/users/getUser';
+import updateUser from '@/api/admin/users/updateUser';
+import createUser from '@/api/admin/users/createUser';
+import deleteUser from '@/api/admin/users/deleteUser';
+import { Divider, Group, Stack, Title } from '@mantine/core';
+import Button from '@/elements/Button';
+import { load } from '@/lib/debounce';
+import TextInput from '@/elements/input/TextInput';
+import Switch from '@/elements/input/Switch';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor';
 
 export default () => {
-  const params = useParams<"id">();
+  const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openModal, setOpenModal] = useState<"delete" | "disable_two_factor">(
-    null
-  );
+  const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor'>(null);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User>({
-    username: "",
-    email: "",
-    nameFirst: "",
-    nameLast: "",
-    password: "",
+    username: '',
+    email: '',
+    nameFirst: '',
+    nameLast: '',
+    password: '',
     admin: false,
   } as User);
 
@@ -40,7 +38,7 @@ export default () => {
           setUser(user);
         })
         .catch((msg) => {
-          addToast(httpErrorToHuman(msg), "error");
+          addToast(httpErrorToHuman(msg), 'error');
         });
     }
   }, [params.id]);
@@ -50,10 +48,10 @@ export default () => {
     if (user?.uuid) {
       updateUser(user.uuid, user)
         .then(() => {
-          addToast("User updated.", "success");
+          addToast('User updated.', 'success');
         })
         .catch((msg) => {
-          addToast(httpErrorToHuman(msg), "error");
+          addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
           load(false, setLoading);
@@ -61,11 +59,11 @@ export default () => {
     } else {
       createUser(user)
         .then((user) => {
-          addToast("User created.", "success");
+          addToast('User created.', 'success');
           navigate(`/admin/users/${user.uuid}`);
         })
         .catch((msg) => {
-          addToast(httpErrorToHuman(msg), "error");
+          addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
           load(false, setLoading);
@@ -73,32 +71,32 @@ export default () => {
     }
   };
 
-  const doDisableTwoFactor = () => {
+  const doDisableTwoFactor = async () => {
     load(true, setLoading);
-    disableUserTwoFactor(params.id)
+    await disableUserTwoFactor(params.id)
       .then(() => {
-        addToast("User two factor disabled.", "success");
+        addToast('User two factor disabled.', 'success');
         user.totpEnabled = false;
 
         setOpenModal(null);
       })
       .catch((msg) => {
-        addToast(httpErrorToHuman(msg), "error");
+        addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => {
         load(false, setLoading);
       });
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteUser(user.uuid)
+    await deleteUser(user.uuid)
       .then(() => {
-        addToast("User deleted.", "success");
-        navigate("/admin/users");
+        addToast('User deleted.', 'success');
+        navigate('/admin/users');
       })
       .catch((msg) => {
-        addToast(httpErrorToHuman(msg), "error");
+        addToast(httpErrorToHuman(msg), 'error');
       })
       .finally(() => {
         load(false, setLoading);
@@ -108,43 +106,42 @@ export default () => {
   return (
     <>
       <ConfirmationModal
-        opened={openModal === "delete"}
+        opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={"Confirm User Deletion"}
-        confirm={"Delete"}
+        title={'Confirm User Deletion'}
+        confirm={'Delete'}
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{user?.username}</Code>?
       </ConfirmationModal>
       <ConfirmationModal
-        opened={openModal === "disable_two_factor"}
+        opened={openModal === 'disable_two_factor'}
         onClose={() => setOpenModal(null)}
-        title={"Disable User Two Factor"}
-        confirm={"Disable"}
+        title={'Disable User Two Factor'}
+        confirm={'Disable'}
         onConfirmed={doDisableTwoFactor}
       >
-        Are you sure you want to remove the two factor of{" "}
-        <Code>{user?.username}</Code>?
+        Are you sure you want to remove the two factor of <Code>{user?.username}</Code>?
       </ConfirmationModal>
 
-      <Title order={1}>{params.id ? "Update" : "Create"} User</Title>
+      <Title order={1}>{params.id ? 'Update' : 'Create'} User</Title>
       <Divider />
 
       <Stack>
         <Group grow>
           <TextInput
             withAsterisk
-            label={"Username"}
-            placeholder={"Username"}
-            value={user.username || ""}
+            label={'Username'}
+            placeholder={'Username'}
+            value={user.username || ''}
             onChange={(e) => setUser({ ...user, username: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={"Email"}
-            placeholder={"Email"}
-            type={"email"}
-            value={user.email || ""}
+            label={'Email'}
+            placeholder={'Email'}
+            type={'email'}
+            value={user.email || ''}
             onChange={(e) => setUser({ ...user, email: e.target.value })}
           />
         </Group>
@@ -152,47 +149,41 @@ export default () => {
         <Group grow>
           <TextInput
             withAsterisk
-            label={"First Name"}
-            placeholder={"First Name"}
-            value={user.nameFirst || ""}
+            label={'First Name'}
+            placeholder={'First Name'}
+            value={user.nameFirst || ''}
             onChange={(e) => setUser({ ...user, nameFirst: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={"Last Name"}
-            placeholder={"Last Name"}
-            value={user.nameLast || ""}
+            label={'Last Name'}
+            placeholder={'Last Name'}
+            value={user.nameLast || ''}
             onChange={(e) => setUser({ ...user, nameLast: e.target.value })}
           />
         </Group>
 
         <TextInput
           withAsterisk={!params.id}
-          label={"Password"}
-          placeholder={"Password"}
-          type={"password"}
-          value={user.password || ""}
-          onChange={(e) =>
-            setUser({ ...user, password: e.target.value || null })
-          }
+          label={'Password'}
+          placeholder={'Password'}
+          type={'password'}
+          value={user.password || ''}
+          onChange={(e) => setUser({ ...user, password: e.target.value || null })}
         />
 
-        <Switch
-          label={"Admin"}
-          checked={user.admin}
-          onChange={(e) => setUser({ ...user, admin: e.target.checked })}
-        />
+        <Switch label={'Admin'} checked={user.admin} onChange={(e) => setUser({ ...user, admin: e.target.checked })} />
       </Stack>
 
-      <Group mt={"md"}>
+      <Group mt={'md'}>
         <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
         </Button>
         {params.id && (
           <Button
-            color={"red"}
-            variant={"outline"}
-            onClick={() => setOpenModal("disable_two_factor")}
+            color={'red'}
+            variant={'outline'}
+            onClick={() => setOpenModal('disable_two_factor')}
             loading={loading}
             disabled={!user.totpEnabled}
           >
@@ -200,11 +191,7 @@ export default () => {
           </Button>
         )}
         {params.id && (
-          <Button
-            color={"red"}
-            onClick={() => setOpenModal("delete")}
-            loading={loading}
-          >
+          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
           </Button>
         )}

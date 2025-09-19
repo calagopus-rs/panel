@@ -96,9 +96,9 @@ export default ({ nest }: { nest: Nest }) => {
     }
   };
 
-  const doDelete = () => {
+  const doDelete = async () => {
     load(true, setLoading);
-    deleteEgg(nest.uuid, egg.uuid)
+    await deleteEgg(nest.uuid, egg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
         navigate(`/admin/nests/${nest.uuid}/eggs`);
