@@ -224,7 +224,11 @@ export default function Terminal() {
           {Array.from(imagePulls).map(([id, progress]) => (
             <span key={id} className={'flex flex-row w-full items-center whitespace-pre-wrap break-all'}>
               {progress.status === 'pulling' ? 'Pulling' : 'Extracting'} Layer{' '}
-              <Progress value={(progress.progress / progress.total) * 100} className={'flex-1 ml-2'} />
+              <Progress
+                hourglass={false}
+                value={(progress.progress / progress.total) * 100}
+                className={'flex-1 ml-2'}
+              />
             </span>
           ))}
         </span>
