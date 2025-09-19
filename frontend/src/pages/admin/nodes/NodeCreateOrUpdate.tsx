@@ -3,7 +3,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Code from '@/elements/Code';
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';
@@ -19,7 +19,6 @@ import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
 import Tooltip from '@/elements/Tooltip';
-import getMounts from "@/api/admin/mounts/getMounts";
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const params = useParams<'id'>();
@@ -91,7 +90,6 @@ export default ({ contextNode }: { contextNode?: Node }) => {
   useEffect(() => {
     fetchLocations('');
   }, []);
-
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);

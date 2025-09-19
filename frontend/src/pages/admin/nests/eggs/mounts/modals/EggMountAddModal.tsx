@@ -21,38 +21,36 @@ export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest, egg: 
   const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      getMounts(1, search)
-        .then((data) => {
-          setMounts(data.data);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }, 150),
-    [],
-  );
+  const fetchMounts = (search: string) => {
+    getMounts(1, search)
+      .then((response) => {
+        setMounts(response.data);
 
-  useEffect(() => {
-    getMounts(1)
-      .then((data) => {
-        setMounts(data.data);
-
-        if (data.total > data.data.length) {
+        if (response.total > response.data.length) {
           setDoRefetch(true);
         }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-  }, []);
+  };
+
+  const setDebouncedSearch = useCallback(
+    debounce((search: string) => {
+      fetchMounts(search);
+    }, 150),
+    [],
+  );
 
   useEffect(() => {
     if (doRefetch) {
       setDebouncedSearch(search);
     }
   }, [search]);
+
+  useEffect(() => {
+    fetchMounts('');
+  }, []);
 
   const doAdd = () => {
     load(true, setLoading);

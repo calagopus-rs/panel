@@ -22,38 +22,36 @@ export default ({ location, opened, onClose }: ModalProps & { location: Location
   const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      getDatabaseHosts(1, search)
-        .then((data) => {
-          setDatabaseHosts(data.data);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }, 150),
-    [],
-  );
+  const fetchDatabaseHosts = (search: string) => {
+    getDatabaseHosts(1, search)
+      .then((response) => {
+        setDatabaseHosts(response.data);
 
-  useEffect(() => {
-    getDatabaseHosts(1)
-      .then((data) => {
-        setDatabaseHosts(data.data);
-
-        if (data.total > data.data.length) {
+        if (response.total > response.data.length) {
           setDoRefetch(true);
         }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
-  }, []);
+  };
+
+  const setDebouncedSearch = useCallback(
+    debounce((search: string) => {
+      fetchDatabaseHosts(search);
+    }, 150),
+    [],
+  );
 
   useEffect(() => {
     if (doRefetch) {
       setDebouncedSearch(search);
     }
   }, [search]);
+
+  useEffect(() => {
+    fetchDatabaseHosts('');
+  }, []);
 
   const doCreate = () => {
     load(true, setLoading);
