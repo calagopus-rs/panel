@@ -73,7 +73,7 @@ export default ({ server }: { server: AdminServer }) => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['Id', 'IP', 'IP Alias', 'Port', 'Created']}
+            columns={['', 'Id', 'IP', 'IP Alias', 'Port', 'Notes', 'Created']}
             pagination={serverAllocations}
             onPageSelect={setPage}
           >

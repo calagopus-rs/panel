@@ -2,13 +2,14 @@ import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from "@/api/transformers";
 
 interface Data {
-  allocationUuid: string;
+  notes?: string;
+  primary?: boolean;
 }
 
-export default async (serverUuid: string, data: Data): Promise<ServerAllocation> => {
+export default async (serverUuid: string, allocationUuid: string, data: Data): Promise<ServerAllocation> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/admin/servers/${serverUuid}/allocations`, transformKeysToSnakeCase(data))
+      .patch(`/api/admin/servers/${serverUuid}/allocations/${allocationUuid}`, transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.allocation))
       .catch(reject);
   });
