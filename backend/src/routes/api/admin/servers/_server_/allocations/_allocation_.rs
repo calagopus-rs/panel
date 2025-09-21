@@ -175,23 +175,29 @@ mod patch {
                     }
 
                     sqlx::query!(
-                        "UPDATE servers SET allocation_uuid = NULL WHERE servers.uuid = $1",
+                        "UPDATE servers
+                        SET allocation_uuid = NULL
+                        WHERE servers.uuid = $1",
                         server.uuid,
                     )
                     .execute(&mut *transaction)
                     .await?;
                 } else {
                     sqlx::query!(
-                        "UPDATE servers SET allocation_uuid = $1 WHERE servers.uuid = $2",
+                        "UPDATE servers
+                        SET allocation_uuid = $1
+                        WHERE servers.uuid = $2",
                         allocation.uuid,
                         server.uuid,
                     )
                     .execute(&mut *transaction)
                     .await?;
                 }
-            } else if server.allocation.is_none() && primary {
+            } else if primary {
                 sqlx::query!(
-                    "UPDATE servers SET allocation_uuid = $1 WHERE servers.uuid = $2",
+                    "UPDATE servers
+                    SET allocation_uuid = $1
+                    WHERE servers.uuid = $2",
                     allocation.uuid,
                     server.uuid,
                 )
