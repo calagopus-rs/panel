@@ -20,6 +20,9 @@ import updateServer from '@/api/admin/servers/updateServer';
 import createServer from '@/api/admin/servers/createServer';
 import deleteServer from '@/api/admin/servers/deleteServer';
 import Modal from '@/elements/modals/Modal';
+import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
+import { formatAllocation } from '@/lib/server';
+import MultiSelect from '@/elements/input/MultiSelect';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -52,6 +55,10 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const [eggs, setEggs] = useState<AdminNestEgg[]>([]);
   const [doEggsRefetch, setDoEggsRefetch] = useState(false);
   const [eggSearch, setEggSearch] = useState('');
+  const [availableAllocations, setAvailableAllocations] = useState<NodeAllocation[]>([]);
+  const [doAllocationsRefetch, setDoAllocationsRefetch] = useState(false);
+  const [allocationsSearch, setAllocationsSearch] = useState('');
+  const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState('');
 
   const [server, setServer] = useState<UpdateAdminServer>({
     externalId: '',
@@ -223,11 +230,46 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     }
   }, [eggSearch]);
 
+  const fetchAvailableAllocations = (search: string) => {
+    getAvailableNodeAllocations(server.nodeUuid, 1, search)
+      .then((response) => {
+        setAvailableAllocations(response.data);
+
+        if (response.total > response.data.length) {
+          setDoAllocationsRefetch(true);
+        }
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
+  const setDebouncedAllocationSearch = useCallback(
+    debounce((search: string) => {
+      fetchAvailableAllocations(search);
+    }, 150),
+    [],
+  );
+
+  useEffect(() => {
+    if (doEggsRefetch) {
+      setDebouncedEggSearch(eggSearch);
+    }
+  }, [eggSearch]);
+
   useEffect(() => {
     fetchNodes('');
     fetchUsers('');
     fetchNests('');
   }, []);
+
+  useEffect(() => {
+    if (!server.nodeUuid || !doAllocationsRefetch) {
+      return;
+    }
+
+    fetchAvailableAllocations('');
+  }, [server.nodeUuid]);
 
   useEffect(() => {
     if (!selectedNestUuid) {
@@ -542,52 +584,94 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
           </Paper>
         </Group>
 
-        <Paper withBorder p='md'>
-          <Title order={3}>Feature Limits</Title>
+        <Group grow>
+          <Paper withBorder p='md'>
+            <Title order={3}>Feature Limits</Title>
 
-          <Group grow>
-            <NumberInput
-              withAsterisk
-              label={'Allocations'}
-              placeholder={'1'}
-              min={0}
-              value={server.featureLimits.allocations || 1}
-              onChange={(value) =>
-                setServer({ ...server, featureLimits: { ...server.featureLimits, allocations: Number(value) } })
-              }
-            />
-            <NumberInput
-              withAsterisk
-              label={'Databases'}
-              placeholder={'0'}
-              min={0}
-              value={server.featureLimits.databases || 0}
-              onChange={(value) =>
-                setServer({ ...server, featureLimits: { ...server.featureLimits, databases: Number(value) } })
-              }
-            />
-            <NumberInput
-              withAsterisk
-              label={'Backups'}
-              placeholder={'0'}
-              min={0}
-              value={server.featureLimits.backups || 0}
-              onChange={(value) =>
-                setServer({ ...server, featureLimits: { ...server.featureLimits, backups: Number(value) } })
-              }
-            />
-            <NumberInput
-              withAsterisk
-              label={'Schedules'}
-              placeholder={'0'}
-              min={0}
-              value={server.featureLimits.schedules || 0}
-              onChange={(value) =>
-                setServer({ ...server, featureLimits: { ...server.featureLimits, schedules: Number(value) } })
-              }
-            />
-          </Group>
-        </Paper>
+            <Group grow>
+              <NumberInput
+                withAsterisk
+                label={'Allocations'}
+                placeholder={'1'}
+                min={0}
+                value={server.featureLimits.allocations || 1}
+                onChange={(value) =>
+                  setServer({ ...server, featureLimits: { ...server.featureLimits, allocations: Number(value) } })
+                }
+              />
+              <NumberInput
+                withAsterisk
+                label={'Databases'}
+                placeholder={'0'}
+                min={0}
+                value={server.featureLimits.databases || 0}
+                onChange={(value) =>
+                  setServer({ ...server, featureLimits: { ...server.featureLimits, databases: Number(value) } })
+                }
+              />
+              <NumberInput
+                withAsterisk
+                label={'Backups'}
+                placeholder={'0'}
+                min={0}
+                value={server.featureLimits.backups || 0}
+                onChange={(value) =>
+                  setServer({ ...server, featureLimits: { ...server.featureLimits, backups: Number(value) } })
+                }
+              />
+              <NumberInput
+                withAsterisk
+                label={'Schedules'}
+                placeholder={'0'}
+                min={0}
+                value={server.featureLimits.schedules || 0}
+                onChange={(value) =>
+                  setServer({ ...server, featureLimits: { ...server.featureLimits, schedules: Number(value) } })
+                }
+              />
+            </Group>
+          </Paper>
+
+          {!contextServer && (
+            <Paper withBorder p='md'>
+              <Title order={3}>Allocations</Title>
+
+              <Group grow>
+                <Select
+                  label={'Primary Allocation'}
+                  placeholder={'host:port'}
+                  value={server.allocationUuid}
+                  disabled={!server.nodeUuid}
+                  onChange={(value) => setServer({ ...server, allocationUuid: value })}
+                  data={availableAllocations.filter((alloc) => !server.allocationUuids.includes(alloc.uuid))
+                    .map((alloc) => ({
+                      label: formatAllocation(alloc),
+                      value: alloc.uuid,
+                    }))}
+                  searchable
+                  searchValue={primaryAllocationsSearch}
+                  onSearchChange={setPrimaryAllocationsSearch}
+                  allowDeselect
+                />
+                <MultiSelect
+                  label={'Primary Allocation'}
+                  placeholder={'host:port'}
+                  value={server.allocationUuids}
+                  disabled={!server.nodeUuid}
+                  onChange={(value) => setServer({ ...server, allocationUuids: value })}
+                  data={availableAllocations.filter((alloc) => alloc.uuid !== server.allocationUuid)
+                    .map((alloc) => ({
+                      label: formatAllocation(alloc),
+                      value: alloc.uuid,
+                    }))}
+                  searchable
+                  searchValue={allocationsSearch}
+                  onSearchChange={setAllocationsSearch}
+                />
+              </Group>
+            </Paper>
+          )}
+        </Group>
 
         <Group>
           <Button onClick={doCreateOrUpdate} loading={loading}>
