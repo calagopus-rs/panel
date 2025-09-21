@@ -20,6 +20,7 @@ export enum SocketEvent {
   BACKUP_RESTORE_COMPLETED = 'backup restore completed',
   OPERATION_PROGRESS = 'operation progress',
   OPERATION_COMPLETED = 'operation completed',
+  OPERATION_ERROR = 'operation error',
 }
 
 export enum SocketRequest {

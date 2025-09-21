@@ -724,6 +724,13 @@ impl WingsClient {
         request_impl(self, Method::GET, "/api/system", None::<&()>, None).await
     }
 
+    pub async fn post_system_upgrade(
+        &self,
+        data: &super::system_upgrade::post::RequestBody,
+    ) -> Result<super::system_upgrade::post::Response, (StatusCode, super::ApiError)> {
+        request_impl(self, Method::POST, "/api/system/upgrade", Some(data), None).await
+    }
+
     pub async fn post_transfers(
         &self,
     ) -> Result<super::transfers::post::Response, (StatusCode, super::ApiError)> {

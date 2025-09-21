@@ -40,7 +40,7 @@ export default () => {
       return;
     }
 
-    setStats(transformKeysToCamelCase(wsStats));
+    setStats(transformKeysToCamelCase(wsStats) as ResourceUsage);
   });
 
   useWebsocketEvent(SocketEvent.IMAGE_PULL_PROGRESS, (id, data) => {
@@ -133,6 +133,28 @@ export default () => {
     }
 
     refreshFiles(Number(searchParams.get('page')) || 1);
+    removeFileOperation(uuid);
+  });
+
+  useWebsocketEvent(SocketEvent.OPERATION_ERROR, (uuid, error) => {
+    const fileOperation = fileOperations.get(uuid);
+    switch (fileOperation.type) {
+      case 'compress':
+        addToast(`Failed to compress files to ${fileOperation.path}:\n${error}`, 'error');
+        break;
+      case 'decompress':
+        addToast(
+          `Failed to decompress ${fileOperation.path} to ${fileOperation.destination || '/'}:\n${error}`,
+          'error',
+        );
+        break;
+      case 'pull':
+        addToast(`Failed to pull ${fileOperation.path}:\n${error}`, 'error');
+        break;
+      default:
+        break;
+    }
+
     removeFileOperation(uuid);
   });
 

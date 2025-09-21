@@ -93,7 +93,9 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                       leftSection={<FontAwesomeIcon icon={item.icon} />}
                       color={item.color === 'red' ? 'red' : undefined}
                       disabled={item.disabled}
-                      onClick={() => {
+                      onClick={(e) => {
+                        if (!e.isTrusted) return;
+
                         item.onClick();
                         hideMenu();
                       }}
@@ -109,7 +111,9 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                         leftSection={<FontAwesomeIcon icon={subItem.icon} />}
                         color={subItem.color === 'red' ? 'red' : undefined}
                         disabled={subItem.disabled}
-                        onClick={() => {
+                        onClick={(e) => {
+                          if (!e.isTrusted) return;
+
                           subItem.onClick();
                           hideMenu();
                         }}
@@ -125,7 +129,9 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
                   leftSection={<FontAwesomeIcon icon={item.icon} />}
                   color={item.color === 'red' ? 'red' : undefined}
                   disabled={item.disabled}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (!e.isTrusted) return;
+
                     item.onClick();
                     hideMenu();
                   }}

@@ -161,6 +161,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
           metaKey: e.metaKey,
           button: e.button,
         });
+
         target.dispatchEvent(newEvent);
       }
     }

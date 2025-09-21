@@ -1320,6 +1320,42 @@ pub mod system {
         pub type Response = Response200;
     }
 }
+pub mod system_upgrade {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
+                #[schema(inline)]
+                pub url: String,
+                #[schema(inline)]
+                pub headers: IndexMap<String, String>,
+                #[schema(inline)]
+                pub sha256: String,
+                #[schema(inline)]
+                pub restart_command: String,
+                #[schema(inline)]
+                pub restart_command_args: Vec<String>,
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
+            }
+        }
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response409 {
+                #[schema(inline)]
+                pub error: String,
+            }
+        }
+
+        pub type Response = Response202;
+    }
+}
 pub mod transfers {
     use super::*;
 
