@@ -35,7 +35,7 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
         setServerAllocations({
           ...serverAllocations,
           data: serverAllocations.data.map((a) => (a.uuid === allocation.uuid ? { ...a, notes: allocationNote } : a)),
-        })
+        });
         addToast('Allocation edited.', 'success');
         setOpenModal(null);
       })
@@ -52,8 +52,11 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
       .then(() => {
         setServerAllocations({
           ...serverAllocations,
-          data: serverAllocations.data.map((a) => (a.uuid === allocation.uuid ? { ...a, primary: true } : a)),
-        })
+          data: serverAllocations.data.map((a) => ({
+            ...a,
+            isPrimary: a.uuid === allocation.uuid,
+          })),
+        });
         addToast('Allocation set as primary.', 'success');
       })
       .catch((msg) => {
@@ -135,7 +138,7 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
               <Code>{allocation.port}</Code>
             </TableData>
             <TableData>
-              {allocation.notes ?? 'N/A'}
+              {allocation.notes || 'N/A'}
             </TableData>
             <TableData>
               <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>
