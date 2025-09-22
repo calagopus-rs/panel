@@ -2,15 +2,16 @@ import AdminActivity from '@/pages/admin/activity/AdminActivity';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminDatabaseHosts from '@/pages/admin/database-hosts/AdminDatabaseHosts';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
+import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import AdminNests from '@/pages/admin/nests/AdminNests';
+import AdminNodes from '@/pages/admin/nodes/AdminNodes';
+import AdminServers from '@/pages/admin/servers/AdminServers';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminUsers from '@/pages/admin/users/AdminUsers';
-import AdminNodes from '@/pages/admin/nodes/AdminNodes';
-import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
+import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys';
-import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
 import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions';
 import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
@@ -36,8 +37,10 @@ import {
   faCog,
   faCrow,
   faDatabase,
+  faDesktop,
   faDungeon,
-  faExternalLink,
+  faEarthAmerica,
+  faFolder,
   faFolderOpen,
   faKey,
   faNetworkWired,
@@ -53,7 +56,6 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
-import AdminServers from '@/pages/admin/servers/AdminServers';
 
 interface RouteDefinition {
   name: string | undefined;
@@ -147,15 +149,9 @@ const routes: Routes = {
     },
     {
       name: 'Locations',
-      icon: faDungeon,
+      icon: faEarthAmerica,
       path: '/locations/*',
       element: AdminLocations,
-    },
-    {
-      name: 'Database Hosts',
-      icon: faDatabase,
-      path: '/database-hosts/*',
-      element: AdminDatabaseHosts,
     },
     {
       name: 'Nodes',
@@ -165,7 +161,7 @@ const routes: Routes = {
     },
     {
       name: 'Servers',
-      icon: faBicycle,
+      icon: faDesktop,
       path: '/servers/*',
       element: AdminServers,
     },
@@ -176,8 +172,14 @@ const routes: Routes = {
       element: AdminNests,
     },
     {
+      name: 'Database Hosts',
+      icon: faDatabase,
+      path: '/database-hosts/*',
+      element: AdminDatabaseHosts,
+    },
+    {
       name: 'Mounts',
-      icon: faExternalLink,
+      icon: faFolder,
       path: '/mounts/*',
       element: AdminMounts,
     },

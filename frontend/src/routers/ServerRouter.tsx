@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare, faMagnifyingGlass, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
@@ -18,10 +18,12 @@ import Container from '@/elements/Container';
 import { load } from '@/lib/debounce';
 import Notification from '@/elements/Notification';
 import Progress from '@/elements/Progress';
+import { useAuth } from '@/providers/AuthProvider';
 
 export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const { server, backupRestoreProgress } = useServerStore();
   const resetState = useServerStore((state) => state.reset);
@@ -56,6 +58,12 @@ export default () => {
             <FontAwesomeIcon icon={faServer} />
             <span>Servers</span>
           </Sidebar.Link>
+          {user.admin && (
+            <Sidebar.Link to={`/admin/servers/${params.id}`} end>
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
+              <span>View admin</span>
+            </Sidebar.Link>
+          )}
         </Sidebar.Section>
         <Sidebar.Section>
           {routes.server
