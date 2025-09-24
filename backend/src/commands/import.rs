@@ -857,139 +857,6 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         }
     };
 
-    let mount_mappings = match process_table(
-        &source_database,
-        "mounts",
-        None,
-        async |rows| {
-            let mut mapping = HashMap::with_capacity(rows.len());
-
-            for row in rows {
-                let id: u32 = row.try_get("id")?;
-                let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
-                let name: &str = row.try_get("name")?;
-                let description: Option<&str> = row.try_get("description")?;
-                let source: &str = row.try_get("source")?;
-                let target: &str = row.try_get("target")?;
-                let read_only: bool = row.try_get("read_only")?;
-                let user_mountable: bool = row.try_get("user_mountable")?;
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO mounts (uuid, name, description, source, target, read_only, user_mountable, created)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(uuid.as_uuid())
-                .bind(name)
-                .bind(description)
-                .bind(source)
-                .bind(target)
-                .bind(read_only)
-                .bind(user_mountable)
-                .execute(database.write())
-                .await?;
-
-                mapping.insert(id, *uuid.as_uuid());
-            }
-
-            Ok(mapping)
-        },
-        256,
-    )
-    .await
-    {
-        Ok(mount_mappings) => mount_mappings,
-        Err(err) => {
-            tracing::error!("failed to process mounts table: {:#?}", err);
-            return 1;
-        }
-    };
-    if let Err(err) = process_table(
-        &source_database,
-        "egg_mount",
-        None,
-        async |rows| {
-            for row in rows {
-                let egg_id: u32 = row.try_get("egg_id")?;
-                let mount_id: u32 = row.try_get("mount_id")?;
-
-                let egg_uuid = match egg_mappings.iter().find(|m| m.contains_key(&egg_id)) {
-                    Some(egg_uuid) => egg_uuid.get(&egg_id).unwrap(),
-                    None => continue,
-                };
-
-                let mount_uuid = match mount_mappings.iter().find(|m| m.contains_key(&mount_id)) {
-                    Some(mount_uuid) => mount_uuid.get(&mount_id).unwrap(),
-                    None => continue,
-                };
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO nest_egg_mounts (egg_uuid, mount_uuid, created)
-                    VALUES ($1, $2, NOW())
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(egg_uuid)
-                .bind(mount_uuid)
-                .execute(database.write())
-                .await?;
-            }
-
-            Ok(())
-        },
-        100,
-    )
-    .await
-    {
-        tracing::error!("failed to process egg mounts table: {:#?}", err);
-        return 1;
-    }
-    if let Err(err) = process_table(
-        &source_database,
-        "mount_node",
-        None,
-        async |rows| {
-            for row in rows {
-                let node_id: u32 = row.try_get("node_id")?;
-                let mount_id: u32 = row.try_get("mount_id")?;
-
-                let node_uuid = match node_mappings.iter().find(|m| m.contains_key(&node_id)) {
-                    Some(node_uuid) => node_uuid.get(&node_id).unwrap(),
-                    None => continue,
-                };
-
-                let mount_uuid = match mount_mappings.iter().find(|m| m.contains_key(&mount_id)) {
-                    Some(mount_uuid) => mount_uuid.get(&mount_id).unwrap(),
-                    None => continue,
-                };
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO node_mounts (node_uuid, mount_uuid, created)
-                    VALUES ($1, $2, NOW())
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(node_uuid)
-                .bind(mount_uuid)
-                .execute(database.write())
-                .await?;
-            }
-
-            Ok(())
-        },
-        100,
-    )
-    .await
-    {
-        tracing::error!("failed to process node mounts table: {:#?}", err);
-        return 1;
-    }
-    drop(mount_mappings);
-
     let database_host_mappings = match process_table(
         &source_database,
         "database_hosts",
@@ -1421,6 +1288,181 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         return 1;
     }
     drop(user_mappings);
+
+    let mount_mappings = match process_table(
+        &source_database,
+        "mounts",
+        None,
+        async |rows| {
+            let mut mapping = HashMap::with_capacity(rows.len());
+
+            for row in rows {
+                let id: u32 = row.try_get("id")?;
+                let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
+                let name: &str = row.try_get("name")?;
+                let description: Option<&str> = row.try_get("description")?;
+                let source: &str = row.try_get("source")?;
+                let target: &str = row.try_get("target")?;
+                let read_only: bool = row.try_get("read_only")?;
+                let user_mountable: bool = row.try_get("user_mountable")?;
+
+                sqlx::query(
+                    r#"
+                    INSERT INTO mounts (uuid, name, description, source, target, read_only, user_mountable, created)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+                    ON CONFLICT DO NOTHING
+                    "#,
+                )
+                .bind(uuid.as_uuid())
+                .bind(name)
+                .bind(description)
+                .bind(source)
+                .bind(target)
+                .bind(read_only)
+                .bind(user_mountable)
+                .execute(database.write())
+                .await?;
+
+                mapping.insert(id, *uuid.as_uuid());
+            }
+
+            Ok(mapping)
+        },
+        256,
+    )
+    .await
+    {
+        Ok(mount_mappings) => mount_mappings,
+        Err(err) => {
+            tracing::error!("failed to process mounts table: {:#?}", err);
+            return 1;
+        }
+    };
+    if let Err(err) = process_table(
+        &source_database,
+        "egg_mount",
+        None,
+        async |rows| {
+            for row in rows {
+                let egg_id: u32 = row.try_get("egg_id")?;
+                let mount_id: u32 = row.try_get("mount_id")?;
+
+                let egg_uuid = match egg_mappings.iter().find(|m| m.contains_key(&egg_id)) {
+                    Some(egg_uuid) => egg_uuid.get(&egg_id).unwrap(),
+                    None => continue,
+                };
+
+                let mount_uuid = match mount_mappings.iter().find(|m| m.contains_key(&mount_id)) {
+                    Some(mount_uuid) => mount_uuid.get(&mount_id).unwrap(),
+                    None => continue,
+                };
+
+                sqlx::query(
+                    r#"
+                    INSERT INTO nest_egg_mounts (egg_uuid, mount_uuid, created)
+                    VALUES ($1, $2, NOW())
+                    ON CONFLICT DO NOTHING
+                    "#,
+                )
+                .bind(egg_uuid)
+                .bind(mount_uuid)
+                .execute(database.write())
+                .await?;
+            }
+
+            Ok(())
+        },
+        100,
+    )
+    .await
+    {
+        tracing::error!("failed to process egg mounts table: {:#?}", err);
+        return 1;
+    }
+    if let Err(err) = process_table(
+        &source_database,
+        "mount_node",
+        None,
+        async |rows| {
+            for row in rows {
+                let node_id: u32 = row.try_get("node_id")?;
+                let mount_id: u32 = row.try_get("mount_id")?;
+
+                let node_uuid = match node_mappings.iter().find(|m| m.contains_key(&node_id)) {
+                    Some(node_uuid) => node_uuid.get(&node_id).unwrap(),
+                    None => continue,
+                };
+
+                let mount_uuid = match mount_mappings.iter().find(|m| m.contains_key(&mount_id)) {
+                    Some(mount_uuid) => mount_uuid.get(&mount_id).unwrap(),
+                    None => continue,
+                };
+
+                sqlx::query(
+                    r#"
+                    INSERT INTO node_mounts (node_uuid, mount_uuid, created)
+                    VALUES ($1, $2, NOW())
+                    ON CONFLICT DO NOTHING
+                    "#,
+                )
+                .bind(node_uuid)
+                .bind(mount_uuid)
+                .execute(database.write())
+                .await?;
+            }
+
+            Ok(())
+        },
+        100,
+    )
+    .await
+    {
+        tracing::error!("failed to process node mounts table: {:#?}", err);
+        return 1;
+    }
+    if let Err(err) = process_table(
+        &source_database,
+        "mount_server",
+        None,
+        async |rows| {
+            for row in rows {
+                let server_id: u32 = row.try_get("server_id")?;
+                let mount_id: u32 = row.try_get("mount_id")?;
+
+                let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id))
+                {
+                    Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
+                    None => continue,
+                };
+
+                let mount_uuid = match mount_mappings.iter().find(|m| m.contains_key(&mount_id)) {
+                    Some(mount_uuid) => mount_uuid.get(&mount_id).unwrap(),
+                    None => continue,
+                };
+
+                sqlx::query(
+                    r#"
+                    INSERT INTO server_mounts (server_uuid, mount_uuid, created)
+                    VALUES ($1, $2, NOW())
+                    ON CONFLICT DO NOTHING
+                    "#,
+                )
+                .bind(server_uuid)
+                .bind(mount_uuid)
+                .execute(database.write())
+                .await?;
+            }
+
+            Ok(())
+        },
+        100,
+    )
+    .await
+    {
+        tracing::error!("failed to process server mounts table: {:#?}", err);
+        return 1;
+    }
+    drop(mount_mappings);
 
     let schedule_mappings = match process_table(
         &source_database,
