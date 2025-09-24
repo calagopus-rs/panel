@@ -169,7 +169,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
     let source_app_key = match std::env::var("APP_KEY")
         .map(|v| BASE64_ENGINE.decode(v.trim_start_matches("base64:")))
     {
-        Ok(Ok(value)) => value,
+        Ok(Ok(value)) => Arc::new(value),
         Ok(Err(err)) => {
             eprintln!(
                 "{}: {:#?}",
@@ -340,53 +340,63 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         None,
         async |rows| {
             let mut mapping = HashMap::with_capacity(rows.len());
+            let mut futures = Vec::with_capacity(rows.len());
 
             for row in rows {
                 let id: u32 = row.try_get("id")?;
-                let external_id: Option<&str> = row.try_get("external_id")?;
                 let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
-                let username: &str = row.try_get("username")?;
-                let email: &str = row.try_get("email")?;
-                let name_first: &str = row.try_get("name_first")?;
-                let name_last: &str = row.try_get("name_last")?;
-                let password: &str = row.try_get("password")?;
-                let admin: bool = row.try_get("root_admin")?;
-                let totp_enabled: bool = row.try_get("use_totp")?;
-                let totp_secret: Option<String> = row.try_get::<Option<&str>, _>("totp_secret")?
-                    .and_then(|s| decrypt_laravel_value(s, &source_app_key).ok());
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO users (uuid, external_id, username, email, name_first, name_last, password, admin, totp_enabled, totp_secret, created)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-                    ON CONFLICT DO NOTHING
-                    "#
-                )
-                .bind(uuid.as_uuid())
-                .bind(external_id)
-                .bind(username)
-                .bind(email)
-                .bind(name_first)
-                .bind(name_last)
-                .bind(password.replace("$2y$", "$2a$"))
-                .bind(admin)
-                .bind(totp_enabled)
-                .bind(totp_secret)
-                .bind(created)
-                .execute(database.write())
-                .await?;
 
                 mapping.insert(id, *uuid.as_uuid());
+
+                let source_app_key = source_app_key.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let external_id: Option<&str> = row.try_get("external_id")?;
+                    let username: &str = row.try_get("username")?;
+                    let email: &str = row.try_get("email")?;
+                    let name_first: &str = row.try_get("name_first")?;
+                    let name_last: &str = row.try_get("name_last")?;
+                    let password: &str = row.try_get("password")?;
+                    let admin: bool = row.try_get("root_admin")?;
+                    let totp_enabled: bool = row.try_get("use_totp")?;
+                    let totp_secret: Option<String> = row.try_get::<Option<&str>, _>("totp_secret")?
+                        .and_then(|s| decrypt_laravel_value(s, &source_app_key).ok());
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+
+                    sqlx::query(
+                        r#"
+                        INSERT INTO users (uuid, external_id, username, email, name_first, name_last, password, admin, totp_enabled, totp_secret, created)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+                        ON CONFLICT DO NOTHING
+                        "#
+                    )
+                    .bind(uuid.as_uuid())
+                    .bind(external_id)
+                    .bind(username)
+                    .bind(email)
+                    .bind(name_first)
+                    .bind(name_last)
+                    .bind(password.replace("$2y$", "$2a$"))
+                    .bind(admin)
+                    .bind(totp_enabled)
+                    .bind(totp_secret)
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(mapping)
         },
-        256,
+        64,
     )
     .await
     {
-        Ok(user_mappings) => user_mappings,
+        Ok(user_mappings) => Arc::new(user_mappings),
         Err(err) => {
             tracing::error!("failed to process users table: {:#?}", err);
             return 1;
@@ -398,72 +408,82 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         "user_ssh_keys",
         Some("deleted_at IS NULL"),
         async |rows| {
+            let mut futures = Vec::with_capacity(rows.len());
+
             for row in rows {
-                let user_id: u32 = row.try_get("user_id")?;
-                let name: &str = row.try_get("name")?;
-                let public_key: &str = row.try_get("public_key")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+                let user_mappings = user_mappings.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let user_id: u32 = row.try_get("user_id")?;
+                    let name: &str = row.try_get("name")?;
+                    let public_key: &str = row.try_get("public_key")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
 
-                let user_uuid = match user_mappings.iter().find(|m| m.contains_key(&user_id)) {
-                    Some(user_uuid) => user_uuid.get(&user_id).unwrap(),
-                    None => continue,
-                };
+                    let user_uuid = match user_mappings.iter().find(|m| m.contains_key(&user_id)) {
+                        Some(user_uuid) => user_uuid.get(&user_id).unwrap(),
+                        None => return Ok(()),
+                    };
 
-                let base64_data = public_key
-                    .replace("-----BEGIN PUBLIC KEY-----", "")
-                    .replace("-----END PUBLIC KEY-----", "")
-                    .replace("\r\n", "");
-                let base64_data = BASE64_ENGINE.decode(base64_data)?;
+                    let base64_data = public_key
+                        .replace("-----BEGIN PUBLIC KEY-----", "")
+                        .replace("-----END PUBLIC KEY-----", "")
+                        .replace("\r\n", "");
+                    let base64_data = BASE64_ENGINE.decode(base64_data)?;
 
-                let pkey = openssl::pkey::PKey::public_key_from_der(&base64_data)?;
-                let public_key = russh::keys::PublicKey::from(match pkey.id() {
-                    openssl::pkey::Id::RSA => {
-                        let rsa = pkey.rsa()?;
+                    let pkey = openssl::pkey::PKey::public_key_from_der(&base64_data)?;
+                    let public_key = russh::keys::PublicKey::from(match pkey.id() {
+                        openssl::pkey::Id::RSA => {
+                            let rsa = pkey.rsa()?;
 
-                        russh::keys::ssh_key::public::KeyData::Rsa(
-                            russh::keys::ssh_key::public::RsaPublicKey {
-                                e: rsa.e().to_vec().as_slice().try_into()?,
-                                n: rsa.n().to_vec().as_slice().try_into()?,
-                            },
-                        )
-                    }
-                    openssl::pkey::Id::ED25519 => {
-                        let data = pkey.raw_public_key()?;
+                            russh::keys::ssh_key::public::KeyData::Rsa(
+                                russh::keys::ssh_key::public::RsaPublicKey {
+                                    e: rsa.e().to_vec().as_slice().try_into()?,
+                                    n: rsa.n().to_vec().as_slice().try_into()?,
+                                },
+                            )
+                        }
+                        openssl::pkey::Id::ED25519 => {
+                            let data = pkey.raw_public_key()?;
 
-                        russh::keys::ssh_key::public::KeyData::Ed25519(
-                            russh::keys::ssh_key::public::Ed25519PublicKey(
-                                data.try_into().map_err(|_| {
-                                    anyhow::anyhow!("invalid ed25519 public key length")
-                                })?,
-                            ),
-                        )
-                    }
-                    _ => continue,
+                            russh::keys::ssh_key::public::KeyData::Ed25519(
+                                russh::keys::ssh_key::public::Ed25519PublicKey(
+                                    data.try_into().map_err(|_| {
+                                        anyhow::anyhow!("invalid ed25519 public key length")
+                                    })?,
+                                ),
+                            )
+                        }
+                        _ => return Ok(()),
+                    });
+
+                    sqlx::query(
+                        r#"
+                        INSERT INTO user_ssh_keys (user_uuid, name, fingerprint, public_key, created)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT DO NOTHING
+                        "#,
+                    )
+                    .bind(user_uuid)
+                    .bind(name)
+                    .bind(
+                        public_key
+                            .fingerprint(russh::keys::HashAlg::Sha256)
+                            .to_string(),
+                    )
+                    .bind(public_key.to_bytes().unwrap())
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
                 });
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO user_ssh_keys (user_uuid, name, fingerprint, public_key, created)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(user_uuid)
-                .bind(name)
-                .bind(
-                    public_key
-                        .fingerprint(russh::keys::HashAlg::Sha256)
-                        .to_string(),
-                )
-                .bind(public_key.to_bytes().unwrap())
-                .bind(created)
-                .execute(database.write())
-                .await?;
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(())
         },
-        100,
+        64,
     )
     .await
     {
@@ -558,7 +578,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
     )
     .await
     {
-        Ok(location_mappings) => location_mappings,
+        Ok(location_mappings) => Arc::new(location_mappings),
         Err(err) => {
             tracing::error!("failed to process locations table: {:#?}", err);
             return 1;
@@ -570,67 +590,78 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         None,
         async |rows| {
             let mut mapping = HashMap::with_capacity(rows.len());
+            let mut futures = Vec::with_capacity(rows.len());
 
             for row in rows {
                 let id: u32 = row.try_get("id")?;
                 let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
-                let public: bool = row.try_get("public")?;
-                let name: &str = row.try_get("name")?;
-                let description: Option<&str> = row.try_get("description")?;
-                let location_id: u32 = row.try_get("location_id")?;
-                let fqdn: &str = row.try_get("fqdn")?;
-                let scheme: &str = row.try_get("scheme")?;
-                let memory: u64 = row.try_get("memory")?;
-                let disk: u64 = row.try_get("disk")?;
-                let token_id: &str = row.try_get("daemon_token_id")?;
-                let token: &str = row.try_get("daemon_token")?;
-                let daemon_listen: u16 = row.try_get("daemonListen")?;
-                let daemon_sftp: u16 = row.try_get("daemonSFTP")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
-
-                let location_uuid = match location_mappings.iter().find(|m| m.contains_key(&location_id)) {
-                    Some(location_uuid) => location_uuid.get(&location_id).unwrap(),
-                    None => continue,
-                };
-
-                let token = match decrypt_laravel_value(token, &source_app_key) {
-                    Ok(token) => token,
-                    Err(_) => continue,
-                };
-
-                let url: reqwest::Url = match format!("{}://{}:{}", scheme, fqdn, daemon_listen).parse() {
-                    Ok(url) => url,
-                    Err(_) => continue,
-                };
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO nodes (uuid, public, name, description, location_uuid, url, sftp_port, memory, disk, token_id, token, created)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-                    ON CONFLICT DO NOTHING
-                    "#
-                )
-                .bind(uuid.as_uuid())
-                .bind(public)
-                .bind(name)
-                .bind(description)
-                .bind(location_uuid)
-                .bind(url.to_string())
-                .bind(daemon_sftp as i32)
-                .bind(memory as i64)
-                .bind(disk as i64)
-                .bind(token_id)
-                .bind(database.encrypt(&token).unwrap())
-                .bind(created)
-                .execute(database.write())
-                .await?;
 
                 mapping.insert(id, *uuid.as_uuid());
+
+                let source_app_key = source_app_key.clone();
+                let location_mappings = location_mappings.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let public: bool = row.try_get("public")?;
+                    let name: &str = row.try_get("name")?;
+                    let description: Option<&str> = row.try_get("description")?;
+                    let location_id: u32 = row.try_get("location_id")?;
+                    let fqdn: &str = row.try_get("fqdn")?;
+                    let scheme: &str = row.try_get("scheme")?;
+                    let memory: u64 = row.try_get("memory")?;
+                    let disk: u64 = row.try_get("disk")?;
+                    let token_id: &str = row.try_get("daemon_token_id")?;
+                    let token: &str = row.try_get("daemon_token")?;
+                    let daemon_listen: u16 = row.try_get("daemonListen")?;
+                    let daemon_sftp: u16 = row.try_get("daemonSFTP")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+
+                    let location_uuid = match location_mappings.iter().find(|m| m.contains_key(&location_id)) {
+                        Some(location_uuid) => location_uuid.get(&location_id).unwrap(),
+                        None => return Ok(()),
+                    };
+
+                    let token = match decrypt_laravel_value(token, &source_app_key) {
+                        Ok(token) => token,
+                        Err(_) => return Ok(()),
+                    };
+
+                    let url: reqwest::Url = match format!("{}://{}:{}", scheme, fqdn, daemon_listen).parse() {
+                        Ok(url) => url,
+                        Err(_) => return Ok(()),
+                    };
+
+                    sqlx::query(
+                        r#"
+                        INSERT INTO nodes (uuid, public, name, description, location_uuid, url, sftp_port, memory, disk, token_id, token, created)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                        ON CONFLICT DO NOTHING
+                        "#
+                    )
+                    .bind(uuid.as_uuid())
+                    .bind(public)
+                    .bind(name)
+                    .bind(description)
+                    .bind(location_uuid)
+                    .bind(url.to_string())
+                    .bind(daemon_sftp as i32)
+                    .bind(memory as i64)
+                    .bind(disk as i64)
+                    .bind(token_id)
+                    .bind(database.encrypt(&token).unwrap())
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(mapping)
         },
-        256,
+        64,
     )
     .await
     {
@@ -919,98 +950,110 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         None,
         async |rows| {
             let mut mapping = HashMap::with_capacity(rows.len());
+            let mut futures = Vec::with_capacity(rows.len());
 
             for row in rows {
                 let id: u32 = row.try_get("id")?;
-                let external_id: Option<&str> = row.try_get("external_id")?;
                 let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
-                let node_id: u32 = row.try_get("node_id")?;
-                let name: &str = row.try_get("name")?;
-                let description: Option<&str> = row.try_get("description")?;
-                let status: Option<&str> = row.try_get("status")?;
-                let owner_id: u32 = row.try_get("owner_id")?;
-                let memory: u32 = row.try_get("memory")?;
-                let swap: i32 = row.try_get("swap")?;
-                let disk: u32 = row.try_get("disk")?;
-                let io_weight: u32 = row.try_get("io")?;
-                let cpu: u32 = row.try_get("cpu")?;
                 let allocation_id: u32 = row.try_get("allocation_id")?;
-                let egg_id: u32 = row.try_get("egg_id")?;
-                let startup: &str = row.try_get("startup")?;
-                let image: &str = row.try_get("image")?;
-                let allocation_limit: u32 = row.try_get("allocation_limit")?;
-                let database_limit: u32 = row.try_get("database_limit")?;
-                let backup_limit: u32 = row.try_get("backup_limit")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
-
-                let node_uuid = match node_mappings.iter().find(|m| m.contains_key(&node_id)) {
-                    Some(node_uuid) => node_uuid.get(&node_id).unwrap(),
-                    None => continue,
-                };
-
-                let owner_uuid = match user_mappings.iter().find(|m| m.contains_key(&owner_id)) {
-                    Some(owner_uuid) => owner_uuid.get(&owner_id).unwrap(),
-                    None => continue,
-                };
-
-                let egg_uuid = match egg_mappings.iter().find(|m| m.contains_key(&egg_id)) {
-                    Some(egg_uuid) => egg_uuid.get(&egg_id).unwrap(),
-                    None => continue,
-                };
-
-                let (status, suspended) = match status {
-                    Some("installing") => (Some(crate::models::server::ServerStatus::Installing), false),
-                    Some("install_failed") => (Some(crate::models::server::ServerStatus::InstallFailed), false),
-                    Some("reinstall_failed") => (Some(crate::models::server::ServerStatus::ReinstallFailed), false),
-                    Some("restoring_backup") => {
-                        (Some(crate::models::server::ServerStatus::RestoringBackup), false)
-                    }
-                    Some("suspended") => (None, true),
-                    _ => (None, false),
-                };
-
-                sqlx::query(
-                    r#"
-                    INSERT INTO servers (
-                        uuid, uuid_short, external_id, node_uuid, name, description, status, suspended,
-                        owner_uuid, memory, swap, disk, io_weight, cpu, pinned_cpus, allocation_limit,
-                        database_limit, backup_limit, egg_uuid, startup, image, created
-                    )
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(uuid.as_uuid())
-                .bind(uuid.as_uuid().as_fields().0 as i32)
-                .bind(external_id)
-                .bind(node_uuid)
-                .bind(name)
-                .bind(description)
-                .bind(status)
-                .bind(suspended)
-                .bind(owner_uuid)
-                .bind(memory as i64)
-                .bind(swap as i64)
-                .bind(disk as i64)
-                .bind(io_weight as i16)
-                .bind(cpu as i32)
-                .bind(&[] as &[i32])
-                .bind(allocation_limit as i32)
-                .bind(database_limit as i32)
-                .bind(backup_limit as i32)
-                .bind(egg_uuid)
-                .bind(startup)
-                .bind(image)
-                .bind(created)
-                .execute(database.write())
-                .await?;
 
                 mapping.insert(id, (*uuid.as_uuid(), allocation_id));
+
+                let node_mappings = node_mappings.clone();
+                let user_mappings = user_mappings.clone();
+                let egg_mappings = egg_mappings.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let external_id: Option<&str> = row.try_get("external_id")?;
+                    let node_id: u32 = row.try_get("node_id")?;
+                    let name: &str = row.try_get("name")?;
+                    let description: Option<&str> = row.try_get("description")?;
+                    let status: Option<&str> = row.try_get("status")?;
+                    let owner_id: u32 = row.try_get("owner_id")?;
+                    let memory: u32 = row.try_get("memory")?;
+                    let swap: i32 = row.try_get("swap")?;
+                    let disk: u32 = row.try_get("disk")?;
+                    let io_weight: u32 = row.try_get("io")?;
+                    let cpu: u32 = row.try_get("cpu")?;
+                    let egg_id: u32 = row.try_get("egg_id")?;
+                    let startup: &str = row.try_get("startup")?;
+                    let image: &str = row.try_get("image")?;
+                    let allocation_limit: u32 = row.try_get("allocation_limit")?;
+                    let database_limit: u32 = row.try_get("database_limit")?;
+                    let backup_limit: u32 = row.try_get("backup_limit")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+
+                    let node_uuid = match node_mappings.iter().find(|m| m.contains_key(&node_id)) {
+                        Some(node_uuid) => node_uuid.get(&node_id).unwrap(),
+                        None => return Ok(()),
+                    };
+
+                    let owner_uuid = match user_mappings.iter().find(|m| m.contains_key(&owner_id)) {
+                        Some(owner_uuid) => owner_uuid.get(&owner_id).unwrap(),
+                        None => return Ok(()),
+                    };
+
+                    let egg_uuid = match egg_mappings.iter().find(|m| m.contains_key(&egg_id)) {
+                        Some(egg_uuid) => egg_uuid.get(&egg_id).unwrap(),
+                        None => return Ok(()),
+                    };
+
+                    let (status, suspended) = match status {
+                        Some("installing") => (Some(crate::models::server::ServerStatus::Installing), false),
+                        Some("install_failed") => (Some(crate::models::server::ServerStatus::InstallFailed), false),
+                        Some("reinstall_failed") => (Some(crate::models::server::ServerStatus::ReinstallFailed), false),
+                        Some("restoring_backup") => {
+                            (Some(crate::models::server::ServerStatus::RestoringBackup), false)
+                        }
+                        Some("suspended") => (None, true),
+                        _ => (None, false),
+                    };
+
+                    sqlx::query(
+                        r#"
+                        INSERT INTO servers (
+                            uuid, uuid_short, external_id, node_uuid, name, description, status, suspended,
+                            owner_uuid, memory, swap, disk, io_weight, cpu, pinned_cpus, allocation_limit,
+                            database_limit, backup_limit, egg_uuid, startup, image, created
+                        )
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)
+                        ON CONFLICT DO NOTHING
+                        "#,
+                    )
+                    .bind(uuid.as_uuid())
+                    .bind(uuid.as_uuid().as_fields().0 as i32)
+                    .bind(external_id)
+                    .bind(node_uuid)
+                    .bind(name)
+                    .bind(description)
+                    .bind(status)
+                    .bind(suspended)
+                    .bind(owner_uuid)
+                    .bind(memory as i64)
+                    .bind(swap as i64)
+                    .bind(disk as i64)
+                    .bind(io_weight as i16)
+                    .bind(cpu as i32)
+                    .bind(&[] as &[i32])
+                    .bind(allocation_limit as i32)
+                    .bind(database_limit as i32)
+                    .bind(backup_limit as i32)
+                    .bind(egg_uuid)
+                    .bind(startup)
+                    .bind(image)
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(mapping)
         },
-        256,
+        64,
     )
     .await
     {
@@ -1025,49 +1068,61 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         "databases",
         None,
         async |rows| {
+            let mut futures = Vec::with_capacity(rows.len());
+
             for row in rows {
-                let server_id: u32 = row.try_get("server_id")?;
-                let database_host_id: u32 = row.try_get("database_host_id")?;
-                let database_name: &str = row.try_get("database")?;
-                let username: &str = row.try_get("username")?;
-                let password: &str = row.try_get("password")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+                let server_mappings = server_mappings.clone();
+                let database_host_mappings = database_host_mappings.clone();
+                let source_app_key = source_app_key.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let server_id: u32 = row.try_get("server_id")?;
+                    let database_host_id: u32 = row.try_get("database_host_id")?;
+                    let database_name: &str = row.try_get("database")?;
+                    let username: &str = row.try_get("username")?;
+                    let password: &str = row.try_get("password")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
 
-                let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id)) {
-                    Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
-                    None => continue,
-                };
+                    let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id)) {
+                        Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
+                        None => return Ok(()),
+                    };
 
-                let database_host_uuid = match database_host_mappings.iter().find(|m| m.contains_key(&database_host_id)) {
-                    Some(database_host_uuid) => database_host_uuid.get(&database_host_id).unwrap(),
-                    None => continue,
-                };
+                    let database_host_uuid = match database_host_mappings.iter().find(|m| m.contains_key(&database_host_id)) {
+                        Some(database_host_uuid) => database_host_uuid.get(&database_host_id).unwrap(),
+                        None => return Ok(()),
+                    };
 
-                let password = match decrypt_laravel_value(password, &source_app_key) {
-                    Ok(password) => password,
-                    Err(_) => continue,
-                };
+                    let password = match decrypt_laravel_value(password, &source_app_key) {
+                        Ok(password) => password,
+                        Err(_) => return Ok(()),
+                    };
 
-                sqlx::query(
-                    r#"
-                    INSERT INTO server_databases (server_uuid, database_host_uuid, name, username, password, created)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(server_uuid)
-                .bind(database_host_uuid)
-                .bind(database_name)
-                .bind(username)
-                .bind(database.encrypt(&password).unwrap())
-                .bind(created)
-                .execute(database.write())
-                .await?;
+                    sqlx::query(
+                        r#"
+                        INSERT INTO server_databases (server_uuid, database_host_uuid, name, username, password, created)
+                        VALUES ($1, $2, $3, $4, $5, $6)
+                        ON CONFLICT DO NOTHING
+                        "#,
+                    )
+                    .bind(server_uuid)
+                    .bind(database_host_uuid)
+                    .bind(database_name)
+                    .bind(username)
+                    .bind(database.encrypt(&password).unwrap())
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(())
         },
-        100,
+        64,
     )
     .await
     {
@@ -1128,64 +1183,74 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         "backups",
         None,
         async |rows| {
+            let mut futures = Vec::with_capacity(rows.len());
+
             for row in rows {
-                let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
-                let server_id: u32 = row.try_get("server_id")?;
-                let successful: bool = row.try_get("is_successful")?;
-                let locked: bool = row.try_get("is_locked")?;
-                let name: &str = row.try_get("name")?;
-                let ignored_files: Option<serde_json::Value> = row.try_get("ignored_files")?;
-                let disk: &str = row.try_get("disk")?;
-                let checksum: Option<&str> = row.try_get("checksum")?;
-                let bytes: u64 = row.try_get("bytes")?;
-                let completed: Option<chrono::DateTime<chrono::Utc>> = row.try_get("completed_at")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
-                let deleted: Option<chrono::DateTime<chrono::Utc>> = row.try_get("deleted_at")?;
+                let server_mappings = server_mappings.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let uuid: uuid::fmt::Hyphenated = row.try_get("uuid")?;
+                    let server_id: u32 = row.try_get("server_id")?;
+                    let successful: bool = row.try_get("is_successful")?;
+                    let locked: bool = row.try_get("is_locked")?;
+                    let name: &str = row.try_get("name")?;
+                    let ignored_files: Option<serde_json::Value> = row.try_get("ignored_files")?;
+                    let disk: &str = row.try_get("disk")?;
+                    let checksum: Option<&str> = row.try_get("checksum")?;
+                    let bytes: u64 = row.try_get("bytes")?;
+                    let completed: Option<chrono::DateTime<chrono::Utc>> = row.try_get("completed_at")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+                    let deleted: Option<chrono::DateTime<chrono::Utc>> = row.try_get("deleted_at")?;
 
-                let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id)) {
-                    Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
-                    None => continue,
-                };
+                    let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id)) {
+                        Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
+                        None => return Ok(()),
+                    };
 
-                let ignored_files: Vec<String> = serde_json::from_value(
-                    ignored_files.unwrap_or_else(|| serde_json::Value::Array(vec![])),
-                )
-                .unwrap_or_default();
+                    let ignored_files: Vec<String> = serde_json::from_value(
+                        ignored_files.unwrap_or_else(|| serde_json::Value::Array(vec![])),
+                    )
+                    .unwrap_or_default();
 
-                sqlx::query(
-                    r#"
-                    INSERT INTO server_backups (uuid, server_uuid, node_uuid, name, successful, locked, ignored_files, disk, checksum, bytes, completed, deleted, created)
-                    VALUES ($1, $2, (SELECT node_uuid FROM servers WHERE uuid = $2), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(uuid.as_uuid())
-                .bind(server_uuid)
-                .bind(name)
-                .bind(successful)
-                .bind(locked)
-                .bind(ignored_files)
-                .bind(match disk {
-                    "wings" => crate::models::server_backup::BackupDisk::Local,
-                    "s3" => crate::models::server_backup::BackupDisk::S3,
-                    "ddup-bak" => crate::models::server_backup::BackupDisk::DdupBak,
-                    "btrfs" => crate::models::server_backup::BackupDisk::Btrfs,
-                    "zfs" => crate::models::server_backup::BackupDisk::Zfs,
-                    "restic" => crate::models::server_backup::BackupDisk::Restic,
-                    _ => crate::models::server_backup::BackupDisk::Local,
-                })
-                .bind(checksum)
-                .bind(bytes as i64)
-                .bind(completed)
-                .bind(deleted)
-                .bind(created)
-                .execute(database.write())
-                .await?;
+                    sqlx::query(
+                        r#"
+                        INSERT INTO server_backups (uuid, server_uuid, node_uuid, name, successful, locked, ignored_files, disk, checksum, bytes, completed, deleted, created)
+                        VALUES ($1, $2, (SELECT node_uuid FROM servers WHERE uuid = $2), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                        ON CONFLICT DO NOTHING
+                        "#,
+                    )
+                    .bind(uuid.as_uuid())
+                    .bind(server_uuid)
+                    .bind(name)
+                    .bind(successful)
+                    .bind(locked)
+                    .bind(ignored_files)
+                    .bind(match disk {
+                        "wings" => crate::models::server_backup::BackupDisk::Local,
+                        "s3" => crate::models::server_backup::BackupDisk::S3,
+                        "ddup-bak" => crate::models::server_backup::BackupDisk::DdupBak,
+                        "btrfs" => crate::models::server_backup::BackupDisk::Btrfs,
+                        "zfs" => crate::models::server_backup::BackupDisk::Zfs,
+                        "restic" => crate::models::server_backup::BackupDisk::Restic,
+                        _ => crate::models::server_backup::BackupDisk::Local,
+                    })
+                    .bind(checksum)
+                    .bind(bytes as i64)
+                    .bind(completed)
+                    .bind(deleted)
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(())
         },
-        100,
+        64,
     )
     .await
     {
@@ -1197,86 +1262,97 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         "subusers",
         None,
         async |rows| {
+            let mut futures = Vec::with_capacity(rows.len());
+
             for row in rows {
-                let user_id: u32 = row.try_get("user_id")?;
-                let server_id: u32 = row.try_get("server_id")?;
-                let permissions: serde_json::Value = row.try_get("permissions")?;
-                let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
+                let user_mappings = user_mappings.clone();
+                let server_mappings = server_mappings.clone();
+                let database = database.clone();
+                futures.push(async move {
+                    let user_id: u32 = row.try_get("user_id")?;
+                    let server_id: u32 = row.try_get("server_id")?;
+                    let permissions: serde_json::Value = row.try_get("permissions")?;
+                    let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
 
-                let user_uuid = match user_mappings.iter().find(|m| m.contains_key(&user_id)) {
-                    Some(user_uuid) => user_uuid.get(&user_id).unwrap(),
-                    None => continue,
-                };
+                    let user_uuid = match user_mappings.iter().find(|m| m.contains_key(&user_id)) {
+                        Some(user_uuid) => user_uuid.get(&user_id).unwrap(),
+                        None => return Ok(()),
+                    };
 
-                let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id))
-                {
-                    Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
-                    None => continue,
-                };
+                    let server_uuid = match server_mappings.iter().find(|m| m.contains_key(&server_id))
+                    {
+                        Some(server_uuid) => server_uuid.get(&server_id).unwrap().0,
+                        None => return Ok(()),
+                    };
 
-                let raw_permissions: Vec<String> =
-                    serde_json::from_value(permissions).unwrap_or_default();
-                let mut permissions = HashSet::with_capacity(raw_permissions.len());
+                    let raw_permissions: Vec<String> =
+                        serde_json::from_value(permissions).unwrap_or_default();
+                    let mut permissions = HashSet::with_capacity(raw_permissions.len());
 
-                for permission in raw_permissions {
-                    permissions.insert(match permission.as_str() {
-                        "control.console" => "control.console",
-                        "control.start" => "control.start",
-                        "control.stop" => "control.stop",
-                        "control.restart" => "control.restart",
-                        "user.create" => "subusers.create",
-                        "user.read" => "subusers.read",
-                        "user.update" => "subusers.update",
-                        "user.delete" => "subusers.delete",
-                        "file.create" => "files.create",
-                        "file.read" => "files.read",
-                        "file.read-content" => "files.read-content",
-                        "file.update" => "files.update",
-                        "file.delete" => "files.delete",
-                        "file.archive" => "files.archive",
-                        "backup.create" => "backups.create",
-                        "backup.read" => "backups.read",
-                        "backup.download" => "backups.download",
-                        "backup.restore" => "backups.restore",
-                        "backup.delete" => "backups.delete",
-                        "allocation.create" => "allocations.create",
-                        "allocation.read" => "allocations.read",
-                        "allocation.update" => "allocations.update",
-                        "allocation.delete" => "allocations.delete",
-                        "startup.read" => "startup.read",
-                        "startup.update" => "startup.update",
-                        "startup.docker-image" => "startup.docker-image",
-                        "database.create" => "databases.create",
-                        "database.read" => "databases.read",
-                        "database.update" => "databases.update",
-                        "database.view_password" => "databases.read-password",
-                        "database.delete" => "databases.delete",
-                        "schedule.create" => "schedules.create",
-                        "schedule.read" => "schedules.read",
-                        "schedule.update" => "schedules.update",
-                        "schedule.delete" => "schedules.delete",
-                        "settings.rename" => "settings.rename",
-                        "settings.reinstall" => "settings.reinstall",
-                        "activity.read" => "activity.read",
-                        _ => continue,
-                    });
-                }
+                    for permission in raw_permissions {
+                        permissions.insert(match permission.as_str() {
+                            "control.console" => "control.console",
+                            "control.start" => "control.start",
+                            "control.stop" => "control.stop",
+                            "control.restart" => "control.restart",
+                            "user.create" => "subusers.create",
+                            "user.read" => "subusers.read",
+                            "user.update" => "subusers.update",
+                            "user.delete" => "subusers.delete",
+                            "file.create" => "files.create",
+                            "file.read" => "files.read",
+                            "file.read-content" => "files.read-content",
+                            "file.update" => "files.update",
+                            "file.delete" => "files.delete",
+                            "file.archive" => "files.archive",
+                            "backup.create" => "backups.create",
+                            "backup.read" => "backups.read",
+                            "backup.download" => "backups.download",
+                            "backup.restore" => "backups.restore",
+                            "backup.delete" => "backups.delete",
+                            "allocation.create" => "allocations.create",
+                            "allocation.read" => "allocations.read",
+                            "allocation.update" => "allocations.update",
+                            "allocation.delete" => "allocations.delete",
+                            "startup.read" => "startup.read",
+                            "startup.update" => "startup.update",
+                            "startup.docker-image" => "startup.docker-image",
+                            "database.create" => "databases.create",
+                            "database.read" => "databases.read",
+                            "database.update" => "databases.update",
+                            "database.view_password" => "databases.read-password",
+                            "database.delete" => "databases.delete",
+                            "schedule.create" => "schedules.create",
+                            "schedule.read" => "schedules.read",
+                            "schedule.update" => "schedules.update",
+                            "schedule.delete" => "schedules.delete",
+                            "settings.rename" => "settings.rename",
+                            "settings.reinstall" => "settings.reinstall",
+                            "activity.read" => "activity.read",
+                            _ => continue,
+                        });
+                    }
 
-                sqlx::query(
-                    r#"
-                    INSERT INTO server_subusers (server_uuid, user_uuid, permissions, ignored_files, created)
-                    VALUES ($1, $2, $3, $4, $5)
-                    ON CONFLICT DO NOTHING
-                    "#,
-                )
-                .bind(server_uuid)
-                .bind(user_uuid)
-                .bind(permissions.into_iter().collect::<Vec<&str>>())
-                .bind(&[] as &[&str])
-                .bind(created)
-                .execute(database.write())
-                .await?;
+                    sqlx::query(
+                        r#"
+                        INSERT INTO server_subusers (server_uuid, user_uuid, permissions, ignored_files, created)
+                        VALUES ($1, $2, $3, $4, $5)
+                        ON CONFLICT DO NOTHING
+                        "#,
+                    )
+                    .bind(server_uuid)
+                    .bind(user_uuid)
+                    .bind(permissions.into_iter().collect::<Vec<&str>>())
+                    .bind(&[] as &[&str])
+                    .bind(created)
+                    .execute(database.write())
+                    .await?;
+
+                    Ok::<(), anyhow::Error>(())
+                });
             }
+
+            futures_util::future::try_join_all(futures).await?;
 
             Ok(())
         },
