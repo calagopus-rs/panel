@@ -69,6 +69,20 @@ fn cli() -> Command {
                 .arg_required_else_help(false),
         )
         .subcommand(
+            Command::new("import")
+                .about("Imports the database from pterodactyl.")
+                .arg(
+                    Arg::new("environment")
+                        .help("path to the pterodactyl environment variables file")
+                        .num_args(1)
+                        .short('e')
+                        .long("environment")
+                        .default_value("/var/www/pterodactyl/.env")
+                        .required(false),
+                )
+                .arg_required_else_help(false),
+        )
+        .subcommand(
             Command::new("diagnostics")
                 .about("Collect and report information about this Panel to assist in debugging.")
                 .arg(
@@ -186,6 +200,9 @@ async fn main() {
                 env.as_ref().ok().map(|c| &c.0),
             )
             .await,
+        ),
+        Some(("import", sub_matches)) => std::process::exit(
+            commands::import::import(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
         ),
         Some(("diagnostics", sub_matches)) => std::process::exit(
             commands::diagnostics::diagnostics(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,

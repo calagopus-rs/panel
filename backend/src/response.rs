@@ -22,7 +22,7 @@ impl ApiResponse {
     #[inline]
     pub fn json(body: impl serde::Serialize) -> Self {
         Self {
-            body: axum::body::Body::from(serde_json::to_string(&body).unwrap()),
+            body: axum::body::Body::from(serde_json::to_vec(&body).unwrap()),
             status: axum::http::StatusCode::OK,
             headers: axum::http::HeaderMap::from_iter([(
                 axum::http::header::CONTENT_TYPE,
