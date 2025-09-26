@@ -1,6 +1,5 @@
-use crate::storage::StorageUrlRetriever;
-
 use super::BaseModel;
+use crate::storage::StorageUrlRetriever;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};

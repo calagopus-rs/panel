@@ -1,5 +1,4 @@
 use std::{path::Path, sync::Arc};
-
 use tokio::sync::RwLockReadGuard;
 
 fn get_s3_client(
