@@ -35,8 +35,8 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Card>
-        <Stack>
+      <Card h='100%'>
+        <Stack h='100%'>
           <Title order={2} c={'white'}>
             Rename Server
           </Title>
@@ -57,7 +57,7 @@ export default () => {
             onChange={(e) => setDescription(e.target.value)}
           />
 
-          <Group>
+          <Group h='100%'>
             <Button disabled={!name} onClick={doUpdate} loading={loading}>
               Save
             </Button>

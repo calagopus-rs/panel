@@ -34,8 +34,8 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Card>
-        <Stack>
+      <Card h='100%'>
+        <Stack h='100%'>
           <Title order={2} c={'white'}>
             Auto-Kill
           </Title>
@@ -49,7 +49,7 @@ export default () => {
             onChange={(value) => setSeconds(Number(value))}
           />
 
-          <Group>
+          <Group mt='auto'>
             <Button onClick={doUpdate} loading={loading}>
               Save
             </Button>

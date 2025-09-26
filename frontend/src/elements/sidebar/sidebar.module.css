@@ -9,16 +9,16 @@
 .sidebarCollapsed {
   @apply w-22;
 
-  & > .section {
-    & > a {
-      & > span {
+  &>.section {
+    &>a {
+      &>span {
         @apply hidden;
       }
     }
   }
 
-  & > .user {
-    & > div {
+  &>.user {
+    &>div {
       @apply hidden;
     }
   }
@@ -38,11 +38,11 @@
   @apply hover:text-neutral-50;
   @apply transition-colors duration-150 ease-in-out;
 
-  & > svg {
+  &>svg {
     @apply h-5 w-5 flex flex-shrink-0;
   }
 
-  & > span {
+  &>span {
     @apply font-medium text-lg whitespace-nowrap leading-none ml-3;
   }
 }
@@ -50,7 +50,7 @@
 .activeLink {
   @apply text-neutral-50 bg-neutral-800 rounded;
 
-  & > svg {
+  &>svg {
     @apply text-cyan-500;
   }
 }
@@ -67,11 +67,11 @@
   .navLink {
     @apply h-12 min-h-[3rem];
 
-    & > svg {
+    &>svg {
       @apply h-6 w-6;
     }
 
-    & > span {
+    &>span {
       @apply text-base;
     }
   }
