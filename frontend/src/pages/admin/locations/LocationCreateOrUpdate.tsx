@@ -8,7 +8,7 @@ import BackupS3 from './forms/BackupS3';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import BackupRestic from './forms/BackupRestic';
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';

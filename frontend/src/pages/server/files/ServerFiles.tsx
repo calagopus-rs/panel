@@ -10,7 +10,7 @@ import { httpErrorToHuman, axiosInstance } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
-import { Card, Group, Input, Popover, Title, UnstyledButton } from '@mantine/core';
+import { Card, Group, Popover, Title, UnstyledButton } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {

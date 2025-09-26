@@ -36,8 +36,9 @@ export default () => {
           })
           .finally(() => load(false, setLoading));
       });
-    } catch {
+    } catch (err) {
       load(false, setLoading);
+      console.error(err);
     }
   };
 

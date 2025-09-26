@@ -3,7 +3,7 @@ import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
-import runSchedule from '@/api/server/schedules/triggerSchedule';
+import triggerSchedule from '@/api/server/schedules/triggerSchedule';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -19,6 +19,8 @@ import {
   faExclamationTriangle,
   faMicrochip,
   faInfoCircle,
+  faPlayCircle,
+  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
@@ -33,6 +35,10 @@ import Tooltip from '@/elements/Tooltip';
 import Card from '@/elements/Card';
 import Badge from '@/elements/Badge';
 import Code from '@/elements/Code';
+import { load } from '@/lib/debounce';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import AnimatedHourglass from '@/elements/AnimatedHourglass';
+import { useToast } from '@/providers/ToastProvider';
 
 interface DetailCardProps {
   icon: React.ReactNode;
@@ -236,7 +242,9 @@ function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
   return <>{renderCondition(condition)}</>;
 }
 
-function ActionStep({ step }: { step: ScheduleStep }) {
+function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStatus: ScheduleStatus }) {
+  const getScheduleStepError = useServerStore((state) => state.getScheduleStepError);
+
   const renderActionDetails = () => {
     const action = step.action;
     switch (action.type) {
@@ -329,16 +337,25 @@ function ActionStep({ step }: { step: ScheduleStep }) {
     }
   };
 
+  const stepError = getScheduleStepError(step);
+
   return (
     <Timeline.Item
-      bullet={<FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size={'sm'} />}
+      bullet={
+        scheduleStatus.step === step.uuid ? (
+          <AnimatedHourglass />
+        ) : (
+          <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size={'sm'} />
+        )
+      }
       title={
         <Group gap={'sm'}>
           <Text fw={600}>
-            Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}
+            Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}{' '}
           </Text>
-          {step.error && (
-            <Tooltip label={step.error}>
+          {scheduleStatus.step === step.uuid && <Badge ml={'md'}>Running</Badge>}
+          {stepError && (
+            <Tooltip label={stepError}>
               <ThemeIcon size={'sm'} color={'red'}>
                 <FontAwesomeIcon icon={faExclamationTriangle} size={'xs'} />
               </ThemeIcon>
@@ -357,12 +374,14 @@ function ActionStep({ step }: { step: ScheduleStep }) {
 export default () => {
   const params = useParams<'id'>();
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const server = useServerStore((state) => state.server);
+  const { server, scheduleStatus } = useServerStore();
 
   const [page, setPage] = useState(1);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
@@ -379,11 +398,15 @@ export default () => {
     }
   }, [params.id, page]);
 
-  const doRunSchedule = () => {
+  const doTriggerSchedule = (skipCondition: boolean) => {
     if (params.id) {
-      runSchedule(server.uuid, params.id).then(() => {
-        setSchedule((schedule) => (schedule ? { ...schedule, isProcessing: true } : null));
-      });
+      load(true, setLoading);
+
+      triggerSchedule(server.uuid, params.id, skipCondition)
+        .then(() => {
+          addToast('Schedule triggered.', 'success');
+        })
+        .finally(() => load(false, setLoading));
     }
   };
 
@@ -394,8 +417,6 @@ export default () => {
       </div>
     );
   }
-
-  const sortedSteps = steps.sort((a, b) => a.order - b.order);
 
   return (
     <Stack gap={'lg'}>
@@ -410,15 +431,57 @@ export default () => {
         </Group>
 
         <Group>
-          {sortedSteps.length > 0 && (
-            <Button
-              disabled={!schedule.enabled}
-              onClick={doRunSchedule}
-              color={'green'}
-              leftSection={<FontAwesomeIcon icon={faPlay} />}
-            >
-              Run Now
-            </Button>
+          {steps.length > 0 && (
+            <ContextMenuProvider>
+              <ContextMenu
+                items={[
+                  {
+                    icon: faPlayCircle,
+                    label: 'Trigger (do not skip condition)',
+                    onClick: () => doTriggerSchedule(false),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faPlay,
+                    label: 'Trigger (skip condition)',
+                    onClick: () => doTriggerSchedule(true),
+                    color: 'gray',
+                  },
+                ]}
+              >
+                {({ openMenu }) =>
+                  schedule.enabled ? (
+                    <Button
+                      loading={loading}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        openMenu(rect.left, rect.bottom);
+                      }}
+                      color={'green'}
+                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                    >
+                      Trigger
+                    </Button>
+                  ) : (
+                    <Tooltip label={'Cannot Trigger disabled schedule'}>
+                      <Button
+                        disabled
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          openMenu(rect.left, rect.bottom);
+                        }}
+                        color={'green'}
+                        rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                      >
+                        Trigger
+                      </Button>
+                    </Tooltip>
+                  )
+                }
+              </ContextMenu>
+            </ContextMenuProvider>
           )}
           <Button
             onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit`)}
@@ -473,14 +536,23 @@ export default () => {
                 </Button>
               </Group>
             </Group>
-            {sortedSteps.length === 0 ? (
+            {steps.length === 0 ? (
               <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
                 No actions configured for this schedule
               </Alert>
             ) : (
-              <Timeline active={-1} bulletSize={40} lineWidth={2}>
-                {sortedSteps.map((step) => (
-                  <ActionStep key={step.uuid} step={step} />
+              <Timeline
+                active={steps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1}
+                color={'blue'}
+                bulletSize={40}
+                lineWidth={2}
+              >
+                {steps.map((step) => (
+                  <ActionStep
+                    key={step.uuid}
+                    step={step}
+                    scheduleStatus={scheduleStatus.get(schedule.uuid) ?? { running: false, step: null }}
+                  />
                 ))}
               </Timeline>
             )}

@@ -18,6 +18,8 @@ export enum SocketEvent {
   BACKUP_COMPLETED = 'backup completed',
   BACKUP_RESTORE_PROGRESS = 'backup restore progress',
   BACKUP_RESTORE_COMPLETED = 'backup restore completed',
+  SCHEDULE_STATUS = 'schedule status',
+  SCHEDULE_STEP_ERROR = 'schedule step error',
   OPERATION_PROGRESS = 'operation progress',
   OPERATION_COMPLETED = 'operation completed',
   OPERATION_ERROR = 'operation error',

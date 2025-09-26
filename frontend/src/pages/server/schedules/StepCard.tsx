@@ -5,7 +5,7 @@ import { scheduleStepIconMapping, scheduleStepLabelMapping } from '@/lib/enums';
 import { formatMiliseconds } from '@/lib/time';
 import { faGear, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon, Alert, Group, Stack, Text, ThemeIcon } from '@mantine/core';
+import { ActionIcon, Group, Stack, Text, ThemeIcon } from '@mantine/core';
 import { join } from 'pathe';
 import { useState } from 'react';
 import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
@@ -123,11 +123,6 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
                 <span>Select an action type to configure</span>
               )}
             </Text>
-            {step.error && (
-              <Alert color={'red'} p={'xs'}>
-                Error: {step.error}
-              </Alert>
-            )}
           </Stack>
         </Group>
 

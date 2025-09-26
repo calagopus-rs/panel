@@ -610,6 +610,11 @@ interface ScheduleStep {
   created: Date;
 }
 
+interface ScheduleStatus {
+  running: boolean;
+  step: string | null;
+}
+
 interface FileOperationCompress {
   type: 'compress';
   path: string;

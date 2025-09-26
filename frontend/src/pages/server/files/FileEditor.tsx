@@ -9,7 +9,6 @@ import { FileBreadcrumbs } from './FileBreadcrumbs';
 import saveFileContent from '@/api/server/files/saveFileContent';
 import { join } from 'pathe';
 import NotFound from '@/pages/NotFound';
-import { createPortal } from 'react-dom';
 import FileNameModal from './modals/FileNameModal';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';

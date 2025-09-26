@@ -1,5 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSchedule from '@/api/server/schedules/deleteSchedule';
+import triggerSchedule from '@/api/server/schedules/triggerSchedule';
 import Badge from '@/elements/Badge';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
@@ -9,7 +10,7 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEye, faPencil, faPlay, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faPencil, faPlay, faPlayCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -31,6 +32,12 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
+  };
+
+  const doTriggerSchedule = (skipCondition: boolean) => {
+    triggerSchedule(server.uuid, schedule.uuid, skipCondition).then(() => {
+      addToast('Schedule triggered.', 'success');
+    });
   };
 
   return (
@@ -59,8 +66,22 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
           },
           {
             icon: faPlay,
-            label: 'Run Now',
-            onClick: () => alert('Soon'),
+            label: 'Trigger',
+            onClick: undefined,
+            items: [
+              {
+                icon: faPlayCircle,
+                label: 'Trigger (do not skip condition)',
+                onClick: () => doTriggerSchedule(false),
+                color: 'gray',
+              },
+              {
+                icon: faPlay,
+                label: 'Trigger (skip condition)',
+                onClick: () => doTriggerSchedule(true),
+                color: 'gray',
+              },
+            ],
           },
           {
             icon: faTrash,

@@ -18,6 +18,8 @@ export default () => {
     setBackupProgress,
     setBackupRestoreProgress,
     updateBackup,
+    setScheduleStatus,
+    setScheduleStepError,
     fileOperations,
     setFileOperation,
     removeFileOperation,
@@ -103,6 +105,21 @@ export default () => {
 
   useWebsocketEvent(SocketEvent.INSTALL_COMPLETED, () => {
     updateServer({ status: null });
+  });
+
+  useWebsocketEvent(SocketEvent.SCHEDULE_STATUS, (uuid, data) => {
+    let wsData: ScheduleStatus = null;
+    try {
+      wsData = JSON.parse(data);
+    } catch {
+      return;
+    }
+
+    setScheduleStatus(uuid, wsData);
+  });
+
+  useWebsocketEvent(SocketEvent.SCHEDULE_STEP_ERROR, (uuid, error) => {
+    setScheduleStepError(uuid, error);
   });
 
   useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {

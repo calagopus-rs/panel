@@ -1,4 +1,3 @@
-import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
