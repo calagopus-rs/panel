@@ -234,7 +234,7 @@ export default ({
             }}
             ref={ref}
           >
-            <td className={'pl-4 relative cursor-pointer w-10 text-center'}>
+            <td className={'pl-4 relative cursor-pointer w-10 text-center py-2'}>
               <Checkbox
                 id={file.name}
                 disabled={movingFiles.size > 0}
@@ -251,18 +251,20 @@ export default ({
             </td>
 
             <TableData>
-              {file.file ? (
-                <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFile} />
-              ) : (
-                <FontAwesomeIcon className={'mr-4 text-gray-400'} icon={faFolder} />
-              )}
-              {file.name}
+              <span className='flex items-center gap-4 leading-[100%]'>
+                <FontAwesomeIcon className={'text-gray-400'} icon={file.file ? faFile : faFolder} />
+                {file.name}
+              </span>
             </TableData>
 
-            <TableData>{bytesToString(file.size)}</TableData>
+            <TableData>
+              <span className='flex items-center gap-4 leading-[100%]'>{bytesToString(file.size)}</span>
+            </TableData>
 
             <TableData>
-              <Tooltip label={formatDateTime(file.modified)}>{formatTimestamp(file.modified)}</Tooltip>
+              <Tooltip label={formatDateTime(file.modified)}>
+                <span className='flex items-center gap-4 leading-[100%]'>{formatTimestamp(file.modified)}</span>
+              </Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
