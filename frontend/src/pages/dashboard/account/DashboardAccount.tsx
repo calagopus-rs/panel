@@ -3,6 +3,7 @@ import EmailContainer from './EmailContainer';
 import TwoFactorContainer from './TwoFactorContainer';
 import AccountContainer from './AccountContainer';
 import { Grid } from '@mantine/core';
+import AvatarContainer from './AvatarContainer';
 
 export default () => {
   return (
@@ -11,6 +12,7 @@ export default () => {
       <EmailContainer />
       <TwoFactorContainer />
       <AccountContainer />
+      <AvatarContainer />
     </Grid>
   );
 };

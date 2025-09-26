@@ -3,6 +3,7 @@ import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Stack, Title } from '@mantine/core';
@@ -15,8 +16,11 @@ export default () => {
   const [username, setUsername] = useState(user.username);
   const [nameFirst, setNameFirst] = useState(user.nameFirst);
   const [nameLast, setNameLast] = useState(user.nameLast);
+  const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
+    load(true, setLoading);
+
     updateAccount({ username, nameFirst, nameLast })
       .then(() => {
         addToast('Account updated.', 'success');
@@ -25,7 +29,8 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -59,7 +64,7 @@ export default () => {
             />
           </Group>
           <Group>
-            <Button disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>
+            <Button loading={loading} disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>
               Update Account
             </Button>
           </Group>

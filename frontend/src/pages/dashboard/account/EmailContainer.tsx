@@ -3,6 +3,7 @@ import updateEmail from '@/api/me/account/updateEmail';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Stack, Title } from '@mantine/core';
@@ -14,8 +15,11 @@ export default () => {
 
   const [email, setEmail] = useState(user.email);
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
+    load(true, setLoading);
+
     updateEmail(email, password)
       .then(() => {
         addToast('Email updated.', 'success');
@@ -25,7 +29,8 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -52,7 +57,7 @@ export default () => {
           />
         </Stack>
         <Group className='mt-auto pt-4'>
-          <Button disabled={!email || !password} onClick={doUpdate}>
+          <Button loading={loading} disabled={!email || !password} onClick={doUpdate}>
             Update Email
           </Button>
         </Group>

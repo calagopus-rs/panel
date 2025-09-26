@@ -3,6 +3,7 @@ import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useState } from 'react';
@@ -13,8 +14,11 @@ export default () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
+    load(true, setLoading);
+
     updatePassword(currentPassword, newPassword)
       .then(() => {
         addToast('Password updated.', 'success');
@@ -25,7 +29,8 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      });
+      })
+      .finally(() => load(false, setLoading));
   };
 
   return (
@@ -61,6 +66,7 @@ export default () => {
           />
           <Group>
             <Button
+              loading={loading}
               disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
               onClick={doUpdate}
             >

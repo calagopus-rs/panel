@@ -101,6 +101,9 @@ importers:
       react:
         specifier: ^19.1.1
         version: 19.1.1
+      react-avatar-editor:
+        specifier: 14.0.0-beta.6
+        version: 14.0.0-beta.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       react-chartjs-2:
         specifier: ^5.3.0
         version: 5.3.0(chart.js@4.5.0)(react@19.1.1)
@@ -1998,6 +2001,12 @@ packages:
     resolution: {integrity: sha512-bCpkbm9JiAuMGhkqoAiC0lLkb40DJ0HOEJIku+9JDjxX3Rcs+ztEOG13wbrOskt3n2DTrjshhaQ/iay+SnGg5Q==}
     peerDependencies:
       react: '>=16.4.1'
+
+  react-avatar-editor@14.0.0-beta.6:
+    resolution: {integrity: sha512-Bpot3wzqgzN0TnkiPtkt4VF2uA055sl2/T0dFUqN/5gefmUetyMjcN0gKp70m14FaHCAN32qsT2F48p71c6xUg==}
+    peerDependencies:
+      react: ^0.14.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^0.14.0 || ^16.0.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   react-chartjs-2@5.3.0:
     resolution: {integrity: sha512-UfZZFnDsERI3c3CZGxzvNJd02SHjaSJ8kgW1djn65H1KK8rehwTjyrRKOG3VTMG8wtHZ5rgAO5oTHtHi9GCCmw==}
@@ -4355,6 +4364,11 @@ snapshots:
       hoist-non-react-statics: 3.3.2
       prop-types: 15.8.1
       react: 19.1.1
+
+  react-avatar-editor@14.0.0-beta.6(react-dom@19.1.1(react@19.1.1))(react@19.1.1):
+    dependencies:
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
 
   react-chartjs-2@5.3.0(chart.js@4.5.0)(react@19.1.1):
     dependencies:

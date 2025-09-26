@@ -80,18 +80,20 @@ impl Storage {
                     return Err(err.into());
                 }
 
-                tokio::spawn(async move {
-                    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+                if let Some(parent) = path.parent().map(|p| p.to_path_buf()) {
+                    tokio::spawn(async move {
+                        tokio::time::sleep(std::time::Duration::from_secs(10)).await;
 
-                    let mut directory = match tokio::fs::read_dir(&path).await {
-                        Ok(directory) => directory,
-                        Err(_) => return,
-                    };
+                        let mut directory = match tokio::fs::read_dir(&parent).await {
+                            Ok(directory) => directory,
+                            Err(_) => return,
+                        };
 
-                    if directory.next_entry().await.is_ok_and(|e| e.is_none()) {
-                        tokio::fs::remove_dir(path).await.ok();
-                    }
-                });
+                        if directory.next_entry().await.is_ok_and(|e| e.is_none()) {
+                            tokio::fs::remove_dir(parent).await.ok();
+                        }
+                    });
+                }
             }
             crate::settings::StorageDriver::S3 {
                 access_key,
