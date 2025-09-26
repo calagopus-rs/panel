@@ -42,7 +42,7 @@ export default () => {
       <Select
         label={'Provider'}
         value={settings.type}
-        onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
+        onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
         data={Object.entries(captchaProviderTypeLabelMapping).map(([value, label]) => ({
           value,
           label,

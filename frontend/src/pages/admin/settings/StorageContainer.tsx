@@ -4,25 +4,26 @@ import { useState } from 'react';
 import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
-import EmailSmtp from './forms/EmailSmtp';
 import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
-import { mailModeTypeLabelMapping } from '@/lib/enums';
+import { storageDriverTypeLabelMapping } from '@/lib/enums';
+import StorageFilesystem from './forms/StorageFilesystem';
+import StorageS3 from './forms/StorageS3';
 
 export default () => {
   const { addToast } = useToast();
-  const { mailMode } = useAdminStore();
+  const { storageDriver } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<MailMode>(mailMode);
+  const [settings, setSettings] = useState<StorageDriver>(storageDriver);
 
   const doUpdate = () => {
     load(true, setLoading);
-    updateEmailSettings(transformKeysToSnakeCase({ ...settings } as MailMode))
+    updateEmailSettings(transformKeysToSnakeCase({ ...settings } as StorageDriver))
       .then(() => {
-        addToast('Email settings updated.', 'success');
+        addToast('Storage settings updated.', 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -35,20 +36,24 @@ export default () => {
   return (
     <>
       <Title mt={'md'} order={2}>
-        Email Settings
+        Storage Settings
       </Title>
 
       <Select
-        label={'Provider'}
+        label={'Driver'}
         value={settings.type}
-        onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
-        data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
+        onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
+        data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
           value,
           label,
         }))}
       />
 
-      {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
+      {settings.type === 'filesystem' ? (
+        <StorageFilesystem settings={settings as StorageDriverFilesystem} setSettings={setSettings} />
+      ) : settings.type === 's3' ? (
+        <StorageS3 settings={settings as StorageDriverS3} setSettings={setSettings} />
+      ) : null}
 
       <Group mt={'md'}>
         <Button onClick={doUpdate} loading={loading}>

@@ -43,6 +43,11 @@ export const locationConfigBackupDiskLabelMapping: Record<LocationConfigBackupDi
   restic: 'Restic',
 };
 
+export const storageDriverTypeLabelMapping: Record<StorageDriverType, string> = {
+  filesystem: 'Filesystem',
+  s3: 'S3',
+};
+
 export const mailModeTypeLabelMapping: Record<MailModeType, string> = {
   none: 'None',
   smtp: 'SMTP',

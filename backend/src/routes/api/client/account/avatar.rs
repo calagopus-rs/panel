@@ -13,7 +13,9 @@ mod put {
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
-    struct Response {}
+    struct Response {
+        avatar: String,
+    }
 
     #[utoipa::path(put, path = "/", responses(
         (status = OK, body = inline(Response)),
@@ -67,7 +69,10 @@ mod put {
         .execute(state.database.write())
         .await?;
 
-        ApiResponse::json(Response {}).ok()
+        ApiResponse::json(Response {
+            avatar: state.storage.retrieve_urls().await.get_url(&avatar_path),
+        })
+        .ok()
     }
 }
 

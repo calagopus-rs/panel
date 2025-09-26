@@ -6,17 +6,19 @@ export interface SettingsSlice extends AdminSettings {
 }
 
 export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice> = (set): SettingsSlice => ({
+  storageDriver: null,
   mailMode: null,
   captchaProvider: null,
   app: {
     name: '',
-    icon: '',
     url: '',
-    telemetryEnabled: false,
+    telemetryEnabled: true,
+    registrationEnabled: true
   },
   server: {
-    maxFileManagerViewSize: 0,
-    allowOverwritingCustomDockerImage: false,
+    maxFileManagerViewSize: 10 * 1024 * 1024 * 1024,
+    maxSchedulesStepCount: 100,
+    allowOverwritingCustomDockerImage: true,
     allowEditingStartupCommand: false,
   },
   webauthn: {
@@ -26,6 +28,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
 
   setSettings: (value) =>
     set((state) => {
+      state.storageDriver = value.storageDriver;
       state.mailMode = value.mailMode;
       state.captchaProvider = value.captchaProvider;
       state.app = value.app;

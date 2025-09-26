@@ -760,6 +760,26 @@ interface LocationConfigBackupConfigs {
   restic: LocationConfigBackupConfigsRestic | null;
 }
 
+type StorageDriverType = 'filesystem' | 's3';
+
+interface StorageDriverFilesystem {
+  type: 'filesystem';
+  path: string;
+}
+
+interface StorageDriverS3 {
+  type: 's3';
+  publicUrl: string;
+  accessKey: string;
+  secretKey: string;
+  bucket: string;
+  region: string;
+  endpoint: string;
+  pathStyle: boolean;
+}
+
+type StorageDriver = StorageDriverFilesystem | StorageDriverS3;
+
 type MailModeType = 'none' | 'smtp';
 
 interface MailModeNone {
@@ -837,6 +857,7 @@ interface PublicSettings {
 }
 
 interface AdminSettings {
+  storageDriver: StorageDriver;
   mailMode: MailMode;
   captchaProvider: CaptchaProvider;
   app: {

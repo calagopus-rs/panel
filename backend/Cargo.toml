@@ -57,6 +57,7 @@ cron = { workspace = true }
 webauthn-rs = { version = "0.5.2", features = ["danger-allow-state-serialisation"] }
 openssl = { version = "0.10.73", features = ["vendored"] }
 base64 = "0.22.1"
+tokio-util = { version = "0.7.16", features = ["full"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"

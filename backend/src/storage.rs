@@ -72,11 +72,26 @@ impl Storage {
 
         match &settings.storage_driver {
             crate::settings::StorageDriver::Filesystem { path: base_path } => {
-                if let Err(err) = tokio::fs::remove_dir_all(Path::new(base_path).join(path)).await
+                let path = Path::new(base_path).join(path);
+
+                if let Err(err) = tokio::fs::remove_file(&path).await
                     && err.kind() != std::io::ErrorKind::NotFound
                 {
                     return Err(err.into());
                 }
+
+                tokio::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(10)).await;
+
+                    let mut directory = match tokio::fs::read_dir(&path).await {
+                        Ok(directory) => directory,
+                        Err(_) => return,
+                    };
+
+                    if directory.next_entry().await.is_ok_and(|e| e.is_none()) {
+                        tokio::fs::remove_dir(path).await.ok();
+                    }
+                });
             }
             crate::settings::StorageDriver::S3 {
                 access_key,

@@ -1,7 +1,7 @@
 use axum::{
     ServiceExt,
     body::Body,
-    extract::{ConnectInfo, Request},
+    extract::{ConnectInfo, Path, Request},
     http::StatusCode,
     middleware::Next,
     response::Response,
@@ -19,6 +19,8 @@ use tower_cookies::CookieManagerLayer;
 use tower_http::normalize_path::NormalizePathLayer;
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa_axum::router::OpenApiRouter;
+
+use crate::{response::ApiResponse, routes::GetState};
 
 mod cache;
 mod captcha;
@@ -289,6 +291,55 @@ async fn main() {
 
     let app = OpenApiRouter::new()
         .merge(routes::router(&state))
+        .route(
+            "/avatars/{user}/{file}",
+            get(
+                |state: GetState, Path::<(uuid::Uuid, String)>((user, file))| async move {
+                    let settings = state.settings.get().await;
+
+                    if file.len() != 13 || file.contains("..") || !file.ends_with(".webp") {
+                        return ApiResponse::error("file not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+
+                    let base_path = match &settings.storage_driver {
+                        settings::StorageDriver::Filesystem { path } => std::path::Path::new(path),
+                        _ => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    let path = base_path.join(format!("avatars/{user}/{file}"));
+                    let size = match tokio::fs::metadata(&path).await {
+                        Ok(metadata) => metadata.len(),
+                        Err(_) => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    let tokio_file = match tokio::fs::File::open(path).await {
+                        Ok(file) => file,
+                        Err(_) => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    ApiResponse::new(Body::from_stream(tokio_util::io::ReaderStream::new(
+                        tokio_file,
+                    )))
+                    .with_header("Content-Length", &size.to_string())
+                    .with_header("ETag", file.trim_end_matches(".webp"))
+                    .ok()
+                },
+            ),
+        )
         .fallback(|req: Request<Body>| async move {
             if !req.uri().path().starts_with("/api") {
                 let path = &req.uri().path()[1..];
