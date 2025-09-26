@@ -55,7 +55,7 @@ impl UserApiKey {
         permissions: Vec<String>,
     ) -> Result<(String, Self), sqlx::Error> {
         let key = format!(
-            "ptlc_{}",
+            "clgp_{}",
             rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 43)
         );
 

@@ -1,4 +1,5 @@
 use super::BaseModel;
+use crate::storage::StorageUrlRetriever;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -120,9 +121,14 @@ impl AdminActivity {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiAdminActivity {
+    pub fn into_admin_api_object(
+        self,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> AdminApiAdminActivity {
         AdminApiAdminActivity {
-            user: self.user.map(|user| user.into_api_object()),
+            user: self
+                .user
+                .map(|user| user.into_api_object(storage_url_retriever)),
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,

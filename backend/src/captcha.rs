@@ -2,10 +2,7 @@ use std::sync::{Arc, LazyLock};
 
 static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
     reqwest::Client::builder()
-        .user_agent(format!(
-            "github.com/pterodactyl-rs/panel {}",
-            crate::VERSION
-        ))
+        .user_agent(format!("github.com/calagopus-rs/panel {}", crate::VERSION))
         .build()
         .expect("Failed to create HTTP client")
 });

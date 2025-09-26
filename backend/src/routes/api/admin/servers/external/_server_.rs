@@ -37,7 +37,8 @@ mod get {
         };
 
         ApiResponse::json(Response {
-            server: server.into_admin_api_object(&state.database),
+            server: server
+                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await),
         })
         .ok()
     }

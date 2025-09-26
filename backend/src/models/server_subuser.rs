@@ -1,5 +1,8 @@
 use super::BaseModel;
-use crate::models::{user::User, user_password_reset::UserPasswordReset};
+use crate::{
+    models::{user::User, user_password_reset::UserPasswordReset},
+    storage::StorageUrlRetriever,
+};
 use indexmap::IndexMap;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
@@ -501,9 +504,12 @@ impl ServerSubuser {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiServerSubuser {
+    pub fn into_api_object(
+        self,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> ApiServerSubuser {
         ApiServerSubuser {
-            user: self.user.into_api_object(),
+            user: self.user.into_api_object(storage_url_retriever),
             permissions: self.permissions,
             ignored_files: self.ignored_files,
             created: self.created.and_utc(),

@@ -7,7 +7,7 @@ on:
 env:
   BIN_NAME: panel-rs
   PROJECT_NAME: panel-rs
-  REPO_NAME: pterodactyl-rs/panel
+  REPO_NAME: calagopus-rs/panel
 
 jobs:
   build-frontend:

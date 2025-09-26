@@ -6,9 +6,9 @@ export default async (data: AdminSettings['app']): Promise<void> => {
       .put('/api/admin/settings', {
         app: {
           name: data.name,
-          icon: data.icon,
           url: data.url,
           telemetry_enabled: data.telemetryEnabled,
+          registration_enabled: data.registrationEnabled,
         },
       })
       .then(() => resolve())

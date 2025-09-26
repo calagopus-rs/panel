@@ -33,6 +33,7 @@ mod models;
 mod response;
 mod routes;
 mod settings;
+mod storage;
 mod utils;
 
 #[cfg(target_os = "linux")]
@@ -64,6 +65,20 @@ fn cli() -> Command {
                         .long("override")
                         .default_value("false")
                         .value_parser(clap::value_parser!(bool))
+                        .required(false),
+                )
+                .arg_required_else_help(false),
+        )
+        .subcommand(
+            Command::new("import")
+                .about("Imports the database from pterodactyl.")
+                .arg(
+                    Arg::new("environment")
+                        .help("path to the pterodactyl environment variables file")
+                        .num_args(1)
+                        .short('e')
+                        .long("environment")
+                        .default_value("/var/www/pterodactyl/.env")
                         .required(false),
                 )
                 .arg_required_else_help(false),
@@ -187,6 +202,9 @@ async fn main() {
             )
             .await,
         ),
+        Some(("import", sub_matches)) => std::process::exit(
+            commands::import::import(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+        ),
         Some(("diagnostics", sub_matches)) => std::process::exit(
             commands::diagnostics::diagnostics(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
         ),
@@ -202,7 +220,7 @@ async fn main() {
                 "{: >21} |_|  |___/",
                 format!("{VERSION} (git-{GIT_COMMIT})")
             );
-            tracing::info!("github.com/pterodactyl-rs/panel\n");
+            tracing::info!("github.com/calagopus-rs/panel\n");
         }
         _ => {
             cli().print_help().unwrap();
@@ -246,6 +264,7 @@ async fn main() {
     }
 
     let settings = Arc::new(settings::Settings::new(database.clone()).await);
+    let storage = Arc::new(storage::Storage::new(settings.clone()));
     let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
     let mail = Arc::new(mail::Mail::new(settings.clone()));
 
@@ -254,12 +273,13 @@ async fn main() {
         version: format!("{VERSION}:{GIT_COMMIT}"),
 
         client: reqwest::ClientBuilder::new()
-            .user_agent(format!("github.com/pterodactyl-rs/panel {VERSION}"))
+            .user_agent(format!("github.com/calagopus-rs/panel {VERSION}"))
             .build()
             .unwrap(),
 
         settings: settings.clone(),
         jwt,
+        storage,
         captcha,
         mail,
         database: database.clone(),
@@ -297,6 +317,7 @@ async fn main() {
                                     Some("js") => "application/javascript",
                                     Some("css") => "text/css",
                                     Some("json") => "application/json",
+                                    Some("svg") => "image/svg+xml",
                                     _ => "application/octet-stream",
                                 },
                                 None => "application/octet-stream",

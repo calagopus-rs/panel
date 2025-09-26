@@ -1,7 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import DashboardHome from '@/pages/dashboard/home/DashboardHome';
 import { NavLink, Route, Routes } from 'react-router';
-import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
@@ -10,16 +9,19 @@ import { faGraduationCap, faMagnifyingGlass, faServer } from '@fortawesome/free-
 import { useAuth } from '@/providers/AuthProvider';
 import routes, { to } from './routes';
 import Container from '@/elements/Container';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const { user } = useAuth();
+  const { settings } = useGlobalStore();
 
   return (
     <div className={'lg:flex'}>
       <Sidebar collapsed={false}>
-        <NavLink to={'/'}>
-          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
-            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
+        <NavLink to={'/'} className={'w-full'}>
+          <div className={'h-28 w-full p-4 flex flex-row items-center justify-between mt-1 select-none cursor-pointer'}>
+            <img src={'/icon.svg'} className={'h-full'} alt={'Calagopus Icon'} />
+            <h1 className={'grow font-logo text-xl'}>{settings.app.name}</h1>
           </div>
         </NavLink>
         <Sidebar.Section>

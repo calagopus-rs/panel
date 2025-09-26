@@ -3,6 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod activity;
 mod api_keys;
+mod avatar;
 mod email;
 mod logout;
 mod password;
@@ -14,7 +15,7 @@ mod two_factor;
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::api::client::GetUser,
+        routes::{GetState, api::client::GetUser},
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -27,9 +28,11 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route(user: GetUser) -> ApiResponseResult {
+    pub async fn route(state: GetState, user: GetUser) -> ApiResponseResult {
         ApiResponse::json(Response {
-            user: user.0.into_api_full_object(),
+            user: user
+                .0
+                .into_api_full_object(&state.storage.retrieve_urls().await),
         })
         .ok()
     }
@@ -125,6 +128,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(patch::route))
         .nest("/logout", logout::router(state))
+        .nest("/avatar", avatar::router(state))
         .nest("/email", email::router(state))
         .nest("/password", password::router(state))
         .nest("/two-factor", two_factor::router(state))

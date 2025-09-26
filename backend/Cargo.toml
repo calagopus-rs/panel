@@ -9,14 +9,14 @@ rule-validator = { path = "../rule-validator" }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["chrono"] }
 tracing-appender = "0.2.3"
-sentry = { version = "0.42.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
-sentry-tower = { version = "0.42.0", default-features = false, features = ["http", "axum-matched-path"] }
-sentry-anyhow = "0.42.0"
+sentry = { version = "0.43.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
+sentry-tower = { version = "0.43.0", default-features = false, features = ["http", "axum-matched-path"] }
+sentry-anyhow = "0.43.0"
 axum = "0.8.1"
 colored = "3.0.0"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "mysql", "chrono", "ipnetwork", "uuid"] }
 dotenvy = "0.15.7"
-rustis = "0.16.1"
+rustis = { version = "0.16.1", features = ["json"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1.43.0", features = ["full"] }
@@ -56,6 +56,7 @@ dialoguer = "0.12.0"
 cron = { workspace = true }
 webauthn-rs = { version = "0.5.2", features = ["danger-allow-state-serialisation"] }
 openssl = { version = "0.10.73", features = ["vendored"] }
+base64 = "0.22.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"

@@ -7,8 +7,16 @@
   src: local('Helvetica'), url('/fonts/Helvetica.woff') format('woff');
 }
 
+@font-face {
+  font-family: 'Odor Mean Chey';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Odor Mean Chey'), url('/fonts/OdorMeanChey.ttf') format('truetype');
+}
+
 @theme {
   --font-sans: 'Helvetica', 'Arial', 'sans-serif';
+  --font-logo: 'Odor Mean Chey', 'Helvetica', 'Arial', 'sans-serif';
 }
 
 body {

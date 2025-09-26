@@ -1,4 +1,5 @@
 use super::BaseModel;
+use crate::storage::StorageUrlRetriever;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -1082,7 +1083,11 @@ impl Server {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiServer {
+    pub fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> AdminApiServer {
         let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
 
         AdminApiServer {
@@ -1091,7 +1096,7 @@ impl Server {
             external_id: self.external_id,
             allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             node: self.node.into_admin_api_object(database),
-            owner: self.owner.into_api_full_object(),
+            owner: self.owner.into_api_full_object(storage_url_retriever),
             egg: self.egg.into_admin_api_object(),
             nest: self.nest.into_admin_api_object(),
             status: self.status,

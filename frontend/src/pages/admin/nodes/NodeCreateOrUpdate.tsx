@@ -193,7 +193,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
           <TextInput
             withAsterisk
             label={'URL'}
-            description={'used for internal communication with the panel'}
+            description={'used for internal communication with the node'}
             placeholder={'URL'}
             value={node.url || ''}
             onChange={(e) => setNode({ ...node, url: e.target.value })}

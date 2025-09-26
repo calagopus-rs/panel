@@ -56,7 +56,7 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, api::admin::users::_user_::GetParamUser},
+        routes::{ApiError, GetState, api::admin::users::_user_::GetParamUser},
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -76,9 +76,12 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(user: GetParamUser) -> ApiResponseResult {
+    pub async fn route(state: GetState, user: GetParamUser) -> ApiResponseResult {
         ApiResponse::json(Response {
-            user: user.0.0.into_api_full_object(),
+            user: user
+                .0
+                .0
+                .into_api_full_object(&state.storage.retrieve_urls().await),
         })
         .ok()
     }

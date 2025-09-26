@@ -7,25 +7,32 @@ import getServers from '@/api/server/getServers';
 import Spinner from '@/elements/Spinner';
 import { useGlobalStore } from '@/stores/global';
 import { load } from '@/lib/debounce';
+import Switch from '@/elements/input/Switch';
 
 export default () => {
   const { serverListDesign, setServerListDesign } = useGlobalStore();
 
   const [loading, setLoading] = useState(true);
+  const [showOtherServers, setShowOtherServers] = useState(false);
   const [servers, setServers] = useState<Server[]>([]);
 
   useEffect(() => {
-    getServers().then((response) => {
+    getServers(showOtherServers).then((response) => {
       load(false, setLoading);
       setServers(response.data);
     });
-  }, []);
+  }, [showOtherServers]);
 
   return (
     <>
       <div className={'justify-between flex items-center mb-2'}>
         <h1 className={'text-4xl font-bold text-white'}>Servers</h1>
-        <div className={'flex gap-2'}>
+        <div className={'flex items-center gap-2'}>
+          <Switch
+            label={"Show other users' servers"}
+            checked={showOtherServers}
+            onChange={() => setShowOtherServers((s) => !s)}
+          />
           <FontAwesomeIcon
             className={classNames('p-2 rounded-full cursor-pointer', [
               serverListDesign === 'grid' ? 'bg-neutral-700 text-cyan-500' : 'bg-neutral-600 text-neutral-300',

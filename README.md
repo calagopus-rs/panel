@@ -1,6 +1,6 @@
-# pterodactyl-rs panel (experimental)
+# calagopus-rs panel (experimental)
 
-a rewrite of [pterodactyl panel](https://github.com/pterodactyl/panel) in the rust programming language. This rewrite aims to be a better alternative to the original panel, implementing new features and better performance.
+a rewrite of [pterodactyl panel](https://github.com/pterodactyl/panel) in the rust programming language. This rewrite aims to be a better alternative to the original panel, implementing new features, better performance and a new UI.
 
 ## todo
 

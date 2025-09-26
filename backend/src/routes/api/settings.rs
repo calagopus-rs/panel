@@ -12,15 +12,16 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct ResponseApp<'a> {
         name: &'a str,
-        icon: Option<&'a str>,
         registration_enabled: bool,
     }
 
     #[derive(ToSchema, Serialize)]
     struct ResponseServer {
+        max_file_manager_view_size: u64,
+        max_schedules_step_count: u64,
+
         allow_overwriting_custom_docker_image: bool,
         allow_editing_startup_command: bool,
-        max_file_manager_view_size: u64,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -46,15 +47,16 @@ mod get {
             captcha_provider: settings.captcha_provider.to_public_provider(),
             app: ResponseApp {
                 name: &settings.app.name,
-                icon: settings.app.icon.as_deref(),
                 registration_enabled: settings.app.registration_enabled,
             },
             server: ResponseServer {
+                max_file_manager_view_size: settings.server.max_file_manager_view_size,
+                max_schedules_step_count: settings.server.max_schedules_step_count,
+
                 allow_overwriting_custom_docker_image: settings
                     .server
                     .allow_overwriting_custom_docker_image,
                 allow_editing_startup_command: settings.server.allow_editing_startup_command,
-                max_file_manager_view_size: settings.server.max_file_manager_view_size,
             },
         })
         .ok()
