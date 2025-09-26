@@ -95,6 +95,14 @@ export default () => {
     setSearchParams({ directory: browsingDirectory, page: page.toString() });
   };
 
+  const filteredData = browsingEntries.data.filter((file) =>
+    file.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
+  useEffect(() => {
+    setSearchTerm('');
+  }, [browsingEntries.data]);
+
   const loadDirectoryData = () => {
     load(true, setLoading);
 
@@ -779,15 +787,13 @@ export default () => {
                 pagination={browsingEntries}
                 onPageSelect={onPageSelect}
               >
-                {browsingEntries.data
-                  .filter((file) => file.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map((file) => (
-                    <SelectionArea.Selectable key={file.name} item={file}>
-                      {(innerRef: Ref<HTMLTableRowElement>) => (
-                        <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
-                      )}
-                    </SelectionArea.Selectable>
-                  ))}
+                {filteredData.map((file) => (
+                  <SelectionArea.Selectable key={file.name} item={file}>
+                    {(innerRef: Ref<HTMLTableRowElement>) => (
+                      <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
+                    )}
+                  </SelectionArea.Selectable>
+                ))}
               </Table>
             </ContextMenuProvider>
           </SelectionArea>
