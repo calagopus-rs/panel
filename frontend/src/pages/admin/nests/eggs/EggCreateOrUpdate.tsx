@@ -57,8 +57,8 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
-    if (egg?.uuid) {
-      updateEgg(contextNest.uuid, egg.uuid, egg)
+    if (contextEgg?.uuid) {
+      updateEgg(contextNest.uuid, contextEgg.uuid, egg)
         .then(() => {
           addToast('Egg updated.', 'success');
         })
@@ -85,7 +85,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
 
   const doDelete = async () => {
     load(true, setLoading);
-    await deleteEgg(contextNest.uuid, egg.uuid)
+    await deleteEgg(contextNest.uuid, contextEgg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
         navigate(`/admin/nests/${contextNest.uuid}/eggs`);

@@ -18,8 +18,8 @@ import { zones } from 'tzdata';
 import { load } from '@/lib/debounce';
 import updateServer from '@/api/admin/servers/updateServer';
 import createServer from '@/api/admin/servers/createServer';
-import deleteServer from "@/api/admin/servers/deleteServer";
-import Modal from "@/elements/modals/Modal";
+import deleteServer from '@/api/admin/servers/deleteServer';
+import Modal from '@/elements/modals/Modal';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -251,7 +251,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
       ...server,
       image: Object.values(egg.dockerImages)[0] ?? '',
       startup: egg.startup ?? '',
-    })
+    });
   }, [server.eggUuid]);
 
   const doCreateOrUpdate = () => {

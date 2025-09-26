@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, Ref } from "react";
+import { useEffect, useState, useRef, useCallback, Ref } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
@@ -10,7 +10,7 @@ import { httpErrorToHuman, axiosInstance } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
-import { Card, Group, Popover, Title, UnstyledButton } from '@mantine/core';
+import { Card, Group, Input, Popover, Title, UnstyledButton } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -52,6 +52,7 @@ interface BatchInfo {
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
+
   const navigate = useNavigate();
   const { addToast } = useToast();
   const {

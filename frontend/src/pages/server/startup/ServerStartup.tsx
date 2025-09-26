@@ -101,6 +101,11 @@ export default () => {
           </p>
         </Card>
       </div>
+      <Group my={'md'}>
+        <Title order={1} c={'white'}>
+          Variables
+        </Title>
+      </Group>
       <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
         {variables.map((variable) => (
           <VariableContainer key={variable.envVariable} variable={variable} />

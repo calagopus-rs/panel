@@ -25,7 +25,7 @@ function ChartBlock({
         <h3 className={'transition-colors duration-100'}>{title}</h3>
         {legend && <span className={'text-sm flex items-center'}>{legend}</span>}
       </div>
-      <div className={'z-10 ml-2'}>{children}</div>
+      <div className={'z-10 ml-2 min-h-full'}>{children}</div>
     </Card>
   );
 }

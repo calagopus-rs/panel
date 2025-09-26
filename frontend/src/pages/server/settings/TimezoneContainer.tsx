@@ -53,8 +53,8 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Card>
-        <Stack>
+      <Card h='100%'>
+        <Stack h='100%'>
           <Title order={2} c={'white'}>
             Timezone
           </Title>
@@ -71,7 +71,7 @@ export default () => {
             <Text>{time}</Text>
           </Stack>
 
-          <Group>
+          <Group mt='auto'>
             <Button onClick={doUpdate} loading={loading}>
               Save
             </Button>

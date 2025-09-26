@@ -9,14 +9,14 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Card>
+      <Card h='100%'>
         <SettingsReinstallModal opened={modalOpen} onClose={() => setModalOpen(false)} />
 
         <Title order={2} c={'white'}>
           Reinstall Server
         </Title>
 
-        <Group mt={'md'}>
+        <Group pt={'md'} mt={'auto'}>
           <Button color={'red'} onClick={() => setModalOpen(true)}>
             Reinstall Server
           </Button>
