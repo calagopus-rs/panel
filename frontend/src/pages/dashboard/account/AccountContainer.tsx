@@ -1,6 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
@@ -29,43 +30,41 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Title order={2} c={'white'}>
-        Account
-      </Title>
-
-      <Stack className={'mt-4'}>
-        <TextInput
-          withAsterisk
-          label={'Username'}
-          placeholder={'Username'}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        <Group grow>
+      <Card h='100%'>
+        <Title order={2} c={'white'}>
+          Account
+        </Title>
+        <Stack className={'mt-4'}>
           <TextInput
             withAsterisk
-            label={'First Name'}
-            placeholder={'First Name'}
-            value={nameFirst}
-            onChange={(e) => setNameFirst(e.target.value)}
+            label={'Username'}
+            placeholder={'Username'}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
-
-          <TextInput
-            withAsterisk
-            label={'Last Name'}
-            placeholder={'Last Name'}
-            value={nameLast}
-            onChange={(e) => setNameLast(e.target.value)}
-          />
-        </Group>
-
-        <Group>
-          <Button disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>
-            Update Account
-          </Button>
-        </Group>
-      </Stack>
+          <Group grow>
+            <TextInput
+              withAsterisk
+              label={'First Name'}
+              placeholder={'First Name'}
+              value={nameFirst}
+              onChange={(e) => setNameFirst(e.target.value)}
+            />
+            <TextInput
+              withAsterisk
+              label={'Last Name'}
+              placeholder={'Last Name'}
+              value={nameLast}
+              onChange={(e) => setNameLast(e.target.value)}
+            />
+          </Group>
+          <Group>
+            <Button disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>
+              Update Account
+            </Button>
+          </Group>
+        </Stack>
+      </Card>
     </Grid.Col>
   );
 };

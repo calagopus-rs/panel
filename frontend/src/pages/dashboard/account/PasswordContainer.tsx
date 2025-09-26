@@ -1,6 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
 import { Grid, Group, Stack, Title } from '@mantine/core';
@@ -29,47 +30,45 @@ export default () => {
 
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
-      <Title order={2} c={'white'}>
-        Password
-      </Title>
-
-      <Stack className={'mt-4'}>
-        <TextInput
-          withAsterisk
-          label={'Current Password'}
-          placeholder={'Current Password'}
-          type={'password'}
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-        />
-
-        <TextInput
-          withAsterisk
-          label={'New Password'}
-          placeholder={'New Password'}
-          type={'password'}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
-
-        <TextInput
-          withAsterisk
-          label={'Confirm New Password'}
-          placeholder={'Confirm New Password'}
-          type={'password'}
-          value={confirmNewPassword}
-          onChange={(e) => setConfirmNewPassword(e.target.value)}
-        />
-
-        <Group>
-          <Button
-            disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
-            onClick={doUpdate}
-          >
-            Update Password
-          </Button>
-        </Group>
-      </Stack>
+      <Card h='100%'>
+        <Title order={2} c={'white'}>
+          Password
+        </Title>
+        <Stack className={'mt-4'}>
+          <TextInput
+            withAsterisk
+            label={'Current Password'}
+            placeholder={'Current Password'}
+            type={'password'}
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+          <TextInput
+            withAsterisk
+            label={'New Password'}
+            placeholder={'New Password'}
+            type={'password'}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+          <TextInput
+            withAsterisk
+            label={'Confirm New Password'}
+            placeholder={'Confirm New Password'}
+            type={'password'}
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+          />
+          <Group>
+            <Button
+              disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
+              onClick={doUpdate}
+            >
+              Update Password
+            </Button>
+          </Group>
+        </Stack>
+      </Card>
     </Grid.Col>
   );
 };
