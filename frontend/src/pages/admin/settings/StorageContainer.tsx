@@ -1,7 +1,6 @@
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { useState } from 'react';
-import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
 import { load } from '@/lib/debounce';
@@ -11,6 +10,7 @@ import Select from '@/elements/input/Select';
 import { storageDriverTypeLabelMapping } from '@/lib/enums';
 import StorageFilesystem from './forms/StorageFilesystem';
 import StorageS3 from './forms/StorageS3';
+import updateStorageSettings from '@/api/admin/settings/updateStorageSettings';
 
 export default () => {
   const { addToast } = useToast();
@@ -21,7 +21,7 @@ export default () => {
 
   const doUpdate = () => {
     load(true, setLoading);
-    updateEmailSettings(transformKeysToSnakeCase({ ...settings } as StorageDriver))
+    updateStorageSettings(transformKeysToSnakeCase({ ...settings } as StorageDriver))
       .then(() => {
         addToast('Storage settings updated.', 'success');
       })
