@@ -40,7 +40,9 @@ export default ({ variable }: { variable: ServerVariable }) => {
     <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
       <div>
         <Title order={2} c={'white'}>
-          {variable.name}
+          <Group justify='space-between' align='center'>
+            {variable.name} {!variable.isEditable && <Badge>Read Only</Badge>}
+          </Group>
         </Title>
 
         <div className={'mt-4'}>
@@ -89,9 +91,7 @@ export default ({ variable }: { variable: ServerVariable }) => {
               disabled={loading || !variable.isEditable}
             />
           )}
-          <p className={'text-gray-400 text-sm mt-2'}>
-            {variable.description} {!variable.isEditable && <Badge>Read Only</Badge>}
-          </p>
+          <p className={'text-gray-400 text-sm mt-4'}>{variable.description}</p>
         </div>
 
         <Group mt={'md'}>
