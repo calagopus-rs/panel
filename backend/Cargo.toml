@@ -16,7 +16,7 @@ axum = "0.8.1"
 colored = "3.0.0"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "mysql", "chrono", "ipnetwork", "uuid"] }
 dotenvy = "0.15.7"
-rustis = "0.16.1"
+rustis = { version = "0.16.1", features = ["json"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { version = "1.43.0", features = ["full"] }

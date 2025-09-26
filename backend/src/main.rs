@@ -219,7 +219,7 @@ async fn main() {
                 "{: >21} |_|  |___/",
                 format!("{VERSION} (git-{GIT_COMMIT})")
             );
-            tracing::info!("github.com/pterodactyl-rs/panel\n");
+            tracing::info!("github.com/calagopus-rs/panel\n");
         }
         _ => {
             cli().print_help().unwrap();
@@ -271,7 +271,7 @@ async fn main() {
         version: format!("{VERSION}:{GIT_COMMIT}"),
 
         client: reqwest::ClientBuilder::new()
-            .user_agent(format!("github.com/pterodactyl-rs/panel {VERSION}"))
+            .user_agent(format!("github.com/calagopus-rs/panel {VERSION}"))
             .build()
             .unwrap(),
 
@@ -314,6 +314,7 @@ async fn main() {
                                     Some("js") => "application/javascript",
                                     Some("css") => "text/css",
                                     Some("json") => "application/json",
+                                    Some("svg") => "image/svg+xml",
                                     _ => "application/octet-stream",
                                 },
                                 None => "application/octet-stream",

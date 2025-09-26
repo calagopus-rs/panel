@@ -17,9 +17,11 @@ import login from '@/api/auth/login';
 import PinInput from '@/elements/input/PinInput';
 import checkpointLogin from '@/api/auth/checkpointLogin';
 import { load } from '@/lib/debounce';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const { doLogin } = useAuth();
+  const { settings } = useGlobalStore();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -191,9 +193,11 @@ export default () => {
 
               <Divider label={'OR'} labelPosition={'center'} />
 
-              <Button variant={'light'} onClick={() => navigate('/auth/register')} size={'md'} fullWidth>
-                Register
-              </Button>
+              {settings.app.registrationEnabled && (
+                <Button variant={'light'} onClick={() => navigate('/auth/register')} size={'md'} fullWidth>
+                  Register
+                </Button>
+              )}
               <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
                 Forgot Password
               </Button>

@@ -4,10 +4,12 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings';
 import { Group, Stack, Title } from '@mantine/core';
-import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
+import { bytesToString, parseSize } from '@/lib/size';
+import TextInput from '@/elements/input/TextInput';
+import NumberInput from '@/elements/input/NumberInput';
 
 export default () => {
   const { addToast } = useToast();
@@ -15,6 +17,9 @@ export default () => {
 
   const [loading, setLoading] = useState(false);
   const [serverSettings, setServerSettings] = useState<AdminSettings['server']>(server);
+  const [maxFileManagerViewSizeInput, setMaxFileManagerViewSizeInput] = useState<string>(
+    bytesToString(server.maxFileManagerViewSize),
+  );
 
   const doUpdate = () => {
     load(true, setLoading);
@@ -37,28 +42,53 @@ export default () => {
       </Title>
 
       <Stack>
-        <NumberInput
-          label={'Max File Manager View Size'}
-          placeholder={'Max File Manager View Size'}
-          value={serverSettings.maxFileManagerViewSize}
-          onChange={(e) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: Number(e) })}
-        />
+        <Group grow>
+          <TextInput
+            label={'Max File Manager View Size + Unit (e.g. 2GB)'}
+            placeholder={'Max File Manager View Size'}
+            value={maxFileManagerViewSizeInput}
+            onChange={(e) => {
+              const input = e.currentTarget.value;
+              setMaxFileManagerViewSizeInput(input);
 
-        <Switch
-          label={'Allow Overwriting Custom Docker Image'}
-          checked={serverSettings.allowOverwritingCustomDockerImage}
-          onChange={(e) =>
-            setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.currentTarget.checked })
-          }
-        />
+              try {
+                const parsed = parseSize(input);
+                if (parsed > 0) {
+                  setServerSettings({ ...serverSettings, maxFileManagerViewSize: parsed });
+                }
+              } catch {
+                // ignore invalid intermediate states
+              }
+            }}
+          />
 
-        <Switch
-          label={'Allow Editing Startup Command'}
-          checked={serverSettings.allowEditingStartupCommand}
-          onChange={(e) =>
-            setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.currentTarget.checked })
-          }
-        />
+          <NumberInput
+            label={'Max Server Schedule Steps'}
+            placeholder={'Max Server Schedule Steps'}
+            value={serverSettings.maxSchedulesStepCount}
+            onChange={(value) => {
+              setServerSettings({ ...serverSettings, maxSchedulesStepCount: Number(value) });
+            }}
+          />
+        </Group>
+
+        <Group grow>
+          <Switch
+            label={'Allow Overwriting Custom Docker Image'}
+            checked={serverSettings.allowOverwritingCustomDockerImage}
+            onChange={(e) =>
+              setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.currentTarget.checked })
+            }
+          />
+
+          <Switch
+            label={'Allow Editing Startup Command'}
+            checked={serverSettings.allowEditingStartupCommand}
+            onChange={(e) =>
+              setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.currentTarget.checked })
+            }
+          />
+        </Group>
       </Stack>
 
       <Group mt={'md'}>

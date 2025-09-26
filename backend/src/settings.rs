@@ -64,7 +64,6 @@ pub enum PublicCaptchaProvider<'a> {
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsApp {
     pub name: String,
-    pub icon: Option<String>,
     pub url: String,
 
     pub telemetry_enabled: bool,
@@ -78,8 +77,6 @@ impl AppSettingsApp {
 
         keys.push("app::name");
         values.push(self.name.clone());
-        keys.push("app::icon");
-        values.push(self.icon.clone().unwrap_or_default());
         keys.push("app::url");
         values.push(self.url.clone());
         keys.push("app::telemetry_enabled");
@@ -94,11 +91,10 @@ impl AppSettingsApp {
         AppSettingsApp {
             name: map
                 .remove("app::name")
-                .unwrap_or_else(|| "pterodactyl-rs".to_string()),
-            icon: map.remove("app::icon").filter(|s| !s.is_empty()),
+                .unwrap_or_else(|| "Calagopus".to_string()),
             url: map
                 .remove("app::url")
-                .unwrap_or_else(|| "http://localhost".to_string()),
+                .unwrap_or_else(|| "http://localhost:8000".to_string()),
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
                 .map(|s| s == "true")

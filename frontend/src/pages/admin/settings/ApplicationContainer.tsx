@@ -54,20 +54,20 @@ export default () => {
           />
         </Group>
 
-        <TextInput
-          withAsterisk
-          label={'Icon'}
-          placeholder={'Icon'}
-          value={appSettings.icon || ''}
-          onChange={(e) => setAppSettings({ ...appSettings, icon: e.target.value })}
-        />
-
-        <Switch
-          label={'Enable Telemetry'}
-          name={'telemetryEnabled'}
-          defaultChecked={appSettings.telemetryEnabled}
-          onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
-        />
+        <Group grow>
+          <Switch
+            label={'Enable Telemetry'}
+            name={'telemetryEnabled'}
+            defaultChecked={appSettings.telemetryEnabled}
+            onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
+          />
+          <Switch
+            label={'Enable Registration'}
+            name={'registrationEnabled'}
+            defaultChecked={appSettings.registrationEnabled}
+            onChange={(e) => setAppSettings((settings) => ({ ...settings, registrationEnabled: e.target.checked }))}
+          />
+        </Group>
       </Stack>
 
       <Group mt={'md'}>

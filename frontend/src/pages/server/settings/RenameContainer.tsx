@@ -6,7 +6,8 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Card, Grid, Group, Stack, Title } from '@mantine/core';
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import Card from '@/elements/Card';
 import { useState } from 'react';
 
 export default () => {

@@ -6,6 +6,7 @@ use rustis::{
     commands::{
         GenericCommands, InfoSection, ServerCommands, SetCondition, SetExpiration, StringCommands,
     },
+    resp::Json,
 };
 use serde::{Serialize, de::DeserializeOwned};
 use std::future::Future;
@@ -106,26 +107,21 @@ impl Cache {
         fn_compute: F,
     ) -> Result<T, anyhow::Error>
     where
-        T: Serialize + DeserializeOwned,
+        T: Serialize + DeserializeOwned + Send,
         F: FnOnce() -> Fut,
         Fut: Future<Output = Result<T, anyhow::Error>>,
     {
-        let cached_value: Option<String> = self.client.get(key).await?;
+        let cached_value: Option<Json<T>> = self.client.get(key).await?;
 
         match cached_value {
-            Some(value) => {
-                let result: T = serde_json::from_str(&value)?;
-
-                Ok(result)
-            }
+            Some(value) => Ok(value.into_inner()),
             None => {
                 let result = fn_compute().await?;
 
-                let serialized = serde_json::to_string(&result)?;
                 self.client
                     .set_with_options(
                         key,
-                        serialized,
+                        Json(&result),
                         SetCondition::None,
                         SetExpiration::Ex(ttl),
                         false,
@@ -134,19 +130,6 @@ impl Cache {
 
                 Ok(result)
             }
-        }
-    }
-
-    #[inline]
-    pub async fn clear_organization(&self, organization: i32) {
-        let keys: Vec<String> = self
-            .client
-            .keys(format!("organization::{organization}*"))
-            .await
-            .unwrap();
-
-        if !keys.is_empty() {
-            self.client.del(keys).await.unwrap();
         }
     }
 }

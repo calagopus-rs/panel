@@ -826,12 +826,13 @@ interface PublicSettings {
   captchaProvider: PublicCaptchaProvider;
   app: {
     name: string;
-    icon: string;
+    registrationEnabled: boolean;
   };
   server: {
+    maxFileManagerViewSize: number;
+    maxSchedulesStepCount: number;
     allowOverwritingCustomDockerImage: boolean;
     allowEditingStartupCommand: boolean;
-    maxFileManagerViewSize: number;
   };
 }
 
@@ -840,9 +841,9 @@ interface AdminSettings {
   captchaProvider: CaptchaProvider;
   app: {
     name: string;
-    icon: string;
     url: string;
     telemetryEnabled: boolean;
+    registrationEnabled: boolean;
   };
   webauthn: {
     rpId: string;
@@ -850,6 +851,7 @@ interface AdminSettings {
   };
   server: {
     maxFileManagerViewSize: number;
+    maxSchedulesStepCount: number;
     allowOverwritingCustomDockerImage: boolean;
     allowEditingStartupCommand: boolean;
   };

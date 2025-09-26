@@ -42,21 +42,23 @@ export default () => {
           onChange={(e) => setUsername(e.target.value)}
         />
 
-        <TextInput
-          withAsterisk
-          label={'First Name'}
-          placeholder={'First Name'}
-          value={nameFirst}
-          onChange={(e) => setNameFirst(e.target.value)}
-        />
+        <Group grow>
+          <TextInput
+            withAsterisk
+            label={'First Name'}
+            placeholder={'First Name'}
+            value={nameFirst}
+            onChange={(e) => setNameFirst(e.target.value)}
+          />
 
-        <TextInput
-          withAsterisk
-          label={'Last Name'}
-          placeholder={'Last Name'}
-          value={nameLast}
-          onChange={(e) => setNameLast(e.target.value)}
-        />
+          <TextInput
+            withAsterisk
+            label={'Last Name'}
+            placeholder={'Last Name'}
+            value={nameLast}
+            onChange={(e) => setNameLast(e.target.value)}
+          />
+        </Group>
 
         <Group>
           <Button disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>

@@ -17,12 +17,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <div className='mb-3 text-xs transition-all text-gray-400'>
         <span>
           <a
-            href={'https://github.com/pterodactyl-rs/panel'}
+            href={'https://github.com/calagopus-rs/panel'}
             target={'_blank'}
             rel={'noopener noreferrer'}
             className={'underline'}
           >
-            github.com/pterodactyl-rs/panel
+            Calagopus
           </a>
           @{settings.version}
           <br />

@@ -1,7 +1,6 @@
 import Sidebar from '@/elements/sidebar/Sidebar';
 import { useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router';
-import CollapsedIcon from '@/assets/pterodactyl.svg';
 import classNames from 'classnames';
 import styles from '@/elements/sidebar/sidebar.module.css';
 import NotFound from '@/pages/NotFound';
@@ -18,11 +17,13 @@ import Container from '@/elements/Container';
 import { load } from '@/lib/debounce';
 import Notification from '@/elements/Notification';
 import Progress from '@/elements/Progress';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
 
+  const { settings } = useGlobalStore();
   const { server, backupRestoreProgress } = useServerStore();
   const resetState = useServerStore((state) => state.reset);
   const setServer = useServerStore((state) => state.setServer);
@@ -42,9 +43,10 @@ export default () => {
   return (
     <div className={'lg:flex'}>
       <Sidebar collapsed={false}>
-        <NavLink to={'/'}>
-          <div className={'h-fit w-full flex flex-col items-center justify-center mt-1 select-none cursor-pointer'}>
-            <img src={CollapsedIcon} className={'my-4 h-20'} alt={'Pterodactyl Icon'} />
+        <NavLink to={'/'} className={'w-full'}>
+          <div className={'h-28 w-full p-4 flex flex-row items-center justify-between mt-1 select-none cursor-pointer'}>
+            <img src={'/icon.svg'} className={'h-full'} alt={'Calagopus Icon'} />
+            <h1 className={'grow font-logo text-xl'}>{settings.app.name}</h1>
           </div>
         </NavLink>
         <Sidebar.Section>
