@@ -52,7 +52,6 @@ interface BatchInfo {
 
 export default () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
 
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -94,14 +93,6 @@ export default () => {
   const onPageSelect = (page: number) => {
     setSearchParams({ directory: browsingDirectory, page: page.toString() });
   };
-
-  const filteredData = browsingEntries.data.filter((file) =>
-    file.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  useEffect(() => {
-    setSearchTerm('');
-  }, [browsingEntries.data]);
 
   const loadDirectoryData = () => {
     load(true, setLoading);
@@ -700,13 +691,6 @@ export default () => {
                 </Popover.Dropdown>
               </Popover>
             )}
-            <Input
-              placeholder='Search..'
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-              }}
-            />
             <Button
               onClick={() => setOpenModal('nameDirectory')}
               color={'blue'}
@@ -787,7 +771,7 @@ export default () => {
                 pagination={browsingEntries}
                 onPageSelect={onPageSelect}
               >
-                {filteredData.map((file) => (
+                {browsingEntries.data.map((file) => (
                   <SelectionArea.Selectable key={file.name} item={file}>
                     {(innerRef: Ref<HTMLTableRowElement>) => (
                       <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
