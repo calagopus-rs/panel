@@ -41,6 +41,7 @@ pub struct AppState {
 
     pub settings: Arc<crate::settings::Settings>,
     pub jwt: Arc<crate::jwt::Jwt>,
+    pub storage: Arc<crate::storage::Storage>,
     pub captcha: Arc<crate::captcha::Captcha>,
     pub mail: Arc<crate::mail::Mail>,
     pub database: Arc<crate::database::Database>,

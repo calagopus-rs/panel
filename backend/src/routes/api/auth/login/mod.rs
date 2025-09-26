@@ -155,7 +155,7 @@ mod post {
             }
 
             ApiResponse::json(Response::Completed {
-                user: Box::new(user.into_api_full_object()),
+                user: Box::new(user.into_api_full_object(&state.storage.retrieve_urls().await)),
             })
             .ok()
         }

@@ -61,6 +61,7 @@ mod put {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
+        storage_driver: Option<crate::settings::StorageDriver>,
         mail_mode: Option<crate::settings::MailMode>,
         captcha_provider: Option<crate::settings::CaptchaProvider>,
 
@@ -85,6 +86,9 @@ mod put {
     ) -> ApiResponseResult {
         let mut settings = state.settings.get_mut().await;
 
+        if let Some(storage_driver) = data.storage_driver {
+            settings.storage_driver = storage_driver;
+        }
         if let Some(mail_mode) = data.mail_mode {
             settings.mail_mode = mail_mode;
         }

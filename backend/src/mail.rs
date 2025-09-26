@@ -23,7 +23,7 @@ impl Mail {
         Self { settings }
     }
 
-    async fn get_transport(&self) -> Result<Transport, Box<dyn std::error::Error + Send + Sync>> {
+    async fn get_transport(&self) -> Result<Transport, anyhow::Error> {
         let settings = self.settings.get().await;
 
         match &settings.mail_mode {

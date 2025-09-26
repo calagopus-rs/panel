@@ -179,7 +179,7 @@ mod post {
         );
 
         ApiResponse::json(Response {
-            user: user.into_api_full_object(),
+            user: user.into_api_full_object(&state.storage.retrieve_urls().await),
         })
         .ok()
     }

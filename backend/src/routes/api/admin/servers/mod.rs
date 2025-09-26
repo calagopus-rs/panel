@@ -56,6 +56,8 @@ mod get {
         )
         .await?;
 
+        let storage_url_retriever = state.storage.retrieve_urls().await;
+
         ApiResponse::json(Response {
             servers: Pagination {
                 total: servers.total,
@@ -64,7 +66,9 @@ mod get {
                 data: servers
                     .data
                     .into_iter()
-                    .map(|server| server.into_admin_api_object(&state.database))
+                    .map(|server| {
+                        server.into_admin_api_object(&state.database, &storage_url_retriever)
+                    })
                     .collect(),
             },
         })
@@ -236,7 +240,8 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            server: server.into_admin_api_object(&state.database),
+            server: server
+                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await),
         })
         .ok()
     }

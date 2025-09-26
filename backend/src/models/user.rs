@@ -1,3 +1,5 @@
+use crate::storage::StorageUrlRetriever;
+
 use super::BaseModel;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -436,12 +438,15 @@ impl User {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiUser {
+    pub fn into_api_object(self, storage_url_retriever: &StorageUrlRetriever<'_>) -> ApiUser {
         ApiUser {
             uuid: self.uuid,
             username: self.username,
             role: self.role.map(|r| r.name),
-            avatar: self.avatar,
+            avatar: self
+                .avatar
+                .as_ref()
+                .map(|a| storage_url_retriever.get_url(a)),
             admin: self.admin,
             totp_enabled: self.totp_enabled,
             created: self.created.and_utc(),
@@ -449,12 +454,18 @@ impl User {
     }
 
     #[inline]
-    pub fn into_api_full_object(self) -> ApiFullUser {
+    pub fn into_api_full_object(
+        self,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> ApiFullUser {
         ApiFullUser {
             uuid: self.uuid,
             username: self.username,
             role: self.role.map(|r| r.into_admin_api_object()),
-            avatar: self.avatar,
+            avatar: self
+                .avatar
+                .as_ref()
+                .map(|a| storage_url_retriever.get_url(a)),
             email: self.email,
             name_first: self.name_first,
             name_last: self.name_last,

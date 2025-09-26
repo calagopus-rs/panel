@@ -9,6 +9,23 @@ use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
+pub enum StorageDriver {
+    Filesystem {
+        path: String,
+    },
+    S3 {
+        public_url: String,
+        access_key: String,
+        secret_key: String,
+        bucket: String,
+        region: String,
+        endpoint: String,
+        path_style: bool,
+    },
+}
+
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[serde(tag = "type", rename_all = "snake_case")]
 pub enum MailMode {
     None,
     Smtp {
@@ -189,6 +206,7 @@ impl AppSettingsServer {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettings {
+    pub storage_driver: StorageDriver,
     pub mail_mode: MailMode,
     pub captcha_provider: CaptchaProvider,
 
@@ -207,6 +225,51 @@ impl AppSettings {
     ) -> (Vec<&'static str>, Vec<String>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
+
+        match &self.storage_driver {
+            StorageDriver::Filesystem { path } => {
+                keys.push("::storage_driver");
+                values.push("filesystem".to_string());
+                keys.push("::storage_filesystem_path");
+                values.push(path.clone());
+            }
+            StorageDriver::S3 {
+                public_url,
+                access_key,
+                secret_key,
+                bucket,
+                region,
+                endpoint,
+                path_style,
+            } => {
+                keys.push("::storage_driver");
+                values.push("s3".to_string());
+                keys.push("::storage_s3_public_url");
+                values.push(public_url.clone());
+                keys.push("::storage_s3_access_key");
+                values.push(
+                    database
+                        .encrypt(access_key)
+                        .map(|b| base32::encode(base32::Alphabet::Z, &b))
+                        .unwrap_or_default(),
+                );
+                keys.push("::storage_s3_secret_key");
+                values.push(
+                    database
+                        .encrypt(secret_key)
+                        .map(|b| base32::encode(base32::Alphabet::Z, &b))
+                        .unwrap_or_default(),
+                );
+                keys.push("::storage_s3_bucket");
+                values.push(bucket.clone());
+                keys.push("::storage_s3_region");
+                values.push(region.clone());
+                keys.push("::storage_s3_endpoint");
+                values.push(endpoint.clone());
+                keys.push("::storage_s3_path_style");
+                values.push(path_style.to_string());
+            }
+        }
 
         match &self.mail_mode {
             MailMode::None => {
@@ -305,6 +368,66 @@ impl AppSettings {
         database: &crate::database::Database,
     ) -> Self {
         AppSettings {
+            storage_driver: match map.remove("::storage_driver").as_deref() {
+                Some("filesystem") => StorageDriver::Filesystem {
+                    path: map.remove("::storage_filesystem_path").unwrap_or_else(|| {
+                        if std::env::consts::OS == "windows" {
+                            "C:\\calagopus_data".to_string()
+                        } else {
+                            "/var/lib/calagopus".to_string()
+                        }
+                    }),
+                },
+                Some("s3") => StorageDriver::S3 {
+                    public_url: map
+                        .remove("::storage_s3_public_url")
+                        .unwrap_or_else(|| "https://your-s3-bucket.s3.amazonaws.com".to_string()),
+                    access_key: map
+                        .remove("::storage_s3_access_key")
+                        .and_then(|s| {
+                            if s.is_empty() {
+                                None
+                            } else {
+                                base32::decode(base32::Alphabet::Z, &s)
+                                    .and_then(|b| database.decrypt(&b))
+                            }
+                        })
+                        .unwrap_or("your-access-key".to_string()),
+                    secret_key: map
+                        .remove("::storage_s3_secret_key")
+                        .and_then(|s| {
+                            if s.is_empty() {
+                                None
+                            } else {
+                                base32::decode(base32::Alphabet::Z, &s)
+                                    .and_then(|b| database.decrypt(&b))
+                            }
+                        })
+                        .unwrap_or("your-secret-key".to_string()),
+                    bucket: map
+                        .remove("::storage_s3_bucket")
+                        .unwrap_or_else(|| "your-s3-bucket".to_string()),
+                    region: map
+                        .remove("::storage_s3_region")
+                        .unwrap_or_else(|| "us-east-1".to_string()),
+                    endpoint: map
+                        .remove("::storage_s3_endpoint")
+                        .unwrap_or_else(|| "https://s3.amazonaws.com".to_string()),
+                    path_style: map
+                        .remove("::storage_s3_path_style")
+                        .map(|s| s == "true")
+                        .unwrap_or(false),
+                },
+                _ => StorageDriver::Filesystem {
+                    path: map.remove("::storage_filesystem_path").unwrap_or_else(|| {
+                        if std::env::consts::OS == "windows" {
+                            "C:\\calagopus_data".to_string()
+                        } else {
+                            "/var/lib/calagopus".to_string()
+                        }
+                    }),
+                },
+            },
             mail_mode: match map.remove("::mail_mode").as_deref() {
                 Some("none") => MailMode::None,
                 Some("smtp") => MailMode::Smtp {

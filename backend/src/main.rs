@@ -33,6 +33,7 @@ mod models;
 mod response;
 mod routes;
 mod settings;
+mod storage;
 mod utils;
 
 #[cfg(target_os = "linux")]
@@ -263,6 +264,7 @@ async fn main() {
     }
 
     let settings = Arc::new(settings::Settings::new(database.clone()).await);
+    let storage = Arc::new(storage::Storage::new(settings.clone()));
     let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
     let mail = Arc::new(mail::Mail::new(settings.clone()));
 
@@ -277,6 +279,7 @@ async fn main() {
 
         settings: settings.clone(),
         jwt,
+        storage,
         captcha,
         mail,
         database: database.clone(),

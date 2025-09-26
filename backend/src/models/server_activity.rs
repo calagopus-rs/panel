@@ -1,3 +1,5 @@
+use crate::storage::StorageUrlRetriever;
+
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -152,9 +154,14 @@ impl ServerActivity {
     }
 
     #[inline]
-    pub fn into_api_object(self) -> ApiServerActivity {
+    pub fn into_api_object(
+        self,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> ApiServerActivity {
         ApiServerActivity {
-            user: self.user.map(|user| user.into_api_object()),
+            user: self
+                .user
+                .map(|user| user.into_api_object(storage_url_retriever)),
             event: self.event,
             ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,

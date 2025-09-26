@@ -62,7 +62,9 @@ mod get {
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         ApiResponse::json(Response {
-            server: server.0.into_admin_api_object(&state.database),
+            server: server
+                .0
+                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await),
         })
         .ok()
     }
