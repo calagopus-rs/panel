@@ -139,12 +139,12 @@ export default () => {
           <Switch
             label={'Read Only'}
             checked={mount.readOnly || false}
-            onChange={(e) => setMount({ ...mount, readOnly: e.currentTarget.checked })}
+            onChange={(e) => setMount({ ...mount, readOnly: e.target.checked })}
           />
           <Switch
             label={'User Mountable'}
             checked={mount.userMountable || false}
-            onChange={(e) => setMount({ ...mount, userMountable: e.currentTarget.checked })}
+            onChange={(e) => setMount({ ...mount, userMountable: e.target.checked })}
           />
         </Group>
 

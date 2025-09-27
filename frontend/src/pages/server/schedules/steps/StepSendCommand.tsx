@@ -15,12 +15,12 @@ export default ({
         label={'Command'}
         placeholder={'say Hello World'}
         value={action.command}
-        onChange={(e) => setAction({ ...action, command: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, command: e.target.value })}
       />
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
     </Stack>
   );

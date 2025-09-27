@@ -16,7 +16,7 @@ export default ({
         label={'Startup Command'}
         placeholder={'java -jar server.jar'}
         value={action.command}
-        onChange={(e) => setAction({ ...action, command: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, command: e.target.value })}
       />
       <Switch
         label={'Ignore Failure'}
@@ -24,7 +24,7 @@ export default ({
         onChange={(e) =>
           setAction({
             ...action,
-            ignoreFailure: e.currentTarget.checked,
+            ignoreFailure: e.target.checked,
           })
         }
       />

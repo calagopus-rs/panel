@@ -252,10 +252,16 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   );
 
   useEffect(() => {
-    if (doEggsRefetch) {
-      setDebouncedEggSearch(eggSearch);
+    if (doAllocationsRefetch) {
+      setDebouncedAllocationSearch(allocationsSearch);
     }
-  }, [eggSearch]);
+  }, [allocationsSearch]);
+
+  useEffect(() => {
+    if (doAllocationsRefetch) {
+      setDebouncedAllocationSearch(primaryAllocationsSearch);
+    }
+  }, [primaryAllocationsSearch]);
 
   useEffect(() => {
     fetchNodes('');
@@ -264,7 +270,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   }, []);
 
   useEffect(() => {
-    if (!server.nodeUuid || !doAllocationsRefetch) {
+    if (!server.nodeUuid) {
       return;
     }
 
@@ -654,7 +660,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   allowDeselect
                 />
                 <MultiSelect
-                  label={'Primary Allocation'}
+                  label={'Allocations'}
                   placeholder={'host:port'}
                   value={server.allocationUuids}
                   disabled={!server.nodeUuid}

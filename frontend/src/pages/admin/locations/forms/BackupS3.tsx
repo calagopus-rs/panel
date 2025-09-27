@@ -74,7 +74,7 @@ export default ({
         <Switch
           label={backupConfig?.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
           checked={backupConfig?.pathStyle || false}
-          onChange={(e) => setBackupConfigs({ ...backupConfig, pathStyle: e.currentTarget.checked })}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, pathStyle: e.target.checked })}
         />
       </Stack>
     </Stack>

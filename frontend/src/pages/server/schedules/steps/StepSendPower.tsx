@@ -27,7 +27,7 @@ export default ({
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
     </Stack>
   );

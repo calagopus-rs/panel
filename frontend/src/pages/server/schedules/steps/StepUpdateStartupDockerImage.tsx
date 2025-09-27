@@ -30,7 +30,7 @@ export default ({
         onChange={(e) =>
           setAction({
             ...action,
-            ignoreFailure: e.currentTarget.checked,
+            ignoreFailure: e.target.checked,
           })
         }
       />

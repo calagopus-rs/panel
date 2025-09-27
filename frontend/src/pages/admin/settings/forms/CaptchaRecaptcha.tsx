@@ -33,7 +33,7 @@ export default ({
       <Switch
         label={'V3'}
         checked={settings.v3}
-        onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.currentTarget.checked }))}
+        onChange={(e) => setSettings((settings) => ({ ...settings, v3: e.target.checked }))}
       />
     </Stack>
   );

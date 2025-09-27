@@ -199,7 +199,7 @@ export default () => {
         <Switch
           label={'Public'}
           checked={databaseHost.public || false}
-          onChange={(e) => setDatabaseHost({ ...databaseHost, public: e.currentTarget.checked })}
+          onChange={(e) => setDatabaseHost({ ...databaseHost, public: e.target.checked })}
         />
 
         <Group>

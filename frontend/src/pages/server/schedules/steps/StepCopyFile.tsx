@@ -16,24 +16,24 @@ export default ({
         label={'Source File'}
         placeholder={'/source.txt'}
         value={action.file}
-        onChange={(e) => setAction({ ...action, file: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, file: e.target.value })}
       />
       <TextInput
         withAsterisk
         label={'Destination'}
         placeholder={'/backup/target.txt'}
         value={action.destination}
-        onChange={(e) => setAction({ ...action, destination: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, destination: e.target.value })}
       />
       <Switch
         label={'Run in Foreground'}
         checked={action.foreground}
-        onChange={(e) => setAction({ ...action, foreground: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, foreground: e.target.checked })}
       />
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
     </Stack>
   );

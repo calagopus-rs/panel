@@ -263,7 +263,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         <Switch
           label={'Public'}
           checked={node.public || false}
-          onChange={(e) => setNode({ ...node, public: e.currentTarget.checked })}
+          onChange={(e) => setNode({ ...node, public: e.target.checked })}
         />
 
         <Group>

@@ -17,7 +17,7 @@ export default ({
         label={'File Path'}
         placeholder={'/file.txt'}
         value={action.file}
-        onChange={(e) => setAction({ ...action, file: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, file: e.target.value })}
       />
       <TextArea
         withAsterisk
@@ -26,17 +26,17 @@ export default ({
         autosize
         minRows={3}
         value={action.content}
-        onChange={(e) => setAction({ ...action, content: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, content: e.target.value })}
       />
       <Switch
         label={'Append to File'}
         checked={action.append}
-        onChange={(e) => setAction({ ...action, append: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, append: e.target.checked })}
       />
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
     </Stack>
   );

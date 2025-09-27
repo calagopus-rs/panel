@@ -16,7 +16,7 @@ export default ({
         label={'Root Path'}
         placeholder={'/'}
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
 
       <Stack gap={'xs'}>
@@ -30,7 +30,7 @@ export default ({
               value={file.from}
               onChange={(e) => {
                 const newFiles = [...action.files];
-                newFiles[index].from = e.currentTarget.value;
+                newFiles[index].from = e.target.value;
                 setAction({ ...action, files: newFiles });
               }}
             />
@@ -41,7 +41,7 @@ export default ({
               value={file.to}
               onChange={(e) => {
                 const newFiles = [...action.files];
-                newFiles[index].to = e.currentTarget.value;
+                newFiles[index].to = e.target.value;
                 setAction({ ...action, files: newFiles });
               }}
             />

@@ -172,7 +172,7 @@ ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }
       className={'relative cursor-pointer w-10 text-center'}
       onClick={(e) => {
         e.stopPropagation();
-        const rect = e.currentTarget.getBoundingClientRect();
+        const rect = e.target.getBoundingClientRect();
         openMenu(rect.left, rect.bottom);
       }}
     >

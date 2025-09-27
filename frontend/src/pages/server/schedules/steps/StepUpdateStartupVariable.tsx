@@ -16,14 +16,14 @@ export default ({
         label={'Environment Variable'}
         placeholder={'JAVA_OPTS'}
         value={action.envVariable}
-        onChange={(e) => setAction({ ...action, envVariable: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, envVariable: e.target.value })}
       />
       <TextInput
         withAsterisk
         label={'Value'}
         placeholder={'-Xmx2G -Xms1G'}
         value={action.value}
-        onChange={(e) => setAction({ ...action, value: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, value: e.target.value })}
       />
       <Switch
         label={'Ignore Failure'}
@@ -31,7 +31,7 @@ export default ({
         onChange={(e) =>
           setAction({
             ...action,
-            ignoreFailure: e.currentTarget.checked,
+            ignoreFailure: e.target.checked,
           })
         }
       />

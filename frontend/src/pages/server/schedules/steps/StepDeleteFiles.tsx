@@ -16,7 +16,7 @@ export default ({
         label={'Root Path'}
         placeholder={'/'}
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
       <TagsInput
         withAsterisk

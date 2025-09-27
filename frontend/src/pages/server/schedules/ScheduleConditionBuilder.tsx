@@ -142,7 +142,7 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
                 label={'Value + Unit (e.g. 2GB)'}
                 value={sizeInput}
                 onChange={(e) => {
-                  const input = e.currentTarget.value;
+                  const input = e.target.value;
                   setSizeInput(input);
 
                   try {
@@ -163,7 +163,7 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
           <TextInput
             label={'File Path'}
             value={condition.file}
-            onChange={(e) => onChange({ ...condition, file: e.currentTarget.value })}
+            onChange={(e) => onChange({ ...condition, file: e.target.value })}
           />
         )}
 

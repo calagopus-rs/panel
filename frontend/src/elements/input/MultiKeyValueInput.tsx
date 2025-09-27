@@ -91,7 +91,7 @@ export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
         <TextInput
           ref={keyInputRef}
           value={newKey}
-          onChange={(e) => setNewKey(e.currentTarget.value)}
+          onChange={(e) => setNewKey(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholderKey}
           w={140}
@@ -99,7 +99,7 @@ export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
         <TextInput
           ref={valueInputRef}
           value={newValue}
-          onChange={(e) => setNewValue(e.currentTarget.value)}
+          onChange={(e) => setNewValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholderValue}
           w={220}

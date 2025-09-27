@@ -59,7 +59,7 @@ export default () => {
             label={'Code'}
             placeholder={'000000'}
             value={code}
-            onChange={(e) => setCode(e.currentTarget.value)}
+            onChange={(e) => setCode(e.target.value)}
           />
 
           <TextInput

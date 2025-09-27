@@ -16,17 +16,17 @@ export default ({
         label={'Backup Name'}
         placeholder={'Auto-generated if empty'}
         value={action.name || ''}
-        onChange={(e) => setAction({ ...action, name: e.currentTarget.value || null })}
+        onChange={(e) => setAction({ ...action, name: e.target.value || null })}
       />
       <Switch
         label={'Run in Foreground'}
         checked={action.foreground}
-        onChange={(e) => setAction({ ...action, foreground: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, foreground: e.target.checked })}
       />
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
       <TagsInput
         label={'Ignored Files'}

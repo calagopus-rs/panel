@@ -58,7 +58,7 @@ export default ({ node }: { node: Node }) => {
           <TextInput
             placeholder={'Search...'}
             value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
+            onChange={(e) => setSearch(e.target.value)}
             w={250}
           />
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>

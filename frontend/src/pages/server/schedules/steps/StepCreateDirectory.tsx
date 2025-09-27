@@ -16,19 +16,19 @@ export default ({
         label={'Root Path'}
         placeholder={'/'}
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
       <TextInput
         withAsterisk
         label={'Directory Name'}
         placeholder={'new_folder'}
         value={action.name}
-        onChange={(e) => setAction({ ...action, name: e.currentTarget.value })}
+        onChange={(e) => setAction({ ...action, name: e.target.value })}
       />
       <Switch
         label={'Ignore Failure'}
         checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.currentTarget.checked })}
+        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />
     </Stack>
   );
