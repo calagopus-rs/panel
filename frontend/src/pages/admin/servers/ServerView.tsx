@@ -1,6 +1,13 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faExternalLink, faFolder, faNetworkWired, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCodeCommit,
+  faCog,
+  faExternalLink,
+  faFolder,
+  faNetworkWired,
+  faPaperPlane
+} from "@fortawesome/free-solid-svg-icons";
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -11,6 +18,7 @@ import ServerCreateOrUpdate from './ServerCreateOrUpdate';
 import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations';
 import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts';
 import AdminServerTransfer from '@/pages/admin/servers/transfer/AdminServerTransfer';
+import AdminServerVariables from "@/pages/admin/servers/variables/AdminServerVariables";
 
 export default () => {
   const params = useParams<'id'>();
@@ -48,6 +56,11 @@ export default () => {
             link: `/admin/servers/${params.id}/allocations`,
           },
           {
+            name: 'Variables',
+            icon: faCodeCommit,
+            link: `/admin/servers/${params.id}/variables`,
+          },
+          {
             name: 'Mounts',
             icon: faFolder,
             link: `/admin/servers/${params.id}/mounts`,
@@ -68,6 +81,7 @@ export default () => {
       <Routes>
         <Route path={'/'} element={<ServerCreateOrUpdate contextServer={server} />} />
         <Route path={'/allocations'} element={<AdminServerAllocations server={server} />} />
+        <Route path={'/variables'} element={<AdminServerVariables server={server} />} />
         <Route path={'/mounts'} element={<AdminServerMounts server={server} />} />
         <Route path={'/transfer'} element={<AdminServerTransfer server={server} />} />
       </Routes>

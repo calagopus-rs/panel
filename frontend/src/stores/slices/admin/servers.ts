@@ -5,7 +5,8 @@ import { StateCreator } from 'zustand';
 export interface ServersSlice {
   servers: ResponseMeta<AdminServer>;
   serverAllocations: ResponseMeta<ServerAllocation>;
-  serverMounts: ResponseMeta<AdminServerMount>
+  serverVariables: ServerVariable[];
+  serverMounts: ResponseMeta<AdminServerMount>;
 
   setServers: (servers: ResponseMeta<AdminServer>) => void;
   addServer: (server: AdminServer) => void;
@@ -15,6 +16,9 @@ export interface ServersSlice {
   addServerAllocation: (allocation: ServerAllocation) => void;
   removeServerAllocation: (allocation: ServerAllocation) => void;
 
+  setServerVariables: (variables: ServerVariable[]) => void;
+  updateServerVariable: (envVariable: string, updatedProps: Partial<ServerVariable>) => void;
+
   setServerMounts: (mounts: ResponseMeta<AdminServerMount>) => void;
   addServerMount: (mount: AdminServerMount) => void;
   removeServerMount: (mount: AdminServerMount) => void;
@@ -23,6 +27,7 @@ export interface ServersSlice {
 export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> = (set): ServersSlice => ({
   servers: getEmptyPaginationSet<AdminServer>(),
   serverAllocations: getEmptyPaginationSet<ServerAllocation>(),
+  serverVariables: [],
   serverMounts: getEmptyPaginationSet<AdminServerMount>(),
 
   setServers: (value) => set((state) => ({ ...state, servers: value })),
@@ -59,6 +64,12 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         data: state.serverAllocations.data.filter((a) => a.uuid !== allocation.uuid),
         total: state.serverAllocations.total - 1,
       }
+    })),
+
+  setServerVariables: (serverVariables) => set((state) => ({ ...state, serverVariables })),
+  updateServerVariable: (envVariable, updatedProps) =>
+    set((state) => ({
+      serverVariables: state.serverVariables.map((v) => (v.envVariable === envVariable ? { ...v, ...updatedProps } : v)),
     })),
 
   setServerMounts: (value) => set((state) => ({ ...state, serverMounts: value })),
