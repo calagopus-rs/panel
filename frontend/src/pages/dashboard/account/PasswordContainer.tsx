@@ -2,6 +2,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
+import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
@@ -48,11 +49,10 @@ export default () => {
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
           />
-          <TextInput
+          <PasswordInput
             withAsterisk
             label={'New Password'}
             placeholder={'New Password'}
-            type={'password'}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />

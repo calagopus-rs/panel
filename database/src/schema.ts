@@ -85,9 +85,9 @@ export const users = pgTable('users', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (users) => [
-	index('users_external_id_idx').on(users.externalId),
+	uniqueIndex('users_external_id_idx').on(users.externalId),
 	uniqueIndex('users_username_idx').on(users.username),
-	uniqueIndex('users_email_idx').on(users.email)
+	uniqueIndex('users_email_idx').on(sql`lower(${users.email})`)
 ])
 
 export const userActivities = pgTable('user_activities', {
@@ -303,7 +303,7 @@ export const nodeAllocations = pgTable('node_allocations', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (allocations) => [
 	index('allocations_node_uuid_idx').on(allocations.nodeUuid),
-	uniqueIndex('allocations_node_uuid_port_idx').on(allocations.nodeUuid, allocations.port)
+	uniqueIndex('allocations_node_uuid_ip_port_idx').on(allocations.nodeUuid, sql`host(${allocations.ip})`, allocations.port)
 ])
 
 export const nests = pgTable('nests', {
