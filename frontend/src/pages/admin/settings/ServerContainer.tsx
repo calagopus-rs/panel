@@ -7,9 +7,9 @@ import { Group, Stack, Title } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
-import { bytesToString, parseSize } from '@/lib/size';
-import TextInput from '@/elements/input/TextInput';
+import { bytesToString } from '@/lib/size';
 import NumberInput from '@/elements/input/NumberInput';
+import SizeInput from '@/elements/input/SizeInput';
 
 export default () => {
   const { addToast } = useToast();
@@ -43,23 +43,12 @@ export default () => {
 
       <Stack>
         <Group grow>
-          <TextInput
+          <SizeInput
             label={'Max File Manager View Size + Unit (e.g. 2GB)'}
             placeholder={'Max File Manager View Size'}
             value={maxFileManagerViewSizeInput}
-            onChange={(e) => {
-              const input = e.currentTarget.value;
-              setMaxFileManagerViewSizeInput(input);
-
-              try {
-                const parsed = parseSize(input);
-                if (parsed > 0) {
-                  setServerSettings({ ...serverSettings, maxFileManagerViewSize: parsed });
-                }
-              } catch {
-                // ignore invalid intermediate states
-              }
-            }}
+            setState={setMaxFileManagerViewSizeInput}
+            onChange={(value) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: value })}
           />
 
           <NumberInput

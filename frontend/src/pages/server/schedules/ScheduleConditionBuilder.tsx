@@ -11,6 +11,7 @@ import {
 import { bytesToString, parseSize } from '@/lib/size';
 import TextInput from '@/elements/input/TextInput';
 import { useState } from 'react';
+import SizeInput from '@/elements/input/SizeInput';
 
 const maxConditionDepth = 3;
 
@@ -138,22 +139,11 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
               />
             )}
             {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
-              <TextInput
+              <SizeInput
                 label={'Value + Unit (e.g. 2GB)'}
                 value={sizeInput}
-                onChange={(e) => {
-                  const input = e.target.value;
-                  setSizeInput(input);
-
-                  try {
-                    const parsed = parseSize(input);
-                    if (parsed > 0) {
-                      onChange({ ...condition, value: parsed });
-                    }
-                  } catch {
-                    // ignore invalid intermediate states
-                  }
-                }}
+                setState={setSizeInput}
+                onChange={(value) => onChange({ ...condition, value })}
               />
             )}
           </Group>

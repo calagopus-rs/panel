@@ -23,6 +23,8 @@ import { formatAllocation } from '@/lib/server';
 import MultiSelect from '@/elements/input/MultiSelect';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import SizeInput from '@/elements/input/SizeInput';
+import { bytesToString, mbToBytes } from '@/lib/size';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -37,6 +39,9 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [memoryInput, setMemoryInput] = useState('');
+  const [diskInput, setDiskInput] = useState('');
+  const [swapInput, setSwapInput] = useState('');
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [doNodesRefetch, setDoNodesRefetch] = useState(false);
@@ -87,35 +92,16 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   });
 
   useEffect(() => {
-    setServer({
-      externalId: contextServer?.externalId ?? '',
-      name: contextServer?.name ?? '',
-      description: contextServer?.description ?? '',
-      startOnCompletion: true,
-      skipScripts: false,
-      limits: contextServer?.limits ?? {
-        cpu: 100,
-        memory: 1024,
-        swap: 0,
-        disk: 10240,
-        ioWeight: 500,
-      },
-      pinnedCpus: contextServer?.pinnedCpus ?? [],
-      startup: contextServer?.startup ?? '',
-      image: contextServer?.image ?? '',
-      timezone: contextServer?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone,
-      featureLimits: contextServer?.featureLimits ?? {
-        allocations: 1,
-        databases: 0,
-        backups: 0,
-        schedules: 0,
-      },
-      nodeUuid: contextServer?.node.uuid ?? '',
-      ownerUuid: contextServer?.owner.uuid ?? '',
-      eggUuid: contextServer?.egg.uuid ?? '',
-      allocationUuid: contextServer?.allocation?.uuid ?? null,
-      allocationUuids: [],
-    });
+    if (contextServer) {
+      setServer(contextServer);
+    }
+    setMemoryInput(
+      contextServer ? bytesToString(mbToBytes(contextServer?.limits.memory)) : bytesToString(mbToBytes(1024)),
+    );
+    setDiskInput(
+      contextServer ? bytesToString(mbToBytes(contextServer?.limits.disk)) : bytesToString(mbToBytes(10240)),
+    );
+    setSwapInput(contextServer ? bytesToString(mbToBytes(contextServer?.limits.swap)) : bytesToString(mbToBytes(0)));
   }, [contextServer]);
 
   const fetchNodes = (search: string) => {
@@ -452,24 +438,22 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   min={1}
                   onChange={(value) => setServer({ ...server, limits: { ...server.limits, cpu: Number(value) } })}
                 />
-                <NumberInput
+                <SizeInput
                   withAsterisk
-                  label={'Memory (MB)'}
-                  placeholder={'1024'}
-                  value={server.limits.memory || 100}
-                  min={1}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, memory: Number(value) } })}
+                  label={'Memory + Unit (e.g. 1 GiB)'}
+                  value={memoryInput}
+                  setState={setMemoryInput}
+                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, memory: value } })}
                 />
               </Group>
 
               <Group grow>
-                <NumberInput
+                <SizeInput
                   withAsterisk
-                  label={'Disk Space (MB)'}
-                  placeholder={'10240'}
-                  value={server.limits.disk || 10240}
-                  min={1}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, disk: Number(value) } })}
+                  label={'Disk Space + Unit (e.g. 10 GiB)'}
+                  value={diskInput}
+                  setState={setDiskInput}
+                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, disk: value } })}
                 />
                 <NumberInput
                   withAsterisk
@@ -478,6 +462,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   value={server.limits.swap || 0}
                   min={-1}
                   onChange={(value) => setServer({ ...server, limits: { ...server.limits, swap: Number(value) } })}
+                />
+                <SizeInput
+                  withAsterisk
+                  label={'Swap + Unit (e.g. 500 MiB)'}
+                  value={swapInput}
+                  setState={setSwapInput}
+                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, swap: value } })}
                 />
                 <NumberInput
                   label={'IO Weight'}
