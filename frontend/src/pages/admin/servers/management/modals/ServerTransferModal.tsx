@@ -1,7 +1,7 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { httpErrorToHuman } from "@/api/axios";
+import { useToast } from "@/providers/ToastProvider";
 import React, { useCallback, useEffect, useState } from "react";
-import { Container, Paper, Stack, Title } from "@mantine/core";
+import { Container, ModalProps, Paper, Stack, Title } from "@mantine/core";
 import debounce from "debounce";
 import getNodes from "@/api/admin/nodes/getNodes";
 import Select from "@/elements/input/Select";
@@ -18,30 +18,34 @@ import postTransfer from "@/api/admin/servers/postTransfer";
 import { load } from "@/lib/debounce";
 import { useNavigate } from "react-router";
 
-export default ({ server }: { server: AdminServer }) => {
+export default ({
+                  server,
+                  opened,
+                  onClose
+                }: ModalProps & { server: AdminServer; }) => {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openModal, setOpenModal] = useState<'confirm'>(null);
+  const [openModal, setOpenModal] = useState<"confirm">(null);
   const [loading, setLoading] = useState(false);
   const [selectedNodeUuid, setSelectedNodeUuid] = useState(null);
   const [selectedPrimaryAllocationUuid, setSelectedPrimaryAllocationUuid] = useState(null);
   const [selectedAllocationUuids, setSelectedAllocationUuids] = useState<string[]>([]);
   const [selectedBackupUuids, setSelectedBackupsUuids] = useState<string[]>([]);
   const [deleteSourceBackups, setDeleteSourceBackups] = useState(false);
-  const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_zstd');
-  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('good_compression');
+  const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>("tar_zstd");
+  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>("good_compression");
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [doNodesRefetch, setDoNodesRefetch] = useState(false);
-  const [nodeSearch, setNodeSearch] = useState('');
+  const [nodeSearch, setNodeSearch] = useState("");
   const [availableAllocations, setAvailableAllocations] = useState<NodeAllocation[]>([]);
   const [doAllocationsRefetch, setDoAllocationsRefetch] = useState(false);
-  const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState('');
-  const [allocationsSearch, setAllocationsSearch] = useState('');
+  const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState("");
+  const [allocationsSearch, setAllocationsSearch] = useState("");
   const [backups, setBackups] = useState<ServerBackup[]>([]);
   const [doBackupsRefetch, setDoBackupsRefetch] = useState(false);
-  const [backupSearch, setBackupSearch] = useState('');
+  const [backupSearch, setBackupSearch] = useState("");
 
   const fetchNodes = (search: string) => {
     getNodes(1, search)
@@ -53,7 +57,7 @@ export default ({ server }: { server: AdminServer }) => {
         }
       })
       .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+        addToast(httpErrorToHuman(msg), "error");
       });
   };
 
@@ -61,7 +65,7 @@ export default ({ server }: { server: AdminServer }) => {
     debounce((search: string) => {
       fetchNodes(search);
     }, 150),
-    [],
+    []
   );
 
   useEffect(() => {
@@ -71,7 +75,7 @@ export default ({ server }: { server: AdminServer }) => {
   }, [nodeSearch]);
 
   useEffect(() => {
-    fetchNodes('');
+    fetchNodes("");
   }, []);
 
   const fetchAvailableAllocations = (search: string) => {
@@ -84,7 +88,7 @@ export default ({ server }: { server: AdminServer }) => {
         }
       })
       .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+        addToast(httpErrorToHuman(msg), "error");
       });
   };
 
@@ -92,7 +96,7 @@ export default ({ server }: { server: AdminServer }) => {
     debounce((search: string) => {
       fetchAvailableAllocations(search);
     }, 150),
-    [],
+    []
   );
 
   useEffect(() => {
@@ -112,7 +116,7 @@ export default ({ server }: { server: AdminServer }) => {
       return;
     }
 
-    fetchAvailableAllocations('');
+    fetchAvailableAllocations("");
   }, [selectedNodeUuid]);
 
   const fetchBackups = (search: string) => {
@@ -125,7 +129,7 @@ export default ({ server }: { server: AdminServer }) => {
         }
       })
       .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+        addToast(httpErrorToHuman(msg), "error");
       });
   };
 
@@ -133,7 +137,7 @@ export default ({ server }: { server: AdminServer }) => {
     debounce((search: string) => {
       fetchBackups(search);
     }, 150),
-    [],
+    []
   );
 
   useEffect(() => {
@@ -143,7 +147,7 @@ export default ({ server }: { server: AdminServer }) => {
   }, [backupSearch]);
 
   useEffect(() => {
-    fetchBackups('');
+    fetchBackups("");
   }, []);
 
   const doTransfer = () => {
@@ -156,45 +160,46 @@ export default ({ server }: { server: AdminServer }) => {
       backups: selectedBackupUuids,
       deleteSourceBackups,
       archiveFormat,
-      compressionLevel,
+      compressionLevel
     })
-    .then(() => {
-      addToast('Server transfer started.', 'success');
-      navigate('/admin/servers');
-    })
-    .catch((msg) => {
-      addToast(httpErrorToHuman(msg), 'error');
-    })
-    .finally(() => {
-      load(false, setLoading);
-    });
+      .then(() => {
+        addToast("Server transfer started.", "success");
+        navigate("/admin/servers");
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), "error");
+      })
+      .finally(() => {
+        load(false, setLoading);
+      });
   };
 
   return (
-    <Container size={'xs'}>
+    <>
       <ConfirmationModal
-        opened={openModal === 'confirm'}
+        opened={openModal === "confirm"}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Server Transfer'}
-        confirm={'Transfer'}
+        title={"Confirm Server Transfer"}
+        confirm={"Transfer"}
         onConfirmed={doTransfer}
       >
-        Are you sure you want to transfer <Code>{server.name}</Code> from <Code>{server.node.name}</Code> to <Code>{nodes.find((node) => node.uuid === selectedNodeUuid)?.name}</Code>?
+        Are you sure you want to
+        transfer <Code>{server.name}</Code> from <Code>{server.node.name}</Code> to <Code>{nodes.find((node) => node.uuid === selectedNodeUuid)?.name}</Code>?
       </ConfirmationModal>
 
-      <Paper withBorder p='md'>
+      <Paper withBorder p="md">
         <Stack>
           <Title order={2}>Server Transfer</Title>
 
           <Select
             withAsterisk
-            label={'Node'}
-            placeholder={'Node'}
-            value={selectedNodeUuid || ''}
+            label={"Node"}
+            placeholder={"Node"}
+            value={selectedNodeUuid || ""}
             onChange={(value) => setSelectedNodeUuid(value)}
             data={nodes.filter((node) => node.uuid !== server.node.uuid).map((node) => ({
               label: node.name,
-              value: node.uuid,
+              value: node.uuid
             }))}
             searchable
             searchValue={nodeSearch}
@@ -202,15 +207,15 @@ export default ({ server }: { server: AdminServer }) => {
           />
 
           <Select
-            label={'Primary Allocation'}
-            placeholder={'host:port'}
+            label={"Primary Allocation"}
+            placeholder={"host:port"}
             value={selectedPrimaryAllocationUuid}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedPrimaryAllocationUuid(value)}
             data={availableAllocations.filter((alloc) => !selectedAllocationUuids.includes(alloc.uuid))
               .map((alloc) => ({
                 label: formatAllocation(alloc),
-                value: alloc.uuid,
+                value: alloc.uuid
               }))}
             searchable
             searchValue={primaryAllocationsSearch}
@@ -219,15 +224,15 @@ export default ({ server }: { server: AdminServer }) => {
           />
 
           <MultiSelect
-            label={'Primary Allocation'}
-            placeholder={'host:port'}
+            label={"Primary Allocation"}
+            placeholder={"host:port"}
             value={selectedAllocationUuids}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedAllocationUuids(value)}
             data={availableAllocations.filter((alloc) => alloc.uuid !== selectedPrimaryAllocationUuid)
               .map((alloc) => ({
                 label: formatAllocation(alloc),
-                value: alloc.uuid,
+                value: alloc.uuid
               }))}
             searchable
             searchValue={allocationsSearch}
@@ -235,51 +240,51 @@ export default ({ server }: { server: AdminServer }) => {
           />
 
           <MultiSelect
-            label={'Backups to transfer'}
-            placeholder={'Backups to transfer'}
+            label={"Backups to transfer"}
+            placeholder={"Backups to transfer"}
             value={selectedBackupUuids}
             onChange={(value) => setSelectedBackupsUuids(value)}
             data={backups.map((backup) => ({
-                label: backup.name,
-                value: backup.uuid,
-              }))}
+              label: backup.name,
+              value: backup.uuid
+            }))}
             searchable
             searchValue={backupSearch}
             onSearchChange={setBackupSearch}
           />
 
           <Switch
-            label={'Delete source backups'}
+            label={"Delete source backups"}
             checked={deleteSourceBackups}
             onChange={(e) => setDeleteSourceBackups(e.target.checked)}
           />
 
           <Select
-            label={'Archive Format'}
+            label={"Archive Format"}
             value={archiveFormat}
             onChange={(value) => setArchiveFormat(value as ArchiveFormat)}
             data={Object.entries(archiveFormatLabelMapping).map(([value, label]) => ({
               value,
-              label,
+              label
             }))}
           />
 
           <Select
-            label={'Compression Level'}
+            label={"Compression Level"}
             value={compressionLevel}
             onChange={(value) => setCompressionLevel(value as CompressionLevel)}
-            disabled={archiveFormat === 'tar'}
+            disabled={archiveFormat === "tar"}
             data={Object.entries(compressionLevelLabelMapping).map(([value, label]) => ({
               value,
-              label,
+              label
             }))}
           />
 
-          <Button color={'blue'} onClick={() => setOpenModal('confirm')} loading={loading} disabled={!selectedNodeUuid}>
+          <Button color={"blue"} onClick={() => setOpenModal("confirm")} loading={loading} disabled={!selectedNodeUuid}>
             Transfer
           </Button>
         </Stack>
       </Paper>
-    </Container>
+    </>
   );
 };
