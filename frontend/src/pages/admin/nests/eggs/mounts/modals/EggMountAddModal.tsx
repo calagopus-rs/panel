@@ -9,9 +9,9 @@ import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
-import createEggMount from "@/api/admin/eggs/mounts/createEggMount";
+import createEggMount from '@/api/admin/eggs/mounts/createEggMount';
 
-export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest, egg: AdminNestEgg }) => {
+export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest; egg: AdminNestEgg }) => {
   const { addToast } = useToast();
   const { addEggMount } = useAdminStore();
 

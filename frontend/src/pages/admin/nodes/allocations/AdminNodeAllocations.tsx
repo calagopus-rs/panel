@@ -107,12 +107,7 @@ export default ({ node }: { node: Node }) => {
       <Group justify={'space-between'} mb={'md'}>
         <Title order={2}>Node Allocations</Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => setOpenModal('delete')}
             color={'red'}

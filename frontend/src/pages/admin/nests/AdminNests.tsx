@@ -53,12 +53,7 @@ const NestsContainer = () => {
           Nests
         </Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/nests/new')}
             color={'blue'}

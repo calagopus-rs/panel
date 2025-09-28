@@ -2,7 +2,7 @@ import Card from '@/elements/Card';
 import Code from '@/elements/Code';
 import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
-import { Group, Stack, Title } from '@mantine/core';
+import { Stack, Title } from '@mantine/core';
 import hljs from 'highlight.js/lib/core';
 import yaml from 'highlight.js/lib/languages/yaml';
 import 'highlight.js/styles/a11y-dark.min.css';
@@ -45,9 +45,7 @@ export default ({ node }: { node: Node }) => {
 
   return (
     <>
-      <Title order={2}>
-        Node Configuration
-      </Title>
+      <Title order={2}>Node Configuration</Title>
 
       <div className={'grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'}>
         <div className={'flex flex-col md:col-span-3'}>

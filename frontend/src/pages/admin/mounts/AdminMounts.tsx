@@ -51,12 +51,7 @@ const MountsContainer = () => {
           Mounts
         </Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/mounts/new')}
             color={'blue'}

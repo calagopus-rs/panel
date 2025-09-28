@@ -11,9 +11,9 @@ import { Group, Title } from '@mantine/core';
 import Card from '@/elements/Card';
 import TextArea from '@/elements/input/TextArea';
 import Select from '@/elements/input/Select';
-import { load } from "@/lib/debounce";
-import updateVariable from "@/api/server/startup/updateVariable";
-import VariableContainer from "@/elements/VariableContainer";
+import { load } from '@/lib/debounce';
+import updateVariable from '@/api/server/startup/updateVariable';
+import VariableContainer from '@/elements/VariableContainer';
 
 export default () => {
   const { addToast } = useToast();

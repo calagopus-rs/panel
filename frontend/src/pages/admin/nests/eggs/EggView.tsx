@@ -6,9 +6,9 @@ import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
-import getEgg from "@/api/admin/eggs/getEgg";
-import EggCreateOrUpdate from "@/pages/admin/nests/eggs/EggCreateOrUpdate";
-import AdminEggMounts from "@/pages/admin/nests/eggs/mounts/AdminEggMounts";
+import getEgg from '@/api/admin/eggs/getEgg';
+import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
+import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
 
 export default ({ contextNest }: { contextNest: Nest }) => {
   const params = useParams<'eggId'>();

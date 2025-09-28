@@ -1,4 +1,4 @@
-import { NavLink, useLocation } from "react-router";
+import { NavLink, useLocation } from 'react-router';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tabs } from '@mantine/core';
@@ -14,9 +14,9 @@ interface Props {
 
 export default ({ items }: Props) => {
   const location = useLocation();
-  const activeItem = items
-      .filter((item) => location.pathname.startsWith(item.link))
-      .sort((a, b) => b.link.length - a.link.length)[0] ?? items[0];
+  const activeItem =
+    items.filter((item) => location.pathname.startsWith(item.link)).sort((a, b) => b.link.length - a.link.length)[0] ??
+    items[0];
 
   return (
     <Tabs my={'xs'} defaultValue={activeItem?.name ?? items[0].name}>

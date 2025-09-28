@@ -8,8 +8,8 @@ import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
-import createServerMount from "@/api/admin/servers/mounts/createServerMount";
-import getAvailableServerMounts from "@/api/admin/servers/mounts/getAvailableServerMounts";
+import createServerMount from '@/api/admin/servers/mounts/createServerMount';
+import getAvailableServerMounts from '@/api/admin/servers/mounts/getAvailableServerMounts';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();

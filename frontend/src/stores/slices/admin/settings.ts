@@ -13,7 +13,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
     name: '',
     url: '',
     telemetryEnabled: true,
-    registrationEnabled: true
+    registrationEnabled: true,
   },
   server: {
     maxFileManagerViewSize: 10 * 1024 * 1024 * 1024,

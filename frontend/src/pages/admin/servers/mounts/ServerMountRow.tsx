@@ -10,7 +10,7 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
 import { NavLink } from 'react-router';
-import deleteServerMount from "@/api/admin/servers/mounts/deleteServerMount";
+import deleteServerMount from '@/api/admin/servers/mounts/deleteServerMount';
 
 export default ({ server, mount }: { server: AdminServer; mount: AdminServerMount }) => {
   const { addToast } = useToast();

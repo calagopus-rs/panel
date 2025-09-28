@@ -2,24 +2,24 @@ import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import ContextMenu from "@/elements/ContextMenu";
-import { faPencil, faStar, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { useState } from "react";
-import ConfirmationModal from "@/elements/modals/ConfirmationModal";
-import { formatAllocation } from "@/lib/server";
-import { httpErrorToHuman } from "@/api/axios";
-import deleteServerAllocation from "@/api/admin/servers/allocations/deleteServerAllocation";
-import { useToast } from "@/providers/ToastProvider";
-import { useAdminStore } from "@/stores/admin";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import updateServerAllocation from "@/api/admin/servers/allocations/updateServerAllocation";
-import Modal from "@/elements/modals/Modal";
-import { Group, Stack } from "@mantine/core";
-import Button from "@/elements/Button";
-import TextInput from "@/elements/input/TextInput";
-import { load } from "@/lib/debounce";
+import ContextMenu from '@/elements/ContextMenu';
+import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { formatAllocation } from '@/lib/server';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteServerAllocation from '@/api/admin/servers/allocations/deleteServerAllocation';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import updateServerAllocation from '@/api/admin/servers/allocations/updateServerAllocation';
+import Modal from '@/elements/modals/Modal';
+import { Group, Stack } from '@mantine/core';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 
-export default ({ server, allocation }: { server: AdminServer, allocation: ServerAllocation }) => {
+export default ({ server, allocation }: { server: AdminServer; allocation: ServerAllocation }) => {
   const { addToast } = useToast();
   const { serverAllocations, setServerAllocations, removeServerAllocation } = useAdminStore();
 
@@ -42,10 +42,10 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-    .finally(() => {
-      load(false, setLoading);
-    });
-  }
+      .finally(() => {
+        load(false, setLoading);
+      });
+  };
 
   const doSetPrimary = () => {
     updateServerAllocation(server.uuid, allocation.uuid, { primary: true })
@@ -105,8 +105,7 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
         onConfirmed={doRemove}
       >
         Are you sure you want to remove
-        <Code>{formatAllocation(allocation)}</Code>
-        ?
+        <Code>{formatAllocation(allocation)}</Code>?
       </ConfirmationModal>
 
       <ContextMenu
@@ -137,9 +136,7 @@ export default ({ server, allocation }: { server: AdminServer, allocation: Serve
             <TableData>
               <Code>{allocation.port}</Code>
             </TableData>
-            <TableData>
-              {allocation.notes || 'N/A'}
-            </TableData>
+            <TableData>{allocation.notes || 'N/A'}</TableData>
             <TableData>
               <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>
             </TableData>

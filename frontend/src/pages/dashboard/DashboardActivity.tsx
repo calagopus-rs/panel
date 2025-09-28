@@ -42,12 +42,7 @@ export default () => {
           Activity
         </Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
         </Group>
       </Group>
 

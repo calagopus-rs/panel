@@ -51,16 +51,9 @@ export default ({ node }: { node: Node }) => {
       <NodeMountAddModal node={node} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={2}>
-          Node Mounts
-        </Title>
+        <Title order={2}>Node Mounts</Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
           </Button>

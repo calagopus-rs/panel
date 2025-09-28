@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
@@ -10,18 +10,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import getServerAllocations from "@/api/admin/servers/allocations/getServerAllocations";
-import ServerAllocationRow from "./ServerAllocationRow";
-import ServerAllocationAddModal from "@/pages/admin/servers/allocations/modals/ServerAllocationAddModal";
-import { ContextMenuProvider } from "@/elements/ContextMenu";
+import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations';
+import ServerAllocationRow from './ServerAllocationRow';
+import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 
 export default ({ server }: { server: AdminServer }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
-  const {
-    serverAllocations,
-    setServerAllocations,
-  } = useAdminStore();
+  const { serverAllocations, setServerAllocations } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
   const [loading, setLoading] = useState(serverAllocations.data.length === 0);
@@ -51,16 +48,10 @@ export default ({ server }: { server: AdminServer }) => {
 
   return (
     <>
-      <ServerAllocationAddModal
-        server={server}
-        opened={openModal === 'add'}
-        onClose={() => setOpenModal(null)}
-      />
+      <ServerAllocationAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={2}>
-          Server Allocations
-        </Title>
+        <Title order={2}>Server Allocations</Title>
         <Group>
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
@@ -78,7 +69,7 @@ export default ({ server }: { server: AdminServer }) => {
             onPageSelect={setPage}
           >
             {serverAllocations.data.map((allocation) => (
-                <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
+              <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
             ))}
           </Table>
         </ContextMenuProvider>

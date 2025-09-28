@@ -2,7 +2,7 @@ import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { Group, Title } from '@mantine/core';
+import { Title } from '@mantine/core';
 import { load } from '@/lib/debounce';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
@@ -40,9 +40,7 @@ export default ({ location }: { location: Location }) => {
 
   return (
     <>
-      <Title order={2}>
-        Location Nodes
-      </Title>
+      <Title order={2}>Location Nodes</Title>
 
       {loading ? (
         <Spinner.Centered />

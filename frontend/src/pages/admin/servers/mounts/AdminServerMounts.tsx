@@ -11,9 +11,9 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import ServerMountRow from "@/pages/admin/servers/mounts/ServerMountRow";
-import getServerMounts from "@/api/admin/servers/mounts/getServerMounts";
-import ServerMountAddModal from "@/pages/admin/servers/mounts/modals/ServerMountAddModal";
+import ServerMountRow from '@/pages/admin/servers/mounts/ServerMountRow';
+import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
+import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal';
 
 export default ({ server }: { server: AdminServer }) => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,9 +48,7 @@ export default ({ server }: { server: AdminServer }) => {
       <ServerMountAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={2}>
-          Server Mounts
-        </Title>
+        <Title order={2}>Server Mounts</Title>
         <Group>
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add

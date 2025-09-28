@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Title, Divider, Stack } from '@mantine/core';
+import { Group, Title, Stack } from '@mantine/core';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';

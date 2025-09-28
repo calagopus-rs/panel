@@ -1,7 +1,7 @@
 import { axiosInstance, httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
-import { Group, Title } from '@mantine/core';
+import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
 import SemiCircleProgress from '@/elements/SemiCircleProgress';
 import Card from '@/elements/Card';
@@ -59,9 +59,7 @@ export default ({ node }: { node: Node }) => {
 
   return (
     <>
-      <Title order={2}>
-        Node Statistics
-      </Title>
+      <Title order={2}>Node Statistics</Title>
 
       {!statistics ? (
         <Spinner.Centered />

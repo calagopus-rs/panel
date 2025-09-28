@@ -55,7 +55,7 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         ...state.serverAllocations,
         data: [...state.serverAllocations.data, allocation],
         total: state.serverAllocations.total + 1,
-      }
+      },
     })),
   removeServerAllocation: (allocation) =>
     set((state) => ({
@@ -63,13 +63,15 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         ...state.serverAllocations,
         data: state.serverAllocations.data.filter((a) => a.uuid !== allocation.uuid),
         total: state.serverAllocations.total - 1,
-      }
+      },
     })),
 
   setServerVariables: (serverVariables) => set((state) => ({ ...state, serverVariables })),
   updateServerVariable: (envVariable, updatedProps) =>
     set((state) => ({
-      serverVariables: state.serverVariables.map((v) => (v.envVariable === envVariable ? { ...v, ...updatedProps } : v)),
+      serverVariables: state.serverVariables.map((v) =>
+        v.envVariable === envVariable ? { ...v, ...updatedProps } : v,
+      ),
     })),
 
   setServerMounts: (value) => set((state) => ({ ...state, serverMounts: value })),
@@ -79,7 +81,7 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         ...state.serverMounts,
         data: [...state.serverMounts.data, mount],
         total: state.serverMounts.total + 1,
-      }
+      },
     })),
   removeServerMount: (mount) =>
     set((state) => ({
@@ -87,6 +89,6 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         ...state.serverMounts,
         data: state.serverMounts.data.filter((m) => m.mount.uuid !== mount.mount.uuid),
         total: state.serverMounts.total - 1,
-      }
+      },
     })),
 });

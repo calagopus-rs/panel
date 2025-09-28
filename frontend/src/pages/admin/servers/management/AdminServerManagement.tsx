@@ -1,5 +1,5 @@
-import { Grid, Title } from "@mantine/core";
-import Card from "@/elements/Card";
+import { Grid, Title } from '@mantine/core';
+import Card from '@/elements/Card';
 
 export default ({ server }: { server: AdminServer }) => {
   return (

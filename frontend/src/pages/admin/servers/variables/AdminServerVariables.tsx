@@ -1,17 +1,16 @@
-import { Group, Title } from "@mantine/core";
-import VariableContainer from "@/elements/VariableContainer";
-import { useAdminStore } from "@/stores/admin";
-import { load } from "@/lib/debounce";
-import { httpErrorToHuman } from "@/api/axios";
-import updateServerVariable from "@/api/admin/servers/variables/updateServerVariable";
-import { useToast } from "@/providers/ToastProvider";
-import { useEffect } from "react";
-import getServerVariables from "@/api/admin/servers/variables/getServerVariables";
+import { Group, Title } from '@mantine/core';
+import VariableContainer from '@/elements/VariableContainer';
+import { useAdminStore } from '@/stores/admin';
+import { load } from '@/lib/debounce';
+import { httpErrorToHuman } from '@/api/axios';
+import updateServerVariable from '@/api/admin/servers/variables/updateServerVariable';
+import { useToast } from '@/providers/ToastProvider';
+import { useEffect } from 'react';
+import getServerVariables from '@/api/admin/servers/variables/getServerVariables';
 
 export default ({ server }: { server: AdminServer }) => {
   const { addToast } = useToast();
   const { serverVariables, setServerVariables, updateServerVariable: updateServerStoreVariable } = useAdminStore();
-
 
   useEffect(() => {
     getServerVariables(server.uuid).then((data) => {
@@ -36,10 +35,8 @@ export default ({ server }: { server: AdminServer }) => {
 
   return (
     <>
-      <Group mb={"md"}>
-        <Title order={2}>
-          Server Variables
-        </Title>
+      <Group mb={'md'}>
+        <Title order={2}>Server Variables</Title>
       </Group>
       <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
         {serverVariables.map((variable) => (
@@ -48,4 +45,4 @@ export default ({ server }: { server: AdminServer }) => {
       </div>
     </>
   );
-}
+};

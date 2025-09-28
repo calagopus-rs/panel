@@ -6,7 +6,7 @@ export default async (data: AdminSettings['webauthn']): Promise<void> => {
       .put('/api/admin/settings', {
         webauthn: {
           rp_id: data.rpId,
-          rp_origin: data.rpOrigin
+          rp_origin: data.rpOrigin,
         },
       })
       .then(() => resolve())

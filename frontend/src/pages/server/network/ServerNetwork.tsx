@@ -59,12 +59,7 @@ export default () => {
           Network
         </Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={doAdd} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
           </Button>

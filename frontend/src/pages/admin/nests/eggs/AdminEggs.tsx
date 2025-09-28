@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import { load } from '@/lib/debounce';
-import EggView from "@/pages/admin/nests/eggs/EggView";
+import EggView from '@/pages/admin/nests/eggs/EggView';
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
@@ -78,12 +78,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
           Eggs
         </Title>
         <Group>
-          <TextInput
-            placeholder={'Search...'}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            w={250}
-          />
+          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
             <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
             Upload

@@ -29,7 +29,6 @@ import ServerSettings from '@/pages/server/settings/ServerSettings';
 import ServerStartup from '@/pages/server/startup/ServerStartup';
 import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 import {
-  faBicycle,
   faBoxArchive,
   faBriefcase,
   faBuilding,
@@ -38,7 +37,6 @@ import {
   faCrow,
   faDatabase,
   faDesktop,
-  faDungeon,
   faEarthAmerica,
   faFolder,
   faFolderOpen,

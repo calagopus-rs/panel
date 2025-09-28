@@ -1,26 +1,26 @@
-import js from "@eslint/js";
-import globals from "globals";
+import js from '@eslint/js';
+import globals from 'globals';
 import type { Linter } from 'eslint';
 
-import tseslint from "typescript-eslint";
-import reactPlugin from "eslint-plugin-react";
-import reactHooksPlugin from "eslint-plugin-react-hooks";
+import tseslint from 'typescript-eslint';
+import reactPlugin from 'eslint-plugin-react';
+import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-plugin-prettier';
 
 export default [
   {
-    ignores: ["**/dist/*"],
+    ignores: ['**/dist/*'],
   },
 
   js.configs.recommended,
   ...tseslint.configs.recommended,
 
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
+    files: ['**/*.{js,jsx,ts,tsx}'],
 
     languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
+      ecmaVersion: 'latest',
+      sourceType: 'module',
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -35,27 +35,29 @@ export default [
 
     plugins: {
       react: reactPlugin,
-      "react-hooks": reactHooksPlugin,
+      'react-hooks': reactHooksPlugin,
       prettier,
     },
 
     rules: {
-      "react/jsx-uses-react": "error",
-      "react/jsx-uses-vars": "error",
-      "react/jsx-key": "warn",
+      'react/jsx-uses-react': 'error',
+      'react/jsx-uses-vars': 'error',
+      'react/jsx-key': 'warn',
 
-      "react-hooks/rules-of-hooks": "error",
+      'react-hooks/rules-of-hooks': 'error',
 
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/no-explicit-any": "warn",
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
 
-      "react/prop-types": "off",
+      'react/prop-types': 'off',
+
+      'prettier/prettier': 'warn',
     },
 
     settings: {
       react: {
-        version: "detect",
+        version: 'detect',
       },
     },
   },

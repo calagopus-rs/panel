@@ -6,8 +6,8 @@ import {
   faExternalLink,
   faFolder,
   faNetworkWired,
-  faPaperPlane, faWrench
-} from "@fortawesome/free-solid-svg-icons";
+  faWrench,
+} from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -17,9 +17,8 @@ import getServer from '@/api/admin/servers/getServer';
 import ServerCreateOrUpdate from './ServerCreateOrUpdate';
 import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations';
 import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts';
-import AdminServerTransfer from '@/pages/admin/servers/transfer/AdminServerTransfer';
-import AdminServerVariables from "@/pages/admin/servers/variables/AdminServerVariables";
-import AdminServerManagement from "@/pages/admin/servers/management/AdminServerManagement";
+import AdminServerVariables from '@/pages/admin/servers/variables/AdminServerVariables';
+import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement';
 
 export default () => {
   const params = useParams<'id'>();
