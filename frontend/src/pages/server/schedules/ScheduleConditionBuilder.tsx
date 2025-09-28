@@ -8,7 +8,7 @@ import {
   scheduleConditionLabelMapping,
   serverPowerStateLabelMapping,
 } from '@/lib/enums';
-import { bytesToString, parseSize } from '@/lib/size';
+import { bytesToString } from '@/lib/size';
 import TextInput from '@/elements/input/TextInput';
 import { useState } from 'react';
 import SizeInput from '@/elements/input/SizeInput';
