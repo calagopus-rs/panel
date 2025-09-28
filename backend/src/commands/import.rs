@@ -1754,7 +1754,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                     r#"
                     INSERT INTO node_allocations (node_uuid, ip, ip_alias, port, created)
                     VALUES ($1, $2, $3, $4, NOW())
-                    ON CONFLICT (node_uuid, ip, port) DO UPDATE SET port = EXCLUDED.port
+                    ON CONFLICT (node_uuid, host(ip), port) DO UPDATE SET port = EXCLUDED.port
                     RETURNING uuid
                     "#,
                 )
