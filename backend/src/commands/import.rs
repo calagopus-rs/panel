@@ -763,18 +763,22 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
 
                 let config_files: Vec<crate::models::nest_egg::ProcessConfigurationFile> =
                     serde_json::from_value(config_files.unwrap_or_default()).unwrap_or_default();
-                let config_startup: crate::models::nest_egg::NestEggConfigStartup =
+                let mut config_startup: crate::models::nest_egg::NestEggConfigStartup =
                     serde_json::from_value(config_startup.unwrap_or_default()).unwrap_or_default();
                 let config_stop: crate::models::nest_egg::NestEggConfigStop = serde_json::from_str(
                     config_stop.as_deref().unwrap_or(""),
                 )
                 .unwrap_or_else(|_| crate::models::nest_egg::NestEggConfigStop {
-                    r#type: "command".to_string(),
+                    r#type: "".to_string(),
                     value: config_stop,
                 });
                 let config_allocations = crate::models::nest_egg::NestEggConfigAllocations {
                     user_self_assign: Default::default(),
                 };
+
+                if config_startup.done.is_empty() {
+                    config_startup.done.push("".to_string());
+                }
 
                 sqlx::query(
                     r#"

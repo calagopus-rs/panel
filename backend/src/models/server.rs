@@ -584,7 +584,9 @@ impl Server {
             JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            WHERE (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1) AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            WHERE
+                (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1)
+                AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%' OR users.email ILIKE '%' || $2 || '%')
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
             "#,
@@ -628,8 +630,7 @@ impl Server {
             JOIN nests ON nests.uuid = nest_eggs.nest_uuid
             LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
             WHERE
-                servers.owner_uuid != $1
-                AND server_subusers.user_uuid != $1
+                servers.owner_uuid != $1 AND (server_subusers.user_uuid IS NULL OR server_subusers.user_uuid != $1)
                 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%' OR users.username ILIKE '%' || $2 || '%' OR users.email ILIKE '%' || $2 || '%')
             ORDER BY servers.created
             LIMIT $3 OFFSET $4
