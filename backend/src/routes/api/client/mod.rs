@@ -26,8 +26,8 @@ pub enum AuthMethod {
 
 pub type GetUser = crate::extract::ConsumingExtension<User>;
 pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
-pub type GetPermissionManager = crate::extract::ConsumingExtension<PermissionManager>;
-pub type GetUserActivityLogger = axum::extract::Extension<UserActivityLogger>;
+pub type GetPermissionManager = axum::extract::Extension<PermissionManager>;
+pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivityLogger>;
 
 #[derive(Clone)]
 pub struct UserActivityLogger {
