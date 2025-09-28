@@ -8,51 +8,21 @@ import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
-import debounce from 'debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
   const { addToast } = useToast();
   const { addNodeMount } = useAdminStore();
 
-  const [selectedMount, setSelectedMount] = useState<Mount | null>(null);
-  const [mounts, setMounts] = useState<Mount[]>([]);
-  const [search, setSearch] = useState('');
-  const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedMount, setSelectedMount] = useState<Mount | null>(null);
 
-  const fetchMounts = (search: string) => {
-    getMounts(1, search)
-      .then((response) => {
-        setMounts(response.data);
-
-        if (response.total > response.data.length) {
-          setDoRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      fetchMounts(search);
-    }, 150),
-    [],
-  );
+  const mounts = useSearchableResource<Mount>({ fetcher: (search) => getMounts(1, search) });
 
   useEffect(() => {
-    if (doRefetch) {
-      setDebouncedSearch(search);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (opened) {
-      fetchMounts('');
-    } else {
-      setSearch('');
+    if (!opened) {
+      mounts.setSearch('');
       setSelectedMount(null);
     }
   }, [opened]);
@@ -83,14 +53,14 @@ export default ({ node, opened, onClose }: ModalProps & { node: Node }) => {
           label={'Mount'}
           placeholder={'Mount'}
           value={selectedMount?.uuid}
-          onChange={(value) => setSelectedMount(mounts.find((m) => m.uuid === value))}
-          data={mounts.map((mount) => ({
+          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.uuid === value))}
+          data={mounts.items.map((mount) => ({
             label: mount.name,
             value: mount.uuid,
           }))}
           searchable
-          searchValue={search}
-          onSearchChange={setSearch}
+          searchValue={mounts.search}
+          onSearchChange={mounts.setSearch}
         />
 
         <Group mt={'md'}>

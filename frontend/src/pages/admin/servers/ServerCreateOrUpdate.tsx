@@ -81,6 +81,10 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     fetcher: (search) => getEggs(selectedNestUuid, 1, search),
     deps: [selectedNestUuid],
   });
+  const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
+    fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
+    deps: [server.nodeUuid],
+  });
   const availableAllocations = useSearchableResource<NodeAllocation>({
     fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
     deps: [server.nodeUuid],
@@ -432,15 +436,15 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     value={server.allocationUuid}
                     disabled={!server.nodeUuid}
                     onChange={(value) => setServer({ ...server, allocationUuid: value })}
-                    data={availableAllocations.items
+                    data={availablePrimaryAllocations.items
                       .filter((alloc) => !server.allocationUuids.includes(alloc.uuid))
                       .map((alloc) => ({
                         label: formatAllocation(alloc),
                         value: alloc.uuid,
                       }))}
                     searchable
-                    searchValue={availableAllocations.search}
-                    onSearchChange={availableAllocations.setSearch}
+                    searchValue={availablePrimaryAllocations.search}
+                    onSearchChange={availablePrimaryAllocations.setSearch}
                     allowDeselect
                   />
                   <MultiSelect

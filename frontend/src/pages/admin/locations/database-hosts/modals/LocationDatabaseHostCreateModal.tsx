@@ -9,49 +9,19 @@ import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
-import debounce from 'debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ location, opened, onClose }: ModalProps & { location: Location }) => {
   const { addToast } = useToast();
   const { addLocationDatabaseHost } = useAdminStore();
 
-  const [databaseHost, setDatabaseHost] = useState<DatabaseHost | null>(null);
-  const [databaseHosts, setDatabaseHosts] = useState<DatabaseHost[]>([]);
-  const [search, setSearch] = useState('');
-  const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [databaseHost, setDatabaseHost] = useState<DatabaseHost | null>(null);
 
-  const fetchDatabaseHosts = (search: string) => {
-    getDatabaseHosts(1, search)
-      .then((response) => {
-        setDatabaseHosts(response.data);
-
-        if (response.total > response.data.length) {
-          setDoRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      fetchDatabaseHosts(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doRefetch) {
-      setDebouncedSearch(search);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    fetchDatabaseHosts('');
-  }, []);
+  const databaseHosts = useSearchableResource<DatabaseHost>({
+    fetcher: (search) => getDatabaseHosts(1, search),
+  });
 
   const doCreate = () => {
     load(true, setLoading);
@@ -79,9 +49,9 @@ export default ({ location, opened, onClose }: ModalProps & { location: Location
           label={'Database Host'}
           placeholder={'Database Host'}
           value={databaseHost?.uuid}
-          onChange={(value) => setDatabaseHost(databaseHosts.find((dh) => dh.uuid === value))}
+          onChange={(value) => setDatabaseHost(databaseHosts.items.find((dh) => dh.uuid === value))}
           data={Object.values(
-            databaseHosts.reduce(
+            databaseHosts.items.reduce(
               (acc, { uuid, name, type }) => (
                 (acc[type] ??= { group: databaseTypeLabelMapping[type], items: [] }).items.push({
                   value: uuid,
@@ -93,8 +63,8 @@ export default ({ location, opened, onClose }: ModalProps & { location: Location
             ),
           )}
           searchable
-          searchValue={search}
-          onSearchChange={setSearch}
+          searchValue={databaseHosts.search}
+          onSearchChange={databaseHosts.setSearch}
         />
 
         <Group mt={'md'}>

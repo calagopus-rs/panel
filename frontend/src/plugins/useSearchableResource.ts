@@ -3,13 +3,8 @@ import debounce from 'debounce';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 
-interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-}
-
 interface UseSearchableResourceOptions<T> {
-  fetcher: (search: string) => Promise<PaginatedResponse<T>>;
+  fetcher: (search: string) => Promise<ResponseMeta<T>>;
   deps?: unknown[];
   debounceMs?: number;
 }

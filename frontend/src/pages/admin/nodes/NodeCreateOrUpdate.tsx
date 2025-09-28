@@ -14,22 +14,19 @@ import updateNode from '@/api/admin/nodes/updateNode';
 import createNode from '@/api/admin/nodes/createNode';
 import deleteNode from '@/api/admin/nodes/deleteNode';
 import getLocations from '@/api/admin/locations/getLocations';
-import debounce from 'debounce';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
 import Tooltip from '@/elements/Tooltip';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [search, setSearch] = useState('');
-  const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState<'delete'>(null);
   const [node, setNode] = useState<UpdateNode>({
     locationUuid: '',
     name: '',
@@ -44,52 +41,27 @@ export default ({ contextNode }: { contextNode?: Node }) => {
     disk: 10240,
   } as UpdateNode);
 
+  const locations = useSearchableResource<Location>({
+    fetcher: (search) => getLocations(1, search),
+  });
+
   useEffect(() => {
-    setNode({
-      locationUuid: contextNode?.location.uuid ?? '',
-      name: contextNode?.name ?? '',
-      public: contextNode?.public ?? false,
-      description: contextNode?.description ?? null,
-      publicUrl: contextNode?.publicUrl ?? null,
-      url: contextNode?.url ?? '',
-      sftpHost: contextNode?.sftpHost ?? null,
-      sftpPort: contextNode?.sftpPort ?? 2022,
-      maintenanceMessage: contextNode?.maintenanceMessage ?? null,
-      memory: contextNode?.memory ?? 8192,
-      disk: contextNode?.disk ?? 10240,
-    });
-  }, [contextNode]);
-
-  const fetchLocations = (search: string) => {
-    getLocations(1, search)
-      .then((response) => {
-        setLocations(response.data);
-
-        if (response.total > response.data.length) {
-          setDoRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+    if (contextNode) {
+      setNode({
+        locationUuid: contextNode.location.uuid,
+        name: contextNode.name,
+        public: contextNode.public,
+        description: contextNode.description,
+        publicUrl: contextNode.publicUrl,
+        url: contextNode.url,
+        sftpHost: contextNode.sftpHost,
+        sftpPort: contextNode.sftpPort,
+        maintenanceMessage: contextNode.maintenanceMessage,
+        memory: contextNode.memory,
+        disk: contextNode.disk,
       });
-  };
-
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      fetchLocations(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doRefetch) {
-      setDebouncedSearch(search);
     }
-  }, [search]);
-
-  useEffect(() => {
-    fetchLocations('');
-  }, []);
+  }, [contextNode]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
@@ -179,13 +151,13 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             placeholder={'Location'}
             value={node.locationUuid}
             onChange={(value) => setNode({ ...node, locationUuid: value })}
-            data={locations.map((location) => ({
+            data={locations.items.map((location) => ({
               label: location.name,
               value: location.uuid,
             }))}
             searchable
-            searchValue={search}
-            onSearchChange={setSearch}
+            searchValue={locations.search}
+            onSearchChange={locations.setSearch}
           />
         </Group>
 

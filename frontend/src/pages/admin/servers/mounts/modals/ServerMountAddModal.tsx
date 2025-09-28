@@ -6,52 +6,25 @@ import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
-import debounce from 'debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import createServerMount from '@/api/admin/servers/mounts/createServerMount';
 import getAvailableServerMounts from '@/api/admin/servers/mounts/getAvailableServerMounts';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
   const { addServerMount } = useAdminStore();
 
-  const [selectedMount, setSelectedMount] = useState<NodeMount | null>(null);
-  const [mounts, setMounts] = useState<NodeMount[]>([]);
-  const [search, setSearch] = useState('');
-  const [doRefetch, setDoRefetch] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedMount, setSelectedMount] = useState<NodeMount | null>(null);
 
-  const fetchMounts = (search: string) => {
-    getAvailableServerMounts(server.uuid, 1, search)
-      .then((response) => {
-        setMounts(response.data);
-
-        if (response.total > response.data.length) {
-          setDoRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedSearch = useCallback(
-    debounce((search: string) => {
-      fetchMounts(search);
-    }, 150),
-    [],
-  );
+  const mounts = useSearchableResource<AdminServerMount>({
+    fetcher: (search) => getAvailableServerMounts(server.uuid, 1, search),
+  });
 
   useEffect(() => {
-    if (doRefetch) {
-      setDebouncedSearch(search);
-    }
-  }, [search]);
-
-  useEffect(() => {
-    if (opened) {
-      fetchMounts('');
-    } else {
+    if (!opened) {
+      mounts.setSearch('');
       setSelectedMount(null);
     }
   }, [opened]);
@@ -82,14 +55,14 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
           label={'Mount'}
           placeholder={'Mount'}
           value={selectedMount?.mount.uuid}
-          onChange={(value) => setSelectedMount(mounts.find((m) => m.mount.uuid === value))}
-          data={mounts.map((mount) => ({
+          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.mount.uuid === value))}
+          data={mounts.items.map((mount) => ({
             label: mount.mount.name,
             value: mount.mount.uuid,
           }))}
           searchable
-          searchValue={search}
-          onSearchChange={setSearch}
+          searchValue={mounts.search}
+          onSearchChange={mounts.setSearch}
         />
 
         <Group mt={'md'}>

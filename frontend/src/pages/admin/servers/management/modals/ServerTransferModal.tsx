@@ -18,6 +18,7 @@ import postTransfer from '@/api/admin/servers/postTransfer';
 import { load } from '@/lib/debounce';
 import { useNavigate } from 'react-router';
 import Modal from '@/elements/modals/Modal';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
@@ -33,119 +34,16 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_zstd');
   const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('good_compression');
 
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [doNodesRefetch, setDoNodesRefetch] = useState(false);
-  const [nodeSearch, setNodeSearch] = useState('');
-  const [availableAllocations, setAvailableAllocations] = useState<NodeAllocation[]>([]);
-  const [doAllocationsRefetch, setDoAllocationsRefetch] = useState(false);
-  const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState('');
-  const [allocationsSearch, setAllocationsSearch] = useState('');
-  const [backups, setBackups] = useState<ServerBackup[]>([]);
-  const [doBackupsRefetch, setDoBackupsRefetch] = useState(false);
-  const [backupSearch, setBackupSearch] = useState('');
-
-  const fetchNodes = (search: string) => {
-    getNodes(1, search)
-      .then((response) => {
-        setNodes(response.data);
-
-        if (response.total > response.data.length) {
-          setDoNodesRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedNodeSearch = useCallback(
-    debounce((search: string) => {
-      fetchNodes(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doNodesRefetch) {
-      setDebouncedNodeSearch(nodeSearch);
-    }
-  }, [nodeSearch]);
-
-  useEffect(() => {
-    fetchNodes('');
-  }, []);
-
-  const fetchAvailableAllocations = (search: string) => {
-    getAvailableNodeAllocations(selectedNodeUuid, 1, search)
-      .then((response) => {
-        setAvailableAllocations(response.data);
-
-        if (response.total > response.data.length) {
-          setDoAllocationsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedAllocationSearch = useCallback(
-    debounce((search: string) => {
-      fetchAvailableAllocations(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doAllocationsRefetch) {
-      setDebouncedAllocationSearch(allocationsSearch);
-    }
-  }, [allocationsSearch]);
-
-  useEffect(() => {
-    if (doAllocationsRefetch) {
-      setDebouncedAllocationSearch(primaryAllocationsSearch);
-    }
-  }, [primaryAllocationsSearch]);
-
-  useEffect(() => {
-    if (!selectedNodeUuid) {
-      return;
-    }
-
-    fetchAvailableAllocations('');
-  }, [selectedNodeUuid]);
-
-  const fetchBackups = (search: string) => {
-    getBackups(server.uuid, 1, search)
-      .then((response) => {
-        setBackups(response.data);
-
-        if (response.total > response.data.length) {
-          setDoBackupsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedBackupSearch = useCallback(
-    debounce((search: string) => {
-      fetchBackups(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doBackupsRefetch) {
-      setDebouncedBackupSearch(backupSearch);
-    }
-  }, [backupSearch]);
-
-  useEffect(() => {
-    fetchBackups('');
-  }, []);
+  const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
+  const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
+    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid, 1, search),
+    deps: [selectedNodeUuid],
+  });
+  const availableAllocations = useSearchableResource<NodeAllocation>({
+    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid, 1, search),
+    deps: [selectedNodeUuid],
+  });
+  const backups = useSearchableResource<ServerBackup>({ fetcher: (search) => getBackups(server.uuid, 1, search) });
 
   const closeAll = () => {
     onClose();
@@ -187,7 +85,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
         onConfirmed={doTransfer}
       >
         Are you sure you want to transfer <Code>{server.name}</Code> from <Code>{server.node.name}</Code> to{' '}
-        <Code>{nodes.find((node) => node.uuid === selectedNodeUuid)?.name}</Code>?
+        <Code>{nodes.items.find((node) => node.uuid === selectedNodeUuid)?.name}</Code>?
       </ConfirmationModal>
 
       <Modal title={'Server Transfer'} onClose={onClose} opened={opened && !openModal}>
@@ -198,15 +96,15 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             placeholder={'Node'}
             value={selectedNodeUuid || ''}
             onChange={(value) => setSelectedNodeUuid(value)}
-            data={nodes
+            data={nodes.items
               .filter((node) => node.uuid !== server.node.uuid)
               .map((node) => ({
                 label: node.name,
                 value: node.uuid,
               }))}
             searchable
-            searchValue={nodeSearch}
-            onSearchChange={setNodeSearch}
+            searchValue={nodes.search}
+            onSearchChange={nodes.setSearch}
           />
 
           <Select
@@ -215,15 +113,15 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             value={selectedPrimaryAllocationUuid}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedPrimaryAllocationUuid(value)}
-            data={availableAllocations
+            data={availableAllocations.items
               .filter((alloc) => !selectedAllocationUuids.includes(alloc.uuid))
               .map((alloc) => ({
                 label: formatAllocation(alloc),
                 value: alloc.uuid,
               }))}
             searchable
-            searchValue={primaryAllocationsSearch}
-            onSearchChange={setPrimaryAllocationsSearch}
+            searchValue={availablePrimaryAllocations.search}
+            onSearchChange={availablePrimaryAllocations.setSearch}
             allowDeselect
           />
 
@@ -233,15 +131,15 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             value={selectedAllocationUuids}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedAllocationUuids(value)}
-            data={availableAllocations
+            data={availableAllocations.items
               .filter((alloc) => alloc.uuid !== selectedPrimaryAllocationUuid)
               .map((alloc) => ({
                 label: formatAllocation(alloc),
                 value: alloc.uuid,
               }))}
             searchable
-            searchValue={allocationsSearch}
-            onSearchChange={setAllocationsSearch}
+            searchValue={availableAllocations.search}
+            onSearchChange={availableAllocations.setSearch}
           />
 
           <MultiSelect
@@ -249,13 +147,13 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             placeholder={'Backups to transfer'}
             value={selectedBackupUuids}
             onChange={(value) => setSelectedBackupsUuids(value)}
-            data={backups.map((backup) => ({
+            data={backups.items.map((backup) => ({
               label: backup.name,
               value: backup.uuid,
             }))}
             searchable
-            searchValue={backupSearch}
-            onSearchChange={setBackupSearch}
+            searchValue={backups.search}
+            onSearchChange={backups.setSearch}
           />
 
           <Switch

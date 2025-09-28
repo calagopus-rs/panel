@@ -11,6 +11,7 @@ import { formatAllocation } from '@/lib/server';
 import { load } from '@/lib/debounce';
 import createServerAllocation from '@/api/admin/servers/allocations/createServerAllocation';
 import { useAdminStore } from '@/stores/admin';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
@@ -18,41 +19,14 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
 
   const [loading, setLoading] = useState(false);
   const [selectedAllocationUuids, setSelectedAllocationUuids] = useState([]);
-  const [availableAllocations, setAvailableAllocations] = useState<NodeAllocation[]>([]);
-  const [doAllocationsRefetch, setDoAllocationsRefetch] = useState(false);
-  const [allocationsSearch, setAllocationsSearch] = useState('');
 
-  const fetchAvailableAllocations = (search: string) => {
-    getAvailableNodeAllocations(server.node.uuid, 1, search)
-      .then((response) => {
-        setAvailableAllocations(response.data);
-
-        if (response.total > response.data.length) {
-          setDoAllocationsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedAvailableAllocationsSearch = useCallback(
-    debounce((search: string) => {
-      fetchAvailableAllocations(search);
-    }, 150),
-    [],
-  );
+  const availableAllocations = useSearchableResource<NodeAllocation>({
+    fetcher: (search) => getAvailableNodeAllocations(server.node.uuid, 1, search),
+  });
 
   useEffect(() => {
-    if (doAllocationsRefetch) {
-      setDebouncedAvailableAllocationsSearch(allocationsSearch);
-    }
-  }, [allocationsSearch]);
-
-  useEffect(() => {
-    if (opened) {
-      fetchAvailableAllocations('');
-    } else {
+    if (!opened) {
+      availableAllocations.setSearch('');
       setSelectedAllocationUuids([]);
     }
   }, [opened]);
@@ -90,13 +64,13 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
           placeholder={'host:port'}
           value={selectedAllocationUuids}
           onChange={(value) => setSelectedAllocationUuids(value)}
-          data={availableAllocations.map((alloc) => ({
+          data={availableAllocations.items.map((alloc) => ({
             label: formatAllocation(alloc),
             value: alloc.uuid,
           }))}
           searchable
-          searchValue={allocationsSearch}
-          onSearchChange={setAllocationsSearch}
+          searchValue={availableAllocations.search}
+          onSearchChange={availableAllocations.setSearch}
         />
 
         <Group mt={'md'}>
