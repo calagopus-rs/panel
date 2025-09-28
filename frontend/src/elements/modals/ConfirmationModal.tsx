@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Group, ModalProps } from '@mantine/core';
+import { DefaultMantineColor, Group, ModalProps } from '@mantine/core';
 import Modal from './Modal';
 import Button from '../Button';
 import { load } from '@/lib/debounce';
 
 type ConfirmationProps = Omit<ModalProps, 'children'> & {
-  children: React.ReactNode;
   confirm?: string | undefined;
+  confirmColor?: DefaultMantineColor;
   onConfirmed: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
+  children: React.ReactNode;
 };
 
-export default ({ confirm = 'Okay', children, onConfirmed, ...props }: ConfirmationProps) => {
+export default ({ confirm = 'Okay', confirmColor = 'red', onConfirmed, children, ...props }: ConfirmationProps) => {
   const [loading, setLoading] = useState(false);
 
   const onConfirmedAlt = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -27,7 +28,7 @@ export default ({ confirm = 'Okay', children, onConfirmed, ...props }: Confirmat
     <Modal {...props}>
       {children}
       <Group mt={'md'}>
-        <Button color={'red'} loading={loading} onClick={onConfirmedAlt}>
+        <Button color={confirmColor} loading={loading} onClick={onConfirmedAlt}>
           {confirm}
         </Button>
         <Button variant={'default'} onClick={props.onClose}>

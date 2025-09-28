@@ -11,6 +11,7 @@ export interface ServersSlice {
   setServers: (servers: ResponseMeta<AdminServer>) => void;
   addServer: (server: AdminServer) => void;
   removeServer: (server: AdminServer) => void;
+  updateServer: (server: AdminServer) => void;
 
   setServerAllocations: (allocations: ResponseMeta<ServerAllocation>) => void;
   addServerAllocation: (allocation: ServerAllocation) => void;
@@ -45,6 +46,13 @@ export const createServersSlice: StateCreator<AdminStore, [], [], ServersSlice> 
         ...state.servers,
         data: state.servers.data.filter((s) => s.uuid !== server.uuid),
         total: state.servers.total - 1,
+      },
+    })),
+  updateServer: (server) =>
+    set((state) => ({
+      servers: {
+        ...state.servers,
+        data: state.servers.data.map((s) => (s.uuid === server.uuid ? server : s)),
       },
     })),
 

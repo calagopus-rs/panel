@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Stack, Group, Paper, Title } from '@mantine/core';
+import { Stack, Group, Paper, Title, Alert } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router';
 import TextInput from '@/elements/input/TextInput';
 import TextArea from '@/elements/input/TextArea';
@@ -18,11 +18,11 @@ import { zones } from 'tzdata';
 import { load } from '@/lib/debounce';
 import updateServer from '@/api/admin/servers/updateServer';
 import createServer from '@/api/admin/servers/createServer';
-import deleteServer from '@/api/admin/servers/deleteServer';
-import Modal from '@/elements/modals/Modal';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
 import { formatAllocation } from '@/lib/server';
 import MultiSelect from '@/elements/input/MultiSelect';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -37,10 +37,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [deleteDoForce, setDeleteDoForce] = useState(false);
-  const [deleteDoDeleteBackups, setDeleteDoDeleteBackups] = useState(false);
-  const [deleteServerName, setDeleteServerName] = useState('');
 
   const [nodes, setNodes] = useState<Node[]>([]);
   const [doNodesRefetch, setDoNodesRefetch] = useState(false);
@@ -60,7 +56,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const [allocationsSearch, setAllocationsSearch] = useState('');
   const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState('');
 
-  const [server, setServer] = useState<UpdateAdminServer>({
+  const [server, setServer] = useState<Partial<UpdateAdminServer>>({
     externalId: '',
     name: '',
     description: '',
@@ -330,63 +326,16 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     }
   };
 
-  const doDelete = () => {
-    load(true, setLoading);
-    deleteServer(params.id, {
-      force: deleteDoForce,
-      deleteBackups: deleteDoDeleteBackups,
-    })
-      .then(() => {
-        addToast('Server deleted.', 'success');
-        navigate('/admin/servers');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
-      });
-  };
-
   return (
     <>
-      <Modal title={'Confirm Server Deletion'} onClose={() => setOpenModal(null)} opened={openModal === 'delete'}>
-        <Stack>
-          <Switch
-            label={'Do you want to forcefully delete this server?'}
-            name={'force'}
-            defaultChecked={deleteDoForce}
-            onChange={(e) => setDeleteDoForce(e.target.checked)}
-          />
-
-          <Switch
-            label={'Do you want to delete backups of this server?'}
-            name={'deleteBackups'}
-            defaultChecked={deleteDoDeleteBackups}
-            onChange={(e) => setDeleteDoDeleteBackups(e.target.checked)}
-          />
-
-          <TextInput
-            withAsterisk
-            label={'Confirm Server Name'}
-            placeholder={'Server Name'}
-            value={deleteServerName}
-            onChange={(e) => setDeleteServerName(e.target.value)}
-          />
-        </Stack>
-
-        <Group mt={'md'}>
-          <Button color={'red'} disabled={server.name != deleteServerName} onClick={doDelete}>
-            Okay
-          </Button>
-          <Button variant={'default'} onClick={() => setOpenModal(null)}>
-            Cancel
-          </Button>
-        </Group>
-      </Modal>
-
       <Stack>
         <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
+
+        {contextServer?.suspended && (
+          <Alert title='Server Suspended' color='orange' icon={<FontAwesomeIcon icon={faCircleInfo} />}>
+            This server is suspended.
+          </Alert>
+        )}
 
         <Group grow align={'normal'}>
           <Paper withBorder p='md'>
@@ -697,11 +646,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
           <Button onClick={doCreateOrUpdate} loading={loading}>
             Save
           </Button>
-          {params.id && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
         </Group>
       </Stack>
     </>

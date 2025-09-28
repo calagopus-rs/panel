@@ -178,6 +178,7 @@ interface UpdateAdminServer {
   description: string | null;
   startOnCompletion: boolean;
   skipScripts: boolean;
+  suspended: boolean;
   limits: ServerLimits;
   pinnedCpus: number[];
   startup: string;

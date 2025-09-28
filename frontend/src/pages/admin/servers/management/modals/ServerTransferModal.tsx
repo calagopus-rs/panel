@@ -17,6 +17,7 @@ import Code from '@/elements/Code';
 import postTransfer from '@/api/admin/servers/postTransfer';
 import { load } from '@/lib/debounce';
 import { useNavigate } from 'react-router';
+import Modal from '@/elements/modals/Modal';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
@@ -146,6 +147,11 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
     fetchBackups('');
   }, []);
 
+  const closeAll = () => {
+    onClose();
+    setOpenModal(null);
+  };
+
   const doTransfer = () => {
     load(true, setLoading);
 
@@ -160,6 +166,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
     })
       .then(() => {
         addToast('Server transfer started.', 'success');
+        closeAll();
         navigate('/admin/servers');
       })
       .catch((msg) => {
@@ -174,7 +181,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
     <>
       <ConfirmationModal
         opened={openModal === 'confirm'}
-        onClose={() => setOpenModal(null)}
+        onClose={closeAll}
         title={'Confirm Server Transfer'}
         confirm={'Transfer'}
         onConfirmed={doTransfer}
@@ -183,10 +190,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
         <Code>{nodes.find((node) => node.uuid === selectedNodeUuid)?.name}</Code>?
       </ConfirmationModal>
 
-      <Paper withBorder p='md'>
+      <Modal title={'Server Transfer'} onClose={onClose} opened={opened && !openModal}>
         <Stack>
-          <Title order={2}>Server Transfer</Title>
-
           <Select
             withAsterisk
             label={'Node'}
@@ -284,7 +289,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             Transfer
           </Button>
         </Stack>
-      </Paper>
+      </Modal>
     </>
   );
 };
