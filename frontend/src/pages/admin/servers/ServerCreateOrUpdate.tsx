@@ -388,7 +388,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
       <Stack>
         <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
 
-        <Group grow align={'inherit'}>
+        <Group grow align={'normal'}>
           <Paper withBorder p='md'>
             <Stack>
               <Title order={3}>Basic Information</Title>
@@ -489,7 +489,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
           </Paper>
         </Group>
 
-        <Group grow align={'inherit'}>
+        <Group grow align={'normal'}>
           <Paper withBorder p='md'>
             <Stack>
               <Title order={3}>Resource Limits</Title>
@@ -598,7 +598,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
           </Paper>
         </Group>
 
-        <Group grow align={'inherit'}>
+        <Group grow align={'normal'}>
           <Paper withBorder p='md'>
             <Stack>
               <Title order={3}>Feature Limits</Title>
