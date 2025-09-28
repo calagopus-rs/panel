@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Stack, Group, Paper, Title, Alert } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router';
 import TextInput from '@/elements/input/TextInput';
@@ -10,7 +10,6 @@ import Button from '@/elements/Button';
 import getNodes from '@/api/admin/nodes/getNodes';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
-import debounce from 'debounce';
 import getUsers from '@/api/admin/users/getUsers';
 import getNests from '@/api/admin/nests/getNests';
 import getEggs from '@/api/admin/eggs/getEggs';
@@ -25,6 +24,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import SizeInput from '@/elements/input/SizeInput';
 import { bytesToString, mbToBytes } from '@/lib/size';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -42,24 +42,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const [memoryInput, setMemoryInput] = useState('');
   const [diskInput, setDiskInput] = useState('');
   const [swapInput, setSwapInput] = useState('');
-
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [doNodesRefetch, setDoNodesRefetch] = useState(false);
-  const [nodeSearch, setNodeSearch] = useState('');
-  const [users, setUsers] = useState<User[]>([]);
-  const [doUsersRefetch, setDoUsersRefetch] = useState(false);
-  const [userSearch, setUserSearch] = useState('');
-  const [nests, setNests] = useState<Nest[]>([]);
   const [selectedNestUuid, setSelectedNestUuid] = useState<string>(contextServer?.nest.uuid ?? '');
-  const [doNestsRefetch, setDoNestsRefetch] = useState(false);
-  const [nestSearch, setNestSearch] = useState('');
-  const [eggs, setEggs] = useState<AdminNestEgg[]>([]);
-  const [doEggsRefetch, setDoEggsRefetch] = useState(false);
-  const [eggSearch, setEggSearch] = useState('');
-  const [availableAllocations, setAvailableAllocations] = useState<NodeAllocation[]>([]);
-  const [doAllocationsRefetch, setDoAllocationsRefetch] = useState(false);
-  const [allocationsSearch, setAllocationsSearch] = useState('');
-  const [primaryAllocationsSearch, setPrimaryAllocationsSearch] = useState('');
 
   const [server, setServer] = useState<Partial<UpdateAdminServer>>({
     externalId: '',
@@ -91,6 +74,18 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     allocationUuids: [],
   });
 
+  const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
+  const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
+  const nests = useSearchableResource<Nest>({ fetcher: (search) => getNests(1, search) });
+  const eggs = useSearchableResource<AdminNestEgg>({
+    fetcher: (search) => getEggs(selectedNestUuid, 1, search),
+    deps: [selectedNestUuid],
+  });
+  const availableAllocations = useSearchableResource<NodeAllocation>({
+    fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
+    deps: [server.nodeUuid],
+  });
+
   useEffect(() => {
     if (contextServer) {
       setServer(contextServer);
@@ -104,175 +99,12 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     setSwapInput(contextServer ? bytesToString(mbToBytes(contextServer?.limits.swap)) : bytesToString(mbToBytes(0)));
   }, [contextServer]);
 
-  const fetchNodes = (search: string) => {
-    getNodes(1, search)
-      .then((response) => {
-        setNodes(response.data);
-
-        if (response.total > response.data.length) {
-          setDoNodesRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedNodeSearch = useCallback(
-    debounce((search: string) => {
-      fetchNodes(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doNodesRefetch) {
-      setDebouncedNodeSearch(nodeSearch);
-    }
-  }, [nodeSearch]);
-
-  const fetchUsers = (search: string) => {
-    getUsers(1, search)
-      .then((response) => {
-        setUsers(response.data);
-
-        if (response.total > response.data.length) {
-          setDoUsersRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedUserSearch = useCallback(
-    debounce((search: string) => {
-      fetchUsers(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doUsersRefetch) {
-      setDebouncedUserSearch(userSearch);
-    }
-  }, [userSearch]);
-
-  const fetchNests = (search: string) => {
-    getNests(1, search)
-      .then((response) => {
-        setNests(response.data);
-
-        if (response.total > response.data.length) {
-          setDoNestsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedNestSearch = useCallback(
-    debounce((search: string) => {
-      fetchNests(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doNestsRefetch) {
-      setDebouncedNestSearch(nestSearch);
-    }
-  }, [nestSearch]);
-
-  const fetchEggs = (search: string) => {
-    getEggs(selectedNestUuid, 1, search)
-      .then((response) => {
-        setEggs(response.data);
-
-        if (response.total > response.data.length) {
-          setDoEggsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedEggSearch = useCallback(
-    debounce((search: string) => {
-      fetchEggs(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doEggsRefetch) {
-      setDebouncedEggSearch(eggSearch);
-    }
-  }, [eggSearch]);
-
-  const fetchAvailableAllocations = (search: string) => {
-    getAvailableNodeAllocations(server.nodeUuid, 1, search)
-      .then((response) => {
-        setAvailableAllocations(response.data);
-
-        if (response.total > response.data.length) {
-          setDoAllocationsRefetch(true);
-        }
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
-  const setDebouncedAllocationSearch = useCallback(
-    debounce((search: string) => {
-      fetchAvailableAllocations(search);
-    }, 150),
-    [],
-  );
-
-  useEffect(() => {
-    if (doAllocationsRefetch) {
-      setDebouncedAllocationSearch(allocationsSearch);
-    }
-  }, [allocationsSearch]);
-
-  useEffect(() => {
-    if (doAllocationsRefetch) {
-      setDebouncedAllocationSearch(primaryAllocationsSearch);
-    }
-  }, [primaryAllocationsSearch]);
-
-  useEffect(() => {
-    fetchNodes('');
-    fetchUsers('');
-    fetchNests('');
-  }, []);
-
-  useEffect(() => {
-    if (!server.nodeUuid) {
-      return;
-    }
-
-    fetchAvailableAllocations('');
-  }, [server.nodeUuid]);
-
-  useEffect(() => {
-    if (!selectedNestUuid) {
-      return;
-    }
-
-    fetchEggs('');
-  }, [selectedNestUuid]);
-
   useEffect(() => {
     if (!server.eggUuid) {
       return;
     }
 
-    const egg = eggs.find((egg) => egg.uuid === server.eggUuid);
+    const egg = eggs.items.find((egg) => egg.uuid === server.eggUuid);
     if (!egg) {
       return;
     }
@@ -365,13 +197,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   placeholder={'Node'}
                   value={server.nodeUuid || ''}
                   onChange={(value) => setServer({ ...server, nodeUuid: value })}
-                  data={nodes.map((node) => ({
+                  data={nodes.items.map((node) => ({
                     label: node.name,
                     value: node.uuid,
                   }))}
                   searchable
-                  searchValue={nodeSearch}
-                  onSearchChange={setNodeSearch}
+                  searchValue={nodes.search}
+                  onSearchChange={nodes.setSearch}
                 />
                 <Select
                   withAsterisk
@@ -379,13 +211,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   placeholder={'Owner'}
                   value={server.ownerUuid || ''}
                   onChange={(value) => setServer({ ...server, ownerUuid: value })}
-                  data={users.map((user) => ({
+                  data={users.items.map((user) => ({
                     label: user.username,
                     value: user.uuid,
                   }))}
                   searchable
-                  searchValue={userSearch}
-                  onSearchChange={setUserSearch}
+                  searchValue={users.search}
+                  onSearchChange={users.setSearch}
                 />
               </Group>
 
@@ -396,13 +228,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   placeholder={'nest'}
                   value={selectedNestUuid}
                   onChange={(value) => setSelectedNestUuid(value)}
-                  data={nests.map((nest) => ({
+                  data={nests.items.map((nest) => ({
                     label: nest.name,
                     value: nest.uuid,
                   }))}
                   searchable
-                  searchValue={nestSearch}
-                  onSearchChange={setNestSearch}
+                  searchValue={nests.search}
+                  onSearchChange={nests.setSearch}
                 />
                 <Select
                   withAsterisk
@@ -411,13 +243,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   value={server.eggUuid || ''}
                   onChange={(value) => setServer({ ...server, eggUuid: value })}
                   disabled={!selectedNestUuid}
-                  data={eggs.map((egg) => ({
+                  data={eggs.items.map((egg) => ({
                     label: egg.name,
                     value: egg.uuid,
                   }))}
                   searchable
-                  searchValue={eggSearch}
-                  onSearchChange={setEggSearch}
+                  searchValue={eggs.search}
+                  onSearchChange={eggs.setSearch}
                 />
               </Group>
             </Stack>
@@ -490,7 +322,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   placeholder={'ghcr.io/...'}
                   value={server.image || ''}
                   onChange={(value) => setServer({ ...server, image: value })}
-                  data={Object.entries(eggs.find((egg) => egg.uuid === server.eggUuid)?.dockerImages || {}).map(
+                  data={Object.entries(eggs.items.find((egg) => egg.uuid === server.eggUuid)?.dockerImages || {}).map(
                     ([label, value]) => ({
                       label,
                       value,
@@ -600,15 +432,15 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     value={server.allocationUuid}
                     disabled={!server.nodeUuid}
                     onChange={(value) => setServer({ ...server, allocationUuid: value })}
-                    data={availableAllocations
+                    data={availableAllocations.items
                       .filter((alloc) => !server.allocationUuids.includes(alloc.uuid))
                       .map((alloc) => ({
                         label: formatAllocation(alloc),
                         value: alloc.uuid,
                       }))}
                     searchable
-                    searchValue={primaryAllocationsSearch}
-                    onSearchChange={setPrimaryAllocationsSearch}
+                    searchValue={availableAllocations.search}
+                    onSearchChange={availableAllocations.setSearch}
                     allowDeselect
                   />
                   <MultiSelect
@@ -617,15 +449,15 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     value={server.allocationUuids}
                     disabled={!server.nodeUuid}
                     onChange={(value) => setServer({ ...server, allocationUuids: value })}
-                    data={availableAllocations
+                    data={availableAllocations.items
                       .filter((alloc) => alloc.uuid !== server.allocationUuid)
                       .map((alloc) => ({
                         label: formatAllocation(alloc),
                         value: alloc.uuid,
                       }))}
                     searchable
-                    searchValue={allocationsSearch}
-                    onSearchChange={setAllocationsSearch}
+                    searchValue={availableAllocations.search}
+                    onSearchChange={availableAllocations.setSearch}
                   />
                 </Group>
               </Stack>
