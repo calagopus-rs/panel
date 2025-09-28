@@ -5,7 +5,11 @@ mod post {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
         routes::{
-            ApiError, GetState, api::admin::database_hosts::_database_host_::GetDatabaseHost,
+            ApiError, GetState,
+            api::{
+                admin::database_hosts::_database_host_::GetDatabaseHost,
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -26,7 +30,13 @@ mod post {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, database_host: GetDatabaseHost) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        database_host: GetDatabaseHost,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("database-hosts.test")?;
+
         match database_host.get_connection(&state.database).await {
             Ok(pool) => match pool {
                 crate::models::database_host::DatabasePool::Mysql(pool) => {

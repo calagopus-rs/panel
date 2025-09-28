@@ -6,8 +6,11 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+                },
             },
         },
     };
@@ -39,15 +42,12 @@ mod post {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         database: GetServerDatabase,
         activity_logger: GetServerActivityLogger,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.update")?;
 
         if database.locked {
             return ApiResponse::error("database is locked and the password cannot be rotated")
@@ -77,7 +77,10 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            password: if server.has_permission("databases.read-password").is_ok() {
+            password: if permissions
+                .has_server_permission("databases.read-password")
+                .is_ok()
+            {
                 Some(password)
             } else {
                 None

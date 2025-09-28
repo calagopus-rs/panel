@@ -8,7 +8,7 @@ mod get {
         routes::{
             ApiError, GetState,
             api::client::{
-                GetUser,
+                GetPermissionManager, GetUser,
                 servers::_server_::{GetServer, GetServerActivityLogger},
             },
         },
@@ -69,16 +69,13 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("files.read-content") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("files.read-content")?;
 
         for file in &params.files {
             if server.is_ignored(file, params.directory) {

@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_schedule::ServerSchedule},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -45,6 +48,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -54,11 +58,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("schedules.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.read")?;
 
         let schedules = ServerSchedule::by_server_uuid_with_pagination(
             &state.database,
@@ -91,7 +91,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -128,6 +131,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -138,11 +142,7 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("schedules.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.create")?;
 
         let schedules = ServerSchedule::count_by_server_uuid(&state.database, server.uuid).await;
         if schedules >= server.schedule_limit as i64 {

@@ -6,7 +6,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+            api::{
+                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+                client::GetPermissionManager,
+            },
         },
     };
     use serde::Serialize;
@@ -30,9 +33,12 @@ mod post {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.reset-token")?;
+
         let (token_id, token) = node.reset_token(&state.database).await?;
 
         activity_logger

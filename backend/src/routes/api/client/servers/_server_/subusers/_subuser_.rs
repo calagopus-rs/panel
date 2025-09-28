@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -36,15 +39,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, subuser)): Path<(String, String)>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("subusers.delete") {
-            return ApiResponse::json(ApiError::new_value(&[&error]))
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("subusers.delete")?;
 
         let subuser =
             match ServerSubuser::by_server_uuid_username(&state.database, server.uuid, &subuser)
@@ -121,7 +121,7 @@ mod patch {
         routes::{
             ApiError, GetState,
             api::client::{
-                GetUser,
+                GetPermissionManager, GetUser,
                 servers::_server_::{GetServer, GetServerActivityLogger},
             },
         },
@@ -134,7 +134,7 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
         permissions: Option<Vec<String>>,
         ignored_files: Option<Vec<String>>,
     }
@@ -161,6 +161,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
@@ -183,11 +184,7 @@ mod patch {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("subusers.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("subusers.update")?;
 
         let mut subuser =
             match ServerSubuser::by_server_uuid_username(&state.database, server.uuid, &subuser)

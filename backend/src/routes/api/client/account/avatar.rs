@@ -4,7 +4,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod put {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::{body::Bytes, http::StatusCode};
     use image::{ImageReader, codecs::webp::WebPEncoder, imageops::FilterType};
@@ -21,7 +24,14 @@ mod put {
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
     ), request_body = String)]
-    pub async fn route(state: GetState, user: GetUser, image: Bytes) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        user: GetUser,
+        image: Bytes,
+    ) -> ApiResponseResult {
+        permissions.has_user_permission("account.avatar")?;
+
         let image = match ImageReader::new(std::io::Cursor::new(image)).with_guessed_format() {
             Ok(reader) => reader,
             Err(_) => {
@@ -79,7 +89,10 @@ mod put {
 mod delete {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::Serialize;
@@ -92,7 +105,11 @@ mod delete {
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
     ))]
-    pub async fn route(state: GetState, user: GetUser) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        user: GetUser,
+    ) -> ApiResponseResult {
         let avatar = match &user.avatar {
             Some(avatar) => avatar,
             None => {
@@ -101,6 +118,8 @@ mod delete {
                     .ok();
             }
         };
+
+        permissions.has_user_permission("account.avatar")?;
 
         state.storage.remove(avatar).await?;
 

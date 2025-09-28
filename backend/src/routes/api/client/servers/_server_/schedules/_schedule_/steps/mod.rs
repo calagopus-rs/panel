@@ -9,7 +9,9 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+            api::client::{
+                GetPermissionManager, servers::_server_::schedules::_schedule_::GetServerSchedule,
+            },
         },
     };
     use axum::{extract::Query, http::StatusCode};
@@ -39,7 +41,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        permissions: GetPermissionManager,
         schedule: GetServerSchedule,
         Query(params): Query<PaginationParams>,
     ) -> ApiResponseResult {
@@ -49,11 +51,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("schedules.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.read")?;
 
         let schedule_steps =
             ServerScheduleStep::all_by_schedule_uuid(&state.database, schedule.uuid).await?;
@@ -74,8 +72,11 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+                },
             },
         },
     };
@@ -113,6 +114,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
@@ -124,11 +126,7 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("schedules.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.update")?;
 
         let settings = state.settings.get().await;
 

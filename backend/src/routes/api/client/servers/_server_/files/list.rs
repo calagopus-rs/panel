@@ -5,7 +5,10 @@ mod get {
     use crate::{
         models::Pagination,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -60,6 +63,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut server: GetServer,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
@@ -69,11 +73,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("files.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("files.read")?;
 
         if server.is_ignored(&params.directory, true) {
             return ApiResponse::error("directory not found")

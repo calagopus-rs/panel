@@ -4,7 +4,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::GetState,
+        routes::{GetState, api::client::GetPermissionManager},
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -18,7 +18,9 @@ mod get {
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
     ))]
-    pub async fn route(state: GetState) -> ApiResponseResult {
+    pub async fn route(state: GetState, permissions: GetPermissionManager) -> ApiResponseResult {
+        permissions.has_admin_permission("settings.read")?;
+
         let settings = state.settings.get().await;
 
         ApiResponse::json(Response {
@@ -31,7 +33,10 @@ mod get {
 mod put {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::admin::GetAdminActivityLogger},
+        routes::{
+            GetState,
+            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
+        },
     };
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
@@ -81,9 +86,12 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("settings.update")?;
+
         let mut settings = state.settings.get_mut().await;
 
         if let Some(storage_driver) = data.storage_driver {

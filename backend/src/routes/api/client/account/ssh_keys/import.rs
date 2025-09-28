@@ -7,7 +7,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -45,6 +45,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -54,6 +55,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("ssh-keys.create")?;
 
         fn limit_string(string: &str, limit: usize) -> String {
             string.chars().take(limit).collect::<String>()

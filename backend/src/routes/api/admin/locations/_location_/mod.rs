@@ -1,5 +1,9 @@
 use super::State;
-use crate::{models::location::Location, response::ApiResponse, routes::GetState};
+use crate::{
+    models::location::Location,
+    response::ApiResponse,
+    routes::{GetState, api::client::GetPermissionManager},
+};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -15,6 +19,7 @@ pub type GetLocation = crate::extract::ConsumingExtension<Location>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     Path(location): Path<Vec<String>>,
     mut req: Request,
     next: Next,
@@ -27,6 +32,10 @@ pub async fn auth(
                 .into_response());
         }
     };
+
+    if let Err(err) = permissions.has_admin_permission("locations.read") {
+        return Ok(err.into_response());
+    }
 
     let location = Location::by_uuid(&state.database, location).await;
     let location = match location {
@@ -47,7 +56,10 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::locations::_location_::GetLocation},
+        routes::{
+            ApiError, GetState,
+            api::{admin::locations::_location_::GetLocation, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -67,7 +79,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, location: GetLocation) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        location: GetLocation,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("locations.read")?;
+
         ApiResponse::json(Response {
             location: location.0.into_admin_api_object(&state.database),
         })
@@ -81,7 +99,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+            api::{
+                admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -103,9 +124,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         location: GetLocation,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("locations.delete")?;
+
         if location.nodes > 0 {
             return ApiResponse::error("location has nodes, cannot delete")
                 .with_status(StatusCode::CONFLICT)
@@ -134,7 +158,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+            api::{
+                admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -175,6 +202,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut location: GetLocation,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -184,6 +212,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("locations.update")?;
 
         if let Some(name) = data.name {
             location.name = name;

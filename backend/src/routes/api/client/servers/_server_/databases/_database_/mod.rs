@@ -2,7 +2,10 @@ use super::State;
 use crate::{
     models::server_database::ServerDatabase,
     response::ApiResponse,
-    routes::{GetState, api::client::servers::_server_::GetServer},
+    routes::{
+        GetState,
+        api::client::{GetPermissionManager, servers::_server_::GetServer},
+    },
 };
 use axum::{
     extract::{Path, Request},
@@ -19,6 +22,7 @@ pub type GetServerDatabase = crate::extract::ConsumingExtension<ServerDatabase>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     server: GetServer,
     Path(database): Path<Vec<String>>,
     mut req: Request,
@@ -33,10 +37,8 @@ pub async fn auth(
         }
     };
 
-    if let Err(error) = server.has_permission("backups.read") {
-        return Ok(ApiResponse::error(&error)
-            .with_status(StatusCode::UNAUTHORIZED)
-            .into_response());
+    if let Err(err) = permissions.has_server_permission("databases.read") {
+        return Ok(err.into_response());
     }
 
     let database =
@@ -62,10 +64,12 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, databases::_database_::GetServerDatabase},
+            api::client::{
+                GetPermissionManager, servers::_server_::databases::_database_::GetServerDatabase,
+            },
         },
     };
-    use axum::{extract::Query, http::StatusCode};
+    use axum::extract::Query;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -103,15 +107,11 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        permissions: GetPermissionManager,
         database: GetServerDatabase,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.read")?;
 
         ApiResponse::json(Response {
             database: database
@@ -127,8 +127,11 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+                },
             },
         },
     };
@@ -158,15 +161,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         database: GetServerDatabase,
         activity_logger: GetServerActivityLogger,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.delete") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.delete")?;
 
         if database.locked {
             return ApiResponse::error("database is locked and cannot be deleted")
@@ -201,12 +201,14 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServerActivityLogger, databases::_database_::GetServerDatabase,
+                },
             },
         },
     };
-    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
@@ -237,16 +239,12 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        permissions: GetPermissionManager,
         activity_logger: GetServerActivityLogger,
         mut database: GetServerDatabase,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.update")?;
 
         if let Some(locked) = data.locked {
             database.locked = locked;

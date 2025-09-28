@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_subuser::ServerSubuser},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -45,6 +48,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -54,11 +58,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("subusers.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("subusers.read")?;
 
         let subusers = ServerSubuser::by_server_uuid_with_pagination(
             &state.database,
@@ -94,7 +94,7 @@ mod post {
         routes::{
             ApiError, GetState,
             api::client::{
-                GetUser,
+                GetPermissionManager, GetUser,
                 servers::_server_::{GetServer, GetServerActivityLogger},
             },
         },
@@ -109,7 +109,7 @@ mod post {
         #[validate(email)]
         #[schema(format = "email")]
         email: String,
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
         permissions: Vec<String>,
         ignored_files: Vec<String>,
 
@@ -135,6 +135,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         ip: crate::GetIp,
         user: GetUser,
         server: GetServer,
@@ -165,11 +166,7 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("subusers.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("subusers.create")?;
 
         let username = match ServerSubuser::create(
             &state.database,

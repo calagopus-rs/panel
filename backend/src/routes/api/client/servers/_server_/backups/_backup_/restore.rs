@@ -6,8 +6,11 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+                },
             },
         },
     };
@@ -42,16 +45,13 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("backups.restore") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("backups.restore")?;
 
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")

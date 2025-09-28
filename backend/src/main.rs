@@ -32,6 +32,7 @@ mod extract;
 mod jwt;
 mod mail;
 mod models;
+mod permissions;
 mod response;
 mod routes;
 mod settings;

@@ -9,7 +9,7 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetAuthMethod, GetUser},
+            api::client::{GetAuthMethod, GetPermissionManager, GetUser},
         },
     };
     use axum::{extract::Query, http::StatusCode};
@@ -42,6 +42,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         auth: GetAuthMethod,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
@@ -51,6 +52,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("sessions.read")?;
 
         let sessions = UserSession::by_user_uuid_with_pagination(
             &state.database,

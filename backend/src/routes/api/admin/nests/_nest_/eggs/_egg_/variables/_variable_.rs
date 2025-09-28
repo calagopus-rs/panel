@@ -7,9 +7,12 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -42,11 +45,14 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
         Path((_nest, _egg, variable)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.update")?;
+
         let egg_variable =
             match NestEggVariable::by_egg_uuid_uuid(&state.database, egg.uuid, variable).await? {
                 Some(variable) => variable,
@@ -83,9 +89,12 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -144,6 +153,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
@@ -155,6 +165,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.update")?;
 
         let mut egg_variable =
             match NestEggVariable::by_egg_uuid_uuid(&state.database, egg.uuid, variable).await? {

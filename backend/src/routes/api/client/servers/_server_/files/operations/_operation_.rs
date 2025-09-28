@@ -6,7 +6,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -35,15 +38,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, operation)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("files.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("files.update")?;
 
         match server
             .node

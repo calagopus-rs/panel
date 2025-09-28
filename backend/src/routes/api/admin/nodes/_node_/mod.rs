@@ -1,5 +1,9 @@
 use super::State;
-use crate::{models::node::Node, response::ApiResponse, routes::GetState};
+use crate::{
+    models::node::Node,
+    response::ApiResponse,
+    routes::{GetState, api::client::GetPermissionManager},
+};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -18,6 +22,7 @@ pub type GetNode = crate::extract::ConsumingExtension<Node>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     Path(node): Path<Vec<String>>,
     mut req: Request,
     next: Next,
@@ -30,6 +35,10 @@ pub async fn auth(
                 .into_response());
         }
     };
+
+    if let Err(err) = permissions.has_admin_permission("nodes.read") {
+        return Ok(err.into_response());
+    }
 
     let node = Node::by_uuid(&state.database, node).await;
     let node = match node {
@@ -50,7 +59,10 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
+        routes::{
+            ApiError, GetState,
+            api::{admin::nodes::_node_::GetNode, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -71,7 +83,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, node: GetNode) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        node: GetNode,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.read")?;
+
         ApiResponse::json(Response {
             node: node.0.into_admin_api_object(&state.database),
         })
@@ -85,7 +103,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+            api::{
+                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -108,9 +129,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.delete")?;
+
         if node.servers > 0 {
             return ApiResponse::error("node has servers, cannot delete")
                 .with_status(StatusCode::BAD_REQUEST)
@@ -151,7 +175,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+            api::{
+                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -207,6 +234,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut node: GetNode,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -216,6 +244,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("nodes.update")?;
 
         if let Some(location_uuid) = data.location_uuid {
             let location = match Location::by_uuid(&state.database, location_uuid).await? {

@@ -9,7 +9,7 @@ mod get {
         routes::{
             ApiError, GetState,
             api::client::{
-                GetUser,
+                GetPermissionManager, GetUser,
                 servers::_server_::{
                     GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
                 },
@@ -55,17 +55,14 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("backups.download") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("backups.download")?;
 
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")

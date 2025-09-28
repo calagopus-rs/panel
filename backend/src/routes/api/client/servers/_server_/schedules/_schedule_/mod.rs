@@ -2,7 +2,10 @@ use super::State;
 use crate::{
     models::server_schedule::ServerSchedule,
     response::ApiResponse,
-    routes::{GetState, api::client::servers::_server_::GetServer},
+    routes::{
+        GetState,
+        api::client::{GetPermissionManager, servers::_server_::GetServer},
+    },
 };
 use axum::{
     extract::{Path, Request},
@@ -21,6 +24,7 @@ pub type GetServerSchedule = crate::extract::ConsumingExtension<ServerSchedule>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     server: GetServer,
     Path(schedule): Path<Vec<String>>,
     mut req: Request,
@@ -35,10 +39,8 @@ pub async fn auth(
         }
     };
 
-    if let Err(error) = server.has_permission("schedules.read") {
-        return Ok(ApiResponse::error(&error)
-            .with_status(StatusCode::UNAUTHORIZED)
-            .into_response());
+    if let Err(err) = permissions.has_server_permission("schedules.read") {
+        return Ok(err.into_response());
     }
 
     let schedule =
@@ -64,10 +66,11 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError,
-            api::client::servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+            api::client::{
+                GetPermissionManager, servers::_server_::schedules::_schedule_::GetServerSchedule,
+            },
         },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -92,12 +95,11 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(server: GetServer, schedule: GetServerSchedule) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("schedules.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+    pub async fn route(
+        permissions: GetPermissionManager,
+        schedule: GetServerSchedule,
+    ) -> ApiResponseResult {
+        permissions.has_server_permission("schedules.read")?;
 
         ApiResponse::json(Response {
             schedule: schedule.0.into_api_object(),
@@ -112,12 +114,14 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+                },
             },
         },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -143,15 +147,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("schedules.delete") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.delete")?;
 
         ServerSchedule::delete_by_uuid(&state.database, schedule.uuid).await?;
 
@@ -192,8 +193,11 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+                },
             },
         },
     };
@@ -235,6 +239,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         mut schedule: GetServerSchedule,
@@ -246,11 +251,7 @@ mod patch {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("schedules.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.update")?;
 
         if let Some(name) = data.name {
             schedule.name = name

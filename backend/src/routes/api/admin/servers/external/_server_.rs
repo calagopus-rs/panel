@@ -5,7 +5,7 @@ mod get {
     use crate::{
         models::server::Server,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
+        routes::{ApiError, GetState, api::client::GetPermissionManager},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -26,7 +26,13 @@ mod get {
             example = "whatever",
         ),
     ))]
-    pub async fn route(state: GetState, Path(server): Path<String>) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        Path(server): Path<String>,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.read")?;
+
         let server = match Server::by_external_id(&state.database, &server).await? {
             Some(server) => server,
             None => {

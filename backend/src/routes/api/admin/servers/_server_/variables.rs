@@ -5,7 +5,10 @@ mod get {
     use crate::{
         models::server_variable::ServerVariable,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::{admin::servers::_server_::GetServer, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -25,7 +28,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        server: GetServer,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.variables")?;
+
         let variables = ServerVariable::all_by_server_uuid_egg_uuid(
             &state.database,
             server.uuid,
@@ -49,7 +58,10 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -83,6 +95,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -92,6 +105,8 @@ mod put {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("server.variables")?;
 
         let variables = ServerVariable::all_by_server_uuid_egg_uuid(
             &state.database,

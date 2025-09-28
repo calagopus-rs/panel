@@ -7,10 +7,9 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, servers::_server_::GetServer},
+            api::client::{GetPermissionManager, GetUser, servers::_server_::GetServer},
         },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -30,12 +29,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, user: GetUser, server: GetServer) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("files.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        user: GetUser,
+        server: GetServer,
+    ) -> ApiResponseResult {
+        permissions.has_server_permission("files.create")?;
 
         #[derive(Serialize)]
         struct FileUploadJwt<'a> {

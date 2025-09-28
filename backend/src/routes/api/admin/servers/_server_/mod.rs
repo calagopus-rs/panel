@@ -1,5 +1,9 @@
 use super::State;
-use crate::{models::server::Server, response::ApiResponse, routes::GetState};
+use crate::{
+    models::server::Server,
+    response::ApiResponse,
+    routes::{GetState, api::client::GetPermissionManager},
+};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -17,10 +21,15 @@ pub type GetServer = crate::extract::ConsumingExtension<Server>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     Path(server): Path<Vec<String>>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    if let Err(err) = permissions.has_admin_permission("servers.read") {
+        return Ok(err.into_response());
+    }
+
     let server = Server::by_identifier(&state.database, &server[0]).await;
     let server = match server {
         Ok(Some(server)) => server,
@@ -40,7 +49,10 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::{admin::servers::_server_::GetServer, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -60,7 +72,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        server: GetServer,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.read")?;
+
         ApiResponse::json(Response {
             server: server
                 .0
@@ -76,7 +94,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -105,10 +126,13 @@ mod delete {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.delete")?;
+
         let backups = if data.delete_backups {
             ServerBackup::all_by_server_uuid(&state.database, server.uuid).await?
         } else {
@@ -157,7 +181,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -216,6 +243,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut server: GetServer,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -225,6 +253,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("servers.update")?;
 
         if let Some(owner_uuid) = data.owner_uuid {
             let owner = match User::by_uuid(&state.database, owner_uuid).await? {

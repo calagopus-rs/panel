@@ -3,7 +3,10 @@ use crate::storage::StorageUrlRetriever;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap},
+    sync::Arc,
+};
 use utoipa::ToSchema;
 use validator::Validate;
 
@@ -54,7 +57,7 @@ pub struct Server {
     pub backup_limit: i32,
     pub schedule_limit: i32,
 
-    pub subuser_permissions: Option<Vec<String>>,
+    pub subuser_permissions: Option<Arc<Vec<String>>>,
     pub subuser_ignored_files: Option<Vec<String>>,
     #[serde(skip_serializing, skip_deserializing)]
     subuser_ignored_files_overrides: Option<Box<ignore::overrides::Override>>,
@@ -164,7 +167,10 @@ impl BaseModel for Server {
             database_limit: row.get(format!("{prefix}database_limit").as_str()),
             backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
             schedule_limit: row.get(format!("{prefix}schedule_limit").as_str()),
-            subuser_permissions: row.try_get::<Vec<String>, _>("permissions").ok(),
+            subuser_permissions: row
+                .try_get::<Vec<String>, _>("permissions")
+                .map(Arc::new)
+                .ok(),
             subuser_ignored_files: row.try_get::<Vec<String>, _>("ignored_files").ok(),
             subuser_ignored_files_overrides: None,
             created: row.get(format!("{prefix}created").as_str()),
@@ -825,22 +831,6 @@ impl Server {
         }
     }
 
-    #[inline]
-    pub fn has_permission(&self, permission: &str) -> Result<(), String> {
-        if let Some(permissions) = &self.subuser_permissions {
-            if permissions.iter().any(|p| p == permission) {
-                Ok(())
-            } else {
-                Err(format!(
-                    "you do not have permission to perform this action: {permission}"
-                ))
-            }
-        } else {
-            Ok(())
-        }
-    }
-
-    #[inline]
     pub fn wings_permissions(&self, user: &super::user::User) -> Vec<&str> {
         let mut permissions = Vec::new();
         if user.admin {
@@ -859,7 +849,7 @@ impl Server {
             permissions.reserve_exact(subuser_permissions.len() + 1);
             permissions.push("websocket.connect");
 
-            for permission in subuser_permissions {
+            for permission in subuser_permissions.iter() {
                 permissions.push(permission.as_str());
             }
         } else {
@@ -872,7 +862,6 @@ impl Server {
         permissions
     }
 
-    #[inline]
     pub fn is_ignored(&mut self, path: &str, is_dir: bool) -> bool {
         if let Some(ignored_files) = &self.subuser_ignored_files {
             if let Some(overrides) = &self.subuser_ignored_files_overrides {
@@ -1139,7 +1128,7 @@ impl Server {
                 vec!["*".to_string()]
             } else {
                 self.subuser_permissions
-                    .unwrap_or_else(|| vec!["*".to_string()])
+                    .map_or_else(|| vec!["*".to_string()], |p| p.to_vec())
             },
             node_uuid: self.node.uuid,
             node_name: self.node.name,

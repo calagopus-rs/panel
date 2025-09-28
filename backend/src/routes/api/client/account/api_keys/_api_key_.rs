@@ -7,7 +7,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -30,16 +30,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
-        auth: GetAuthMethod,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(api_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
-        if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return ApiResponse::error("cannot delete api key with api key")
-                .with_status(StatusCode::FORBIDDEN)
-                .ok();
-        }
+        permissions.has_user_permission("api-keys.delete")?;
 
         let api_key =
             match UserApiKey::by_user_uuid_uuid(&state.database, user.uuid, api_key).await? {
@@ -74,11 +70,14 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
+            api::client::{
+                AuthMethod, GetAuthMethod, GetPermissionManager, GetUser, GetUserActivityLogger,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use std::sync::Arc;
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -88,8 +87,12 @@ mod patch {
         #[schema(min_length = 3, max_length = 31)]
         name: Option<String>,
 
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Option<Vec<String>>,
+        #[validate(custom(function = "crate::permissions::validate_user_permissions"))]
+        user_permissions: Option<Vec<String>>,
+        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        admin_permissions: Option<Vec<String>>,
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        server_permissions: Option<Vec<String>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -110,6 +113,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         auth: GetAuthMethod,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
@@ -122,9 +126,24 @@ mod patch {
                 .ok();
         }
 
-        if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return ApiResponse::error("cannot update api key with api key")
-                .with_status(StatusCode::FORBIDDEN)
+        permissions.has_user_permission("api-keys.update")?;
+
+        if let AuthMethod::ApiKey(api_key) = &*auth
+            && (!data
+                .user_permissions
+                .as_ref()
+                .is_some_and(|p| p.iter().all(|p| api_key.user_permissions.contains(p)))
+                || !data
+                    .admin_permissions
+                    .as_ref()
+                    .is_some_and(|p| p.iter().all(|p| api_key.admin_permissions.contains(p)))
+                || !data
+                    .server_permissions
+                    .as_ref()
+                    .is_some_and(|p| p.iter().all(|p| api_key.server_permissions.contains(p))))
+        {
+            return ApiResponse::error("permissions: more permissions than self")
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 
@@ -141,17 +160,25 @@ mod patch {
         if let Some(name) = data.name {
             api_key.name = name;
         }
-        if let Some(permissions) = data.permissions {
-            api_key.permissions = permissions;
+        if let Some(user_permissions) = data.user_permissions {
+            api_key.user_permissions = Arc::new(user_permissions);
+        }
+        if let Some(admin_permissions) = data.admin_permissions {
+            api_key.admin_permissions = Arc::new(admin_permissions);
+        }
+        if let Some(server_permissions) = data.server_permissions {
+            api_key.server_permissions = Arc::new(server_permissions);
         }
 
         match sqlx::query!(
             "UPDATE user_api_keys
-            SET name = $1, permissions = $2
-            WHERE user_api_keys.uuid = $3",
-            api_key.name,
-            &api_key.permissions,
+            SET name = $2, user_permissions = $3, admin_permissions = $4, server_permissions = $5
+            WHERE user_api_keys.uuid = $1",
             api_key.uuid,
+            api_key.name,
+            &*api_key.user_permissions,
+            &*api_key.admin_permissions,
+            &*api_key.server_permissions,
         )
         .execute(state.database.write())
         .await
@@ -178,7 +205,9 @@ mod patch {
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
-                    "permissions": api_key.permissions,
+                    "user_permissions": api_key.user_permissions,
+                    "admin_permissions": api_key.admin_permissions,
+                    "server_permissions": api_key.server_permissions,
                 }),
             )
             .await;

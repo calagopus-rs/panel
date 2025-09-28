@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -34,10 +37,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         Path((_server, mount)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.mounts")?;
+
         let server_mount =
             match ServerMount::by_server_uuid_mount_uuid(&state.database, server.uuid, mount)
                 .await?

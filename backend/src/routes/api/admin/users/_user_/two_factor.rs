@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, users::_user_::GetParamUser},
+            api::{
+                admin::{GetAdminActivityLogger, users::_user_::GetParamUser},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -23,9 +26,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetParamUser,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("users.disable-two-factor")?;
+
         if !user.totp_enabled {
             return ApiResponse::error("two-factor authentication is not enabled")
                 .with_status(StatusCode::CONFLICT)

@@ -7,7 +7,7 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user::User},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
+        routes::{ApiError, GetState, api::client::GetPermissionManager},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -39,6 +39,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -46,6 +47,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("users.read")?;
 
         let users = User::all_with_pagination(
             &state.database,
@@ -77,7 +80,10 @@ mod post {
     use crate::{
         models::user::User,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
+        routes::{
+            ApiError, GetState,
+            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -121,6 +127,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -129,6 +136,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("users.create")?;
 
         let user = match User::create(
             &state.database,

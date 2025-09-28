@@ -7,7 +7,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -29,10 +29,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
+        permissions.has_user_permission("ssh-keys.delete")?;
+
         let ssh_key =
             match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {
                 Some(ssh_key) => ssh_key,
@@ -66,7 +69,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -98,6 +101,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(ssh_key): Path<uuid::Uuid>,
@@ -108,6 +112,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("ssh-keys.update")?;
 
         let mut ssh_key =
             match UserSshKey::by_user_uuid_uuid(&state.database, user.uuid, ssh_key).await? {

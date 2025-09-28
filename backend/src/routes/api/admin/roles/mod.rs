@@ -7,7 +7,7 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, role::Role},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
+        routes::{ApiError, GetState, api::client::GetPermissionManager},
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -39,6 +39,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = crate::utils::validate_data(&params) {
@@ -46,6 +47,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("roles.read")?;
 
         let roles = Role::all_with_pagination(
             &state.database,
@@ -75,7 +78,10 @@ mod post {
     use crate::{
         models::role::Role,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
+        routes::{
+            ApiError, GetState,
+            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -91,8 +97,10 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(custom(function = "crate::models::role::validate_permissions"))]
-        permissions: Vec<String>,
+        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        admin_permissions: Vec<String>,
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        server_permissions: Vec<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -107,6 +115,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -116,11 +125,14 @@ mod post {
                 .ok();
         }
 
+        permissions.has_admin_permission("roles.create")?;
+
         let role = match Role::create(
             &state.database,
             &data.name,
             data.description.as_deref(),
-            &data.permissions,
+            &data.admin_permissions,
+            &data.server_permissions,
         )
         .await
         {
@@ -146,8 +158,8 @@ mod post {
                     "uuid": role.uuid,
                     "name": role.name,
                     "description": role.description,
-
-                    "permissions": role.permissions,
+                    "admin_permissions": role.admin_permissions,
+                    "server_permissions": role.server_permissions,
                 }),
             )
             .await;

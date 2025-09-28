@@ -6,7 +6,7 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -33,6 +33,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -42,6 +43,8 @@ mod put {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("account.password")?;
 
         if !user
             .validate_password(&state.database, &data.password)

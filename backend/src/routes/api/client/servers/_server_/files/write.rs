@@ -6,7 +6,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Query, http::StatusCode};
@@ -40,16 +43,13 @@ mod post {
     ), request_body = String)]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut server: GetServer,
         activity_logger: GetServerActivityLogger,
         Query(params): Query<Params>,
         body: String,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("files.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("files.create")?;
 
         if server.is_ignored(&params.file, false) {
             return ApiResponse::json(ApiError::new_value(&["file not found"]))

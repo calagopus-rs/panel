@@ -1,5 +1,9 @@
 use super::State;
-use crate::{models::database_host::DatabaseHost, response::ApiResponse, routes::GetState};
+use crate::{
+    models::database_host::DatabaseHost,
+    response::ApiResponse,
+    routes::{GetState, api::client::GetPermissionManager},
+};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -14,10 +18,15 @@ pub type GetDatabaseHost = crate::extract::ConsumingExtension<DatabaseHost>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     Path(database_host): Path<uuid::Uuid>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    if let Err(err) = permissions.has_admin_permission("database-hosts.read") {
+        return Ok(err.into_response());
+    }
+
     let database_host = DatabaseHost::by_uuid(&state.database, database_host).await;
     let database_host = match database_host {
         Ok(Some(database_host)) => database_host,
@@ -37,7 +46,13 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, api::admin::database_hosts::_database_host_::GetDatabaseHost},
+        routes::{
+            ApiError,
+            api::{
+                admin::database_hosts::_database_host_::GetDatabaseHost,
+                client::GetPermissionManager,
+            },
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -57,7 +72,12 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(database_host: GetDatabaseHost) -> ApiResponseResult {
+    pub async fn route(
+        permissions: GetPermissionManager,
+        database_host: GetDatabaseHost,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("database-hosts.read")?;
+
         ApiResponse::json(Response {
             database_host: database_host.0.into_admin_api_object(),
         })
@@ -71,8 +91,9 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost,
+            api::{
+                admin::{GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost},
+                client::GetPermissionManager,
             },
         },
     };
@@ -96,9 +117,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         database_host: GetDatabaseHost,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("database-hosts.delete")?;
+
         if database_host.databases > 0 {
             return ApiResponse::error("database host has databases, cannot delete")
                 .with_status(StatusCode::CONFLICT)
@@ -126,8 +150,9 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost,
+            api::{
+                admin::{GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost},
+                client::GetPermissionManager,
             },
         },
     };
@@ -177,6 +202,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut database_host: GetDatabaseHost,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -186,6 +212,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("database-hosts.update")?;
 
         if let Some(name) = data.name {
             database_host.name = name;

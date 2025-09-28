@@ -8,7 +8,10 @@ mod get {
     use crate::{
         models::{Pagination, server_database::ServerDatabase},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -71,6 +74,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
@@ -80,11 +84,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("databases.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.read")?;
 
         let databases = ServerDatabase::by_server_uuid_with_pagination(
             &state.database,
@@ -95,7 +95,9 @@ mod get {
         )
         .await?;
 
-        let can_read_password = server.has_permission("databases.read-password").is_ok();
+        let can_read_password = permissions
+            .has_server_permission("databases.read-password")
+            .is_ok();
 
         ApiResponse::json(Response {
             databases: Pagination {
@@ -124,7 +126,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -165,6 +170,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -175,11 +181,7 @@ mod post {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("databases.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.create")?;
 
         let database_host = match DatabaseHost::by_location_uuid_uuid(
             &state.database,
@@ -246,7 +248,9 @@ mod post {
         ApiResponse::json(Response {
             database: database.into_api_object(
                 &state.database,
-                server.has_permission("databases.read-password").is_ok(),
+                permissions
+                    .has_server_permission("databases.read-password")
+                    .is_ok(),
             ),
         })
         .ok()

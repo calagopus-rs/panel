@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+            api::{
+                admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -35,10 +38,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         location: GetLocation,
         activity_logger: GetAdminActivityLogger,
         Path((_location, database_host)): Path<(uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("locations.database-hosts")?;
+
         let database_host = match LocationDatabaseHost::by_location_uuid_database_host_uuid(
             &state.database,
             location.uuid,

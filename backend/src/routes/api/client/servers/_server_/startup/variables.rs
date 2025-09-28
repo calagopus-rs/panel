@@ -5,9 +5,11 @@ mod get {
     use crate::{
         models::server_variable::ServerVariable,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -26,12 +28,12 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("startup.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        server: GetServer,
+    ) -> ApiResponseResult {
+        permissions.has_server_permission("startup.read")?;
 
         let variables = ServerVariable::all_by_server_uuid_egg_uuid(
             &state.database,
@@ -57,7 +59,10 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -92,6 +97,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -102,11 +108,7 @@ mod put {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("startup.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("startup.update")?;
 
         let variables = ServerVariable::all_by_server_uuid_egg_uuid(
             &state.database,

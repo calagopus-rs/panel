@@ -7,7 +7,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -29,10 +29,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(session): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
+        permissions.has_user_permission("sessions.delete")?;
+
         let session =
             match UserSession::by_user_uuid_uuid(&state.database, user.uuid, session).await? {
                 Some(session) => session,

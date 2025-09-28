@@ -2,13 +2,13 @@
 resolver = "3"
 members = ["backend", "rule-validator", "wings-api"]
 default-members = ["backend"]
-package.version = "0.9.2"
+package.version = "0.10.0"
 package.edition = "2024"
 
 [workspace.dependencies]
-utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid"] }
+utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid", "rc_schema"] }
 validator = { version = "0.20.0", features = ["derive"] }
-serde = { version = "1.0.218", features = ["derive"] }
+serde = { version = "1.0.218", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
 chrono = { version = "0.4.40", features = ["serde"] }

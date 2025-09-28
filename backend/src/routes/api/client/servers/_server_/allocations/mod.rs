@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -45,6 +48,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -54,11 +58,7 @@ mod get {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("allocations.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("allocations.read")?;
 
         let allocations = ServerAllocation::by_server_uuid_with_pagination(
             &state.database,
@@ -93,7 +93,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -119,14 +122,11 @@ mod post {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("allocations.create") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("allocations.create")?;
 
         let allocations =
             ServerAllocation::count_by_server_uuid(&state.database, server.uuid).await;

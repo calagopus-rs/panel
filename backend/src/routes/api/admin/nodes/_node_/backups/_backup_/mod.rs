@@ -2,7 +2,10 @@ use super::State;
 use crate::{
     models::server_backup::ServerBackup,
     response::ApiResponse,
-    routes::{GetState, api::admin::nodes::_node_::GetNode},
+    routes::{
+        GetState,
+        api::{admin::nodes::_node_::GetNode, client::GetPermissionManager},
+    },
 };
 use axum::{
     extract::{Path, Request},
@@ -18,6 +21,7 @@ pub type GetServerBackup = crate::extract::ConsumingExtension<ServerBackup>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     node: GetNode,
     Path(backup): Path<Vec<String>>,
     mut req: Request,
@@ -31,6 +35,10 @@ pub async fn auth(
                 .into_response());
         }
     };
+
+    if let Err(err) = permissions.has_admin_permission("nodes.backups") {
+        return Ok(err.into_response());
+    }
 
     let backup = ServerBackup::by_node_uuid_uuid(&state.database, node.uuid, backup).await;
     let backup = match backup {
@@ -52,7 +60,13 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, api::admin::nodes::_node_::backups::_backup_::GetServerBackup},
+        routes::{
+            ApiError,
+            api::{
+                admin::nodes::_node_::backups::_backup_::GetServerBackup,
+                client::GetPermissionManager,
+            },
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -78,7 +92,12 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(backup: GetServerBackup) -> ApiResponseResult {
+    pub async fn route(
+        permissions: GetPermissionManager,
+        backup: GetServerBackup,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.backups")?;
+
         ApiResponse::json(Response {
             backup: backup.0.into_api_object(),
         })
@@ -91,9 +110,12 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -123,10 +145,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.backups")?;
+
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")
                 .with_status(StatusCode::EXPECTATION_FAILED)

@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_security_key::UserSecurityKey},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -39,6 +42,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -47,6 +51,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("security-keys.read")?;
 
         let security_keys = UserSecurityKey::by_user_uuid_with_pagination(
             &state.database,
@@ -77,7 +83,10 @@ mod post {
     use crate::{
         models::user_security_key::UserSecurityKey,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -106,6 +115,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -114,6 +124,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("security-keys.create")?;
 
         let webauthn = state.settings.get_webauthn().await?;
 

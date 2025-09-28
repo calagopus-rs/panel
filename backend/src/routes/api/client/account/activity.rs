@@ -5,7 +5,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_activity::UserActivity},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -37,6 +40,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -45,6 +49,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("activity.read")?;
 
         let activities = UserActivity::by_user_uuid_with_pagination(
             &state.database,

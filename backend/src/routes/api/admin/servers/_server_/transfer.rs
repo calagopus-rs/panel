@@ -8,7 +8,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -44,10 +47,13 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("server.transfer")?;
+
         if server.destination_node_uuid.is_some() {
             return ApiResponse::error("server is already being transferred")
                 .with_status(StatusCode::CONFLICT)

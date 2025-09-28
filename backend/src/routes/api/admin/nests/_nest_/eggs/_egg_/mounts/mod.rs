@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, nest_egg_mount::NestEggMount},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
+        routes::{
+            ApiError, GetState,
+            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -49,6 +52,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         egg: GetNestEgg,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -57,6 +61,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.mounts")?;
 
         let mounts = NestEggMount::by_egg_uuid_with_pagination(
             &state.database,
@@ -89,9 +95,12 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -127,11 +136,14 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.mounts")?;
+
         let mount = match Mount::by_uuid(&state.database, data.mount_uuid).await? {
             Some(mount) => mount,
             None => {

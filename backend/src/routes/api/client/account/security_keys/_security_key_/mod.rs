@@ -9,7 +9,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -31,10 +31,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(security_key): Path<uuid::Uuid>,
     ) -> ApiResponseResult {
+        permissions.has_user_permission("security-keys.delete")?;
+
         let security_key =
             match UserSecurityKey::by_user_uuid_uuid(&state.database, user.uuid, security_key)
                 .await?
@@ -71,7 +74,7 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -103,6 +106,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         Path(security_key): Path<uuid::Uuid>,
@@ -113,6 +117,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("security-keys.update")?;
 
         let mut security_key =
             match UserSecurityKey::by_user_uuid_uuid(&state.database, user.uuid, security_key)

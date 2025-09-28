@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, node_allocation::NodeAllocation},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::nodes::_node_::GetNode},
+        routes::{
+            ApiError, GetState,
+            api::{admin::nodes::_node_::GetNode, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -45,6 +48,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -53,6 +57,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("nodes.allocations")?;
 
         let allocations = NodeAllocation::by_node_uuid_with_pagination(
             &state.database,
@@ -85,7 +91,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+            api::{
+                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+                client::GetPermissionManager,
+            },
         },
     };
     use serde::{Deserialize, Serialize};
@@ -111,10 +120,13 @@ mod delete {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.allocations")?;
+
         NodeAllocation::delete_by_uuids(&state.database, &data.uuids).await?;
 
         activity_logger
@@ -138,7 +150,10 @@ mod put {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+            api::{
+                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -171,6 +186,7 @@ mod put {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         node: GetNode,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -180,6 +196,8 @@ mod put {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("nodes.allocations")?;
 
         let allocation_ip = data.ip.into();
         let mut futures = Vec::new();

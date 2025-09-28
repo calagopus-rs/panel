@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, server_allocation::ServerAllocation},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::{admin::servers::_server_::GetServer, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -44,6 +47,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -52,6 +56,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("servers.allocations")?;
 
         let allocations = ServerAllocation::by_server_uuid_with_pagination(
             &state.database,
@@ -86,7 +92,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -117,10 +126,13 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("server.allocations")?;
+
         let node_allocation = match NodeAllocation::by_node_uuid_uuid(
             &state.database,
             server.node.uuid,

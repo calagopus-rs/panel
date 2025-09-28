@@ -8,7 +8,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, nest_egg::NestEgg},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::nests::_nest_::GetNest},
+        routes::{
+            ApiError, GetState,
+            api::{admin::nests::_nest_::GetNest, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -45,6 +48,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -53,6 +57,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.read")?;
 
         let eggs = NestEgg::by_nest_uuid_with_pagination(
             &state.database,
@@ -85,7 +91,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
+            api::{
+                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -145,6 +154,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -154,6 +164,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.create")?;
 
         if !data.config_allocations.user_self_assign.is_valid() {
             return ApiResponse::error("config_allocations.user_self_assign: port ranges must be 1024-65535 and start_port < end_port")

@@ -8,7 +8,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_ssh_key::UserSshKey},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -40,6 +43,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -48,6 +52,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("ssh-keys.read")?;
 
         let ssh_keys = UserSshKey::by_user_uuid_with_pagination(
             &state.database,
@@ -80,7 +86,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -109,6 +115,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -118,6 +125,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("ssh-keys.create")?;
 
         let public_key = match russh::keys::PublicKey::from_openssh(&data.public_key) {
             Ok(key) => key,

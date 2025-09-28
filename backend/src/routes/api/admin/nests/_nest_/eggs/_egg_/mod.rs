@@ -2,7 +2,10 @@ use super::State;
 use crate::{
     models::nest_egg::NestEgg,
     response::ApiResponse,
-    routes::{GetState, api::admin::nests::_nest_::GetNest},
+    routes::{
+        GetState,
+        api::{admin::nests::_nest_::GetNest, client::GetPermissionManager},
+    },
 };
 use axum::{
     extract::{Path, Request},
@@ -19,6 +22,7 @@ pub type GetNestEgg = crate::extract::ConsumingExtension<NestEgg>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     nest: GetNest,
     Path(egg): Path<Vec<String>>,
     mut req: Request,
@@ -32,6 +36,10 @@ pub async fn auth(
                 .into_response());
         }
     };
+
+    if let Err(err) = permissions.has_admin_permission("eggs.read") {
+        return Ok(err.into_response());
+    }
 
     let egg = NestEgg::by_nest_uuid_uuid(&state.database, nest.uuid, egg).await;
     let egg = match egg {
@@ -53,7 +61,10 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
+        routes::{
+            ApiError,
+            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -78,7 +89,9 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(egg: GetNestEgg) -> ApiResponseResult {
+    pub async fn route(permissions: GetPermissionManager, egg: GetNestEgg) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.read")?;
+
         ApiResponse::json(Response {
             egg: egg.0.into_admin_api_object(),
         })
@@ -92,9 +105,12 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -123,10 +139,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.delete")?;
+
         if egg.servers > 0 {
             return ApiResponse::error("egg has servers, cannot delete")
                 .with_status(StatusCode::CONFLICT)
@@ -157,9 +176,12 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -225,6 +247,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         mut egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
@@ -235,6 +258,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.update")?;
 
         if let Some(name) = data.name {
             egg.name = name;

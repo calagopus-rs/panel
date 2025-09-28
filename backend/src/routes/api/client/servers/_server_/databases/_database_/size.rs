@@ -6,7 +6,10 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, databases::_database_::GetServerDatabase},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, databases::_database_::GetServerDatabase},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -36,14 +39,11 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         database: GetServerDatabase,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("databases.read")?;
 
         let size = match database.get_size(&state.database).await {
             Ok(size) => size,

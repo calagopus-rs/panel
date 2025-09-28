@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -35,10 +38,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         Path((_server, allocation)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("servers.allocations")?;
+
         let allocation =
             match ServerAllocation::by_server_uuid_uuid(&state.database, server.uuid, allocation)
                 .await?
@@ -77,7 +83,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+            api::{
+                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -116,6 +125,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetAdminActivityLogger,
         Path((_server, allocation)): Path<(String, uuid::Uuid)>,
@@ -126,6 +136,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("servers.allocations")?;
 
         let allocation =
             match ServerAllocation::by_server_uuid_uuid(&state.database, server.uuid, allocation)

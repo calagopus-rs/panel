@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -35,15 +38,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, allocation)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("allocations.delete") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("allocations.delete")?;
 
         let allocation =
             match ServerAllocation::by_server_uuid_uuid(&state.database, server.uuid, allocation)
@@ -95,7 +95,10 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -134,6 +137,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, allocation)): Path<(String, uuid::Uuid)>,
@@ -145,11 +149,7 @@ mod patch {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("allocations.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("allocations.update")?;
 
         let allocation =
             match ServerAllocation::by_server_uuid_uuid(&state.database, server.uuid, allocation)

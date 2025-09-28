@@ -4,7 +4,10 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::http::StatusCode;
     use serde::Serialize;
@@ -20,7 +23,13 @@ mod get {
         (status = OK, body = inline(Response)),
         (status = CONFLICT, body = ApiError),
     ))]
-    pub async fn route(state: GetState, user: GetUser) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        user: GetUser,
+    ) -> ApiResponseResult {
+        permissions.has_user_permission("account.two-factor")?;
+
         if user.totp_enabled {
             return ApiResponse::error("two-factor authentication is already enabled")
                 .with_status(StatusCode::CONFLICT)
@@ -63,7 +72,7 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -94,10 +103,13 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_user_permission("account.two-factor")?;
+
         if user.totp_enabled {
             return ApiResponse::error("two-factor authentication is already enabled")
                 .with_status(StatusCode::CONFLICT)
@@ -167,7 +179,7 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
+            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
         },
     };
     use axum::http::StatusCode;
@@ -196,10 +208,13 @@ mod delete {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut user: GetUser,
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_user_permission("account.two-factor")?;
+
         if !user.totp_enabled {
             return ApiResponse::error("two-factor authentication is not enabled")
                 .with_status(StatusCode::CONFLICT)

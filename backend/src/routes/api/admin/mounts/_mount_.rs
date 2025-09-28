@@ -5,7 +5,7 @@ mod get {
     use crate::{
         models::mount::Mount,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
+        routes::{ApiError, GetState, api::client::GetPermissionManager},
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -26,7 +26,13 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(state: GetState, Path(mount): Path<uuid::Uuid>) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        Path(mount): Path<uuid::Uuid>,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("mounts.read")?;
+
         let mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
@@ -47,7 +53,10 @@ mod delete {
     use crate::{
         models::mount::Mount,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
+        routes::{
+            ApiError, GetState,
+            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
@@ -69,9 +78,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         Path(mount): Path<uuid::Uuid>,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("mounts.delete")?;
+
         let mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
@@ -117,7 +129,10 @@ mod patch {
     use crate::{
         models::mount::Mount,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::admin::GetAdminActivityLogger},
+        routes::{
+            ApiError, GetState,
+            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
+        },
     };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
@@ -161,10 +176,13 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         Path(mount): Path<uuid::Uuid>,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("mounts.update")?;
+
         let mut mount = match Mount::by_uuid(&state.database, mount).await? {
             Some(mount) => mount,
             None => {

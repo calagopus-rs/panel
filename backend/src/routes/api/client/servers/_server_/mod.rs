@@ -5,7 +5,7 @@ use crate::{
     response::ApiResponse,
     routes::{
         GetState,
-        api::client::{GetAuthMethod, GetUser},
+        api::client::{GetAuthMethod, GetPermissionManager, GetUser},
     },
 };
 use axum::{
@@ -70,6 +70,7 @@ impl ServerActivityLogger {
 pub async fn auth(
     state: GetState,
     user: GetUser,
+    permissions: GetPermissionManager,
     auth: GetAuthMethod,
     ip: GetIp,
     matched_path: MatchedPath,
@@ -118,6 +119,11 @@ pub async fn auth(
         }
     }
 
+    req.extensions_mut().insert(
+        permissions
+            .0
+            .add_subuser_permissions(server.subuser_permissions.clone()),
+    );
     req.extensions_mut().insert(ServerActivityLogger {
         state: Arc::clone(&state),
         server_uuid: server.uuid,

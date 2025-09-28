@@ -184,7 +184,10 @@ export const userApiKeys = pgTable('user_api_keys', {
 	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	keyStart: char('key_start', { length: 16 }).notNull(),
 	key: text('key').notNull(),
-	permissions: varchar('permissions', { length: 32 }).array().notNull(),
+
+	user_permissions: varchar('user_permissions', { length: 64 }).array().notNull(),
+	admin_permissions: varchar('admin_permissions', { length: 64 }).array().notNull(),
+	server_permissions: varchar('server_permissions', { length: 64 }).array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull(),
 	lastUsed: timestamp('last_used')
@@ -201,7 +204,8 @@ export const roles = pgTable('roles', {
 	name: varchar('name', { length: 255 }).notNull(),
 	description: text('description'),
 
-	permissions: varchar('permissions', { length: 32 }).array().notNull(),
+	admin_permissions: varchar('admin_permissions', { length: 64 }).array().notNull(),
+	server_permissions: varchar('server_permissions', { length: 64 }).array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (roles) => [

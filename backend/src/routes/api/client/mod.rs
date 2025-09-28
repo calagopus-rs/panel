@@ -4,6 +4,7 @@ use crate::{
     response::ApiResponse,
 };
 use axum::{
+    body::Body,
     extract::Request,
     http::StatusCode,
     middleware::Next,
@@ -25,7 +26,8 @@ pub enum AuthMethod {
 
 pub type GetUser = crate::extract::ConsumingExtension<User>;
 pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
-pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivityLogger>;
+pub type GetPermissionManager = crate::extract::ConsumingExtension<PermissionManager>;
+pub type GetUserActivityLogger = axum::extract::Extension<UserActivityLogger>;
 
 #[derive(Clone)]
 pub struct UserActivityLogger {
@@ -53,6 +55,141 @@ impl UserActivityLogger {
                 err
             );
         }
+    }
+}
+
+#[derive(Clone)]
+pub struct PermissionManager {
+    user_admin: bool,
+    role_admin_permissions: Option<Arc<Vec<String>>>,
+    role_server_permissions: Option<Arc<Vec<String>>>,
+    api_key_user_permissions: Option<Arc<Vec<String>>>,
+    api_key_admin_permissions: Option<Arc<Vec<String>>>,
+    api_key_server_permissions: Option<Arc<Vec<String>>>,
+    server_subuser_permissions: Option<Arc<Vec<String>>>,
+}
+
+impl PermissionManager {
+    pub fn new(user: &User) -> Self {
+        Self {
+            user_admin: user.admin,
+            role_admin_permissions: user.role.as_ref().map(|r| r.admin_permissions.clone()),
+            role_server_permissions: user.role.as_ref().map(|r| r.server_permissions.clone()),
+            api_key_user_permissions: None,
+            api_key_admin_permissions: None,
+            api_key_server_permissions: None,
+            server_subuser_permissions: None,
+        }
+    }
+
+    pub fn add_api_key(mut self, api_key: &UserApiKey) -> Self {
+        self.api_key_user_permissions = Some(api_key.user_permissions.clone());
+        self.api_key_admin_permissions = Some(api_key.admin_permissions.clone());
+        self.api_key_server_permissions = Some(api_key.server_permissions.clone());
+
+        self
+    }
+
+    pub fn add_subuser_permissions(mut self, permissions: Option<Arc<Vec<String>>>) -> Self {
+        self.server_subuser_permissions = permissions;
+
+        self
+    }
+
+    pub fn has_user_permission(&self, permission: &str) -> Result<(), ApiResponse> {
+        if let Some(permissions) = &self.api_key_user_permissions {
+            if permissions.iter().any(|p| p == permission) {
+                return Ok(());
+            } else {
+                return Err(ApiResponse::new(Body::from(format!(
+                    "you do not have permission to perform this action: {permission}"
+                )))
+                .with_status(StatusCode::FORBIDDEN));
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn has_admin_permission(&self, permission: &str) -> Result<(), ApiResponse> {
+        if self.user_admin {
+            return Ok(());
+        }
+
+        let has_role_permission = if let Some(permissions) = &self.role_admin_permissions {
+            permissions.iter().any(|p| p == permission)
+        } else {
+            false
+        };
+
+        if !has_role_permission {
+            return Err(ApiResponse::new(Body::from(format!(
+                "you do not have permission to perform this action: {permission}"
+            )))
+            .with_status(StatusCode::FORBIDDEN));
+        }
+
+        if let Some(permissions) = &self.api_key_admin_permissions
+            && !permissions.iter().any(|p| p == permission)
+        {
+            return Err(ApiResponse::new(Body::from(format!(
+                "you do not have permission to perform this action: {permission}"
+            )))
+            .with_status(StatusCode::FORBIDDEN));
+        }
+
+        Ok(())
+    }
+
+    pub fn has_server_permission(&self, permission: &str) -> Result<(), ApiResponse> {
+        if self.user_admin {
+            return Ok(());
+        }
+
+        if self.server_subuser_permissions.is_none() && self.role_server_permissions.is_none() {
+            if let Some(api_key_permissions) = &self.api_key_server_permissions
+                && api_key_permissions.iter().any(|p| p == permission)
+            {
+                return Ok(());
+            }
+
+            return Err(ApiResponse::new(Body::from(format!(
+                "you do not have permission to perform this action: {permission}"
+            )))
+            .with_status(StatusCode::FORBIDDEN));
+        }
+
+        let has_role_permission = if let Some(permissions) = &self.role_server_permissions {
+            permissions.iter().any(|p| p == permission)
+        } else {
+            false
+        };
+
+        let has_subuser_permission = if let Some(permissions) = &self.server_subuser_permissions {
+            permissions.iter().any(|p| p == permission)
+        } else {
+            false
+        };
+
+        let has_base_permission = has_role_permission || has_subuser_permission;
+
+        if !has_base_permission {
+            return Err(ApiResponse::new(Body::from(format!(
+                "you do not have permission to perform this action: {permission}"
+            )))
+            .with_status(StatusCode::FORBIDDEN));
+        }
+
+        if let Some(api_key_permissions) = &self.api_key_server_permissions
+            && !api_key_permissions.iter().any(|p| p == permission)
+        {
+            return Err(ApiResponse::new(Body::from(format!(
+                "you do not have permission to perform this action: {permission}"
+            )))
+            .with_status(StatusCode::FORBIDDEN));
+        }
+
+        Ok(())
     }
 }
 
@@ -134,6 +271,7 @@ pub async fn auth(
                 .build(),
         );
 
+        req.extensions_mut().insert(PermissionManager::new(&user));
         req.extensions_mut().insert(UserActivityLogger {
             state: Arc::clone(&state),
             user_uuid: user.uuid,
@@ -188,6 +326,8 @@ pub async fn auth(
             })
             .await;
 
+        req.extensions_mut()
+            .insert(PermissionManager::new(&user).add_api_key(&api_key));
         req.extensions_mut().insert(UserActivityLogger {
             state: Arc::clone(&state),
             user_uuid: user.uuid,

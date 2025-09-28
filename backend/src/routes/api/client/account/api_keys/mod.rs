@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::{Pagination, PaginationParamsWithSearch, user_api_key::UserApiKey},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, GetUser},
+        },
     };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
@@ -39,6 +42,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
@@ -47,6 +51,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("api-keys.read")?;
 
         let api_keys = UserApiKey::by_user_uuid_with_pagination(
             &state.database,
@@ -79,7 +85,9 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::{AuthMethod, GetAuthMethod, GetUser, GetUserActivityLogger},
+            api::client::{
+                AuthMethod, GetAuthMethod, GetPermissionManager, GetUser, GetUserActivityLogger,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -92,8 +100,13 @@ mod post {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
         name: String,
-        #[validate(custom(function = "crate::models::server_subuser::validate_permissions"))]
-        permissions: Vec<String>,
+
+        #[validate(custom(function = "crate::permissions::validate_user_permissions"))]
+        user_permissions: Vec<String>,
+        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        admin_permissions: Vec<String>,
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        server_permissions: Vec<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -110,6 +123,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         auth: GetAuthMethod,
         user: GetUser,
         activity_logger: GetUserActivityLogger,
@@ -121,9 +135,24 @@ mod post {
                 .ok();
         }
 
-        if matches!(*auth, AuthMethod::ApiKey(_)) {
-            return ApiResponse::error("cannot create api key with api key")
-                .with_status(StatusCode::FORBIDDEN)
+        permissions.has_user_permission("api-keys.create")?;
+
+        if let AuthMethod::ApiKey(api_key) = &*auth
+            && (!data
+                .user_permissions
+                .iter()
+                .all(|p| api_key.user_permissions.contains(p))
+                || !data
+                    .admin_permissions
+                    .iter()
+                    .all(|p| api_key.admin_permissions.contains(p))
+                || !data
+                    .server_permissions
+                    .iter()
+                    .all(|p| api_key.server_permissions.contains(p)))
+        {
+            return ApiResponse::error("permissions: more permissions than self")
+                .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
 
@@ -131,7 +160,9 @@ mod post {
             &state.database,
             user.uuid,
             &data.name,
-            data.permissions,
+            &data.user_permissions,
+            &data.admin_permissions,
+            &data.server_permissions,
         )
         .await
         {
@@ -157,7 +188,9 @@ mod post {
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,
                     "name": api_key.name,
-                    "permissions": api_key.permissions,
+                    "user_permissions": api_key.user_permissions,
+                    "admin_permissions": api_key.admin_permissions,
+                    "server_permissions": api_key.server_permissions,
                 }),
             )
             .await;

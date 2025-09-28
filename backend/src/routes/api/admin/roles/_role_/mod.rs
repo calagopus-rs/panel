@@ -1,5 +1,9 @@
 use super::State;
-use crate::{models::role::Role, response::ApiResponse, routes::GetState};
+use crate::{
+    models::role::Role,
+    response::ApiResponse,
+    routes::{GetState, api::client::GetPermissionManager},
+};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -14,10 +18,15 @@ pub type GetRole = crate::extract::ConsumingExtension<Role>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     Path(role): Path<uuid::Uuid>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
+    if let Err(err) = permissions.has_server_permission("roles.read") {
+        return Ok(err.into_response());
+    }
+
     let role = Role::by_uuid(&state.database, role).await;
     let role = match role {
         Ok(Some(role)) => role,
@@ -37,7 +46,10 @@ pub async fn auth(
 mod get {
     use crate::{
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, api::admin::roles::_role_::GetRole},
+        routes::{
+            ApiError,
+            api::{admin::roles::_role_::GetRole, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -57,7 +69,9 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(role: GetRole) -> ApiResponseResult {
+    pub async fn route(permissions: GetPermissionManager, role: GetRole) -> ApiResponseResult {
+        permissions.has_admin_permission("roles.read")?;
+
         ApiResponse::json(Response {
             role: role.0.into_admin_api_object(),
         })
@@ -71,7 +85,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, roles::_role_::GetRole},
+            api::{
+                admin::{GetAdminActivityLogger, roles::_role_::GetRole},
+                client::GetPermissionManager,
+            },
         },
     };
     use serde::Serialize;
@@ -92,9 +109,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         role: GetRole,
         activity_logger: GetAdminActivityLogger,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("roles.delete")?;
+
         Role::delete_by_uuid(&state.database, role.uuid).await?;
 
         activity_logger
@@ -116,11 +136,15 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, roles::_role_::GetRole},
+            api::{
+                admin::{GetAdminActivityLogger, roles::_role_::GetRole},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use std::sync::Arc;
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -133,8 +157,10 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(custom(function = "crate::models::role::validate_permissions"))]
-        permissions: Option<Vec<String>>,
+        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        admin_permissions: Option<Vec<String>>,
+        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        server_permissions: Option<Vec<String>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -154,6 +180,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         mut role: GetRole,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -163,6 +190,8 @@ mod patch {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("roles.update")?;
 
         if let Some(name) = data.name {
             role.name = name;
@@ -174,18 +203,22 @@ mod patch {
                 role.description = Some(description);
             }
         }
-        if let Some(permissions) = data.permissions {
-            role.permissions = permissions;
+        if let Some(admin_permissions) = data.admin_permissions {
+            role.admin_permissions = Arc::new(admin_permissions);
+        }
+        if let Some(server_permissions) = data.server_permissions {
+            role.server_permissions = Arc::new(server_permissions);
         }
 
         match sqlx::query!(
             "UPDATE roles
-            SET name = $2, description = $3, permissions = $4
+            SET name = $2, description = $3, admin_permissions = $4, server_permissions = $5
             WHERE roles.uuid = $1",
             role.uuid,
             role.name,
             role.description,
-            &role.permissions
+            &*role.admin_permissions,
+            &*role.server_permissions
         )
         .execute(state.database.write())
         .await
@@ -212,7 +245,8 @@ mod patch {
                     "uuid": role.uuid,
                     "name": role.name,
                     "description": role.description,
-                    "permissions": role.permissions,
+                    "admin_permissions": role.admin_permissions,
+                    "server_permissions": role.server_permissions,
                 }),
             )
             .await;

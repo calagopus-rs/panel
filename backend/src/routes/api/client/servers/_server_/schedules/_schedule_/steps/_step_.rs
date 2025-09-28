@@ -7,8 +7,11 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+                },
             },
         },
     };
@@ -49,6 +52,7 @@ mod patch {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
@@ -70,11 +74,7 @@ mod patch {
             }
         };
 
-        if let Err(error) = server.has_permission("schedules.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.update")?;
 
         if let Some(action) = data.action {
             schedule_step.action = action;
@@ -133,8 +133,11 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
+                },
             },
         },
     };
@@ -169,6 +172,7 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
@@ -189,11 +193,7 @@ mod delete {
             }
         };
 
-        if let Err(error) = server.has_permission("schedules.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.update")?;
 
         ServerScheduleStep::delete_by_uuid(&state.database, schedule_step.uuid).await?;
 

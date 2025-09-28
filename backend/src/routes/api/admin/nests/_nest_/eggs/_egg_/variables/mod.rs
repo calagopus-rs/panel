@@ -7,7 +7,10 @@ mod get {
     use crate::{
         models::nest_egg_variable::NestEggVariable,
         response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::admin::nests::_nest_::eggs::_egg_::GetNestEgg},
+        routes::{
+            GetState,
+            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetPermissionManager},
+        },
     };
     use serde::Serialize;
     use utoipa::ToSchema;
@@ -31,7 +34,13 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, egg: GetNestEgg) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        egg: GetNestEgg,
+    ) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.read")?;
+
         let variables = NestEggVariable::all_by_egg_uuid(&state.database, egg.uuid).await?;
 
         ApiResponse::json(Response {
@@ -50,9 +59,12 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -107,6 +119,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
@@ -117,6 +130,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.update")?;
 
         let egg_variable = match NestEggVariable::create(
             &state.database,

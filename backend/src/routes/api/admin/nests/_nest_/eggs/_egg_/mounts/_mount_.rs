@@ -7,9 +7,12 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{
-                GetAdminActivityLogger,
-                nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+            api::{
+                admin::{
+                    GetAdminActivityLogger,
+                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
+                },
+                client::GetPermissionManager,
             },
         },
     };
@@ -42,11 +45,14 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
         Path((_nest, _egg, mount)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("eggs.mounts")?;
+
         let egg_mount =
             match NestEggMount::by_egg_uuid_mount_uuid(&state.database, egg.uuid, mount).await? {
                 Some(mount) => mount,

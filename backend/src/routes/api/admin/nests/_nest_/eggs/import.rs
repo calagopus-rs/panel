@@ -10,7 +10,10 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
+            api::{
+                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
+                client::GetPermissionManager,
+            },
         },
     };
     use axum::http::StatusCode;
@@ -98,6 +101,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         nest: GetNest,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
@@ -107,6 +111,8 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_admin_permission("eggs.create")?;
 
         let config_files =
             serde_json::from_str(data.config.get("files").unwrap_or(&"[]".to_string()))

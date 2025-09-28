@@ -6,7 +6,10 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, schedules::_schedule_::GetServerSchedule},
+            },
         },
     };
     use axum::http::StatusCode;
@@ -36,14 +39,11 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         schedule: GetServerSchedule,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("schedules.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("schedules.update")?;
 
         let schedule_status = match server
             .node

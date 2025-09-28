@@ -5,9 +5,11 @@ mod get {
     use crate::{
         models::location_database_host::LocationDatabaseHost,
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::servers::_server_::GetServer},
+        routes::{
+            ApiError, GetState,
+            api::client::{GetPermissionManager, servers::_server_::GetServer},
+        },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -26,12 +28,12 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("databases.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        server: GetServer,
+    ) -> ApiResponseResult {
+        permissions.has_server_permission("databases.read")?;
 
         let database_hosts = LocationDatabaseHost::all_public_by_location_uuid(
             &state.database,

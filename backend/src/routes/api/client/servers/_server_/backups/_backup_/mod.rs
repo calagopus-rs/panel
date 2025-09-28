@@ -2,7 +2,10 @@ use super::State;
 use crate::{
     models::server_backup::ServerBackup,
     response::ApiResponse,
-    routes::{GetState, api::client::servers::_server_::GetServer},
+    routes::{
+        GetState,
+        api::client::{GetPermissionManager, servers::_server_::GetServer},
+    },
 };
 use axum::{
     extract::{Path, Request},
@@ -19,6 +22,7 @@ pub type GetServerBackup = crate::extract::ConsumingExtension<ServerBackup>;
 
 pub async fn auth(
     state: GetState,
+    permissions: GetPermissionManager,
     server: GetServer,
     Path(backup): Path<Vec<String>>,
     mut req: Request,
@@ -33,10 +37,8 @@ pub async fn auth(
         }
     };
 
-    if let Err(error) = server.has_permission("backups.read") {
-        return Ok(ApiResponse::error(&error)
-            .with_status(StatusCode::UNAUTHORIZED)
-            .into_response());
+    if let Err(err) = permissions.has_server_permission("backups.read") {
+        return Ok(err.into_response());
     }
 
     let backup = ServerBackup::by_server_uuid_uuid(&state.database, server.uuid, backup).await;
@@ -61,10 +63,11 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError,
-            api::client::servers::_server_::{GetServer, backups::_backup_::GetServerBackup},
+            api::client::{
+                GetPermissionManager, servers::_server_::backups::_backup_::GetServerBackup,
+            },
         },
     };
-    use axum::http::StatusCode;
     use serde::Serialize;
     use utoipa::ToSchema;
 
@@ -89,12 +92,11 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(server: GetServer, backup: GetServerBackup) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("backups.read") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+    pub async fn route(
+        permissions: GetPermissionManager,
+        backup: GetServerBackup,
+    ) -> ApiResponseResult {
+        permissions.has_server_permission("backups.read")?;
 
         ApiResponse::json(Response {
             backup: backup.0.into_api_object(),
@@ -108,8 +110,11 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{
+                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+                },
             },
         },
     };
@@ -139,15 +144,12 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
-        if let Err(error) = server.has_permission("backups.delete") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("backups.delete")?;
 
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")
@@ -188,8 +190,9 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{
-                GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServerActivityLogger, backups::_backup_::GetServerBackup},
             },
         },
     };
@@ -228,7 +231,7 @@ mod patch {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        server: GetServer,
+        permissions: GetPermissionManager,
         activity_logger: GetServerActivityLogger,
         mut backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
@@ -239,11 +242,7 @@ mod patch {
                 .ok();
         }
 
-        if let Err(error) = server.has_permission("backups.update") {
-            return ApiResponse::error(&error)
-                .with_status(StatusCode::UNAUTHORIZED)
-                .ok();
-        }
+        permissions.has_server_permission("backups.update")?;
 
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")

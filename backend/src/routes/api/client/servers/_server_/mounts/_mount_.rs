@@ -7,7 +7,10 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
         routes::{
             ApiError, GetState,
-            api::client::servers::_server_::{GetServer, GetServerActivityLogger},
+            api::client::{
+                GetPermissionManager,
+                servers::_server_::{GetServer, GetServerActivityLogger},
+            },
         },
     };
     use axum::{extract::Path, http::StatusCode};
@@ -34,10 +37,13 @@ mod delete {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         Path((_server, mount)): Path<(String, uuid::Uuid)>,
     ) -> ApiResponseResult {
+        permissions.has_server_permission("mounts.detach")?;
+
         let server_mount =
             match ServerMount::by_server_uuid_mount_uuid(&state.database, server.uuid, mount)
                 .await?
@@ -60,7 +66,7 @@ mod delete {
 
         activity_logger
             .log(
-                "server:mount.delete",
+                "server:mount.detach",
                 serde_json::json!({
                     "mount_uuid": server_mount.mount.uuid,
                 }),

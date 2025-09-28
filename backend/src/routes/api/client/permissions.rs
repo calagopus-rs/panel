@@ -3,17 +3,17 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::{
-        models::server_subuser::PERMISSIONS,
+        permissions::{ADMIN_PERMISSIONS, PermissionMap, SERVER_PERMISSIONS, USER_PERMISSIONS},
         response::{ApiResponse, ApiResponseResult},
     };
-    use indexmap::IndexMap;
     use serde::Serialize;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response<'a> {
-        subuser_permissions:
-            &'a IndexMap<&'static str, (&'static str, IndexMap<&'static str, &'static str>)>,
+        user_permissions: &'a PermissionMap,
+        admin_permissions: &'a PermissionMap,
+        server_permissions: &'a PermissionMap,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -21,7 +21,9 @@ mod get {
     ))]
     pub async fn route() -> ApiResponseResult {
         ApiResponse::json(Response {
-            subuser_permissions: &PERMISSIONS,
+            user_permissions: &USER_PERMISSIONS,
+            admin_permissions: &ADMIN_PERMISSIONS,
+            server_permissions: &SERVER_PERMISSIONS,
         })
         .ok()
     }
