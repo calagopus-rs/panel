@@ -909,13 +909,11 @@ type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
 
 type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
 
-interface PermissionData {
-  [category: string]: [
-    string,
-    {
-      [permission: string]: string;
-    },
-  ];
+interface PermissionMap {
+  [category: string]: {
+    description: string;
+    permissions: Record<string, string>;
+  };
 }
 
 type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip' | 'seven_zip';

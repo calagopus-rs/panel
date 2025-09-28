@@ -33,7 +33,7 @@ export default () => {
     setSearch(searchParams.get('search') || '');
 
     getPermissions().then((res) => {
-      setAvailablePermissions(res.subuserPermissions);
+      setAvailablePermissions(res.serverPermissions);
     });
   }, []);
 

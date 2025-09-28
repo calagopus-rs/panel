@@ -9,8 +9,8 @@ export interface SubusersSlice {
   addSubuser: (subusers: ServerSubuser) => void;
   removeSubuser: (subusers: ServerSubuser) => void;
 
-  availablePermissions: PermissionData;
-  setAvailablePermissions: (permissions: PermissionData) => void;
+  availablePermissions: PermissionMap;
+  setAvailablePermissions: (permissions: PermissionMap) => void;
 }
 
 export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlice> = (set): SubusersSlice => ({

@@ -1,7 +1,9 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Response {
-  subuserPermissions: PermissionData;
+  userPermissions: PermissionMap;
+  adminPermissions: PermissionMap;
+  serverPermissions: PermissionMap;
 }
 
 export default async (): Promise<Response> => {

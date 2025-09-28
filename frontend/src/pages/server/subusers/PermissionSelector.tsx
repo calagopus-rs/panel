@@ -65,7 +65,7 @@ export default ({
   };
 
   const toggleAllInCategory = (category: string) => {
-    const categoryPermissions = Object.keys(availablePermissions[category][1]);
+    const categoryPermissions = Object.keys(availablePermissions[category].permissions);
     const allSelected = categoryPermissions.every((perm) => selectedPermissions.has(`${category}.${perm}`));
 
     const newSelected = new Set(selectedPermissions);
@@ -88,7 +88,7 @@ export default ({
   };
 
   const getCategorySelectionState = (category: string) => {
-    const categoryPermissions = Object.keys(availablePermissions[category][1]);
+    const categoryPermissions = Object.keys(availablePermissions[category].permissions);
     const selectedCount = categoryPermissions.filter((perm) => selectedPermissions.has(`${category}.${perm}`)).length;
 
     if (selectedCount === 0) return 'none';
@@ -99,7 +99,7 @@ export default ({
   return (
     <div className={'grid grid-cols-1 gap-6'}>
       <div className={'space-y-4'}>
-        {Object.entries(availablePermissions).map(([category, [description, permissions]]) => {
+        {Object.entries(availablePermissions).map(([category, { description, permissions }]) => {
           const isExpanded = expandedCategories.has(category);
           const selectionState = getCategorySelectionState(category);
 
