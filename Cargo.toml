@@ -1,12 +1,26 @@
 [workspace]
 resolver = "3"
-members = ["backend", "rule-validator", "wings-api"]
+members = ["backend", "rule-validator", "wings-api", "extensions/*"]
 default-members = ["backend"]
 package.version = "0.10.0"
 package.edition = "2024"
 
 [workspace.dependencies]
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["chrono"] }
+tracing-appender = "0.2.3"
+sentry = { version = "0.43.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
+sentry-tower = { version = "0.43.0", default-features = false, features = ["http", "axum-matched-path"] }
+sentry-anyhow = "0.43.0"
+axum = "0.8.1"
+sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "mysql", "chrono", "ipnetwork", "uuid"] }
+tokio = { version = "1.43.0", features = ["full"] }
+tokio-util = { version = "0.7.16", features = ["full"] }
+async-trait = "0.1.89"
+axum-extra = { version = "0.10.1", features = ["query"] }
+anyhow = "1.0.98"
 utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid", "rc_schema"] }
+utoipa-axum = "0.2.0"
 validator = { version = "0.20.0", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }

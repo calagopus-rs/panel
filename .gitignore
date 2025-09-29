@@ -1,3 +1,5 @@
 target/
 .env
 logs/
+extensions/*
+!extensions/.gitkeep

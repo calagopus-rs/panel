@@ -10,6 +10,7 @@ use axum::{
 use clap::{Arg, Command};
 use colored::Colorize;
 use include_dir::{Dir, include_dir};
+use panel_rs::{response::ApiResponse, routes::GetState, *};
 use routes::ApiError;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
@@ -20,31 +21,10 @@ use tower_http::normalize_path::NormalizePathLayer;
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa_axum::router::OpenApiRouter;
 
-use crate::{response::ApiResponse, routes::GetState};
-
-mod cache;
-mod captcha;
-mod commands;
-mod database;
-mod deserialize;
-mod env;
-mod extract;
-mod jwt;
-mod mail;
-mod models;
-mod permissions;
-mod response;
-mod routes;
-mod settings;
-mod storage;
-mod utils;
-
 #[cfg(target_os = "linux")]
 #[global_allocator]
 static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
-const VERSION: &str = env!("CARGO_PKG_VERSION");
-const GIT_COMMIT: &str = env!("CARGO_GIT_COMMIT");
 const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
 fn cli() -> Command {
@@ -102,8 +82,6 @@ fn cli() -> Command {
                 .arg_required_else_help(false),
         )
 }
-
-pub type GetIp = axum::extract::Extension<std::net::IpAddr>;
 
 async fn handle_request(
     connect_info: ConnectInfo<SocketAddr>,
