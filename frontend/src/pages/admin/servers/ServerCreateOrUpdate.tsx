@@ -92,7 +92,20 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
 
   useEffect(() => {
     if (contextServer) {
-      setServer(contextServer);
+      setServer({
+        externalId: contextServer.externalId,
+        name: contextServer.name,
+        description: contextServer.description,
+        limits: contextServer.limits,
+        pinnedCpus: contextServer.pinnedCpus,
+        startup: contextServer.startup,
+        image: contextServer.image,
+        timezone: contextServer.timezone,
+        featureLimits: contextServer.featureLimits,
+        nodeUuid: contextServer.node.uuid,
+        ownerUuid: contextServer.owner.uuid,
+        eggUuid: contextServer.egg.uuid,
+      });
     }
     setMemoryInput(
       contextServer ? bytesToString(mbToBytes(contextServer?.limits.memory)) : bytesToString(mbToBytes(1024)),
