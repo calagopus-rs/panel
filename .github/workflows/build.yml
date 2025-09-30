@@ -127,6 +127,21 @@ jobs:
         with:
           prefix-key: ${{ runner.os }}-${{ matrix.rust }}-${{ matrix.target }}
 
+      - name: Initialize Repo (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p extensions/internal-list/src
+          touch extensions/internal-list/src/lib.rs
+          echo '[package]\nname = "extension-internal-list"\nversion = "0.1.0"\nedition = "2021"\n\n[dependencies]' > extensions/internal-list/Cargo.toml
+
+      - name: Initialize Repo (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mkdir -Force -Path extensions\internal-list\src
+          New-Item -Path extensions\internal-list\src\lib.rs -ItemType File -Force
+          Set-Content -Path extensions\internal-list\Cargo.toml -Value "[package]`nname = ""extension-internal-list""`nversion = ""0.1.0""`nedition = ""2021""`n`n[dependencies]"
+        shell: pwsh
+
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
