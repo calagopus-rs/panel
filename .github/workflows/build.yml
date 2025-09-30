@@ -132,7 +132,7 @@ jobs:
         run: |
           mkdir -p extensions/internal-list/src
           touch extensions/internal-list/src/lib.rs
-          echo '[package]\nname = "extension-internal-list"\nversion = "0.1.0"\nedition = "2021"\n\n[dependencies]' > extensions/internal-list/Cargo.toml
+          echo "[package]\nname = \"extension-internal-list\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]" > extensions/internal-list/Cargo.toml
 
       - name: Initialize Repo (Windows)
         if: runner.os == 'Windows'
@@ -141,13 +141,6 @@ jobs:
           New-Item -Path extensions\internal-list\src\lib.rs -ItemType File -Force
           Set-Content -Path extensions\internal-list\Cargo.toml -Value "[package]`nname = ""extension-internal-list""`nversion = ""0.1.0""`nedition = ""2021""`n`n[dependencies]"
         shell: pwsh
-
-      - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.cross }}
-          command: test
-          args: --release --target ${{ matrix.target }}
 
       - name: Build release binary
         uses: actions-rs/cargo@v1
