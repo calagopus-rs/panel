@@ -1,6 +1,6 @@
 use super::State;
-use crate::jwt::BasePayload;
 use serde::{Deserialize, Serialize};
+use shared::jwt::BasePayload;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 #[derive(Deserialize, Serialize)]
@@ -13,19 +13,21 @@ pub struct TwoFactorRequiredJwt {
 }
 
 mod post {
-    use crate::{
+    use axum::http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
         models::{
             user::User, user_activity::UserActivity, user_recovery_code::UserRecoveryCode,
             user_session::UserSession,
         },
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
     };
-    use axum::http::StatusCode;
-    use serde::{Deserialize, Serialize};
     use tower_cookies::{Cookie, Cookies};
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::auth::login::checkpoint::TwoFactorRequiredJwt;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -38,7 +40,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiFullUser,
+        user: shared::models::user::ApiFullUser,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -48,7 +50,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
+        ip: shared::GetIp,
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
@@ -158,7 +160,7 @@ mod post {
             ip.0.into(),
             headers
                 .get("User-Agent")
-                .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
+                .map(|ua| shared::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                 .unwrap_or("unknown"),
         )
         .await?;

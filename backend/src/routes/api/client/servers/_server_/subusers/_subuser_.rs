@@ -2,19 +2,17 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
-    use crate::{
-        models::server_subuser::ServerSubuser,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_subuser::ServerSubuser,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::sync::Arc;
     use utoipa::ToSchema;
 
@@ -115,26 +113,24 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        models::server_subuser::ServerSubuser,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager, GetUser,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_subuser::ServerSubuser,
+            user::{GetPermissionManager, GetUser},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::sync::Arc;
     use utoipa::ToSchema;
     use validator::Validate;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
         permissions: Option<Vec<String>>,
         ignored_files: Option<Vec<String>>,
     }
@@ -168,7 +164,7 @@ mod patch {
         Path((_server, subuser)): Path<(String, String)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

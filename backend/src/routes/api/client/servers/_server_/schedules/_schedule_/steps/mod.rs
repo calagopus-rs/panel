@@ -4,24 +4,23 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _step_;
 
 mod get {
-    use crate::{
-        models::{PaginationParams, server_schedule_step::ServerScheduleStep},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager, servers::_server_::schedules::_schedule_::GetServerSchedule,
-            },
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            PaginationParams, server_schedule_step::ServerScheduleStep, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        schedule_steps: Vec<crate::models::server_schedule_step::ApiServerScheduleStep>,
+        schedule_steps: Vec<shared::models::server_schedule_step::ApiServerScheduleStep>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -45,7 +44,7 @@ mod get {
         schedule: GetServerSchedule,
         Query(params): Query<PaginationParams>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -67,23 +66,21 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::server_schedule_step::ServerScheduleStep,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_schedule_step::ServerScheduleStep,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -93,7 +90,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        schedule_step: crate::models::server_schedule_step::ApiServerScheduleStep,
+        schedule_step: shared::models::server_schedule_step::ApiServerScheduleStep,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -120,7 +117,7 @@ mod post {
         schedule: GetServerSchedule,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

@@ -2,15 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser},
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::user::{GetPermissionManager, GetUser},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -67,16 +65,17 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::user_recovery_code::UserRecoveryCode,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+            user_recovery_code::UserRecoveryCode,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -125,7 +124,7 @@ mod post {
             }
         };
 
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -174,16 +173,17 @@ mod post {
 }
 
 mod delete {
-    use crate::{
-        models::user_recovery_code::UserRecoveryCode,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+            user_recovery_code::UserRecoveryCode,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -221,7 +221,7 @@ mod delete {
                 .ok();
         }
 
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

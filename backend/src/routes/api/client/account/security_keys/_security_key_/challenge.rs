@@ -2,16 +2,17 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::user_security_key::UserSecurityKey,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+            user_security_key::UserSecurityKey,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use webauthn_rs::prelude::RegisterPublicKeyCredential;
 
@@ -26,8 +27,8 @@ mod post {
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = NOT_FOUND, body = inline(ApiError)),
-        (status = CONFLICT, body = inline(ApiError)),
+        (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,

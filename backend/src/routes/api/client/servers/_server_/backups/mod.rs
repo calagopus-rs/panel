@@ -4,22 +4,22 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _backup_;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, server_backup::ServerBackup},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, servers::_server_::GetServer},
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch, server::GetServer, server_backup::ServerBackup,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        backups: Pagination<crate::models::server_backup::ApiServerBackup>,
+        backups: Pagination<shared::models::server_backup::ApiServerBackup>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -52,7 +52,7 @@ mod get {
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -86,19 +86,17 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::server_backup::ServerBackup,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_backup::ServerBackup,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -113,7 +111,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        backup: crate::models::server_backup::ApiServerBackup,
+        backup: shared::models::server_backup::ApiServerBackup,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -134,7 +132,7 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

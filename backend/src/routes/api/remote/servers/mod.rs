@@ -1,17 +1,17 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _server_;
+pub mod _server_;
 mod reset;
 
 mod get {
-    use crate::{
-        models::{PaginationParams, server::Server},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::remote::GetNode},
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{PaginationParams, node::GetNode, server::Server},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -23,7 +23,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        data: Vec<crate::models::server::RemoteApiServer>,
+        data: Vec<shared::models::server::RemoteApiServer>,
         #[schema(inline)]
         meta: ResponseMeta,
     }
@@ -47,7 +47,7 @@ mod get {
         node: GetNode,
         Query(params): Query<PaginationParams>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

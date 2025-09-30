@@ -4,19 +4,19 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _role_;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, role::Role},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetPermissionManager},
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{Pagination, PaginationParamsWithSearch, role::Role, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        roles: Pagination<crate::models::role::AdminApiRole>,
+        roles: Pagination<shared::models::role::AdminApiRole>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -42,7 +42,7 @@ mod get {
         permissions: GetPermissionManager,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -75,16 +75,13 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::role::Role,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, role::Role, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -97,15 +94,15 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
         admin_permissions: Vec<String>,
-        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
         server_permissions: Vec<String>,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        role: crate::models::role::AdminApiRole,
+        role: shared::models::role::AdminApiRole,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -119,7 +116,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

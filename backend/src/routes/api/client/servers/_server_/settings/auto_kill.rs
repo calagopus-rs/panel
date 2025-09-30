@@ -2,18 +2,16 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -47,7 +45,7 @@ mod put {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

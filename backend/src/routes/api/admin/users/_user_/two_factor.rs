@@ -2,19 +2,17 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
-    use crate::{
-        models::user_recovery_code::UserRecoveryCode,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, users::_user_::GetParamUser},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::users::_user_::GetParamUser;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
+            user_recovery_code::UserRecoveryCode,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

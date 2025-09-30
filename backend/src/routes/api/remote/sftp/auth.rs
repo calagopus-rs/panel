@@ -2,13 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::{server::Server, user::User},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{server::Server, user::User},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]

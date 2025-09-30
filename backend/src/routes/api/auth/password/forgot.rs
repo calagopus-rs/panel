@@ -2,13 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::{user::User, user_password_reset::UserPasswordReset},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{user::User, user_password_reset::UserPasswordReset},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -30,10 +30,10 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
+        ip: shared::GetIp,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -67,7 +67,7 @@ mod post {
 
             let settings = state.settings.get().await;
 
-            let mail = crate::mail::MAIL_PASSWORD_RESET
+            let mail = shared::mail::MAIL_PASSWORD_RESET
                 .replace("{{app_name}}", &settings.app.name)
                 .replace("{{user_username}}", &user.username)
                 .replace(

@@ -1,20 +1,20 @@
 use super::State;
-use crate::{
-    models::database_host::DatabaseHost,
-    response::ApiResponse,
-    routes::{GetState, api::client::GetPermissionManager},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{database_host::DatabaseHost, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod test;
 
-pub type GetDatabaseHost = crate::extract::ConsumingExtension<DatabaseHost>;
+pub type GetDatabaseHost = shared::extract::ConsumingExtension<DatabaseHost>;
 
 pub async fn auth(
     state: GetState,
@@ -44,22 +44,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::{
-                admin::database_hosts::_database_host_::GetDatabaseHost,
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::database_hosts::_database_host_::GetDatabaseHost;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        database_host: crate::models::database_host::AdminApiDatabaseHost,
+        database_host: shared::models::database_host::AdminApiDatabaseHost,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -86,19 +82,17 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::database_host::DatabaseHost,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::database_hosts::_database_host_::GetDatabaseHost;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, database_host::DatabaseHost,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -146,18 +140,14 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, database_hosts::_database_host_::GetDatabaseHost},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::database_hosts::_database_host_::GetDatabaseHost;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -207,7 +197,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

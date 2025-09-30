@@ -2,11 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::api::remote::servers::_server_::GetServer,
-    };
     use serde::Serialize;
+    use shared::{
+        models::server::GetServer,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -36,12 +36,12 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::server::ServerStatus,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::remote::servers::_server_::GetServer},
-    };
     use serde::{Deserialize, Serialize};
+    use shared::{
+        GetState,
+        models::server::{GetServer, ServerStatus},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]

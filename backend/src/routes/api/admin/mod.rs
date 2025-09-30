@@ -1,16 +1,17 @@
 use super::State;
-use crate::{
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::client::{AuthMethod, GetAuthMethod, GetUser},
-    },
-};
 use axum::{
     extract::Request,
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{
+        admin_activity::AdminActivityLogger,
+        user::{AuthMethod, GetAuthMethod, GetUser},
+    },
+    response::ApiResponse,
 };
 use std::sync::Arc;
 use utoipa_axum::router::OpenApiRouter;
@@ -26,40 +27,9 @@ mod servers;
 mod settings;
 mod users;
 
-pub type GetAdminActivityLogger = crate::extract::ConsumingExtension<AdminActivityLogger>;
-
-#[derive(Clone)]
-pub struct AdminActivityLogger {
-    state: State,
-    user_uuid: uuid::Uuid,
-    api_key_uuid: Option<uuid::Uuid>,
-    ip: std::net::IpAddr,
-}
-
-impl AdminActivityLogger {
-    pub async fn log(&self, event: &str, data: serde_json::Value) {
-        if let Err(err) = crate::models::admin_activity::AdminActivity::log(
-            &self.state.database,
-            Some(self.user_uuid),
-            self.api_key_uuid,
-            event,
-            Some(self.ip.into()),
-            data,
-        )
-        .await
-        {
-            tracing::warn!(
-                user = %self.user_uuid,
-                "failed to log admin activity: {:#?}",
-                err
-            );
-        }
-    }
-}
-
 pub async fn auth(
     state: GetState,
-    ip: crate::GetIp,
+    ip: shared::GetIp,
     user: GetUser,
     auth: GetAuthMethod,
     mut req: Request,

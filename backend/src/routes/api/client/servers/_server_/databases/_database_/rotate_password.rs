@@ -2,21 +2,19 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Serialize)]
     struct Response {

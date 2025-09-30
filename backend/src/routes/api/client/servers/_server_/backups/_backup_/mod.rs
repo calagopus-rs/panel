@@ -1,24 +1,21 @@
 use super::State;
-use crate::{
-    models::server_backup::ServerBackup,
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::client::{GetPermissionManager, servers::_server_::GetServer},
-    },
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{server::GetServer, server_backup::ServerBackup, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod download;
 mod restore;
 
-pub type GetServerBackup = crate::extract::ConsumingExtension<ServerBackup>;
+pub type GetServerBackup = shared::extract::ConsumingExtension<ServerBackup>;
 
 pub async fn auth(
     state: GetState,
@@ -59,21 +56,19 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::client::{
-                GetPermissionManager, servers::_server_::backups::_backup_::GetServerBackup,
-            },
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Serialize)]
     pub struct Response {
-        backup: crate::models::server_backup::ApiServerBackup,
+        backup: shared::models::server_backup::ApiServerBackup,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -106,21 +101,19 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -186,20 +179,17 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{GetServerActivityLogger, backups::_backup_::GetServerBackup},
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{server::GetServerActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -236,7 +226,7 @@ mod patch {
         mut backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

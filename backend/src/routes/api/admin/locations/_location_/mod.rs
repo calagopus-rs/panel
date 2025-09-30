@@ -1,21 +1,21 @@
 use super::State;
-use crate::{
-    models::location::Location,
-    response::ApiResponse,
-    routes::{GetState, api::client::GetPermissionManager},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{location::Location, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod database_hosts;
 mod nodes;
 
-pub type GetLocation = crate::extract::ConsumingExtension<Location>;
+pub type GetLocation = shared::extract::ConsumingExtension<Location>;
 
 pub async fn auth(
     state: GetState,
@@ -54,19 +54,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::locations::_location_::GetLocation, client::GetPermissionManager},
-        },
-    };
+    use crate::routes::api::admin::locations::_location_::GetLocation;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        location: crate::models::location::AdminApiLocation,
+        location: shared::models::location::AdminApiLocation,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -94,19 +93,16 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::location::Location,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::locations::_location_::GetLocation;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, location::Location, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -154,18 +150,14 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, locations::_location_::GetLocation},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::locations::_location_::GetLocation;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -181,8 +173,8 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        backup_disk: Option<crate::models::server_backup::BackupDisk>,
-        backup_configs: Option<crate::models::location::LocationBackupConfigs>,
+        backup_disk: Option<shared::models::server_backup::BackupDisk>,
+        backup_configs: Option<shared::models::location::LocationBackupConfigs>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -207,7 +199,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -243,7 +235,7 @@ mod patch {
             location.short_name,
             location.name,
             location.description,
-            location.backup_disk as crate::models::server_backup::BackupDisk,
+            location.backup_disk as shared::models::server_backup::BackupDisk,
             serde_json::to_value(&location.backup_configs)?,
             location.uuid,
         )

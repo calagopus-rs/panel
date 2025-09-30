@@ -2,18 +2,14 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::database_hosts::_database_host_::GetDatabaseHost,
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::database_hosts::_database_host_::GetDatabaseHost;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -39,14 +35,14 @@ mod post {
 
         match database_host.get_connection(&state.database).await {
             Ok(pool) => match pool {
-                crate::models::database_host::DatabasePool::Mysql(pool) => {
+                shared::models::database_host::DatabasePool::Mysql(pool) => {
                     if let Err(err) = sqlx::query("SELECT 1").execute(pool.as_ref()).await {
                         return ApiResponse::error(&err.to_string())
                             .with_status(StatusCode::EXPECTATION_FAILED)
                             .ok();
                     }
                 }
-                crate::models::database_host::DatabasePool::Postgres(pool) => {
+                shared::models::database_host::DatabasePool::Postgres(pool) => {
                     if let Err(err) = sqlx::query("SELECT 1").execute(pool.as_ref()).await {
                         return ApiResponse::error(&err.to_string())
                             .with_status(StatusCode::EXPECTATION_FAILED)

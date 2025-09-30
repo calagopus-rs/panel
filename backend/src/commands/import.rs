@@ -130,7 +130,7 @@ pub async fn process_table<T, Fut: Future<Output = Result<T, anyhow::Error>>>(
     Ok(results)
 }
 
-pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 {
+pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32 {
     let env = match env {
         Some(env) => env,
         None => {
@@ -281,8 +281,8 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
         }
     };
 
-    let database = Arc::new(crate::database::Database::new(env).await);
-    let settings = Arc::new(crate::settings::Settings::new(database.clone()).await);
+    let database = Arc::new(shared::database::Database::new(env).await);
+    let settings = Arc::new(shared::settings::Settings::new(database.clone()).await);
 
     if let Err(err) = process_table(
         &source_database,
@@ -307,7 +307,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                     .map(|p| p.parse::<u16>())
                 && let Some(from_address) = source_settings.remove("settings::mail:from:address")
             {
-                settings.mail_mode = crate::settings::MailMode::Smtp {
+                settings.mail_mode = shared::settings::MailMode::Smtp {
                     host: smtp_host,
                     port: smtp_port,
                     username: source_settings.remove("settings::mail:mailers:smtp:username"),
@@ -563,8 +563,8 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                 )
                 .bind(short_name)
                 .bind(description)
-                .bind(crate::models::server_backup::BackupDisk::Local)
-                .bind(serde_json::to_value(crate::models::location::LocationBackupConfigs::default())?)
+                .bind(shared::models::server_backup::BackupDisk::Local)
+                .bind(serde_json::to_value(shared::models::location::LocationBackupConfigs::default())?)
                 .bind(created)
                 .fetch_one(database.write())
                 .await?;
@@ -738,7 +738,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                 let config_files: Option<serde_json::Value> = row.try_get("config_files")?;
                 let config_startup: Option<serde_json::Value> = row.try_get("config_startup")?;
                 let config_stop: Option<String> = row.try_get("config_stop")?;
-                let config_script = crate::models::nest_egg::NestEggConfigScript {
+                let config_script = shared::models::nest_egg::NestEggConfigScript {
                     container: row.try_get("script_container")?,
                     entrypoint: row.try_get("script_entry")?,
                     content: row.try_get("script_install")?,
@@ -761,18 +761,18 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                 )
                 .unwrap_or_default();
 
-                let config_files: Vec<crate::models::nest_egg::ProcessConfigurationFile> =
+                let config_files: Vec<shared::models::nest_egg::ProcessConfigurationFile> =
                     serde_json::from_value(config_files.unwrap_or_default()).unwrap_or_default();
-                let mut config_startup: crate::models::nest_egg::NestEggConfigStartup =
+                let mut config_startup: shared::models::nest_egg::NestEggConfigStartup =
                     serde_json::from_value(config_startup.unwrap_or_default()).unwrap_or_default();
-                let config_stop: crate::models::nest_egg::NestEggConfigStop = serde_json::from_str(
-                    config_stop.as_deref().unwrap_or(""),
-                )
-                .unwrap_or_else(|_| crate::models::nest_egg::NestEggConfigStop {
-                    r#type: "".to_string(),
-                    value: config_stop,
-                });
-                let config_allocations = crate::models::nest_egg::NestEggConfigAllocations {
+                let config_stop: shared::models::nest_egg::NestEggConfigStop =
+                    serde_json::from_str(config_stop.as_deref().unwrap_or("")).unwrap_or_else(
+                        |_| shared::models::nest_egg::NestEggConfigStop {
+                            r#type: "".to_string(),
+                            value: config_stop,
+                        },
+                    );
+                let config_allocations = shared::models::nest_egg::NestEggConfigAllocations {
                     user_self_assign: Default::default(),
                 };
 
@@ -923,7 +923,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                 )
                 .bind(name)
                 .bind(true)
-                .bind(crate::models::database_host::DatabaseType::Mysql)
+                .bind(shared::models::database_host::DatabaseType::Mysql)
                 .bind(host)
                 .bind(port as i32)
                 .bind(username)
@@ -1003,11 +1003,11 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                     };
 
                     let (status, suspended) = match status {
-                        Some("installing") => (Some(crate::models::server::ServerStatus::Installing), false),
-                        Some("install_failed") => (Some(crate::models::server::ServerStatus::InstallFailed), false),
-                        Some("reinstall_failed") => (Some(crate::models::server::ServerStatus::ReinstallFailed), false),
+                        Some("installing") => (Some(shared::models::server::ServerStatus::Installing), false),
+                        Some("install_failed") => (Some(shared::models::server::ServerStatus::InstallFailed), false),
+                        Some("reinstall_failed") => (Some(shared::models::server::ServerStatus::ReinstallFailed), false),
                         Some("restoring_backup") => {
-                            (Some(crate::models::server::ServerStatus::RestoringBackup), false)
+                            (Some(shared::models::server::ServerStatus::RestoringBackup), false)
                         }
                         Some("suspended") => (None, true),
                         _ => (None, false),
@@ -1230,13 +1230,13 @@ pub async fn import(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 
                     .bind(locked)
                     .bind(ignored_files)
                     .bind(match disk {
-                        "wings" => crate::models::server_backup::BackupDisk::Local,
-                        "s3" => crate::models::server_backup::BackupDisk::S3,
-                        "ddup-bak" => crate::models::server_backup::BackupDisk::DdupBak,
-                        "btrfs" => crate::models::server_backup::BackupDisk::Btrfs,
-                        "zfs" => crate::models::server_backup::BackupDisk::Zfs,
-                        "restic" => crate::models::server_backup::BackupDisk::Restic,
-                        _ => crate::models::server_backup::BackupDisk::Local,
+                        "wings" => shared::models::server_backup::BackupDisk::Local,
+                        "s3" => shared::models::server_backup::BackupDisk::S3,
+                        "ddup-bak" => shared::models::server_backup::BackupDisk::DdupBak,
+                        "btrfs" => shared::models::server_backup::BackupDisk::Btrfs,
+                        "zfs" => shared::models::server_backup::BackupDisk::Zfs,
+                        "restic" => shared::models::server_backup::BackupDisk::Restic,
+                        _ => shared::models::server_backup::BackupDisk::Local,
                     })
                     .bind(checksum)
                     .bind(bytes as i64)

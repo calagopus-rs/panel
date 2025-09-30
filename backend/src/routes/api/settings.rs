@@ -2,11 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::GetState,
-    };
     use serde::Serialize;
+    use shared::{
+        GetState,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -29,7 +29,7 @@ mod get {
         version: &'a str,
 
         #[schema(inline)]
-        captcha_provider: crate::settings::PublicCaptchaProvider<'a>,
+        captcha_provider: shared::settings::PublicCaptchaProvider<'a>,
         #[schema(inline)]
         app: ResponseApp<'a>,
         #[schema(inline)]

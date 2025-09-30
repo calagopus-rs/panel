@@ -3,3 +3,4 @@ target/
 logs/
 extensions/*
 !extensions/.gitkeep
+backend/src/extensions/list.rs

@@ -2,20 +2,17 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        models::server_variable::ServerVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, servers::_server_::GetServer},
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{server::GetServer, server_variable::ServerVariable, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        variables: Vec<crate::models::server_variable::ApiServerVariable>,
+        variables: Vec<shared::models::server_variable::ApiServerVariable>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -54,19 +51,17 @@ mod get {
 }
 
 mod put {
-    use crate::{
-        models::server_variable::ServerVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_variable::ServerVariable,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::collections::HashMap;
     use utoipa::ToSchema;
     use validator::Validate;
@@ -102,7 +97,7 @@ mod put {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

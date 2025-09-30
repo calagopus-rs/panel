@@ -4,22 +4,22 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _mount_;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, node_mount::NodeMount},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::nodes::_node_::GetNode, client::GetPermissionManager},
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch, node::GetNode, node_mount::NodeMount,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        mounts: Pagination<crate::models::node_mount::AdminApiNodeMount>,
+        mounts: Pagination<shared::models::node_mount::AdminApiNodeMount>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -51,7 +51,7 @@ mod get {
         node: GetNode,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -85,19 +85,16 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::{mount::Mount, node_mount::NodeMount},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, nodes::_node_::GetNode},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, mount::Mount, node::GetNode,
+            node_mount::NodeMount, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -138,7 +135,7 @@ mod post {
             }
         };
 
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

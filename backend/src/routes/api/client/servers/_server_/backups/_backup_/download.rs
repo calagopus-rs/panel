@@ -2,23 +2,21 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        jwt::BasePayload,
-        models::server_backup::{BackupDisk, ServerBackup},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager, GetUser,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, backups::_backup_::GetServerBackup,
-                },
-            },
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        jwt::BasePayload,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_backup::{BackupDisk, ServerBackup},
+            user::{GetPermissionManager, GetUser},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {

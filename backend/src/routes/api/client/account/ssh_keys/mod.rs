@@ -5,22 +5,23 @@ mod _ssh_key_;
 mod import;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, user_ssh_key::UserSshKey},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser},
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch,
+            user::{GetPermissionManager, GetUser},
+            user_ssh_key::UserSshKey,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        ssh_keys: Pagination<crate::models::user_ssh_key::ApiUserSshKey>,
+        ssh_keys: Pagination<shared::models::user_ssh_key::ApiUserSshKey>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -47,7 +48,7 @@ mod get {
         user: GetUser,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -81,16 +82,17 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::user_ssh_key::UserSshKey,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+            user_ssh_key::UserSshKey,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -105,7 +107,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        ssh_key: crate::models::user_ssh_key::ApiUserSshKey,
+        ssh_key: shared::models::user_ssh_key::ApiUserSshKey,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -120,7 +122,7 @@ mod post {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

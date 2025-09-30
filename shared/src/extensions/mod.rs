@@ -1,25 +1,27 @@
 #![allow(unused_variables)]
 
-use crate::routes::State;
+use crate::State;
+use std::ops::{Deref, DerefMut};
 use utoipa_axum::router::OpenApiRouter;
 
-mod list;
 pub mod manager;
 
 pub struct ExtensionRouteBuilder {
     state: State,
-    api_admin: Option<Box<OpenApiRouter<State>>>,
-    api_auth: Option<Box<OpenApiRouter<State>>>,
-    api_client: Option<Box<OpenApiRouter<State>>>,
-    api_client_servers_server: Option<Box<OpenApiRouter<State>>>,
-    api_remote: Option<Box<OpenApiRouter<State>>>,
-    api_remote_servers_server: Option<Box<OpenApiRouter<State>>>,
+    pub global: Option<Box<OpenApiRouter<State>>>,
+    pub api_admin: Option<Box<OpenApiRouter<State>>>,
+    pub api_auth: Option<Box<OpenApiRouter<State>>>,
+    pub api_client: Option<Box<OpenApiRouter<State>>>,
+    pub api_client_servers_server: Option<Box<OpenApiRouter<State>>>,
+    pub api_remote: Option<Box<OpenApiRouter<State>>>,
+    pub api_remote_servers_server: Option<Box<OpenApiRouter<State>>>,
 }
 
 impl ExtensionRouteBuilder {
-    pub(crate) fn new(state: State) -> Self {
+    pub fn new(state: State) -> Self {
         Self {
             state,
+            global: None,
             api_admin: None,
             api_auth: None,
             api_client: None,
@@ -27,6 +29,19 @@ impl ExtensionRouteBuilder {
             api_remote: None,
             api_remote_servers_server: None,
         }
+    }
+
+    /// Adds a router for handling requests to `/`.
+    pub fn add_global_router(
+        mut self,
+        router: impl FnOnce(OpenApiRouter<State>) -> OpenApiRouter<State>,
+    ) -> Self {
+        self.global = Some(Box::new(router(self.global.map_or_else(
+            || OpenApiRouter::new().with_state(self.state.clone()),
+            |b| *b,
+        ))));
+
+        self
     }
 
     /// Adds a router for handling requests to `/api/admin`.
@@ -141,5 +156,47 @@ pub trait Extension: Send + Sync {
         args: &[Box<dyn std::any::Any>],
     ) -> Option<Box<dyn std::any::Any>> {
         None
+    }
+}
+
+pub struct ConstructedExtension {
+    pub name: &'static str,
+    pub description: &'static str,
+    pub authors: &'static [&'static str],
+
+    pub extension: Box<dyn Extension>,
+}
+
+impl ConstructedExtension {
+    /// Gets the display name of the extension defined by the author
+    #[inline]
+    pub const fn name(&self) -> &'static str {
+        self.name
+    }
+
+    /// Gets the description of the extension defined by the author
+    #[inline]
+    pub const fn description(&self) -> &'static str {
+        self.description
+    }
+
+    /// Gets the author name of the extension defined by the author
+    #[inline]
+    pub const fn author(&self) -> &'static [&'static str] {
+        self.authors
+    }
+}
+
+impl Deref for ConstructedExtension {
+    type Target = Box<dyn Extension>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.extension
+    }
+}
+
+impl DerefMut for ConstructedExtension {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.extension
     }
 }

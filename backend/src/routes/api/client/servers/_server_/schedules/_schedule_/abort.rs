@@ -2,21 +2,19 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -40,7 +38,7 @@ mod post {
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
-        ip: crate::GetIp,
+        ip: shared::GetIp,
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,

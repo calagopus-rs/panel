@@ -2,15 +2,16 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        jwt::BasePayload,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, servers::_server_::GetServer},
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        jwt::BasePayload,
+        models::{
+            server::GetServer,
+            user::{GetPermissionManager, GetUser},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

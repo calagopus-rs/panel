@@ -3,7 +3,7 @@ use colored::Colorize;
 use std::path::Path;
 use tokio::process::Command;
 
-pub async fn service_install(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 {
+pub async fn service_install(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32 {
     let r#override = *matches.get_one::<bool>("override").unwrap();
 
     if std::env::consts::OS != "linux" {

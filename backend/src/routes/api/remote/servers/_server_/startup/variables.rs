@@ -2,13 +2,15 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::{
-        models::{server_activity::ServerActivity, server_variable::ServerVariable},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::remote::servers::_server_::GetServer},
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::GetServer, server_activity::ServerActivity, server_variable::ServerVariable,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::collections::HashMap;
     use utoipa::ToSchema;
     use validator::Validate;
@@ -42,7 +44,7 @@ mod put {
         server: GetServer,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

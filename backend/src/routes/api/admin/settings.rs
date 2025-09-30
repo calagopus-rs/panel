@@ -2,17 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::client::GetPermissionManager},
-    };
     use serde::Serialize;
+    use shared::{
+        GetState,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response<'a> {
         #[schema(inline)]
-        settings: &'a crate::settings::AppSettings,
+        settings: &'a shared::settings::AppSettings,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -31,14 +32,12 @@ mod get {
 }
 
 mod put {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            GetState,
-            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
-        },
-    };
     use serde::{Deserialize, Serialize};
+    use shared::{
+        GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]
@@ -66,9 +65,9 @@ mod put {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        storage_driver: Option<crate::settings::StorageDriver>,
-        mail_mode: Option<crate::settings::MailMode>,
-        captcha_provider: Option<crate::settings::CaptchaProvider>,
+        storage_driver: Option<shared::settings::StorageDriver>,
+        mail_mode: Option<shared::settings::MailMode>,
+        captcha_provider: Option<shared::settings::CaptchaProvider>,
 
         #[schema(inline)]
         app: Option<PayloadApp>,

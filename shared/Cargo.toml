@@ -1,0 +1,43 @@
+[package]
+name = "shared"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+wings-api = { workspace = true }
+rustis = { workspace = true }
+rust-s3 = { workspace = true }
+reqwest = { workspace = true }
+tokio = { workspace = true }
+utoipa = { workspace = true }
+anyhow = { workspace = true }
+axum = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "tokio1-rustls-tls", "tokio1"] }
+serde = { workspace = true }
+utoipa-axum = { workspace = true }
+serde_json = { workspace = true }
+base32 = "0.5.1"
+sqlx = { workspace = true }
+webauthn-rs = { workspace = true }
+jwt = "0.16.0"
+async-trait = { workspace = true }
+hmac = { version = "0.12.1", features = ["std"] }
+chrono = { workspace = true }
+sha2 = { workspace = true }
+dotenvy = { workspace = true }
+colored = { workspace = true }
+uuid = { workspace = true }
+simple_crypt = "0.2.3"
+validator = { workspace = true }
+indexmap = { workspace = true }
+regex = { workspace = true }
+sentry-anyhow = { workspace = true }
+russh = { workspace = true }
+rand = { workspace = true }
+constant_time_eq = "0.4.2"
+urlencoding = { workspace = true }
+ignore = { version = "0.4.23", features = ["simd-accel"] }
+futures-util = { workspace = true }

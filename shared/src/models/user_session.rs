@@ -1,5 +1,6 @@
+use crate::models::user::{AuthMethod, GetAuthMethod};
+
 use super::BaseModel;
-use crate::routes::api::client::{AuthMethod, GetAuthMethod};
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sha2::Digest;

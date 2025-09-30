@@ -2,20 +2,20 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        models::location_database_host::LocationDatabaseHost,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, servers::_server_::GetServer},
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            location_database_host::LocationDatabaseHost, server::GetServer,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        database_hosts: Vec<crate::models::database_host::ApiDatabaseHost>,
+        database_hosts: Vec<shared::models::database_host::ApiDatabaseHost>,
     }
 
     #[utoipa::path(get, path = "/", responses(

@@ -1,18 +1,17 @@
 use super::State;
-use crate::{
-    GetIp,
-    models::server::{Server, ServerStatus},
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::client::{GetAuthMethod, GetPermissionManager, GetUser},
-    },
-};
 use axum::{
     extract::{MatchedPath, Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{
+        server::{Server, ServerActivityLogger, ServerStatus},
+        user::{GetAuthMethod, GetPermissionManager, GetUser},
+    },
+    response::ApiResponse,
 };
 use std::sync::Arc;
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -32,47 +31,13 @@ mod startup;
 mod subusers;
 mod websocket;
 
-pub type GetServer = crate::extract::ConsumingExtension<Server>;
-pub type GetServerActivityLogger = crate::extract::ConsumingExtension<ServerActivityLogger>;
-
-#[derive(Clone)]
-pub struct ServerActivityLogger {
-    state: State,
-    server_uuid: uuid::Uuid,
-    user_uuid: uuid::Uuid,
-    api_key_uuid: Option<uuid::Uuid>,
-    ip: std::net::IpAddr,
-}
-
-impl ServerActivityLogger {
-    pub async fn log(&self, event: &str, data: serde_json::Value) {
-        if let Err(err) = crate::models::server_activity::ServerActivity::log(
-            &self.state.database,
-            self.server_uuid,
-            Some(self.user_uuid),
-            self.api_key_uuid,
-            event,
-            Some(self.ip.into()),
-            data,
-        )
-        .await
-        {
-            tracing::warn!(
-                user = %self.user_uuid,
-                "failed to log server activity: {:#?}",
-                err
-            );
-        }
-    }
-}
-
 #[allow(clippy::too_many_arguments)]
 pub async fn auth(
     state: GetState,
     user: GetUser,
     permissions: GetPermissionManager,
     auth: GetAuthMethod,
-    ip: GetIp,
+    ip: shared::GetIp,
     matched_path: MatchedPath,
     Path(server): Path<Vec<String>>,
     mut req: Request,
@@ -141,16 +106,16 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::api::client::{GetUser, servers::_server_::GetServer},
-    };
     use serde::Serialize;
+    use shared::{
+        models::{server::GetServer, user::GetUser},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        server: crate::models::server::ApiServer,
+        server: shared::models::server::ApiServer,
     }
 
     #[utoipa::path(get, path = "/", responses(

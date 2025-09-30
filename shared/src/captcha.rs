@@ -8,11 +8,11 @@ static CLIENT: LazyLock<reqwest::Client> = LazyLock::new(|| {
 });
 
 pub struct Captcha {
-    settings: Arc<crate::settings::Settings>,
+    settings: Arc<super::settings::Settings>,
 }
 
 impl Captcha {
-    pub fn new(settings: Arc<crate::settings::Settings>) -> Self {
+    pub fn new(settings: Arc<super::settings::Settings>) -> Self {
         Self { settings }
     }
 
@@ -24,7 +24,7 @@ impl Captcha {
             None => {
                 if matches!(
                     settings.captcha_provider,
-                    crate::settings::CaptchaProvider::None
+                    super::settings::CaptchaProvider::None
                 ) {
                     return Ok(());
                 } else {
@@ -34,8 +34,8 @@ impl Captcha {
         };
 
         match &settings.captcha_provider {
-            crate::settings::CaptchaProvider::None => Ok(()),
-            crate::settings::CaptchaProvider::Turnstile { secret_key, .. } => {
+            super::settings::CaptchaProvider::None => Ok(()),
+            super::settings::CaptchaProvider::Turnstile { secret_key, .. } => {
                 let response = CLIENT
                     .post("https://challenges.cloudflare.com/turnstile/v0/siteverify")
                     .json(&serde_json::json!({
@@ -59,7 +59,7 @@ impl Captcha {
 
                 Err("captcha: verification failed".to_string())
             }
-            crate::settings::CaptchaProvider::Recaptcha { v3, secret_key, .. } => {
+            super::settings::CaptchaProvider::Recaptcha { v3, secret_key, .. } => {
                 let response = CLIENT
                     .get("https://www.google.com/recaptcha/api/siteverify")
                     .query(&[

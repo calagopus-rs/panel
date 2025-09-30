@@ -1,24 +1,21 @@
 use super::State;
-use crate::{
-    models::server_database::ServerDatabase,
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::client::{GetPermissionManager, servers::_server_::GetServer},
-    },
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{server::GetServer, server_database::ServerDatabase, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod rotate_password;
 mod size;
 
-pub type GetServerDatabase = crate::extract::ConsumingExtension<ServerDatabase>;
+pub type GetServerDatabase = shared::extract::ConsumingExtension<ServerDatabase>;
 
 pub async fn auth(
     state: GetState,
@@ -60,18 +57,16 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager, servers::_server_::databases::_database_::GetServerDatabase,
-            },
-        },
-    };
     use axum::extract::Query;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
@@ -81,7 +76,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     pub struct Response {
-        database: crate::models::server_database::ApiServerDatabase,
+        database: shared::models::server_database::ApiServerDatabase,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -123,21 +118,19 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, databases::_database_::GetServerDatabase,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -197,20 +190,15 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServerActivityLogger, databases::_database_::GetServerDatabase,
-                },
-            },
-        },
-    };
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{server::GetServerActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {

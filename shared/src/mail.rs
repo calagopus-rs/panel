@@ -1,8 +1,8 @@
 use lettre::AsyncTransport;
 use std::sync::Arc;
 
-pub const MAIL_PASSWORD_RESET: &str = include_str!("../static/mails/password_reset.html");
-pub const MAIL_ACCOUNT_CREATED: &str = include_str!("../static/mails/account_created.html");
+pub const MAIL_PASSWORD_RESET: &str = include_str!("../mails/password_reset.html");
+pub const MAIL_ACCOUNT_CREATED: &str = include_str!("../mails/account_created.html");
 
 #[derive(Debug)]
 enum Transport {
@@ -15,11 +15,11 @@ enum Transport {
 }
 
 pub struct Mail {
-    settings: Arc<crate::settings::Settings>,
+    settings: Arc<super::settings::Settings>,
 }
 
 impl Mail {
-    pub fn new(settings: Arc<crate::settings::Settings>) -> Self {
+    pub fn new(settings: Arc<super::settings::Settings>) -> Self {
         Self { settings }
     }
 
@@ -27,8 +27,8 @@ impl Mail {
         let settings = self.settings.get().await;
 
         match &settings.mail_mode {
-            crate::settings::MailMode::None => Ok(Transport::None),
-            crate::settings::MailMode::Smtp {
+            super::settings::MailMode::None => Ok(Transport::None),
+            super::settings::MailMode::Smtp {
                 host,
                 port,
                 username,

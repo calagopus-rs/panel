@@ -5,6 +5,8 @@ use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
+pub type GetNode = crate::extract::ConsumingExtension<Node>;
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Node {
     pub uuid: uuid::Uuid,

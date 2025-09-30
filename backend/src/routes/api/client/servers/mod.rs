@@ -1,16 +1,16 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _server_;
+pub mod _server_;
 
 mod get {
-    use crate::{
-        models::{Pagination, server::Server},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetUser},
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{Pagination, server::Server, user::GetUser},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -25,7 +25,7 @@ mod get {
         #[validate(length(min = 1, max = 100))]
         #[serde(
             default,
-            deserialize_with = "crate::deserialize::deserialize_string_option"
+            deserialize_with = "shared::deserialize::deserialize_string_option"
         )]
         pub search: Option<String>,
 
@@ -36,7 +36,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        servers: Pagination<crate::models::server::ApiServer>,
+        servers: Pagination<shared::models::server::ApiServer>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -67,7 +67,7 @@ mod get {
         user: GetUser,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

@@ -1,23 +1,20 @@
 use super::State;
-use crate::{
-    models::server_backup::ServerBackup,
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::{admin::nodes::_node_::GetNode, client::GetPermissionManager},
-    },
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{node::GetNode, server_backup::ServerBackup, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod download;
 
-pub type GetServerBackup = crate::extract::ConsumingExtension<ServerBackup>;
+pub type GetServerBackup = shared::extract::ConsumingExtension<ServerBackup>;
 
 pub async fn auth(
     state: GetState,
@@ -58,22 +55,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::{
-                admin::nodes::_node_::backups::_backup_::GetServerBackup,
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nodes::_node_::backups::_backup_::GetServerBackup;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     pub struct Response {
-        backup: crate::models::server_backup::ApiServerBackup,
+        backup: shared::models::server_backup::ApiServerBackup,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -106,21 +99,16 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nodes::_node_::backups::_backup_::GetServerBackup;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, node::GetNode, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

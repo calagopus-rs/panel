@@ -1,14 +1,14 @@
 use super::State;
-use crate::{
-    models::server::Server,
-    response::ApiResponse,
-    routes::{GetState, api::remote::GetNode},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{node::GetNode, server::Server},
+    response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -16,8 +16,6 @@ mod backups;
 mod install;
 mod startup;
 mod transfer;
-
-pub type GetServer = crate::extract::ConsumingExtension<Server>;
 
 pub async fn auth(
     state: GetState,
@@ -53,13 +51,14 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
+    use shared::{
+        GetState,
+        models::server::GetServer,
         response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::remote::servers::_server_::GetServer},
     };
 
     #[utoipa::path(get, path = "/", responses(
-        (status = OK, body = crate::models::server::RemoteApiServer),
+        (status = OK, body = shared::models::server::RemoteApiServer),
     ), params(
         (
             "server" = uuid::Uuid,

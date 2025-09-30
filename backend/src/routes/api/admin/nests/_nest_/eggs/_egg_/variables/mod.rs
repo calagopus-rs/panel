@@ -4,20 +4,19 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod _variable_;
 
 mod get {
-    use crate::{
-        models::nest_egg_variable::NestEggVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            GetState,
-            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetPermissionManager},
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        GetState,
+        models::{nest_egg_variable::NestEggVariable, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        variables: Vec<crate::models::nest_egg_variable::AdminApiNestEggVariable>,
+        variables: Vec<shared::models::nest_egg_variable::AdminApiNestEggVariable>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -54,22 +53,17 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::nest_egg_variable::NestEggVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, nest_egg_variable::NestEggVariable,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -98,7 +92,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        variable: crate::models::nest_egg_variable::AdminApiNestEggVariable,
+        variable: shared::models::nest_egg_variable::AdminApiNestEggVariable,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -125,7 +119,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

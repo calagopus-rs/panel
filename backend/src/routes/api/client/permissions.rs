@@ -2,11 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
+    use serde::Serialize;
+    use shared::{
         permissions::{ADMIN_PERMISSIONS, PermissionMap, SERVER_PERMISSIONS, USER_PERMISSIONS},
         response::{ApiResponse, ApiResponseResult},
     };
-    use serde::Serialize;
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

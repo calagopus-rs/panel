@@ -1,17 +1,14 @@
 use super::State;
-use crate::{
-    models::server_schedule::ServerSchedule,
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::client::{GetPermissionManager, servers::_server_::GetServer},
-    },
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{server::GetServer, server_schedule::ServerSchedule, user::GetPermissionManager},
+    response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -20,7 +17,7 @@ mod status;
 mod steps;
 mod trigger;
 
-pub type GetServerSchedule = crate::extract::ConsumingExtension<ServerSchedule>;
+pub type GetServerSchedule = shared::extract::ConsumingExtension<ServerSchedule>;
 
 pub async fn auth(
     state: GetState,
@@ -62,21 +59,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::client::{
-                GetPermissionManager, servers::_server_::schedules::_schedule_::GetServerSchedule,
-            },
-        },
-    };
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     pub struct Response {
-        schedule: crate::models::server_schedule::ApiServerSchedule,
+        schedule: shared::models::server_schedule::ApiServerSchedule,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -109,20 +103,17 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::server_schedule::ServerSchedule,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_schedule::ServerSchedule,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -189,22 +180,20 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -245,7 +234,7 @@ mod patch {
         mut schedule: GetServerSchedule,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

@@ -13,16 +13,17 @@ mod ssh_keys;
 mod two_factor;
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{GetState, api::client::GetUser},
-    };
     use serde::Serialize;
+    use shared::{
+        GetState,
+        models::user::GetUser,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiFullUser,
+        user: shared::models::user::ApiFullUser,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -39,15 +40,13 @@ mod get {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{user::GetUser, user_activity::GetUserActivityLogger},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -55,7 +54,7 @@ mod patch {
     pub struct Payload {
         #[validate(
             length(min = 3, max = 15),
-            regex(path = "*crate::models::user::USERNAME_REGEX")
+            regex(path = "*shared::models::user::USERNAME_REGEX")
         )]
         #[schema(min_length = 3, max_length = 15)]
         #[schema(pattern = "^[a-zA-Z0-9_]+$")]
@@ -80,7 +79,7 @@ mod patch {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

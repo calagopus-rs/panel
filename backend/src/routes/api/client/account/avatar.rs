@@ -2,17 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser},
-        },
-    };
     use axum::{body::Bytes, http::StatusCode};
     use image::{ImageReader, codecs::webp::WebPEncoder, imageops::FilterType};
     use rand::distr::SampleString;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -28,6 +29,7 @@ mod put {
         state: GetState,
         permissions: GetPermissionManager,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
         image: Bytes,
     ) -> ApiResponseResult {
         permissions.has_user_permission("account.avatar")?;
@@ -79,6 +81,10 @@ mod put {
         .execute(state.database.write())
         .await?;
 
+        activity_logger
+            .log("user:account.update-avatar", serde_json::json!({}))
+            .await;
+
         ApiResponse::json(Response {
             avatar: state.storage.retrieve_urls().await.get_url(&avatar_path),
         })
@@ -87,15 +93,16 @@ mod put {
 }
 
 mod delete {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser},
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -109,6 +116,7 @@ mod delete {
         state: GetState,
         permissions: GetPermissionManager,
         user: GetUser,
+        activity_logger: GetUserActivityLogger,
     ) -> ApiResponseResult {
         let avatar = match &user.avatar {
             Some(avatar) => avatar,
@@ -131,6 +139,10 @@ mod delete {
         )
         .execute(state.database.write())
         .await?;
+
+        activity_logger
+            .log("user:account.delete-avatar", serde_json::json!({}))
+            .await;
 
         ApiResponse::json(Response {}).ok()
     }

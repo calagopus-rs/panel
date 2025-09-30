@@ -26,20 +26,20 @@ fn get_s3_client(
 }
 
 pub struct StorageUrlRetriever<'a> {
-    settings: RwLockReadGuard<'a, crate::settings::AppSettings>,
+    settings: RwLockReadGuard<'a, super::settings::AppSettings>,
 }
 
 impl<'a> StorageUrlRetriever<'a> {
-    pub fn new(settings: RwLockReadGuard<'a, crate::settings::AppSettings>) -> Self {
+    pub fn new(settings: RwLockReadGuard<'a, super::settings::AppSettings>) -> Self {
         Self { settings }
     }
 
     pub fn get_url(&self, path: &str) -> String {
         match &self.settings.storage_driver {
-            crate::settings::StorageDriver::Filesystem { .. } => {
+            super::settings::StorageDriver::Filesystem { .. } => {
                 format!("{}/{}", self.settings.app.url.trim_end_matches('/'), path)
             }
-            crate::settings::StorageDriver::S3 { public_url, .. } => {
+            super::settings::StorageDriver::S3 { public_url, .. } => {
                 format!("{}/{}", public_url.trim_end_matches('/'), path)
             }
         }
@@ -47,11 +47,11 @@ impl<'a> StorageUrlRetriever<'a> {
 }
 
 pub struct Storage {
-    settings: Arc<crate::settings::Settings>,
+    settings: Arc<super::settings::Settings>,
 }
 
 impl Storage {
-    pub fn new(settings: Arc<crate::settings::Settings>) -> Self {
+    pub fn new(settings: Arc<super::settings::Settings>) -> Self {
         Self { settings }
     }
 
@@ -71,7 +71,7 @@ impl Storage {
         tracing::debug!(path, "removing file");
 
         match &settings.storage_driver {
-            crate::settings::StorageDriver::Filesystem { path: base_path } => {
+            super::settings::StorageDriver::Filesystem { path: base_path } => {
                 let path = Path::new(base_path).join(path);
 
                 if let Err(err) = tokio::fs::remove_file(&path).await
@@ -95,7 +95,7 @@ impl Storage {
                     });
                 }
             }
-            crate::settings::StorageDriver::S3 {
+            super::settings::StorageDriver::S3 {
                 access_key,
                 secret_key,
                 bucket,
@@ -131,7 +131,7 @@ impl Storage {
         tracing::debug!(path, "storing file: {} bytes", data.len());
 
         match &settings.storage_driver {
-            crate::settings::StorageDriver::Filesystem { path: base_path } => {
+            super::settings::StorageDriver::Filesystem { path: base_path } => {
                 let full_path = Path::new(base_path).join(path);
                 if let Some(parent) = full_path.parent() {
                     tokio::fs::create_dir_all(parent).await?;
@@ -139,7 +139,7 @@ impl Storage {
 
                 tokio::fs::write(full_path, data).await?;
             }
-            crate::settings::StorageDriver::S3 {
+            super::settings::StorageDriver::S3 {
                 access_key,
                 secret_key,
                 bucket,

@@ -10,10 +10,9 @@ use axum::{
 use clap::{Arg, Command};
 use colored::Colorize;
 use include_dir::{Dir, include_dir};
-use panel_rs::{response::ApiResponse, routes::GetState, *};
-use routes::ApiError;
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
+use shared::{ApiError, GetState, response::ApiResponse};
 use std::{net::SocketAddr, sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
@@ -88,7 +87,7 @@ async fn handle_request(
     mut req: Request<Body>,
     next: Next,
 ) -> Result<Response<Body>, StatusCode> {
-    let ip = crate::utils::extract_ip(req.headers()).unwrap_or_else(|| connect_info.ip());
+    let ip = shared::utils::extract_ip(req.headers()).unwrap_or_else(|| connect_info.ip());
 
     req.extensions_mut().insert(ip);
 
@@ -170,24 +169,29 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
 async fn main() {
     let matches = cli().get_matches();
 
-    let env = env::Env::parse();
+    let env = shared::env::Env::parse();
 
     match matches.subcommand() {
         Some(("version", sub_matches)) => std::process::exit(
-            commands::version::version(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+            panel_rs::commands::version::version(sub_matches, env.as_ref().ok().map(|c| &c.0))
+                .await,
         ),
         Some(("service-install", sub_matches)) => std::process::exit(
-            commands::service_install::service_install(
+            panel_rs::commands::service_install::service_install(
                 sub_matches,
                 env.as_ref().ok().map(|c| &c.0),
             )
             .await,
         ),
         Some(("import", sub_matches)) => std::process::exit(
-            commands::import::import(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+            panel_rs::commands::import::import(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
         ),
         Some(("diagnostics", sub_matches)) => std::process::exit(
-            commands::diagnostics::diagnostics(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
+            panel_rs::commands::diagnostics::diagnostics(
+                sub_matches,
+                env.as_ref().ok().map(|c| &c.0),
+            )
+            .await,
         ),
         None => {
             tracing::info!("                         _");
@@ -199,7 +203,7 @@ async fn main() {
             tracing::info!(" |_|                  | |  \\__ \\");
             tracing::info!(
                 "{: >21} |_|  |___/",
-                format!("{VERSION} (git-{GIT_COMMIT})")
+                format!("{} (git-{})", shared::VERSION, shared::GIT_COMMIT)
             );
             tracing::info!("github.com/calagopus-rs/panel\n");
         }
@@ -221,7 +225,7 @@ async fn main() {
         env.sentry_url.clone(),
         sentry::ClientOptions {
             server_name: env.server_name.clone().map(|s| s.into()),
-            release: Some(format!("{VERSION}:{GIT_COMMIT}").into()),
+            release: Some(format!("{}:{}", shared::VERSION, shared::GIT_COMMIT).into()),
             traces_sample_rate: 1.0,
             ..Default::default()
         },
@@ -229,9 +233,9 @@ async fn main() {
 
     let env = Arc::new(env);
     //let s3 = Arc::new(s3::S3::new(env.clone()).await);
-    let jwt = Arc::new(jwt::Jwt::new(&env));
-    let database = Arc::new(database::Database::new(&env).await);
-    let cache = Arc::new(cache::Cache::new(&env).await);
+    let jwt = Arc::new(shared::jwt::Jwt::new(&env));
+    let database = Arc::new(shared::database::Database::new(&env).await);
+    let cache = Arc::new(shared::cache::Cache::new(&env).await);
 
     if env.database_migrate {
         tracing::info!("running database migrations...");
@@ -244,20 +248,24 @@ async fn main() {
         }
     }
 
-    let settings = Arc::new(settings::Settings::new(database.clone()).await);
-    let storage = Arc::new(storage::Storage::new(settings.clone()));
-    let captcha = Arc::new(captcha::Captcha::new(settings.clone()));
-    let mail = Arc::new(mail::Mail::new(settings.clone()));
+    let extensions = Arc::new(shared::extensions::manager::ExtensionManager::new(
+        extension_internal_list::list(),
+    ));
+    let settings = Arc::new(shared::settings::Settings::new(database.clone()).await);
+    let storage = Arc::new(shared::storage::Storage::new(settings.clone()));
+    let captcha = Arc::new(shared::captcha::Captcha::new(settings.clone()));
+    let mail = Arc::new(shared::mail::Mail::new(settings.clone()));
 
-    let state = Arc::new(routes::AppState {
+    let state = Arc::new(shared::AppState {
         start_time: Instant::now(),
-        version: format!("{VERSION}:{GIT_COMMIT}"),
+        version: format!("{}:{}", shared::VERSION, shared::GIT_COMMIT),
 
         client: reqwest::ClientBuilder::new()
-            .user_agent(format!("github.com/calagopus-rs/panel {VERSION}"))
+            .user_agent(format!("github.com/calagopus-rs/panel {}", shared::VERSION))
             .build()
             .unwrap(),
 
+        extensions: extensions.clone(),
         settings: settings.clone(),
         jwt,
         storage,
@@ -268,8 +276,79 @@ async fn main() {
         env,
     });
 
+    let routes = extensions.init(state.clone()).await;
+    let mut extension_router = OpenApiRouter::new().with_state(state.clone());
+
+    if let Some(global) = routes.global {
+        extension_router = extension_router.merge(*global);
+    }
+    if let Some(api_admin) = routes.api_admin {
+        extension_router = extension_router.nest(
+            "/api/admin",
+            api_admin
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::client::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::admin::auth,
+                )),
+        );
+    }
+    if let Some(api_auth) = routes.api_auth {
+        extension_router = extension_router.nest("/api/auth", *api_auth);
+    }
+    if let Some(api_client) = routes.api_client {
+        extension_router = extension_router.nest(
+            "/api/client",
+            api_client.route_layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                panel_rs::routes::api::client::auth,
+            )),
+        );
+    }
+    if let Some(api_client_servers_server) = routes.api_client_servers_server {
+        extension_router = extension_router.nest(
+            "/api/client/servers/{server}",
+            api_client_servers_server
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::client::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::client::servers::_server_::auth,
+                )),
+        );
+    }
+    if let Some(api_remote) = routes.api_remote {
+        extension_router = extension_router.nest(
+            "/api/remote",
+            api_remote.route_layer(axum::middleware::from_fn_with_state(
+                state.clone(),
+                panel_rs::routes::api::remote::auth,
+            )),
+        );
+    }
+    if let Some(api_remote_servers_server) = routes.api_remote_servers_server {
+        extension_router = extension_router.nest(
+            "/api/remote/servers/{server}",
+            api_remote_servers_server
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::remote::auth,
+                ))
+                .route_layer(axum::middleware::from_fn_with_state(
+                    state.clone(),
+                    panel_rs::routes::api::remote::servers::_server_::auth,
+                )),
+        );
+    }
+
     let app = OpenApiRouter::new()
-        .merge(routes::router(&state))
+        .merge(panel_rs::routes::router(&state))
+        .merge(extension_router)
         .route(
             "/avatars/{user}/{file}",
             get(
@@ -283,7 +362,9 @@ async fn main() {
                     }
 
                     let base_path = match &settings.storage_driver {
-                        settings::StorageDriver::Filesystem { path } => std::path::Path::new(path),
+                        shared::settings::StorageDriver::Filesystem { path } => {
+                            std::path::Path::new(path)
+                        }
                         _ => {
                             return ApiResponse::error("file not found")
                                 .with_status(StatusCode::NOT_FOUND)
@@ -382,7 +463,7 @@ async fn main() {
         state.env.bind.cyan(),
         format!(
             "(app@{}, {}ms)",
-            VERSION,
+            shared::VERSION,
             state.start_time.elapsed().as_millis()
         )
         .bright_black()

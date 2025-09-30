@@ -2,22 +2,20 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod patch {
-    use crate::{
-        models::server_schedule_step::ServerScheduleStep,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_schedule_step::ServerScheduleStep,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
@@ -56,7 +54,7 @@ mod patch {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
-        Path((_server, _schedule, schedule_step)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
+        Path((_server, _schedule, schedule_step)): Path<(String, uuid::Uuid, uuid::Uuid)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let mut schedule_step = match ServerScheduleStep::by_schedule_uuid_uuid(
@@ -128,22 +126,20 @@ mod patch {
 }
 
 mod delete {
-    use crate::{
-        models::server_schedule_step::ServerScheduleStep,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager,
-                servers::_server_::{
-                    GetServer, GetServerActivityLogger, schedules::_schedule_::GetServerSchedule,
-                },
-            },
-        },
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            server_schedule_step::ServerScheduleStep,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -176,7 +172,7 @@ mod delete {
         server: GetServer,
         activity_logger: GetServerActivityLogger,
         schedule: GetServerSchedule,
-        Path((_server, _schedule, schedule_step)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
+        Path((_server, _schedule, schedule_step)): Path<(String, uuid::Uuid, uuid::Uuid)>,
     ) -> ApiResponseResult {
         let schedule_step = match ServerScheduleStep::by_schedule_uuid_uuid(
             &state.database,

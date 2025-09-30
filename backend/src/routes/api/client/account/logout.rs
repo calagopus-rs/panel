@@ -2,16 +2,16 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::user_session::UserSession,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{AuthMethod, GetAuthMethod},
-        },
-    };
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{AuthMethod, GetAuthMethod},
+            user_session::UserSession,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use tower_cookies::{Cookie, Cookies};
     use utoipa::ToSchema;
 

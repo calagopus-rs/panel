@@ -2,22 +2,17 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod delete {
-    use crate::{
-        models::nest_egg_variable::NestEggVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, nest_egg_variable::NestEggVariable,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -84,22 +79,17 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        models::nest_egg_variable::NestEggVariable,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::{extract::Path, http::StatusCode};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, nest_egg_variable::NestEggVariable,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -160,7 +150,7 @@ mod patch {
         Path((_nest, _egg, variable)): Path<(uuid::Uuid, uuid::Uuid, uuid::Uuid)>,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

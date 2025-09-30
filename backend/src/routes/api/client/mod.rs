@@ -1,14 +1,16 @@
 use super::{GetState, State};
-use crate::{
-    models::{user::User, user_api_key::UserApiKey, user_session::UserSession},
-    response::ApiResponse,
-};
 use axum::{
-    body::Body,
     extract::Request,
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    models::{
+        user::{AuthMethod, PermissionManager, User},
+        user_activity::UserActivityLogger,
+    },
+    response::ApiResponse,
 };
 use std::sync::Arc;
 use tower_cookies::{Cookie, Cookies};
@@ -16,186 +18,11 @@ use utoipa_axum::router::OpenApiRouter;
 
 mod account;
 mod permissions;
-mod servers;
-
-#[derive(Clone)]
-pub enum AuthMethod {
-    Session(UserSession),
-    ApiKey(UserApiKey),
-}
-
-pub type GetUser = crate::extract::ConsumingExtension<User>;
-pub type GetAuthMethod = crate::extract::ConsumingExtension<AuthMethod>;
-pub type GetPermissionManager = axum::extract::Extension<PermissionManager>;
-pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivityLogger>;
-
-#[derive(Clone)]
-pub struct UserActivityLogger {
-    state: State,
-    user_uuid: uuid::Uuid,
-    api_key_uuid: Option<uuid::Uuid>,
-    ip: std::net::IpAddr,
-}
-
-impl UserActivityLogger {
-    pub async fn log(&self, event: &str, data: serde_json::Value) {
-        if let Err(err) = crate::models::user_activity::UserActivity::log(
-            &self.state.database,
-            self.user_uuid,
-            self.api_key_uuid,
-            event,
-            self.ip.into(),
-            data,
-        )
-        .await
-        {
-            tracing::warn!(
-                user = %self.user_uuid,
-                "failed to log user activity: {:#?}",
-                err
-            );
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct PermissionManager {
-    user_admin: bool,
-    role_admin_permissions: Option<Arc<Vec<String>>>,
-    role_server_permissions: Option<Arc<Vec<String>>>,
-    api_key_user_permissions: Option<Arc<Vec<String>>>,
-    api_key_admin_permissions: Option<Arc<Vec<String>>>,
-    api_key_server_permissions: Option<Arc<Vec<String>>>,
-    server_subuser_permissions: Option<Arc<Vec<String>>>,
-}
-
-impl PermissionManager {
-    pub fn new(user: &User) -> Self {
-        Self {
-            user_admin: user.admin,
-            role_admin_permissions: user.role.as_ref().map(|r| r.admin_permissions.clone()),
-            role_server_permissions: user.role.as_ref().map(|r| r.server_permissions.clone()),
-            api_key_user_permissions: None,
-            api_key_admin_permissions: None,
-            api_key_server_permissions: None,
-            server_subuser_permissions: None,
-        }
-    }
-
-    pub fn add_api_key(mut self, api_key: &UserApiKey) -> Self {
-        self.api_key_user_permissions = Some(api_key.user_permissions.clone());
-        self.api_key_admin_permissions = Some(api_key.admin_permissions.clone());
-        self.api_key_server_permissions = Some(api_key.server_permissions.clone());
-
-        self
-    }
-
-    pub fn add_subuser_permissions(mut self, permissions: Option<Arc<Vec<String>>>) -> Self {
-        self.server_subuser_permissions = permissions;
-
-        self
-    }
-
-    pub fn has_user_permission(&self, permission: &str) -> Result<(), ApiResponse> {
-        if let Some(permissions) = &self.api_key_user_permissions {
-            if permissions.iter().any(|p| p == permission) {
-                return Ok(());
-            } else {
-                return Err(ApiResponse::new(Body::from(format!(
-                    "you do not have permission to perform this action: {permission}"
-                )))
-                .with_status(StatusCode::FORBIDDEN));
-            }
-        }
-
-        Ok(())
-    }
-
-    pub fn has_admin_permission(&self, permission: &str) -> Result<(), ApiResponse> {
-        if self.user_admin {
-            return Ok(());
-        }
-
-        let has_role_permission = if let Some(permissions) = &self.role_admin_permissions {
-            permissions.iter().any(|p| p == permission)
-        } else {
-            false
-        };
-
-        if !has_role_permission {
-            return Err(ApiResponse::new(Body::from(format!(
-                "you do not have permission to perform this action: {permission}"
-            )))
-            .with_status(StatusCode::FORBIDDEN));
-        }
-
-        if let Some(permissions) = &self.api_key_admin_permissions
-            && !permissions.iter().any(|p| p == permission)
-        {
-            return Err(ApiResponse::new(Body::from(format!(
-                "you do not have permission to perform this action: {permission}"
-            )))
-            .with_status(StatusCode::FORBIDDEN));
-        }
-
-        Ok(())
-    }
-
-    pub fn has_server_permission(&self, permission: &str) -> Result<(), ApiResponse> {
-        if self.user_admin {
-            return Ok(());
-        }
-
-        if self.server_subuser_permissions.is_none() && self.role_server_permissions.is_none() {
-            if let Some(api_key_permissions) = &self.api_key_server_permissions
-                && api_key_permissions.iter().any(|p| p == permission)
-            {
-                return Ok(());
-            }
-
-            return Err(ApiResponse::new(Body::from(format!(
-                "you do not have permission to perform this action: {permission}"
-            )))
-            .with_status(StatusCode::FORBIDDEN));
-        }
-
-        let has_role_permission = if let Some(permissions) = &self.role_server_permissions {
-            permissions.iter().any(|p| p == permission)
-        } else {
-            false
-        };
-
-        let has_subuser_permission = if let Some(permissions) = &self.server_subuser_permissions {
-            permissions.iter().any(|p| p == permission)
-        } else {
-            false
-        };
-
-        let has_base_permission = has_role_permission || has_subuser_permission;
-
-        if !has_base_permission {
-            return Err(ApiResponse::new(Body::from(format!(
-                "you do not have permission to perform this action: {permission}"
-            )))
-            .with_status(StatusCode::FORBIDDEN));
-        }
-
-        if let Some(api_key_permissions) = &self.api_key_server_permissions
-            && !api_key_permissions.iter().any(|p| p == permission)
-        {
-            return Err(ApiResponse::new(Body::from(format!(
-                "you do not have permission to perform this action: {permission}"
-            )))
-            .with_status(StatusCode::FORBIDDEN));
-        }
-
-        Ok(())
-    }
-}
+pub mod servers;
 
 pub async fn auth(
     state: GetState,
-    ip: crate::GetIp,
+    ip: shared::GetIp,
     cookies: Cookies,
     mut req: Request,
     next: Next,
@@ -230,7 +57,7 @@ pub async fn auth(
             .database
             .batch_action("update_user_session", session.uuid, {
                 let state = state.clone();
-                let user_agent = crate::utils::slice_up_to(
+                let user_agent = shared::utils::slice_up_to(
                     req.headers()
                         .get("User-Agent")
                         .and_then(|ua| ua.to_str().ok())

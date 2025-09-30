@@ -2,20 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        jwt::BasePayload,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{
-                GetPermissionManager, GetUser,
-                servers::_server_::{GetServer, GetServerActivityLogger},
-            },
-        },
-    };
     use axum::http::StatusCode;
     use axum_extra::extract::Query;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        jwt::BasePayload,
+        models::{
+            server::{GetServer, GetServerActivityLogger},
+            user::{GetPermissionManager, GetUser},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::path::{Path, PathBuf};
     use utoipa::ToSchema;
 

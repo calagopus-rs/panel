@@ -2,20 +2,15 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        jwt::BasePayload,
-        models::server_backup::BackupDisk,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::nodes::_node_::{GetNode, backups::_backup_::GetServerBackup},
-                client::GetUser,
-            },
-        },
-    };
+    use crate::routes::api::admin::nodes::_node_::backups::_backup_::GetServerBackup;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        jwt::BasePayload,
+        models::{node::GetNode, server_backup::BackupDisk, user::GetUser},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

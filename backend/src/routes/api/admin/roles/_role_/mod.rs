@@ -1,20 +1,20 @@
 use super::State;
-use crate::{
-    models::role::Role,
-    response::ApiResponse,
-    routes::{GetState, api::client::GetPermissionManager},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{role::Role, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod users;
 
-pub type GetRole = crate::extract::ConsumingExtension<Role>;
+pub type GetRole = shared::extract::ConsumingExtension<Role>;
 
 pub async fn auth(
     state: GetState,
@@ -44,19 +44,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::{admin::roles::_role_::GetRole, client::GetPermissionManager},
-        },
-    };
+    use crate::routes::api::admin::roles::_role_::GetRole;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        role: crate::models::role::AdminApiRole,
+        role: shared::models::role::AdminApiRole,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -80,19 +79,15 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::role::Role,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, roles::_role_::GetRole},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, role::Role, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
+
+    use crate::routes::api::admin::roles::_role_::GetRole;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -132,21 +127,18 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, roles::_role_::GetRole},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::sync::Arc;
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::admin::roles::_role_::GetRole;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -157,9 +149,9 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        #[validate(custom(function = "crate::permissions::validate_admin_permissions"))]
+        #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
         admin_permissions: Option<Vec<String>>,
-        #[validate(custom(function = "crate::permissions::validate_server_permissions"))]
+        #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
         server_permissions: Option<Vec<String>>,
     }
 
@@ -185,7 +177,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

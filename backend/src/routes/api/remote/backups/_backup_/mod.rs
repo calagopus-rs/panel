@@ -1,21 +1,21 @@
 use super::State;
-use crate::{
-    models::server_backup::ServerBackup,
-    response::ApiResponse,
-    routes::{GetState, api::remote::GetNode},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{node::GetNode, server_backup::ServerBackup},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod restic;
 mod restore;
 
-pub type GetBackup = crate::extract::ConsumingExtension<ServerBackup>;
+pub type GetBackup = shared::extract::ConsumingExtension<ServerBackup>;
 
 pub async fn auth(
     state: GetState,
@@ -42,19 +42,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
+    use crate::routes::api::remote::backups::_backup_::GetBackup;
+    use axum::{extract::Query, http::StatusCode};
+    use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
         models::{
+            node::GetNode,
             server::Server,
             server_backup::{BackupDisk, ServerBackup},
         },
         response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::remote::{GetNode, backups::_backup_::GetBackup},
-        },
     };
-    use axum::{extract::Query, http::StatusCode};
-    use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
     use utoipa::ToSchema;
 
@@ -208,20 +207,19 @@ mod get {
 }
 
 mod post {
-    use crate::{
+    use crate::routes::api::remote::backups::_backup_::GetBackup;
+    use axum::http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
         models::{
+            node::GetNode,
             server::Server,
             server_activity::ServerActivity,
             server_backup::{BackupDisk, ServerBackup},
         },
         response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::remote::{GetNode, backups::_backup_::GetBackup},
-        },
     };
-    use axum::http::StatusCode;
-    use serde::{Deserialize, Serialize};
     use utoipa::ToSchema;
 
     #[derive(Debug, ToSchema, Deserialize)]

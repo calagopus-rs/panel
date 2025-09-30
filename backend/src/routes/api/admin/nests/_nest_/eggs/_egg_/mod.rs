@@ -1,24 +1,23 @@
+use crate::routes::api::admin::nests::_nest_::GetNest;
+
 use super::State;
-use crate::{
-    models::nest_egg::NestEgg,
-    response::ApiResponse,
-    routes::{
-        GetState,
-        api::{admin::nests::_nest_::GetNest, client::GetPermissionManager},
-    },
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{nest_egg::NestEgg, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod mounts;
 mod variables;
 
-pub type GetNestEgg = crate::extract::ConsumingExtension<NestEgg>;
+pub type GetNestEgg = shared::extract::ConsumingExtension<NestEgg>;
 
 pub async fn auth(
     state: GetState,
@@ -59,19 +58,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::{admin::nests::_nest_::eggs::_egg_::GetNestEgg, client::GetPermissionManager},
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        egg: crate::models::nest_egg::AdminApiNestEgg,
+        egg: shared::models::nest_egg::AdminApiNestEgg,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -100,22 +98,16 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::nest_egg::NestEgg,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, nest_egg::NestEgg, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -172,22 +164,15 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{
-                    GetAdminActivityLogger,
-                    nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg},
-                },
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::http::StatusCode;
     use indexmap::IndexMap;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -205,15 +190,15 @@ mod patch {
         description: Option<String>,
 
         #[schema(inline)]
-        config_files: Option<Vec<crate::models::nest_egg::ProcessConfigurationFile>>,
+        config_files: Option<Vec<shared::models::nest_egg::ProcessConfigurationFile>>,
         #[schema(inline)]
-        config_startup: Option<crate::models::nest_egg::NestEggConfigStartup>,
+        config_startup: Option<shared::models::nest_egg::NestEggConfigStartup>,
         #[schema(inline)]
-        config_stop: Option<crate::models::nest_egg::NestEggConfigStop>,
+        config_stop: Option<shared::models::nest_egg::NestEggConfigStop>,
         #[schema(inline)]
-        config_script: Option<crate::models::nest_egg::NestEggConfigScript>,
+        config_script: Option<shared::models::nest_egg::NestEggConfigScript>,
         #[schema(inline)]
-        config_allocations: Option<crate::models::nest_egg::NestEggConfigAllocations>,
+        config_allocations: Option<shared::models::nest_egg::NestEggConfigAllocations>,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
@@ -253,7 +238,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

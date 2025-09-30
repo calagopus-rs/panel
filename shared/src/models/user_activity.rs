@@ -1,41 +1,68 @@
+use crate::State;
+
 use super::BaseModel;
-use crate::storage::StorageUrlRetriever;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
+pub type GetUserActivityLogger = crate::extract::ConsumingExtension<UserActivityLogger>;
+
+#[derive(Clone)]
+pub struct UserActivityLogger {
+    pub state: State,
+    pub user_uuid: uuid::Uuid,
+    pub api_key_uuid: Option<uuid::Uuid>,
+    pub ip: std::net::IpAddr,
+}
+
+impl UserActivityLogger {
+    pub async fn log(&self, event: &str, data: serde_json::Value) {
+        if let Err(err) = crate::models::user_activity::UserActivity::log(
+            &self.state.database,
+            self.user_uuid,
+            self.api_key_uuid,
+            event,
+            self.ip.into(),
+            data,
+        )
+        .await
+        {
+            tracing::warn!(
+                user = %self.user_uuid,
+                "failed to log user activity: {:#?}",
+                err
+            );
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
-pub struct AdminActivity {
-    pub user: Option<super::user::User>,
+pub struct UserActivity {
     pub api_key_uuid: Option<uuid::Uuid>,
 
     pub event: String,
-    pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
+    pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub data: serde_json::Value,
 
     pub created: chrono::NaiveDateTime,
 }
 
-impl BaseModel for AdminActivity {
+impl BaseModel for UserActivity {
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
 
-        let mut columns = BTreeMap::from([
+        BTreeMap::from([
             (
-                "admin_activities.api_key_uuid",
+                "user_activities.api_key_uuid",
                 format!("{prefix}api_key_uuid"),
             ),
-            ("admin_activities.event", format!("{prefix}event")),
-            ("admin_activities.ip", format!("{prefix}ip")),
-            ("admin_activities.data", format!("{prefix}data")),
-            ("admin_activities.created", format!("{prefix}created")),
-        ]);
-
-        columns.extend(super::user::User::columns(Some("user_")));
-
-        columns
+            ("user_activities.event", format!("{prefix}event")),
+            ("user_activities.ip", format!("{prefix}ip")),
+            ("user_activities.data", format!("{prefix}data")),
+            ("user_activities.created", format!("{prefix}created")),
+        ])
     }
 
     #[inline]
@@ -43,14 +70,6 @@ impl BaseModel for AdminActivity {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            user: if row
-                .try_get::<uuid::Uuid, _>("user_uuid".to_string().as_str())
-                .is_ok()
-            {
-                Some(super::user::User::map(Some("user_"), row))
-            } else {
-                None
-            },
             api_key_uuid: row.get(format!("{prefix}api_key_uuid").as_str()),
             event: row.get(format!("{prefix}event").as_str()),
             ip: row.get(format!("{prefix}ip").as_str()),
@@ -60,19 +79,19 @@ impl BaseModel for AdminActivity {
     }
 }
 
-impl AdminActivity {
+impl UserActivity {
     pub async fn log(
         database: &crate::database::Database,
-        user_uuid: Option<uuid::Uuid>,
+        user_uuid: uuid::Uuid,
         api_key_uuid: Option<uuid::Uuid>,
         event: &str,
-        ip: Option<sqlx::types::ipnetwork::IpNetwork>,
+        ip: sqlx::types::ipnetwork::IpNetwork,
         data: serde_json::Value,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
             r#"
-            INSERT INTO admin_activities (user_uuid, api_key_uuid, event, ip, data)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO user_activities (user_uuid, api_key_uuid, event, ip, data, created)
+            VALUES ($1, $2, $3, $4, $5, NOW())
             "#,
         )
         .bind(user_uuid)
@@ -86,8 +105,9 @@ impl AdminActivity {
         Ok(())
     }
 
-    pub async fn all_with_pagination(
+    pub async fn by_user_uuid_with_pagination(
         database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
         search: Option<&str>,
@@ -97,15 +117,14 @@ impl AdminActivity {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
-            FROM admin_activities
-            LEFT JOIN users ON users.uuid = admin_activities.user_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE ($1 IS NULL OR admin_activities.event ILIKE '%' || $1 || '%' OR users.username ILIKE '%' || $1 || '%')
-            ORDER BY admin_activities.created DESC
-            LIMIT $2 OFFSET $3
+            FROM user_activities
+            WHERE user_activities.user_uuid = $1 AND ($2 IS NULL OR user_activities.event ILIKE '%' || $2 || '%')
+            ORDER BY user_activities.created DESC
+            LIMIT $3 OFFSET $4
             "#,
             Self::columns_sql(None)
         ))
+        .bind(user_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -121,16 +140,10 @@ impl AdminActivity {
     }
 
     #[inline]
-    pub fn into_admin_api_object(
-        self,
-        storage_url_retriever: &StorageUrlRetriever<'_>,
-    ) -> AdminApiAdminActivity {
-        AdminApiAdminActivity {
-            user: self
-                .user
-                .map(|user| user.into_api_object(storage_url_retriever)),
+    pub fn into_api_object(self) -> ApiUserActivity {
+        ApiUserActivity {
             event: self.event,
-            ip: self.ip.map(|ip| ip.ip().to_string()),
+            ip: self.ip.ip().to_string(),
             data: self.data,
             is_api: self.api_key_uuid.is_some(),
             created: self.created.and_utc(),
@@ -139,12 +152,10 @@ impl AdminActivity {
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "AdminAdminActivity")]
-pub struct AdminApiAdminActivity {
-    pub user: Option<super::user::ApiUser>,
-
+#[schema(title = "UserActivity")]
+pub struct ApiUserActivity {
     pub event: String,
-    pub ip: Option<String>,
+    pub ip: String,
     pub data: serde_json::Value,
 
     pub is_api: bool,

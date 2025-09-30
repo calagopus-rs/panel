@@ -2,23 +2,20 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::{
-            nest_egg::{NestEgg, NestEggConfigScript},
-            nest_egg_variable::NestEggVariable,
-        },
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::http::StatusCode;
     use indexmap::IndexMap;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger,
+            nest_egg::{NestEgg, NestEggConfigScript},
+            nest_egg_variable::NestEggVariable,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::collections::HashMap;
     use utoipa::ToSchema;
     use validator::Validate;
@@ -84,7 +81,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        egg: crate::models::nest_egg::AdminApiNestEgg,
+        egg: shared::models::nest_egg::AdminApiNestEgg,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -106,7 +103,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -142,7 +139,7 @@ mod post {
             config_startup,
             config_stop,
             data.scripts.installation,
-            crate::models::nest_egg::NestEggConfigAllocations {
+            shared::models::nest_egg::NestEggConfigAllocations {
                 user_self_assign: Default::default(),
             },
             &data.startup,

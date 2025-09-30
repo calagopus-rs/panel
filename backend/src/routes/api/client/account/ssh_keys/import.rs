@@ -2,17 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::{
-        models::user_ssh_key::UserSshKey,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::client::{GetPermissionManager, GetUser, GetUserActivityLogger},
-        },
-    };
     use axum::http::StatusCode;
     use chrono::Datelike;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            user::{GetPermissionManager, GetUser},
+            user_activity::GetUserActivityLogger,
+            user_ssh_key::UserSshKey,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -35,7 +36,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        ssh_keys: Vec<crate::models::user_ssh_key::ApiUserSshKey>,
+        ssh_keys: Vec<shared::models::user_ssh_key::ApiUserSshKey>,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -50,7 +51,7 @@ mod post {
         activity_logger: GetUserActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

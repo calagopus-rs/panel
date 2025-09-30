@@ -1,20 +1,20 @@
 use super::State;
-use crate::{
-    models::nest::Nest,
-    response::ApiResponse,
-    routes::{GetState, api::client::GetPermissionManager},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use shared::{
+    GetState,
+    models::{nest::Nest, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod eggs;
 
-pub type GetNest = crate::extract::ConsumingExtension<Nest>;
+pub type GetNest = shared::extract::ConsumingExtension<Nest>;
 
 pub async fn auth(
     state: GetState,
@@ -53,19 +53,18 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError,
-            api::{admin::nests::_nest_::GetNest, client::GetPermissionManager},
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use serde::Serialize;
+    use shared::{
+        ApiError,
+        models::user::GetPermissionManager,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        nest: crate::models::nest::AdminApiNest,
+        nest: shared::models::nest::AdminApiNest,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -89,19 +88,14 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::nest::Nest,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::http::StatusCode;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, nest::Nest, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
@@ -150,20 +144,17 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::admin::nests::_nest_::GetNest;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -201,7 +192,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

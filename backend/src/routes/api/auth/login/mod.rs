@@ -5,17 +5,19 @@ mod checkpoint;
 mod security_key;
 
 mod post {
-    use crate::{
+    use axum::http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
         jwt::BasePayload,
         models::{user::User, user_activity::UserActivity, user_session::UserSession},
         response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::auth::login::checkpoint::TwoFactorRequiredJwt},
     };
-    use axum::http::StatusCode;
-    use serde::{Deserialize, Serialize};
     use tower_cookies::{Cookie, Cookies};
     use utoipa::ToSchema;
     use validator::Validate;
+
+    use crate::routes::api::auth::login::checkpoint::TwoFactorRequiredJwt;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -31,7 +33,7 @@ mod post {
     #[serde(tag = "type", rename_all = "snake_case")]
     enum Response {
         Completed {
-            user: Box<crate::models::user::ApiFullUser>,
+            user: Box<shared::models::user::ApiFullUser>,
         },
         TwoFactorRequired {
             token: String,
@@ -44,12 +46,12 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
+        ip: shared::GetIp,
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -119,7 +121,7 @@ mod post {
                 ip.0.into(),
                 headers
                     .get("User-Agent")
-                    .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
+                    .map(|ua| shared::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                     .unwrap_or("unknown"),
             )
             .await?;

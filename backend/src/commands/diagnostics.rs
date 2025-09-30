@@ -5,7 +5,7 @@ use serde::Deserialize;
 use std::{collections::VecDeque, fmt::Write, path::Path};
 use tokio::{fs::File, io::AsyncBufReadExt};
 
-pub async fn diagnostics(matches: &ArgMatches, env: Option<&crate::env::Env>) -> i32 {
+pub async fn diagnostics(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32 {
     let log_lines = *matches.get_one::<usize>("log_lines").unwrap();
 
     let env = match env {
@@ -29,9 +29,9 @@ pub async fn diagnostics(matches: &ArgMatches, env: Option<&crate::env::Env>) ->
     write_line(
         &mut output,
         "panel-rs",
-        &format!("{}:{}", crate::VERSION, crate::GIT_COMMIT),
+        &format!("{}:{}", shared::VERSION, shared::GIT_COMMIT),
     );
-    write_line(&mut output, "target", env!("CARGO_TARGET"));
+    write_line(&mut output, "target", shared::TARGET);
     write_line(&mut output, "os", std::env::consts::OS);
 
     write_header(&mut output, "panel-rs configuration");
@@ -137,7 +137,7 @@ pub async fn diagnostics(matches: &ArgMatches, env: Option<&crate::env::Env>) ->
         .post("https://api.pastes.dev/post")
         .header(
             "User-Agent",
-            format!("wings-rs diagnostics/v{}", crate::VERSION),
+            format!("panel-rs diagnostics/v{}", shared::VERSION),
         )
         .header("Content-Type", "text/plain")
         .header("Accept", "application/json")

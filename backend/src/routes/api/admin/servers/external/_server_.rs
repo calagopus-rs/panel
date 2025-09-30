@@ -2,18 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        models::server::Server,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetPermissionManager},
-    };
     use axum::{extract::Path, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{server::Server, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        server: crate::models::server::AdminApiServer,
+        server: shared::models::server::AdminApiServer,
     }
 
     #[utoipa::path(get, path = "/", responses(

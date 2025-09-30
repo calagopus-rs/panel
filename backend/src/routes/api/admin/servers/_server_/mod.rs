@@ -1,14 +1,14 @@
 use super::State;
-use crate::{
-    models::server::Server,
-    response::ApiResponse,
-    routes::{GetState, api::client::GetPermissionManager},
-};
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
     middleware::Next,
     response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{server::Server, user::GetPermissionManager},
+    response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
@@ -16,8 +16,6 @@ mod allocations;
 mod mounts;
 mod transfer;
 mod variables;
-
-pub type GetServer = crate::extract::ConsumingExtension<Server>;
 
 pub async fn auth(
     state: GetState,
@@ -47,19 +45,17 @@ pub async fn auth(
 }
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetPermissionManager},
-        },
-    };
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{server::GetServer, user::GetPermissionManager},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        server: crate::models::server::AdminApiServer,
+        server: shared::models::server::AdminApiServer,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -89,19 +85,16 @@ mod get {
 }
 
 mod delete {
-    use crate::{
-        models::server_backup::ServerBackup,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, server::GetServer, server_backup::ServerBackup,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]
@@ -176,19 +169,18 @@ mod delete {
 }
 
 mod patch {
-    use crate::{
-        models::{nest_egg::NestEgg, user::User},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, servers::_server_::GetServer},
-                client::GetPermissionManager,
-            },
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger,
+            nest_egg::NestEgg,
+            server::GetServer,
+            user::{GetPermissionManager, User},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use std::str::FromStr;
     use utoipa::ToSchema;
     use validator::Validate;
@@ -210,7 +202,7 @@ mod patch {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        limits: Option<crate::models::server::ApiServerLimits>,
+        limits: Option<shared::models::server::ApiServerLimits>,
         pinned_cpus: Option<Vec<i16>>,
 
         #[validate(length(min = 1, max = 255))]
@@ -223,7 +215,7 @@ mod patch {
         #[schema(min_length = 3, max_length = 255)]
         timezone: Option<String>,
 
-        feature_limits: Option<crate::models::server::ApiServerFeatureLimits>,
+        feature_limits: Option<shared::models::server::ApiServerFeatureLimits>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -248,7 +240,7 @@ mod patch {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

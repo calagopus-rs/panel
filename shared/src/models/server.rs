@@ -1,5 +1,5 @@
 use super::BaseModel;
-use crate::storage::StorageUrlRetriever;
+use crate::{State, storage::StorageUrlRetriever};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -9,6 +9,40 @@ use std::{
 };
 use utoipa::ToSchema;
 use validator::Validate;
+
+pub type GetServer = crate::extract::ConsumingExtension<Server>;
+pub type GetServerActivityLogger = crate::extract::ConsumingExtension<ServerActivityLogger>;
+
+#[derive(Clone)]
+pub struct ServerActivityLogger {
+    pub state: State,
+    pub server_uuid: uuid::Uuid,
+    pub user_uuid: uuid::Uuid,
+    pub api_key_uuid: Option<uuid::Uuid>,
+    pub ip: std::net::IpAddr,
+}
+
+impl ServerActivityLogger {
+    pub async fn log(&self, event: &str, data: serde_json::Value) {
+        if let Err(err) = crate::models::server_activity::ServerActivity::log(
+            &self.state.database,
+            self.server_uuid,
+            Some(self.user_uuid),
+            self.api_key_uuid,
+            event,
+            Some(self.ip.into()),
+            data,
+        )
+        .await
+        {
+            tracing::warn!(
+                user = %self.user_uuid,
+                "failed to log server activity: {:#?}",
+                err
+            );
+        }
+    }
+}
 
 #[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
 #[serde(rename_all = "snake_case")]

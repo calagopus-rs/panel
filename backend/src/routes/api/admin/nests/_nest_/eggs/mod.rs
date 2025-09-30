@@ -5,22 +5,22 @@ mod _egg_;
 mod import;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, nest_egg::NestEgg},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::nests::_nest_::GetNest, client::GetPermissionManager},
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch, nest_egg::NestEgg, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        eggs: Pagination<crate::models::nest_egg::AdminApiNestEgg>,
+        eggs: Pagination<shared::models::nest_egg::AdminApiNestEgg>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -52,7 +52,7 @@ mod get {
         nest: GetNest,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -86,20 +86,17 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::nest_egg::NestEgg,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{
-                admin::{GetAdminActivityLogger, nests::_nest_::GetNest},
-                client::GetPermissionManager,
-            },
-        },
-    };
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::http::StatusCode;
     use indexmap::IndexMap;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, nest_egg::NestEgg, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -116,15 +113,15 @@ mod post {
         description: Option<String>,
 
         #[schema(inline)]
-        config_files: Vec<crate::models::nest_egg::ProcessConfigurationFile>,
+        config_files: Vec<shared::models::nest_egg::ProcessConfigurationFile>,
         #[schema(inline)]
-        config_startup: crate::models::nest_egg::NestEggConfigStartup,
+        config_startup: shared::models::nest_egg::NestEggConfigStartup,
         #[schema(inline)]
-        config_stop: crate::models::nest_egg::NestEggConfigStop,
+        config_stop: shared::models::nest_egg::NestEggConfigStop,
         #[schema(inline)]
-        config_script: crate::models::nest_egg::NestEggConfigScript,
+        config_script: shared::models::nest_egg::NestEggConfigScript,
         #[schema(inline)]
-        config_allocations: crate::models::nest_egg::NestEggConfigAllocations,
+        config_allocations: shared::models::nest_egg::NestEggConfigAllocations,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
@@ -138,7 +135,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        egg: crate::models::nest_egg::AdminApiNestEgg,
+        egg: shared::models::nest_egg::AdminApiNestEgg,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -159,7 +156,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

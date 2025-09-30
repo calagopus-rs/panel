@@ -2,17 +2,15 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        models::server_backup::BackupDisk,
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::remote::{GetNode, backups::_backup_::GetBackup},
-        },
-    };
+    use crate::routes::api::remote::backups::_backup_::GetBackup;
     use axum::http::StatusCode;
     use indexmap::IndexMap;
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{node::GetNode, server_backup::BackupDisk},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]

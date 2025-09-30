@@ -2,13 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
-    };
     use axum::extract::Query;
     use rustis::commands::{SetCondition, SetExpiration, StringCommands};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use webauthn_rs::prelude::{Passkey, RequestChallengeResponse};
 
@@ -78,14 +78,14 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::{user::User, user_activity::UserActivity, user_session::UserSession},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState},
-    };
     use axum::http::StatusCode;
     use rustis::commands::{GenericCommands, StringCommands};
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{user::User, user_activity::UserActivity, user_session::UserSession},
+        response::{ApiResponse, ApiResponseResult},
+    };
     use tower_cookies::{Cookie, Cookies};
     use utoipa::ToSchema;
     use webauthn_rs::prelude::{PasskeyAuthentication, PublicKeyCredential};
@@ -99,7 +99,7 @@ mod post {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        user: crate::models::user::ApiFullUser,
+        user: shared::models::user::ApiFullUser,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -108,7 +108,7 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
-        ip: crate::GetIp,
+        ip: shared::GetIp,
         headers: axum::http::HeaderMap,
         cookies: Cookies,
         axum::Json(data): axum::Json<Payload>,
@@ -183,7 +183,7 @@ mod post {
             ip.0.into(),
             headers
                 .get("User-Agent")
-                .map(|ua| crate::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
+                .map(|ua| shared::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
                 .unwrap_or("unknown"),
         )
         .await?;

@@ -2,22 +2,22 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, server_mount::ServerMount},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::servers::_server_::GetServer, client::GetPermissionManager},
-        },
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch, server::GetServer, server_mount::ServerMount,
+            user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        mounts: Pagination<crate::models::server_mount::AdminApiServerMount>,
+        mounts: Pagination<shared::models::server_mount::AdminApiServerMount>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -49,7 +49,7 @@ mod get {
         server: GetServer,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

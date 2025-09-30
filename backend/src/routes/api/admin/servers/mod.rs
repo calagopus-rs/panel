@@ -5,19 +5,21 @@ mod _server_;
 mod external;
 
 mod get {
-    use crate::{
-        models::{Pagination, PaginationParamsWithSearch, server::Server},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{ApiError, GetState, api::client::GetPermissionManager},
-    };
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
+    use shared::{
+        ApiError, GetState,
+        models::{
+            Pagination, PaginationParamsWithSearch, server::Server, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        servers: Pagination<crate::models::server::AdminApiServer>,
+        servers: Pagination<shared::models::server::AdminApiServer>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -43,7 +45,7 @@ mod get {
         permissions: GetPermissionManager,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&params) {
+        if let Err(errors) = shared::utils::validate_data(&params) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
@@ -80,16 +82,19 @@ mod get {
 }
 
 mod post {
-    use crate::{
-        models::{nest_egg::NestEgg, node::Node, server::Server, user::User},
-        response::{ApiResponse, ApiResponseResult},
-        routes::{
-            ApiError, GetState,
-            api::{admin::GetAdminActivityLogger, client::GetPermissionManager},
-        },
-    };
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger,
+            nest_egg::NestEgg,
+            node::Node,
+            server::Server,
+            user::{GetPermissionManager, User},
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
     use utoipa::ToSchema;
     use validator::Validate;
 
@@ -115,7 +120,7 @@ mod post {
         #[schema(max_length = 1024)]
         description: Option<String>,
 
-        limits: crate::models::server::ApiServerLimits,
+        limits: shared::models::server::ApiServerLimits,
         pinned_cpus: Vec<i16>,
 
         #[validate(length(min = 1, max = 1024))]
@@ -127,12 +132,12 @@ mod post {
         #[schema(min_length = 3, max_length = 255, value_type = String)]
         timezone: Option<chrono_tz::Tz>,
 
-        feature_limits: crate::models::server::ApiServerFeatureLimits,
+        feature_limits: shared::models::server::ApiServerFeatureLimits,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        server: crate::models::server::AdminApiServer,
+        server: shared::models::server::AdminApiServer,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -147,7 +152,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        if let Err(errors) = crate::utils::validate_data(&data) {
+        if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();

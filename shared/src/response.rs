@@ -1,4 +1,4 @@
-use crate::routes::ApiError;
+use crate::ApiError;
 use axum::response::IntoResponse;
 
 pub type ApiResponseResult = Result<ApiResponse, ApiResponse>;
