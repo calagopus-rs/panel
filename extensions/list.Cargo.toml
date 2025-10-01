@@ -1,0 +1,7 @@
+[package]
+name = "extension-internal-list"
+version = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+shared = { workspace = true }

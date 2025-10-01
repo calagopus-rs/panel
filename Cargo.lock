@@ -1424,14 +1424,10 @@ dependencies = [
 
 [[package]]
 name = "extension-internal-list"
-version = "0.1.0"
-
-[[package]]
-name = "extension-internal-list-builder"
 version = "0.10.0"
 dependencies = [
- "serde",
- "toml 0.9.7",
+ "extension-test",
+ "shared",
 ]
 
 [[package]]

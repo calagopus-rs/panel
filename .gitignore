@@ -2,5 +2,5 @@ target/
 .env
 logs/
 extensions/*
-!extensions/.gitkeep
-backend/src/extensions/list.rs
+!extensions/list.lib.rs
+!extensions/list.Cargo.toml

@@ -1,7 +1,7 @@
 init:
 	mkdir -p extensions/internal-list/src
-	touch extensions/internal-list/src/lib.rs
-	echo '[package]\nname = "extension-internal-list"\nversion = "0.1.0"\nedition = "2021"\n\n[dependencies]' > extensions/internal-list/Cargo.toml
+	cp extensions/list.lib.rs extensions/internal-list/src/lib.rs
+	cp extensions/list.Cargo.toml extensions/internal-list/Cargo.toml
 
 build: init
 	cargo build --manifest-path extensions/internal-list/Cargo.toml
