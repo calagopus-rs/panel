@@ -37,6 +37,7 @@ pub struct ServerBackup {
     pub uuid: uuid::Uuid,
     pub server_uuid: Option<uuid::Uuid>,
     pub node_uuid: uuid::Uuid,
+    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
 
     pub name: String,
     pub successful: bool,
@@ -61,7 +62,7 @@ impl BaseModel for ServerBackup {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
 
-        BTreeMap::from([
+        let mut columns = BTreeMap::from([
             ("server_backups.uuid", format!("{prefix}uuid")),
             ("server_backups.server_uuid", format!("{prefix}server_uuid")),
             ("server_backups.node_uuid", format!("{prefix}node_uuid")),
@@ -81,7 +82,13 @@ impl BaseModel for ServerBackup {
             ("server_backups.completed", format!("{prefix}completed")),
             ("server_backups.deleted", format!("{prefix}deleted")),
             ("server_backups.created", format!("{prefix}created")),
-        ])
+        ]);
+
+        columns.extend(super::backup_configurations::BackupConfiguration::columns(
+            Some("backup_configuration_"),
+        ));
+
+        columns
     }
 
     #[inline]
@@ -91,6 +98,19 @@ impl BaseModel for ServerBackup {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             server_uuid: row.get(format!("{prefix}server_uuid").as_str()),
+            backup_configuration: if row
+                .try_get::<uuid::Uuid, _>("backup_configuration_uuid".to_string().as_str())
+                .is_ok()
+            {
+                Some(Box::new(
+                    super::backup_configurations::BackupConfiguration::map(
+                        Some("backup_configuration_"),
+                        row,
+                    ),
+                ))
+            } else {
+                None
+            },
             node_uuid: row.get(format!("{prefix}node_uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
@@ -115,25 +135,29 @@ impl ServerBackup {
         server: super::server::Server,
         name: &str,
         ignored_files: Vec<String>,
-    ) -> Result<Self, sqlx::Error> {
-        let row = sqlx::query(&format!(
+    ) -> Result<uuid::Uuid, anyhow::Error> {
+        let backup_configuration = server.backup_configuration().ok_or_else(|| {
+            anyhow::anyhow!("no backup configuration available, unable to create backup")
+        })?;
+
+        let row = sqlx::query(
             r#"
             INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING {}
-            "#,
-            Self::columns_sql(None)
-        ))
+            RETURNING uuid
+            "#
+        )
         .bind(server.uuid)
         .bind(server.node.uuid)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
-        .bind(server.node.location.backup_disk)
+        .bind(backup_configuration.backup_disk)
         .fetch_one(database.write())
         .await?;
 
         tokio::spawn({
             let uuid = row.get::<uuid::Uuid, _>("uuid");
+            let backup_disk = backup_configuration.backup_disk;
             let database = Arc::clone(database);
 
             async move {
@@ -145,7 +169,7 @@ impl ServerBackup {
                     .post_servers_server_backup(
                         server.uuid,
                         &wings_api::servers_server_backup::post::RequestBody {
-                            adapter: server.node.location.backup_disk.to_wings_adapter(),
+                            adapter: backup_disk.to_wings_adapter(),
                             uuid,
                             ignore: ignored_files.join("\n"),
                         },
@@ -171,7 +195,7 @@ impl ServerBackup {
             }
         });
 
-        Ok(Self::map(None, &row))
+        Ok(row.get("uuid"))
     }
 
     pub async fn create_raw(
@@ -179,24 +203,47 @@ impl ServerBackup {
         server: &super::server::Server,
         name: &str,
         ignored_files: Vec<String>,
-    ) -> Result<Self, sqlx::Error> {
-        let row = sqlx::query(&format!(
+    ) -> Result<uuid::Uuid, anyhow::Error> {
+        let backup_configuration = server.backup_configuration().ok_or_else(|| {
+            anyhow::anyhow!("no backup configuration available, unable to create backup")
+        })?;
+
+        let row = sqlx::query(
             r#"
             INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING {}
-            "#,
-            Self::columns_sql(None)
-        ))
+            RETURNING uuid
+            "#
+        )
         .bind(server.uuid)
         .bind(server.node.uuid)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
-        .bind(server.node.location.backup_disk)
+        .bind(backup_configuration.backup_disk)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Ok(row.get("uuid"))
+    }
+
+    pub async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
+            WHERE AND server_backups.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_server_uuid_uuid(
@@ -208,6 +255,7 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.server_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None)
@@ -229,6 +277,7 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.node_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None)
@@ -254,6 +303,7 @@ impl ServerBackup {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE
                 server_backups.server_uuid = $1
                 AND server_backups.deleted IS NULL
@@ -291,6 +341,7 @@ impl ServerBackup {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE
                 server_backups.node_uuid = $1
                 AND server_backups.server_uuid IS NULL
@@ -324,6 +375,7 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.server_uuid = $1 AND server_backups.deleted IS NULL
             "#,
             Self::columns_sql(None)
@@ -353,11 +405,15 @@ impl ServerBackup {
     }
 
     pub async fn restore(
-        &self,
+        self,
         database: &crate::database::Database,
         server: super::server::Server,
         truncate_directory: bool,
-    ) -> Result<(), s3::error::S3Error> {
+    ) -> Result<(), anyhow::Error> {
+        let backup_configuration = self.backup_configuration.ok_or_else(|| {
+            anyhow::anyhow!("no backup configuration available, unable to create backup")
+        })?;
+
         if let Err((status, error)) = server
             .node
             .api_client(database)
@@ -369,7 +425,7 @@ impl ServerBackup {
                     download_url: match self.disk {
                         BackupDisk::S3 => {
                             if let Some(mut s3_configuration) =
-                                server.node.location.backup_configs.s3
+                                backup_configuration.backup_configs.s3
                             {
                                 s3_configuration.decrypt(database);
 
@@ -391,20 +447,17 @@ impl ServerBackup {
             )
             .await
         {
-            return Err(s3::error::S3Error::HttpFailWithBody(
-                status.as_u16(),
-                error.error,
-            ));
+            return Err(s3::error::S3Error::HttpFailWithBody(status.as_u16(), error.error).into());
         }
 
         Ok(())
     }
 
     pub async fn delete(
-        &self,
+        self,
         database: &crate::database::Database,
         server: &super::server::Server,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), anyhow::Error> {
         let node = if self.node_uuid == server.node.uuid {
             &server.node
         } else {
@@ -413,9 +466,13 @@ impl ServerBackup {
                 .ok_or_else(|| sqlx::Error::RowNotFound)?
         };
 
+        let backup_configuration = self.backup_configuration.ok_or_else(|| {
+            anyhow::anyhow!("no backup configuration available, unable to create backup")
+        })?;
+
         match self.disk {
             BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = node.location.backup_configs.s3.clone() {
+                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3.clone() {
                     s3_configuration.decrypt(database);
 
                     let client = s3_configuration
@@ -445,7 +502,7 @@ impl ServerBackup {
                     .await
                     && status != StatusCode::NOT_FOUND
                 {
-                    return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
+                    return Err(anyhow::anyhow!(error.error));
                 }
             }
         }
@@ -465,13 +522,17 @@ impl ServerBackup {
     }
 
     pub async fn delete_detached(
-        &self,
+        self,
         database: &crate::database::Database,
         node: super::node::Node,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), anyhow::Error> {
+        let backup_configuration = self.backup_configuration.ok_or_else(|| {
+            anyhow::anyhow!("no backup configuration available, unable to create backup")
+        })?;
+
         match self.disk {
             BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = node.location.backup_configs.s3 {
+                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
                     s3_configuration.decrypt(database);
 
                     let client = s3_configuration
@@ -480,10 +541,7 @@ impl ServerBackup {
                     let file_path = match self.upload_path.as_ref() {
                         Some(path) => path,
                         None => {
-                            return Err(sqlx::Error::Io(std::io::Error::new(
-                                std::io::ErrorKind::NotFound,
-                                "upload path not found",
-                            )));
+                            return Err(anyhow::anyhow!("upload path not found"));
                         }
                     };
 
@@ -491,10 +549,7 @@ impl ServerBackup {
                         tracing::error!(backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
                     }
                 } else {
-                    return Err(sqlx::Error::Io(std::io::Error::new(
-                        std::io::ErrorKind::NotFound,
-                        "S3 configuration not found",
-                    )));
+                    return Err(anyhow::anyhow!("S3 configuration not found"));
                 }
             }
             _ => {
@@ -509,7 +564,7 @@ impl ServerBackup {
                     .await
                     && status != StatusCode::NOT_FOUND
                 {
-                    return Err(sqlx::Error::Io(std::io::Error::other(error.error)));
+                    return Err(anyhow::anyhow!(error.error));
                 }
             }
         }
@@ -531,7 +586,7 @@ impl ServerBackup {
     pub async fn delete_oldest_by_server_uuid(
         database: &crate::database::Database,
         server: &super::server::Server,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), anyhow::Error> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -554,7 +609,7 @@ impl ServerBackup {
 
             backup.delete(database, server).await
         } else {
-            Err(sqlx::Error::RowNotFound)
+            Err(sqlx::Error::RowNotFound.into())
         }
     }
 

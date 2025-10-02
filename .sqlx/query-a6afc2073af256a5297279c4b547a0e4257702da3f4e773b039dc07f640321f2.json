@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE locations\n            SET backup_configuration_uuid = $2, name = $3, description = $4\n            WHERE locations.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a6afc2073af256a5297279c4b547a0e4257702da3f4e773b039dc07f640321f2"
+}

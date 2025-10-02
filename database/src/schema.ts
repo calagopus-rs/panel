@@ -230,15 +230,27 @@ export const mounts = pgTable('mounts', {
 	uniqueIndex('mounts_source_target_idx').on(mounts.source, mounts.target)
 ])
 
-export const locations = pgTable('locations', {
+export const backupConfigurations = pgTable('backup_configurations', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	shortName: varchar('short_name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	backup_disk: backupDiskEnum('backup_disk').default('LOCAL').notNull(),
 	backup_configs: jsonb('backup_configs').default({}).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (backupConfigurations) => [
+	uniqueIndex('backup_configurations_name_idx').on(backupConfigurations.name)
+])
+
+export const locations = pgTable('locations', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	backupConfigurationUuid: uuid('backup_configuration_uuid').references(() => backupConfigurations.uuid, { onDelete: 'set null' }),
+
+	shortName: varchar('short_name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	description: text('description'),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locations) => [
@@ -258,6 +270,7 @@ export const locationDatabaseHosts = pgTable('location_database_hosts', {
 export const nodes = pgTable('nodes', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	locationUuid: uuid('location_uuid').references(() => locations.uuid).notNull(),
+	backupConfigurationUuid: uuid('backup_configuration_uuid').references(() => backupConfigurations.uuid, { onDelete: 'set null' }),
 
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	public: boolean('public').notNull(),
@@ -413,6 +426,7 @@ export const servers = pgTable('servers', {
 	destinationNodeUuid: uuid('destination_node_uuid').references(() => nodes.uuid),
 	ownerUuid: uuid('owner_uuid').references(() => users.uuid).notNull(),
 	eggUuid: uuid('egg_uuid').references(() => nestEggs.uuid).notNull(),
+	backupConfigurationUuid: uuid('backup_configuration_uuid').references(() => backupConfigurations.uuid, { onDelete: 'set null' }),
 
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
@@ -440,7 +454,6 @@ export const servers = pgTable('servers', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (servers) => [
 	index('servers_node_uuid_idx').on(servers.nodeUuid),
-	uniqueIndex('servers_uuid_idx').on(servers.uuid),
 	uniqueIndex('servers_uuid_short_idx').on(servers.uuidShort),
 	index('servers_external_id_idx').on(servers.externalId),
 	index('servers_owner_uuid_idx').on(servers.ownerUuid),
@@ -521,6 +534,7 @@ export const serverBackups = pgTable('server_backups', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	serverUuid: uuid('server_uuid').references(() => servers.uuid, { onDelete: 'set null' }),
 	nodeUuid: uuid('node_uuid').references(() => nodes.uuid, { onDelete: 'cascade' }).notNull(),
+	backupConfigurationUuid: uuid('backup_configuration_uuid').references(() => backupConfigurations.uuid, { onDelete: 'set null' }),
 
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	successful: boolean('successful').default(false).notNull(),

@@ -169,8 +169,8 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, location::Location, node::GetNode,
-            user::GetPermissionManager,
+            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
+            location::Location, node::GetNode, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -180,6 +180,7 @@ mod patch {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         location_uuid: Option<uuid::Uuid>,
+        backup_configuration_uuid: Option<uuid::Uuid>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -250,6 +251,25 @@ mod patch {
 
             node.location = location;
         }
+        if let Some(backup_configuration_uuid) = data.backup_configuration_uuid {
+            if backup_configuration_uuid.is_nil() {
+                node.backup_configuration = None;
+            } else {
+                let backup_configuration =
+                    match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid)
+                        .await?
+                    {
+                        Some(backup_configuration) => backup_configuration,
+                        None => {
+                            return ApiResponse::error("backup configuration not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                node.backup_configuration = Some(Box::new(backup_configuration));
+            }
+        }
         if let Some(name) = data.name {
             node.name = name;
         }
@@ -299,12 +319,15 @@ mod patch {
 
         match sqlx::query!(
             "UPDATE nodes
-            SET location_uuid = $1, name = $2,
-                public = $3, description = $4, public_url = $5,
-                url = $6, sftp_host = $7, sftp_port = $8,
-                maintenance_message = $9, memory = $10, disk = $11
-            WHERE nodes.uuid = $12",
+            SET location_uuid = $1, backup_configuration_uuid = $2, name = $3,
+                public = $4, description = $5, public_url = $6,
+                url = $7, sftp_host = $8, sftp_port = $9,
+                maintenance_message = $10, memory = $11, disk = $12
+            WHERE nodes.uuid = $13",
             node.location.uuid,
+            node.backup_configuration
+                .as_ref()
+                .map(|backup_configuration| backup_configuration.uuid),
             node.name,
             node.public,
             node.description,

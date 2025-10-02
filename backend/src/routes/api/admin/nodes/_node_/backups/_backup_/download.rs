@@ -38,7 +38,7 @@ mod get {
     pub async fn route(
         state: GetState,
         user: GetUser,
-        mut node: GetNode,
+        node: GetNode,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
         if backup.completed.is_none() {
@@ -47,8 +47,17 @@ mod get {
                 .ok();
         }
 
-        if matches!(backup.disk, BackupDisk::S3)
-            && let Some(s3_configuration) = &mut node.location.backup_configs.s3
+        let mut backup_configuration = match backup.0.backup_configuration {
+            Some(backup_configuration) => backup_configuration,
+            None => {
+                return ApiResponse::error("backup does not have a backup configuration assigned")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
+        };
+
+        if matches!(backup.0.disk, BackupDisk::S3)
+            && let Some(s3_configuration) = &mut backup_configuration.backup_configs.s3
         {
             s3_configuration.decrypt(&state.database);
 
@@ -62,7 +71,7 @@ mod get {
                         .ok();
                 }
             };
-            let file_path = match backup.upload_path.as_ref() {
+            let file_path = match backup.0.upload_path.as_ref() {
                 Some(path) => path,
                 None => {
                     return ApiResponse::error("upload path not found")
@@ -98,7 +107,7 @@ mod get {
                     issued_at: Some(chrono::Utc::now().timestamp()),
                     jwt_id: user.uuid.to_string(),
                 },
-                backup_uuid: backup.uuid,
+                backup_uuid: backup.0.uuid,
                 unique_id: uuid::Uuid::new_v4(),
             },
         )?;

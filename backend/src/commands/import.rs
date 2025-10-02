@@ -555,16 +555,14 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
 
                 let row = sqlx::query(
                     r#"
-                    INSERT INTO locations (short_name, name, description, backup_disk, backup_configs, created)
-                    VALUES ($1, $1, $2, $3, $4, $5)
+                    INSERT INTO locations (name, description, created)
+                    VALUES ($1, $1, $2, $3)
                     ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
                     RETURNING uuid
                     "#,
                 )
                 .bind(short_name)
                 .bind(description)
-                .bind(shared::models::server_backup::BackupDisk::Local)
-                .bind(serde_json::to_value(shared::models::location::LocationBackupConfigs::default())?)
                 .bind(created)
                 .fetch_one(database.write())
                 .await?;

@@ -88,6 +88,7 @@ mod post {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration,
             nest_egg::NestEgg,
             node::Node,
             server::Server,
@@ -103,6 +104,7 @@ mod post {
         node_uuid: uuid::Uuid,
         owner_uuid: uuid::Uuid,
         egg_uuid: uuid::Uuid,
+        backup_configuration_uuid: Option<uuid::Uuid>,
 
         allocation_uuid: Option<uuid::Uuid>,
         allocation_uuids: Vec<uuid::Uuid>,
@@ -187,11 +189,27 @@ mod post {
             }
         };
 
+        let backup_configuration = if let Some(backup_configuration_uuid) =
+            data.backup_configuration_uuid
+        {
+            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
+                Some(backup_configuration) => Some(backup_configuration),
+                None => {
+                    return ApiResponse::error("backup configuration not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            }
+        } else {
+            None
+        };
+
         let server = match Server::create(
             &state.database,
             &node,
             owner.uuid,
             egg.uuid,
+            backup_configuration.map(|backup_configuration| backup_configuration.uuid),
             data.allocation_uuid,
             &data.allocation_uuids,
             data.external_id.as_deref(),

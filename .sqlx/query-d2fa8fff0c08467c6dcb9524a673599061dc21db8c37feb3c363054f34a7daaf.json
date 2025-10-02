@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nodes\n            SET location_uuid = $1, backup_configuration_uuid = $2, name = $3,\n                public = $4, description = $5, public_url = $6,\n                url = $7, sftp_host = $8, sftp_port = $9,\n                maintenance_message = $10, memory = $11, disk = $12\n            WHERE nodes.uuid = $13",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Bool",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Int4",
+        "Text",
+        "Int8",
+        "Int8",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d2fa8fff0c08467c6dcb9524a673599061dc21db8c37feb3c363054f34a7daaf"
+}

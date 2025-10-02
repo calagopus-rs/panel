@@ -141,6 +141,20 @@
       "when": 1759054204756,
       "tag": "0019_furry_stardust",
       "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1759428244157,
+      "tag": "0020_cloudy_slyde",
+      "breakpoints": false
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1759438974583,
+      "tag": "0021_freezing_puck",
+      "breakpoints": false
     }
   ]
 }

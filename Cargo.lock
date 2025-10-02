@@ -1424,7 +1424,7 @@ dependencies = [
 
 [[package]]
 name = "extension-internal-list"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "extension-test",
  "shared",
@@ -1432,7 +1432,7 @@ dependencies = [
 
 [[package]]
 name = "extension-test"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "async-trait",
  "shared",
@@ -2960,7 +2960,7 @@ dependencies = [
 
 [[package]]
 name = "panel-rs"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3730,7 +3730,7 @@ dependencies = [
 
 [[package]]
 name = "rule-validator"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "chrono",
  "regex",
@@ -4341,7 +4341,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -6267,7 +6267,7 @@ checksum = "271414315aff87387382ec3d271b52d7ae78726f5d44ac98b4f4030c91880486"
 
 [[package]]
 name = "wings-api"
-version = "0.10.1"
+version = "0.11.0"
 dependencies = [
  "chrono",
  "cron",

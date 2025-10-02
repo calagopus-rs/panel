@@ -82,7 +82,11 @@ mod post {
             match ServerBackup::create_raw(&state.database, &server, &name, data.ignored_files)
                 .await
             {
-                Ok(backup) => backup,
+                Ok(backup_uuid) => ServerBackup::by_uuid(&state.database, backup_uuid)
+                    .await?
+                    .ok_or_else(|| {
+                        anyhow::anyhow!("failed to retrieve backup after creation: {}", backup_uuid)
+                    })?,
                 Err(err) => {
                     tracing::error!(name = %name, "failed to create backup: {:#?}", err);
 

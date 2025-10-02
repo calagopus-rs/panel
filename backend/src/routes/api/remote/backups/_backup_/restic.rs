@@ -8,7 +8,7 @@ mod get {
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{node::GetNode, server_backup::BackupDisk},
+        models::server_backup::BackupDisk,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -30,14 +30,23 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, node: GetNode, backup: GetBackup) -> ApiResponseResult {
+    pub async fn route(state: GetState, backup: GetBackup) -> ApiResponseResult {
         if backup.disk != BackupDisk::Restic {
             return ApiResponse::error("backup is not stored on restic")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
 
-        let mut restic_configuration = match node.0.location.backup_configs.restic {
+        let backup_configuration = match backup.0.backup_configuration {
+            Some(backup_configuration) => backup_configuration,
+            None => {
+                return ApiResponse::error("backup does not have a backup configuration assigned")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
+        };
+
+        let mut restic_configuration = match backup_configuration.backup_configs.restic {
             Some(config) => config,
             None => {
                 return ApiResponse::error("restic configuration not found")

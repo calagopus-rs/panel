@@ -1,7 +1,7 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
-mod _location_;
+mod _backup_configuration_;
 
 mod get {
     use axum::{extract::Query, http::StatusCode};
@@ -9,7 +9,8 @@ mod get {
     use shared::{
         ApiError, GetState,
         models::{
-            Pagination, PaginationParamsWithSearch, location::Location, user::GetPermissionManager,
+            Pagination, PaginationParamsWithSearch, backup_configurations::BackupConfiguration,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -18,7 +19,7 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        locations: Pagination<shared::models::location::AdminApiLocation>,
+        locations: Pagination<shared::models::backup_configurations::AdminApiBackupConfiguration>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -50,9 +51,9 @@ mod get {
                 .ok();
         }
 
-        permissions.has_admin_permission("locations.read")?;
+        permissions.has_admin_permission("backup-configurations.read")?;
 
-        let locations = Location::all_with_pagination(
+        let backup_configurations = BackupConfiguration::all_with_pagination(
             &state.database,
             params.page,
             params.per_page,
@@ -62,13 +63,15 @@ mod get {
 
         ApiResponse::json(Response {
             locations: Pagination {
-                total: locations.total,
-                per_page: locations.per_page,
-                page: locations.page,
-                data: locations
+                total: backup_configurations.total,
+                per_page: backup_configurations.per_page,
+                page: backup_configurations.page,
+                data: backup_configurations
                     .data
                     .into_iter()
-                    .map(|location| location.into_admin_api_object(&state.database))
+                    .map(|backup_configuration| {
+                        backup_configuration.into_admin_api_object(&state.database)
+                    })
                     .collect(),
             },
         })
@@ -83,7 +86,7 @@ mod post {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            location::Location, user::GetPermissionManager,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -92,19 +95,21 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        backup_configuration_uuid: Option<uuid::Uuid>,
-
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
         name: String,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         description: Option<String>,
+
+        backup_disk: shared::models::server_backup::BackupDisk,
+        #[serde(default)]
+        backup_configs: shared::models::backup_configurations::BackupConfigs,
     }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        location: shared::models::location::AdminApiLocation,
+        backup_configuration: shared::models::backup_configurations::AdminApiBackupConfiguration,
     }
 
     #[utoipa::path(post, path = "/", responses(
@@ -124,41 +129,27 @@ mod post {
                 .ok();
         }
 
-        permissions.has_admin_permission("locations.create")?;
+        permissions.has_admin_permission("backup-configurations.create")?;
 
-        let backup_configuration = if let Some(backup_configuration_uuid) =
-            data.backup_configuration_uuid
-        {
-            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
-                Some(backup_configuration) => Some(backup_configuration),
-                None => {
-                    return ApiResponse::error("backup configuration not found")
-                        .with_status(StatusCode::NOT_FOUND)
-                        .ok();
-                }
-            }
-        } else {
-            None
-        };
-
-        let location = match Location::create(
+        let backup_configuration = match BackupConfiguration::create(
             &state.database,
-            backup_configuration.map(|backup_configuration| backup_configuration.uuid),
             &data.name,
             data.description.as_deref(),
+            data.backup_disk,
+            data.backup_configs,
         )
         .await
         {
-            Ok(location) => location,
+            Ok(backup_configuration) => backup_configuration,
             Err(err) if err.to_string().contains("unique constraint") => {
-                return ApiResponse::error("location with name already exists")
+                return ApiResponse::error("backup configuration with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create location: {:#?}", err);
+                tracing::error!("failed to create backup configuration: {:#?}", err);
 
-                return ApiResponse::error("failed to create location")
+                return ApiResponse::error("failed to create backup configuration")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
@@ -166,17 +157,17 @@ mod post {
 
         activity_logger
             .log(
-                "location:create",
+                "backup-configuration:create",
                 serde_json::json!({
-                    "uuid": location.uuid,
-                    "name": location.name,
-                    "description": location.description,
+                    "uuid": backup_configuration.uuid,
+                    "name": backup_configuration.name,
+                    "description": backup_configuration.description,
                 }),
             )
             .await;
 
         ApiResponse::json(Response {
-            location: location.into_admin_api_object(&state.database),
+            backup_configuration: backup_configuration.into_admin_api_object(&state.database),
         })
         .ok()
     }
@@ -186,6 +177,9 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
-        .nest("/{location}", _location_::router(state))
+        .nest(
+            "/{backup_configuration}",
+            _backup_configuration_::router(state),
+        )
         .with_state(state.clone())
 }

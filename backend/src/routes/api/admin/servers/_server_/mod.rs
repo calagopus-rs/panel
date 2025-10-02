@@ -142,8 +142,10 @@ mod delete {
 
         if data.delete_backups {
             for backup in backups {
+                let backup_uuid = backup.uuid;
+
                 if let Err(err) = backup.delete(&state.database, &server).await {
-                    tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+                    tracing::error!(server = %server.uuid, backup = %backup_uuid, "failed to delete backup: {:#?}", err);
 
                     if !data.force {
                         return ApiResponse::error(&format!("failed to delete backup: {err}"))
@@ -175,6 +177,7 @@ mod patch {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration,
             nest_egg::NestEgg,
             server::GetServer,
             user::{GetPermissionManager, User},
@@ -189,6 +192,7 @@ mod patch {
     pub struct Payload {
         owner_uuid: Option<uuid::Uuid>,
         egg_uuid: Option<uuid::Uuid>,
+        backup_configuration_uuid: Option<uuid::Uuid>,
 
         suspended: Option<bool>,
 
@@ -272,6 +276,25 @@ mod patch {
 
             server.egg = Box::new(egg);
         }
+        if let Some(backup_configuration_uuid) = data.backup_configuration_uuid {
+            if backup_configuration_uuid.is_nil() {
+                server.backup_configuration = None;
+            } else {
+                let backup_configuration =
+                    match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid)
+                        .await?
+                    {
+                        Some(backup_configuration) => backup_configuration,
+                        None => {
+                            return ApiResponse::error("backup configuration not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                server.backup_configuration = Some(Box::new(backup_configuration));
+            }
+        }
         if let Some(suspended) = data.suspended {
             server.suspended = suspended;
         }
@@ -331,14 +354,19 @@ mod patch {
         match sqlx::query!(
             "UPDATE servers
             SET
-                owner_uuid = $1, egg_uuid = $2, suspended = $3, external_id = $4,
-                name = $5, description = $6, cpu = $7, memory = $8,
-                swap = $9, disk = $10, io_weight = $11, pinned_cpus = $12,
-                startup = $13, image = $14, timezone = $15, allocation_limit = $16,
-                backup_limit = $17, database_limit = $18, schedule_limit = $19
-            WHERE servers.uuid = $20",
+                owner_uuid = $1, egg_uuid = $2, backup_configuration_uuid = $3,
+                suspended = $4, external_id = $5, name = $6, description = $7,
+                cpu = $8, memory = $9, swap = $10, disk = $11, io_weight = $12,
+                pinned_cpus = $13, startup = $14, image = $15, timezone = $16,
+                allocation_limit = $17, backup_limit = $18, database_limit = $19,
+                schedule_limit = $20
+            WHERE servers.uuid = $21",
             server.owner.uuid,
             server.egg.uuid,
+            server
+                .backup_configuration
+                .as_ref()
+                .map(|backup_configuration| backup_configuration.uuid),
             server.suspended,
             server.external_id,
             server.name,

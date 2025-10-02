@@ -77,13 +77,17 @@ mod post {
                 .ok();
         }
 
+        let backup_uuid = backup.uuid;
+        let backup_name = backup.name.clone();
+
         let uuid = server.uuid;
         if let Err(err) = backup
+            .0
             .restore(&state.database, server.0, data.truncate_directory)
             .await
         {
             transaction.rollback().await?;
-            tracing::error!(server = %uuid, backup = %backup.uuid, "failed to restore backup: {:#?}", err);
+            tracing::error!(server = %uuid, backup = %backup_uuid, "failed to restore backup: {:#?}", err);
 
             return ApiResponse::error("failed to restore backup")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -96,8 +100,8 @@ mod post {
             .log(
                 "server:backup.restore",
                 serde_json::json!({
-                    "uuid": backup.uuid,
-                    "name": backup.name,
+                    "uuid": backup_uuid,
+                    "name": backup_name,
                     "truncate_directory": data.truncate_directory,
                 }),
             )

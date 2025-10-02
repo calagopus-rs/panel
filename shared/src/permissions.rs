@@ -197,18 +197,36 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                 description: "Permissions that control the ability to manage locations for the panel.",
                 permissions: IndexMap::from([
                     ("create", "Allows to create new locations for the panel."),
-                    (
-                        "read",
-                        "Allows to view locations and their backup passwords for the panel.",
-                    ),
-                    (
-                        "update",
-                        "Allows to modify locations and their backup passwords.",
-                    ),
+                    ("read", "Allows to view locations for the panel."),
+                    ("update", "Allows to modify locations."),
                     ("delete", "Allows to delete locations from the panel."),
                     (
                         "database-hosts",
                         "Allows to view and manage a locations' database hosts.",
+                    ),
+                ]),
+            },
+        ),
+        (
+            "backup-configurations",
+            PermissionGroup {
+                description: "Permissions that control the ability to manage backup configurations for the panel.",
+                permissions: IndexMap::from([
+                    (
+                        "create",
+                        "Allows to create new backup configurations for the panel.",
+                    ),
+                    (
+                        "read",
+                        "Allows to view backup configurations and their passwords for the panel.",
+                    ),
+                    (
+                        "update",
+                        "Allows to modify backup configurations and their passwords.",
+                    ),
+                    (
+                        "delete",
+                        "Allows to delete backup configurations from the panel.",
                     ),
                 ]),
             },

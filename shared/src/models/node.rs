@@ -11,6 +11,7 @@ pub type GetNode = crate::extract::ConsumingExtension<Node>;
 pub struct Node {
     pub uuid: uuid::Uuid,
     pub location: super::location::Location,
+    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
 
     pub name: String,
     pub public: bool,
@@ -74,6 +75,11 @@ impl BaseModel for Node {
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_")));
+        columns.extend(
+            super::backup_configurations::BackupConfiguration::node_columns(Some(
+                "node_backup_configuration_",
+            )),
+        );
 
         columns
     }
@@ -85,6 +91,19 @@ impl BaseModel for Node {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             location: super::location::Location::map(Some("location_"), row),
+            backup_configuration: if row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .is_ok()
+            {
+                Some(Box::new(
+                    super::backup_configurations::BackupConfiguration::map(
+                        Some("node_backup_configuration_"),
+                        row,
+                    ),
+                ))
+            } else {
+                None
+            },
             name: row.get(format!("{prefix}name").as_str()),
             public: row.get(format!("{prefix}public").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
@@ -115,6 +134,7 @@ impl Node {
     pub async fn create(
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
+        backup_configuration_uuid: Option<uuid::Uuid>,
         name: &str,
         public: bool,
         description: Option<&str>,
@@ -131,12 +151,13 @@ impl Node {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO nodes (location_uuid, name, public, description, public_url, url, sftp_host, sftp_port, maintenance_message, memory, disk, token_id, token)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            INSERT INTO nodes (location_uuid, backup_configuration_uuid, name, public, description, public_url, url, sftp_host, sftp_port, maintenance_message, memory, disk, token_id, token)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
             RETURNING uuid
             "#
         )
         .bind(location_uuid)
+        .bind(backup_configuration_uuid)
         .bind(name)
         .bind(public)
         .bind(description)
@@ -164,6 +185,8 @@ impl Node {
             SELECT {}, {}
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.uuid = $1
             "#,
             Self::columns_sql(None),
@@ -186,6 +209,8 @@ impl Node {
             SELECT {}
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.token_id = $1
             "#,
             Self::columns_sql(None)
@@ -222,6 +247,8 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.location_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
             ORDER BY nodes.created
             LIMIT $3 OFFSET $4
@@ -229,6 +256,43 @@ impl Node {
             Self::columns_sql(None)
         ))
         .bind(location_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn by_backup_configuration_uuid_with_pagination(
+        database: &crate::database::Database,
+        backup_configuration_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM nodes
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            WHERE nodes.backup_configuration_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
+            ORDER BY nodes.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(backup_configuration_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -256,6 +320,8 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE $1 IS NULL OR nodes.name ILIKE '%' || $1 || '%'
             ORDER BY nodes.created
             LIMIT $2 OFFSET $3
@@ -347,6 +413,9 @@ impl Node {
         AdminApiNode {
             uuid: self.uuid,
             location: self.location.into_admin_api_object(database),
+            backup_configuration: self
+                .backup_configuration
+                .map(|backup_configuration| backup_configuration.into_admin_api_object(database)),
             name: self.name,
             public: self.public,
             description: self.description,
@@ -372,6 +441,7 @@ impl Node {
 pub struct AdminApiNode {
     pub uuid: uuid::Uuid,
     pub location: super::location::AdminApiLocation,
+    pub backup_configuration: Option<super::backup_configurations::AdminApiBackupConfiguration>,
 
     pub name: String,
     pub public: bool,

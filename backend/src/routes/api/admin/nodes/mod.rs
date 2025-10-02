@@ -80,8 +80,8 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, location::Location, node::Node,
-            user::GetPermissionManager,
+            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
+            location::Location, node::Node, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -91,6 +91,7 @@ mod post {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         location_uuid: uuid::Uuid,
+        backup_configuration_uuid: Option<uuid::Uuid>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -153,9 +154,25 @@ mod post {
             }
         };
 
+        let backup_configuration = if let Some(backup_configuration_uuid) =
+            data.backup_configuration_uuid
+        {
+            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
+                Some(backup_configuration) => Some(backup_configuration),
+                None => {
+                    return ApiResponse::error("backup configuration not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            }
+        } else {
+            None
+        };
+
         let node = match Node::create(
             &state.database,
             location.uuid,
+            backup_configuration.map(|backup_configuration| backup_configuration.uuid),
             &data.name,
             data.public,
             data.description.as_deref(),

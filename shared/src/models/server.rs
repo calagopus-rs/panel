@@ -67,6 +67,7 @@ pub struct Server {
     pub owner: super::user::User,
     pub egg: Box<super::nest_egg::NestEgg>,
     pub nest: Box<super::nest::Nest>,
+    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
 
     pub status: Option<ServerStatus>,
     pub suspended: bool,
@@ -147,6 +148,9 @@ impl BaseModel for Server {
         columns.extend(super::user::User::columns(Some("owner_")));
         columns.extend(super::nest_egg::NestEgg::columns(Some("egg_")));
         columns.extend(super::nest::Nest::columns(Some("nest_")));
+        columns.extend(super::backup_configurations::BackupConfiguration::columns(
+            Some("server_backup_configuration_"),
+        ));
 
         columns
     }
@@ -180,6 +184,19 @@ impl BaseModel for Server {
             owner: super::user::User::map(Some("owner_"), row),
             egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)),
             nest: Box::new(super::nest::Nest::map(Some("nest_"), row)),
+            backup_configuration: if row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .is_ok()
+            {
+                Some(Box::new(
+                    super::backup_configurations::BackupConfiguration::map(
+                        Some("server_backup_configuration_"),
+                        row,
+                    ),
+                ))
+            } else {
+                None
+            },
             status: row.get(format!("{prefix}status").as_str()),
             suspended: row.get(format!("{prefix}suspended").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
@@ -219,6 +236,7 @@ impl Server {
         node: &super::node::Node,
         owner_uuid: uuid::Uuid,
         egg_uuid: uuid::Uuid,
+        backup_configuration_uuid: Option<uuid::Uuid>,
         allocation_uuid: Option<uuid::Uuid>,
         allocation_uuids: &[uuid::Uuid],
         external_id: Option<&str>,
@@ -249,6 +267,7 @@ impl Server {
                     node_uuid,
                     owner_uuid,
                     egg_uuid,
+                    backup_configuration_uuid,
                     name,
                     description,
                     status,
@@ -267,9 +286,9 @@ impl Server {
                     schedule_limit
                 )
                 VALUES (
-                    $1, $2, $3, $4, $5, $6, $7, $8,
-                    $9, $10, $11, $12, $13, $14, $15,
-                    $16, $17, $18, $19, $20, $21, $22
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9,
+                    $10, $11, $12, $13, $14, $15, $16,
+                    $17, $18, $19, $20, $21, $22, $23
                 )
                 RETURNING uuid
                 "#,
@@ -280,6 +299,7 @@ impl Server {
             .bind(node.uuid)
             .bind(owner_uuid)
             .bind(egg_uuid)
+            .bind(backup_configuration_uuid)
             .bind(name)
             .bind(description)
             .bind(if skip_scripts {
@@ -405,6 +425,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -433,6 +456,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -461,6 +487,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -488,6 +517,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -526,6 +558,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -569,6 +604,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -611,6 +649,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -656,6 +697,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -701,6 +745,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -714,6 +761,51 @@ impl Server {
             Self::columns_sql(None)
         ))
         .bind(node_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn by_backup_configuration_uuid_with_pagination(
+        database: &crate::database::Database,
+        backup_configuration_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM servers
+            JOIN nodes ON nodes.uuid = servers.node_uuid
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+            WHERE servers.backup_configuration_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(backup_configuration_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -742,6 +834,9 @@ impl Server {
             FROM servers
             JOIN nodes ON nodes.uuid = servers.node_uuid
             JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = servers.backup_configuration_uuid
             LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
             LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
             JOIN users ON users.uuid = servers.owner_uuid
@@ -895,6 +990,42 @@ impl Server {
         }
 
         permissions
+    }
+
+    pub fn into_backup_configuration(
+        self,
+    ) -> Option<Box<super::backup_configurations::BackupConfiguration>> {
+        if let Some(backup_configuration) = self.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        if let Some(backup_configuration) = self.node.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        if let Some(backup_configuration) = self.node.location.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        None
+    }
+
+    pub fn backup_configuration(
+        &self,
+    ) -> Option<&super::backup_configurations::BackupConfiguration> {
+        if let Some(backup_configuration) = &self.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        if let Some(backup_configuration) = &self.node.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        if let Some(backup_configuration) = &self.node.location.backup_configuration {
+            return Some(backup_configuration);
+        }
+
+        None
     }
 
     pub fn is_ignored(&mut self, path: &str, is_dir: bool) -> bool {
@@ -1123,6 +1254,9 @@ impl Server {
             owner: self.owner.into_api_full_object(storage_url_retriever),
             egg: self.egg.into_admin_api_object(),
             nest: self.nest.into_admin_api_object(),
+            backup_configuration: self
+                .backup_configuration
+                .map(|backup_configuration| backup_configuration.into_admin_api_object(database)),
             status: self.status,
             suspended: self.suspended,
             name: self.name,
@@ -1256,6 +1390,7 @@ pub struct AdminApiServer {
     pub owner: super::user::ApiFullUser,
     pub egg: super::nest_egg::AdminApiNestEgg,
     pub nest: super::nest::AdminApiNest,
+    pub backup_configuration: Option<super::backup_configurations::AdminApiBackupConfiguration>,
 
     pub status: Option<ServerStatus>,
     pub suspended: bool,

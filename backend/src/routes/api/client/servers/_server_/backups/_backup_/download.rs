@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -15,8 +16,6 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
@@ -55,7 +54,7 @@ mod get {
         state: GetState,
         permissions: GetPermissionManager,
         user: GetUser,
-        mut server: GetServer,
+        server: GetServer,
         activity_logger: GetServerActivityLogger,
         backup: GetServerBackup,
         Query(params): Query<Params>,
@@ -68,8 +67,17 @@ mod get {
                 .ok();
         }
 
-        if matches!(backup.disk, BackupDisk::S3)
-            && let Some(s3_configuration) = &mut server.node.location.backup_configs.s3
+        let mut backup_configuration = match backup.0.backup_configuration {
+            Some(backup_configuration) => backup_configuration,
+            None => {
+                return ApiResponse::error("backup does not have a backup configuration assigned")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
+        };
+
+        if matches!(backup.0.disk, BackupDisk::S3)
+            && let Some(s3_configuration) = &mut backup_configuration.backup_configs.s3
         {
             s3_configuration.decrypt(&state.database);
 
@@ -83,9 +91,9 @@ mod get {
                         .ok();
                 }
             };
-            let file_path = match backup.upload_path.as_ref() {
+            let file_path = match backup.0.upload_path.as_ref() {
                 Some(path) => path,
-                None => &ServerBackup::s3_path(server.uuid, backup.uuid),
+                None => &ServerBackup::s3_path(server.uuid, backup.0.uuid),
             };
 
             let url = client.presign_get(file_path, 15 * 60, None).await?;
@@ -94,8 +102,8 @@ mod get {
                 .log(
                     "server:backup.download",
                     serde_json::json!({
-                        "backup": backup.uuid,
-                        "name": backup.name,
+                        "backup": backup.0.uuid,
+                        "name": backup.0.name,
                     }),
                 )
                 .await;
@@ -126,7 +134,7 @@ mod get {
                     issued_at: Some(chrono::Utc::now().timestamp()),
                     jwt_id: user.uuid.to_string(),
                 },
-                backup_uuid: backup.uuid,
+                backup_uuid: backup.0.uuid,
                 server_uuid: server.uuid,
                 unique_id: uuid::Uuid::new_v4(),
             },
@@ -144,8 +152,8 @@ mod get {
             .log(
                 "server:backup.download",
                 serde_json::json!({
-                    "uuid": backup.uuid,
-                    "name": backup.name,
+                    "uuid": backup.0.uuid,
+                    "name": backup.0.name,
                 }),
             )
             .await;

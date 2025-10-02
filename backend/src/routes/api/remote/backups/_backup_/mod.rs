@@ -101,7 +101,16 @@ mod get {
                 .ok();
         }
 
-        let mut s3_configuration = match node.0.location.backup_configs.s3 {
+        let backup_configuration = match backup.0.backup_configuration {
+            Some(backup_configuration) => backup_configuration,
+            None => {
+                return ApiResponse::error("backup does not have a backup configuration assigned")
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+            }
+        };
+
+        let mut s3_configuration = match backup_configuration.backup_configs.s3 {
             Some(config) => config,
             None => {
                 return ApiResponse::error("S3 configuration not found")
@@ -113,7 +122,7 @@ mod get {
 
         let server = match Server::by_uuid(
             &state.database,
-            match backup.server_uuid {
+            match backup.0.server_uuid {
                 Some(id) => id,
                 None => {
                     return ApiResponse::error("server uuid not found")
@@ -141,7 +150,7 @@ mod get {
             Ok(client) => client,
             Err(err) => {
                 tracing::error!(
-                    backup = %backup.uuid,
+                    backup = %backup.0.uuid,
                     location = %node.0.location.name,
                     "failed to create S3 client: {:#?}",
                     err
@@ -153,7 +162,7 @@ mod get {
             }
         };
 
-        let file_path = ServerBackup::s3_path(server.uuid, backup.uuid);
+        let file_path = ServerBackup::s3_path(server.uuid, backup.0.uuid);
         let content_type = ServerBackup::s3_content_type(&file_path);
 
         let multipart = match client
@@ -163,7 +172,7 @@ mod get {
             Ok(multipart) => multipart,
             Err(err) => {
                 tracing::error!(
-                    backup = %backup.uuid,
+                    backup = %backup.0.uuid,
                     location = %node.0.location.name,
                     "failed to initiate multipart upload: {:#?}",
                     err
@@ -197,7 +206,7 @@ mod get {
             WHERE server_backups.uuid = $3",
             multipart.upload_id,
             file_path,
-            backup.uuid
+            backup.0.uuid
         )
         .execute(state.database.write())
         .await?;
@@ -268,7 +277,18 @@ mod post {
                 }
             };
 
-            let mut s3_configuration = match node.0.location.backup_configs.s3 {
+            let backup_configuration = match backup.0.backup_configuration {
+                Some(backup_configuration) => backup_configuration,
+                None => {
+                    return ApiResponse::error(
+                        "backup does not have a backup configuration assigned",
+                    )
+                    .with_status(StatusCode::EXPECTATION_FAILED)
+                    .ok();
+                }
+            };
+
+            let mut s3_configuration = match backup_configuration.backup_configs.s3 {
                 Some(config) => config,
                 None => {
                     return ApiResponse::error("S3 configuration not found")

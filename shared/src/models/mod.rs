@@ -5,6 +5,7 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 pub mod admin_activity;
+pub mod backup_configurations;
 pub mod database_host;
 pub mod location;
 pub mod location_database_host;

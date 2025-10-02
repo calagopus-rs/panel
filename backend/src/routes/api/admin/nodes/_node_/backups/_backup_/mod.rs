@@ -146,9 +146,12 @@ mod delete {
                 .ok();
         }
 
+        let backup_uuid = backup.uuid;
+        let backup_name = backup.name.clone();
+
         let node_uuid = node.uuid;
-        if let Err(err) = backup.delete_detached(&state.database, node.0).await {
-            tracing::error!(backup = %backup.uuid, "failed to delete detached backup: {:#?}", err);
+        if let Err(err) = backup.0.delete_detached(&state.database, node.0).await {
+            tracing::error!(backup = %backup_uuid, "failed to delete detached backup: {:#?}", err);
 
             return ApiResponse::error("failed to delete detached backup")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -159,10 +162,10 @@ mod delete {
             .log(
                 "node:backup.delete",
                 serde_json::json!({
-                    "uuid": backup.uuid,
+                    "uuid": backup_uuid,
                     "node_uuid": node_uuid,
 
-                    "name": backup.name,
+                    "name": backup_name,
                 }),
             )
             .await;

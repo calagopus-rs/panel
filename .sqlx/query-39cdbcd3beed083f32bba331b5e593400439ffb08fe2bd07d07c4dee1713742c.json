@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE locations\n            SET short_name = $1, name = $2, description = $3, backup_disk = $4, backup_configs = $5\n            WHERE locations.uuid = $6",
+  "query": "UPDATE backup_configurations\n            SET name = $2, description = $3, backup_disk = $4, backup_configs = $5\n            WHERE backup_configurations.uuid = $1",
   "describe": {
     "columns": [],
     "parameters": {
       "Left": [
-        "Varchar",
+        "Uuid",
         "Varchar",
         "Text",
         {
@@ -23,11 +23,10 @@
             }
           }
         },
-        "Jsonb",
-        "Uuid"
+        "Jsonb"
       ]
     },
     "nullable": []
   },
-  "hash": "2d8b05caabee6a63d47f303678bb1da0a04638646f4d89be9d880e9880b8676e"
+  "hash": "39cdbcd3beed083f32bba331b5e593400439ffb08fe2bd07d07c4dee1713742c"
 }

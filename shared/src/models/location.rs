@@ -1,148 +1,16 @@
 use super::BaseModel;
-use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
-pub struct LocationBackupConfigsS3 {
-    pub access_key: String,
-    pub secret_key: String,
-    pub bucket: String,
-    pub region: String,
-    pub endpoint: String,
-    pub path_style: bool,
-    pub part_size: u64,
-}
-
-impl LocationBackupConfigsS3 {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
-        self.secret_key = base32::encode(
-            base32::Alphabet::Z,
-            &database.encrypt(self.secret_key.as_bytes()).unwrap(),
-        );
-    }
-
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
-        self.secret_key = database
-            .decrypt(base32::decode(base32::Alphabet::Z, &self.secret_key).unwrap())
-            .unwrap();
-    }
-
-    pub fn censor(&mut self) {
-        self.secret_key = "".to_string();
-    }
-
-    pub fn into_client(self) -> Result<Box<s3::Bucket>, s3::error::S3Error> {
-        let mut bucket = s3::Bucket::new(
-            &self.bucket,
-            s3::Region::Custom {
-                region: self.region,
-                endpoint: self.endpoint,
-            },
-            s3::creds::Credentials::new(
-                Some(&self.access_key),
-                Some(&self.secret_key),
-                None,
-                None,
-                None,
-            )
-            .unwrap(),
-        )?;
-
-        if self.path_style {
-            bucket.set_path_style();
-        }
-
-        Ok(bucket)
-    }
-}
-
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
-pub struct LocationBackupConfigsRestic {
-    pub repository: String,
-    pub retry_lock_seconds: u64,
-
-    pub environment: IndexMap<String, String>,
-}
-
-impl LocationBackupConfigsRestic {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
-        for value in self.environment.values_mut() {
-            *value = base32::encode(
-                base32::Alphabet::Z,
-                &database.encrypt(value.as_bytes()).unwrap(),
-            );
-        }
-    }
-
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
-        for value in self.environment.values_mut() {
-            *value = database
-                .decrypt(base32::decode(base32::Alphabet::Z, value).unwrap())
-                .unwrap();
-        }
-    }
-
-    pub fn censor(&mut self) {
-        for (key, value) in self.environment.iter_mut() {
-            if key == "RESTIC_PASSWORD" || key == "AWS_SECRET_ACCESS_KEY" {
-                *value = "".to_string();
-            }
-        }
-    }
-}
-
-#[derive(ToSchema, Serialize, Deserialize, Default, Clone)]
-pub struct LocationBackupConfigs {
-    #[serde(default)]
-    #[schema(inline)]
-    pub s3: Option<LocationBackupConfigsS3>,
-    #[serde(default)]
-    #[schema(inline)]
-    pub restic: Option<LocationBackupConfigsRestic>,
-}
-
-impl LocationBackupConfigs {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
-        if let Some(s3) = &mut self.s3 {
-            s3.encrypt(database);
-        }
-        if let Some(restic) = &mut self.restic {
-            restic.encrypt(database);
-        }
-    }
-
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
-        if let Some(s3) = &mut self.s3 {
-            s3.decrypt(database);
-        }
-        if let Some(restic) = &mut self.restic {
-            restic.decrypt(database);
-        }
-    }
-
-    pub fn censor(&mut self) {
-        if let Some(s3) = &mut self.s3 {
-            s3.censor();
-        }
-        if let Some(restic) = &mut self.restic {
-            restic.censor();
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Location {
     pub uuid: uuid::Uuid,
+    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
 
-    pub short_name: String,
     pub name: String,
     pub description: Option<String>,
-
-    pub backup_disk: super::server_backup::BackupDisk,
-    pub backup_configs: LocationBackupConfigs,
 
     pub nodes: i64,
 
@@ -154,22 +22,24 @@ impl BaseModel for Location {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
 
-        BTreeMap::from([
+        let mut columns = BTreeMap::from([
             ("locations.uuid", format!("{prefix}uuid")),
-            ("locations.short_name", format!("{prefix}short_name")),
             ("locations.name", format!("{prefix}name")),
             ("locations.description", format!("{prefix}description")),
-            ("locations.backup_disk", format!("{prefix}backup_disk")),
-            (
-                "locations.backup_configs",
-                format!("{prefix}backup_configs"),
-            ),
             (
                 "(SELECT COUNT(*) FROM nodes WHERE nodes.location_uuid = locations.uuid)",
                 format!("{prefix}nodes"),
             ),
             ("locations.created", format!("{prefix}created")),
-        ])
+        ]);
+
+        columns.extend(
+            super::backup_configurations::BackupConfiguration::location_columns(Some(
+                "location_backup_configuration_",
+            )),
+        );
+
+        columns
     }
 
     #[inline]
@@ -178,14 +48,21 @@ impl BaseModel for Location {
 
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
-            short_name: row.get(format!("{prefix}short_name").as_str()),
+            backup_configuration: if row
+                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .is_ok()
+            {
+                Some(Box::new(
+                    super::backup_configurations::BackupConfiguration::map(
+                        Some("location_backup_configuration_"),
+                        row,
+                    ),
+                ))
+            } else {
+                None
+            },
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
-            backup_disk: row.get(format!("{prefix}backup_disk").as_str()),
-            backup_configs: serde_json::from_value(
-                row.get(format!("{prefix}backup_configs").as_str()),
-            )
-            .unwrap_or_default(),
             nodes: row.get(format!("{prefix}nodes").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
@@ -195,27 +72,21 @@ impl BaseModel for Location {
 impl Location {
     pub async fn create(
         database: &crate::database::Database,
-        short_name: &str,
+        backup_configuration_uuid: Option<uuid::Uuid>,
         name: &str,
         description: Option<&str>,
-        backup_disk: super::server_backup::BackupDisk,
-        mut backup_configs: LocationBackupConfigs,
     ) -> Result<Self, sqlx::Error> {
-        backup_configs.encrypt(database);
-
         let row = sqlx::query(&format!(
             r#"
-            INSERT INTO locations (short_name, name, description, backup_disk, backup_configs)
-            VALUES ($1, $2, $3, $4, $5)
+            INSERT INTO locations (backup_configuration_uuid, name, description)
+            VALUES ($1, $2, $3)
             RETURNING {}
             "#,
             Self::columns_sql(None)
         ))
-        .bind(short_name)
+        .bind(backup_configuration_uuid)
         .bind(name)
         .bind(description)
-        .bind(backup_disk)
-        .bind(serde_json::to_value(backup_configs).unwrap())
         .fetch_one(database.write())
         .await?;
 
@@ -230,6 +101,7 @@ impl Location {
             r#"
             SELECT {}
             FROM locations
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
             WHERE locations.uuid = $1
             "#,
             Self::columns_sql(None)
@@ -239,6 +111,41 @@ impl Location {
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_backup_configuration_uuid_with_pagination(
+        database: &crate::database::Database,
+        backup_configuration_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM locations
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            WHERE locations.backup_configuration_uuid = $1 AND ($2 IS NULL OR locations.name ILIKE '%' || $2 || '%')
+            ORDER BY locations.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(backup_configuration_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
     }
 
     pub async fn all_with_pagination(
@@ -253,7 +160,8 @@ impl Location {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
-            WHERE ($1 IS NULL OR locations.name ILIKE '%' || $1 || '%' OR locations.short_name ILIKE '%' || $1 || '%')
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            WHERE $1 IS NULL OR locations.name ILIKE '%' || $1 || '%'
             ORDER BY locations.created
             LIMIT $2 OFFSET $3
             "#,
@@ -291,19 +199,14 @@ impl Location {
     }
 
     #[inline]
-    pub fn into_admin_api_object(
-        mut self,
-        database: &crate::database::Database,
-    ) -> AdminApiLocation {
-        self.backup_configs.decrypt(database);
-
+    pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiLocation {
         AdminApiLocation {
             uuid: self.uuid,
-            short_name: self.short_name,
+            backup_configuration: self
+                .backup_configuration
+                .map(|backup_configuration| backup_configuration.into_admin_api_object(database)),
             name: self.name,
             description: self.description,
-            backup_disk: self.backup_disk,
-            backup_configs: self.backup_configs,
             nodes: self.nodes,
             created: self.created.and_utc(),
         }
@@ -314,13 +217,10 @@ impl Location {
 #[schema(title = "Location")]
 pub struct AdminApiLocation {
     pub uuid: uuid::Uuid,
+    pub backup_configuration: Option<super::backup_configurations::AdminApiBackupConfiguration>,
 
-    pub short_name: String,
     pub name: String,
     pub description: Option<String>,
-
-    pub backup_disk: super::server_backup::BackupDisk,
-    pub backup_configs: LocationBackupConfigs,
 
     pub nodes: i64,
 

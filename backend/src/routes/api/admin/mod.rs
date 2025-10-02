@@ -17,6 +17,7 @@ use std::sync::Arc;
 use utoipa_axum::router::OpenApiRouter;
 
 mod activity;
+mod backup_configurations;
 mod database_hosts;
 mod locations;
 mod mounts;
@@ -64,6 +65,10 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/nodes", nodes::router(state))
         .nest("/nests", nests::router(state))
         .nest("/database-hosts", database_hosts::router(state))
+        .nest(
+            "/backup-configurations",
+            backup_configurations::router(state),
+        )
         .nest("/mounts", mounts::router(state))
         .nest("/users", users::router(state))
         .nest("/roles", roles::router(state))
