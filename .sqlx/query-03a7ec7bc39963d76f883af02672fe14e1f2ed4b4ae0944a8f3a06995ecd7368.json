@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_backups\n                SET checksum = $2, bytes = $3, files = $4, successful = true, browsable = $5, streaming = $6, completed = NOW()\n                WHERE server_backups.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Int8",
+        "Int8",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "03a7ec7bc39963d76f883af02672fe14e1f2ed4b4ae0944a8f3a06995ecd7368"
+}
