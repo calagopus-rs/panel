@@ -1216,8 +1216,8 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
 
                     sqlx::query(
                         r#"
-                        INSERT INTO server_backups (uuid, server_uuid, node_uuid, name, successful, locked, ignored_files, disk, checksum, bytes, completed, deleted, created)
-                        VALUES ($1, $2, (SELECT node_uuid FROM servers WHERE uuid = $2), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                        INSERT INTO server_backups (uuid, server_uuid, node_uuid, name, successful, browsable, streaming, locked, ignored_files, disk, checksum, bytes, completed, deleted, created)
+                        VALUES ($1, $2, (SELECT node_uuid FROM servers WHERE uuid = $2), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
                         ON CONFLICT DO NOTHING
                         "#,
                     )
@@ -1225,6 +1225,8 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                     .bind(server_uuid)
                     .bind(name)
                     .bind(successful)
+                    .bind(matches!(disk, "ddup-bak" | "btrfs" | "zfs" | "restic"))
+                    .bind(matches!(disk, "ddup-bak" | "btrfs" | "zfs" | "restic"))
                     .bind(locked)
                     .bind(ignored_files)
                     .bind(match disk {

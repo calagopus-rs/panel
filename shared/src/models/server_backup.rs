@@ -41,6 +41,8 @@ pub struct ServerBackup {
 
     pub name: String,
     pub successful: bool,
+    pub browsable: bool,
+    pub streaming: bool,
     pub locked: bool,
 
     pub ignored_files: Vec<String>,
@@ -68,6 +70,8 @@ impl BaseModel for ServerBackup {
             ("server_backups.node_uuid", format!("{prefix}node_uuid")),
             ("server_backups.name", format!("{prefix}name")),
             ("server_backups.successful", format!("{prefix}successful")),
+            ("server_backups.browsable", format!("{prefix}browsable")),
+            ("server_backups.streaming", format!("{prefix}streaming")),
             ("server_backups.locked", format!("{prefix}locked")),
             (
                 "server_backups.ignored_files",
@@ -114,6 +118,8 @@ impl BaseModel for ServerBackup {
             node_uuid: row.get(format!("{prefix}node_uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
+            browsable: row.get(format!("{prefix}browsable").as_str()),
+            streaming: row.get(format!("{prefix}streaming").as_str()),
             locked: row.get(format!("{prefix}locked").as_str()),
             ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
             checksum: row.get(format!("{prefix}checksum").as_str()),
@@ -142,12 +148,14 @@ impl ServerBackup {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO server_backups (server_uuid, node_uuid, backup_configuration_uuid, name, ignored_files, bytes, disk)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING uuid
             "#
         )
         .bind(server.uuid)
         .bind(server.node.uuid)
+        .bind(backup_configuration.uuid)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
@@ -210,12 +218,14 @@ impl ServerBackup {
 
         let row = sqlx::query(
             r#"
-            INSERT INTO server_backups (server_uuid, node_uuid, name, ignored_files, bytes, disk) VALUES ($1, $2, $3, $4, $5, $6)
+            INSERT INTO server_backups (server_uuid, node_uuid, backup_configuration_uuid, name, ignored_files, bytes, disk)
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING uuid
             "#
         )
         .bind(server.uuid)
         .bind(server.node.uuid)
+        .bind(backup_configuration.uuid)
         .bind(name)
         .bind(&ignored_files)
         .bind(0i64)
@@ -235,7 +245,7 @@ impl ServerBackup {
             SELECT {}
             FROM server_backups
             LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
-            WHERE AND server_backups.uuid = $1
+            WHERE server_backups.uuid = $1
             "#,
             Self::columns_sql(None)
         ))
@@ -635,14 +645,8 @@ impl ServerBackup {
             ignored_files: self.ignored_files,
             is_successful: self.successful,
             is_locked: self.locked,
-            is_browsable: matches!(
-                self.disk,
-                BackupDisk::DdupBak | BackupDisk::Btrfs | BackupDisk::Zfs | BackupDisk::Restic
-            ),
-            is_streaming: matches!(
-                self.disk,
-                BackupDisk::DdupBak | BackupDisk::Btrfs | BackupDisk::Zfs | BackupDisk::Restic
-            ),
+            is_browsable: self.browsable,
+            is_streaming: self.streaming,
             checksum: self.checksum,
             bytes: self.bytes,
             files: self.files,

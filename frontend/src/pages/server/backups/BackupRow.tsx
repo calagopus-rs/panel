@@ -88,7 +88,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
           {
             icon: faFileArrowDown,
             label: 'Download',
-            onClick: backup.isStreaming ? () => doDownload('tar_gz') : undefined,
+            onClick: !backup.isStreaming ? () => doDownload('tar_gz') : undefined,
             color: 'gray',
             items: backup.isStreaming
               ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({

@@ -72,7 +72,15 @@ export default () => {
   });
 
   useWebsocketEvent(SocketEvent.BACKUP_COMPLETED, (uuid, data) => {
-    let wsData: { isSuccessful: boolean; checksum_type: string; checksum: string; size: number; files: number } = null;
+    let wsData: {
+      isSuccessful: boolean;
+      checksum_type: string;
+      checksum: string;
+      size: number;
+      files: number;
+      browsable: boolean;
+      streaming: boolean;
+    } = null;
     try {
       wsData = JSON.parse(data);
     } catch {
@@ -84,6 +92,8 @@ export default () => {
       checksum: `${wsData.checksum_type}:${wsData.checksum}`,
       bytes: wsData.size,
       files: wsData.files,
+      isBrowsable: wsData.browsable,
+      isStreaming: wsData.streaming,
       completed: new Date(),
     });
   });

@@ -538,6 +538,8 @@ export const serverBackups = pgTable('server_backups', {
 
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	successful: boolean('successful').default(false).notNull(),
+	browsable: boolean('browsable').default(false).notNull(),
+	streaming: boolean('streaming').default(false).notNull(),
 	locked: boolean('locked').default(false).notNull(),
 
 	ignoredFiles: text('ignored_files').array().notNull(),

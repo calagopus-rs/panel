@@ -92,7 +92,9 @@ impl BaseModel for Node {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             location: super::location::Location::map(Some("location_"), row),
             backup_configuration: if row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    format!("{prefix}node_backup_configuration_uuid").as_str(),
+                )
                 .is_ok()
             {
                 Some(Box::new(

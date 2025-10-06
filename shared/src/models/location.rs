@@ -49,7 +49,9 @@ impl BaseModel for Location {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             backup_configuration: if row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    format!("{prefix}location_backup_configuration_uuid").as_str(),
+                )
                 .is_ok()
             {
                 Some(Box::new(

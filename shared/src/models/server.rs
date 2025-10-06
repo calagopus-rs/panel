@@ -185,7 +185,9 @@ impl BaseModel for Server {
             egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)),
             nest: Box::new(super::nest::Nest::map(Some("nest_"), row)),
             backup_configuration: if row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}backup_configuration_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    format!("{prefix}server_backup_configuration_uuid").as_str(),
+                )
                 .is_ok()
             {
                 Some(Box::new(

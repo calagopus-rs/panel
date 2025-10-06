@@ -6,7 +6,7 @@ mod post {
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{node::GetNode, server::GetServer},
+        models::server::GetServer,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -25,16 +25,10 @@ mod post {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(state: GetState, node: GetNode, server: GetServer) -> ApiResponseResult {
+    pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         if server.destination_node_uuid.is_none() {
             return ApiResponse::error("server is not being transferred")
                 .with_status(StatusCode::CONFLICT)
-                .ok();
-        }
-
-        if node.uuid != server.node.uuid {
-            return ApiResponse::error("source node must call failure endpoint")
-                .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
         }
 
