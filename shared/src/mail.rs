@@ -12,6 +12,16 @@ enum Transport {
         from_address: String,
         from_name: Option<String>,
     },
+    Sendmail {
+        transport: lettre::AsyncSendmailTransport<lettre::Tokio1Executor>,
+        from_address: String,
+        from_name: Option<String>,
+    },
+    File {
+        transport: lettre::AsyncFileTransport<lettre::Tokio1Executor>,
+        from_address: String,
+        from_name: Option<String>,
+    },
 }
 
 pub struct Mail {
@@ -67,6 +77,35 @@ impl Mail {
                     from_name: from_name.clone(),
                 })
             }
+            super::settings::MailMode::Sendmail {
+                command,
+                from_address,
+                from_name,
+            } => {
+                let transport =
+                    lettre::AsyncSendmailTransport::<lettre::Tokio1Executor>::new_with_command(
+                        command,
+                    );
+
+                Ok(Transport::Sendmail {
+                    transport,
+                    from_address: from_address.clone(),
+                    from_name: from_name.clone(),
+                })
+            }
+            super::settings::MailMode::File {
+                path,
+                from_address,
+                from_name,
+            } => {
+                let transport = lettre::AsyncFileTransport::<lettre::Tokio1Executor>::new(path);
+
+                Ok(Transport::File {
+                    transport,
+                    from_address: from_address.clone(),
+                    from_name: from_name.clone(),
+                })
+            }
         }
     }
 
@@ -87,10 +126,48 @@ impl Mail {
         );
 
         tokio::spawn(async move {
-            let run = async || -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+            let run = async || -> Result<(), anyhow::Error> {
                 match transport {
                     Transport::None => Ok(()),
                     Transport::Smtp {
+                        transport,
+                        from_address,
+                        from_name,
+                    } => transport
+                        .send(
+                            lettre::message::Message::builder()
+                                .subject(subject)
+                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                .from(lettre::message::Mailbox::new(
+                                    from_name,
+                                    from_address.parse()?,
+                                ))
+                                .header(lettre::message::header::ContentType::TEXT_HTML)
+                                .body(body)?,
+                        )
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| e.into()),
+                    Transport::Sendmail {
+                        transport,
+                        from_address,
+                        from_name,
+                    } => transport
+                        .send(
+                            lettre::message::Message::builder()
+                                .subject(subject)
+                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                .from(lettre::message::Mailbox::new(
+                                    from_name,
+                                    from_address.parse()?,
+                                ))
+                                .header(lettre::message::header::ContentType::TEXT_HTML)
+                                .body(body)?,
+                        )
+                        .await
+                        .map(|_| ())
+                        .map_err(|e| e.into()),
+                    Transport::File {
                         transport,
                         from_address,
                         from_name,

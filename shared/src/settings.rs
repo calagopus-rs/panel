@@ -38,6 +38,18 @@ pub enum MailMode {
         from_address: String,
         from_name: Option<String>,
     },
+    Sendmail {
+        command: String,
+
+        from_address: String,
+        from_name: Option<String>,
+    },
+    File {
+        path: String,
+
+        from_address: String,
+        from_name: Option<String>,
+    },
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
@@ -316,6 +328,34 @@ impl AppSettings {
                 keys.push("::mail_smtp_from_name");
                 values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
             }
+            MailMode::Sendmail {
+                command,
+                from_address,
+                from_name,
+            } => {
+                keys.push("::mail_mode");
+                values.push("sendmail".to_string());
+                keys.push("::mail_sendmail_command");
+                values.push(command.clone());
+                keys.push("::mail_sendmail_from_address");
+                values.push(from_address.clone());
+                keys.push("::mail_sendmail_from_name");
+                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
+            }
+            MailMode::File {
+                path,
+                from_address,
+                from_name,
+            } => {
+                keys.push("::mail_mode");
+                values.push("file".to_string());
+                keys.push("::mail_file_path");
+                values.push(path.clone());
+                keys.push("::mail_file_from_address");
+                values.push(from_address.clone());
+                keys.push("::mail_file_from_name");
+                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
+            }
         }
 
         match &self.captcha_provider {
@@ -463,6 +503,28 @@ impl AppSettings {
                         .unwrap_or_else(|| "noreply@example.com".to_string()),
                     from_name: map
                         .remove("::mail_smtp_from_name")
+                        .filter(|s| !s.is_empty()),
+                },
+                Some("sendmail") => MailMode::Sendmail {
+                    command: map
+                        .remove("::mail_sendmail_command")
+                        .unwrap_or_else(|| "sendmail".to_string()),
+                    from_address: map
+                        .remove("::mail_sendmail_from_address")
+                        .unwrap_or_else(|| "noreply@example.com".to_string()),
+                    from_name: map
+                        .remove("::mail_sendmail_from_name")
+                        .filter(|s| !s.is_empty()),
+                },
+                Some("file") => MailMode::File {
+                    path: map
+                        .remove("::mail_file_path")
+                        .unwrap_or_else(|| "/var/lib/calagopus/mails".to_string()),
+                    from_address: map
+                        .remove("::mail_file_from_address")
+                        .unwrap_or_else(|| "noreply@example.com".to_string()),
+                    from_name: map
+                        .remove("::mail_file_from_name")
                         .filter(|s| !s.is_empty()),
                 },
                 _ => MailMode::None,

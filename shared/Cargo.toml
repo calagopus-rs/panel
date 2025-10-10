@@ -15,7 +15,7 @@ axum = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
-lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "tokio1-rustls-tls", "tokio1"] }
+lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "sendmail-transport", "file-transport", "tokio1-rustls-tls", "tokio1"] }
 serde = { workspace = true }
 utoipa-axum = { workspace = true }
 serde_json = { workspace = true }
