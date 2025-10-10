@@ -130,7 +130,6 @@ impl Env {
 
         let (file_appender, _guard) = tracing_appender::non_blocking::NonBlockingBuilder::default()
             .buffered_lines_limit(50)
-            .lossy(false)
             .finish(latest_file.and(rolling_appender));
 
         tracing::subscriber::set_global_default(

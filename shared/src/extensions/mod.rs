@@ -163,6 +163,7 @@ pub struct ConstructedExtension {
     pub name: &'static str,
     pub description: &'static str,
     pub authors: &'static [&'static str],
+    pub version: &'static str,
 
     pub extension: Box<dyn Extension>,
 }
@@ -184,6 +185,12 @@ impl ConstructedExtension {
     #[inline]
     pub const fn author(&self) -> &'static [&'static str] {
         self.authors
+    }
+
+    /// Gets the version name of the extension defined by the author
+    #[inline]
+    pub const fn version(&self) -> &'static str {
+        self.version
     }
 }
 

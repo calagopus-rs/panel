@@ -101,23 +101,6 @@ nestify::nest! {
 }
 
 nestify::nest! {
-    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ExtensionInfo {
-        #[schema(inline)]
-        pub name: String,
-        #[schema(inline)]
-        pub description: String,
-        #[schema(inline)]
-        pub version: String,
-        #[schema(inline)]
-        pub author: String,
-        #[schema(inline)]
-        pub license: String,
-        #[schema(inline)]
-        pub additional: IndexMap<String, serde_json::Value>,
-    }
-}
-
-nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Mount {
         #[schema(inline)]
         pub target: String,
@@ -346,22 +329,6 @@ pub mod backups_backup {
         pub type Response404 = ApiError;
 
         pub type Response = Response202;
-    }
-}
-pub mod extensions {
-    use super::*;
-
-    pub mod get {
-        use super::*;
-
-        nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
-                #[schema(inline)]
-                pub extensions: Vec<ExtensionInfo>,
-            }
-        }
-
-        pub type Response = Response200;
     }
 }
 pub mod servers {
@@ -1316,6 +1283,42 @@ pub mod system {
                 pub version: String,
             }
         }
+
+        pub type Response = Response200;
+    }
+}
+pub mod system_logs {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub log_files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200LogFiles {
+                    #[schema(inline)]
+                    pub name: String,
+                    #[schema(inline)]
+                    pub size: u64,
+                    #[schema(inline)]
+                    pub last_modified: chrono::DateTime<chrono::Utc>,
+                }>,
+            }
+        }
+
+        pub type Response = Response200;
+    }
+}
+pub mod system_logs_file {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        pub type Response200 = String;
+
+        pub type Response404 = ApiError;
 
         pub type Response = Response200;
     }

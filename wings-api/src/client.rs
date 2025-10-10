@@ -91,6 +91,25 @@ impl WingsClient {
         Self { base_url, token }
     }
 
+    pub fn request_raw(
+        &self,
+        method: Method,
+        endpoint: impl AsRef<str>,
+    ) -> reqwest::RequestBuilder {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.as_ref().trim_start_matches('/')
+        );
+        let mut request = CLIENT.request(method, &url);
+
+        if !self.token.is_empty() {
+            request = request.header("Authorization", format!("Bearer {}", self.token));
+        }
+
+        request
+    }
+
     pub async fn delete_backups_backup(
         &self,
         backup: uuid::Uuid,
@@ -104,12 +123,6 @@ impl WingsClient {
             None,
         )
         .await
-    }
-
-    pub async fn get_extensions(
-        &self,
-    ) -> Result<super::extensions::get::Response, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, "/api/extensions", None::<&()>, None).await
     }
 
     pub async fn get_servers(
@@ -722,6 +735,26 @@ impl WingsClient {
         &self,
     ) -> Result<super::system::get::Response, (StatusCode, super::ApiError)> {
         request_impl(self, Method::GET, "/api/system", None::<&()>, None).await
+    }
+
+    pub async fn get_system_logs(
+        &self,
+    ) -> Result<super::system_logs::get::Response, (StatusCode, super::ApiError)> {
+        request_impl(self, Method::GET, "/api/system/logs", None::<&()>, None).await
+    }
+
+    pub async fn get_system_logs_file(
+        &self,
+        file: &str,
+    ) -> Result<super::system_logs_file::get::Response, (StatusCode, super::ApiError)> {
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/system/logs/{file}"),
+            None::<&()>,
+            None,
+        )
+        .await
     }
 
     pub async fn post_system_upgrade(

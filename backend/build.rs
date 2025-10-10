@@ -30,6 +30,7 @@ fn main() {
             name: String,
             description: Option<String>,
             authors: Option<Vec<String>>,
+            version: String,
         }
 
         let cargo_toml: CargoToml = toml::from_str(&cargo_toml).unwrap();
@@ -88,6 +89,9 @@ shared = {{ workspace = true }}
             )
             .to_string(),
         );
+        exts.push_str(",\n");
+        exts.push_str("            version: ");
+        exts.push_str(&toml::Value::String(package.version).to_string());
         exts.push_str(",\n");
         exts.push_str("            extension: Box::new(");
         exts.push_str(&identifier);

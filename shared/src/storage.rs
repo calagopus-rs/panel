@@ -62,8 +62,8 @@ impl Storage {
     }
 
     pub async fn remove(&self, path: &str) -> Result<(), anyhow::Error> {
-        if path.is_empty() {
-            return Ok(());
+        if path.is_empty() || path.contains("..") || path.starts_with("/") {
+            return Err(anyhow::anyhow!("invalid path"));
         }
 
         let settings = self.settings.get().await;
@@ -126,6 +126,10 @@ impl Storage {
         data: &[u8],
         content_type: &str,
     ) -> Result<(), anyhow::Error> {
+        if path.is_empty() || path.contains("..") || path.starts_with("/") {
+            return Err(anyhow::anyhow!("invalid path"));
+        }
+
         let settings = self.settings.get().await;
 
         tracing::debug!(path, "storing file: {} bytes", data.len());

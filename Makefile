@@ -4,10 +4,10 @@ init:
 	cp extensions/list.Cargo.toml extensions/internal-list/Cargo.toml
 
 build: init
-	cargo build --manifest-path extensions/internal-list/Cargo.toml
+	cargo build
 
 run: init
-	cargo run --manifest-path extensions/internal-list/Cargo.toml
+	cargo run
 
 build-release: init
-	cargo build --release --manifest-path extensions/internal-list/Cargo.toml
+	cargo build --release

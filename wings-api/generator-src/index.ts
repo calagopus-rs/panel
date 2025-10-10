@@ -115,6 +115,25 @@ impl WingsClient {
         Self { base_url, token }
     }
 
+    pub fn request_raw(
+        &self,
+        method: Method,
+        endpoint: impl AsRef<str>,
+    ) -> reqwest::RequestBuilder {
+        let url = format!(
+            "{}/{}",
+            self.base_url.trim_end_matches('/'),
+            endpoint.as_ref().trim_start_matches('/')
+        );
+        let mut request = CLIENT.request(method, &url);
+
+        if !self.token.is_empty() {
+            request = request.header("Authorization", format!("Bearer {}", self.token));
+        }
+
+        request
+    }
+
 `)
 
 for (const [name, schema] of Object.entries(openapi.components?.schemas || {})) {

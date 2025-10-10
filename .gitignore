@@ -1,6 +1,6 @@
 target/
 .env
-logs/
+/logs/
 extensions/*
 !extensions/list.lib.rs
 !extensions/list.Cargo.toml
