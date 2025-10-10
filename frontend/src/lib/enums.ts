@@ -51,6 +51,8 @@ export const storageDriverTypeLabelMapping: Record<StorageDriverType, string> = 
 export const mailModeTypeLabelMapping: Record<MailModeType, string> = {
   none: 'None',
   smtp: 'SMTP',
+  sendmail: 'Sendmail Command',
+  filesystem: 'Filesystem',
 };
 
 export const archiveFormatLabelMapping: Record<ArchiveFormat, string> = {

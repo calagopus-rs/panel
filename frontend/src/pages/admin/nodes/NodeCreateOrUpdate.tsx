@@ -17,7 +17,6 @@ import getLocations from '@/api/admin/locations/getLocations';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
-import Tooltip from '@/elements/Tooltip';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
@@ -247,18 +246,11 @@ export default ({ contextNode }: { contextNode?: Node }) => {
               Reset Token
             </Button>
           )}
-          {params.id &&
-            (contextNode.servers > 0 ? (
-              <Tooltip label={'Cannot delete node with servers'}>
-                <Button color={'red'} loading={loading} disabled>
-                  Delete
-                </Button>
-              </Tooltip>
-            ) : (
-              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-                Delete
-              </Button>
-            ))}
+          {params.id && (
+            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
         </Group>
       </Stack>
     </>

@@ -68,7 +68,7 @@ const LocationsContainer = () => {
         <Spinner.Centered />
       ) : (
         <Table
-          columns={['Id', 'Short Name', 'Long Name', 'Backup Disk', 'Nodes']}
+          columns={['Id', 'Short Name', 'Long Name', 'Backup Disk', 'Created']}
           pagination={locations}
           onPageSelect={setPage}
         >

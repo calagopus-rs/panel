@@ -17,7 +17,6 @@ import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
-import Tooltip from '@/elements/Tooltip';
 
 export default () => {
   const params = useParams<'id'>();
@@ -211,18 +210,11 @@ export default () => {
               Test
             </Button>
           )}
-          {params.id &&
-            ((databaseHost as AdminDatabaseHost)?.databases > 0 ? (
-              <Tooltip label={'Cannot delete database host with databases'}>
-                <Button color={'red'} loading={loading} disabled>
-                  Delete
-                </Button>
-              </Tooltip>
-            ) : (
-              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-                Delete
-              </Button>
-            ))}
+          {params.id && (
+            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
         </Group>
       </Stack>
     </>

@@ -119,8 +119,6 @@ pub struct NestEgg {
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
 
-    pub servers: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -154,10 +152,6 @@ impl BaseModel for NestEgg {
             ("nest_eggs.docker_images", format!("{prefix}docker_images")),
             ("nest_eggs.file_denylist", format!("{prefix}file_denylist")),
             ("nest_eggs.created", format!("{prefix}created")),
-            (
-                "(SELECT COUNT(*) FROM servers WHERE servers.egg_uuid = nest_eggs.uuid)",
-                format!("{prefix}servers"),
-            ),
             ("nest_eggs.created", format!("{prefix}created")),
         ])
     }
@@ -195,7 +189,6 @@ impl BaseModel for NestEgg {
             )
             .unwrap_or_default(),
             file_denylist: row.get(format!("{prefix}file_denylist").as_str()),
-            servers: row.get(format!("{prefix}servers").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -326,6 +319,23 @@ impl NestEgg {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
+    pub async fn count_by_nest_uuid(
+        database: &crate::database::Database,
+        nest_uuid: uuid::Uuid,
+    ) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM nest_eggs
+            WHERE nest_eggs.nest_uuid = $1
+            "#,
+        )
+        .bind(nest_uuid)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
@@ -360,7 +370,6 @@ impl NestEgg {
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
-            servers: self.servers,
             created: self.created.and_utc(),
         }
     }
@@ -405,8 +414,6 @@ pub struct AdminApiNestEgg {
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
     pub file_denylist: Vec<String>,
-
-    pub servers: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

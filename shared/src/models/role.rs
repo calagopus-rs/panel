@@ -14,8 +14,6 @@ pub struct Role {
     pub admin_permissions: Arc<Vec<String>>,
     pub server_permissions: Arc<Vec<String>>,
 
-    pub users: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -36,10 +34,6 @@ impl BaseModel for Role {
                 "roles.server_permissions",
                 format!("{prefix}server_permissions"),
             ),
-            (
-                "(SELECT COUNT(*) FROM users WHERE users.role_uuid = roles.uuid)",
-                format!("{prefix}users"),
-            ),
             ("roles.created", format!("{prefix}created")),
         ])
     }
@@ -54,7 +48,6 @@ impl BaseModel for Role {
             description: row.get(format!("{prefix}description").as_str()),
             admin_permissions: Arc::new(row.get(format!("{prefix}admin_permissions").as_str())),
             server_permissions: Arc::new(row.get(format!("{prefix}server_permissions").as_str())),
-            users: row.get(format!("{prefix}users").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -162,7 +155,6 @@ impl Role {
             description: self.description,
             admin_permissions: self.admin_permissions,
             server_permissions: self.server_permissions,
-            users: self.users,
             created: self.created.and_utc(),
         }
     }
@@ -178,8 +170,6 @@ pub struct AdminApiRole {
 
     pub admin_permissions: Arc<Vec<String>>,
     pub server_permissions: Arc<Vec<String>>,
-
-    pub users: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

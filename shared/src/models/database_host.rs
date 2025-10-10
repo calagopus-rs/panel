@@ -70,9 +70,6 @@ pub struct DatabaseHost {
     pub username: String,
     pub password: Vec<u8>,
 
-    pub databases: i64,
-    pub locations: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -92,14 +89,6 @@ impl BaseModel for DatabaseHost {
             ("database_hosts.port", format!("{prefix}port")),
             ("database_hosts.username", format!("{prefix}username")),
             ("database_hosts.password", format!("{prefix}password")),
-            (
-                "(SELECT COUNT(*) FROM server_databases WHERE server_databases.database_host_uuid = database_hosts.uuid)",
-                format!("{prefix}databases"),
-            ),
-            (
-                "(SELECT COUNT(*) FROM location_database_hosts WHERE location_database_hosts.database_host_uuid = database_hosts.uuid)",
-                format!("{prefix}locations"),
-            ),
             ("database_hosts.created", format!("{prefix}created")),
         ])
     }
@@ -119,8 +108,6 @@ impl BaseModel for DatabaseHost {
             port: row.get(format!("{prefix}port").as_str()),
             username: row.get(format!("{prefix}username").as_str()),
             password: row.get(format!("{prefix}password").as_str()),
-            databases: row.get(format!("{prefix}databases").as_str()),
-            locations: row.get(format!("{prefix}locations").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -312,8 +299,6 @@ impl DatabaseHost {
             public_port: self.public_port,
             port: self.port,
             username: self.username,
-            databases: self.databases,
-            locations: self.locations,
             created: self.created.and_utc(),
         }
     }
@@ -345,9 +330,6 @@ pub struct AdminApiDatabaseHost {
     pub port: i32,
 
     pub username: String,
-
-    pub databases: i64,
-    pub locations: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

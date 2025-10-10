@@ -21,8 +21,6 @@ interface AdminUpdateDatabaseHost {
 
 interface AdminDatabaseHost extends AdminUpdateDatabaseHost {
   uuid: string;
-  databases: number;
-  locations: number;
   created: Date;
 }
 
@@ -36,7 +34,6 @@ interface UpdateLocation {
 
 interface Location extends UpdateLocation {
   uuid: string;
-  nodes: number;
   created: Date;
 }
 
@@ -51,9 +48,6 @@ interface AdminUpdateMount {
 
 interface Mount extends AdminUpdateMount {
   uuid: string;
-  eggs: number;
-  nodes: number;
-  servers: number;
   created: Date;
 }
 
@@ -62,7 +56,6 @@ interface Nest {
   author: string;
   name: string;
   description: string | null;
-  eggs: number;
   created: Date;
 }
 
@@ -109,7 +102,6 @@ interface AdminUpdateNestEgg {
 
 interface AdminNestEgg extends AdminUpdateNestEgg {
   uuid: string;
-  servers: number;
   created: Date;
 }
 
@@ -155,7 +147,6 @@ interface Node {
   disk: number;
   tokenId: string;
   token: string;
-  servers: number;
   created: Date;
 }
 
@@ -476,7 +467,6 @@ interface ServerSchedule {
   enabled: boolean;
   triggers: ScheduleTrigger[];
   condition: ScheduleCondition;
-  steps: number;
   lastRun: Date | null;
   lastFailure: Date | null;
   created: Date;
@@ -786,7 +776,7 @@ interface StorageDriverS3 {
 
 type StorageDriver = StorageDriverFilesystem | StorageDriverS3;
 
-type MailModeType = 'none' | 'smtp';
+type MailModeType = 'none' | 'smtp' | 'sendmail' | 'filesystem';
 
 interface MailModeNone {
   type: 'none';
@@ -803,7 +793,21 @@ interface MailModeSmtp {
   fromName: string | null;
 }
 
-type MailMode = MailModeNone | MailModeSmtp;
+interface MailModeSendmail {
+  type: 'sendmail';
+  command: string;
+  fromAddress: string;
+  fromName: string | null;
+}
+
+interface MailModeFilesystem {
+  type: 'filesystem';
+  path: string;
+  fromAddress: string;
+  fromName: string | null;
+}
+
+type MailMode = MailModeNone | MailModeSmtp | MailModeSendmail | MailModeFilesystem;
 
 type ProcessConfigurationConfigParser = 'file' | 'yaml' | 'properties' | 'ini' | 'json' | 'xml';
 

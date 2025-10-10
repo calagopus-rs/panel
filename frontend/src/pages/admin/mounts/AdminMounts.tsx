@@ -65,11 +65,7 @@ const MountsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['ID', 'Name', 'Source', 'Target', 'Servers', 'Nodes']}
-          pagination={mounts}
-          onPageSelect={setPage}
-        >
+        <Table columns={['ID', 'Name', 'Source', 'Target', 'Created']} pagination={mounts} onPageSelect={setPage}>
           {mounts.data.map((m) => (
             <MountRow key={m.uuid} mount={m} />
           ))}

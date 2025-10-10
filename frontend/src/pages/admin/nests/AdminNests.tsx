@@ -67,7 +67,7 @@ const NestsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Author', 'Description', 'Eggs']} pagination={nests} onPageSelect={setPage}>
+        <Table columns={['ID', 'Name', 'Author', 'Description', 'Created']} pagination={nests} onPageSelect={setPage}>
           {nests.data.map((nest) => (
             <NestRow key={nest.uuid} nest={nest} />
           ))}

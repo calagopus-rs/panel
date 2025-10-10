@@ -12,8 +12,6 @@ pub struct Nest {
     pub name: String,
     pub description: Option<String>,
 
-    pub eggs: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -44,7 +42,6 @@ impl BaseModel for Nest {
             author: row.get(format!("{prefix}author").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
-            eggs: row.get(format!("{prefix}eggs").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -149,7 +146,6 @@ impl Nest {
             author: self.author,
             name: self.name,
             description: self.description,
-            eggs: self.eggs,
             created: self.created.and_utc(),
         }
     }
@@ -163,8 +159,6 @@ pub struct AdminApiNest {
     pub author: String,
     pub name: String,
     pub description: Option<String>,
-
-    pub eggs: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

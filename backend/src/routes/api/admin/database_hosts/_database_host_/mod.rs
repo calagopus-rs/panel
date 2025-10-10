@@ -89,7 +89,7 @@ mod delete {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger, database_host::DatabaseHost,
-            user::GetPermissionManager,
+            server_database::ServerDatabase, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -117,7 +117,9 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("database-hosts.delete")?;
 
-        if database_host.databases > 0 {
+        if ServerDatabase::count_by_database_host_uuid(&state.database, database_host.uuid).await
+            > 0
+        {
             return ApiResponse::error("database host has databases, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();

@@ -93,7 +93,10 @@ mod delete {
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{admin_activity::GetAdminActivityLogger, nest::Nest, user::GetPermissionManager},
+        models::{
+            admin_activity::GetAdminActivityLogger, nest::Nest, nest_egg::NestEgg,
+            user::GetPermissionManager,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -120,7 +123,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("nests.delete")?;
 
-        if nest.eggs > 0 {
+        if NestEgg::count_by_nest_uuid(&state.database, nest.uuid).await > 0 {
             return ApiResponse::error("nest has eggs, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();

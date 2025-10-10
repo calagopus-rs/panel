@@ -1,5 +1,7 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
+import Tooltip from '@/elements/Tooltip';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
 export default ({ mount }: { mount: Mount }) => {
@@ -18,8 +20,9 @@ export default ({ mount }: { mount: Mount }) => {
       <TableData>
         <Code>{mount.target}</Code>
       </TableData>
-      <TableData>{mount.servers}</TableData>
-      <TableData>{mount.nodes}</TableData>
+      <TableData>
+        <Tooltip label={formatDateTime(mount.created)}>{formatTimestamp(mount.created)}</Tooltip>
+      </TableData>
     </TableRow>
   );
 };

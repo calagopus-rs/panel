@@ -10,6 +10,8 @@ import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
+import EmailSendmail from './forms/EmailSendmail';
+import EmailFile from './forms/EmailFile';
 
 export default () => {
   const { addToast } = useToast();
@@ -48,7 +50,13 @@ export default () => {
         }))}
       />
 
-      {settings.type === 'smtp' && <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />}
+      {settings.type === 'smtp' ? (
+        <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />
+      ) : settings.type === 'sendmail' ? (
+        <EmailSendmail settings={settings as MailModeSendmail} setSettings={setSettings} />
+      ) : settings.type === 'filesystem' ? (
+        <EmailFile settings={settings as MailModeFilesystem} setSettings={setSettings} />
+      ) : null}
 
       <Group mt={'md'}>
         <Button onClick={doUpdate} loading={loading}>

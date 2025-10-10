@@ -65,11 +65,7 @@ const DatabaseHostsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['ID', 'Name', 'Type', 'Address', 'Databases', 'Locations']}
-          pagination={databaseHosts}
-          onPageSelect={setPage}
-        >
+        <Table columns={['ID', 'Name', 'Type', 'Address', 'Created']} pagination={databaseHosts} onPageSelect={setPage}>
           {databaseHosts.data.map((dh) => (
             <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
           ))}

@@ -17,7 +17,7 @@ enum Transport {
         from_address: String,
         from_name: Option<String>,
     },
-    File {
+    Filesystem {
         transport: lettre::AsyncFileTransport<lettre::Tokio1Executor>,
         from_address: String,
         from_name: Option<String>,
@@ -93,14 +93,14 @@ impl Mail {
                     from_name: from_name.clone(),
                 })
             }
-            super::settings::MailMode::File {
+            super::settings::MailMode::Filesystem {
                 path,
                 from_address,
                 from_name,
             } => {
                 let transport = lettre::AsyncFileTransport::<lettre::Tokio1Executor>::new(path);
 
-                Ok(Transport::File {
+                Ok(Transport::Filesystem {
                     transport,
                     from_address: from_address.clone(),
                     from_name: from_name.clone(),
@@ -128,65 +128,67 @@ impl Mail {
         tokio::spawn(async move {
             let run = async || -> Result<(), anyhow::Error> {
                 match transport {
-                    Transport::None => Ok(()),
+                    Transport::None => {}
                     Transport::Smtp {
                         transport,
                         from_address,
                         from_name,
-                    } => transport
-                        .send(
-                            lettre::message::Message::builder()
-                                .subject(subject)
-                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
-                                .from(lettre::message::Mailbox::new(
-                                    from_name,
-                                    from_address.parse()?,
-                                ))
-                                .header(lettre::message::header::ContentType::TEXT_HTML)
-                                .body(body)?,
-                        )
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| e.into()),
+                    } => {
+                        transport
+                            .send(
+                                lettre::message::Message::builder()
+                                    .subject(subject)
+                                    .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                    .from(lettre::message::Mailbox::new(
+                                        from_name,
+                                        from_address.parse()?,
+                                    ))
+                                    .header(lettre::message::header::ContentType::TEXT_HTML)
+                                    .body(body)?,
+                            )
+                            .await?;
+                    }
                     Transport::Sendmail {
                         transport,
                         from_address,
                         from_name,
-                    } => transport
-                        .send(
-                            lettre::message::Message::builder()
-                                .subject(subject)
-                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
-                                .from(lettre::message::Mailbox::new(
-                                    from_name,
-                                    from_address.parse()?,
-                                ))
-                                .header(lettre::message::header::ContentType::TEXT_HTML)
-                                .body(body)?,
-                        )
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| e.into()),
-                    Transport::File {
+                    } => {
+                        transport
+                            .send(
+                                lettre::message::Message::builder()
+                                    .subject(subject)
+                                    .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                    .from(lettre::message::Mailbox::new(
+                                        from_name,
+                                        from_address.parse()?,
+                                    ))
+                                    .header(lettre::message::header::ContentType::TEXT_HTML)
+                                    .body(body)?,
+                            )
+                            .await?;
+                    }
+                    Transport::Filesystem {
                         transport,
                         from_address,
                         from_name,
-                    } => transport
-                        .send(
-                            lettre::message::Message::builder()
-                                .subject(subject)
-                                .to(lettre::message::Mailbox::new(None, destination.parse()?))
-                                .from(lettre::message::Mailbox::new(
-                                    from_name,
-                                    from_address.parse()?,
-                                ))
-                                .header(lettre::message::header::ContentType::TEXT_HTML)
-                                .body(body)?,
-                        )
-                        .await
-                        .map(|_| ())
-                        .map_err(|e| e.into()),
+                    } => {
+                        transport
+                            .send(
+                                lettre::message::Message::builder()
+                                    .subject(subject)
+                                    .to(lettre::message::Mailbox::new(None, destination.parse()?))
+                                    .from(lettre::message::Mailbox::new(
+                                        from_name,
+                                        from_address.parse()?,
+                                    ))
+                                    .header(lettre::message::header::ContentType::TEXT_HTML)
+                                    .body(body)?,
+                            )
+                            .await?;
+                    }
                 }
+
+                Ok(())
             };
 
             match run().await {

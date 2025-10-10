@@ -17,10 +17,6 @@ pub struct Mount {
     pub read_only: bool,
     pub user_mountable: bool,
 
-    pub eggs: i64,
-    pub nodes: i64,
-    pub servers: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -37,18 +33,6 @@ impl BaseModel for Mount {
             ("mounts.target", format!("{prefix}target")),
             ("mounts.read_only", format!("{prefix}read_only")),
             ("mounts.user_mountable", format!("{prefix}user_mountable")),
-            (
-                "(SELECT COUNT(*) FROM nest_egg_mounts WHERE nest_egg_mounts.mount_uuid = mounts.uuid)",
-                format!("{prefix}eggs"),
-            ),
-            (
-                "(SELECT COUNT(*) FROM node_mounts WHERE node_mounts.mount_uuid = mounts.uuid)",
-                format!("{prefix}nodes"),
-            ),
-            (
-                "(SELECT COUNT(*) FROM server_mounts WHERE server_mounts.mount_uuid = mounts.uuid)",
-                format!("{prefix}servers"),
-            ),
             ("mounts.created", format!("{prefix}created")),
         ])
     }
@@ -65,9 +49,6 @@ impl BaseModel for Mount {
             target: row.get(format!("{prefix}target").as_str()),
             read_only: row.get(format!("{prefix}read_only").as_str()),
             user_mountable: row.get(format!("{prefix}user_mountable").as_str()),
-            eggs: row.get(format!("{prefix}eggs").as_str()),
-            nodes: row.get(format!("{prefix}nodes").as_str()),
-            servers: row.get(format!("{prefix}servers").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -206,9 +187,6 @@ impl Mount {
             target: self.target,
             read_only: self.read_only,
             user_mountable: self.user_mountable,
-            eggs: self.eggs,
-            nodes: self.nodes,
-            servers: self.servers,
             created: self.created.and_utc(),
         }
     }
@@ -227,10 +205,6 @@ pub struct AdminApiMount {
 
     pub read_only: bool,
     pub user_mountable: bool,
-
-    pub eggs: i64,
-    pub nodes: i64,
-    pub servers: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

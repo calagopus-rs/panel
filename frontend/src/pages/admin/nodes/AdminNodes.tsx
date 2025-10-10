@@ -67,11 +67,7 @@ const NodesContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['', 'Id', 'Name', 'Location', 'URL', 'Servers', 'Created']}
-          pagination={nodes}
-          onPageSelect={setPage}
-        >
+        <Table columns={['', 'Id', 'Name', 'Location', 'URL', 'Created']} pagination={nodes} onPageSelect={setPage}>
           {nodes.data.map((node) => (
             <NodeRow key={node.uuid} node={node} />
           ))}

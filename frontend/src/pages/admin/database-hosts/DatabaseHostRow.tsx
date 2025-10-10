@@ -1,6 +1,8 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
+import Tooltip from '@/elements/Tooltip';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
 export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
@@ -22,8 +24,9 @@ export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
           {databaseHost.host}:{databaseHost.port}
         </Code>
       </TableData>
-      <TableData>{databaseHost.databases}</TableData>
-      <TableData>{databaseHost.locations}</TableData>
+      <TableData>
+        <Tooltip label={formatDateTime(databaseHost.created)}>{formatTimestamp(databaseHost.created)}</Tooltip>
+      </TableData>
     </TableRow>
   );
 };

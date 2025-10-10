@@ -836,6 +836,23 @@ impl Server {
         .unwrap_or(0)
     }
 
+    pub async fn count_by_nest_egg_uuid(
+        database: &crate::database::Database,
+        nest_egg_uuid: uuid::Uuid,
+    ) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM servers
+            WHERE servers.nest_egg_uuid = $1
+            "#,
+        )
+        .bind(nest_egg_uuid)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
     pub async fn sync(self, database: &crate::database::Database) -> Result<(), anyhow::Error> {
         match self
             .node

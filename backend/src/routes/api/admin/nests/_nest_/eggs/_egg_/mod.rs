@@ -104,7 +104,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, nest_egg::NestEgg, user::GetPermissionManager,
+            admin_activity::GetAdminActivityLogger, nest_egg::NestEgg, server::Server,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -138,7 +139,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("eggs.delete")?;
 
-        if egg.servers > 0 {
+        if Server::count_by_nest_egg_uuid(&state.database, egg.uuid).await > 0 {
             return ApiResponse::error("egg has servers, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();

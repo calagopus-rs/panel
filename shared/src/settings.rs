@@ -44,7 +44,7 @@ pub enum MailMode {
         from_address: String,
         from_name: Option<String>,
     },
-    File {
+    Filesystem {
         path: String,
 
         from_address: String,
@@ -342,18 +342,18 @@ impl AppSettings {
                 keys.push("::mail_sendmail_from_name");
                 values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
             }
-            MailMode::File {
+            MailMode::Filesystem {
                 path,
                 from_address,
                 from_name,
             } => {
                 keys.push("::mail_mode");
-                values.push("file".to_string());
-                keys.push("::mail_file_path");
+                values.push("filesystem".to_string());
+                keys.push("::mail_filesystem_path");
                 values.push(path.clone());
-                keys.push("::mail_file_from_address");
+                keys.push("::mail_filesystem_from_address");
                 values.push(from_address.clone());
-                keys.push("::mail_file_from_name");
+                keys.push("::mail_filesystem_from_name");
                 values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
             }
         }
@@ -516,15 +516,15 @@ impl AppSettings {
                         .remove("::mail_sendmail_from_name")
                         .filter(|s| !s.is_empty()),
                 },
-                Some("file") => MailMode::File {
+                Some("filesystem") => MailMode::Filesystem {
                     path: map
-                        .remove("::mail_file_path")
+                        .remove("::mail_filesystem_path")
                         .unwrap_or_else(|| "/var/lib/calagopus/mails".to_string()),
                     from_address: map
-                        .remove("::mail_file_from_address")
+                        .remove("::mail_filesystem_from_address")
                         .unwrap_or_else(|| "noreply@example.com".to_string()),
                     from_name: map
-                        .remove("::mail_file_from_name")
+                        .remove("::mail_filesystem_from_name")
                         .filter(|s| !s.is_empty()),
                 },
                 _ => MailMode::None,

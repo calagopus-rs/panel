@@ -1,5 +1,7 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
+import Tooltip from '@/elements/Tooltip';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
 export default ({ nest }: { nest: Nest }) => {
@@ -17,7 +19,9 @@ export default ({ nest }: { nest: Nest }) => {
 
       <TableData>{nest.description}</TableData>
 
-      <TableData>{nest.eggs}</TableData>
+      <TableData>
+        <Tooltip label={formatDateTime(nest.created)}>{formatTimestamp(nest.created)}</Tooltip>
+      </TableData>
     </TableRow>
   );
 };

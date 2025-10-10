@@ -14,8 +14,6 @@ pub struct ServerSchedule {
     pub triggers: Vec<wings_api::ScheduleTrigger>,
     pub condition: wings_api::ScheduleCondition,
 
-    pub steps: i64,
-
     pub last_run: Option<chrono::NaiveDateTime>,
     pub last_failure: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
@@ -32,10 +30,6 @@ impl BaseModel for ServerSchedule {
             ("server_schedules.enabled", format!("{prefix}enabled")),
             ("server_schedules.triggers", format!("{prefix}triggers")),
             ("server_schedules.condition", format!("{prefix}condition")),
-            (
-                "(SELECT COUNT(*) FROM server_schedule_steps WHERE server_schedule_steps.schedule_uuid = server_schedules.uuid)",
-                format!("{prefix}steps"),
-            ),
             ("server_schedules.last_run", format!("{prefix}last_run")),
             (
                 "server_schedules.last_failure",
@@ -57,7 +51,6 @@ impl BaseModel for ServerSchedule {
                 .unwrap(),
             condition: serde_json::from_value(row.get(format!("{prefix}condition").as_str()))
                 .unwrap(),
-            steps: row.get(format!("{prefix}steps").as_str()),
             last_run: row.get(format!("{prefix}last_run").as_str()),
             last_failure: row.get(format!("{prefix}last_failure").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
@@ -209,7 +202,6 @@ impl ServerSchedule {
             enabled: self.enabled,
             triggers: self.triggers,
             condition: self.condition,
-            steps: self.steps,
             last_run: self.last_run.map(|dt| dt.and_utc()),
             last_failure: self.last_failure.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),
@@ -227,8 +219,6 @@ pub struct ApiServerSchedule {
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
     pub condition: wings_api::ScheduleCondition,
-
-    pub steps: i64,
 
     pub last_run: Option<chrono::DateTime<chrono::Utc>>,
     pub last_failure: Option<chrono::DateTime<chrono::Utc>>,

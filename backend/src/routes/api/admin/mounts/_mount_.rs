@@ -92,22 +92,6 @@ mod delete {
             }
         };
 
-        if mount.eggs > 0 {
-            return ApiResponse::error("mount has eggs, cannot delete")
-                .with_status(StatusCode::CONFLICT)
-                .ok();
-        }
-        if mount.nodes > 0 {
-            return ApiResponse::error("mount has nodes, cannot delete")
-                .with_status(StatusCode::CONFLICT)
-                .ok();
-        }
-        if mount.servers > 0 {
-            return ApiResponse::error("mount has servers, cannot delete")
-                .with_status(StatusCode::CONFLICT)
-                .ok();
-        }
-
         Mount::delete_by_uuid(&state.database, mount.uuid).await?;
 
         activity_logger
