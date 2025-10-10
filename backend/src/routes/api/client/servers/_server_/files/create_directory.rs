@@ -66,6 +66,8 @@ mod post {
 
         match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .post_servers_server_files_create_directory(server.uuid, &request_body)
             .await

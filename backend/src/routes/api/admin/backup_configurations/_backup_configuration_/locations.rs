@@ -68,16 +68,9 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            locations: Pagination {
-                total: locations.total,
-                per_page: locations.per_page,
-                page: locations.page,
-                data: locations
-                    .data
-                    .into_iter()
-                    .map(|location| location.into_admin_api_object(&state.database))
-                    .collect(),
-            },
+            locations: locations
+                .async_map(|location| location.into_admin_api_object(&state.database))
+                .await,
         })
         .ok()
     }

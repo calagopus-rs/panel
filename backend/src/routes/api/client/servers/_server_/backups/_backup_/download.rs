@@ -68,7 +68,7 @@ mod get {
         }
 
         let mut backup_configuration = match backup.0.backup_configuration {
-            Some(backup_configuration) => backup_configuration,
+            Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
             None => {
                 return ApiResponse::error("backup does not have a backup configuration assigned")
                     .with_status(StatusCode::EXPECTATION_FAILED)
@@ -121,7 +121,9 @@ mod get {
             unique_id: uuid::Uuid,
         }
 
-        let token = server.node.create_jwt(
+        let node = server.node.fetch(&state.database).await?;
+
+        let token = node.create_jwt(
             &state.database,
             &state.jwt,
             &BackupDownloadJwt {
@@ -140,7 +142,7 @@ mod get {
             },
         )?;
 
-        let mut url = server.node.public_url();
+        let mut url = node.public_url();
         url.set_path("/download/backup");
         url.set_query(Some(&format!(
             "token={}&archive_format={}",

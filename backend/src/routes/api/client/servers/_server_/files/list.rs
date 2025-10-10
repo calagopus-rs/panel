@@ -80,6 +80,8 @@ mod get {
 
         let entries = match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .get_servers_server_files_list(
                 server.uuid,

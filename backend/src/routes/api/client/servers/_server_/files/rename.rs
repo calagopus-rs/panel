@@ -61,6 +61,8 @@ mod put {
 
         let data = match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .put_servers_server_files_rename(server.uuid, &request_body)
             .await

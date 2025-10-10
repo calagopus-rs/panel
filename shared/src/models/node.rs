@@ -1,4 +1,4 @@
-use super::BaseModel;
+use super::{BaseModel, ByUuid, Fetchable};
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -11,7 +11,7 @@ pub type GetNode = crate::extract::ConsumingExtension<Node>;
 pub struct Node {
     pub uuid: uuid::Uuid,
     pub location: super::location::Location,
-    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
+    pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
     pub name: String,
     pub public: bool,
@@ -30,10 +30,6 @@ pub struct Node {
     pub token_id: String,
     pub token: Vec<u8>,
 
-    pub servers: i64,
-    pub outgoing_transfers: i64,
-    pub incoming_transfers: i64,
-
     pub created: chrono::NaiveDateTime,
 }
 
@@ -44,6 +40,10 @@ impl BaseModel for Node {
 
         let mut columns = BTreeMap::from([
             ("nodes.uuid", format!("{prefix}uuid")),
+            (
+                "nodes.backup_configuration_uuid",
+                format!("{prefix}node_backup_configuration_uuid"),
+            ),
             ("nodes.name", format!("{prefix}name")),
             ("nodes.public", format!("{prefix}public")),
             ("nodes.description", format!("{prefix}description")),
@@ -59,27 +59,10 @@ impl BaseModel for Node {
             ("nodes.disk", format!("{prefix}disk")),
             ("nodes.token_id", format!("{prefix}token_id")),
             ("nodes.token", format!("{prefix}token")),
-            (
-                "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = nodes.uuid)",
-                format!("{prefix}servers"),
-            ),
-            (
-                "(SELECT COUNT(*) FROM servers WHERE servers.node_uuid = nodes.uuid AND servers.destination_node_uuid IS NOT NULL)",
-                format!("{prefix}outgoing_transfers"),
-            ),
-            (
-                "(SELECT COUNT(*) FROM servers WHERE servers.destination_node_uuid = nodes.uuid)",
-                format!("{prefix}incoming_transfers"),
-            ),
             ("nodes.created", format!("{prefix}created")),
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_")));
-        columns.extend(
-            super::backup_configurations::BackupConfiguration::node_columns(Some(
-                "node_backup_configuration_",
-            )),
-        );
 
         columns
     }
@@ -91,21 +74,11 @@ impl BaseModel for Node {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             location: super::location::Location::map(Some("location_"), row),
-            backup_configuration: if row
-                .try_get::<uuid::Uuid, _>(
-                    format!("{prefix}node_backup_configuration_uuid").as_str(),
-                )
-                .is_ok()
-            {
-                Some(Box::new(
-                    super::backup_configurations::BackupConfiguration::map(
-                        Some("node_backup_configuration_"),
-                        row,
-                    ),
-                ))
-            } else {
-                None
-            },
+            backup_configuration:
+                super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
+                    row,
+                    format!("{prefix}node_backup_configuration_uuid"),
+                ),
             name: row.get(format!("{prefix}name").as_str()),
             public: row.get(format!("{prefix}public").as_str()),
             description: row.get(format!("{prefix}description").as_str()),
@@ -123,9 +96,6 @@ impl BaseModel for Node {
             disk: row.get(format!("{prefix}disk").as_str()),
             token_id: row.get(format!("{prefix}token_id").as_str()),
             token: row.get(format!("{prefix}token").as_str()),
-            servers: row.get(format!("{prefix}servers").as_str()),
-            outgoing_transfers: row.get(format!("{prefix}outgoing_transfers").as_str()),
-            incoming_transfers: row.get(format!("{prefix}incoming_transfers").as_str()),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -176,29 +146,6 @@ impl Node {
         .await?;
 
         Ok(row.get("uuid"))
-    }
-
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}, {}
-            FROM nodes
-            JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
-            WHERE nodes.uuid = $1
-            "#,
-            Self::columns_sql(None),
-            super::location::Location::columns_sql(Some("location_")),
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_token_id_token(
@@ -344,6 +291,23 @@ impl Node {
         })
     }
 
+    pub async fn count_by_location_uuid(
+        database: &crate::database::Database,
+        location_uuid: uuid::Uuid,
+    ) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM nodes
+            WHERE nodes.location_uuid = $1
+            "#,
+        )
+        .bind(location_uuid)
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
@@ -411,13 +375,27 @@ impl Node {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self, database: &crate::database::Database) -> AdminApiNode {
-        AdminApiNode {
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiNode, sqlx::Error> {
+        let (location, backup_configuration) =
+            tokio::join!(self.location.into_admin_api_object(database), async {
+                if let Some(backup_configuration) = self.backup_configuration {
+                    backup_configuration
+                        .fetch(database)
+                        .await
+                        .ok()
+                        .map(|b| b.into_admin_api_object(database))
+                } else {
+                    None
+                }
+            });
+
+        Ok(AdminApiNode {
             uuid: self.uuid,
-            location: self.location.into_admin_api_object(database),
-            backup_configuration: self
-                .backup_configuration
-                .map(|backup_configuration| backup_configuration.into_admin_api_object(database)),
+            location,
+            backup_configuration,
             name: self.name,
             public: self.public,
             description: self.description,
@@ -430,11 +408,34 @@ impl Node {
             disk: self.disk,
             token_id: self.token_id,
             token: database.decrypt(&self.token).unwrap(),
-            servers: self.servers,
-            outgoing_transfers: self.outgoing_transfers,
-            incoming_transfers: self.incoming_transfers,
             created: self.created.and_utc(),
-        }
+        })
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for Node {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}, {}
+            FROM nodes
+            JOIN locations ON locations.uuid = nodes.location_uuid
+            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
+            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
+            WHERE nodes.uuid = $1
+            "#,
+            Self::columns_sql(None),
+            super::location::Location::columns_sql(Some("location_")),
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 
@@ -463,10 +464,6 @@ pub struct AdminApiNode {
 
     pub token_id: String,
     pub token: String,
-
-    pub servers: i64,
-    pub outgoing_transfers: i64,
-    pub incoming_transfers: i64,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

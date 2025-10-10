@@ -38,7 +38,9 @@ mod get {
             permissions: Vec<&'a str>,
         }
 
-        let token = server.node.create_jwt(
+        let node = server.node.fetch(&state.database).await?;
+
+        let token = node.create_jwt(
             &state.database,
             &state.jwt,
             &WebsocketJwt {
@@ -57,7 +59,7 @@ mod get {
             },
         )?;
 
-        let mut url = server.node.public_url();
+        let mut url = node.public_url();
         url.set_path(&format!("/api/servers/{}/ws", server.uuid));
         if url.scheme() == "http" {
             url.set_scheme("ws").unwrap();

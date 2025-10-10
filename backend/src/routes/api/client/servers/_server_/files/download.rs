@@ -83,6 +83,8 @@ mod get {
             }
         }
 
+        let node = server.node.fetch(&state.database).await?;
+
         let url = if params.files.len() == 1 {
             #[derive(Serialize)]
             struct FileDownloadJwt {
@@ -94,7 +96,7 @@ mod get {
                 unique_id: uuid::Uuid,
             }
 
-            let token = server.node.create_jwt(
+            let token = node.create_jwt(
                 &state.database,
                 &state.jwt,
                 &FileDownloadJwt {
@@ -113,7 +115,7 @@ mod get {
                 },
             )?;
 
-            let mut url = server.node.public_url();
+            let mut url = node.public_url();
             if params.directory {
                 url.set_path("/download/directory");
             } else {
@@ -138,7 +140,7 @@ mod get {
                 unique_id: uuid::Uuid,
             }
 
-            let token = server.node.create_jwt(
+            let token = node.create_jwt(
                 &state.database,
                 &state.jwt,
                 &FilesDownloadJwt {
@@ -158,7 +160,7 @@ mod get {
                 },
             )?;
 
-            let mut url = server.node.public_url();
+            let mut url = node.public_url();
             url.set_path("/download/files");
             url.set_query(Some(&format!(
                 "token={}&archive_format={}",

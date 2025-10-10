@@ -1,3 +1,5 @@
+use crate::models::ByUuid;
+
 use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -189,64 +191,6 @@ impl BaseModel for BackupConfiguration {
 }
 
 impl BackupConfiguration {
-    #[inline]
-    pub fn location_columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
-        let prefix = prefix.unwrap_or_default();
-
-        BTreeMap::from([
-            (
-                "location_backup_configurations.uuid",
-                format!("{prefix}uuid"),
-            ),
-            (
-                "location_backup_configurations.name",
-                format!("{prefix}name"),
-            ),
-            (
-                "location_backup_configurations.description",
-                format!("{prefix}description"),
-            ),
-            (
-                "location_backup_configurations.backup_disk",
-                format!("{prefix}backup_disk"),
-            ),
-            (
-                "location_backup_configurations.backup_configs",
-                format!("{prefix}backup_configs"),
-            ),
-            (
-                "location_backup_configurations.created",
-                format!("{prefix}created"),
-            ),
-        ])
-    }
-
-    #[inline]
-    pub fn node_columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
-        let prefix = prefix.unwrap_or_default();
-
-        BTreeMap::from([
-            ("node_backup_configurations.uuid", format!("{prefix}uuid")),
-            ("node_backup_configurations.name", format!("{prefix}name")),
-            (
-                "node_backup_configurations.description",
-                format!("{prefix}description"),
-            ),
-            (
-                "node_backup_configurations.backup_disk",
-                format!("{prefix}backup_disk"),
-            ),
-            (
-                "node_backup_configurations.backup_configs",
-                format!("{prefix}backup_configs"),
-            ),
-            (
-                "node_backup_configurations.created",
-                format!("{prefix}created"),
-            ),
-        ])
-    }
-
     pub async fn create(
         database: &crate::database::Database,
         name: &str,
@@ -272,25 +216,6 @@ impl BackupConfiguration {
         .await?;
 
         Ok(Self::map(None, &row))
-    }
-
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM backup_configurations
-            WHERE backup_configurations.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn all_with_pagination(
@@ -357,6 +282,28 @@ impl BackupConfiguration {
             backup_configs: self.backup_configs,
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for BackupConfiguration {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM backup_configurations
+            WHERE backup_configurations.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

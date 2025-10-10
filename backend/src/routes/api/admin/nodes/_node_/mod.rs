@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{node::Node, user::GetPermissionManager},
+    models::{ByUuid, node::Node, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -38,7 +38,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let node = Node::by_uuid(&state.database, node).await;
+    let node = Node::by_uuid_optional(&state.database, node).await;
     let node = match node {
         Ok(Some(node)) => node,
         Ok(None) => {
@@ -87,7 +87,7 @@ mod get {
         permissions.has_admin_permission("nodes.read")?;
 
         ApiResponse::json(Response {
-            node: node.0.into_admin_api_object(&state.database),
+            node: node.0.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }
@@ -101,6 +101,7 @@ mod delete {
         models::{
             admin_activity::GetAdminActivityLogger,
             node::{GetNode, Node},
+            server::Server,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -129,20 +130,8 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("nodes.delete")?;
 
-        if node.servers > 0 {
+        if Server::count_by_node_uuid(&state.database, node.uuid).await > 0 {
             return ApiResponse::error("node has servers, cannot delete")
-                .with_status(StatusCode::BAD_REQUEST)
-                .ok();
-        }
-
-        if node.incoming_transfers > 0 {
-            return ApiResponse::error("node has incoming transfers, cannot delete")
-                .with_status(StatusCode::BAD_REQUEST)
-                .ok();
-        }
-
-        if node.outgoing_transfers > 0 {
-            return ApiResponse::error("node has outgoing transfers, cannot delete")
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
@@ -169,8 +158,9 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            location::Location, node::GetNode, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration, location::Location, node::GetNode,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -255,19 +245,23 @@ mod patch {
             if backup_configuration_uuid.is_nil() {
                 node.backup_configuration = None;
             } else {
-                let backup_configuration =
-                    match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid)
-                        .await?
-                    {
-                        Some(backup_configuration) => backup_configuration,
-                        None => {
-                            return ApiResponse::error("backup configuration not found")
-                                .with_status(StatusCode::NOT_FOUND)
-                                .ok();
-                        }
-                    };
+                let backup_configuration = match BackupConfiguration::by_uuid_optional(
+                    &state.database,
+                    backup_configuration_uuid,
+                )
+                .await?
+                {
+                    Some(backup_configuration) => backup_configuration,
+                    None => {
+                        return ApiResponse::error("backup configuration not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+                };
 
-                node.backup_configuration = Some(Box::new(backup_configuration));
+                node.backup_configuration = Some(BackupConfiguration::get_fetchable(
+                    backup_configuration.uuid,
+                ));
             }
         }
         if let Some(name) = data.name {

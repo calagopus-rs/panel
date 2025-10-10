@@ -78,7 +78,8 @@ mod get {
         ApiResponse::json(Response {
             server: server
                 .0
-                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await),
+                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await)
+                .await?,
         })
         .ok()
     }
@@ -176,6 +177,7 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{
+            ByUuid,
             admin_activity::GetAdminActivityLogger,
             backup_configurations::BackupConfiguration,
             nest_egg::NestEgg,
@@ -280,19 +282,23 @@ mod patch {
             if backup_configuration_uuid.is_nil() {
                 server.backup_configuration = None;
             } else {
-                let backup_configuration =
-                    match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid)
-                        .await?
-                    {
-                        Some(backup_configuration) => backup_configuration,
-                        None => {
-                            return ApiResponse::error("backup configuration not found")
-                                .with_status(StatusCode::NOT_FOUND)
-                                .ok();
-                        }
-                    };
+                let backup_configuration = match BackupConfiguration::by_uuid_optional(
+                    &state.database,
+                    backup_configuration_uuid,
+                )
+                .await?
+                {
+                    Some(backup_configuration) => backup_configuration,
+                    None => {
+                        return ApiResponse::error("backup configuration not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+                };
 
-                server.backup_configuration = Some(Box::new(backup_configuration));
+                server.backup_configuration = Some(BackupConfiguration::get_fetchable(
+                    backup_configuration.uuid,
+                ));
             }
         }
         if let Some(suspended) = data.suspended {

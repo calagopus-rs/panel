@@ -94,16 +94,9 @@ mod get {
         }?;
 
         ApiResponse::json(Response {
-            servers: Pagination {
-                total: servers.total,
-                per_page: servers.per_page,
-                page: servers.page,
-                data: servers
-                    .data
-                    .into_iter()
-                    .map(|server| server.into_api_object(&user))
-                    .collect(),
-            },
+            servers: servers
+                .try_async_map(|server| server.into_api_object(&state.database, &user))
+                .await?,
         })
         .ok()
     }

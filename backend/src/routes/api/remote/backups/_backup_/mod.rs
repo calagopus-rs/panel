@@ -102,7 +102,7 @@ mod get {
         }
 
         let backup_configuration = match backup.0.backup_configuration {
-            Some(backup_configuration) => backup_configuration,
+            Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
             None => {
                 return ApiResponse::error("backup does not have a backup configuration assigned")
                     .with_status(StatusCode::EXPECTATION_FAILED)
@@ -280,7 +280,7 @@ mod post {
             };
 
             let backup_configuration = match backup.0.backup_configuration {
-                Some(backup_configuration) => backup_configuration,
+                Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
                 None => {
                     return ApiResponse::error(
                         "backup does not have a backup configuration assigned",

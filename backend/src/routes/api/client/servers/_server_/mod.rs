@@ -66,7 +66,7 @@ pub async fn auth(
                     .with_status(StatusCode::CONFLICT)
                     .into_response());
             }
-        } else if server.destination_node_uuid.is_some() {
+        } else if server.destination_node.is_some() {
             return Ok(ApiResponse::error("server is being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .into_response());
@@ -108,6 +108,7 @@ pub async fn auth(
 mod get {
     use serde::Serialize;
     use shared::{
+        GetState,
         models::{server::GetServer, user::GetUser},
         response::{ApiResponse, ApiResponseResult},
     };
@@ -127,9 +128,9 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(user: GetUser, server: GetServer) -> ApiResponseResult {
+    pub async fn route(state: GetState, user: GetUser, server: GetServer) -> ApiResponseResult {
         ApiResponse::json(Response {
-            server: server.0.into_api_object(&user),
+            server: server.0.into_api_object(&state.database, &user).await?,
         })
         .ok()
     }

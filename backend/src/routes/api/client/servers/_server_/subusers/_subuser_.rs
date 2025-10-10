@@ -74,8 +74,16 @@ mod delete {
             async move {
                 tracing::debug!(server = %server.uuid, "removing subuser permissions in wings");
 
-                if let Err(err) = server
-                    .node
+                let node = match server.node.fetch(&state.database).await {
+                    Ok(node) => node,
+                    Err(err) => {
+                        tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+
+                        return;
+                    }
+                };
+
+                if let Err(err) = node
                     .api_client(&database)
                     .post_servers_server_ws_permissions(
                         server.uuid,
@@ -92,8 +100,7 @@ mod delete {
                     tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
                 }
 
-                if let Err(err) = server
-                    .node
+                if let Err(err) = node
                     .api_client(&database)
                     .post_servers_server_ws_deny(
                         server.uuid,
@@ -237,8 +244,16 @@ mod patch {
             async move {
                 tracing::debug!(server = %server.uuid, "updating subuser permissions in wings");
 
-                if let Err(err) = server
-                    .node
+                let node = match server.node.fetch(&state.database).await {
+                    Ok(node) => node,
+                    Err(err) => {
+                        tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:#?}", err);
+
+                        return;
+                    }
+                };
+
+                if let Err(err) = node
                     .api_client(&database)
                     .post_servers_server_ws_permissions(
                         server.uuid,

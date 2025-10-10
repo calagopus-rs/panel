@@ -45,6 +45,8 @@ mod delete {
 
         match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .delete_servers_server_files_operations_operation(server.uuid, operation)
             .await

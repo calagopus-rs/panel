@@ -1,4 +1,4 @@
-use super::BaseModel;
+use super::{BaseModel, ByUuid, Fetchable};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -37,7 +37,7 @@ pub struct ServerBackup {
     pub uuid: uuid::Uuid,
     pub server_uuid: Option<uuid::Uuid>,
     pub node_uuid: uuid::Uuid,
-    pub backup_configuration: Option<Box<super::backup_configurations::BackupConfiguration>>,
+    pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
     pub name: String,
     pub successful: bool,
@@ -64,10 +64,14 @@ impl BaseModel for ServerBackup {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
 
-        let mut columns = BTreeMap::from([
+        BTreeMap::from([
             ("server_backups.uuid", format!("{prefix}uuid")),
             ("server_backups.server_uuid", format!("{prefix}server_uuid")),
             ("server_backups.node_uuid", format!("{prefix}node_uuid")),
+            (
+                "server_backups.backup_configuration_uuid",
+                format!("{prefix}backup_configuration_uuid"),
+            ),
             ("server_backups.name", format!("{prefix}name")),
             ("server_backups.successful", format!("{prefix}successful")),
             ("server_backups.browsable", format!("{prefix}browsable")),
@@ -86,13 +90,7 @@ impl BaseModel for ServerBackup {
             ("server_backups.completed", format!("{prefix}completed")),
             ("server_backups.deleted", format!("{prefix}deleted")),
             ("server_backups.created", format!("{prefix}created")),
-        ]);
-
-        columns.extend(super::backup_configurations::BackupConfiguration::columns(
-            Some("backup_configuration_"),
-        ));
-
-        columns
+        ])
     }
 
     #[inline]
@@ -102,19 +100,11 @@ impl BaseModel for ServerBackup {
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
             server_uuid: row.get(format!("{prefix}server_uuid").as_str()),
-            backup_configuration: if row
-                .try_get::<uuid::Uuid, _>("backup_configuration_uuid".to_string().as_str())
-                .is_ok()
-            {
-                Some(Box::new(
-                    super::backup_configurations::BackupConfiguration::map(
-                        Some("backup_configuration_"),
-                        row,
-                    ),
-                ))
-            } else {
-                None
-            },
+            backup_configuration:
+                super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
+                    row,
+                    format!("{prefix}backup_configuration_uuid"),
+                ),
             node_uuid: row.get(format!("{prefix}node_uuid").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
@@ -141,18 +131,20 @@ impl ServerBackup {
         server: super::server::Server,
         name: &str,
         ignored_files: Vec<String>,
-    ) -> Result<uuid::Uuid, anyhow::Error> {
-        let backup_configuration = server.backup_configuration().ok_or_else(|| {
-            anyhow::anyhow!("no backup configuration available, unable to create backup")
-        })?;
+    ) -> Result<Self, anyhow::Error> {
+        let backup_configuration =
+            server.backup_configuration(database).await.ok_or_else(|| {
+                anyhow::anyhow!("no backup configuration available, unable to create backup")
+            })?;
 
-        let row = sqlx::query(
+        let row = sqlx::query(&format!(
             r#"
             INSERT INTO server_backups (server_uuid, node_uuid, backup_configuration_uuid, name, ignored_files, bytes, disk)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING uuid
-            "#
-        )
+            RETURNING {}
+            "#,
+            Self::columns_sql(None)
+        ))
         .bind(server.uuid)
         .bind(server.node.uuid)
         .bind(backup_configuration.uuid)
@@ -171,8 +163,30 @@ impl ServerBackup {
             async move {
                 tracing::debug!(backup = %uuid, "creating server backup");
 
-                if let Err(err) = server
-                    .node
+                let node = match server.node.fetch(&database).await {
+                    Ok(node) => node,
+                    Err(err) => {
+                        tracing::error!(backup = %uuid, "failed to create server backup: {:#?}", err);
+
+                        if let Err(err) = sqlx::query!(
+                            r#"
+                            UPDATE server_backups
+                            SET successful = false, completed = NOW()
+                            WHERE server_backups.uuid = $1
+                            "#,
+                            uuid
+                        )
+                        .execute(database.write())
+                        .await
+                        {
+                            tracing::error!(backup = %uuid, "failed to update server backup status: {:#?}", err);
+                        }
+
+                        return;
+                    }
+                };
+
+                if let Err(err) = node
                     .api_client(&database)
                     .post_servers_server_backup(
                         server.uuid,
@@ -203,7 +217,7 @@ impl ServerBackup {
             }
         });
 
-        Ok(row.get("uuid"))
+        Ok(Self::map(None, &row))
     }
 
     pub async fn create_raw(
@@ -211,18 +225,20 @@ impl ServerBackup {
         server: &super::server::Server,
         name: &str,
         ignored_files: Vec<String>,
-    ) -> Result<uuid::Uuid, anyhow::Error> {
-        let backup_configuration = server.backup_configuration().ok_or_else(|| {
-            anyhow::anyhow!("no backup configuration available, unable to create backup")
-        })?;
+    ) -> Result<Self, anyhow::Error> {
+        let backup_configuration =
+            server.backup_configuration(database).await.ok_or_else(|| {
+                anyhow::anyhow!("no backup configuration available, unable to create backup")
+            })?;
 
-        let row = sqlx::query(
+        let row = sqlx::query(&format!(
             r#"
             INSERT INTO server_backups (server_uuid, node_uuid, backup_configuration_uuid, name, ignored_files, bytes, disk)
             VALUES ($1, $2, $3, $4, $5, $6, $7)
-            RETURNING uuid
-            "#
-        )
+            RETURNING {}
+            "#,
+            Self::columns_sql(None)
+        ))
         .bind(server.uuid)
         .bind(server.node.uuid)
         .bind(backup_configuration.uuid)
@@ -233,27 +249,7 @@ impl ServerBackup {
         .fetch_one(database.write())
         .await?;
 
-        Ok(row.get("uuid"))
-    }
-
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
-            WHERE server_backups.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
+        Ok(Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_uuid(
@@ -420,12 +416,18 @@ impl ServerBackup {
         server: super::server::Server,
         truncate_directory: bool,
     ) -> Result<(), anyhow::Error> {
-        let backup_configuration = self.backup_configuration.ok_or_else(|| {
-            anyhow::anyhow!("no backup configuration available, unable to create backup")
-        })?;
+        let backup_configuration = self
+            .backup_configuration
+            .ok_or_else(|| {
+                anyhow::anyhow!("no backup configuration available, unable to create backup")
+            })?
+            .fetch(database)
+            .await?;
 
         if let Err((status, error)) = server
             .node
+            .fetch(database)
+            .await?
             .api_client(database)
             .post_servers_server_backup_backup_restore(
                 server.uuid,
@@ -469,16 +471,18 @@ impl ServerBackup {
         server: &super::server::Server,
     ) -> Result<(), anyhow::Error> {
         let node = if self.node_uuid == server.node.uuid {
-            &server.node
+            server.node.fetch(database).await
         } else {
-            &super::node::Node::by_uuid(database, self.node_uuid)
-                .await?
-                .ok_or_else(|| sqlx::Error::RowNotFound)?
-        };
+            super::node::Node::by_uuid(database, self.node_uuid).await
+        }?;
 
-        let backup_configuration = self.backup_configuration.ok_or_else(|| {
-            anyhow::anyhow!("no backup configuration available, unable to create backup")
-        })?;
+        let backup_configuration = self
+            .backup_configuration
+            .ok_or_else(|| {
+                anyhow::anyhow!("no backup configuration available, unable to create backup")
+            })?
+            .fetch(database)
+            .await?;
 
         match self.disk {
             BackupDisk::S3 => {
@@ -536,9 +540,13 @@ impl ServerBackup {
         database: &crate::database::Database,
         node: super::node::Node,
     ) -> Result<(), anyhow::Error> {
-        let backup_configuration = self.backup_configuration.ok_or_else(|| {
-            anyhow::anyhow!("no backup configuration available, unable to create backup")
-        })?;
+        let backup_configuration = self
+            .backup_configuration
+            .ok_or_else(|| {
+                anyhow::anyhow!("no backup configuration available, unable to create backup")
+            })?
+            .fetch(database)
+            .await?;
 
         match self.disk {
             BackupDisk::S3 => {
@@ -653,6 +661,29 @@ impl ServerBackup {
             completed: self.completed.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for ServerBackup {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM server_backups
+            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
+            WHERE server_backups.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

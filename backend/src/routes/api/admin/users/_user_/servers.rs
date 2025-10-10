@@ -71,18 +71,11 @@ mod get {
         let storage_url_retriever = state.storage.retrieve_urls().await;
 
         ApiResponse::json(Response {
-            servers: Pagination {
-                total: servers.total,
-                per_page: servers.per_page,
-                page: servers.page,
-                data: servers
-                    .data
-                    .into_iter()
-                    .map(|server| {
-                        server.into_admin_api_object(&state.database, &storage_url_retriever)
-                    })
-                    .collect(),
-            },
+            servers: servers
+                .try_async_map(|server| {
+                    server.into_admin_api_object(&state.database, &storage_url_retriever)
+                })
+                .await?,
         })
         .ok()
     }

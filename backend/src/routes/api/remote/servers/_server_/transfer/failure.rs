@@ -26,11 +26,14 @@ mod post {
         ),
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
-        if server.destination_node_uuid.is_none() {
-            return ApiResponse::error("server is not being transferred")
-                .with_status(StatusCode::CONFLICT)
-                .ok();
-        }
+        let destination_node = match &server.destination_node {
+            Some(destination_node) => destination_node.fetch(&state.database).await?,
+            None => {
+                return ApiResponse::error("server is not being transferred")
+                    .with_status(StatusCode::CONFLICT)
+                    .ok();
+            }
+        };
 
         let mut transaction = state.database.write().begin().await?;
 
@@ -66,11 +69,10 @@ mod post {
         .execute(&mut *transaction)
         .await?;
 
-        if let Ok(Some(destination_node)) = server.destination_node(&state.database).await
-            && let Err(err) = destination_node
-                .api_client(&state.database)
-                .delete_servers_server(server.uuid)
-                .await
+        if let Err(err) = destination_node
+            .api_client(&state.database)
+            .delete_servers_server(server.uuid)
+            .await
         {
             tracing::error!("failed to delete server on destination node: {:#?}", err);
         }

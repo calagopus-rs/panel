@@ -59,16 +59,9 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            nodes: Pagination {
-                total: nodes.total,
-                per_page: nodes.per_page,
-                page: nodes.page,
-                data: nodes
-                    .data
-                    .into_iter()
-                    .map(|node| node.into_admin_api_object(&state.database))
-                    .collect(),
-            },
+            nodes: nodes
+                .try_async_map(|node| node.into_admin_api_object(&state.database))
+                .await?,
         })
         .ok()
     }
@@ -80,8 +73,9 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            location::Location, node::Node, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration, location::Location, node::Node,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -157,7 +151,9 @@ mod post {
         let backup_configuration = if let Some(backup_configuration_uuid) =
             data.backup_configuration_uuid
         {
-            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
+            match BackupConfiguration::by_uuid_optional(&state.database, backup_configuration_uuid)
+                .await?
+            {
                 Some(backup_configuration) => Some(backup_configuration),
                 None => {
                     return ApiResponse::error("backup configuration not found")
@@ -186,9 +182,7 @@ mod post {
         )
         .await
         {
-            Ok(node_uuid) => Node::by_uuid(&state.database, node_uuid)
-                .await?
-                .ok_or_else(|| anyhow::anyhow!("node not found after creation"))?,
+            Ok(node_uuid) => Node::by_uuid(&state.database, node_uuid).await?,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("node with name already exists")
                     .with_status(StatusCode::CONFLICT)
@@ -225,7 +219,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            node: node.into_admin_api_object(&state.database),
+            node: node.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }

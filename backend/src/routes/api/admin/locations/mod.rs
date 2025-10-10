@@ -61,16 +61,9 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            locations: Pagination {
-                total: locations.total,
-                per_page: locations.per_page,
-                page: locations.page,
-                data: locations
-                    .data
-                    .into_iter()
-                    .map(|location| location.into_admin_api_object(&state.database))
-                    .collect(),
-            },
+            locations: locations
+                .async_map(|location| location.into_admin_api_object(&state.database))
+                .await,
         })
         .ok()
     }
@@ -82,8 +75,9 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            location::Location, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration, location::Location,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -129,7 +123,9 @@ mod post {
         let backup_configuration = if let Some(backup_configuration_uuid) =
             data.backup_configuration_uuid
         {
-            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
+            match BackupConfiguration::by_uuid_optional(&state.database, backup_configuration_uuid)
+                .await?
+            {
                 Some(backup_configuration) => Some(backup_configuration),
                 None => {
                     return ApiResponse::error("backup configuration not found")
@@ -176,7 +172,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            location: location.into_admin_api_object(&state.database),
+            location: location.into_admin_api_object(&state.database).await,
         })
         .ok()
     }

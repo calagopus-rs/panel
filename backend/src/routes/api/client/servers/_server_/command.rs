@@ -56,6 +56,8 @@ mod post {
 
         match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .post_servers_server_commands(server.uuid, &request_body)
             .await

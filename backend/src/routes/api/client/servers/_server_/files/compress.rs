@@ -75,6 +75,8 @@ mod post {
         tokio::spawn(async move {
             let response = match server
                 .node
+                .fetch(&state.database)
+                .await?
                 .api_client(&state.database)
                 .post_servers_server_files_compress(server.uuid, &request_body)
                 .await

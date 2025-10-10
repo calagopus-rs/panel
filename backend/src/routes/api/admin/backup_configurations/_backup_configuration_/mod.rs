@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{backup_configurations::BackupConfiguration, user::GetPermissionManager},
+    models::{ByUuid, backup_configurations::BackupConfiguration, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -42,7 +42,7 @@ pub async fn auth(
     }
 
     let backup_configuration =
-        BackupConfiguration::by_uuid(&state.database, backup_configuration).await;
+        BackupConfiguration::by_uuid_optional(&state.database, backup_configuration).await;
     let backup_configuration = match backup_configuration {
         Ok(Some(backup_configuration)) => backup_configuration,
         Ok(None) => {

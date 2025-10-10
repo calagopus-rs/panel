@@ -1,6 +1,7 @@
+use futures_util::StreamExt;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
-use sqlx::postgres::PgRow;
-use std::collections::BTreeMap;
+use sqlx::{Row, postgres::PgRow};
+use std::{collections::BTreeMap, marker::PhantomData};
 use utoipa::ToSchema;
 use validator::Validate;
 
@@ -84,6 +85,46 @@ impl Pagination {
     }
 }
 
+impl<T: Serialize> Pagination<T> {
+    pub async fn async_map<R: serde::Serialize, Fut: Future<Output = R>>(
+        self,
+        mapper: impl Fn(T) -> Fut,
+    ) -> Pagination<R> {
+        let results: Vec<R> = futures_util::stream::iter(self.data.into_iter().map(mapper))
+            .buffer_unordered(10)
+            .collect()
+            .await;
+
+        Pagination {
+            total: self.total,
+            per_page: self.per_page,
+            page: self.page,
+            data: results,
+        }
+    }
+
+    pub async fn try_async_map<R: serde::Serialize, E, Fut: Future<Output = Result<R, E>>>(
+        self,
+        mapper: impl Fn(T) -> Fut,
+    ) -> Result<Pagination<R>, E> {
+        let mut results = Vec::new();
+        results.reserve_exact(self.data.len());
+        let mut result_stream =
+            futures_util::stream::iter(self.data.into_iter().map(mapper)).buffer_unordered(10);
+
+        while let Some(result) = result_stream.next().await {
+            results.push(result?);
+        }
+
+        Ok(Pagination {
+            total: self.total,
+            per_page: self.per_page,
+            page: self.page,
+            data: results,
+        })
+    }
+}
+
 pub trait BaseModel: Serialize + DeserializeOwned {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String>;
 
@@ -97,4 +138,68 @@ pub trait BaseModel: Serialize + DeserializeOwned {
     }
 
     fn map(prefix: Option<&str>, row: &PgRow) -> Self;
+}
+
+#[async_trait::async_trait]
+pub trait ByUuid: BaseModel {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error>;
+
+    async fn by_uuid_optional(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        match Self::by_uuid(database, uuid).await {
+            Ok(res) => Ok(Some(res)),
+            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
+
+    #[inline]
+    fn get_fetchable(uuid: uuid::Uuid) -> Fetchable<Self> {
+        Fetchable {
+            uuid,
+            _model: PhantomData,
+        }
+    }
+
+    #[inline]
+    fn get_fetchable_from_row(row: &PgRow, column: impl AsRef<str>) -> Option<Fetchable<Self>> {
+        match row.try_get(column.as_ref()) {
+            Ok(uuid) => Some(Fetchable {
+                uuid,
+                _model: PhantomData,
+            }),
+            Err(_) => None,
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone, Copy)]
+pub struct Fetchable<M: ByUuid> {
+    pub uuid: uuid::Uuid,
+    #[serde(skip)]
+    _model: PhantomData<M>,
+}
+
+impl<M: ByUuid> Fetchable<M> {
+    #[inline]
+    pub async fn fetch(&self, database: &crate::database::Database) -> Result<M, sqlx::Error> {
+        M::by_uuid(database, self.uuid).await
+    }
+
+    #[inline]
+    pub async fn fetch_optional(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<Option<M>, sqlx::Error> {
+        match M::by_uuid(database, self.uuid).await {
+            Ok(res) => Ok(Some(res)),
+            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(err) => Err(err),
+        }
+    }
 }

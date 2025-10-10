@@ -36,7 +36,7 @@ mod post {
         server: GetServer,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let destination_node_uuid = match server.destination_node_uuid {
+        let destination_node = match &server.destination_node {
             Some(id) => id,
             None => {
                 return ApiResponse::error("server is not being transferred")
@@ -45,7 +45,7 @@ mod post {
             }
         };
 
-        if node.uuid != destination_node_uuid {
+        if node.uuid != destination_node.uuid {
             return ApiResponse::error("destination node must call success endpoint")
                 .with_status(StatusCode::EXPECTATION_FAILED)
                 .ok();
@@ -61,7 +61,7 @@ mod post {
                 WHERE server_allocations.server_uuid = $1 AND node_allocations.node_uuid != $2
                 "#,
                 server.uuid,
-                destination_node_uuid
+                destination_node.uuid
             )
             .fetch_all(state.database.read()),
             sqlx::query!(
@@ -70,7 +70,7 @@ mod post {
                 SET node_uuid = $1, allocation_uuid = $2, destination_allocation_uuid = NULL, destination_node_uuid = NULL
                 WHERE servers.uuid = $3
                 "#,
-                destination_node_uuid,
+                destination_node.uuid,
                 server.destination_allocation_uuid,
                 server.uuid
             )
@@ -85,7 +85,7 @@ mod post {
             "#,
             server.uuid,
             &data.backups,
-            destination_node_uuid
+            destination_node.uuid
         )
         .execute(&mut *transaction)
         .await?;
@@ -103,6 +103,8 @@ mod post {
 
         if let Err(err) = server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .delete_servers_server(server.uuid)
             .await

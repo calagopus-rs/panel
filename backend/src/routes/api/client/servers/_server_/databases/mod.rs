@@ -184,7 +184,7 @@ mod post {
 
         let database_host = match DatabaseHost::by_location_uuid_uuid(
             &state.database,
-            server.node.location.uuid,
+            server.node.fetch(&state.database).await?.location.uuid,
             data.database_host_uuid,
         )
         .await?

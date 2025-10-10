@@ -79,6 +79,8 @@ mod post {
 
         let identifier = match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .post_servers_server_files_pull(server.uuid, &request_body)
             .await

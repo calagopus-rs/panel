@@ -54,6 +54,8 @@ mod get {
 
         let contents = match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .get_servers_server_files_contents(
                 server.uuid,

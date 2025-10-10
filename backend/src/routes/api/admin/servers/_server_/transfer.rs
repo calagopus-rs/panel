@@ -8,7 +8,7 @@ mod post {
         ApiError, GetState,
         jwt::BasePayload,
         models::{
-            admin_activity::GetAdminActivityLogger, node::Node, server::GetServer,
+            ByUuid, admin_activity::GetAdminActivityLogger, node::Node, server::GetServer,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -51,7 +51,7 @@ mod post {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("server.transfer")?;
 
-        if server.destination_node_uuid.is_some() {
+        if server.destination_node.is_some() {
             return ApiResponse::error("server is already being transferred")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
@@ -63,7 +63,8 @@ mod post {
                 .ok();
         }
 
-        let destination_node = match Node::by_uuid(&state.database, data.node_uuid).await? {
+        let destination_node = match Node::by_uuid_optional(&state.database, data.node_uuid).await?
+        {
             Some(node) => node,
             None => {
                 return ApiResponse::error("node not found")
@@ -138,6 +139,8 @@ mod post {
 
         match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .post_servers_server_transfer(
                 server.uuid,

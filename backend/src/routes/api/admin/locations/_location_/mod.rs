@@ -86,7 +86,7 @@ mod get {
         permissions.has_admin_permission("locations.read")?;
 
         ApiResponse::json(Response {
-            location: location.0.into_admin_api_object(&state.database),
+            location: location.0.into_admin_api_object(&state.database).await,
         })
         .ok()
     }
@@ -99,7 +99,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, location::Location, user::GetPermissionManager,
+            admin_activity::GetAdminActivityLogger, location::Location, node::Node,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -126,7 +127,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("locations.delete")?;
 
-        if location.nodes > 0 {
+        if Node::count_by_location_uuid(&state.database, location.uuid).await > 0 {
             return ApiResponse::error("location has nodes, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
@@ -155,8 +156,8 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger,
+            backup_configurations::BackupConfiguration, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -209,19 +210,23 @@ mod patch {
             if backup_configuration_uuid.is_nil() {
                 location.backup_configuration = None;
             } else {
-                let backup_configuration =
-                    match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid)
-                        .await?
-                    {
-                        Some(backup_configuration) => backup_configuration,
-                        None => {
-                            return ApiResponse::error("backup configuration not found")
-                                .with_status(StatusCode::NOT_FOUND)
-                                .ok();
-                        }
-                    };
+                let backup_configuration = match BackupConfiguration::by_uuid_optional(
+                    &state.database,
+                    backup_configuration_uuid,
+                )
+                .await?
+                {
+                    Some(backup_configuration) => backup_configuration,
+                    None => {
+                        return ApiResponse::error("backup configuration not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+                };
 
-                location.backup_configuration = Some(Box::new(backup_configuration));
+                location.backup_configuration = Some(BackupConfiguration::get_fetchable(
+                    backup_configuration.uuid,
+                ));
             }
         }
         if let Some(name) = data.name {

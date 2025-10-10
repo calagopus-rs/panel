@@ -64,18 +64,11 @@ mod get {
         let storage_url_retriever = state.storage.retrieve_urls().await;
 
         ApiResponse::json(Response {
-            servers: Pagination {
-                total: servers.total,
-                per_page: servers.per_page,
-                page: servers.page,
-                data: servers
-                    .data
-                    .into_iter()
-                    .map(|server| {
-                        server.into_admin_api_object(&state.database, &storage_url_retriever)
-                    })
-                    .collect(),
-            },
+            servers: servers
+                .try_async_map(|server| {
+                    server.into_admin_api_object(&state.database, &storage_url_retriever)
+                })
+                .await?,
         })
         .ok()
     }
@@ -87,6 +80,7 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
+            ByUuid,
             admin_activity::GetAdminActivityLogger,
             backup_configurations::BackupConfiguration,
             nest_egg::NestEgg,
@@ -162,7 +156,7 @@ mod post {
 
         permissions.has_admin_permission("servers.create")?;
 
-        let node = match Node::by_uuid(&state.database, data.node_uuid).await? {
+        let node = match Node::by_uuid_optional(&state.database, data.node_uuid).await? {
             Some(node) => node,
             None => {
                 return ApiResponse::error("node not found")
@@ -192,7 +186,9 @@ mod post {
         let backup_configuration = if let Some(backup_configuration_uuid) =
             data.backup_configuration_uuid
         {
-            match BackupConfiguration::by_uuid(&state.database, backup_configuration_uuid).await? {
+            match BackupConfiguration::by_uuid_optional(&state.database, backup_configuration_uuid)
+                .await?
+            {
                 Some(backup_configuration) => Some(backup_configuration),
                 None => {
                     return ApiResponse::error("backup configuration not found")
@@ -273,7 +269,8 @@ mod post {
 
         ApiResponse::json(Response {
             server: server
-                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await),
+                .into_admin_api_object(&state.database, &state.storage.retrieve_urls().await)
+                .await?,
         })
         .ok()
     }

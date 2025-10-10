@@ -44,6 +44,8 @@ mod get {
 
         let schedule_status = match server
             .node
+            .fetch(&state.database)
+            .await?
             .api_client(&state.database)
             .get_servers_server_schedules_schedule(server.uuid, schedule.uuid)
             .await
