@@ -12,9 +12,9 @@ shared = { path = "shared" }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["chrono"] }
 tracing-appender = "0.2.3"
-sentry = { version = "0.43.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
-sentry-tower = { version = "0.43.0", default-features = false, features = ["http", "axum-matched-path"] }
-sentry-anyhow = "0.43.0"
+sentry = { version = "0.45.0", default-features = false, features = ["rustls", "reqwest", "backtrace", "contexts", "debug-images", "panic"] }
+sentry-tower = { version = "0.45.0", default-features = false, features = ["http", "axum-matched-path"] }
+sentry-anyhow = "0.45.0"
 axum = "0.8.1"
 sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki", "postgres", "mysql", "chrono", "ipnetwork", "uuid"] }
 tokio = { version = "1.43.0", features = ["full"] }
