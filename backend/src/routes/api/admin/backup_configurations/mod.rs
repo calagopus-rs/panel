@@ -19,7 +19,8 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        locations: Pagination<shared::models::backup_configurations::AdminApiBackupConfiguration>,
+        backup_configurations:
+            Pagination<shared::models::backup_configurations::AdminApiBackupConfiguration>,
     }
 
     #[utoipa::path(get, path = "/", responses(
@@ -62,7 +63,7 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            locations: Pagination {
+            backup_configurations: Pagination {
                 total: backup_configurations.total,
                 per_page: backup_configurations.per_page,
                 page: backup_configurations.page,
