@@ -134,10 +134,12 @@ mod post {
             },
         )?;
 
+        transaction.commit().await?;
+
         let mut url = destination_node.url;
         url.set_path("/api/transfers");
 
-        match server
+        if let Err(err) = server
             .node
             .fetch(&state.database)
             .await?
@@ -155,17 +157,11 @@ mod post {
             )
             .await
         {
-            Ok(_) => {
-                transaction.commit().await?;
-            }
-            Err(err) => {
-                tracing::error!("failed to transfer server to node: {:#?}", err);
-                transaction.rollback().await?;
+            tracing::error!("failed to transfer server to node: {:#?}", err);
 
-                return ApiResponse::error("failed to transfer server to node")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
+            return ApiResponse::error("failed to transfer server to node")
+                .with_status(StatusCode::INTERNAL_SERVER_ERROR)
+                .ok();
         }
 
         activity_logger
