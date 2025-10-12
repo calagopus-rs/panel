@@ -1,7 +1,6 @@
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { locationConfigBackupDiskLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
@@ -17,11 +16,20 @@ export default ({ location }: { location: Location }) => {
         </NavLink>
       </TableData>
 
-      <TableData>{location.shortName}</TableData>
-
       <TableData>{location.name}</TableData>
 
-      <TableData>{locationConfigBackupDiskLabelMapping[location.backupDisk]}</TableData>
+      <TableData>
+        {location.backupConfiguration ? (
+          <NavLink
+            to={`/admin/backup-configurations/${location.backupConfiguration.uuid}`}
+            className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          >
+            <Code>{location.backupConfiguration.name}</Code>
+          </NavLink>
+        ) : (
+          '-'
+        )}
+      </TableData>
 
       <TableData>
         <Tooltip label={formatDateTime(location.created)}>{formatTimestamp(location.created)}</Tooltip>

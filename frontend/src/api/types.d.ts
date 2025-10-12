@@ -7,6 +7,18 @@ interface AdminActivity {
   created: Date;
 }
 
+interface UpdateBackupConfiguration {
+  name: string;
+  description: string | null;
+  backupDisk: BackupDisk;
+  backupConfigs: BackupDiskConfigurations;
+}
+
+interface BackupConfiguration extends UpdateBackupConfiguration {
+  uuid: string;
+  created: Date;
+}
+
 interface AdminUpdateDatabaseHost {
   name: string;
   username: string;
@@ -25,15 +37,14 @@ interface AdminDatabaseHost extends AdminUpdateDatabaseHost {
 }
 
 interface UpdateLocation {
-  shortName: string;
   name: string;
   description: string | null;
-  backupDisk: LocationConfigBackupDisk;
-  backupConfigs: LocationConfigBackupConfigs;
+  backupConfigurationUuid: string | null;
 }
 
 interface Location extends UpdateLocation {
   uuid: string;
+  backupConfiguration: BackupConfiguration | null;
   created: Date;
 }
 
@@ -733,9 +744,9 @@ interface Download {
   total: number;
 }
 
-type LocationConfigBackupDisk = 'local' | 's3' | 'ddup-bak' | 'btrfs' | 'zfs' | 'restic';
+type BackupDisk = 'local' | 's3' | 'ddup-bak' | 'btrfs' | 'zfs' | 'restic';
 
-interface LocationConfigBackupConfigsS3 {
+interface BackupDiskConfigurationS3 {
   accessKey: string;
   secretKey: string;
   bucket: string;
@@ -745,15 +756,15 @@ interface LocationConfigBackupConfigsS3 {
   partSize: number;
 }
 
-interface LocationConfigBackupConfigsRestic {
+interface BackupDiskConfigurationRestic {
   repository: string;
   retryLockSeconds: number;
   environment: Record<string, string>;
 }
 
-interface LocationConfigBackupConfigs {
-  s3: LocationConfigBackupConfigsS3 | null;
-  restic: LocationConfigBackupConfigsRestic | null;
+interface BackupDiskConfigurations {
+  s3: BackupDiskConfigurationS3 | null;
+  restic: BackupDiskConfigurationRestic | null;
 }
 
 type StorageDriverType = 'filesystem' | 's3';

@@ -38,6 +38,7 @@ import {
   faDatabase,
   faDesktop,
   faEarthAmerica,
+  faFileZipper,
   faFolder,
   faFolderOpen,
   faKey,
@@ -54,6 +55,7 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
+import AdminBackupConfigurations from '@/pages/admin/backupConfigurations/AdminBackupConfigurations';
 
 interface RouteDefinition {
   name: string | undefined;
@@ -174,6 +176,12 @@ const routes: Routes = {
       icon: faDatabase,
       path: '/database-hosts/*',
       element: AdminDatabaseHosts,
+    },
+    {
+      name: 'Backup Configs',
+      icon: faFileZipper,
+      path: '/backup-configurations/*',
+      element: AdminBackupConfigurations,
     },
     {
       name: 'Mounts',

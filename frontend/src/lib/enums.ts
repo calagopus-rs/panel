@@ -34,7 +34,7 @@ export const databaseTypeLabelMapping: Record<DatabaseType, string> = {
   postgres: 'PostgreSQL',
 };
 
-export const locationConfigBackupDiskLabelMapping: Record<LocationConfigBackupDisk, string> = {
+export const backupDiskLabelMapping: Record<BackupDisk, string> = {
   local: 'Local',
   s3: 'S3',
   'ddup-bak': 'Ddup-Bak',
