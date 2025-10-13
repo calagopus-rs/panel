@@ -100,6 +100,12 @@ pub enum ScheduleActionInner {
     Sleep {
         duration: u64,
     },
+    WaitForConsoleLine {
+        ignore_failure: bool,
+
+        contains: String,
+        timeout: u64,
+    },
     SendPower {
         ignore_failure: bool,
 

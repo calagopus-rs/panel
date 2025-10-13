@@ -493,6 +493,13 @@ interface ScheduleActionSleep {
   duration: number;
 }
 
+interface ScheduleActionWaitForConsoleLine {
+  type: 'wait_for_console_line';
+  ignoreFailure: boolean;
+  contains: string;
+  timeout: number;
+}
+
 interface ScheduleActionSendPower {
   type: 'send_power';
   ignoreFailure: boolean;
@@ -590,6 +597,7 @@ interface ScheduleActionUpdateStartupDockerImage {
 
 type ScheduleAction =
   | ScheduleActionSleep
+  | ScheduleActionWaitForConsoleLine
   | ScheduleActionSendPower
   | ScheduleActionSendCommand
   | ScheduleActionCreateBackup

@@ -26,6 +26,7 @@ import StepUpdateStartupCommand from '../steps/StepUpdateStartupCommand';
 import StepUpdateStartupDockerImage from '../steps/StepUpdateStartupDockerImage';
 import StepDecompressFile from '../steps/StepDecompressFile';
 import StepRenameFiles from '../steps/StepRenameFiles';
+import StepWaitForConsoleLine from '../steps/StepWaitForConsoleLine';
 
 type Props = ModalProps & {
   schedule: ServerSchedule;
@@ -106,6 +107,8 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
 
         {step.action.type === 'sleep' ? (
           <StepSleep action={step.action} setAction={(action) => setStep({ ...step, action })} />
+        ) : step.action.type === 'wait_for_console_line' ? (
+          <StepWaitForConsoleLine action={step.action} setAction={(action) => setStep({ ...step, action })} />
         ) : step.action.type === 'send_power' ? (
           <StepSendPower action={step.action} setAction={(action) => setStep({ ...step, action })} />
         ) : step.action.type === 'send_command' ? (

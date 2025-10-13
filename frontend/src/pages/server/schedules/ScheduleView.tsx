@@ -250,6 +250,20 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
     switch (action.type) {
       case 'sleep':
         return <Text size={'sm'}>Sleep for {action.duration}ms</Text>;
+      case 'wait_for_console_line':
+        return (
+          <Stack gap={'xs'}>
+            <Text size={'sm'}>
+              Line must contain: <Code>{action.contains}</Code>
+            </Text>
+            <Text size={'sm'}>
+              Timeout: <Code>{action.timeout}ms</Code>
+            </Text>
+            <Text size={'xs'} c={'dimmed'}>
+              Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
+            </Text>
+          </Stack>
+        );
       case 'send_power':
         return (
           <Stack gap={'xs'}>

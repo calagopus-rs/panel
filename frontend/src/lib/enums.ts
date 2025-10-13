@@ -120,6 +120,7 @@ export const serverPowerActionLabelMapping: Record<ServerPowerAction, string> = 
 
 export const scheduleStepLabelMapping: Record<ScheduleAction['type'], string> = {
   sleep: 'Sleep',
+  wait_for_console_line: 'Wait for Console Line',
   send_power: 'Send Power Signal',
   send_command: 'Send Command',
   create_backup: 'Create Backup',
@@ -139,6 +140,12 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
   sleep: {
     type: 'sleep',
     duration: 0,
+  },
+  wait_for_console_line: {
+    type: 'wait_for_console_line',
+    ignoreFailure: false,
+    contains: '',
+    timeout: 5000,
   },
   send_power: {
     type: 'send_power',
@@ -223,6 +230,7 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
 
 export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinition> = {
   sleep: faHourglass,
+  wait_for_console_line: faTerminal,
   send_power: faPowerOff,
   send_command: faTerminal,
   create_backup: faDatabase,

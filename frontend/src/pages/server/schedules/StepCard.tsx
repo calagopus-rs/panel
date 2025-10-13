@@ -73,6 +73,10 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
             <Text size={'sm'} c={'dimmed'}>
               {step.action.type === 'sleep' ? (
                 <span>Sleep for {formatMiliseconds(step.action.duration)}</span>
+              ) : step.action.type === 'wait_for_console_line' ? (
+                <span>
+                  Wait {formatMiliseconds(step.action.timeout)} for console line containing "{step.action.contains}"
+                </span>
               ) : step.action.type === 'send_power' ? (
                 <span>Do {step.action.action}</span>
               ) : step.action.type === 'send_command' ? (
