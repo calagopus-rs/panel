@@ -150,6 +150,7 @@ pub struct ExportedNestEgg {
     #[serde(default)]
     pub file_denylist: Vec<String>,
 
+    #[schema(inline)]
     pub variables: Vec<super::nest_egg_variable::ExportedNestEggVariable>,
 }
 
