@@ -46,6 +46,7 @@ pub struct ProcessConfiguration {
 
 #[derive(ToSchema, Serialize, Deserialize, Clone, Default)]
 pub struct NestEggConfigStartup {
+    #[serde(default)]
     pub done: Vec<String>,
     #[serde(default)]
     pub strip_ansi: bool,
@@ -123,7 +124,7 @@ pub struct ExportedNestEggConfigs {
     #[schema(inline)]
     #[serde(
         default,
-        deserialize_with = "crate::deserialize::deserialize_pre_stringified"
+        deserialize_with = "crate::deserialize::deserialize_nest_egg_config_stop"
     )]
     pub stop: NestEggConfigStop,
     #[schema(inline)]
