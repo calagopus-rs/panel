@@ -133,6 +133,7 @@ pub struct ExportedNestEgg {
     #[schema(max_length = 1024)]
     pub description: Option<String>,
 
+    #[schema(inline)]
     pub config: ExportedNestEggConfigs,
     #[schema(inline)]
     pub scripts: ExportedNestEggScripts,
