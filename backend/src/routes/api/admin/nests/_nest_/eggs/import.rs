@@ -9,7 +9,10 @@ mod post {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger,
-            nest_egg::{ExportedNestEgg, NestEgg},
+            nest_egg::{
+                ExportedNestEgg, NestEgg, ProcessConfigurationFile,
+                ProcessConfigurationFileReplacement,
+            },
             nest_egg_variable::NestEggVariable,
             user::GetPermissionManager,
         },
@@ -63,7 +66,23 @@ mod post {
             } else {
                 None
             },
-            data.config.files,
+            data.config
+                .files
+                .into_iter()
+                .map(|(file, config)| ProcessConfigurationFile {
+                    file,
+                    parser: config.parser,
+                    replace: config
+                        .find
+                        .into_iter()
+                        .map(|(r#match, value)| ProcessConfigurationFileReplacement {
+                            r#match,
+                            if_value: None,
+                            replace_with: value,
+                        })
+                        .collect(),
+                })
+                .collect(),
             data.config.startup,
             data.config.stop,
             data.scripts.installation,

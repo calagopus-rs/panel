@@ -99,16 +99,32 @@ pub struct NestEggConfigAllocations {
     pub user_self_assign: NestEggConfigAllocationsUserSelfAssign,
 }
 
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
+pub struct ExportedNestEggConfigsFilesFile {
+    #[schema(inline)]
+    pub parser: ServerConfigurationFileParser,
+    pub find: IndexMap<String, serde_json::Value>,
+}
+
 #[derive(ToSchema, Validate, Serialize, Deserialize)]
 pub struct ExportedNestEggConfigs {
     #[schema(inline)]
-    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
-    pub files: Vec<ProcessConfigurationFile>,
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_pre_stringified"
+    )]
+    pub files: IndexMap<String, ExportedNestEggConfigsFilesFile>,
     #[schema(inline)]
-    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_pre_stringified"
+    )]
     pub startup: NestEggConfigStartup,
     #[schema(inline)]
-    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_pre_stringified"
+    )]
     pub stop: NestEggConfigStop,
     #[schema(inline)]
     #[serde(default)]
@@ -419,7 +435,23 @@ impl NestEgg {
             name: self.name,
             description: self.description,
             config: ExportedNestEggConfigs {
-                files: self.config_files,
+                files: self
+                    .config_files
+                    .into_iter()
+                    .map(|file| {
+                        (
+                            file.file,
+                            ExportedNestEggConfigsFilesFile {
+                                parser: file.parser,
+                                find: file
+                                    .replace
+                                    .into_iter()
+                                    .map(|replace| (replace.r#match, replace.replace_with))
+                                    .collect(),
+                            },
+                        )
+                    })
+                    .collect(),
                 startup: self.config_startup,
                 stop: self.config_stop,
                 allocations: self.config_allocations,
