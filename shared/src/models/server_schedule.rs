@@ -3,6 +3,20 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
+use validator::Validate;
+
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
+pub struct ExportedServerSchedule {
+    #[validate(length(min = 1, max = 255))]
+    #[schema(min_length = 1, max_length = 255)]
+    pub name: String,
+    pub enabled: bool,
+
+    pub triggers: Vec<wings_api::ScheduleTrigger>,
+    pub condition: wings_api::ScheduleCondition,
+
+    pub steps: Vec<super::server_schedule_step::ExportedServerScheduleStep>,
+}
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerSchedule {
@@ -192,6 +206,26 @@ impl ServerSchedule {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub async fn into_exported(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<ExportedServerSchedule, sqlx::Error> {
+        Ok(ExportedServerSchedule {
+            name: self.name,
+            enabled: self.enabled,
+            triggers: self.triggers,
+            condition: self.condition,
+            steps: super::server_schedule_step::ServerScheduleStep::all_by_schedule_uuid(
+                database, self.uuid,
+            )
+            .await?
+            .into_iter()
+            .map(|step| step.into_exported())
+            .collect(),
+        })
     }
 
     #[inline]

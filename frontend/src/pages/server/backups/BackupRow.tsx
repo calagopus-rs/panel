@@ -37,7 +37,7 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
     downloadBackup(server.uuid, backup.uuid, archiveFormat)
       .then(({ url }) => {
         addToast('Download started.', 'success');
-        window.open(url);
+        window.open(url, '_blank');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');

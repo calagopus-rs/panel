@@ -1,5 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSchedule from '@/api/server/schedules/deleteSchedule';
+import exportSchedule from '@/api/server/schedules/exportSchedule';
 import triggerSchedule from '@/api/server/schedules/triggerSchedule';
 import Badge from '@/elements/Badge';
 import Code from '@/elements/Code';
@@ -10,7 +11,7 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faEye, faPencil, faPlay, faPlayCircle, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -28,6 +29,27 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
         addToast('Schedule deleted.', 'success');
         setOpenModal(null);
         removeSchedule(schedule);
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
+  const doExport = () => {
+    exportSchedule(server.uuid, schedule.uuid)
+      .then((data) => {
+        addToast('Schedule exported.', 'success');
+
+        const jsonData = JSON.stringify(data, undefined, 2);
+        const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileURL;
+        downloadLink.download = `schedule-${schedule.uuid}.json`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        URL.revokeObjectURL(fileURL);
+        downloadLink.remove();
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -55,11 +77,6 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
       <ContextMenu
         items={[
           {
-            icon: faEye,
-            label: 'View',
-            onClick: () => navigate(navigateUrl),
-          },
-          {
             icon: faPencil,
             label: 'Edit',
             onClick: () => navigate(`${navigateUrl}/edit`),
@@ -82,6 +99,11 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
                 color: 'gray',
               },
             ],
+          },
+          {
+            icon: faShareAlt,
+            label: 'Export',
+            onClick: doExport,
           },
           {
             icon: faTrash,
@@ -116,6 +138,10 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
 
             <TableData>
               <Badge color={schedule.enabled ? 'green' : 'red'}>{schedule.enabled ? 'Active' : 'Inactive'}</Badge>
+            </TableData>
+
+            <TableData>
+              <Tooltip label={formatDateTime(schedule.created)}>{formatTimestamp(schedule.created)}</Tooltip>
             </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />

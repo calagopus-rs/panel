@@ -1,6 +1,5 @@
-use crate::routes::api::admin::nests::_nest_::GetNest;
-
 use super::State;
+use crate::routes::api::admin::nests::_nest_::GetNest;
 use axum::{
     extract::{Path, Request},
     http::StatusCode,
@@ -14,6 +13,7 @@ use shared::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod export;
 mod mounts;
 mod variables;
 
@@ -377,6 +377,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(patch::route))
         .nest("/variables", variables::router(state))
         .nest("/mounts", mounts::router(state))
+        .nest("/export", export::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

@@ -3,6 +3,30 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
+use validator::Validate;
+
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
+pub struct ExportedNestEggVariable {
+    #[validate(length(min = 1, max = 255))]
+    #[schema(min_length = 1, max_length = 255)]
+    pub name: String,
+    #[validate(length(max = 1024))]
+    #[schema(max_length = 1024)]
+    pub description: Option<String>,
+    #[serde(default)]
+    pub order: i16,
+
+    #[validate(length(min = 1, max = 255))]
+    #[schema(min_length = 1, max_length = 255)]
+    pub env_variable: String,
+    #[validate(length(max = 1024))]
+    #[schema(max_length = 1024)]
+    pub default_value: Option<String>,
+
+    pub user_viewable: bool,
+    pub user_editable: bool,
+    pub rules: Option<String>,
+}
 
 #[derive(Serialize, Deserialize)]
 pub struct NestEggVariable {
@@ -170,6 +194,20 @@ impl NestEggVariable {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub fn into_exported(self) -> ExportedNestEggVariable {
+        ExportedNestEggVariable {
+            name: self.name,
+            description: self.description,
+            order: self.order,
+            env_variable: self.env_variable,
+            default_value: self.default_value,
+            user_viewable: self.user_viewable,
+            user_editable: self.user_editable,
+            rules: Some(self.rules.join("|")),
+        }
     }
 
     #[inline]

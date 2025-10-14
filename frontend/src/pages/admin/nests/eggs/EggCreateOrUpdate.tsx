@@ -16,6 +16,7 @@ import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
+import exportEgg from '@/api/admin/eggs/exportEgg';
 
 export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: AdminNestEgg }) => {
   const params = useParams<'eggId'>();
@@ -81,6 +82,29 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
           load(false, setLoading);
         });
     }
+  };
+
+  const doExport = () => {
+    load(true, setLoading);
+    exportEgg(contextNest.uuid, contextEgg.uuid)
+      .then((data) => {
+        addToast('Egg exported.', 'success');
+
+        const jsonData = JSON.stringify(data, undefined, 2);
+        const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
+        const downloadLink = document.createElement('a');
+        downloadLink.href = fileURL;
+        downloadLink.download = `egg-${contextEgg.uuid}.json`;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        URL.revokeObjectURL(fileURL);
+        downloadLink.remove();
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => load(false, setLoading));
   };
 
   const doDelete = async () => {
@@ -276,6 +300,11 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
         <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
         </Button>
+        {params.eggId && (
+          <Button variant={'outline'} onClick={doExport} loading={loading}>
+            Export
+          </Button>
+        )}
         {params.eggId && (
           <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete

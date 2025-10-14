@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
+    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -13,8 +14,6 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {

@@ -4,80 +4,18 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod post {
     use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::http::StatusCode;
-    use indexmap::IndexMap;
-    use serde::{Deserialize, Serialize};
+    use serde::Serialize;
     use shared::{
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger,
-            nest_egg::{NestEgg, NestEggConfigScript},
+            nest_egg::{ExportedNestEgg, NestEgg},
             nest_egg_variable::NestEggVariable,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
-    use std::collections::HashMap;
     use utoipa::ToSchema;
-    use validator::Validate;
-
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct PayloadVariable {
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
-        name: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        description: Option<String>,
-
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
-        env_variable: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        default_value: Option<String>,
-
-        user_viewable: bool,
-        user_editable: bool,
-        rules: Option<String>,
-    }
-
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct PayloadScripts {
-        #[schema(inline)]
-        installation: NestEggConfigScript,
-    }
-
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct Payload {
-        #[validate(length(min = 2, max = 255))]
-        #[schema(min_length = 2, max_length = 255)]
-        author: String,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
-        name: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
-        description: Option<String>,
-
-        config: HashMap<String, String>,
-        #[schema(inline)]
-        scripts: PayloadScripts,
-
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
-        startup: String,
-        #[serde(default)]
-        force_outgoing_ip: bool,
-
-        #[serde(default)]
-        features: Vec<String>,
-        docker_images: IndexMap<String, String>,
-        #[serde(default)]
-        file_denylist: Vec<String>,
-
-        #[schema(inline)]
-        variables: Vec<PayloadVariable>,
-    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
@@ -95,13 +33,13 @@ mod post {
             description = "The nest ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
-    ), request_body = inline(Payload))]
+    ), request_body = ExportedNestEgg)]
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
         nest: GetNest,
         activity_logger: GetAdminActivityLogger,
-        axum::Json(data): axum::Json<Payload>,
+        axum::Json(data): axum::Json<ExportedNestEgg>,
     ) -> ApiResponseResult {
         if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -110,16 +48,6 @@ mod post {
         }
 
         permissions.has_admin_permission("eggs.create")?;
-
-        let config_files =
-            serde_json::from_str(data.config.get("files").unwrap_or(&"[]".to_string()))
-                .unwrap_or_default();
-        let config_startup =
-            serde_json::from_str(data.config.get("startup").unwrap_or(&"{}".to_string()))
-                .unwrap_or_default();
-        let config_stop =
-            serde_json::from_str(data.config.get("stop").unwrap_or(&"{}".to_string()))
-                .unwrap_or_default();
 
         let egg = match NestEgg::create(
             &state.database,
@@ -135,13 +63,11 @@ mod post {
             } else {
                 None
             },
-            config_files,
-            config_startup,
-            config_stop,
+            data.config.files,
+            data.config.startup,
+            data.config.stop,
             data.scripts.installation,
-            shared::models::nest_egg::NestEggConfigAllocations {
-                user_self_assign: Default::default(),
-            },
+            data.config.allocations,
             &data.startup,
             data.force_outgoing_ip,
             &data.features,
@@ -181,7 +107,7 @@ mod post {
                 egg.uuid,
                 &variable.name,
                 variable.description.as_deref(),
-                0,
+                variable.order,
                 &variable.env_variable,
                 variable.default_value.as_deref(),
                 variable.user_viewable,

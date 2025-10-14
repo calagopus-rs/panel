@@ -93,7 +93,7 @@ pub struct ScheduleAction {
     pub inner: ScheduleActionInner,
 }
 
-#[derive(ToSchema, Deserialize, Serialize)]
+#[derive(ToSchema, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "snake_case", tag = "type")]
 #[schema(rename_all = "snake_case")]
 pub enum ScheduleActionInner {

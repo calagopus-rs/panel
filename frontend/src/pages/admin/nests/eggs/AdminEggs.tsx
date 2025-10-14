@@ -81,7 +81,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
             <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
-            Upload
+            Import
           </Button>
           <Button
             onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)}
@@ -104,7 +104,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Author', 'Description', 'Servers']} pagination={eggs} onPageSelect={setPage}>
+        <Table columns={['ID', 'Name', 'Author', 'Description', 'Created']} pagination={eggs} onPageSelect={setPage}>
           {eggs.data.map((egg) => (
             <EggRow key={egg.uuid} nest={nest} egg={egg} />
           ))}

@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _schedule_;
+mod import;
 
 mod get {
     use axum::{extract::Query, http::StatusCode};
@@ -199,5 +200,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(post::route))
         .nest("/{schedule}", _schedule_::router(state))
+        .nest("/import", import::router(state))
         .with_state(state.clone())
 }

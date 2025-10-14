@@ -12,6 +12,7 @@ import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Divider, Group, ModalProps, Stack, Text } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import { load } from '@/lib/debounce';
 import StepSleep from '../steps/StepSleep';
 import StepSendPower from '../steps/StepSendPower';
 import StepSendCommand from '../steps/StepSendCommand';
@@ -39,6 +40,8 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
+  const [loading, setLoading] = useState(false);
+
   const [step, setStep] = useState<ScheduleStep>(
     propStep ||
       ({
@@ -59,6 +62,8 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
   }, [propStep, opened]);
 
   const doCreateOrUpdate = () => {
+    load(true, setLoading);
+
     if (propStep) {
       updateScheduleStep(server.uuid, schedule.uuid, propStep.uuid, step)
         .then(() => {
@@ -68,7 +73,8 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
-        });
+        })
+        .finally(() => load(false, setLoading));
     } else {
       createScheduleStep(server.uuid, schedule.uuid, step)
         .then(() => {
@@ -78,7 +84,8 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
-        });
+        })
+        .finally(() => load(false, setLoading));
     }
   };
 
@@ -143,7 +150,7 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
           <Button variant={'outline'} onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={doCreateOrUpdate} leftSection={<FontAwesomeIcon icon={faSave} />}>
+          <Button onClick={doCreateOrUpdate} leftSection={<FontAwesomeIcon icon={faSave} />} loading={loading}>
             {propStep ? 'Update Step' : 'Create Step'}
           </Button>
         </Group>

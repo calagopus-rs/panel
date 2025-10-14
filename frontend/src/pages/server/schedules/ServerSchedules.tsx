@@ -1,6 +1,6 @@
 import getSchedules from '@/api/server/schedules/getSchedules';
 import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
 import { useSearchParams } from 'react-router';
 import { load } from '@/lib/debounce';
@@ -8,20 +8,26 @@ import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import ScheduleCreateModal from './modals/ScheduleCreateModal';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import { useToast } from '@/providers/ToastProvider';
+import { httpErrorToHuman } from '@/api/axios';
+import importSchedule from '@/api/server/schedules/importSchedule';
 
 export default () => {
+  const { addToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { server, schedules, setSchedules } = useServerStore();
+  const { server, schedules, setSchedules, addSchedule } = useServerStore();
 
   const [loading, setLoading] = useState(schedules.data.length === 0);
   const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState<'create'>(null);
   const [page, setPage] = useState(1);
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setPage(Number(searchParams.get('page')) || 1);
@@ -39,6 +45,27 @@ export default () => {
     });
   }, [page, search]);
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const jsonData = JSON.parse(text);
+
+      importSchedule(server.uuid, jsonData)
+        .then((data) => {
+          addSchedule(data);
+          addToast('Schedule imported.', 'success');
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        });
+    } catch (err) {
+      addToast(httpErrorToHuman(err), 'error');
+    }
+  };
+
   return (
     <>
       <ScheduleCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
@@ -49,9 +76,21 @@ export default () => {
         </Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
+            <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+            Import
+          </Button>
           <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>
+
+          <input
+            type={'file'}
+            accept={'application/json'}
+            ref={fileInputRef}
+            className={'hidden'}
+            onChange={handleFileUpload}
+          />
         </Group>
       </Group>
 
@@ -60,7 +99,7 @@ export default () => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['Name', 'Last Run', 'Last Failure', 'Status', '']}
+            columns={['Name', 'Last Run', 'Last Failure', 'Status', 'Created', '']}
             pagination={schedules}
             onPageSelect={setPage}
           >

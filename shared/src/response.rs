@@ -3,6 +3,7 @@ use axum::response::IntoResponse;
 
 pub type ApiResponseResult = Result<ApiResponse, ApiResponse>;
 
+#[derive(Debug)]
 pub struct ApiResponse {
     pub body: axum::body::Body,
     pub status: axum::http::StatusCode,

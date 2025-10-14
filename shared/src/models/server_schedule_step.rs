@@ -4,6 +4,12 @@ use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
 
+#[derive(ToSchema, Serialize, Deserialize)]
+pub struct ExportedServerScheduleStep {
+    pub action: wings_api::ScheduleActionInner,
+    pub order: i16,
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct ServerScheduleStep {
     pub uuid: uuid::Uuid,
@@ -140,6 +146,14 @@ impl ServerScheduleStep {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub fn into_exported(self) -> ExportedServerScheduleStep {
+        ExportedServerScheduleStep {
+            action: self.action,
+            order: self.order,
+        }
     }
 
     #[inline]

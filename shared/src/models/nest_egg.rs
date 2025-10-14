@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
 use utoipa::ToSchema;
+use validator::Validate;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
@@ -91,11 +92,64 @@ impl NestEggConfigAllocationsUserSelfAssign {
     }
 }
 
-#[derive(ToSchema, Serialize, Deserialize, Clone)]
+#[derive(ToSchema, Serialize, Deserialize, Default, Clone)]
 pub struct NestEggConfigAllocations {
     #[schema(inline)]
     #[serde(default)]
     pub user_self_assign: NestEggConfigAllocationsUserSelfAssign,
+}
+
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
+pub struct ExportedNestEggConfigs {
+    #[schema(inline)]
+    #[serde(default)]
+    pub files: Vec<ProcessConfigurationFile>,
+    #[schema(inline)]
+    #[serde(default)]
+    pub startup: NestEggConfigStartup,
+    #[schema(inline)]
+    #[serde(default)]
+    pub stop: NestEggConfigStop,
+    #[schema(inline)]
+    #[serde(default)]
+    pub allocations: NestEggConfigAllocations,
+}
+
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
+pub struct ExportedNestEggScripts {
+    #[schema(inline)]
+    pub installation: NestEggConfigScript,
+}
+
+#[derive(ToSchema, Validate, Serialize, Deserialize)]
+pub struct ExportedNestEgg {
+    #[validate(length(min = 2, max = 255))]
+    #[schema(min_length = 2, max_length = 255)]
+    pub author: String,
+    #[validate(length(min = 3, max = 255))]
+    #[schema(min_length = 3, max_length = 255)]
+    pub name: String,
+    #[validate(length(max = 1024))]
+    #[schema(max_length = 1024)]
+    pub description: Option<String>,
+
+    pub config: ExportedNestEggConfigs,
+    #[schema(inline)]
+    pub scripts: ExportedNestEggScripts,
+
+    #[validate(length(min = 1, max = 255))]
+    #[schema(min_length = 1, max_length = 255)]
+    pub startup: String,
+    #[serde(default)]
+    pub force_outgoing_ip: bool,
+
+    #[serde(default)]
+    pub features: Vec<String>,
+    pub docker_images: IndexMap<String, String>,
+    #[serde(default)]
+    pub file_denylist: Vec<String>,
+
+    pub variables: Vec<super::nest_egg_variable::ExportedNestEggVariable>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -351,6 +405,39 @@ impl NestEgg {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub async fn into_exported(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<ExportedNestEgg, sqlx::Error> {
+        Ok(ExportedNestEgg {
+            author: self.author,
+            name: self.name,
+            description: self.description,
+            config: ExportedNestEggConfigs {
+                files: self.config_files,
+                startup: self.config_startup,
+                stop: self.config_stop,
+                allocations: self.config_allocations,
+            },
+            scripts: ExportedNestEggScripts {
+                installation: self.config_script,
+            },
+            startup: self.startup,
+            force_outgoing_ip: self.force_outgoing_ip,
+            features: self.features,
+            docker_images: self.docker_images,
+            file_denylist: self.file_denylist,
+            variables: super::nest_egg_variable::NestEggVariable::all_by_egg_uuid(
+                database, self.uuid,
+            )
+            .await?
+            .into_iter()
+            .map(|variable| variable.into_exported())
+            .collect(),
+        })
     }
 
     #[inline]
