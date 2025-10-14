@@ -102,13 +102,13 @@ pub struct NestEggConfigAllocations {
 #[derive(ToSchema, Validate, Serialize, Deserialize)]
 pub struct ExportedNestEggConfigs {
     #[schema(inline)]
-    #[serde(default)]
+    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
     pub files: Vec<ProcessConfigurationFile>,
     #[schema(inline)]
-    #[serde(default)]
+    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
     pub startup: NestEggConfigStartup,
     #[schema(inline)]
-    #[serde(default)]
+    #[serde(default, deserialize_with = "crate::deserialize::deserialize_pre_stringified")]
     pub stop: NestEggConfigStop,
     #[schema(inline)]
     #[serde(default)]
