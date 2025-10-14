@@ -35,8 +35,16 @@ where
     let value: crate::models::nest_egg::NestEggConfigStop = match value {
         serde_json::Value::String(value) => serde_json::from_str(&value).unwrap_or_else(|_| {
             crate::models::nest_egg::NestEggConfigStop {
-                r#type: "command".into(),
-                value: Some(value),
+                r#type: if value == "^C" || value == "^^C" {
+                    "signal".into()
+                } else {
+                    "command".into()
+                },
+                value: Some(match value.as_str() {
+                    "^C" => "SIGINT".into(),
+                    "^^C" => "SIGKILL".into(),
+                    _ => value,
+                }),
             }
         }),
         value => serde_json::from_value(value).map_err(|err| serde::de::Error::custom(err))?,
