@@ -1,4 +1,4 @@
-import getDatabaseHosts from '@/api/admin/databaseHosts/getDatabaseHosts';
+import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import createLocationDatabaseHost from '@/api/admin/locations/database-hosts/createLocationDatabaseHost';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';

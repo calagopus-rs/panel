@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
-import getDatabaseHosts from '@/api/admin/databaseHosts/getDatabaseHosts';
+import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import DatabaseHostRow from './DatabaseHostRow';
 import { Group, TextInput, Title } from '@mantine/core';
 import Table from '@/elements/Table';

@@ -12,7 +12,7 @@ import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
 import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
-import getBackupConfigurations from '@/api/admin/backupConfigurations/getBackupConfigurations';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 
 const BackupConfigurationsContainer = () => {
   const navigate = useNavigate();

@@ -14,7 +14,7 @@ import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getBackupConfigurations from '@/api/admin/backupConfigurations/getBackupConfigurations';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const params = useParams<'id'>();
