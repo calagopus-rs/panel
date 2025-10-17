@@ -18,6 +18,7 @@ import { load } from '@/lib/debounce';
 import { useNavigate } from 'react-router';
 import Modal from '@/elements/modals/Modal';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
+import NumberInput from '@/elements/input/NumberInput';
 
 export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
   const { addToast } = useToast();
@@ -32,6 +33,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const [deleteSourceBackups, setDeleteSourceBackups] = useState(false);
   const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_zstd');
   const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('good_compression');
+  const [multiplexChannels, setMultiplexChannels] = useState(0);
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
@@ -60,6 +62,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       deleteSourceBackups,
       archiveFormat,
       compressionLevel,
+      multiplexChannels,
     })
       .then(() => {
         addToast('Server transfer started.', 'success');
@@ -108,7 +111,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
 
           <Select
             label={'Primary Allocation'}
-            placeholder={'host:port'}
+            placeholder={'Primary Allocation'}
             value={selectedPrimaryAllocationUuid}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedPrimaryAllocationUuid(value)}
@@ -125,8 +128,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
           />
 
           <MultiSelect
-            label={'Primary Allocation'}
-            placeholder={'host:port'}
+            label={'Additional Allocations'}
+            placeholder={'Additional Allocations'}
             value={selectedAllocationUuids}
             disabled={!selectedNodeUuid}
             onChange={(value) => setSelectedAllocationUuids(value)}
@@ -180,6 +183,15 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
               value,
               label,
             }))}
+          />
+
+          <NumberInput
+            withAsterisk
+            label={'Multiplex Channels'}
+            placeholder={'Multiplex Channels'}
+            min={0}
+            value={multiplexChannels}
+            onChange={(value) => setMultiplexChannels(Number(value) || 0)}
           />
 
           <Button color={'blue'} onClick={() => setOpenModal('confirm')} loading={loading} disabled={!selectedNodeUuid}>

@@ -9,6 +9,7 @@ interface Data {
   deleteSourceBackups: boolean;
   archiveFormat: ArchiveFormat;
   compressionLevel: CompressionLevel;
+  multiplexChannels: number;
 }
 
 export default async (serverUuid: string, data: Data): Promise<void> => {

@@ -26,6 +26,7 @@ mod post {
         delete_source_backups: bool,
         archive_format: wings_api::TransferArchiveFormat,
         compression_level: Option<wings_api::CompressionLevel>,
+        multiplex_channels: u64,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -153,6 +154,7 @@ mod post {
                     delete_backups: data.delete_source_backups,
                     archive_format: data.archive_format,
                     compression_level: data.compression_level,
+                    multiplex_streams: data.multiplex_channels,
                 },
             )
             .await

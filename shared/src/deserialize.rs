@@ -17,9 +17,9 @@ where
     let value: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
     let value: T = match value {
         serde_json::Value::String(value) => {
-            serde_json::from_str(&value).map_err(|err| serde::de::Error::custom(err))?
+            serde_json::from_str(&value).map_err(serde::de::Error::custom)?
         }
-        value => serde_json::from_value(value).map_err(|err| serde::de::Error::custom(err))?,
+        value => serde_json::from_value(value).map_err(serde::de::Error::custom)?,
     };
 
     Ok(value)
@@ -47,7 +47,7 @@ where
                 }),
             }
         }),
-        value => serde_json::from_value(value).map_err(|err| serde::de::Error::custom(err))?,
+        value => serde_json::from_value(value).map_err(serde::de::Error::custom)?,
     };
 
     Ok(value)

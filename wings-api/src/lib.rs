@@ -1123,6 +1123,8 @@ pub mod servers_server_transfer {
                 pub backups: Vec<uuid::Uuid>,
                 #[schema(inline)]
                 pub delete_backups: bool,
+                #[schema(inline)]
+                pub multiplex_streams: u64,
             }
         }
 
