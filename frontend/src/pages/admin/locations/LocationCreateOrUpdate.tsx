@@ -15,6 +15,7 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import { NIL as uuidNil } from 'uuid';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const params = useParams<'id'>();
@@ -37,7 +38,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
     setLocation({
       name: contextLocation?.name ?? '',
       description: contextLocation?.description ?? '',
-      backupConfigurationUuid: contextLocation?.backupConfigurationUuid ?? null,
+      backupConfigurationUuid: contextLocation?.backupConfiguration?.uuid ?? uuidNil,
     });
   }, [contextLocation]);
 
@@ -110,8 +111,8 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
           <Select
             allowDeselect
             label={'Backup Configuration'}
-            value={contextLocation?.backupConfiguration?.uuid ?? null}
-            onChange={(value) => setLocation({ ...location, backupConfigurationUuid: value })}
+            value={location.backupConfigurationUuid ?? uuidNil}
+            onChange={(value) => setLocation({ ...location, backupConfigurationUuid: value ?? uuidNil })}
             data={backupConfigurations.items.map((nest) => ({
               label: nest.name,
               value: nest.uuid,
