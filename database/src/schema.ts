@@ -248,13 +248,11 @@ export const locations = pgTable('locations', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 	backupConfigurationUuid: uuid('backup_configuration_uuid').references(() => backupConfigurations.uuid, { onDelete: 'set null' }),
 
-	shortName: varchar('short_name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locations) => [
-	uniqueIndex('locations_short_idx').on(locations.shortName),
 	uniqueIndex('locations_name_idx').on(locations.name)
 ])
 

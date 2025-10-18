@@ -162,6 +162,13 @@
       "when": 1759673418206,
       "tag": "0022_dazzling_prodigy",
       "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1760793935424,
+      "tag": "0023_flippant_wallop",
+      "breakpoints": false
     }
   ]
 }
