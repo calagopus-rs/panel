@@ -307,8 +307,7 @@ export function isArchiveType(mimetype: string) {
     'application/x-bzip2', // .tar.bz2, .bz2
     'application/gzip', // .tar.gz, .gz
     'application/x-gzip',
-    'application/x-lzip', // .tar.lz4, .lz4 (not sure if this mime type is correct)
-    'application/x-sz', // .tar.sz, .sz (not sure if this mime type is correct)
+    'application/x-lz4', // .tar.lz4, .lz4
     'application/x-xz', // .tar.xz, .xz
     'application/zstd', // .tar.zst, .zst
     'application/zip', // .zip
@@ -317,7 +316,13 @@ export function isArchiveType(mimetype: string) {
 }
 
 export function isEditableFile(mimetype: string) {
-  const matches = ['application/jar', 'application/octet-stream', 'inode/directory', /^image\/(?!svg\+xml)/];
+  const matches = [
+    'application/jar',
+    'application/octet-stream',
+    'inode/directory',
+    'inode/symlink',
+    /^image\/(?!svg\+xml)/,
+  ];
 
   if (isArchiveType(mimetype)) return false;
 

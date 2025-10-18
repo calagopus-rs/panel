@@ -31,8 +31,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const [selectedAllocationUuids, setSelectedAllocationUuids] = useState<string[]>([]);
   const [selectedBackupUuids, setSelectedBackupsUuids] = useState<string[]>([]);
   const [deleteSourceBackups, setDeleteSourceBackups] = useState(false);
-  const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_zstd');
-  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('good_compression');
+  const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_lz4');
+  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('best_speed');
   const [multiplexChannels, setMultiplexChannels] = useState(0);
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
@@ -160,6 +160,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
 
           <Switch
             label={'Delete source backups'}
+            description={'Deletes the transferred backups on the source node once transfer finishes'}
             checked={deleteSourceBackups}
             onChange={(e) => setDeleteSourceBackups(e.target.checked)}
           />
@@ -189,6 +190,9 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             withAsterisk
             label={'Multiplex Channels'}
             placeholder={'Multiplex Channels'}
+            description={
+              'Add additional HTTP connections (and therefore also threads) for transfering split archives, total streams is 1 + multiplex channels'
+            }
             min={0}
             value={multiplexChannels}
             onChange={(value) => setMultiplexChannels(Number(value) || 0)}
