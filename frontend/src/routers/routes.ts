@@ -1,6 +1,6 @@
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
 import AdminHome from '@/pages/admin/AdminHome';
-import AdminDatabaseHosts from '@/pages/admin/database-hosts/AdminDatabaseHosts';
+import AdminDatabaseHosts from '@/pages/admin/databaseHosts/AdminDatabaseHosts';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import AdminNests from '@/pages/admin/nests/AdminNests';
