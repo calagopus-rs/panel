@@ -110,7 +110,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
           <Select
             allowDeselect
             label={'Backup Configuration'}
-            value={contextLocation.backupConfiguration.uuid ?? null}
+            value={contextLocation?.backupConfiguration?.uuid ?? null}
             onChange={(value) => setLocation({ ...location, backupConfigurationUuid: value })}
             data={backupConfigurations.items.map((nest) => ({
               label: nest.name,
