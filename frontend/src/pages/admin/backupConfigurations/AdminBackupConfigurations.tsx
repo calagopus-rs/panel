@@ -13,6 +13,7 @@ import { load } from '@/lib/debounce';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
 import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
 
 const BackupConfigurationsContainer = () => {
   const navigate = useNavigate();
@@ -80,7 +81,7 @@ export default () => {
     <Routes>
       <Route path={'/'} element={<BackupConfigurationsContainer />} />
       <Route path={'/new'} element={<BackupConfigurationCreateOrUpdate />} />
-      <Route path={'/:id'} element={<BackupConfigurationCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<BackupConfigurationView />} />
     </Routes>
   );
 };

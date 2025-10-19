@@ -3,21 +3,13 @@ import { useNavigate, useParams } from 'react-router';
 import { useToast } from '@/providers/ToastProvider';
 import { Group, Title, Divider, Stack } from '@mantine/core';
 import { httpErrorToHuman } from '@/api/axios';
-import getDatabaseHost from '@/api/admin/database-hosts/getDatabaseHost';
-import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
-import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
-import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost';
-import testDatabaseHost from '@/api/admin/database-hosts/testDatabaseHost';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
-import NumberInput from '@/elements/input/NumberInput';
-import Switch from '@/elements/input/Switch';
 import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { backupDiskLabelMapping, databaseTypeLabelMapping } from '@/lib/enums';
-import getBackupConfiguration from '@/api/admin/backup-configurations/getBackupConfiguration';
+import { backupDiskLabelMapping } from '@/lib/enums';
 import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
 import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
 import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration';
@@ -25,7 +17,7 @@ import TextArea from '@/elements/input/TextArea';
 import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
 import BackupRestic from '@/pages/admin/locations/forms/BackupRestic';
 
-export default () => {
+export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: BackupConfiguration }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -40,16 +32,13 @@ export default () => {
   } as UpdateBackupConfiguration);
 
   useEffect(() => {
-    if (params.id) {
-      getBackupConfiguration(params.id)
-        .then((bc) => {
-          setBackupConfiguration(bc);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.id]);
+    setBackupConfiguration({
+      name: contextBackupConfiguration?.name ?? '',
+      description: contextBackupConfiguration?.description ?? '',
+      backupDisk: contextBackupConfiguration?.backupDisk ?? 'local',
+      backupConfigs: contextBackupConfiguration?.backupConfigs ?? { s3: null, restic: null },
+    });
+  }, [contextBackupConfiguration]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
