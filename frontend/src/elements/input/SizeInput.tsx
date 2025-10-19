@@ -6,7 +6,7 @@ export default ({
   setState,
   onChange,
   ...rest
-}: TextInputProps & {
+}: Omit<TextInputProps, 'onChange'> & {
   setState: (value: string) => void;
   onChange: (value: number) => void;
 }) => {

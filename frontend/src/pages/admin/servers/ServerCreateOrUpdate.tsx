@@ -284,7 +284,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'CPU Limit (%)'}
                   placeholder={'100'}
                   value={server.limits.cpu || 100}
-                  min={1}
+                  min={0}
                   onChange={(value) => setServer({ ...server, limits: { ...server.limits, cpu: Number(value) } })}
                 />
                 <SizeInput
@@ -292,7 +292,9 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Memory + Unit (e.g. 1 GiB)'}
                   value={memoryInput}
                   setState={setMemoryInput}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, memory: value } })}
+                  onChange={(value) =>
+                    setServer({ ...server, limits: { ...server.limits, memory: value / 1024 / 1024 } })
+                  }
                 />
               </Group>
 
@@ -302,27 +304,25 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Disk Space + Unit (e.g. 10 GiB)'}
                   value={diskInput}
                   setState={setDiskInput}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, disk: value } })}
-                />
-                <NumberInput
-                  withAsterisk
-                  label={'Swap (MB)'}
-                  placeholder={'0'}
-                  value={server.limits.swap || 0}
-                  min={-1}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, swap: Number(value) } })}
+                  onChange={(value) =>
+                    setServer({ ...server, limits: { ...server.limits, disk: value / 1024 / 1024 } })
+                  }
                 />
                 <SizeInput
                   withAsterisk
                   label={'Swap + Unit (e.g. 500 MiB)'}
                   value={swapInput}
                   setState={setSwapInput}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, swap: value } })}
+                  onChange={(value) =>
+                    setServer({ ...server, limits: { ...server.limits, swap: value / 1024 / 1024 } })
+                  }
                 />
                 <NumberInput
                   label={'IO Weight'}
                   value={server.limits.ioWeight || null}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, ioWeight: Number(value) } })}
+                  onChange={(value) =>
+                    setServer({ ...server, limits: { ...server.limits, ioWeight: Number(value) || null } })
+                  }
                 />
               </Group>
             </Stack>
@@ -359,8 +359,8 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
               </Group>
 
               <TextArea
-                label='Startup Command'
-                placeholder='npm start'
+                label={'Startup Command'}
+                placeholder={'npm start'}
                 required
                 rows={2}
                 value={server.startup || ''}
@@ -370,14 +370,14 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
               {!contextServer && (
                 <Group grow>
                   <Switch
-                    label='Start on Completion'
-                    description='Start server after installation completes'
+                    label={'Start on Completion'}
+                    description={'Start server after installation completes'}
                     checked={server.startOnCompletion}
                     onChange={(event) => setServer({ ...server, startOnCompletion: event.target.checked })}
                   />
                   <Switch
-                    label='Skip Scripts'
-                    description='Skip running install scripts'
+                    label={'Skip Scripts'}
+                    description={'Skip running install scripts'}
                     checked={server.skipScripts}
                     onChange={(event) => setServer({ ...server, skipScripts: event.target.checked })}
                   />
@@ -398,7 +398,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Allocations'}
                   placeholder={'1'}
                   min={0}
-                  value={server.featureLimits.allocations || 1}
+                  value={server.featureLimits.allocations || 5}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, allocations: Number(value) } })
                   }
@@ -408,7 +408,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Databases'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.databases || 0}
+                  value={server.featureLimits.databases || 5}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, databases: Number(value) } })
                   }
@@ -418,7 +418,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Backups'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.backups || 0}
+                  value={server.featureLimits.backups || 5}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, backups: Number(value) } })
                   }
@@ -428,7 +428,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Schedules'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.schedules || 0}
+                  value={server.featureLimits.schedules || 10}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, schedules: Number(value) } })
                   }
@@ -445,7 +445,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 <Group grow>
                   <Select
                     label={'Primary Allocation'}
-                    placeholder={'host:port'}
+                    placeholder={'Primary Allocation'}
                     value={server.allocationUuid}
                     disabled={!server.nodeUuid}
                     onChange={(value) => setServer({ ...server, allocationUuid: value })}
@@ -461,8 +461,8 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     allowDeselect
                   />
                   <MultiSelect
-                    label={'Allocations'}
-                    placeholder={'host:port'}
+                    label={'Additional Allocations'}
+                    placeholder={'Additional Allocations'}
                     value={server.allocationUuids}
                     disabled={!server.nodeUuid}
                     onChange={(value) => setServer({ ...server, allocationUuids: value })}

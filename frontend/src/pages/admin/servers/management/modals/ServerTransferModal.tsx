@@ -166,6 +166,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
           />
 
           <Select
+            withAsterisk
             label={'Archive Format'}
             value={archiveFormat}
             onChange={(value) => setArchiveFormat(value as ArchiveFormat)}
@@ -178,6 +179,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
           />
 
           <Select
+            withAsterisk
             label={'Compression Level'}
             value={compressionLevel}
             onChange={(value) => setCompressionLevel(value as CompressionLevel)}

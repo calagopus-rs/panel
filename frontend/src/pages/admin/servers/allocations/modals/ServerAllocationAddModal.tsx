@@ -60,7 +60,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
         <MultiSelect
           withAsterisk
           label={'Allocations'}
-          placeholder={'host:port'}
+          placeholder={'Allocations'}
           value={selectedAllocationUuids}
           onChange={(value) => setSelectedAllocationUuids(value)}
           data={availableAllocations.items.map((alloc) => ({

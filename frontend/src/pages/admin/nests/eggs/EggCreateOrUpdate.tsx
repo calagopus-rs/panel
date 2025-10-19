@@ -171,7 +171,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
         />
 
         <Switch
-          label={'Strip ansi from startup messages'}
+          label={'Strip ANSI from startup messages'}
           checked={egg.configStartup?.stripAnsi || false}
           onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
         />
@@ -181,25 +181,26 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Script Container'}
-            placeholder={'Script Container'}
+            label={'Install Script Container'}
+            placeholder={'Install Script Container'}
             value={egg.configScript?.container || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
           />
           <TextInput
             withAsterisk
-            label={'Script Entrypoint'}
-            placeholder={'Script Entrypoint'}
+            label={'Install Script Entrypoint'}
+            placeholder={'Install Script Entrypoint'}
             value={egg.configScript?.entrypoint || ''}
             onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, entrypoint: e.target.value } })}
           />
         </Group>
 
-        <TextInput
+        <TextArea
           withAsterisk
-          label={'Script Content'}
-          placeholder={'Script Content'}
+          label={'Install Script Content'}
+          placeholder={'Install Script Content'}
           value={egg.configScript?.content || ''}
+          rows={6}
           onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, content: e.target.value } })}
         />
 
