@@ -150,6 +150,7 @@ mod post {
 
         let backup_configuration = if let Some(backup_configuration_uuid) =
             data.backup_configuration_uuid
+            && !backup_configuration_uuid.is_nil()
         {
             match BackupConfiguration::by_uuid_optional(&state.database, backup_configuration_uuid)
                 .await?

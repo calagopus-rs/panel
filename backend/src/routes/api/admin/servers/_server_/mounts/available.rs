@@ -55,7 +55,7 @@ mod get {
                 .ok();
         }
 
-        permissions.has_admin_permission("server.mounts")?;
+        permissions.has_admin_permission("servers.mounts")?;
 
         let mounts = ServerMount::available_by_server_with_pagination(
             &state.database,

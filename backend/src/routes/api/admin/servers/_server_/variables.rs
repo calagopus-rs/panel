@@ -100,7 +100,7 @@ mod put {
                 .ok();
         }
 
-        permissions.has_admin_permission("server.variables")?;
+        permissions.has_admin_permission("servers.variables")?;
 
         let variables = ServerVariable::all_by_server_uuid_egg_uuid(
             &state.database,

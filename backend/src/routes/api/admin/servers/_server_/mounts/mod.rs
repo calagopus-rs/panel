@@ -58,7 +58,7 @@ mod get {
                 .ok();
         }
 
-        permissions.has_admin_permission("server.mounts")?;
+        permissions.has_admin_permission("servers.mounts")?;
 
         let mounts = ServerMount::by_server_uuid_with_pagination(
             &state.database,

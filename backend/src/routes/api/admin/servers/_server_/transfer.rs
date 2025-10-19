@@ -50,7 +50,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        permissions.has_admin_permission("server.transfer")?;
+        permissions.has_admin_permission("servers.transfer")?;
 
         if server.destination_node.is_some() {
             return ApiResponse::error("server is already being transferred")

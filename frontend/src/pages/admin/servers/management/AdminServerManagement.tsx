@@ -6,15 +6,17 @@ import Button from '@/elements/Button';
 import ServerDeleteModal from '@/pages/admin/servers/management/modals/ServerDeleteModal';
 import ServerSuspendModal from '@/pages/admin/servers/management/modals/ServerSuspendModal';
 import ServerUnsuspendModal from '@/pages/admin/servers/management/modals/ServerUnsuspendModal';
+import ServerClearStateModal from './modals/ServerClearStateModal';
 
 export default ({ server }: { server: AdminServer }) => {
-  const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'clear-state' | 'delete'>(null);
 
   return (
     <>
       <ServerTransferModal server={server} opened={openModal === 'transfer'} onClose={() => setOpenModal(null)} />
       <ServerSuspendModal server={server} opened={openModal === 'suspend'} onClose={() => setOpenModal(null)} />
       <ServerUnsuspendModal server={server} opened={openModal === 'unsuspend'} onClose={() => setOpenModal(null)} />
+      <ServerClearStateModal server={server} opened={openModal === 'clear-state'} onClose={() => setOpenModal(null)} />
       <ServerDeleteModal server={server} opened={openModal === 'delete'} onClose={() => setOpenModal(null)} />
 
       <Grid>
@@ -57,6 +59,17 @@ export default ({ server }: { server: AdminServer }) => {
               </Stack>
             </Card>
           )}
+        </Grid.Col>
+        <Grid.Col span={3}>
+          <Card>
+            <Stack gap={'xs'}>
+              <Title order={2}>Clear State</Title>
+              <Text size={'sm'}>This will clear the server state known by the panel.</Text>
+              <Button onClick={() => setOpenModal('clear-state')} variant={'outline'} size={'xs'} color={'red'}>
+                Clear State
+              </Button>
+            </Stack>
+          </Card>
         </Grid.Col>
         <Grid.Col span={3}>
           <Card>

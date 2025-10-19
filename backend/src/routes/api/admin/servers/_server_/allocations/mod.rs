@@ -128,7 +128,7 @@ mod post {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        permissions.has_admin_permission("server.allocations")?;
+        permissions.has_admin_permission("servers.allocations")?;
 
         let node_allocation = match NodeAllocation::by_node_uuid_uuid(
             &state.database,
