@@ -25,6 +25,8 @@ import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import SizeInput from '@/elements/input/SizeInput';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { NIL as uuidNil } from 'uuid';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -70,6 +72,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     nodeUuid: '',
     ownerUuid: '',
     eggUuid: '',
+    backupConfigurationUuid: uuidNil,
     allocationUuid: null,
     allocationUuids: [],
   });
@@ -89,6 +92,9 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
     deps: [server.nodeUuid],
   });
+  const backupConfigurations = useSearchableResource<BackupConfiguration>({
+    fetcher: (search) => getBackupConfigurations(1, search),
+  });
 
   useEffect(() => {
     if (contextServer) {
@@ -105,6 +111,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
         nodeUuid: contextServer.node.uuid,
         ownerUuid: contextServer.owner.uuid,
         eggUuid: contextServer.egg.uuid,
+        backupConfigurationUuid: contextServer.backupConfiguration?.uuid ?? uuidNil,
       });
     }
     setMemoryInput(
@@ -267,6 +274,22 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   searchable
                   searchValue={eggs.search}
                   onSearchChange={eggs.setSearch}
+                />
+              </Group>
+
+              <Group grow>
+                <Select
+                  allowDeselect
+                  label={'Backup Configuration'}
+                  value={server.backupConfigurationUuid ?? uuidNil}
+                  onChange={(value) => setServer({ ...server, backupConfigurationUuid: value ?? uuidNil })}
+                  data={backupConfigurations.items.map((nest) => ({
+                    label: nest.name,
+                    value: nest.uuid,
+                  }))}
+                  searchable
+                  searchValue={backupConfigurations.search}
+                  onSearchChange={backupConfigurations.setSearch}
                 />
               </Group>
             </Stack>

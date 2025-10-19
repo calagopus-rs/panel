@@ -56,7 +56,7 @@ mod get {
 
         permissions.has_admin_permission("nodes.read")?;
 
-        let nodes = Node::by_location_uuid_with_pagination(
+        let nodes = Node::by_backup_configuration_uuid_with_pagination(
             &state.database,
             backup_configuration.uuid,
             params.page,

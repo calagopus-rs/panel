@@ -130,7 +130,6 @@ interface NestEggVariable {
 }
 
 interface UpdateNode {
-  locationUuid: string;
   name: string;
   public: boolean;
   description: string | null;
@@ -141,11 +140,14 @@ interface UpdateNode {
   maintenanceMessage: string | null;
   memory: number;
   disk: number;
+  locationUuid: string;
+  backupConfigurationUuid: string | null;
 }
 
 interface Node {
   uuid: string;
   location: Location;
+  backupConfiguration: BackupConfiguration | null;
   name: string;
   public: boolean;
   description: string | null;
@@ -190,6 +192,7 @@ interface UpdateAdminServer {
   nodeUuid: string;
   ownerUuid: string;
   eggUuid: string;
+  backupConfigurationUuid: string | null;
   allocationUuid: string | null;
   allocationUuids: string[];
 }
@@ -202,6 +205,7 @@ interface AdminServer {
   node: Node;
   owner: User;
   egg: AdminNestEgg;
+  backupConfiguration: BackupConfiguration | null;
   nest: Nest;
   status: ServerStatus | null;
   suspended: boolean;

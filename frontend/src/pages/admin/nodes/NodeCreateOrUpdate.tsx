@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
@@ -18,6 +18,8 @@ import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import { NIL as uuidNil } from 'uuid';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const params = useParams<'id'>();
@@ -28,6 +30,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [node, setNode] = useState<UpdateNode>({
     locationUuid: '',
+    backupConfigurationUuid: uuidNil,
     name: '',
     public: false,
     description: null,
@@ -43,11 +46,15 @@ export default ({ contextNode }: { contextNode?: Node }) => {
   const locations = useSearchableResource<Location>({
     fetcher: (search) => getLocations(1, search),
   });
+  const backupConfigurations = useSearchableResource<BackupConfiguration>({
+    fetcher: (search) => getBackupConfigurations(1, search),
+  });
 
   useEffect(() => {
     if (contextNode) {
       setNode({
         locationUuid: contextNode.location.uuid,
+        backupConfigurationUuid: contextNode.backupConfiguration?.uuid ?? uuidNil,
         name: contextNode.name,
         public: contextNode.public,
         description: contextNode.description,
@@ -216,12 +223,18 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         </Group>
 
         <Group grow align={'start'}>
-          <TextArea
-            label={'Description'}
-            placeholder={'Description'}
-            value={node.description || ''}
-            rows={3}
-            onChange={(e) => setNode({ ...node, description: e.target.value || null })}
+          <Select
+            allowDeselect
+            label={'Backup Configuration'}
+            value={node.backupConfigurationUuid ?? uuidNil}
+            onChange={(value) => setNode({ ...node, backupConfigurationUuid: value ?? uuidNil })}
+            data={backupConfigurations.items.map((nest) => ({
+              label: nest.name,
+              value: nest.uuid,
+            }))}
+            searchable
+            searchValue={backupConfigurations.search}
+            onSearchChange={backupConfigurations.setSearch}
           />
           <TextInput
             label={'Maintenance Message'}
@@ -230,6 +243,14 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             onChange={(e) => setNode({ ...node, maintenanceMessage: e.target.value || null })}
           />
         </Group>
+
+        <TextArea
+          label={'Description'}
+          placeholder={'Description'}
+          value={node.description || ''}
+          rows={3}
+          onChange={(e) => setNode({ ...node, description: e.target.value || null })}
+        />
 
         <Switch
           label={'Public'}

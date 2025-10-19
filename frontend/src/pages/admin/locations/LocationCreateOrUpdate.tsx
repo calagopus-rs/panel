@@ -27,7 +27,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   const [location, setLocation] = useState<UpdateLocation>({
     name: '',
     description: '',
-    backupConfigurationUuid: null,
+    backupConfigurationUuid: uuidNil,
   } as UpdateLocation);
 
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
@@ -35,11 +35,13 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   });
 
   useEffect(() => {
-    setLocation({
-      name: contextLocation?.name ?? '',
-      description: contextLocation?.description ?? '',
-      backupConfigurationUuid: contextLocation?.backupConfiguration?.uuid ?? uuidNil,
-    });
+    if (contextLocation) {
+      setLocation({
+        name: contextLocation.name,
+        description: contextLocation.description,
+        backupConfigurationUuid: contextLocation.backupConfiguration?.uuid ?? uuidNil,
+      });
+    }
   }, [contextLocation]);
 
   const doCreateOrUpdate = () => {
