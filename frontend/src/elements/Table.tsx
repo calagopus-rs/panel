@@ -68,7 +68,9 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
             <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
             &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
           </p>
-          {isFirstPage && isLastPage ? null : <MantinePagination total={totalPages} withEdges onChange={setPage} />}
+          {isFirstPage && isLastPage ? null : (
+            <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
+          )}
         </Group>
       </Table.Td>
     </Table.Tr>
