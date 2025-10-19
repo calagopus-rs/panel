@@ -8,6 +8,24 @@ where
     Ok(value.filter(|s| !s.is_empty()))
 }
 
+pub fn deserialize_array_or_not<'de, D, T: DeserializeOwned>(
+    deserializer: D,
+) -> Result<Vec<T>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer).unwrap_or_default();
+    let value: Vec<T> = match value {
+        serde_json::Value::Array(values) => {
+            serde_json::from_value(serde_json::Value::Array(values))
+                .map_err(serde::de::Error::custom)?
+        }
+        value => vec![serde_json::from_value(value).map_err(serde::de::Error::custom)?],
+    };
+
+    Ok(value)
+}
+
 pub fn deserialize_pre_stringified<'de, D, T: DeserializeOwned>(
     deserializer: D,
 ) -> Result<T, D::Error>

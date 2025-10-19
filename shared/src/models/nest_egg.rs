@@ -46,7 +46,10 @@ pub struct ProcessConfiguration {
 
 #[derive(ToSchema, Serialize, Deserialize, Clone, Default)]
 pub struct NestEggConfigStartup {
-    #[serde(default)]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_array_or_not"
+    )]
     pub done: Vec<String>,
     #[serde(default)]
     pub strip_ansi: bool,
