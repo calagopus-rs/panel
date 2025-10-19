@@ -12,6 +12,7 @@ use shared::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod databases;
 mod test;
 
 pub type GetDatabaseHost = shared::extract::ConsumingExtension<DatabaseHost>;
@@ -301,6 +302,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/test", test::router(state))
+        .nest("/databases", databases::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

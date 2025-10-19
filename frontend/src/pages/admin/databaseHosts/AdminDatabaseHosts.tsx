@@ -10,6 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import DatabaseHostView from './DatabaseHostView';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default () => {
     <Routes>
       <Route path={'/'} element={<DatabaseHostsContainer />} />
       <Route path={'/new'} element={<DatabaseHostCreateOrUpdate />} />
-      <Route path={'/:id'} element={<DatabaseHostCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<DatabaseHostView />} />
     </Routes>
   );
 };

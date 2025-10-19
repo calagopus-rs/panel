@@ -409,31 +409,6 @@ impl Server {
         }
     }
 
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
-    }
-
     pub async fn by_node_uuid_uuid(
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
@@ -1310,6 +1285,34 @@ impl Server {
             timezone: self.timezone,
             created: self.created.and_utc(),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for Server {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM servers
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+            WHERE servers.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

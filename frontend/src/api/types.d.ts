@@ -329,12 +329,25 @@ interface ServerBackupWithProgress extends ServerBackup {
   };
 }
 
+interface AdminServerDatabase {
+  uuid: string;
+  server: AdminServer;
+  name: string;
+  isLocked: boolean;
+  username: string;
+  password: string;
+  host: string;
+  port: number;
+  type: DatabaseType;
+  created: Date;
+}
+
 interface ServerDatabase {
   uuid: string;
   name: string;
   isLocked: boolean;
   username: string;
-  password: string;
+  password: string | null;
   host: string;
   port: number;
   type: DatabaseType;

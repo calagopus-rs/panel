@@ -1,5 +1,11 @@
 use super::BaseModel;
-use crate::models::database_host::{DatabaseTransaction, DatabaseType};
+use crate::{
+    models::{
+        ByUuid, Fetchable,
+        database_host::{DatabaseTransaction, DatabaseType},
+    },
+    storage::StorageUrlRetriever,
+};
 use rand::distr::SampleString;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -14,6 +20,7 @@ pub static DB_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerDatabase {
     pub uuid: uuid::Uuid,
+    pub server: Fetchable<super::server::Server>,
     pub database_host: super::database_host::DatabaseHost,
 
     pub name: String,
@@ -32,6 +39,10 @@ impl BaseModel for ServerDatabase {
 
         let mut columns = BTreeMap::from([
             ("server_databases.uuid", format!("{prefix}uuid")),
+            (
+                "server_databases.server_uuid",
+                format!("{prefix}server_uuid"),
+            ),
             ("server_databases.name", format!("{prefix}name")),
             ("server_databases.locked", format!("{prefix}locked")),
             ("server_databases.username", format!("{prefix}username")),
@@ -52,6 +63,9 @@ impl BaseModel for ServerDatabase {
 
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
+            server: super::server::Server::get_fetchable(
+                row.get(format!("{prefix}server_uuid").as_str()),
+            ),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
             name: row.get(format!("{prefix}name").as_str()),
             locked: row.get(format!("{prefix}locked").as_str()),
@@ -218,6 +232,41 @@ impl ServerDatabase {
         .await?;
 
         Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_database_host_uuid_with_pagination(
+        database: &crate::database::Database,
+        database_host_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_databases
+            JOIN database_hosts ON database_hosts.uuid = server_databases.database_host_uuid
+            WHERE server_databases.database_host_uuid = $1 AND ($2 IS NULL OR server_databases.name ILIKE '%' || $2 || '%')
+            ORDER BY server_databases.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(database_host_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -405,6 +454,37 @@ impl ServerDatabase {
     }
 
     #[inline]
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> Result<AdminApiServerDatabase, sqlx::Error> {
+        Ok(AdminApiServerDatabase {
+            uuid: self.uuid,
+            server: self
+                .server
+                .fetch(database)
+                .await?
+                .into_admin_api_object(database, storage_url_retriever)
+                .await?,
+            r#type: self.database_host.r#type,
+            host: self
+                .database_host
+                .public_host
+                .unwrap_or(self.database_host.host),
+            port: self
+                .database_host
+                .public_port
+                .unwrap_or(self.database_host.port),
+            name: self.name,
+            is_locked: self.locked,
+            username: self.username,
+            password: database.decrypt(&self.password).unwrap(),
+            created: self.created.and_utc(),
+        })
+    }
+
+    #[inline]
     pub fn into_api_object(
         self,
         database: &crate::database::Database,
@@ -432,6 +512,25 @@ impl ServerDatabase {
             created: self.created.and_utc(),
         }
     }
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "AdminServerDatabase")]
+pub struct AdminApiServerDatabase {
+    pub uuid: uuid::Uuid,
+    pub server: super::server::AdminApiServer,
+
+    pub r#type: DatabaseType,
+    pub host: String,
+    pub port: i32,
+
+    pub name: String,
+    pub is_locked: bool,
+
+    pub username: String,
+    pub password: String,
+
+    pub created: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(ToSchema, Serialize)]

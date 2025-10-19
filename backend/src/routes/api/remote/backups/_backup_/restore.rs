@@ -35,8 +35,8 @@ mod post {
         backup: GetBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let server_uuid = match backup.server_uuid {
-            Some(id) => id,
+        let server_uuid = match &backup.server {
+            Some(server) => server.uuid,
             None => {
                 return ApiResponse::error("server uuid not found")
                     .with_status(StatusCode::NOT_FOUND)

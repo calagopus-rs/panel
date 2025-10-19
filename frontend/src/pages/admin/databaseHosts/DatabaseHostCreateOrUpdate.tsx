@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router';
 import { useToast } from '@/providers/ToastProvider';
 import { Group, Title, Divider, Stack } from '@mantine/core';
 import { httpErrorToHuman } from '@/api/axios';
-import getDatabaseHost from '@/api/admin/database-hosts/getDatabaseHost';
 import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
 import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
 import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost';
@@ -18,7 +17,7 @@ import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 
-export default () => {
+export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHost }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
@@ -38,16 +37,18 @@ export default () => {
   } as AdminUpdateDatabaseHost);
 
   useEffect(() => {
-    if (params.id) {
-      getDatabaseHost(params.id)
-        .then((databaseHost) => {
-          setDatabaseHost(databaseHost);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.id]);
+    setDatabaseHost({
+      name: contextDatabaseHost?.name ?? '',
+      username: contextDatabaseHost?.username ?? '',
+      password: null,
+      host: contextDatabaseHost?.host ?? '',
+      port: contextDatabaseHost?.port ?? 3306,
+      public: contextDatabaseHost?.public ?? false,
+      publicHost: contextDatabaseHost?.publicHost ?? null,
+      publicPort: contextDatabaseHost?.publicPort ?? null,
+      type: contextDatabaseHost?.type ?? 'mysql',
+    });
+  }, [contextDatabaseHost]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);

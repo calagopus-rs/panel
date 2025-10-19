@@ -48,6 +48,7 @@ mod get {
     use shared::{
         ApiError, GetState,
         models::{
+            ByUuid,
             node::GetNode,
             server::Server,
             server_backup::{BackupDisk, ServerBackup},
@@ -120,10 +121,10 @@ mod get {
         };
         s3_configuration.decrypt(&state.database);
 
-        let server = match Server::by_uuid(
+        let server = match Server::by_uuid_optional(
             &state.database,
-            match backup.0.server_uuid {
-                Some(id) => id,
+            match backup.0.server {
+                Some(server) => server.uuid,
                 None => {
                     return ApiResponse::error("server uuid not found")
                         .with_status(StatusCode::EXPECTATION_FAILED)
@@ -222,6 +223,7 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
+            ByUuid,
             node::GetNode,
             server::Server,
             server_activity::ServerActivity,
@@ -300,10 +302,10 @@ mod post {
             };
             s3_configuration.decrypt(&state.database);
 
-            let server = match Server::by_uuid(
+            let server = match Server::by_uuid_optional(
                 &state.database,
-                match backup.0.server_uuid {
-                    Some(id) => id,
+                match &backup.0.server {
+                    Some(server) => server.uuid,
                     None => {
                         return ApiResponse::error("server uuid not found")
                             .with_status(StatusCode::EXPECTATION_FAILED)
@@ -418,10 +420,10 @@ mod post {
             .await?;
         }
 
-        if let Some(server_uuid) = backup.0.server_uuid
+        if let Some(server) = &backup.0.server
             && let Err(err) = ServerActivity::log(
                 &state.database,
-                server_uuid,
+                server.uuid,
                 None,
                 None,
                 if data.successful {

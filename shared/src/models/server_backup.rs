@@ -35,8 +35,8 @@ impl BackupDisk {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct ServerBackup {
     pub uuid: uuid::Uuid,
-    pub server_uuid: Option<uuid::Uuid>,
-    pub node_uuid: uuid::Uuid,
+    pub server: Option<Fetchable<super::server::Server>>,
+    pub node: Fetchable<super::node::Node>,
     pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
     pub name: String,
@@ -99,13 +99,16 @@ impl BaseModel for ServerBackup {
 
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
-            server_uuid: row.get(format!("{prefix}server_uuid").as_str()),
+            server: super::server::Server::get_fetchable_from_row(
+                row,
+                format!("{prefix}server_uuid"),
+            ),
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
                     format!("{prefix}backup_configuration_uuid"),
                 ),
-            node_uuid: row.get(format!("{prefix}node_uuid").as_str()),
+            node: super::node::Node::get_fetchable(row.get(format!("{prefix}node_uuid").as_str())),
             name: row.get(format!("{prefix}name").as_str()),
             successful: row.get(format!("{prefix}successful").as_str()),
             browsable: row.get(format!("{prefix}browsable").as_str()),
@@ -470,10 +473,10 @@ impl ServerBackup {
         database: &crate::database::Database,
         server: &super::server::Server,
     ) -> Result<(), anyhow::Error> {
-        let node = if self.node_uuid == server.node.uuid {
+        let node = if self.node.uuid == server.node.uuid {
             server.node.fetch(database).await
         } else {
-            super::node::Node::by_uuid(database, self.node_uuid).await
+            super::node::Node::by_uuid(database, self.node.uuid).await
         }?;
 
         let backup_configuration = self

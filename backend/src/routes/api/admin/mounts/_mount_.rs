@@ -21,7 +21,7 @@ mod get {
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "mount" = i32,
+            "mount" = uuid::Uuid,
             description = "The mount ID",
             example = "1",
         ),

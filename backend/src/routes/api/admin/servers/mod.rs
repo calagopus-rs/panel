@@ -223,9 +223,7 @@ mod post {
         )
         .await
         {
-            Ok(server_uuid) => Server::by_uuid(&state.database, server_uuid)
-                .await?
-                .ok_or_else(|| anyhow::anyhow!("server not found after creation"))?,
+            Ok(server_uuid) => Server::by_uuid(&state.database, server_uuid).await?,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("server with allocation(s) already exists")
                     .with_status(StatusCode::CONFLICT)
