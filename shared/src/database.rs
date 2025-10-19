@@ -28,7 +28,7 @@ impl Database {
 
                 None => PgPoolOptions::new()
                     .min_connections(10)
-                    .max_connections(20)
+                    .max_connections(50)
                     .test_before_acquire(false)
                     .connect(&env.database_url)
                     .await
@@ -38,7 +38,7 @@ impl Database {
                 Some(
                     PgPoolOptions::new()
                         .min_connections(10)
-                        .max_connections(20)
+                        .max_connections(50)
                         .test_before_acquire(false)
                         .connect(&env.database_url)
                         .await

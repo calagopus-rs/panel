@@ -110,7 +110,7 @@ impl<T: Serialize> Pagination<T> {
         let mut results = Vec::new();
         results.reserve_exact(self.data.len());
         let mut result_stream =
-            futures_util::stream::iter(self.data.into_iter().map(mapper)).buffered(10);
+            futures_util::stream::iter(self.data.into_iter().map(mapper)).buffered(25);
 
         while let Some(result) = result_stream.next().await {
             results.push(result?);
