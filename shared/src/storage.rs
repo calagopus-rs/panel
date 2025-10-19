@@ -61,7 +61,12 @@ impl Storage {
         StorageUrlRetriever::new(settings)
     }
 
-    pub async fn remove(&self, path: &str) -> Result<(), anyhow::Error> {
+    pub async fn remove(&self, path: Option<&str>) -> Result<(), anyhow::Error> {
+        let path = match path {
+            Some(path) => path,
+            None => return Ok(()),
+        };
+
         if path.is_empty() || path.contains("..") || path.starts_with("/") {
             return Err(anyhow::anyhow!("invalid path"));
         }

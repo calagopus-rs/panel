@@ -20,7 +20,7 @@ export function bytesToString(bytes: number, decimals = 2): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const value = Number((bytes / Math.pow(k, i)).toFixed(decimals));
 
-  return `${value} ${['Bytes', 'KiB', 'MiB', 'GiB', 'TiB'][i]}`;
+  return `${value} ${['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'][i]}`;
 }
 
 export function parseSize(size: string): number {

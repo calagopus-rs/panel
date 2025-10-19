@@ -1,6 +1,13 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faExternalLink, faInfoCircle, faNetworkWired, faPenRuler } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCog,
+  faExternalLink,
+  faFileLines,
+  faInfoCircle,
+  faNetworkWired,
+  faPenRuler,
+} from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -12,6 +19,7 @@ import AdminNodeMounts from './mounts/AdminNodeMounts';
 import AdminNodeStatistics from './statistics/AdminNodeStatistics';
 import AdminNodeAllocations from './allocations/AdminNodeAllocations';
 import AdminNodeConfiguration from './configuration/AdminNodeConfiguration';
+import AdminNodeLogs from './logs/AdminNodeLogs';
 
 export default () => {
   const params = useParams<'id'>();
@@ -54,6 +62,11 @@ export default () => {
             link: `/admin/nodes/${params.id}/statistics`,
           },
           {
+            name: 'Logs',
+            icon: faFileLines,
+            link: `/admin/nodes/${params.id}/logs`,
+          },
+          {
             name: 'Allocations',
             icon: faNetworkWired,
             link: `/admin/nodes/${params.id}/allocations`,
@@ -70,6 +83,7 @@ export default () => {
         <Route path={'/'} element={<NodeCreateOrUpdate contextNode={node} />} />
         <Route path={'/configuration'} element={<AdminNodeConfiguration node={node} />} />
         <Route path={'/statistics'} element={<AdminNodeStatistics node={node} />} />
+        <Route path={'/logs'} element={<AdminNodeLogs node={node} />} />
         <Route path={'/allocations'} element={<AdminNodeAllocations node={node} />} />
         <Route path={'/mounts'} element={<AdminNodeMounts node={node} />} />
       </Routes>

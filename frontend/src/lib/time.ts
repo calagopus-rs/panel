@@ -13,7 +13,7 @@ export function formatMiliseconds(uptime: number) {
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-export function formatDateTime(timestamp) {
+export function formatDateTime(timestamp: string | number | Date) {
   return new Date(timestamp).toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
@@ -23,7 +23,7 @@ export function formatDateTime(timestamp) {
   });
 }
 
-export function formatTimestamp(timestamp) {
+export function formatTimestamp(timestamp: string | number | Date) {
   const now = new Date();
   const target = new Date(timestamp);
   const diffMs = target.getTime() - now.getTime();
@@ -41,7 +41,7 @@ export function formatTimestamp(timestamp) {
     return formatDateTime(timestamp);
   }
 
-  const format = (value, unit) =>
+  const format = (value: number, unit: string) =>
     `${isFuture ? 'in' : ''} ${value} ${unit}${value !== 1 ? 's' : ''}${isFuture ? '' : ' ago'}`;
 
   if (diffSeconds < 60) return isFuture ? 'in a few seconds' : 'a few seconds ago';

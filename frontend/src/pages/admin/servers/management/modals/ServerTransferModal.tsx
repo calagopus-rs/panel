@@ -32,7 +32,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const [selectedBackupUuids, setSelectedBackupsUuids] = useState<string[]>([]);
   const [deleteSourceBackups, setDeleteSourceBackups] = useState(false);
   const [archiveFormat, setArchiveFormat] = useState<ArchiveFormat>('tar_lz4');
-  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('best_speed');
+  const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('good_compression');
   const [multiplexChannels, setMultiplexChannels] = useState(0);
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
@@ -67,7 +67,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       .then(() => {
         addToast('Server transfer started.', 'success');
         closeAll();
-        navigate('/admin/servers');
+        navigate(`/server/${server.uuidShort}`);
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -169,10 +169,12 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             label={'Archive Format'}
             value={archiveFormat}
             onChange={(value) => setArchiveFormat(value as ArchiveFormat)}
-            data={Object.entries(archiveFormatLabelMapping).map(([value, label]) => ({
-              value,
-              label,
-            }))}
+            data={Object.entries(archiveFormatLabelMapping)
+              .filter(([value]) => !['zip', 'seven_zip'].includes(value))
+              .map(([value, label]) => ({
+                value,
+                label,
+              }))}
           />
 
           <Select

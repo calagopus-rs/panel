@@ -68,7 +68,7 @@ mod put {
 
         tokio::try_join!(
             state.storage.store(&avatar_path, &data, "image/webp"),
-            state.storage.remove(user.avatar.as_deref().unwrap_or("")),
+            state.storage.remove(user.avatar.as_deref()),
         )?;
 
         sqlx::query!(
@@ -129,7 +129,7 @@ mod delete {
 
         permissions.has_user_permission("account.avatar")?;
 
-        state.storage.remove(avatar).await?;
+        state.storage.remove(Some(avatar)).await?;
 
         sqlx::query!(
             "UPDATE users

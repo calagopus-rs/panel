@@ -147,10 +147,7 @@ mod delete {
                 .ok();
         }
 
-        state
-            .storage
-            .remove(user.avatar.as_deref().unwrap_or(""))
-            .await?;
+        state.storage.remove(user.avatar.as_deref()).await?;
         User::delete_by_uuid(&state.database, user.uuid).await?;
 
         activity_logger
