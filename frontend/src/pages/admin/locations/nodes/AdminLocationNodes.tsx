@@ -46,7 +46,7 @@ export default ({ location }: { location: Location }) => {
         <Spinner.Centered />
       ) : (
         <Table
-          columns={['', 'Id', 'Name', 'Location', 'URL', 'Servers', 'Created']}
+          columns={['', 'Id', 'Name', 'Location', 'URL', 'Created']}
           pagination={locationNodes}
           onPageSelect={setPage}
         >
