@@ -1,11 +1,7 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLocationDatabaseHosts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,36 +11,17 @@ import Table from '@/elements/Table';
 import LocationDatabaseHostRow from './LocationDatabaseHostRow';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import LocationDatabaseHostCreateModal from './modals/LocationDatabaseHostCreateModal';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ location }: { location: Location }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { locationDatabaseHosts, setLocationDatabaseHosts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
-  const [loading, setLoading] = useState(locationDatabaseHosts.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getLocationDatabaseHosts(location.uuid, page, search)
-      .then((data) => {
-        setLocationDatabaseHosts(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getLocationDatabaseHosts(location.uuid, page, search),
+    setStoreData: setLocationDatabaseHosts,
+  });
 
   return (
     <>

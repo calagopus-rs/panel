@@ -1,10 +1,8 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { Ref, useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { Ref, useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -18,9 +16,9 @@ import Code from '@/elements/Code';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
 import TextInput from '@/elements/input/TextInput';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ node }: { node: Node }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
   const {
     nodeAllocations,
@@ -32,19 +30,11 @@ export default ({ node }: { node: Node }) => {
 
   const [openModal, setOpenModal] = useState<'create' | 'delete'>(null);
   const [selectedNodeAllocationsPrevious, setSelectedNodeAllocationsPrevious] = useState(selectedNodeAllocations);
-  const [loading, setLoading] = useState(nodeAllocations.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
 
-  const loadAllocations = () =>
-    getNodeAllocations(node.uuid, page, search)
-      .then((data) => {
-        setNodeAllocations(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
+  const { loading, search, setSearch, setPage, refetch } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getNodeAllocations(node.uuid, page, search),
+    setStoreData: setNodeAllocations,
+  });
 
   const onSelectedStart = (event: React.MouseEvent | MouseEvent) => {
     setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : new Set());
@@ -71,24 +61,11 @@ export default ({ node }: { node: Node }) => {
       });
   };
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    loadAllocations();
-  }, [page, search]);
-
   return (
     <>
       <NodeAllocationsCreateModal
         node={node}
-        loadAllocations={loadAllocations}
+        loadAllocations={refetch}
         opened={openModal === 'create'}
         onClose={() => setOpenModal(null)}
       />

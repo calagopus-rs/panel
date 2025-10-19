@@ -1,49 +1,25 @@
-import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect } from 'react';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import { Group, TextInput, Title } from '@mantine/core';
 import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
 import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 const BackupConfigurationsContainer = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { backupConfigurations, setBackupConfigurations } = useAdminStore();
 
-  const [loading, setLoading] = useState(backupConfigurations.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getBackupConfigurations(page, search)
-      .then((data) => {
-        setBackupConfigurations(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getBackupConfigurations,
+    setStoreData: setBackupConfigurations,
+  });
 
   return (
     <>

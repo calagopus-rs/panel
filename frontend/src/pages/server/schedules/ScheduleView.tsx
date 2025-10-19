@@ -1,7 +1,7 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import triggerSchedule from '@/api/server/schedules/triggerSchedule';
 import Button from '@/elements/Button';
@@ -389,28 +389,18 @@ export default () => {
   const params = useParams<'id'>();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { server, scheduleStatus } = useServerStore();
 
-  const [page, setPage] = useState(1);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString() });
-  }, [page]);
 
   useEffect(() => {
     if (params.id) {
       getSchedule(server.uuid, params.id).then(setSchedule);
       getScheduleSteps(server.uuid, params.id).then(setSteps);
     }
-  }, [params.id, page]);
+  }, [params.id]);
 
   const doTriggerSchedule = (skipCondition: boolean) => {
     if (params.id) {

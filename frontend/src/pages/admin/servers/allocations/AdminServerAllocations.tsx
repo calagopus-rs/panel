@@ -1,10 +1,6 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -14,37 +10,17 @@ import getServerAllocations from '@/api/admin/servers/allocations/getServerAlloc
 import ServerAllocationRow from './ServerAllocationRow';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ server }: { server: AdminServer }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { serverAllocations, setServerAllocations } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
-  const [loading, setLoading] = useState(serverAllocations.data.length === 0);
-  const [page, setPage] = useState(1);
 
-  const loadAllocations = () =>
-    getServerAllocations(server.uuid, page)
-      .then((data) => {
-        setServerAllocations(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString() });
-  }, [page]);
-
-  useEffect(() => {
-    loadAllocations();
-  }, [page]);
+  const { loading, setPage } = useSearchablePaginatedTable({
+    fetcher: (page) => getServerAllocations(server.uuid, page),
+    setStoreData: setServerAllocations,
+  });
 
   return (
     <>

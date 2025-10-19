@@ -1,8 +1,5 @@
-import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect } from 'react';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
@@ -12,37 +9,16 @@ import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 const DatabaseHostsContainer = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { databaseHosts, setDatabaseHosts } = useAdminStore();
 
-  const [loading, setLoading] = useState(databaseHosts.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getDatabaseHosts(page, search)
-      .then((data) => {
-        setDatabaseHosts(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getDatabaseHosts,
+    setStoreData: setDatabaseHosts,
+  });
 
   return (
     <>

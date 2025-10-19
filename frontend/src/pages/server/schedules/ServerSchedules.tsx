@@ -1,9 +1,7 @@
 import getSchedules from '@/api/server/schedules/getSchedules';
 import { useServerStore } from '@/stores/server';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import ScheduleRow from './ScheduleRow';
-import { useSearchParams } from 'react-router';
-import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
@@ -16,34 +14,20 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import importSchedule from '@/api/server/schedules/importSchedule';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
   const { addToast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { server, schedules, setSchedules, addSchedule } = useServerStore();
 
-  const [loading, setLoading] = useState(schedules.data.length === 0);
-  const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState<'create'>(null);
-  const [page, setPage] = useState(1);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getSchedules(server.uuid, page, search).then((data) => {
-      setSchedules(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getSchedules(server.uuid, page, search),
+    setStoreData: setSchedules,
+  });
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

@@ -1,10 +1,6 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -14,34 +10,17 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import ServerMountRow from '@/pages/admin/servers/mounts/ServerMountRow';
 import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
 import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ server }: { server: AdminServer }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { serverMounts, setServerMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
-  const [loading, setLoading] = useState(serverMounts.data.length === 0);
-  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString() });
-  }, [page]);
-
-  useEffect(() => {
-    getServerMounts(server.uuid, page)
-      .then((data) => {
-        setServerMounts(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page]);
+  const { loading, setPage } = useSearchablePaginatedTable({
+    fetcher: (page) => getServerMounts(server.uuid, page),
+    setStoreData: setServerMounts,
+  });
 
   return (
     <>

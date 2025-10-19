@@ -1,38 +1,20 @@
 import Spinner from '@/elements/Spinner';
-import { useEffect, useState } from 'react';
 import { useUserStore } from '@/stores/user';
-import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import getSessions from '@/api/me/sessions/getSessions';
 import SessionRow from './SessionRow';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { sessions, setSessions } = useUserStore();
 
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getSessions(page, search).then((data) => {
-      setSessions(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getSessions,
+    setStoreData: setSessions,
+  });
 
   return (
     <>

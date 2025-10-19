@@ -1,7 +1,6 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import DatabaseRow from './DatabaseRow';
 import getDatabases from '@/api/server/databases/getDatabases';
@@ -12,32 +11,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DatabaseCreateModal from './modals/DatabaseCreateModal';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { server, databases, setDatabases } = useServerStore();
 
-  const [loading, setLoading] = useState(databases.data.length === 0);
-  const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState<'create'>(null);
-  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getDatabases(server.uuid, page, search).then((data) => {
-      setDatabases(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getDatabases(server.uuid, page, search),
+    setStoreData: setDatabases,
+  });
 
   return (
     <>

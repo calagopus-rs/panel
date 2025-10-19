@@ -1,36 +1,19 @@
 import getAdminActivity from '@/api/admin/getAdminActivity';
 import Spinner from '@/elements/Spinner';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import Table from '@/elements/Table';
 import ActivityRow from './ActivityRow';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [activities, setActivities] = useState<ResponseMeta<AdminActivity>>();
 
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getAdminActivity(page, search).then((data) => {
-      setActivities(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getAdminActivity,
+    setStoreData: setActivities,
+  });
 
   return (
     <>

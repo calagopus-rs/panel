@@ -4,8 +4,6 @@ import getAllocations from '@/api/server/allocations/getAllocations';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router';
 import AllocationRow from './AllocationRow';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { Group, Title } from '@mantine/core';
@@ -14,32 +12,16 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
   const { server, allocations, setAllocations, addAllocation } = useServerStore();
 
-  const [loading, setLoading] = useState(allocations.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getAllocations(server.uuid, page, search).then((data) => {
-      setAllocations(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getAllocations(server.uuid, page, search),
+    setStoreData: setAllocations,
+  });
 
   const doAdd = () => {
     createAllocation(server.uuid)

@@ -2,11 +2,9 @@ import Spinner from '@/elements/Spinner';
 import { useEffect, useState } from 'react';
 import { useUserStore } from '@/stores/user';
 import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
-import { useSearchParams } from 'react-router';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import SshKeyRow from './SshKeyRow';
 import SshKeyCreateModal from './modals/SshKeyCreateModal';
@@ -14,32 +12,17 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus } from '@fortawesome/free-solid-svg-icons';
 import SshKeyImportModal from './modals/SshKeyImportModal';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { sshKeys, setSshKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create' | 'import'>(null);
 
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getSshKeys(page, search).then((data) => {
-      setSshKeys(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getSshKeys,
+    setStoreData: setSshKeys,
+  });
 
   return (
     <>

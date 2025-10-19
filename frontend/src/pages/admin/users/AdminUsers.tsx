@@ -1,8 +1,5 @@
-import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect } from 'react';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import UserRow from './UserRow';
 import UserCreateOrUpdate from './UserCreateOrUpdate';
@@ -13,37 +10,16 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 const UsersContainer = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { users, setUsers } = useAdminStore();
 
-  const [loading, setLoading] = useState(users.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getUsers(page, search)
-      .then((data) => {
-        setUsers(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getUsers,
+    setStoreData: setUsers,
+  });
 
   return (
     <>

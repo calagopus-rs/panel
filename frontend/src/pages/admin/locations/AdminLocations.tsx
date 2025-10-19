@@ -1,8 +1,5 @@
-import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect } from 'react';
-import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
+import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import getLocations from '@/api/admin/locations/getLocations';
 import LocationRow from './LocationRow';
@@ -13,38 +10,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import LocationView from './LocationView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 const LocationsContainer = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { locations, setLocations } = useAdminStore();
 
-  const [loading, setLoading] = useState(locations.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getLocations(page, search)
-      .then((data) => {
-        setLocations(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: getLocations,
+    setStoreData: setLocations,
+  });
 
   return (
     <>

@@ -726,7 +726,7 @@ export default () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const rect = e.target.getBoundingClientRect();
+                      const rect = e.currentTarget.getBoundingClientRect();
                       openMenu(rect.left, rect.bottom);
                     }}
                     color={'blue'}

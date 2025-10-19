@@ -1,11 +1,7 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useAdminStore } from '@/stores/admin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
@@ -15,36 +11,17 @@ import { ContextMenuProvider } from '@/elements/ContextMenu';
 import EggMountAddModal from './modals/EggMountAddModal';
 import EggMountRow from './EggMountRow';
 import getEggMounts from '@/api/admin/eggs/mounts/getEggMounts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: AdminNestEgg }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const { eggMounts, setEggMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
-  const [loading, setLoading] = useState(eggMounts.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getEggMounts(contextNest.uuid, contextEgg.uuid, page, search)
-      .then((data) => {
-        setEggMounts(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getEggMounts(contextNest.uuid, contextEgg.uuid, page, search),
+    setStoreData: setEggMounts,
+  });
 
   return (
     <>

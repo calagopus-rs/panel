@@ -1,42 +1,19 @@
-import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { getEmptyPaginationSet } from '@/api/axios';
+import { useState } from 'react';
 import { Title } from '@mantine/core';
-import { load } from '@/lib/debounce';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes';
 import NodeRow from '../../nodes/NodeRow';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ location }: { location: Location }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { addToast } = useToast();
   const [locationNodes, setLocationNodes] = useState<ResponseMeta<Node>>(getEmptyPaginationSet());
 
-  const [loading, setLoading] = useState(locationNodes.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getLocationNodes(location.uuid, page, search)
-      .then((data) => {
-        setLocationNodes(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
+  const { loading, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getLocationNodes(location.uuid, page, search),
+    setStoreData: setLocationNodes,
+  });
 
   return (
     <>

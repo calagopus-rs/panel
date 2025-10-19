@@ -1,8 +1,8 @@
 import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect, useRef } from 'react';
-import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
+import { Route, Routes, useNavigate, useParams } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import EggRow from './EggRow';
 import getEggs from '@/api/admin/eggs/getEggs';
@@ -15,42 +15,22 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
 import EggView from '@/pages/admin/nests/eggs/EggView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 const EggsContainer = ({ nest }: { nest: Nest }) => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { addToast } = useToast();
   const { eggs, setEggs, addEgg } = useAdminStore();
 
-  const [loading, setLoading] = useState(eggs.data.length === 0);
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getEggs(nest.uuid, page, search),
+    setStoreData: setEggs,
+  });
 
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getEggs(nest.uuid, page, search)
-      .then((data) => {
-        setEggs(data);
-        load(false, setLoading);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  }, [page, search]);
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 

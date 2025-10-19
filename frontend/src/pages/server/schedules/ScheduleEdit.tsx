@@ -1,7 +1,7 @@
 import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -19,20 +19,10 @@ import { httpErrorToHuman } from '@/api/axios';
 export default () => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
-  const [searchParams, setSearchParams] = useSearchParams();
   const server = useServerStore((state) => state.server);
 
-  const [page, setPage] = useState(1);
   const [schedule, setSchedule] = useState<ServerSchedule>(null);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString() });
-  }, [page]);
 
   useEffect(() => {
     getSchedule(server.uuid, params.id).then(setSchedule);

@@ -1,6 +1,5 @@
 import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useState } from 'react';
 import getBackups from '@/api/server/backups/getBackups';
 import BackupRow from './BackupRow';
 import { Group, Title } from '@mantine/core';
@@ -12,32 +11,17 @@ import Table from '@/elements/Table';
 import Spinner from '@/elements/Spinner';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import BackupCreateModal from './modals/BackupCreateModal';
-import { load } from '@/lib/debounce';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default () => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const { server, backups, setBackups } = useServerStore();
 
-  const [loading, setLoading] = useState(backups.data.length === 0);
-  const [search, setSearch] = useState('');
   const [openModal, setOpenModal] = useState<'create'>(null);
-  const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setPage(Number(searchParams.get('page')) || 1);
-    setSearch(searchParams.get('search') || '');
-  }, []);
-
-  useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
-
-  useEffect(() => {
-    getBackups(server.uuid, page, search).then((data) => {
-      setBackups(data);
-      load(false, setLoading);
-    });
-  }, [page, search]);
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getBackups(server.uuid, page, search),
+    setStoreData: setBackups,
+  });
 
   return (
     <>
