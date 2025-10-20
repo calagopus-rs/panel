@@ -86,7 +86,7 @@ export const users = pgTable('users', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (users) => [
 	uniqueIndex('users_external_id_idx').on(users.externalId),
-	uniqueIndex('users_username_idx').on(users.username),
+	uniqueIndex('users_username_idx').on(sql`lower(${users.username})`),
 	uniqueIndex('users_email_idx').on(sql`lower(${users.email})`)
 ])
 

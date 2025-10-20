@@ -169,6 +169,13 @@
       "when": 1760793935424,
       "tag": "0023_flippant_wallop",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1760975430339,
+      "tag": "0024_uneven_young_avengers",
+      "breakpoints": false
     }
   ]
 }

@@ -72,11 +72,11 @@ impl ServerSubuser {
                     .next()
                     .unwrap_or("unknown")
                     .chars()
-                    .filter(|c| c.is_alphanumeric() || *c == '.' || *c == '-')
+                    .filter(|c| c.is_alphanumeric() || *c == '_')
                     .take(10)
                     .collect::<String>();
                 let username = format!(
-                    "{username}-{}",
+                    "{username}_{}",
                     rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 4)
                 );
                 let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);

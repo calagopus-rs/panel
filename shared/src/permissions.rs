@@ -357,8 +357,9 @@ pub static SERVER_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
         (
             "control",
             PermissionGroup {
-                description: "Permissions that control the ability to control the power state of a server, or send commands.",
+                description: "Permissions that control the ability to control the power state of a server, read the console, or send commands.",
                 permissions: IndexMap::from([
+                    ("read-console", "Allows to read the server console logs."),
                     (
                         "console",
                         "Allows to send commands to the server instance via the console.",
