@@ -399,7 +399,7 @@ impl User {
             SELECT {}
             FROM users
             LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE users.username = lower($1) AND users.password = crypt($2, users.password)
+            WHERE lower(users.username) = lower($1) AND users.password = crypt($2, users.password)
             "#,
             Self::columns_sql(None)
         ))
@@ -422,7 +422,7 @@ impl User {
             FROM users
             LEFT JOIN roles ON roles.uuid = users.role_uuid
             JOIN user_ssh_keys ON user_ssh_keys.user_uuid = users.uuid
-            WHERE users.username = lower($1) AND user_ssh_keys.fingerprint = $2
+            WHERE lower(users.username) = lower($1) AND user_ssh_keys.fingerprint = $2
             "#,
             Self::columns_sql(None)
         ))
