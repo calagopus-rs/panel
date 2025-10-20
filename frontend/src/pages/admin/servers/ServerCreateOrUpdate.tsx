@@ -283,10 +283,16 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Backup Configuration'}
                   value={server.backupConfigurationUuid ?? uuidNil}
                   onChange={(value) => setServer({ ...server, backupConfigurationUuid: value ?? uuidNil })}
-                  data={backupConfigurations.items.map((nest) => ({
-                    label: nest.name,
-                    value: nest.uuid,
-                  }))}
+                  data={[
+                    {
+                      label: 'Inherit from Node/Location',
+                      value: uuidNil,
+                    },
+                    ...backupConfigurations.items.map((nest) => ({
+                      label: nest.name,
+                      value: nest.uuid,
+                    })),
+                  ]}
                   searchable
                   searchValue={backupConfigurations.search}
                   onSearchChange={backupConfigurations.setSearch}

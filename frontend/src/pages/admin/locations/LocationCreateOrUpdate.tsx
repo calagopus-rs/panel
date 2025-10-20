@@ -115,10 +115,16 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
             label={'Backup Configuration'}
             value={location.backupConfigurationUuid ?? uuidNil}
             onChange={(value) => setLocation({ ...location, backupConfigurationUuid: value ?? uuidNil })}
-            data={backupConfigurations.items.map((nest) => ({
-              label: nest.name,
-              value: nest.uuid,
-            }))}
+            data={[
+              {
+                label: 'None',
+                value: uuidNil,
+              },
+              ...backupConfigurations.items.map((nest) => ({
+                label: nest.name,
+                value: nest.uuid,
+              })),
+            ]}
             searchable
             searchValue={backupConfigurations.search}
             onSearchChange={backupConfigurations.setSearch}
