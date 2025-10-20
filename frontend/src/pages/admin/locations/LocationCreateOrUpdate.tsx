@@ -120,9 +120,9 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
                 label: 'None',
                 value: uuidNil,
               },
-              ...backupConfigurations.items.map((nest) => ({
-                label: nest.name,
-                value: nest.uuid,
+              ...backupConfigurations.items.map((backupConfiguration) => ({
+                label: backupConfiguration.name,
+                value: backupConfiguration.uuid,
               })),
             ]}
             searchable

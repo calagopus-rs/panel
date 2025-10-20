@@ -233,9 +233,9 @@ export default ({ contextNode }: { contextNode?: Node }) => {
                 label: 'Inherit from Location',
                 value: uuidNil,
               },
-              ...backupConfigurations.items.map((nest) => ({
-                label: nest.name,
-                value: nest.uuid,
+              ...backupConfigurations.items.map((backupConfiguration) => ({
+                label: backupConfiguration.name,
+                value: backupConfiguration.uuid,
               })),
             ]}
             searchable

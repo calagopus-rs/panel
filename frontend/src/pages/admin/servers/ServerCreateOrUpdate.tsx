@@ -288,9 +288,9 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                       label: 'Inherit from Node/Location',
                       value: uuidNil,
                     },
-                    ...backupConfigurations.items.map((nest) => ({
-                      label: nest.name,
-                      value: nest.uuid,
+                    ...backupConfigurations.items.map((backupConfiguration) => ({
+                      label: backupConfiguration.name,
+                      value: backupConfiguration.uuid,
                     })),
                   ]}
                   searchable
