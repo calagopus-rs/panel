@@ -21,6 +21,7 @@ import {
   faFolderOpen,
   faFileUpload,
   faChevronDown,
+  faServer,
 } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DirectoryNameModal from './modals/DirectoryNameModal';
@@ -34,6 +35,7 @@ import Progress from '@/elements/Progress';
 import SelectionArea from '@/elements/SelectionArea';
 import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
 import { useDropzone } from 'react-dropzone';
+import SftpDetailsModal from './modals/SftpDetailsModal';
 
 interface FileUploadProgress {
   fileName: string;
@@ -70,7 +72,7 @@ export default () => {
     removeFileOperation,
   } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'nameDirectory' | 'pullFile'>(null);
+  const [openModal, setOpenModal] = useState<'sftpDetails' | 'nameDirectory' | 'pullFile'>(null);
   const [childOpenModal, setChildOpenModal] = useState(false);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
@@ -594,6 +596,7 @@ export default () => {
         </div>
       )}
 
+      <SftpDetailsModal opened={openModal === 'sftpDetails'} onClose={() => setOpenModal(null)} />
       <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
       <PullFileModal opened={openModal === 'pullFile'} onClose={() => setOpenModal(null)} />
 
@@ -692,31 +695,45 @@ export default () => {
               </Popover>
             )}
             <Button
-              onClick={() => setOpenModal('nameDirectory')}
-              color={'blue'}
-              leftSection={<FontAwesomeIcon icon={faFolderPlus} />}
+              variant={'outline'}
+              leftSection={<FontAwesomeIcon icon={faServer} />}
+              onClick={() => setOpenModal('sftpDetails')}
             >
-              New Directory
-            </Button>
-            <Button
-              onClick={() => setOpenModal('pullFile')}
-              color={'blue'}
-              leftSection={<FontAwesomeIcon icon={faDownload} />}
-            >
-              Pull
+              SFTP Details
             </Button>
             <ContextMenuProvider>
               <ContextMenu
                 items={[
                   {
+                    icon: faFileCirclePlus,
+                    label: 'File from Editor',
+                    onClick: () =>
+                      navigate(
+                        `/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`,
+                      ),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faFolderPlus,
+                    label: 'Directory',
+                    onClick: () => setOpenModal('nameDirectory'),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faDownload,
+                    label: 'File from Pull',
+                    onClick: () => setOpenModal('pullFile'),
+                    color: 'gray',
+                  },
+                  {
                     icon: faFileUpload,
-                    label: 'File',
+                    label: 'File from Upload',
                     onClick: () => fileInputRef.current?.click(),
                     color: 'gray',
                   },
                   {
                     icon: faFolderOpen,
-                    label: 'Directory',
+                    label: 'Directory from Upload',
                     onClick: () => folderInputRef.current?.click(),
                     color: 'gray',
                   },
@@ -732,22 +749,11 @@ export default () => {
                     color={'blue'}
                     rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                   >
-                    Upload
+                    New
                   </Button>
                 )}
               </ContextMenu>
             </ContextMenuProvider>
-            <Button
-              onClick={() =>
-                navigate(
-                  `/server/${server.uuidShort}/files/new?${createSearchParams({ directory: browsingDirectory })}`,
-                )
-              }
-              color={'blue'}
-              leftSection={<FontAwesomeIcon icon={faFileCirclePlus} />}
-            >
-              New File
-            </Button>
           </Group>
         )}
       </Group>

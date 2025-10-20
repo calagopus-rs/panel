@@ -1,13 +1,22 @@
 import { useToast } from '@/providers/ToastProvider';
+import classNames from 'classnames';
 
-export default ({ content, children }: { content: string; children: React.ReactNode }) => {
+export default ({
+  content,
+  className,
+  children,
+}: {
+  content: string;
+  className?: string;
+  children: React.ReactNode;
+}) => {
   const { addToast } = useToast();
 
   const handleCopy = (e: React.MouseEvent) => {
     e.preventDefault();
 
     if (!window.isSecureContext) {
-      addToast('This feature is only available in secure contexts (HTTPS).', 'error');
+      addToast('Copying is only available in secure contexts (HTTPS).', 'error');
       return;
     }
 
@@ -20,8 +29,9 @@ export default ({ content, children }: { content: string; children: React.ReactN
         console.log(err);
       });
   };
+
   return (
-    <button onClick={handleCopy} className={'cursor-pointer'}>
+    <button onClick={handleCopy} className={classNames('cursor-pointer', className)}>
       {children}
     </button>
   );
