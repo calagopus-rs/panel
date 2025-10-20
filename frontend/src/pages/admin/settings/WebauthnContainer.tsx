@@ -29,6 +29,13 @@ export default () => {
       });
   };
 
+  const doAutofill = () => {
+    setWebauthnSettings({
+      rpId: window.location.hostname.split('.').slice(-2).join('.'),
+      rpOrigin: window.location.origin,
+    });
+  };
+
   return (
     <>
       <Title mt={'md'} order={2}>
@@ -57,6 +64,9 @@ export default () => {
       <Group mt={'md'}>
         <Button onClick={doUpdate} loading={loading}>
           Save
+        </Button>
+        <Button variant={'outline'} onClick={doAutofill} disabled={loading}>
+          Autofill
         </Button>
       </Group>
     </>
