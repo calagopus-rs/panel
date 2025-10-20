@@ -7,6 +7,7 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import Button from '@/elements/Button';
 import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings';
+import { network } from '@rjweb/utils';
 
 export default () => {
   const { addToast } = useToast();
@@ -30,6 +31,11 @@ export default () => {
   };
 
   const doAutofill = () => {
+    if (network.isIP(window.location.hostname)) {
+      addToast('Cannot use Webauthn on an IP Address', 'error');
+      return;
+    }
+
     setWebauthnSettings({
       rpId: window.location.hostname.split('.').slice(-2).join('.'),
       rpOrigin: window.location.origin,
