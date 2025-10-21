@@ -1530,7 +1530,7 @@ impl ValidateRule for Url {
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key)
             && let Ok(url) = reqwest::Url::parse(value)
-            && self.protocols.contains(&url.scheme().to_string())
+            && (self.protocols.is_empty() || self.protocols.contains(&url.scheme().to_string()))
         {
             return Ok(false);
         }
