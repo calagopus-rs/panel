@@ -7,10 +7,10 @@ import { useState } from 'react';
 import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useUserStore } from '@/stores/user';
-import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import CopyOnClick from '@/elements/CopyOnClick';
+import deleteSession from '@/api/me/sessions/deleteSession';
 
 export default ({ session }: { session: UserSession }) => {
   const { addToast } = useToast();
@@ -19,7 +19,7 @@ export default ({ session }: { session: UserSession }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const doDelete = async () => {
-    await deleteSshKey(session.uuid)
+    await deleteSession(session.uuid)
       .then(() => {
         removeSession(session);
         addToast('Session deleted.', 'success');
