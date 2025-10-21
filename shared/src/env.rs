@@ -4,8 +4,13 @@ use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 #[derive(Clone)]
 pub enum RedisMode {
-    Redis { redis_url: String },
-    Sentinel { redis_sentinels: Vec<String> },
+    Redis {
+        redis_url: String,
+    },
+    Sentinel {
+        cluster_name: String,
+        redis_sentinels: Vec<String>,
+    },
 }
 
 impl std::fmt::Display for RedisMode {
@@ -51,6 +56,10 @@ impl Env {
                         .to_string(),
                 },
                 "sentinel" => RedisMode::Sentinel {
+                    cluster_name: std::env::var("REDIS_SENTINEL_CLUSTER")
+                        .context("REDIS_SENTINEL_CLUSTER is required")?
+                        .trim_matches('"')
+                        .to_string(),
                     redis_sentinels: std::env::var("REDIS_SENTINELS")
                         .context("REDIS_SENTINELS is required")?
                         .trim_matches('"')

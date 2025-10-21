@@ -83,7 +83,7 @@ mod get {
             }
         }
 
-        let node = server.node.fetch(&state.database).await?;
+        let node = server.node.fetch_cached(&state.database).await?;
 
         let url = if params.files.len() == 1 {
             #[derive(Serialize)]

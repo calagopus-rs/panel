@@ -180,6 +180,8 @@ pub struct User {
 }
 
 impl BaseModel for User {
+    const NAME: &'static str = "user";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

@@ -39,7 +39,7 @@ mod get {
             use_console_read_permission: bool,
         }
 
-        let node = server.node.fetch(&state.database).await?;
+        let node = server.node.fetch_cached(&state.database).await?;
 
         let token = node.create_jwt(
             &state.database,

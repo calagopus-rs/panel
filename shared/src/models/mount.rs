@@ -21,6 +21,8 @@ pub struct Mount {
 }
 
 impl BaseModel for Mount {
+    const NAME: &'static str = "mount";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

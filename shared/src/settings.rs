@@ -261,14 +261,14 @@ impl AppSettings {
                 keys.push("::storage_s3_access_key");
                 values.push(
                     database
-                        .encrypt(access_key)
+                        .encrypt_sync(access_key)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default(),
                 );
                 keys.push("::storage_s3_secret_key");
                 values.push(
                     database
-                        .encrypt(secret_key)
+                        .encrypt_sync(secret_key)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default(),
                 );
@@ -306,7 +306,7 @@ impl AppSettings {
                 keys.push("::mail_smtp_username");
                 values.push(if let Some(username) = username {
                     database
-                        .encrypt(username)
+                        .encrypt_sync(username)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default()
                 } else {
@@ -315,7 +315,7 @@ impl AppSettings {
                 keys.push("::mail_smtp_password");
                 values.push(if let Some(password) = password {
                     database
-                        .encrypt(password)
+                        .encrypt_sync(password)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default()
                 } else {
@@ -429,7 +429,7 @@ impl AppSettings {
                                 None
                             } else {
                                 base32::decode(base32::Alphabet::Z, &s)
-                                    .and_then(|b| database.decrypt(&b))
+                                    .and_then(|b| database.decrypt_sync(&b))
                             }
                         })
                         .unwrap_or("your-access-key".to_string()),
@@ -440,7 +440,7 @@ impl AppSettings {
                                 None
                             } else {
                                 base32::decode(base32::Alphabet::Z, &s)
-                                    .and_then(|b| database.decrypt(&b))
+                                    .and_then(|b| database.decrypt_sync(&b))
                             }
                         })
                         .unwrap_or("your-secret-key".to_string()),
@@ -483,7 +483,7 @@ impl AppSettings {
                             None
                         } else {
                             base32::decode(base32::Alphabet::Z, &s)
-                                .and_then(|b| database.decrypt(&b))
+                                .and_then(|b| database.decrypt_sync(&b))
                         }
                     }),
                     password: map.remove("::mail_smtp_password").and_then(|s| {
@@ -491,7 +491,7 @@ impl AppSettings {
                             None
                         } else {
                             base32::decode(base32::Alphabet::Z, &s)
-                                .and_then(|b| database.decrypt(&b))
+                                .and_then(|b| database.decrypt_sync(&b))
                         }
                     }),
                     use_tls: map

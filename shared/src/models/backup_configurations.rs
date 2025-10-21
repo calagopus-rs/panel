@@ -19,17 +19,27 @@ pub struct BackupConfigsS3 {
 }
 
 impl BackupConfigsS3 {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
+    pub async fn encrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         self.secret_key = base32::encode(
             base32::Alphabet::Z,
-            &database.encrypt(self.secret_key.as_bytes()).unwrap(),
+            &database.encrypt(self.secret_key.clone()).await?,
         );
+
+        Ok(())
     }
 
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
+    pub async fn decrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         self.secret_key = database
             .decrypt(base32::decode(base32::Alphabet::Z, &self.secret_key).unwrap())
-            .unwrap();
+            .await?;
+
+        Ok(())
     }
 
     pub fn censor(&mut self) {
@@ -70,21 +80,28 @@ pub struct BackupConfigsRestic {
 }
 
 impl BackupConfigsRestic {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
+    pub async fn encrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         for value in self.environment.values_mut() {
-            *value = base32::encode(
-                base32::Alphabet::Z,
-                &database.encrypt(value.as_bytes()).unwrap(),
-            );
+            *value = base32::encode(base32::Alphabet::Z, &database.encrypt(value.clone()).await?);
         }
+
+        Ok(())
     }
 
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
+    pub async fn decrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         for value in self.environment.values_mut() {
             *value = database
                 .decrypt(base32::decode(base32::Alphabet::Z, value).unwrap())
-                .unwrap();
+                .await?;
         }
+
+        Ok(())
     }
 
     pub fn censor(&mut self) {
@@ -107,22 +124,32 @@ pub struct BackupConfigs {
 }
 
 impl BackupConfigs {
-    pub fn encrypt(&mut self, database: &crate::database::Database) {
+    pub async fn encrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         if let Some(s3) = &mut self.s3 {
-            s3.encrypt(database);
+            s3.encrypt(database).await?;
         }
         if let Some(restic) = &mut self.restic {
-            restic.encrypt(database);
+            restic.encrypt(database).await?;
         }
+
+        Ok(())
     }
 
-    pub fn decrypt(&mut self, database: &crate::database::Database) {
+    pub async fn decrypt(
+        &mut self,
+        database: &crate::database::Database,
+    ) -> Result<(), anyhow::Error> {
         if let Some(s3) = &mut self.s3 {
-            s3.decrypt(database);
+            s3.decrypt(database).await?;
         }
         if let Some(restic) = &mut self.restic {
-            restic.decrypt(database);
+            restic.decrypt(database).await?;
         }
+
+        Ok(())
     }
 
     pub fn censor(&mut self) {
@@ -149,6 +176,8 @@ pub struct BackupConfiguration {
 }
 
 impl BaseModel for BackupConfiguration {
+    const NAME: &'static str = "backup_configuration";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -198,7 +227,7 @@ impl BackupConfiguration {
         backup_disk: super::server_backup::BackupDisk,
         mut backup_configs: BackupConfigs,
     ) -> Result<Self, sqlx::Error> {
-        backup_configs.encrypt(database);
+        backup_configs.encrypt(database).await.unwrap();
 
         let row = sqlx::query(&format!(
             r#"
@@ -268,20 +297,20 @@ impl BackupConfiguration {
     }
 
     #[inline]
-    pub fn into_admin_api_object(
+    pub async fn into_admin_api_object(
         mut self,
         database: &crate::database::Database,
-    ) -> AdminApiBackupConfiguration {
-        self.backup_configs.decrypt(database);
+    ) -> Result<AdminApiBackupConfiguration, anyhow::Error> {
+        self.backup_configs.decrypt(database).await?;
 
-        AdminApiBackupConfiguration {
+        Ok(AdminApiBackupConfiguration {
             uuid: self.uuid,
             name: self.name,
             description: self.description,
             backup_disk: self.backup_disk,
             backup_configs: self.backup_configs,
             created: self.created.and_utc(),
-        }
+        })
     }
 }
 

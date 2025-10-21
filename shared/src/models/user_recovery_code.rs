@@ -12,6 +12,8 @@ pub struct UserRecoveryCode {
 }
 
 impl BaseModel for UserRecoveryCode {
+    const NAME: &'static str = "user_recovery_code";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

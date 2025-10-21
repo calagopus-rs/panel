@@ -16,6 +16,8 @@ pub struct Nest {
 }
 
 impl BaseModel for Nest {
+    const NAME: &'static str = "nest";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -25,10 +27,6 @@ impl BaseModel for Nest {
             ("nests.author", format!("{prefix}author")),
             ("nests.name", format!("{prefix}name")),
             ("nests.description", format!("{prefix}description")),
-            (
-                "(SELECT COUNT(*) FROM nest_eggs WHERE nest_eggs.nest_uuid = nests.uuid)",
-                format!("{prefix}eggs"),
-            ),
             ("nests.created", format!("{prefix}created")),
         ])
     }

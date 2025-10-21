@@ -16,6 +16,8 @@ pub struct Location {
 }
 
 impl BaseModel for Location {
+    const NAME: &'static str = "location";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -187,11 +189,15 @@ impl Location {
         AdminApiLocation {
             uuid: self.uuid,
             backup_configuration: if let Some(backup_configuration) = self.backup_configuration {
-                backup_configuration
-                    .fetch(database)
-                    .await
-                    .ok()
-                    .map(|b| b.into_admin_api_object(database))
+                if let Ok(backup_configuration) = backup_configuration.fetch_cached(database).await
+                {
+                    backup_configuration
+                        .into_admin_api_object(database)
+                        .await
+                        .ok()
+                } else {
+                    None
+                }
             } else {
                 None
             },

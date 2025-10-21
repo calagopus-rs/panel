@@ -64,7 +64,7 @@ mod post {
 
         match server
             .node
-            .fetch(&state.database)
+            .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .post_servers_server_reinstall(

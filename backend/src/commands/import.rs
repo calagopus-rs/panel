@@ -281,7 +281,8 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
         }
     };
 
-    let database = Arc::new(shared::database::Database::new(env).await);
+    let cache = Arc::new(shared::cache::Cache::new(env).await);
+    let database = Arc::new(shared::database::Database::new(env, cache.clone()).await);
     let settings = Arc::new(shared::settings::Settings::new(database.clone()).await);
 
     if let Err(err) = process_table(
@@ -669,7 +670,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                     .bind(memory as i64)
                     .bind(disk as i64)
                     .bind(token_id)
-                    .bind(database.encrypt(&token).unwrap())
+                    .bind(database.encrypt(token).await.unwrap())
                     .bind(created)
                     .execute(database.write())
                     .await?;
@@ -948,7 +949,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                 .bind(host)
                 .bind(port as i32)
                 .bind(username)
-                .bind(database.encrypt(&password).unwrap())
+                .bind(database.encrypt(password).await.unwrap())
                 .bind(created)
                 .fetch_one(database.write())
                 .await?;
@@ -1134,7 +1135,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                     .bind(database_host_uuid)
                     .bind(database_name)
                     .bind(username)
-                    .bind(database.encrypt(&password).unwrap())
+                    .bind(database.encrypt(password).await.unwrap())
                     .bind(created)
                     .execute(database.write())
                     .await?;

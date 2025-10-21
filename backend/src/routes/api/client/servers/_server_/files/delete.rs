@@ -60,7 +60,7 @@ mod post {
 
         let data = match server
             .node
-            .fetch(&state.database)
+            .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .post_servers_server_files_delete(server.uuid, &request_body)

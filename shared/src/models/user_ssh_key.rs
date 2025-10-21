@@ -15,6 +15,8 @@ pub struct UserSshKey {
 }
 
 impl BaseModel for UserSshKey {
+    const NAME: &'static str = "user_ssh_key";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

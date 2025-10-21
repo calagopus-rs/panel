@@ -13,6 +13,8 @@ pub struct LocationDatabaseHost {
 }
 
 impl BaseModel for LocationDatabaseHost {
+    const NAME: &'static str = "location_database_host";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

@@ -27,7 +27,7 @@ mod post {
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         let destination_node = match &server.destination_node {
-            Some(destination_node) => destination_node.fetch(&state.database).await?,
+            Some(destination_node) => destination_node.fetch_cached(&state.database).await?,
             None => {
                 return ApiResponse::error("server is not being transferred")
                     .with_status(StatusCode::CONFLICT)

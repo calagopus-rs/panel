@@ -101,6 +101,8 @@ pub struct Server {
 }
 
 impl BaseModel for Server {
+    const NAME: &'static str = "server";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -831,7 +833,7 @@ impl Server {
     pub async fn sync(self, database: &crate::database::Database) -> Result<(), anyhow::Error> {
         match self
             .node
-            .fetch(database)
+            .fetch_cached(database)
             .await?
             .api_client(database)
             .post_servers_server_sync(
@@ -853,8 +855,8 @@ impl Server {
         &self,
         database: &crate::database::Database,
         force: bool,
-    ) -> Result<(), sqlx::Error> {
-        let node = self.node.fetch(database).await?;
+    ) -> Result<(), anyhow::Error> {
+        let node = self.node.fetch_cached(database).await?;
         let databases =
             super::server_database::ServerDatabase::all_by_server_uuid(database, self.uuid).await?;
 
@@ -865,7 +867,7 @@ impl Server {
                     tracing::error!(server = %self.uuid, "failed to delete database: {:#?}", err);
 
                     if !force {
-                        return Err(err);
+                        return Err(err.into());
                     }
                 }
             }
@@ -886,7 +888,7 @@ impl Server {
                 transaction.commit().await?;
                 Ok(())
             }
-            Err(err) => {
+            Err((status, err)) => {
                 tracing::error!(server = %self.uuid, node = %self.node.uuid, "failed to delete server: {:#?}", err);
 
                 if force {
@@ -895,7 +897,7 @@ impl Server {
                 }
 
                 transaction.rollback().await?;
-                Err(sqlx::Error::Io(std::io::Error::other(err.1.error)))
+                Err(anyhow::anyhow!("status code {status}: {}", err.error))
             }
         }
     }
@@ -936,21 +938,21 @@ impl Server {
         database: &crate::database::Database,
     ) -> Option<super::backup_configurations::BackupConfiguration> {
         if let Some(backup_configuration) = &self.backup_configuration
-            && let Ok(backup_configuration) = backup_configuration.fetch(database).await
+            && let Ok(backup_configuration) = backup_configuration.fetch_cached(database).await
         {
             return Some(backup_configuration);
         }
 
-        let node = self.node.fetch(database).await.ok()?;
+        let node = self.node.fetch_cached(database).await.ok()?;
 
         if let Some(backup_configuration) = node.backup_configuration
-            && let Ok(backup_configuration) = backup_configuration.fetch(database).await
+            && let Ok(backup_configuration) = backup_configuration.fetch_cached(database).await
         {
             return Some(backup_configuration);
         }
 
         if let Some(backup_configuration) = node.location.backup_configuration
-            && let Ok(backup_configuration) = backup_configuration.fetch(database).await
+            && let Ok(backup_configuration) = backup_configuration.fetch_cached(database).await
         {
             return Some(backup_configuration);
         }
@@ -1172,22 +1174,28 @@ impl Server {
         self,
         database: &crate::database::Database,
         storage_url_retriever: &StorageUrlRetriever<'_>,
-    ) -> Result<AdminApiServer, sqlx::Error> {
+    ) -> Result<AdminApiServer, anyhow::Error> {
         let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
+
         let (node, backup_configuration) = tokio::join!(
             async {
-                match self.node.fetch(database).await {
-                    Ok(node) => node.into_admin_api_object(database).await,
+                match self.node.fetch_cached(database).await {
+                    Ok(node) => Ok(node.into_admin_api_object(database).await?),
                     Err(err) => Err(err),
                 }
             },
             async {
                 if let Some(backup_configuration) = self.backup_configuration {
-                    backup_configuration
-                        .fetch(database)
-                        .await
-                        .ok()
-                        .map(|b| b.into_admin_api_object(database))
+                    if let Ok(backup_configuration) =
+                        backup_configuration.fetch_cached(database).await
+                    {
+                        backup_configuration
+                            .into_admin_api_object(database)
+                            .await
+                            .ok()
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
@@ -1235,9 +1243,9 @@ impl Server {
         self,
         database: &crate::database::Database,
         user: &super::user::User,
-    ) -> Result<ApiServer, sqlx::Error> {
+    ) -> Result<ApiServer, anyhow::Error> {
         let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
-        let node = self.node.fetch(database).await?;
+        let node = self.node.fetch_cached(database).await?;
 
         Ok(ApiServer {
             uuid: self.uuid,

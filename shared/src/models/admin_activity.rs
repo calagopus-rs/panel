@@ -49,6 +49,8 @@ pub struct AdminActivity {
 }
 
 impl BaseModel for AdminActivity {
+    const NAME: &'static str = "admin_activity";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

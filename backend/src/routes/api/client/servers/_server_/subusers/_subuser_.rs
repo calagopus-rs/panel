@@ -74,7 +74,7 @@ mod delete {
             async move {
                 tracing::debug!(server = %server.uuid, "removing subuser permissions in wings");
 
-                let node = match server.node.fetch(&state.database).await {
+                let node = match server.node.fetch_cached(&state.database).await {
                     Ok(node) => node,
                     Err(err) => {
                         tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
@@ -244,7 +244,7 @@ mod patch {
             async move {
                 tracing::debug!(server = %server.uuid, "updating subuser permissions in wings");
 
-                let node = match server.node.fetch(&state.database).await {
+                let node = match server.node.fetch_cached(&state.database).await {
                     Ok(node) => node,
                     Err(err) => {
                         tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:#?}", err);

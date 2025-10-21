@@ -33,6 +33,8 @@ pub struct ServerDatabase {
 }
 
 impl BaseModel for ServerDatabase {
+    const NAME: &'static str = "server_database";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -141,7 +143,7 @@ impl ServerDatabase {
         .bind(database_host.uuid)
         .bind(&name)
         .bind(&username)
-        .bind(database.encrypt(&password).unwrap())
+        .bind(database.encrypt(password.clone()).await.unwrap())
         .fetch_one(database.write())
         .await
         {
@@ -361,7 +363,7 @@ impl ServerDatabase {
     pub async fn rotate_password(
         &self,
         database: &crate::database::Database,
-    ) -> Result<String, sqlx::Error> {
+    ) -> Result<String, anyhow::Error> {
         let new_password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 24);
 
         match self.database_host.get_connection(database).await? {
@@ -390,7 +392,7 @@ impl ServerDatabase {
             WHERE server_databases.uuid = $2
             "#,
         )
-        .bind(database.encrypt(&new_password).unwrap())
+        .bind(database.encrypt(new_password.clone()).await?)
         .bind(self.uuid)
         .execute(database.write())
         .await?;
@@ -458,12 +460,12 @@ impl ServerDatabase {
         self,
         database: &crate::database::Database,
         storage_url_retriever: &StorageUrlRetriever<'_>,
-    ) -> Result<AdminApiServerDatabase, sqlx::Error> {
+    ) -> Result<AdminApiServerDatabase, anyhow::Error> {
         Ok(AdminApiServerDatabase {
             uuid: self.uuid,
             server: self
                 .server
-                .fetch(database)
+                .fetch_cached(database)
                 .await?
                 .into_admin_api_object(database, storage_url_retriever)
                 .await?,
@@ -479,18 +481,18 @@ impl ServerDatabase {
             name: self.name,
             is_locked: self.locked,
             username: self.username,
-            password: database.decrypt(&self.password).unwrap(),
+            password: database.decrypt(self.password).await?,
             created: self.created.and_utc(),
         })
     }
 
     #[inline]
-    pub fn into_api_object(
+    pub async fn into_api_object(
         self,
         database: &crate::database::Database,
         show_password: bool,
-    ) -> ApiServerDatabase {
-        ApiServerDatabase {
+    ) -> Result<ApiServerDatabase, anyhow::Error> {
+        Ok(ApiServerDatabase {
             uuid: self.uuid,
             r#type: self.database_host.r#type,
             host: self
@@ -505,12 +507,12 @@ impl ServerDatabase {
             is_locked: self.locked,
             username: self.username,
             password: if show_password {
-                Some(database.decrypt(&self.password).unwrap())
+                Some(database.decrypt(self.password).await?)
             } else {
                 None
             },
             created: self.created.and_utc(),
-        }
+        })
     }
 }
 

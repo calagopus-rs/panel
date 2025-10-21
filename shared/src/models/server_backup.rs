@@ -60,6 +60,8 @@ pub struct ServerBackup {
 }
 
 impl BaseModel for ServerBackup {
+    const NAME: &'static str = "server_backup";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -166,7 +168,7 @@ impl ServerBackup {
             async move {
                 tracing::debug!(backup = %uuid, "creating server backup");
 
-                let node = match server.node.fetch(&database).await {
+                let node = match server.node.fetch_cached(&database).await {
                     Ok(node) => node,
                     Err(err) => {
                         tracing::error!(backup = %uuid, "failed to create server backup: {:#?}", err);
@@ -424,12 +426,12 @@ impl ServerBackup {
             .ok_or_else(|| {
                 anyhow::anyhow!("no backup configuration available, unable to create backup")
             })?
-            .fetch(database)
+            .fetch_cached(database)
             .await?;
 
         if let Err((status, error)) = server
             .node
-            .fetch(database)
+            .fetch_cached(database)
             .await?
             .api_client(database)
             .post_servers_server_backup_backup_restore(
@@ -442,7 +444,7 @@ impl ServerBackup {
                             if let Some(mut s3_configuration) =
                                 backup_configuration.backup_configs.s3
                             {
-                                s3_configuration.decrypt(database);
+                                s3_configuration.decrypt(database).await?;
 
                                 let client = s3_configuration.into_client()?;
                                 let file_path = match self.upload_path.as_ref() {
@@ -473,24 +475,20 @@ impl ServerBackup {
         database: &crate::database::Database,
         server: &super::server::Server,
     ) -> Result<(), anyhow::Error> {
-        let node = if self.node.uuid == server.node.uuid {
-            server.node.fetch(database).await
-        } else {
-            super::node::Node::by_uuid(database, self.node.uuid).await
-        }?;
+        let node = self.node.fetch_cached(database).await?;
 
         let backup_configuration = self
             .backup_configuration
             .ok_or_else(|| {
                 anyhow::anyhow!("no backup configuration available, unable to create backup")
             })?
-            .fetch(database)
+            .fetch_cached(database)
             .await?;
 
         match self.disk {
             BackupDisk::S3 => {
                 if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3.clone() {
-                    s3_configuration.decrypt(database);
+                    s3_configuration.decrypt(database).await?;
 
                     let client = s3_configuration
                         .into_client()
@@ -548,13 +546,13 @@ impl ServerBackup {
             .ok_or_else(|| {
                 anyhow::anyhow!("no backup configuration available, unable to create backup")
             })?
-            .fetch(database)
+            .fetch_cached(database)
             .await?;
 
         match self.disk {
             BackupDisk::S3 => {
                 if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
-                    s3_configuration.decrypt(database);
+                    s3_configuration.decrypt(database).await?;
 
                     let client = s3_configuration
                         .into_client()

@@ -20,6 +20,8 @@ pub struct ServerSubuser {
 }
 
 impl BaseModel for ServerSubuser {
+    const NAME: &'static str = "server_subuser";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

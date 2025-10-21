@@ -74,6 +74,8 @@ pub struct DatabaseHost {
 }
 
 impl BaseModel for DatabaseHost {
+    const NAME: &'static str = "database_host";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -143,7 +145,7 @@ impl DatabaseHost {
         .bind(public_port)
         .bind(port)
         .bind(username)
-        .bind(database.encrypt(password).unwrap())
+        .bind(database.encrypt(password.to_string()).await.unwrap())
         .fetch_one(database.write())
         .await?;
 
@@ -164,7 +166,7 @@ impl DatabaseHost {
 
         drop(clients);
 
-        let password = database.decrypt(&self.password).unwrap();
+        let password = database.decrypt(self.password.clone()).await.unwrap();
 
         let pool = match self.r#type {
             DatabaseType::Mysql => {

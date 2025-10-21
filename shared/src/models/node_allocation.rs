@@ -16,6 +16,8 @@ pub struct NodeAllocation {
 }
 
 impl BaseModel for NodeAllocation {
+    const NAME: &'static str = "node_allocation";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

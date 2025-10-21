@@ -238,7 +238,7 @@ mod patch {
             database_host.username = username;
         }
         if let Some(password) = data.password {
-            database_host.password = state.database.encrypt(&password).unwrap();
+            database_host.password = state.database.encrypt(password).await?;
         }
 
         match sqlx::query!(

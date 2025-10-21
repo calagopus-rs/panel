@@ -35,7 +35,7 @@ mod post {
         let mut transaction = state.database.write().begin().await?;
 
         if let Some(destination_node) = &server.destination_node {
-            let destination_node = destination_node.fetch(&state.database).await?;
+            let destination_node = destination_node.fetch_cached(&state.database).await?;
 
             let (allocations, _) = tokio::try_join!(
                 sqlx::query!(

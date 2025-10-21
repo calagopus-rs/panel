@@ -38,7 +38,9 @@ mod get {
         }
 
         let backup_configuration = match backup.0.backup_configuration {
-            Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
+            Some(backup_configuration) => {
+                backup_configuration.fetch_cached(&state.database).await?
+            }
             None => {
                 return ApiResponse::error("backup does not have a backup configuration assigned")
                     .with_status(StatusCode::EXPECTATION_FAILED)
@@ -54,7 +56,7 @@ mod get {
                     .ok();
             }
         };
-        restic_configuration.decrypt(&state.database);
+        restic_configuration.decrypt(&state.database).await?;
 
         ApiResponse::json(Response {
             repository: restic_configuration.repository,

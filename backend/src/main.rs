@@ -20,8 +20,9 @@ use tower_http::normalize_path::NormalizePathLayer;
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
 use utoipa_axum::router::OpenApiRouter;
 
+#[cfg(target_os = "linux")]
 #[global_allocator]
-static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
+static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
@@ -233,8 +234,8 @@ async fn main() {
     let env = Arc::new(env);
     //let s3 = Arc::new(s3::S3::new(env.clone()).await);
     let jwt = Arc::new(shared::jwt::Jwt::new(&env));
-    let database = Arc::new(shared::database::Database::new(&env).await);
     let cache = Arc::new(shared::cache::Cache::new(&env).await);
+    let database = Arc::new(shared::database::Database::new(&env, cache.clone()).await);
 
     if env.database_migrate {
         tracing::info!("running database migrations...");

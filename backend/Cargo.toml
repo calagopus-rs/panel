@@ -50,7 +50,9 @@ base64 = "0.22.1"
 rust-s3 = { workspace = true }
 rustis = { workspace = true }
 dotenvy = { workspace = true }
-mimalloc = "0.1.48"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+tikv-jemallocator = "0.6.0"
 
 [build-dependencies]
 serde = { workspace = true }

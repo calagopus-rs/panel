@@ -48,7 +48,9 @@ mod get {
         }
 
         let mut backup_configuration = match backup.0.backup_configuration {
-            Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
+            Some(backup_configuration) => {
+                backup_configuration.fetch_cached(&state.database).await?
+            }
             None => {
                 return ApiResponse::error("backup does not have a backup configuration assigned")
                     .with_status(StatusCode::EXPECTATION_FAILED)
@@ -59,7 +61,7 @@ mod get {
         if matches!(backup.0.disk, BackupDisk::S3)
             && let Some(s3_configuration) = &mut backup_configuration.backup_configs.s3
         {
-            s3_configuration.decrypt(&state.database);
+            s3_configuration.decrypt(&state.database).await?;
 
             let client = match s3_configuration.clone().into_client() {
                 Ok(client) => client,

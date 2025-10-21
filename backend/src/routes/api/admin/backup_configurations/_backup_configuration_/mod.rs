@@ -93,7 +93,8 @@ mod get {
         ApiResponse::json(Response {
             backup_configuration: backup_configuration
                 .0
-                .into_admin_api_object(&state.database),
+                .into_admin_api_object(&state.database)
+                .await?,
         })
         .ok()
     }
@@ -219,7 +220,10 @@ mod patch {
         }
         if let Some(backup_configs) = data.backup_configs {
             backup_configuration.backup_configs = backup_configs;
-            backup_configuration.backup_configs.encrypt(&state.database);
+            backup_configuration
+                .backup_configs
+                .encrypt(&state.database)
+                .await?;
         }
 
         match sqlx::query!(

@@ -63,18 +63,11 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            backup_configurations: Pagination {
-                total: backup_configurations.total,
-                per_page: backup_configurations.per_page,
-                page: backup_configurations.page,
-                data: backup_configurations
-                    .data
-                    .into_iter()
-                    .map(|backup_configuration| {
-                        backup_configuration.into_admin_api_object(&state.database)
-                    })
-                    .collect(),
-            },
+            backup_configurations: backup_configurations
+                .try_async_map(|backup_configuration| {
+                    backup_configuration.into_admin_api_object(&state.database)
+                })
+                .await?,
         })
         .ok()
     }
@@ -168,7 +161,9 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            backup_configuration: backup_configuration.into_admin_api_object(&state.database),
+            backup_configuration: backup_configuration
+                .into_admin_api_object(&state.database)
+                .await?,
         })
         .ok()
     }

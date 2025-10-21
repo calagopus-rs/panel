@@ -103,7 +103,9 @@ mod get {
         }
 
         let backup_configuration = match backup.0.backup_configuration {
-            Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
+            Some(backup_configuration) => {
+                backup_configuration.fetch_cached(&state.database).await?
+            }
             None => {
                 return ApiResponse::error("backup does not have a backup configuration assigned")
                     .with_status(StatusCode::EXPECTATION_FAILED)
@@ -119,7 +121,7 @@ mod get {
                     .ok();
             }
         };
-        s3_configuration.decrypt(&state.database);
+        s3_configuration.decrypt(&state.database).await?;
 
         let server = match Server::by_uuid_optional(
             &state.database,
@@ -282,7 +284,9 @@ mod post {
             };
 
             let backup_configuration = match backup.0.backup_configuration {
-                Some(backup_configuration) => backup_configuration.fetch(&state.database).await?,
+                Some(backup_configuration) => {
+                    backup_configuration.fetch_cached(&state.database).await?
+                }
                 None => {
                     return ApiResponse::error(
                         "backup does not have a backup configuration assigned",
@@ -300,7 +304,7 @@ mod post {
                         .ok();
                 }
             };
-            s3_configuration.decrypt(&state.database);
+            s3_configuration.decrypt(&state.database).await?;
 
             let server = match Server::by_uuid_optional(
                 &state.database,

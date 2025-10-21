@@ -18,6 +18,8 @@ pub struct UserSecurityKey {
 }
 
 impl BaseModel for UserSecurityKey {
+    const NAME: &'static str = "user_security_key";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();

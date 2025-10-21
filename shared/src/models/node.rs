@@ -34,6 +34,8 @@ pub struct Node {
 }
 
 impl BaseModel for Node {
+    const NAME: &'static str = "node";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
@@ -141,7 +143,7 @@ impl Node {
         .bind(memory)
         .bind(disk)
         .bind(token_id)
-        .bind(database.encrypt(token).unwrap())
+        .bind(database.encrypt(token).await.unwrap())
         .fetch_one(database.write())
         .await?;
 
@@ -170,7 +172,11 @@ impl Node {
 
         Ok(if let Some(node) = row.map(|row| Self::map(None, &row)) {
             if constant_time_eq::constant_time_eq(
-                database.decrypt(&node.token).unwrap().as_bytes(),
+                database
+                    .decrypt(node.token.clone())
+                    .await
+                    .unwrap()
+                    .as_bytes(),
                 token.as_bytes(),
             ) {
                 Some(node)
@@ -328,7 +334,7 @@ impl Node {
     pub async fn reset_token(
         &self,
         database: &crate::database::Database,
-    ) -> Result<(String, String), sqlx::Error> {
+    ) -> Result<(String, String), anyhow::Error> {
         let token_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
         let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 64);
 
@@ -341,7 +347,7 @@ impl Node {
         )
         .bind(self.uuid)
         .bind(&token_id)
-        .bind(database.encrypt(&token).unwrap())
+        .bind(database.encrypt(token.clone()).await?)
         .execute(database.write())
         .await?;
 
@@ -360,7 +366,7 @@ impl Node {
     ) -> wings_api::client::WingsClient {
         wings_api::client::WingsClient::new(
             self.url.to_string(),
-            database.decrypt(&self.token).unwrap(),
+            database.decrypt_sync(&self.token).unwrap(),
         )
     }
 
@@ -371,22 +377,30 @@ impl Node {
         jwt: &crate::jwt::Jwt,
         payload: &T,
     ) -> Result<String, jwt::Error> {
-        jwt.create_custom(database.decrypt(&self.token).unwrap().as_bytes(), payload)
+        jwt.create_custom(
+            database.decrypt_sync(&self.token).unwrap().as_bytes(),
+            payload,
+        )
     }
 
     #[inline]
     pub async fn into_admin_api_object(
         self,
         database: &crate::database::Database,
-    ) -> Result<AdminApiNode, sqlx::Error> {
+    ) -> Result<AdminApiNode, anyhow::Error> {
         let (location, backup_configuration) =
             tokio::join!(self.location.into_admin_api_object(database), async {
                 if let Some(backup_configuration) = self.backup_configuration {
-                    backup_configuration
-                        .fetch(database)
-                        .await
-                        .ok()
-                        .map(|b| b.into_admin_api_object(database))
+                    if let Ok(backup_configuration) =
+                        backup_configuration.fetch_cached(database).await
+                    {
+                        backup_configuration
+                            .into_admin_api_object(database)
+                            .await
+                            .ok()
+                    } else {
+                        None
+                    }
                 } else {
                     None
                 }
@@ -407,7 +421,7 @@ impl Node {
             memory: self.memory,
             disk: self.disk,
             token_id: self.token_id,
-            token: database.decrypt(&self.token).unwrap(),
+            token: database.decrypt(self.token).await?,
             created: self.created.and_utc(),
         })
     }

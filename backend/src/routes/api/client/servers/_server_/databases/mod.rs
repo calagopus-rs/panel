@@ -100,21 +100,14 @@ mod get {
             .is_ok();
 
         ApiResponse::json(Response {
-            databases: Pagination {
-                total: databases.total,
-                per_page: databases.per_page,
-                page: databases.page,
-                data: databases
-                    .data
-                    .into_iter()
-                    .map(|database| {
-                        database.into_api_object(
-                            &state.database,
-                            params.include_password && can_read_password,
-                        )
-                    })
-                    .collect(),
-            },
+            databases: databases
+                .try_async_map(|database| {
+                    database.into_api_object(
+                        &state.database,
+                        params.include_password && can_read_password,
+                    )
+                })
+                .await?,
         })
         .ok()
     }
@@ -184,7 +177,12 @@ mod post {
 
         let database_host = match DatabaseHost::by_location_uuid_uuid(
             &state.database,
-            server.node.fetch(&state.database).await?.location.uuid,
+            server
+                .node
+                .fetch_cached(&state.database)
+                .await?
+                .location
+                .uuid,
             data.database_host_uuid,
         )
         .await?
@@ -245,12 +243,14 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            database: database.into_api_object(
-                &state.database,
-                permissions
-                    .has_server_permission("databases.read-password")
-                    .is_ok(),
-            ),
+            database: database
+                .into_api_object(
+                    &state.database,
+                    permissions
+                        .has_server_permission("databases.read-password")
+                        .is_ok(),
+                )
+                .await?,
         })
         .ok()
     }

@@ -5,18 +5,22 @@ use tokio::sync::Mutex;
 
 type EmptyFuture = Box<dyn Future<Output = ()> + Send>;
 pub struct Database {
+    pub cache: Arc<crate::cache::Cache>,
+
     write: sqlx::PgPool,
     read: Option<sqlx::PgPool>,
 
-    encryption_key: String,
+    encryption_key: Arc<str>,
     batch_actions: Arc<Mutex<HashMap<(&'static str, uuid::Uuid), EmptyFuture>>>,
 }
 
 impl Database {
-    pub async fn new(env: &crate::env::Env) -> Self {
+    pub async fn new(env: &crate::env::Env, cache: Arc<crate::cache::Cache>) -> Self {
         let start = std::time::Instant::now();
 
         let instance = Self {
+            cache,
+
             write: match &env.database_url_primary {
                 Some(url) => PgPoolOptions::new()
                     .min_connections(10)
@@ -48,7 +52,7 @@ impl Database {
                 None
             },
 
-            encryption_key: env.app_encryption_key.clone(),
+            encryption_key: env.app_encryption_key.clone().into(),
             batch_actions: Arc::new(Mutex::new(HashMap::new())),
         };
 
@@ -126,12 +130,39 @@ impl Database {
     }
 
     #[inline]
-    pub fn encrypt(&self, data: impl AsRef<[u8]>) -> Option<Vec<u8>> {
+    pub async fn encrypt(
+        &self,
+        data: impl AsRef<[u8]> + Send + 'static,
+    ) -> Result<Vec<u8>, anyhow::Error> {
+        let encryption_key = self.encryption_key.clone();
+
+        tokio::task::spawn_blocking(move || {
+            simple_crypt::encrypt(data.as_ref(), encryption_key.as_bytes())
+        })
+        .await?
+    }
+
+    #[inline]
+    pub fn encrypt_sync(&self, data: impl AsRef<[u8]>) -> Option<Vec<u8>> {
         simple_crypt::encrypt(data.as_ref(), self.encryption_key.as_bytes()).ok()
     }
 
     #[inline]
-    pub fn decrypt(&self, data: impl AsRef<[u8]>) -> Option<String> {
+    pub async fn decrypt(
+        &self,
+        data: impl AsRef<[u8]> + Send + 'static,
+    ) -> Result<String, anyhow::Error> {
+        let encryption_key = self.encryption_key.clone();
+
+        tokio::task::spawn_blocking(move || {
+            simple_crypt::decrypt(data.as_ref(), encryption_key.as_bytes())
+                .map(|s| String::from_utf8_lossy(&s).to_string())
+        })
+        .await?
+    }
+
+    #[inline]
+    pub fn decrypt_sync(&self, data: impl AsRef<[u8]>) -> Option<String> {
         simple_crypt::decrypt(data.as_ref(), self.encryption_key.as_bytes())
             .map(|s| String::from_utf8_lossy(&s).to_string())
             .ok()

@@ -37,7 +37,12 @@ mod get {
 
         let database_hosts = LocationDatabaseHost::all_public_by_location_uuid(
             &state.database,
-            server.node.fetch(&state.database).await?.location.uuid,
+            server
+                .node
+                .fetch_cached(&state.database)
+                .await?
+                .location
+                .uuid,
         )
         .await?;
 

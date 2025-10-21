@@ -103,7 +103,7 @@ mod post {
 
         if let Err(err) = server
             .node
-            .fetch(&state.database)
+            .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .delete_servers_server(server.uuid)

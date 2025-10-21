@@ -126,6 +126,8 @@ impl<T: Serialize> Pagination<T> {
 }
 
 pub trait BaseModel: Serialize + DeserializeOwned {
+    const NAME: &'static str;
+
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String>;
 
     #[inline]
@@ -146,6 +148,18 @@ pub trait ByUuid: BaseModel {
         database: &crate::database::Database,
         uuid: uuid::Uuid,
     ) -> Result<Self, sqlx::Error>;
+
+    async fn by_uuid_cached(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, anyhow::Error> {
+        database
+            .cache
+            .cached(&format!("{}::{uuid}", Self::NAME), 10, || {
+                Self::by_uuid(database, uuid)
+            })
+            .await
+    }
 
     async fn by_uuid_optional(
         database: &crate::database::Database,
@@ -185,10 +199,18 @@ pub struct Fetchable<M: ByUuid> {
     _model: PhantomData<M>,
 }
 
-impl<M: ByUuid> Fetchable<M> {
+impl<M: ByUuid + Send> Fetchable<M> {
     #[inline]
     pub async fn fetch(&self, database: &crate::database::Database) -> Result<M, sqlx::Error> {
         M::by_uuid(database, self.uuid).await
+    }
+
+    #[inline]
+    pub async fn fetch_cached(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<M, anyhow::Error> {
+        M::by_uuid_cached(database, self.uuid).await
     }
 
     #[inline]

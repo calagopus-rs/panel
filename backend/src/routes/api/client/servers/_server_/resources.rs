@@ -28,7 +28,7 @@ mod get {
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
         let server_details = match server
             .node
-            .fetch(&state.database)
+            .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .get_servers_server(server.uuid)

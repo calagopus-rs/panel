@@ -14,6 +14,8 @@ pub struct ServerVariable {
 }
 
 impl BaseModel for ServerVariable {
+    const NAME: &'static str = "server_variable";
+
     #[inline]
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
