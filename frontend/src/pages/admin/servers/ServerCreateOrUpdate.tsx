@@ -64,10 +64,10 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     image: '',
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     featureLimits: {
-      allocations: 1,
-      databases: 0,
-      backups: 0,
-      schedules: 0,
+      allocations: 5,
+      databases: 5,
+      backups: 5,
+      schedules: 5,
     },
     nodeUuid: '',
     ownerUuid: '',
@@ -427,7 +427,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Allocations'}
                   placeholder={'1'}
                   min={0}
-                  value={server.featureLimits.allocations || 5}
+                  value={server.featureLimits.allocations}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, allocations: Number(value) } })
                   }
@@ -437,7 +437,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Databases'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.databases || 5}
+                  value={server.featureLimits.databases}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, databases: Number(value) } })
                   }
@@ -447,7 +447,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Backups'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.backups || 5}
+                  value={server.featureLimits.backups}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, backups: Number(value) } })
                   }
@@ -457,7 +457,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Schedules'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.schedules || 10}
+                  value={server.featureLimits.schedules}
                   onChange={(value) =>
                     setServer({ ...server, featureLimits: { ...server.featureLimits, schedules: Number(value) } })
                   }
