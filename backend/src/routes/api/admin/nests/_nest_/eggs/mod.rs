@@ -123,8 +123,8 @@ mod post {
         #[schema(inline)]
         config_allocations: shared::models::nest_egg::NestEggConfigAllocations,
 
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
+        #[validate(length(min = 1, max = 4096))]
+        #[schema(min_length = 1, max_length = 4096)]
         startup: String,
         force_outgoing_ip: bool,
 

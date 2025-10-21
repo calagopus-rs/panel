@@ -212,8 +212,8 @@ mod patch {
         limits: Option<shared::models::server::ApiServerLimits>,
         pinned_cpus: Option<Vec<i16>>,
 
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
+        #[validate(length(min = 1, max = 4096))]
+        #[schema(min_length = 1, max_length = 4096)]
         startup: Option<String>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
