@@ -41,6 +41,21 @@ impl Validator {
         })
     }
 
+    pub fn has_rule(&self, key: &str, label: &str) -> bool {
+        let rules = match self.rules.get(key) {
+            Some(rules) => rules,
+            None => return false,
+        };
+
+        for rule in rules {
+            if rule.label() == label {
+                return true;
+            }
+        }
+
+        false
+    }
+
     pub fn validate(&self) -> Result<(), String> {
         for (key, rules) in &self.rules {
             for rule in rules {
@@ -60,6 +75,8 @@ impl Validator {
 }
 
 pub trait ValidateRule: Send + Sync {
+    fn label(&self) -> &'static str;
+
     fn validate(&self, key: &str, validator: &Validator) -> Result<bool, String>;
 }
 
