@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT servers.uuid, servers.node_uuid, servers.destination_node_uuid FROM servers\n                WHERE (servers.node_uuid = $1 AND servers.destination_node_uuid IS NOT NULL)\n                    OR servers.destination_node_uuid = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "node_uuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "destination_node_uuid",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "a9c80acd004eb299d0a07b0088e2ee92497c73a5abd4dc0de8f379136ebb271a"
+}
