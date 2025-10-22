@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
     use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
@@ -13,8 +14,6 @@ mod post {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Serialize)]
     struct Response {

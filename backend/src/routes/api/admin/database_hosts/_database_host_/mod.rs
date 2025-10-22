@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{database_host::DatabaseHost, user::GetPermissionManager},
+    models::{ByUuid, database_host::DatabaseHost, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -28,7 +28,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let database_host = DatabaseHost::by_uuid(&state.database, database_host).await;
+    let database_host = DatabaseHost::by_uuid_optional(&state.database, database_host).await;
     let database_host = match database_host {
         Ok(Some(database_host)) => database_host,
         Ok(None) => {

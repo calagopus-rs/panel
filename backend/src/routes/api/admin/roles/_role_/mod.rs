@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{role::Role, user::GetPermissionManager},
+    models::{ByUuid, role::Role, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -27,7 +27,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let role = Role::by_uuid(&state.database, role).await;
+    let role = Role::by_uuid_optional(&state.database, role).await;
     let role = match role {
         Ok(Some(role)) => role,
         Ok(None) => {

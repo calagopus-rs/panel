@@ -90,7 +90,7 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, mount::Mount, node::GetNode,
+            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount, node::GetNode,
             node_mount::NodeMount, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -126,7 +126,7 @@ mod post {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("nodes.mounts")?;
 
-        let mount = match Mount::by_uuid(&state.database, data.mount_uuid).await? {
+        let mount = match Mount::by_uuid_optional(&state.database, data.mount_uuid).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")

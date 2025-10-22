@@ -1,3 +1,5 @@
+use crate::models::ByUuid;
+
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -231,25 +233,6 @@ impl DatabaseHost {
         })
     }
 
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM database_hosts
-            WHERE database_hosts.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
-    }
-
     pub async fn by_location_uuid_uuid(
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
@@ -314,6 +297,28 @@ impl DatabaseHost {
             host: self.public_host.unwrap_or(self.host),
             port: self.public_port.unwrap_or(self.port),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for DatabaseHost {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM database_hosts
+            WHERE database_hosts.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

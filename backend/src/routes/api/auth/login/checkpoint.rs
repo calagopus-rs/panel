@@ -18,7 +18,7 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            user::User, user_activity::UserActivity, user_recovery_code::UserRecoveryCode,
+            ByUuid, user::User, user_activity::UserActivity, user_recovery_code::UserRecoveryCode,
             user_session::UserSession,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -145,7 +145,7 @@ mod post {
             }
         }
 
-        let user = match User::by_uuid(&state.database, payload.user_uuid).await? {
+        let user = match User::by_uuid_optional(&state.database, payload.user_uuid).await? {
             Some(user) => user,
             None => {
                 return ApiResponse::error("user not found")

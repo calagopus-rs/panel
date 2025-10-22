@@ -56,6 +56,7 @@ pub async fn auth(
 }
 
 mod get {
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
     use serde::Serialize;
     use shared::{
         ApiError,
@@ -63,8 +64,6 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Serialize)]
     pub struct Response {
@@ -101,6 +100,7 @@ mod get {
 }
 
 mod delete {
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
     use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
@@ -112,8 +112,6 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -182,6 +180,7 @@ mod delete {
 }
 
 mod patch {
+    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -191,8 +190,6 @@ mod patch {
     };
     use utoipa::ToSchema;
     use validator::Validate;
-
-    use crate::routes::api::client::servers::_server_::backups::_backup_::GetServerBackup;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {

@@ -7,7 +7,10 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::user::{GetPermissionManager, User},
+    models::{
+        ByUuid,
+        user::{GetPermissionManager, User},
+    },
     response::ApiResponse,
 };
 use std::ops::{Deref, DerefMut};
@@ -46,7 +49,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let user = User::by_uuid(&state.database, user).await;
+    let user = User::by_uuid_optional(&state.database, user).await;
     let user = match user {
         Ok(Some(user)) => user,
         Ok(None) => {

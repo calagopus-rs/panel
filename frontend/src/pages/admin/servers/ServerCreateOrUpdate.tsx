@@ -51,7 +51,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     name: '',
     description: '',
     startOnCompletion: true,
-    skipScripts: false,
+    skipInstaller: false,
     limits: {
       cpu: 100,
       memory: 1024,
@@ -405,10 +405,10 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     onChange={(event) => setServer({ ...server, startOnCompletion: event.target.checked })}
                   />
                   <Switch
-                    label={'Skip Scripts'}
-                    description={'Skip running install scripts'}
-                    checked={server.skipScripts}
-                    onChange={(event) => setServer({ ...server, skipScripts: event.target.checked })}
+                    label={'Skip Installer'}
+                    description={'Skip running the install script'}
+                    checked={server.skipInstaller}
+                    onChange={(event) => setServer({ ...server, skipInstaller: event.target.checked })}
                   />
                 </Group>
               )}
@@ -425,7 +425,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 <NumberInput
                   withAsterisk
                   label={'Allocations'}
-                  placeholder={'1'}
+                  placeholder={'0'}
                   min={0}
                   value={server.featureLimits.allocations}
                   onChange={(value) =>

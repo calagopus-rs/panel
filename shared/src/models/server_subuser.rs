@@ -1,6 +1,6 @@
 use super::BaseModel;
 use crate::{
-    models::{user::User, user_password_reset::UserPasswordReset},
+    models::{ByUuid, user::User, user_password_reset::UserPasswordReset},
     storage::StorageUrlRetriever,
 };
 use rand::distr::SampleString;
@@ -88,9 +88,7 @@ impl ServerSubuser {
                 )
                 .await
                 {
-                    Ok(user_uuid) => User::by_uuid(database, user_uuid)
-                        .await?
-                        .ok_or(sqlx::Error::RowNotFound)?,
+                    Ok(user_uuid) => User::by_uuid(database, user_uuid).await?,
                     Err(err) => {
                         tracing::error!(username = %username, email = %email, "failed to create subuser user: {:#?}", err);
 

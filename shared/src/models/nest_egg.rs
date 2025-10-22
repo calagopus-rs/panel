@@ -1,3 +1,5 @@
+use crate::models::ByUuid;
+
 use super::BaseModel;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
@@ -357,25 +359,6 @@ impl NestEgg {
         })
     }
 
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM nest_eggs
-            WHERE nest_eggs.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
-    }
-
     pub async fn by_nest_uuid_uuid(
         database: &crate::database::Database,
         nest_uuid: uuid::Uuid,
@@ -512,6 +495,28 @@ impl NestEgg {
             docker_images: self.docker_images,
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for NestEgg {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM nest_eggs
+            WHERE nest_eggs.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

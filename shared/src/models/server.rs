@@ -237,7 +237,7 @@ impl Server {
         allocation_uuids: &[uuid::Uuid],
         external_id: Option<&str>,
         start_on_completion: bool,
-        skip_scripts: bool,
+        skip_installer: bool,
         name: &str,
         description: Option<&str>,
         limits: &ApiServerLimits,
@@ -298,7 +298,7 @@ impl Server {
             .bind(backup_configuration_uuid)
             .bind(name)
             .bind(description)
-            .bind(if skip_scripts {
+            .bind(if skip_installer {
                 None
             } else {
                 Some(ServerStatus::Installing)
@@ -373,7 +373,7 @@ impl Server {
                         .post_servers(&wings_api::servers::post::RequestBody {
                             uuid,
                             start_on_completion,
-                            skip_scripts,
+                            skip_scripts: skip_installer,
                         })
                         .await
                     {

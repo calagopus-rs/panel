@@ -149,17 +149,17 @@ impl Cache {
         let now = std::time::Instant::now();
 
         tracing::debug!("checking memory cache");
-        if let Some(entry) = self.memory_cache.read().await.get(key) {
-            if entry.expires_at > now {
-                tracing::debug!("found in memory cache");
-                match bincode::serde::decode_from_slice::<T, _>(
-                    &entry.value,
-                    bincode::config::standard(),
-                ) {
-                    Ok((value, _)) => return Ok(value),
-                    Err(err) => {
-                        tracing::warn!("failed to deserialize from memory cache: {:#?}", err);
-                    }
+        if let Some(entry) = self.memory_cache.read().await.get(key)
+            && entry.expires_at > now
+        {
+            tracing::debug!("found in memory cache");
+            match bincode::serde::decode_from_slice::<T, _>(
+                &entry.value,
+                bincode::config::standard(),
+            ) {
+                Ok((value, _)) => return Ok(value),
+                Err(err) => {
+                    tracing::warn!("failed to deserialize from memory cache: {:#?}", err);
                 }
             }
         }
@@ -196,17 +196,17 @@ impl Cache {
         let _guard = mutex.lock().await;
         tracing::debug!("locked mutex");
 
-        if let Some(entry) = self.memory_cache.read().await.get(key) {
-            if entry.expires_at > now {
-                tracing::debug!("found in memory cache after lock");
-                match bincode::serde::decode_from_slice::<T, _>(
-                    &entry.value,
-                    bincode::config::standard(),
-                ) {
-                    Ok((value, _)) => return Ok(value),
-                    Err(err) => {
-                        tracing::warn!("failed to deserialize from memory cache: {:#?}", err)
-                    }
+        if let Some(entry) = self.memory_cache.read().await.get(key)
+            && entry.expires_at > now
+        {
+            tracing::debug!("found in memory cache after lock");
+            match bincode::serde::decode_from_slice::<T, _>(
+                &entry.value,
+                bincode::config::standard(),
+            ) {
+                Ok((value, _)) => return Ok(value),
+                Err(err) => {
+                    tracing::warn!("failed to deserialize from memory cache: {:#?}", err)
                 }
             }
         }

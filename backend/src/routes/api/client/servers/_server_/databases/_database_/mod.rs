@@ -57,6 +57,7 @@ pub async fn auth(
 }
 
 mod get {
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
     use axum::extract::Query;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -65,8 +66,6 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
@@ -119,6 +118,7 @@ mod get {
 }
 
 mod delete {
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
     use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
@@ -130,8 +130,6 @@ mod delete {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Serialize)]
     struct Response {}
@@ -191,6 +189,7 @@ mod delete {
 }
 
 mod patch {
+    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
@@ -198,8 +197,6 @@ mod patch {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::client::servers::_server_::databases::_database_::GetServerDatabase;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {

@@ -1,5 +1,5 @@
 use super::BaseModel;
-use crate::{response::ApiResponse, storage::StorageUrlRetriever};
+use crate::{models::ByUuid, response::ApiResponse, storage::StorageUrlRetriever};
 use axum::{body::Body, http::StatusCode};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -261,26 +261,6 @@ impl User {
         .await?;
 
         Ok(row.get("uuid"))
-    }
-
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM users
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE users.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_session(
@@ -623,6 +603,29 @@ impl User {
             totp_enabled: self.totp_enabled,
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for User {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            WHERE users.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

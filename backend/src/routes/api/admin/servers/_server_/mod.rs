@@ -256,7 +256,7 @@ mod patch {
         permissions.has_admin_permission("servers.update")?;
 
         if let Some(owner_uuid) = data.owner_uuid {
-            let owner = match User::by_uuid(&state.database, owner_uuid).await? {
+            let owner = match User::by_uuid_optional(&state.database, owner_uuid).await? {
                 Some(owner) => owner,
                 None => {
                     return ApiResponse::error("owner not found")
@@ -268,7 +268,7 @@ mod patch {
             server.owner = owner;
         }
         if let Some(egg_uuid) = data.egg_uuid {
-            let egg = match NestEgg::by_uuid(&state.database, egg_uuid).await? {
+            let egg = match NestEgg::by_uuid_optional(&state.database, egg_uuid).await? {
                 Some(egg) => egg,
                 None => {
                     return ApiResponse::error("egg not found")

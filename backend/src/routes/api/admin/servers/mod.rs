@@ -104,7 +104,7 @@ mod post {
         allocation_uuids: Vec<uuid::Uuid>,
 
         start_on_completion: bool,
-        skip_scripts: bool,
+        skip_installer: bool,
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
@@ -165,7 +165,7 @@ mod post {
             }
         };
 
-        let owner = match User::by_uuid(&state.database, data.owner_uuid).await? {
+        let owner = match User::by_uuid_optional(&state.database, data.owner_uuid).await? {
             Some(user) => user,
             None => {
                 return ApiResponse::error("owner not found")
@@ -174,7 +174,7 @@ mod post {
             }
         };
 
-        let egg = match NestEgg::by_uuid(&state.database, data.egg_uuid).await? {
+        let egg = match NestEgg::by_uuid_optional(&state.database, data.egg_uuid).await? {
             Some(egg) => egg,
             None => {
                 return ApiResponse::error("egg not found")
@@ -211,7 +211,7 @@ mod post {
             &data.allocation_uuids,
             data.external_id.as_deref(),
             data.start_on_completion,
-            data.skip_scripts,
+            data.skip_installer,
             &data.name,
             data.description.as_deref(),
             &data.limits,
@@ -252,7 +252,7 @@ mod post {
                     "external_id": data.external_id,
 
                     "start_on_completion": data.start_on_completion,
-                    "skip_scripts": data.skip_scripts,
+                    "skip_installer": data.skip_installer,
 
                     "name": data.name,
                     "description": data.description,

@@ -69,25 +69,6 @@ impl Nest {
         Ok(Self::map(None, &row))
     }
 
-    pub async fn by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM nests
-            WHERE nests.uuid = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(uuid)
-        .fetch_optional(database.read())
-        .await?;
-
-        Ok(row.map(|row| Self::map(None, &row)))
-    }
-
     pub async fn all_with_pagination(
         database: &crate::database::Database,
         page: i64,
@@ -146,6 +127,28 @@ impl Nest {
             description: self.description,
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for Nest {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM nests
+            WHERE nests.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
     }
 }
 

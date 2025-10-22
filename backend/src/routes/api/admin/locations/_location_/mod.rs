@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{location::Location, user::GetPermissionManager},
+    models::{ByUuid, location::Location, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -37,7 +37,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let location = Location::by_uuid(&state.database, location).await;
+    let location = Location::by_uuid_optional(&state.database, location).await;
     let location = match location {
         Ok(Some(location)) => location,
         Ok(None) => {

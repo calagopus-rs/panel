@@ -230,7 +230,7 @@ mod patch {
         permissions.has_admin_permission("nodes.update")?;
 
         if let Some(location_uuid) = data.location_uuid {
-            let location = match Location::by_uuid(&state.database, location_uuid).await? {
+            let location = match Location::by_uuid_optional(&state.database, location_uuid).await? {
                 Some(location) => location,
                 None => {
                     return ApiResponse::error("location not found")

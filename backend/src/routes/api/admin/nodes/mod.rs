@@ -139,7 +139,8 @@ mod post {
 
         permissions.has_admin_permission("nodes.create")?;
 
-        let location = match Location::by_uuid(&state.database, data.location_uuid).await? {
+        let location = match Location::by_uuid_optional(&state.database, data.location_uuid).await?
+        {
             Some(location) => location,
             None => {
                 return ApiResponse::error("location not found")

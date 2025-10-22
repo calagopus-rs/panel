@@ -6,7 +6,7 @@ mod post {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{user::User, user_session::UserSession},
+        models::{ByUuid, user::User, user_session::UserSession},
         response::{ApiResponse, ApiResponseResult},
     };
     use tower_cookies::{Cookie, Cookies};
@@ -88,9 +88,7 @@ mod post {
         )
         .await
         {
-            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid)
-                .await?
-                .ok_or_else(|| anyhow::anyhow!("user not found after creation"))?,
+            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid).await?,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("user with username or email already exists")
                     .with_status(StatusCode::BAD_REQUEST)

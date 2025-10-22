@@ -7,7 +7,7 @@ use axum::{
 };
 use shared::{
     GetState,
-    models::{nest::Nest, user::GetPermissionManager},
+    models::{ByUuid, nest::Nest, user::GetPermissionManager},
     response::ApiResponse,
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
@@ -36,7 +36,7 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
-    let nest = Nest::by_uuid(&state.database, nest).await;
+    let nest = Nest::by_uuid_optional(&state.database, nest).await;
     let nest = match nest {
         Ok(Some(nest)) => nest,
         Ok(None) => {

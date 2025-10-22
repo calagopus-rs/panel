@@ -97,8 +97,8 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, mount::Mount, nest_egg_mount::NestEggMount,
-            user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount,
+            nest_egg_mount::NestEggMount, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -140,7 +140,7 @@ mod post {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("eggs.mounts")?;
 
-        let mount = match Mount::by_uuid(&state.database, data.mount_uuid).await? {
+        let mount = match Mount::by_uuid_optional(&state.database, data.mount_uuid).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")

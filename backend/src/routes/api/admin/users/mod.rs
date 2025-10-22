@@ -85,6 +85,7 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
+            ByUuid,
             admin_activity::GetAdminActivityLogger,
             user::{GetPermissionManager, User},
         },
@@ -153,9 +154,7 @@ mod post {
         )
         .await
         {
-            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid)
-                .await?
-                .ok_or_else(|| anyhow::anyhow!("user not found after creation"))?,
+            Ok(user_uuid) => User::by_uuid(&state.database, user_uuid).await?,
             Err(err) if err.to_string().contains("unique constraint") => {
                 return ApiResponse::error("user with email/username already exists").ok();
             }

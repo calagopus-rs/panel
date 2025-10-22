@@ -6,7 +6,7 @@ mod get {
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{mount::Mount, user::GetPermissionManager},
+        models::{ByUuid, mount::Mount, user::GetPermissionManager},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -33,7 +33,7 @@ mod get {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.read")?;
 
-        let mount = match Mount::by_uuid(&state.database, mount).await? {
+        let mount = match Mount::by_uuid_optional(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -55,7 +55,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, mount::Mount, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -83,7 +84,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.delete")?;
 
-        let mount = match Mount::by_uuid(&state.database, mount).await? {
+        let mount = match Mount::by_uuid_optional(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
@@ -114,7 +115,8 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, mount::Mount, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -165,7 +167,7 @@ mod patch {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.update")?;
 
-        let mut mount = match Mount::by_uuid(&state.database, mount).await? {
+        let mut mount = match Mount::by_uuid_optional(&state.database, mount).await? {
             Some(mount) => mount,
             None => {
                 return ApiResponse::error("mount not found")
