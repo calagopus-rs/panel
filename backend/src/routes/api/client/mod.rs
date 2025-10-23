@@ -42,7 +42,7 @@ pub async fn auth(
                 .into_response());
         }
 
-        let user = User::by_session(&state.database, session_id.value()).await;
+        let user = User::by_session_cached(&state.database, session_id.value()).await;
         let (user, session) = match user {
             Ok(Some(data)) => data,
             Ok(None) => {
@@ -114,7 +114,7 @@ pub async fn auth(
                 .into_response());
         }
 
-        let user = User::by_api_key(
+        let user = User::by_api_key_cached(
             &state.database,
             api_token
                 .to_str()

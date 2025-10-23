@@ -2,7 +2,6 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
         GetState,
@@ -26,28 +25,31 @@ mod get {
         ),
     ))]
     pub async fn route(state: GetState, server: GetServer) -> ApiResponseResult {
-        let server_details = match server
-            .node
-            .fetch_cached(&state.database)
-            .await?
-            .api_client(&state.database)
-            .get_servers_server(server.uuid)
-            .await
-        {
-            Ok(data) => data,
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to get server details: {:#?}", err);
+        let resources = state
+            .cache
+            .cached(
+                &format!("server::{}::resources", server.uuid),
+                10,
+                || async {
+                    match server
+                        .node
+                        .fetch_cached(&state.database)
+                        .await?
+                        .api_client(&state.database)
+                        .get_servers_server(server.uuid)
+                        .await {
+                            Ok(data) => Ok(data.utilization),
+                            Err((status, err)) => {
+                                tracing::error!(server = %server.uuid, "failed to get server details: {:#?}", err);
 
-                return ApiResponse::error("failed to get server details")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        };
+                                Err(anyhow::anyhow!("status code {status}: {}", err.error))
+                            }
+                        }
+                },
+            )
+            .await?;
 
-        ApiResponse::json(Response {
-            resources: server_details.utilization,
-        })
-        .ok()
+        ApiResponse::json(Response { resources }).ok()
     }
 }
 

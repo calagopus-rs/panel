@@ -91,7 +91,8 @@ mod post {
                 }
             }
         };
-        let server = match Server::by_user_identifier(&state.database, &user, server).await? {
+        let server = match Server::by_user_identifier_cached(&state.database, &user, server).await?
+        {
             Some(server) => server,
             None => {
                 return ApiResponse::error("server not found")

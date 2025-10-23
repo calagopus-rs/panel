@@ -266,7 +266,6 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.server_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None)
@@ -288,7 +287,6 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.node_uuid = $1 AND server_backups.uuid = $2
             "#,
             Self::columns_sql(None)
@@ -314,7 +312,6 @@ impl ServerBackup {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE
                 server_backups.server_uuid = $1
                 AND server_backups.deleted IS NULL
@@ -352,7 +349,6 @@ impl ServerBackup {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE
                 server_backups.node_uuid = $1
                 AND server_backups.server_uuid IS NULL
@@ -386,7 +382,6 @@ impl ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.server_uuid = $1 AND server_backups.deleted IS NULL
             "#,
             Self::columns_sql(None)
@@ -675,7 +670,6 @@ impl ByUuid for ServerBackup {
             r#"
             SELECT {}
             FROM server_backups
-            LEFT JOIN backup_configurations ON backup_configurations.uuid = server_backups.backup_configuration_uuid
             WHERE server_backups.uuid = $1
             "#,
             Self::columns_sql(None)

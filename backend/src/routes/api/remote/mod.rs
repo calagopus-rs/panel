@@ -48,7 +48,7 @@ pub async fn auth(state: GetState, mut req: Request, next: Next) -> Result<Respo
         }
     };
 
-    let node = Node::by_token_id_token(&state.database, token_id, token).await;
+    let node = Node::by_token_id_token_cached(&state.database, token_id, token).await;
     let node = match node {
         Ok(Some(data)) => data,
         Ok(None) => {

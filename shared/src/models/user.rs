@@ -263,65 +263,75 @@ impl User {
         Ok(row.get("uuid"))
     }
 
-    pub async fn by_session(
+    pub async fn by_session_cached(
         database: &crate::database::Database,
         session: &str,
-    ) -> Result<Option<(Self, super::user_session::UserSession)>, sqlx::Error> {
+    ) -> Result<Option<(Self, super::user_session::UserSession)>, anyhow::Error> {
         let (key_id, key) = match session.split_once(':') {
             Some((key_id, key)) => (key_id, key),
             None => return Ok(None),
         };
 
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}, {}
-            FROM users
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN user_sessions ON user_sessions.user_uuid = users.uuid
-            WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
-            "#,
-            Self::columns_sql(None),
-            super::user_session::UserSession::columns_sql(Some("session_"))
-        ))
-        .bind(key_id)
-        .bind(key)
-        .fetch_optional(database.read())
-        .await?;
+        database
+            .cache
+            .cached(&format!("user::session::{session}"), 15, || async {
+                let row = sqlx::query(&format!(
+                    r#"
+                SELECT {}, {}
+                FROM users
+                LEFT JOIN roles ON roles.uuid = users.role_uuid
+                JOIN user_sessions ON user_sessions.user_uuid = users.uuid
+                WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
+                "#,
+                    Self::columns_sql(None),
+                    super::user_session::UserSession::columns_sql(Some("session_"))
+                ))
+                .bind(key_id)
+                .bind(key)
+                .fetch_optional(database.read())
+                .await?;
 
-        Ok(row.map(|row| {
-            (
-                Self::map(None, &row),
-                super::user_session::UserSession::map(Some("session_"), &row),
-            )
-        }))
+                Ok::<_, anyhow::Error>(row.map(|row| {
+                    (
+                        Self::map(None, &row),
+                        super::user_session::UserSession::map(Some("session_"), &row),
+                    )
+                }))
+            })
+            .await
     }
 
-    pub async fn by_api_key(
+    pub async fn by_api_key_cached(
         database: &crate::database::Database,
         key: &str,
-    ) -> Result<Option<(Self, super::user_api_key::UserApiKey)>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}, {}
-            FROM users
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN user_api_keys ON user_api_keys.user_uuid = users.uuid
-            WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
-            "#,
-            Self::columns_sql(None),
-            super::user_api_key::UserApiKey::columns_sql(Some("api_key_"))
-        ))
-        .bind(&key[0..16])
-        .bind(key)
-        .fetch_optional(database.read())
-        .await?;
+    ) -> Result<Option<(Self, super::user_api_key::UserApiKey)>, anyhow::Error> {
+        database
+            .cache
+            .cached(&format!("user::api_key::{key}"), 15, || async {
+                let row = sqlx::query(&format!(
+                    r#"
+                    SELECT {}, {}
+                    FROM users
+                    LEFT JOIN roles ON roles.uuid = users.role_uuid
+                    JOIN user_api_keys ON user_api_keys.user_uuid = users.uuid
+                    WHERE user_api_keys.key_start = $1 AND user_api_keys.key = crypt($2, user_api_keys.key)
+                    "#,
+                    Self::columns_sql(None),
+                    super::user_api_key::UserApiKey::columns_sql(Some("api_key_"))
+                ))
+                .bind(&key[0..16])
+                .bind(key)
+                .fetch_optional(database.read())
+                .await?;
 
-        Ok(row.map(|row| {
-            (
-                Self::map(None, &row),
-                super::user_api_key::UserApiKey::map(Some("api_key_"), &row),
-            )
-        }))
+                Ok::<_, anyhow::Error>(row.map(|row| {
+                    (
+                        Self::map(None, &row),
+                        super::user_api_key::UserApiKey::map(Some("api_key_"), &row),
+                    )
+                }))
+            })
+            .await
     }
 
     pub async fn by_credential_id(

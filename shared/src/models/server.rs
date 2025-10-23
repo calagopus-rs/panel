@@ -498,41 +498,46 @@ impl Server {
         Ok(row.map(|row| Self::map(None, &row)))
     }
 
-    pub async fn by_user_identifier(
+    pub async fn by_user_identifier_cached(
         database: &crate::database::Database,
         user: &super::user::User,
         identifier: &str,
     ) -> Result<Option<Self>, anyhow::Error> {
-        let query = format!(
-            r#"
-            SELECT {}, server_subusers.permissions, server_subusers.ignored_files
-            FROM servers
-            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
-            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
-            JOIN users ON users.uuid = servers.owner_uuid
-            LEFT JOIN roles ON roles.uuid = users.role_uuid
-            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
-            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
-            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
-            WHERE servers.{} = $3 AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $2)
-            "#,
-            Self::columns_sql(None),
-            match identifier.len() {
-                8 => "uuid_short",
-                36 => "uuid",
-                _ => return Ok(None),
-            }
-        );
+        database
+            .cache
+            .cached(&format!("user::{}::server::{identifier}", user.uuid), 5, || async {
+                let query = format!(
+                    r#"
+                    SELECT {}, server_subusers.permissions, server_subusers.ignored_files
+                    FROM servers
+                    LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+                    LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+                    JOIN users ON users.uuid = servers.owner_uuid
+                    LEFT JOIN roles ON roles.uuid = users.role_uuid
+                    JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+                    LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+                    JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+                    WHERE servers.{} = $3 AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1 OR $2)
+                    "#,
+                    Self::columns_sql(None),
+                    match identifier.len() {
+                        8 => "uuid_short",
+                        36 => "uuid",
+                        _ => return Ok::<_, anyhow::Error>(None),
+                    }
+                );
 
-        let mut row = sqlx::query(&query).bind(user.uuid).bind(user.admin);
-        row = match identifier.len() {
-            8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
-            36 => row.bind(uuid::Uuid::parse_str(identifier)?),
-            _ => return Ok(None),
-        };
-        let row = row.fetch_optional(database.read()).await?;
+                let mut row = sqlx::query(&query).bind(user.uuid).bind(user.admin);
+                row = match identifier.len() {
+                    8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
+                    36 => row.bind(uuid::Uuid::parse_str(identifier)?),
+                    _ => return Ok(None),
+                };
+                let row = row.fetch_optional(database.read()).await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+                Ok(row.map(|row| Self::map(None, &row)))
+            })
+            .await
     }
 
     pub async fn by_owner_uuid_with_pagination(

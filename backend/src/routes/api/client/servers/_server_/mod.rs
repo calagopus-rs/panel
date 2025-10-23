@@ -43,7 +43,7 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    let server = Server::by_user_identifier(&state.database, &user, &server[0]).await;
+    let server = Server::by_user_identifier_cached(&state.database, &user, &server[0]).await;
     let server = match server {
         Ok(Some(server)) => server,
         Ok(None) => {

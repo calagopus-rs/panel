@@ -89,7 +89,6 @@ impl Location {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
             WHERE locations.backup_configuration_uuid = $1 AND ($2 IS NULL OR locations.name ILIKE '%' || $2 || '%')
             ORDER BY locations.created
             LIMIT $3 OFFSET $4
@@ -123,7 +122,6 @@ impl Location {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM locations
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
             WHERE $1 IS NULL OR locations.name ILIKE '%' || $1 || '%'
             ORDER BY locations.created
             LIMIT $2 OFFSET $3
@@ -198,7 +196,6 @@ impl ByUuid for Location {
             r#"
             SELECT {}
             FROM locations
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
             WHERE locations.uuid = $1
             "#,
             Self::columns_sql(None)

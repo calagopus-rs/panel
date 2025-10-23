@@ -150,42 +150,45 @@ impl Node {
         Ok(row.get("uuid"))
     }
 
-    pub async fn by_token_id_token(
+    pub async fn by_token_id_token_cached(
         database: &crate::database::Database,
         token_id: &str,
         token: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
-        let row = sqlx::query(&format!(
-            r#"
-            SELECT {}
-            FROM nodes
-            JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
-            WHERE nodes.token_id = $1
-            "#,
-            Self::columns_sql(None)
-        ))
-        .bind(token_id)
-        .fetch_optional(database.read())
-        .await?;
+    ) -> Result<Option<Self>, anyhow::Error> {
+        database
+            .cache
+            .cached(&format!("node::token::{token_id}.{token}"), 10, || async {
+                let row = sqlx::query(&format!(
+                    r#"
+                    SELECT {}
+                    FROM nodes
+                    JOIN locations ON locations.uuid = nodes.location_uuid
+                    WHERE nodes.token_id = $1
+                    "#,
+                    Self::columns_sql(None)
+                ))
+                .bind(token_id)
+                .fetch_optional(database.read())
+                .await?;
 
-        Ok(if let Some(node) = row.map(|row| Self::map(None, &row)) {
-            if constant_time_eq::constant_time_eq(
-                database
-                    .decrypt(node.token.clone())
-                    .await
-                    .unwrap()
-                    .as_bytes(),
-                token.as_bytes(),
-            ) {
-                Some(node)
-            } else {
-                None
-            }
-        } else {
-            None
-        })
+                Ok::<_, anyhow::Error>(if let Some(node) = row.map(|row| Self::map(None, &row)) {
+                    if constant_time_eq::constant_time_eq(
+                        database
+                            .decrypt(node.token.clone())
+                            .await
+                            .unwrap()
+                            .as_bytes(),
+                        token.as_bytes(),
+                    ) {
+                        Some(node)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                })
+            })
+            .await
     }
 
     pub async fn by_location_uuid_with_pagination(
@@ -202,8 +205,6 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.location_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
             ORDER BY nodes.created
             LIMIT $3 OFFSET $4
@@ -239,8 +240,6 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.backup_configuration_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
             ORDER BY nodes.created
             LIMIT $3 OFFSET $4
@@ -275,8 +274,6 @@ impl Node {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE $1 IS NULL OR nodes.name ILIKE '%' || $1 || '%'
             ORDER BY nodes.created
             LIMIT $2 OFFSET $3
@@ -459,8 +456,6 @@ impl ByUuid for Node {
             SELECT {}, {}
             FROM nodes
             JOIN locations ON locations.uuid = nodes.location_uuid
-            LEFT JOIN backup_configurations location_backup_configurations ON location_backup_configurations.uuid = locations.backup_configuration_uuid
-            LEFT JOIN backup_configurations node_backup_configurations ON node_backup_configurations.uuid = nodes.backup_configuration_uuid
             WHERE nodes.uuid = $1
             "#,
             Self::columns_sql(None),
