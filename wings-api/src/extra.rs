@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+pub type Config = super::system_config::get::Response200;
+
 #[derive(Debug, ToSchema, Deserialize, Serialize, Default, Clone, Copy)]
 #[serde(rename_all = "snake_case")]
 #[schema(rename_all = "snake_case")]

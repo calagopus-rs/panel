@@ -331,6 +331,27 @@ impl Node {
         Ok(())
     }
 
+    pub async fn cached_configuration(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<wings_api::Config, anyhow::Error> {
+        database
+            .cache
+            .cached(
+                &format!("node::{}::configuration", self.uuid),
+                120,
+                || async {
+                    match self.api_client(database).get_system_config().await {
+                        Ok(config) => Ok(config),
+                        Err((status, err)) => {
+                            Err(anyhow::anyhow!("status code {status}: {}", err.error))
+                        }
+                    }
+                },
+            )
+            .await
+    }
+
     pub async fn reset_token(
         &self,
         database: &crate::database::Database,

@@ -144,7 +144,7 @@ impl Cache {
         T: Serialize + DeserializeOwned + Send,
         F: FnOnce() -> Fut,
         Fut: Future<Output = Result<T, FutErr>>,
-        FutErr: Into<anyhow::Error> + std::error::Error + Send + Sync + 'static,
+        FutErr: Into<anyhow::Error> + Send + Sync + 'static,
     {
         let now = std::time::Instant::now();
 
@@ -232,7 +232,10 @@ impl Cache {
         }
 
         tracing::debug!("executing compute");
-        let result = fn_compute().await?;
+        let result = match fn_compute().await {
+            Ok(result) => result,
+            Err(err) => return Err(err.into()),
+        };
         tracing::debug!("executed compute");
 
         let serialized = bincode::serde::encode_to_vec(&result, bincode::config::standard())?;
