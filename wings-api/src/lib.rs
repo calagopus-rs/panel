@@ -255,6 +255,7 @@ nestify::nest! {
                 #[schema(inline)]
                 pub remove_allowed: Vec<String>,
             },
+
         },
 
         #[schema(inline)]
@@ -290,6 +291,30 @@ pub enum ServerState {
     Stopping,
     #[serde(rename = "running")]
     Running,
+}
+
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
+pub enum SystemBackupsDdupBakCompressionFormat {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "deflate")]
+    Deflate,
+    #[serde(rename = "gzip")]
+    Gzip,
+    #[serde(rename = "brotli")]
+    Brotli,
+}
+
+#[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
+pub enum SystemDiskLimiterMode {
+    #[serde(rename = "none")]
+    None,
+    #[serde(rename = "btrfs_subvolume")]
+    BtrfsSubvolume,
+    #[serde(rename = "zfs_dataset")]
+    ZfsDataset,
+    #[serde(rename = "xfs_quota")]
+    XfsQuota,
 }
 
 #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
@@ -1283,6 +1308,352 @@ pub mod system {
                 pub os: String,
                 #[schema(inline)]
                 pub version: String,
+            }
+        }
+
+        pub type Response = Response200;
+    }
+}
+pub mod system_config {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub debug: bool,
+                #[schema(inline)]
+                pub app_name: String,
+                #[schema(inline)]
+                pub uuid: uuid::Uuid,
+                #[schema(inline)]
+                pub token_id: String,
+                #[schema(inline)]
+                pub token: String,
+                #[schema(inline)]
+                pub api: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Api {
+                    #[schema(inline)]
+                    pub host: String,
+                    #[schema(inline)]
+                    pub port: u32,
+                    #[schema(inline)]
+                    pub ssl: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200ApiSsl {
+                        #[schema(inline)]
+                        pub enabled: bool,
+                        #[schema(inline)]
+                        pub cert: String,
+                        #[schema(inline)]
+                        pub key: String,
+                    }>,
+                    #[schema(inline)]
+                    pub disable_openapi_docs: bool,
+                    #[schema(inline)]
+                    pub disable_remote_download: bool,
+                    #[schema(inline)]
+                    pub server_remote_download_limit: u64,
+                    #[schema(inline)]
+                    pub remote_download_blocked_cidrs: Vec<String>,
+                    #[schema(inline)]
+                    pub disable_directory_size: bool,
+                    #[schema(inline)]
+                    pub directory_entry_limit: u64,
+                    #[schema(inline)]
+                    pub send_offline_server_logs: bool,
+                    #[schema(inline)]
+                    pub file_search_threads: u64,
+                    #[schema(inline)]
+                    pub file_decompression_threads: u64,
+                    #[schema(inline)]
+                    pub file_compression_threads: u64,
+                    #[schema(inline)]
+                    pub upload_limit: u64,
+                    #[schema(inline)]
+                    pub max_jwt_uses: u64,
+                    #[schema(inline)]
+                    pub trusted_proxies: Vec<String>,
+                },
+
+                #[schema(inline)]
+                pub system: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200System {
+                    #[schema(inline)]
+                    pub root_directory: String,
+                    #[schema(inline)]
+                    pub log_directory: String,
+                    #[schema(inline)]
+                    pub data: String,
+                    #[schema(inline)]
+                    pub archive_directory: String,
+                    #[schema(inline)]
+                    pub backup_directory: String,
+                    #[schema(inline)]
+                    pub tmp_directory: String,
+                    #[schema(inline)]
+                    pub username: String,
+                    #[schema(inline)]
+                    pub timezone: String,
+                    #[schema(inline)]
+                    pub user: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUser {
+                        #[schema(inline)]
+                        pub rootless: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUserRootless {
+                            #[schema(inline)]
+                            pub enabled: bool,
+                            #[schema(inline)]
+                            pub container_uid: u32,
+                            #[schema(inline)]
+                            pub container_gid: u32,
+                        }>,
+                        #[schema(inline)]
+                        pub uid: u32,
+                        #[schema(inline)]
+                        pub gid: u32,
+                    }>,
+                    #[schema(inline)]
+                    pub passwd: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemPasswd {
+                        #[schema(inline)]
+                        pub enabled: bool,
+                        #[schema(inline)]
+                        pub directory: String,
+                    }>,
+                    #[schema(inline)]
+                    pub disk_check_interval: u64,
+                    #[schema(inline)]
+                    pub disk_check_threads: u64,
+                    #[schema(inline)]
+                    pub disk_limiter_mode: Option<SystemDiskLimiterMode>,
+                    #[schema(inline)]
+                    pub activity_send_interval: u64,
+                    #[schema(inline)]
+                    pub activity_send_count: u64,
+                    #[schema(inline)]
+                    pub check_permissions_on_boot: bool,
+                    #[schema(inline)]
+                    pub check_permissions_on_boot_threads: u64,
+                    #[schema(inline)]
+                    pub websocket_log_count: u64,
+                    #[schema(inline)]
+                    pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftp {
+                        #[schema(inline)]
+                        pub bind_address: String,
+                        #[schema(inline)]
+                        pub bind_port: u32,
+                        #[schema(inline)]
+                        pub read_only: bool,
+                        #[schema(inline)]
+                        pub key_algorithm: String,
+                        #[schema(inline)]
+                        pub disable_password_auth: bool,
+                        #[schema(inline)]
+                        pub directory_entry_limit: u64,
+                        #[schema(inline)]
+                        pub directory_entry_send_amount: u64,
+                        #[schema(inline)]
+                        pub shell: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShell {
+                            #[schema(inline)]
+                            pub enabled: bool,
+                            #[schema(inline)]
+                            pub cli: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShellCli {
+                                #[schema(inline)]
+                                pub name: String,
+                            }>,
+                        }>,
+                    }>,
+                    #[schema(inline)]
+                    pub crash_detection: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemCrashDetection {
+                        #[schema(inline)]
+                        pub enabled: bool,
+                        #[schema(inline)]
+                        pub detect_clean_exit_as_crash: bool,
+                        #[schema(inline)]
+                        pub timeout: u64,
+                    }>,
+                    #[schema(inline)]
+                    pub backups: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackups {
+                        #[schema(inline)]
+                        pub write_limit: u64,
+                        #[schema(inline)]
+                        pub read_limit: u64,
+                        #[schema(inline)]
+                        pub compression_level: Option<CompressionLevel>,
+                        #[schema(inline)]
+                        pub mounting: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsMounting {
+                            #[schema(inline)]
+                            pub enabled: bool,
+                            #[schema(inline)]
+                            pub path: String,
+                        }>,
+                        #[schema(inline)]
+                        pub wings: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsWings {
+                            #[schema(inline)]
+                            pub create_threads: u64,
+                            #[schema(inline)]
+                            pub restore_threads: u64,
+                            #[schema(inline)]
+                            pub archive_format: Option<ArchiveFormat>,
+                        }>,
+                        #[schema(inline)]
+                        pub s3: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsS3 {
+                            #[schema(inline)]
+                            pub create_threads: u64,
+                            #[schema(inline)]
+                            pub part_upload_timeout: u64,
+                            #[schema(inline)]
+                            pub retry_limit: u64,
+                        }>,
+                        #[schema(inline)]
+                        pub ddup_bak: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsDdupBak {
+                            #[schema(inline)]
+                            pub create_threads: u64,
+                            #[schema(inline)]
+                            pub compression_format: Option<SystemBackupsDdupBakCompressionFormat>,
+                        }>,
+                        #[schema(inline)]
+                        pub restic: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsRestic {
+                            #[schema(inline)]
+                            pub repository: String,
+                            #[schema(inline)]
+                            pub password_file: String,
+                            #[schema(inline)]
+                            pub retry_lock_seconds: u64,
+                            #[schema(inline)]
+                            pub environment: IndexMap<String, String>,
+                        }>,
+                        #[schema(inline)]
+                        pub btrfs: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsBtrfs {
+                            #[schema(inline)]
+                            pub restore_threads: u64,
+                            #[schema(inline)]
+                            pub create_read_only: bool,
+                        }>,
+                        #[schema(inline)]
+                        pub zfs: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsZfs {
+                            #[schema(inline)]
+                            pub restore_threads: u64,
+                        }>,
+                    }>,
+                    #[schema(inline)]
+                    pub transfers: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemTransfers {
+                        #[schema(inline)]
+                        pub download_limit: u64,
+                    }>,
+                },
+
+                #[schema(inline)]
+                pub docker: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Docker {
+                    #[schema(inline)]
+                    pub socket: String,
+                    #[schema(inline)]
+                    pub server_name_in_container_name: bool,
+                    #[schema(inline)]
+                    pub delete_container_on_stop: bool,
+                    #[schema(inline)]
+                    pub network: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetwork {
+                        #[schema(inline)]
+                        pub interface: String,
+                        #[schema(inline)]
+                        pub disable_interface_binding: bool,
+                        #[schema(inline)]
+                        pub dns: Vec<String>,
+                        #[schema(inline)]
+                        pub name: String,
+                        #[schema(inline)]
+                        pub ispn: bool,
+                        #[schema(inline)]
+                        pub driver: String,
+                        #[schema(inline)]
+                        pub mode: String,
+                        #[schema(inline)]
+                        pub is_internal: bool,
+                        #[schema(inline)]
+                        pub enable_icc: bool,
+                        #[schema(inline)]
+                        pub network_mtu: u64,
+                        #[schema(inline)]
+                        pub interfaces: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfaces {
+                            #[schema(inline)]
+                            pub v4: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV4 {
+                                #[schema(inline)]
+                                pub subnet: String,
+                                #[schema(inline)]
+                                pub gateway: String,
+                            }>,
+                            #[schema(inline)]
+                            pub v6: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV6 {
+                                #[schema(inline)]
+                                pub subnet: String,
+                                #[schema(inline)]
+                                pub gateway: String,
+                            }>,
+                        }>,
+                    }>,
+                    #[schema(inline)]
+                    pub domainname: String,
+                    #[schema(inline)]
+                    pub registries: IndexMap<String, serde_json::Value>,
+                    #[schema(inline)]
+                    pub tmpfs_size: u64,
+                    #[schema(inline)]
+                    pub container_pid_limit: u64,
+                    #[schema(inline)]
+                    pub installer_limits: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerInstallerLimits {
+                        #[schema(inline)]
+                        pub timeout: u64,
+                        #[schema(inline)]
+                        pub memory: u64,
+                        #[schema(inline)]
+                        pub cpu: u64,
+                    }>,
+                    #[schema(inline)]
+                    pub overhead: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerOverhead {
+                        #[schema(inline)]
+                        pub r#override: bool,
+                        #[schema(inline)]
+                        pub default_multiplier: f64,
+                        #[schema(inline)]
+                        pub multipliers: IndexMap<String, f64>,
+                    }>,
+                    #[schema(inline)]
+                    pub userns_mode: String,
+                    #[schema(inline)]
+                    pub log_config: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerLogConfig {
+                        #[schema(inline)]
+                        pub r#type: String,
+                        #[schema(inline)]
+                        pub config: IndexMap<String, String>,
+                    }>,
+                },
+
+                #[schema(inline)]
+                pub throttles: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Throttles {
+                    #[schema(inline)]
+                    pub enabled: bool,
+                    #[schema(inline)]
+                    pub lines: u64,
+                    #[schema(inline)]
+                    pub line_reset_interval: u64,
+                },
+
+                #[schema(inline)]
+                pub remote: String,
+                #[schema(inline)]
+                pub remote_query: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200RemoteQuery {
+                    #[schema(inline)]
+                    pub timeout: u64,
+                    #[schema(inline)]
+                    pub boot_servers_per_page: u64,
+                    #[schema(inline)]
+                    pub retry_limit: u64,
+                },
+
+                #[schema(inline)]
+                pub allowed_mounts: Vec<String>,
+                #[schema(inline)]
+                pub allowed_origins: Vec<String>,
+                #[schema(inline)]
+                pub allow_cors_private_network: bool,
+                #[schema(inline)]
+                pub ignore_panel_config_updates: bool,
             }
         }
 

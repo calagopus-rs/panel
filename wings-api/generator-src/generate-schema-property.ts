@@ -37,12 +37,18 @@ export function convertType(object: oas31.SchemaObject | oas31.ReferenceObject):
     return 'serde_json::Value'
 }
 
+function rustPropertyEscape(property: string): string {
+    const keywords = ['type', 'override']
+
+    return keywords.includes(property) ? `r#${property}` : property
+}
+
 export default function generateSchemaProperty(output: fs.WriteStream, _spaces: number, parent: string, name: string, object: oas31.SchemaObject | oas31.ReferenceObject) {
     const spaces = ' '.repeat(_spaces)
 
     output.write(`${spaces}#[schema(inline)]\n`)
     output.write(`${spaces}${name !== snakeCase(name) ? `#[serde(rename = "${name}")] ` : ''}`)
-    output.write(`pub ${snakeCase(name)}: `)
+    output.write(`pub ${rustPropertyEscape(snakeCase(name))}: `)
 
     if (object.$ref) {
         output.write(`${object.$ref.split('/').at(-1)},\n`)

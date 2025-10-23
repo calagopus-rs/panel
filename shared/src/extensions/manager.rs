@@ -33,12 +33,11 @@ impl ExtensionManager {
         self.vec.read().await
     }
 
-    #[inline]
     pub async fn call(
         &self,
         name: impl AsRef<str>,
-        args: &[Box<dyn std::any::Any>],
-    ) -> Option<Box<dyn std::any::Any>> {
+        args: &[super::ExtensionCallValue],
+    ) -> Option<super::ExtensionCallValue> {
         for ext in self.extensions().await.iter() {
             if let Some(ret) = ext.process_call(name.as_ref(), args).await {
                 return Some(ret);
