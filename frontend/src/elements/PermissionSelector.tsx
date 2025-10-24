@@ -1,37 +1,10 @@
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
-import {
-  faStopwatch,
-  faBoxArchive,
-  faBriefcase,
-  faChevronDown,
-  faChevronUp,
-  faCog,
-  faDatabase,
-  faFolderOpen,
-  faNetworkWired,
-  faPlay,
-  faTerminal,
-  faUsers,
-  faX,
-  IconDefinition,
-} from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faChevronUp, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Title } from '@mantine/core';
 import { useState } from 'react';
-
-const categoryIcons: { [key: string]: IconDefinition } = {
-  control: faTerminal,
-  files: faFolderOpen,
-  databases: faDatabase,
-  subusers: faUsers,
-  backups: faBoxArchive,
-  schedules: faStopwatch,
-  allocations: faNetworkWired,
-  startup: faPlay,
-  settings: faCog,
-  activity: faBriefcase,
-};
+import { permissionCategoryIconMapping } from '@/lib/enums';
 
 export default ({
   permissions,
@@ -107,7 +80,7 @@ export default ({
             <Card key={category}>
               <div className={'flex items-center justify-between gap-1'}>
                 <div className={'flex items-center gap-3'}>
-                  <FontAwesomeIcon icon={categoryIcons[category]} className={'w-5 h-5 text-gray-50'} />
+                  <FontAwesomeIcon icon={permissionCategoryIconMapping[category]} className={'w-5 h-5 text-gray-50'} />
                   <div>
                     <Title order={5} c={'white'} className={'uppercase'}>
                       {category}

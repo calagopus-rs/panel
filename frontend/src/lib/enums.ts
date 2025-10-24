@@ -14,7 +14,22 @@ import {
   faExpand,
   faGear,
   faCode,
+  faFolderOpen,
+  faUsers,
+  faBoxArchive,
+  faStopwatch,
+  faNetworkWired,
+  faPlay,
+  faCog,
+  faBriefcase,
+  faScroll,
+  faFileZipper,
+  faEarthAmerica,
+  faServer,
+  faKiwiBird,
+  faEgg,
 } from '@fortawesome/free-solid-svg-icons';
+import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
 
 export const captchaProviderTypeLabelMapping: Record<CaptchaProvider['type'], string> = {
   none: 'None',
@@ -250,4 +265,27 @@ export const sshKeyProviderLabelMapping: Record<SshKeyProvider, string> = {
   github: 'GitHub',
   gitlab: 'GitLab',
   launchpad: 'Launchpad',
+};
+
+export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
+  activity: faBriefcase,
+  allocations: faNetworkWired,
+  'backup-configurations': faFileZipper,
+  backups: faBoxArchive,
+  control: faTerminal,
+  'database-hosts': faDatabase,
+  databases: faDatabase,
+  eggs: faEgg,
+  files: faFolderOpen,
+  locations: faEarthAmerica,
+  mounts: faFolder,
+  nests: faKiwiBird,
+  nodes: faServer,
+  roles: faScroll,
+  schedules: faStopwatch,
+  servers: faComputer,
+  settings: faCog,
+  startup: faPlay,
+  subusers: faUsers,
+  users: faUsers,
 };

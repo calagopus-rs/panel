@@ -1,6 +1,6 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faDesktop, faGlobe, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -44,7 +44,7 @@ export default () => {
           },
           {
             name: 'Locations',
-            icon: faGlobe,
+            icon: faEarthAmerica,
             link: `/admin/backup-configurations/${params.id}/locations`,
           },
           {

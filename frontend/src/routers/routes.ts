@@ -36,7 +36,6 @@ import {
   faCog,
   faCrow,
   faDatabase,
-  faDesktop,
   faEarthAmerica,
   faFileZipper,
   faFolder,
@@ -58,6 +57,7 @@ import {
 import React from 'react';
 import AdminBackupConfigurations from '@/pages/admin/backupConfigurations/AdminBackupConfigurations';
 import AdminRoles from '@/pages/admin/roles/AdminRoles';
+import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
 
 interface RouteDefinition {
   name: string | undefined;
@@ -163,7 +163,7 @@ const routes: Routes = {
     },
     {
       name: 'Servers',
-      icon: faDesktop,
+      icon: faComputer,
       path: '/servers/*',
       element: AdminServers,
     },
