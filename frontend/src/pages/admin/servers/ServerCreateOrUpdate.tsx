@@ -249,7 +249,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 <Select
                   withAsterisk
                   label={'Nest'}
-                  placeholder={'nest'}
+                  placeholder={'Nest'}
                   value={selectedNestUuid}
                   onChange={(value) => setSelectedNestUuid(value)}
                   data={nests.items.map((nest) => ({

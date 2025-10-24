@@ -175,7 +175,7 @@ export default ({ contextUser }: { contextUser?: User }) => {
           <Select
             withAsterisk
             label={'Role'}
-            placeholder={'role'}
+            placeholder={'Role'}
             value={user.roleUuid}
             onChange={(value) => setUser({ ...user, roleUuid: value })}
             data={roles.items.map((nest) => ({
