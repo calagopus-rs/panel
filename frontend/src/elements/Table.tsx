@@ -44,7 +44,7 @@ interface PaginationProps<T> {
 }
 
 export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T>) {
-  const totalPages = Math.ceil(data.total / data.perPage);
+  const totalPages = data.total === 0 ? 0 : Math.ceil(data.total / data.perPage);
 
   const setPage = (page: number) => {
     if (page < 1 || page > totalPages) {
