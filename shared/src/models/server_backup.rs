@@ -442,7 +442,7 @@ impl ServerBackup {
                                 s3_configuration.decrypt(database).await?;
 
                                 let client = s3_configuration.into_client()?;
-                                let file_path = match self.upload_path.as_ref() {
+                                let file_path = match &self.upload_path {
                                     Some(path) => path,
                                     None => &Self::s3_path(server.uuid, self.uuid),
                                 };
@@ -482,13 +482,13 @@ impl ServerBackup {
 
         match self.disk {
             BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3.clone() {
+                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
                     s3_configuration.decrypt(database).await?;
 
                     let client = s3_configuration
                         .into_client()
                         .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
-                    let file_path = match self.upload_path.as_ref() {
+                    let file_path = match &self.upload_path {
                         Some(path) => path,
                         None => &Self::s3_path(server.uuid, self.uuid),
                     };
@@ -554,9 +554,7 @@ impl ServerBackup {
                         .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
                     let file_path = match self.upload_path.as_ref() {
                         Some(path) => path,
-                        None => {
-                            return Err(anyhow::anyhow!("upload path not found"));
-                        }
+                        None => return Err(anyhow::anyhow!("upload path not found")),
                     };
 
                     if let Err(err) = client.delete_object(file_path).await {

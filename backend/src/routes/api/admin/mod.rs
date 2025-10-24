@@ -36,7 +36,12 @@ pub async fn auth(
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    if !user.admin {
+    if !user.admin
+        && !user
+            .role
+            .as_ref()
+            .map_or(false, |r| !r.admin_permissions.is_empty())
+    {
         return Ok(ApiResponse::error("unauthorized")
             .with_status(StatusCode::UNAUTHORIZED)
             .into_response());

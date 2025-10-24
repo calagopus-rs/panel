@@ -232,7 +232,6 @@ async fn main() {
     ));
 
     let env = Arc::new(env);
-    //let s3 = Arc::new(s3::S3::new(env.clone()).await);
     let jwt = Arc::new(shared::jwt::Jwt::new(&env));
     let cache = Arc::new(shared::cache::Cache::new(&env).await);
     let database = Arc::new(shared::database::Database::new(&env, cache.clone()).await);

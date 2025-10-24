@@ -173,11 +173,7 @@ impl Node {
 
                 Ok::<_, anyhow::Error>(if let Some(node) = row.map(|row| Self::map(None, &row)) {
                     if constant_time_eq::constant_time_eq(
-                        database
-                            .decrypt(node.token.clone())
-                            .await
-                            .unwrap()
-                            .as_bytes(),
+                        database.decrypt(node.token.clone()).await?.as_bytes(),
                         token.as_bytes(),
                     ) {
                         Some(node)

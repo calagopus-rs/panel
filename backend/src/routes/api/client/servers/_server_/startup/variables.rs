@@ -133,16 +133,15 @@ mod put {
         validator_variables.reserve(variables.len());
 
         for variable in variables {
+            let value = if variable.variable.env_variable == data.env_variable {
+                data.value.clone()
+            } else {
+                variable.value
+            };
+
             validator_variables.insert(
-                variable.variable.env_variable.clone(),
-                (
-                    variable.variable.rules,
-                    if variable.variable.env_variable == data.env_variable {
-                        data.value.clone()
-                    } else {
-                        variable.value
-                    },
-                ),
+                variable.variable.env_variable,
+                (variable.variable.rules, value),
             );
         }
 

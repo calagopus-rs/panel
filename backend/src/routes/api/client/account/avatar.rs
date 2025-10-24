@@ -43,7 +43,7 @@ mod put {
             }
         };
 
-        let image = match image.decode() {
+        let image = match tokio::task::spawn_blocking(move || image.decode()).await? {
             Ok(image) => image,
             Err(_) => {
                 return ApiResponse::error("image: unable to decode")

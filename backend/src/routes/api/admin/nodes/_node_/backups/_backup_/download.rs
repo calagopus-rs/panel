@@ -47,7 +47,7 @@ mod get {
                 .ok();
         }
 
-        let mut backup_configuration = match backup.0.backup_configuration {
+        let backup_configuration = match &backup.backup_configuration {
             Some(backup_configuration) => {
                 backup_configuration.fetch_cached(&state.database).await?
             }
@@ -58,12 +58,12 @@ mod get {
             }
         };
 
-        if matches!(backup.0.disk, BackupDisk::S3)
-            && let Some(s3_configuration) = &mut backup_configuration.backup_configs.s3
+        if matches!(backup.disk, BackupDisk::S3)
+            && let Some(mut s3_configuration) = backup_configuration.backup_configs.s3
         {
             s3_configuration.decrypt(&state.database).await?;
 
-            let client = match s3_configuration.clone().into_client() {
+            let client = match s3_configuration.into_client() {
                 Ok(client) => client,
                 Err(err) => {
                     tracing::error!("Failed to create S3 client: {:#?}", err);
@@ -73,7 +73,7 @@ mod get {
                         .ok();
                 }
             };
-            let file_path = match backup.0.upload_path.as_ref() {
+            let file_path = match &backup.upload_path {
                 Some(path) => path,
                 None => {
                     return ApiResponse::error("upload path not found")
@@ -109,7 +109,7 @@ mod get {
                     issued_at: Some(chrono::Utc::now().timestamp()),
                     jwt_id: user.uuid.to_string(),
                 },
-                backup_uuid: backup.0.uuid,
+                backup_uuid: backup.uuid,
                 unique_id: uuid::Uuid::new_v4(),
             },
         )?;

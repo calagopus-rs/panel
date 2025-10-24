@@ -67,7 +67,7 @@ mod get {
                 .ok();
         }
 
-        let mut backup_configuration = match backup.0.backup_configuration {
+        let backup_configuration = match &backup.backup_configuration {
             Some(backup_configuration) => {
                 backup_configuration.fetch_cached(&state.database).await?
             }
@@ -78,12 +78,12 @@ mod get {
             }
         };
 
-        if matches!(backup.0.disk, BackupDisk::S3)
-            && let Some(s3_configuration) = &mut backup_configuration.backup_configs.s3
+        if matches!(backup.disk, BackupDisk::S3)
+            && let Some(mut s3_configuration) = backup_configuration.backup_configs.s3
         {
             s3_configuration.decrypt(&state.database).await?;
 
-            let client = match s3_configuration.clone().into_client() {
+            let client = match s3_configuration.into_client() {
                 Ok(client) => client,
                 Err(err) => {
                     tracing::error!("Failed to create S3 client: {:#?}", err);
@@ -93,9 +93,9 @@ mod get {
                         .ok();
                 }
             };
-            let file_path = match backup.0.upload_path.as_ref() {
+            let file_path = match &backup.upload_path {
                 Some(path) => path,
-                None => &ServerBackup::s3_path(server.uuid, backup.0.uuid),
+                None => &ServerBackup::s3_path(server.uuid, backup.uuid),
             };
 
             let url = client.presign_get(file_path, 15 * 60, None).await?;
@@ -104,8 +104,8 @@ mod get {
                 .log(
                     "server:backup.download",
                     serde_json::json!({
-                        "backup": backup.0.uuid,
-                        "name": backup.0.name,
+                        "backup": backup.uuid,
+                        "name": backup.name,
                     }),
                 )
                 .await;
@@ -138,7 +138,7 @@ mod get {
                     issued_at: Some(chrono::Utc::now().timestamp()),
                     jwt_id: user.uuid.to_string(),
                 },
-                backup_uuid: backup.0.uuid,
+                backup_uuid: backup.uuid,
                 server_uuid: server.uuid,
                 unique_id: uuid::Uuid::new_v4(),
             },
@@ -156,8 +156,8 @@ mod get {
             .log(
                 "server:backup.download",
                 serde_json::json!({
-                    "uuid": backup.0.uuid,
-                    "name": backup.0.name,
+                    "uuid": backup.uuid,
+                    "name": backup.name,
                 }),
             )
             .await;

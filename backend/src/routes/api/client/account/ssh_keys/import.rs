@@ -90,7 +90,7 @@ mod post {
                     }
                 };
 
-                for raw_ssh_key in raw_ssh_keys {
+                for raw_ssh_key in raw_ssh_keys.into_iter().take(50) {
                     let public_key = match russh::keys::PublicKey::from_openssh(&raw_ssh_key.key) {
                         Ok(key) => key,
                         Err(_) => continue,
@@ -149,7 +149,7 @@ mod post {
                     }
                 };
 
-                for raw_ssh_key in raw_ssh_keys {
+                for raw_ssh_key in raw_ssh_keys.into_iter().take(50) {
                     let public_key = match russh::keys::PublicKey::from_openssh(&raw_ssh_key.key) {
                         Ok(key) => key,
                         Err(_) => continue,
@@ -222,7 +222,7 @@ mod post {
                     }
                 };
 
-                for (i, raw_ssh_key) in raw_ssh_keys.entries.into_iter().enumerate() {
+                for (i, raw_ssh_key) in raw_ssh_keys.entries.into_iter().take(50).enumerate() {
                     let public_key = match russh::keys::PublicKey::from_openssh(&format!(
                         "ssh-{} {}",
                         raw_ssh_key.keytype.to_lowercase(),
