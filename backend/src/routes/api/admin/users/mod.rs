@@ -87,6 +87,7 @@ mod post {
         models::{
             ByUuid,
             admin_activity::GetAdminActivityLogger,
+            role::Role,
             user::{GetPermissionManager, User},
         },
         response::{ApiResponse, ApiResponseResult},
@@ -96,6 +97,8 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
+        role_uuid: Option<uuid::Uuid>,
+
         #[validate(
             length(min = 3, max = 15),
             regex(path = "*shared::models::user::USERNAME_REGEX")
@@ -143,8 +146,24 @@ mod post {
 
         permissions.has_admin_permission("users.create")?;
 
+        let role = if let Some(role_uuid) = data.role_uuid
+            && !role_uuid.is_nil()
+        {
+            match Role::by_uuid_optional(&state.database, role_uuid).await? {
+                Some(role) => Some(role),
+                None => {
+                    return ApiResponse::error("role not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            }
+        } else {
+            None
+        };
+
         let user = match User::create(
             &state.database,
+            role.as_ref().map(|role| role.uuid),
             &data.username,
             &data.email,
             &data.name_first,
@@ -172,6 +191,7 @@ mod post {
                 "user:create",
                 serde_json::json!({
                     "uuid": user.uuid,
+                    "role_uuid": role.map(|r| r.uuid),
                     "username": user.username,
                     "email": user.email,
                     "name_first": user.name_first,

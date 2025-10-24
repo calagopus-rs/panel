@@ -79,6 +79,7 @@ mod post {
 
         let user = match User::create(
             &state.database,
+            None,
             &data.username,
             &data.email,
             &data.name_first,

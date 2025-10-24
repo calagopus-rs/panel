@@ -237,6 +237,7 @@ impl BaseModel for User {
 impl User {
     pub async fn create(
         database: &crate::database::Database,
+        role_uuid: Option<uuid::Uuid>,
         username: &str,
         email: &str,
         name_first: &str,
@@ -246,11 +247,12 @@ impl User {
     ) -> Result<uuid::Uuid, sqlx::Error> {
         let row = sqlx::query(
             r#"
-            INSERT INTO users (username, email, name_first, name_last, password, admin)
-            VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf', 8)), $6)
+            INSERT INTO users (role_uuid, username, email, name_first, name_last, password, admin)
+            VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf', 8)), $7)
             RETURNING users.uuid
             "#,
         )
+        .bind(role_uuid)
         .bind(username)
         .bind(email)
         .bind(name_first)

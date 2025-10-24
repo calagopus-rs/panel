@@ -47,9 +47,7 @@ mod post {
 
         let user = match User::by_email(&state.database, &data.email).await? {
             Some(user) => user,
-            None => {
-                return ApiResponse::json(Response {}).ok();
-            }
+            None => return ApiResponse::json(Response {}).ok(),
         };
 
         tokio::spawn(async move {

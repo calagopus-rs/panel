@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users\n            SET role_uuid = $2, username = $3, email = $4, name_first = $5, name_last = $6, admin = $7\n            WHERE users.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d343b89e29b8df73e826d9fc3e8bf0f00c8a6524a08641a45d8b83fb1b6e5f86"
+}

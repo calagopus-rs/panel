@@ -145,14 +145,7 @@ mod post {
             }
         }
 
-        let user = match User::by_uuid_optional(&state.database, payload.user_uuid).await? {
-            Some(user) => user,
-            None => {
-                return ApiResponse::error("user not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
+        let user = User::by_uuid(&state.database, payload.user_uuid).await?;
 
         let key = UserSession::create(
             &state.database,

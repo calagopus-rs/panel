@@ -177,7 +177,9 @@ mod patch {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        models::{
+            ByUuid, admin_activity::GetAdminActivityLogger, role::Role, user::GetPermissionManager,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -185,6 +187,8 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
+        role_uuid: Option<uuid::Uuid>,
+
         #[validate(
             length(min = 3, max = 15),
             regex(path = "*shared::models::user::USERNAME_REGEX")
@@ -238,6 +242,22 @@ mod patch {
 
         permissions.has_admin_permission("users.update")?;
 
+        if let Some(role_uuid) = data.role_uuid {
+            if role_uuid.is_nil() {
+                user.role = None;
+            } else {
+                let role = match Role::by_uuid_optional(&state.database, role_uuid).await? {
+                    Some(role) => role,
+                    None => {
+                        return ApiResponse::error("role not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+                };
+
+                user.role = Some(role);
+            }
+        }
         if let Some(username) = data.username {
             user.username = username;
         }
@@ -268,14 +288,15 @@ mod patch {
 
         match sqlx::query!(
             "UPDATE users
-            SET username = $1, email = $2, name_first = $3, name_last = $4, admin = $5
-            WHERE users.uuid = $6",
+            SET role_uuid = $2, username = $3, email = $4, name_first = $5, name_last = $6, admin = $7
+            WHERE users.uuid = $1",
+            user.uuid,
+            user.role.as_ref().map(|role| role.uuid),
             user.username,
             user.email,
             user.name_first,
             user.name_last,
             user.admin,
-            user.uuid,
         )
         .execute(state.database.write())
         .await
@@ -300,6 +321,7 @@ mod patch {
                 "user:update",
                 serde_json::json!({
                     "uuid": user.uuid,
+                    "role_uuid": user.role.as_ref().map(|r| r.uuid),
                     "username": user.username,
                     "email": user.email,
                     "name_first": user.name_first,
