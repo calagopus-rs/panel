@@ -17,7 +17,7 @@ export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
   const { availablePermissions } = useGlobalStore();
 
   const [email, setEmail] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set(subuser?.permissions ?? []));
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(subuser?.permissions ?? []);
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
   const captchaRef = useRef(null);
 

@@ -8,7 +8,7 @@ export interface ApiKeySlice {
   setApiKeys: (keys: ResponseMeta<UserApiKey>) => void;
   addApiKey: (key: UserApiKey) => void;
   removeApiKey: (key: UserApiKey) => void;
-  updateApiKey: (uuid: string, key: Partial<UserApiKey>) => void;
+  updateApiKey: (uuid: string, key: UpdateUserApiKey) => void;
 }
 
 export const createApiKeysSlice: StateCreator<UserStore, [], [], ApiKeySlice> = (set): ApiKeySlice => ({

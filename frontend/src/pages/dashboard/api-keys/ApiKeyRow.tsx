@@ -10,8 +10,8 @@ import { useUserStore } from '@/stores/user';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import deleteApiKey from '@/api/me/api-keys/deleteApiKey';
-import ApiKeyEditModal from './modals/ApiKeyEditModal';
 import CopyOnClick from '@/elements/CopyOnClick';
+import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
 
 export default ({ apiKey }: { apiKey: UserApiKey }) => {
   const { addToast } = useToast();
@@ -32,8 +32,11 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
 
   return (
     <>
-      <ApiKeyEditModal apiKey={apiKey} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
-
+      <ApiKeyCreateOrUpdateModal
+        contextApiKey={apiKey}
+        opened={openModal === 'edit'}
+        onClose={() => setOpenModal(null)}
+      />
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -67,7 +70,9 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
               </CopyOnClick>
             </TableData>
 
-            <TableData>{apiKey.permissions.length}</TableData>
+            <TableData>
+              {apiKey.userPermissions.length} / {apiKey.serverPermissions.length} / {apiKey.adminPermissions.length}
+            </TableData>
 
             <TableData>
               {!apiKey.lastUsed ? (

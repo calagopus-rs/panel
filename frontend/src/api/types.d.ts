@@ -179,8 +179,8 @@ interface NodeMount {
 interface UpdateRole {
   name: string;
   description: string | null;
-  adminPermissions: Set<string>;
-  serverPermissions: Set<string>;
+  serverPermissions: string[];
+  adminPermissions: string[];
 }
 
 interface Role extends UpdateRole {
@@ -712,11 +712,16 @@ interface UserActivity {
   created: Date;
 }
 
-interface UserApiKey {
-  uuid: string;
+interface UpdateUserApiKey {
   name: string;
+  userPermissions: string[];
+  serverPermissions: string[];
+  adminPermissions: string[];
+}
+
+interface UserApiKey extends UpdateUserApiKey {
+  uuid: string;
   keyStart: string;
-  permissions: string[];
   lastUsed: Date;
   created: Date;
 }
@@ -981,8 +986,8 @@ interface PermissionMap {
 
 interface ApiPermissions {
   userPermissions: PermissionMap;
-  adminPermissions: PermissionMap;
   serverPermissions: PermissionMap;
+  adminPermissions: PermissionMap;
 }
 
 type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip' | 'seven_zip';

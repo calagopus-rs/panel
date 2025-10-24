@@ -28,8 +28,8 @@ export default ({ contextRole }: { contextRole?: Role }) => {
   const [role, setRole] = useState<UpdateRole>({
     name: '',
     description: '',
-    adminPermissions: new Set<string>([]),
-    serverPermissions: new Set<string>([]),
+    adminPermissions: [],
+    serverPermissions: [],
   } as UpdateRole);
 
   useEffect(() => {
@@ -37,8 +37,8 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       setRole({
         name: contextRole.name,
         description: contextRole.description,
-        adminPermissions: new Set(contextRole.adminPermissions ?? []),
-        serverPermissions: new Set(contextRole.serverPermissions ?? []),
+        adminPermissions: contextRole.adminPermissions,
+        serverPermissions: contextRole.serverPermissions,
       });
     }
   }, [contextRole]);

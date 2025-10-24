@@ -6,12 +6,12 @@ import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import ApiKeyRow from './ApiKeyRow';
-import ApiKeyCreateModal from './modals/ApiKeyCreateModal';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import getApiKeys from '@/api/me/api-keys/getApiKeys';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
 
 export default () => {
   const { apiKeys, setApiKeys } = useUserStore();
@@ -25,7 +25,7 @@ export default () => {
 
   return (
     <>
-      <ApiKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
+      <ApiKeyCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} mb={'md'}>
         <Title order={1} c={'white'}>
@@ -44,7 +44,7 @@ export default () => {
       ) : (
         <ContextMenuProvider>
           <Table
-            columns={['Name', 'Key', 'Permissions', 'Last Used', 'Created', '']}
+            columns={['Name', 'Key', 'User / Server / Admin Permissions', 'Last Used', 'Created', '']}
             pagination={apiKeys}
             onPageSelect={setPage}
           >

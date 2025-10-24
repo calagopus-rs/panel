@@ -12,44 +12,44 @@ export default ({
   setSelectedPermissions,
 }: {
   permissions: PermissionMap;
-  selectedPermissions: Set<string>;
-  setSelectedPermissions: (selected: Set<string>) => void;
+  selectedPermissions: string[];
+  setSelectedPermissions: (selected: string[]) => void;
 }) => {
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
   const toggleCategory = (category: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(category)) {
-      newExpanded.delete(category);
+    const newExpanded = expandedCategories;
+    if (newExpanded.includes(category)) {
+      newExpanded.splice(newExpanded.indexOf(category), 1);
     } else {
-      newExpanded.add(category);
+      newExpanded.push(category);
     }
     setExpandedCategories(newExpanded);
   };
 
   const togglePermission = (permissionKey: string) => {
-    const newSelected = new Set(selectedPermissions);
-    if (newSelected.has(permissionKey)) {
-      newSelected.delete(permissionKey);
+    const newSelected = selectedPermissions;
+    if (newSelected.includes(permissionKey)) {
+      newSelected.splice(newSelected.indexOf(permissionKey), 1);
     } else {
-      newSelected.add(permissionKey);
+      newSelected.push(permissionKey);
     }
     setSelectedPermissions(newSelected);
   };
 
   const toggleAllInCategory = (category: string) => {
     const categoryPermissions = Object.keys(permissions[category].permissions);
-    const allSelected = categoryPermissions.every((perm) => selectedPermissions.has(`${category}.${perm}`));
+    const allSelected = categoryPermissions.every((perm) => selectedPermissions.includes(`${category}.${perm}`));
 
-    const newSelected = new Set(selectedPermissions);
+    const newSelected = selectedPermissions;
 
     if (allSelected) {
       categoryPermissions.forEach((perm) => {
-        newSelected.delete(`${category}.${perm}`);
+        newSelected.splice(newSelected.indexOf(`${category}.${perm}`, 1));
       });
     } else {
       categoryPermissions.forEach((perm) => {
-        newSelected.add(`${category}.${perm}`);
+        newSelected.push(`${category}.${perm}`);
       });
     }
 
@@ -62,7 +62,9 @@ export default ({
 
   const getCategorySelectionState = (category: string) => {
     const categoryPermissions = Object.keys(permissions[category].permissions);
-    const selectedCount = categoryPermissions.filter((perm) => selectedPermissions.has(`${category}.${perm}`)).length;
+    const selectedCount = categoryPermissions.filter((perm) =>
+      selectedPermissions.includes(`${category}.${perm}`),
+    ).length;
 
     if (selectedCount === 0) return 'none';
     if (selectedCount === categoryPermissions.length) return 'all';
@@ -73,7 +75,7 @@ export default ({
     <div className={'grid grid-cols-1 gap-6'}>
       <div className={'space-y-4'}>
         {Object.entries(permissions).map(([category, { description, permissions }]) => {
-          const isExpanded = expandedCategories.has(category);
+          const isExpanded = expandedCategories.includes(category);
           const selectionState = getCategorySelectionState(category);
 
           return (
@@ -109,7 +111,7 @@ export default ({
                   <div className={'space-y-3'}>
                     {Object.entries(permissions).map(([permission, permDescription]) => {
                       const permissionKey = `${category}.${permission}`;
-                      const isSelected = selectedPermissions.has(permissionKey);
+                      const isSelected = selectedPermissions.includes(permissionKey);
 
                       return (
                         <Checkbox.Card
@@ -142,10 +144,10 @@ export default ({
 
       <Card>
         <Title order={3} c={'white'}>
-          Selected Permissions ({selectedPermissions.size})
+          Selected Permissions ({selectedPermissions.length})
         </Title>
         <div className={'max-h-96 overflow-y-auto'}>
-          {selectedPermissions.size === 0 ? (
+          {selectedPermissions.length === 0 ? (
             <p className={'text-gray-200 text-sm'}>No permissions selected</p>
           ) : (
             <div className={'space-y-1'}>
@@ -164,9 +166,9 @@ export default ({
           )}
         </div>
 
-        {selectedPermissions.size > 0 && (
+        {selectedPermissions.length > 0 && (
           <div className={'mt-4'}>
-            <Button onClick={() => setSelectedPermissions(new Set())} className={'w-full'}>
+            <Button onClick={() => setSelectedPermissions([])} className={'w-full'}>
               Clear All
             </Button>
           </div>

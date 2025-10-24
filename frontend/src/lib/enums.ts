@@ -28,8 +28,13 @@ import {
   faServer,
   faKiwiBird,
   faEgg,
+  faUser,
+  faKey,
+  faCloud,
+  faComputer,
+  faUserSecret,
+  faUnlockKeyhole,
 } from '@fortawesome/free-solid-svg-icons';
-import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
 
 export const captchaProviderTypeLabelMapping: Record<CaptchaProvider['type'], string> = {
   none: 'None',
@@ -268,8 +273,10 @@ export const sshKeyProviderLabelMapping: Record<SshKeyProvider, string> = {
 };
 
 export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
+  account: faUser,
   activity: faBriefcase,
   allocations: faNetworkWired,
+  'api-keys': faCloud,
   'backup-configurations': faFileZipper,
   backups: faBoxArchive,
   control: faTerminal,
@@ -283,8 +290,11 @@ export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
   nodes: faServer,
   roles: faScroll,
   schedules: faStopwatch,
+  'security-keys': faUnlockKeyhole,
   servers: faComputer,
+  sessions: faUserSecret,
   settings: faCog,
+  'ssh-keys': faKey,
   startup: faPlay,
   subusers: faUsers,
   users: faUsers,

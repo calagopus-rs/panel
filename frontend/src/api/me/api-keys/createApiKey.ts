@@ -5,10 +5,15 @@ interface Response {
   key: string;
 }
 
-export default async (name: string): Promise<Response> => {
+export default async (data: UpdateUserApiKey): Promise<Response> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post('/api/client/account/api-keys', { name, permissions: [] })
+      .post('/api/client/account/api-keys', {
+        ...data,
+        user_permissions: Array.from(data.userPermissions),
+        admin_permissions: Array.from(data.adminPermissions),
+        server_permissions: Array.from(data.serverPermissions),
+      })
       .then(({ data }) => resolve(data))
       .catch(reject);
   });
