@@ -1,10 +1,11 @@
 import Captcha from '@/elements/Captcha';
 import { useRef, useState } from 'react';
-import PermissionSelector from '../PermissionSelector';
 import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
 import Modal from '@/elements/modals/Modal';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
+import { useGlobalStore } from '@/stores/global';
+import PermissionSelector from '@/elements/PermissionSelector';
 
 type Props = ModalProps & {
   subuser?: ServerSubuser;
@@ -13,6 +14,8 @@ type Props = ModalProps & {
 };
 
 export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
+  const { availablePermissions } = useGlobalStore();
+
   const [email, setEmail] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<Set<string>>(new Set(subuser?.permissions ?? []));
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
@@ -46,6 +49,7 @@ export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
         <div>
           <label>Permissions</label>
           <PermissionSelector
+            permissions={availablePermissions.serverPermissions}
             selectedPermissions={selectedPermissions}
             setSelectedPermissions={setSelectedPermissions}
           />

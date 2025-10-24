@@ -1,12 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-interface Response {
-  userPermissions: PermissionMap;
-  adminPermissions: PermissionMap;
-  serverPermissions: PermissionMap;
-}
-
-export default async (): Promise<Response> => {
+export default async (): Promise<Permissions> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/client/permissions')

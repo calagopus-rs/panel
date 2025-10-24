@@ -12,19 +12,24 @@ import TextArea from '@/elements/input/TextArea';
 import updateRole from '@/api/admin/roles/updateRole';
 import createRole from '@/api/admin/roles/createRole';
 import deleteRole from '@/api/admin/roles/deleteRole';
+import getPermissions from '@/api/getPermissions';
+import { useGlobalStore } from '@/stores/global';
+import PermissionSelector from '@/elements/PermissionSelector';
 
 export default ({ contextRole }: { contextRole?: Role }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
+  const { availablePermissions, setAvailablePermissions } = useGlobalStore();
+
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<UpdateRole>({
     name: '',
     description: '',
-    adminPermissions: [],
-    serverPermissions: [],
+    adminPermissions: new Set<string>([]),
+    serverPermissions: new Set<string>([]),
   } as UpdateRole);
 
   useEffect(() => {
@@ -32,11 +37,18 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       setRole({
         name: contextRole.name,
         description: contextRole.description,
-        adminPermissions: contextRole.adminPermissions,
-        serverPermissions: contextRole.serverPermissions,
+        adminPermissions: new Set(contextRole.adminPermissions ?? []),
+        serverPermissions: new Set(contextRole.serverPermissions ?? []),
       });
     }
   }, [contextRole]);
+
+  useEffect(() => {
+    getPermissions().then((res) => {
+      setAvailablePermissions(res);
+      load(false, setLoading);
+    });
+  }, []);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
@@ -114,6 +126,29 @@ export default ({ contextRole }: { contextRole?: Role }) => {
             rows={3}
             onChange={(e) => setRole({ ...role, description: e.target.value || null })}
           />
+        </Group>
+
+        <Group grow align={'normal'}>
+          <Stack>
+            <Title order={3}>Server Permissions</Title>
+            {availablePermissions?.serverPermissions && (
+              <PermissionSelector
+                permissions={availablePermissions.serverPermissions}
+                selectedPermissions={role.serverPermissions}
+                setSelectedPermissions={(permissions) => setRole({ ...role, serverPermissions: permissions })}
+              />
+            )}
+          </Stack>
+          <Stack>
+            <Title order={3}>Admin Permissions</Title>
+            {availablePermissions?.adminPermissions && (
+              <PermissionSelector
+                permissions={availablePermissions.adminPermissions}
+                selectedPermissions={role.adminPermissions}
+                setSelectedPermissions={(permissions) => setRole({ ...role, adminPermissions: permissions })}
+              />
+            )}
+          </Stack>
         </Group>
 
         <Group>

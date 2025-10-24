@@ -1,15 +1,15 @@
 import { create } from 'zustand';
-import { AllocationsSlice, createAllocationsSlice } from './slices/server/allocations';
-import { BackupsSlice, createBackupsSlice } from './slices/server/backups';
-import { DatabasesSlice, createDatabasesSlice } from './slices/server/databases';
-import { FilesSlice, createFilesSlice } from './slices/server/files';
-import { SchedulesSlice, createSchedulesSlice } from './slices/server/schedules';
-import { ServerSlice, createServerSlice } from './slices/server/server';
-import { StateSlice, createStateSlice } from './slices/server/state';
-import { StatsSlice, createStatsSlice } from './slices/server/stats';
-import { SubusersSlice, createSubusersSlice } from './slices/server/subusers';
-import { StartupSlice, createStartupSlice } from './slices/server/startup';
-import { WebsocketSlice, createWebsocketSlice } from './slices/server/websocket';
+import { createBackupsSlice, BackupsSlice } from '@/stores/slices/server/backups';
+import { createAllocationsSlice, AllocationsSlice } from '@/stores/slices/server/allocations';
+import { createDatabasesSlice, DatabasesSlice } from '@/stores/slices/server/databases';
+import { createFilesSlice, FilesSlice } from '@/stores/slices/server/files';
+import { createSchedulesSlice, SchedulesSlice } from '@/stores/slices/server/schedules';
+import { createServerSlice, ServerSlice } from '@/stores/slices/server/server';
+import { createStatsSlice, StatsSlice } from '@/stores/slices/server/stats';
+import { createStateSlice, StateSlice } from '@/stores/slices/server/state';
+import { createSubusersSlice, SubusersSlice } from '@/stores/slices/server/subusers';
+import { createStartupSlice, StartupSlice } from '@/stores/slices/server/startup';
+import { createWebsocketSlice, WebsocketSlice } from '@/stores/slices/server/websocket';
 
 export interface ServerStore
   extends AllocationsSlice,

@@ -1,6 +1,5 @@
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
-import { useServerStore } from '@/stores/server';
 import {
   faStopwatch,
   faBoxArchive,
@@ -35,13 +34,14 @@ const categoryIcons: { [key: string]: IconDefinition } = {
 };
 
 export default ({
+  permissions,
   selectedPermissions,
   setSelectedPermissions,
 }: {
+  permissions: PermissionMap;
   selectedPermissions: Set<string>;
   setSelectedPermissions: (selected: Set<string>) => void;
 }) => {
-  const { availablePermissions } = useServerStore();
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const toggleCategory = (category: string) => {
@@ -65,7 +65,7 @@ export default ({
   };
 
   const toggleAllInCategory = (category: string) => {
-    const categoryPermissions = Object.keys(availablePermissions[category].permissions);
+    const categoryPermissions = Object.keys(permissions[category].permissions);
     const allSelected = categoryPermissions.every((perm) => selectedPermissions.has(`${category}.${perm}`));
 
     const newSelected = new Set(selectedPermissions);
@@ -88,7 +88,7 @@ export default ({
   };
 
   const getCategorySelectionState = (category: string) => {
-    const categoryPermissions = Object.keys(availablePermissions[category].permissions);
+    const categoryPermissions = Object.keys(permissions[category].permissions);
     const selectedCount = categoryPermissions.filter((perm) => selectedPermissions.has(`${category}.${perm}`)).length;
 
     if (selectedCount === 0) return 'none';
@@ -99,7 +99,7 @@ export default ({
   return (
     <div className={'grid grid-cols-1 gap-6'}>
       <div className={'space-y-4'}>
-        {Object.entries(availablePermissions).map(([category, { description, permissions }]) => {
+        {Object.entries(permissions).map(([category, { description, permissions }]) => {
           const isExpanded = expandedCategories.has(category);
           const selectionState = getCategorySelectionState(category);
 
@@ -117,7 +117,7 @@ export default ({
                 </div>
                 <div className={'flex items-center gap-2'}>
                   <Checkbox
-                    onClick={() => toggleAllInCategory(category)}
+                    onChange={() => toggleAllInCategory(category)}
                     indeterminate={selectionState === 'partial'}
                     checked={selectionState === 'all'}
                   />

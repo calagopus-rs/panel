@@ -8,9 +8,6 @@ export interface SubusersSlice {
   setSubusers: (subusers: ResponseMeta<ServerSubuser>) => void;
   addSubuser: (subusers: ServerSubuser) => void;
   removeSubuser: (subusers: ServerSubuser) => void;
-
-  availablePermissions: PermissionMap;
-  setAvailablePermissions: (permissions: PermissionMap) => void;
 }
 
 export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlice> = (set): SubusersSlice => ({
@@ -32,7 +29,4 @@ export const createSubusersSlice: StateCreator<ServerStore, [], [], SubusersSlic
         total: state.subusers.total - 1,
       },
     })),
-
-  availablePermissions: null,
-  setAvailablePermissions: (value) => set((state) => ({ ...state, availablePermissions: value })),
 });

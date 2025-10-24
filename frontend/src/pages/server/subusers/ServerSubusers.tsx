@@ -16,16 +16,18 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useGlobalStore } from '@/stores/global';
 
 export default () => {
   const { addToast } = useToast();
-  const { server, subusers, setSubusers, addSubuser, setAvailablePermissions } = useServerStore();
+  const { server, subusers, setSubusers, addSubuser } = useServerStore();
+  const { setAvailablePermissions } = useGlobalStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
 
   useEffect(() => {
     getPermissions().then((res) => {
-      setAvailablePermissions(res.serverPermissions);
+      setAvailablePermissions(res);
     });
   }, []);
 

@@ -179,8 +179,8 @@ interface NodeMount {
 interface UpdateRole {
   name: string;
   description: string | null;
-  adminPermissions: string[];
-  serverPermissions: string[];
+  adminPermissions: Set<string>;
+  serverPermissions: Set<string>;
 }
 
 interface Role extends UpdateRole {
@@ -967,6 +967,12 @@ interface PermissionMap {
     description: string;
     permissions: Record<string, string>;
   };
+}
+
+interface Permissions {
+  userPermissions: PermissionMap;
+  adminPermissions: PermissionMap;
+  serverPermissions: PermissionMap;
 }
 
 type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip' | 'seven_zip';
