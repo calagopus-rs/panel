@@ -1,52 +1,61 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Code from '@/elements/Code';
-import getUser from '@/api/admin/users/getUser';
 import updateUser from '@/api/admin/users/updateUser';
 import createUser from '@/api/admin/users/createUser';
 import deleteUser from '@/api/admin/users/deleteUser';
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import TextInput from '@/elements/input/TextInput';
 import Switch from '@/elements/input/Switch';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getNests from '@/api/admin/nests/getNests';
+import getRoles from '@/api/admin/roles/getRoles';
+import Select from '@/elements/input/Select';
 
-export default () => {
+export default ({ contextUser }: { contextUser?: User }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor'>(null);
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState<User>({
+  const [user, setUser] = useState<UpdateUser>({
     username: '',
     email: '',
     nameFirst: '',
     nameLast: '',
     password: '',
     admin: false,
-  } as User);
+    totpEnabled: false,
+    roleUuid: '',
+  } as UpdateUser);
+
+  const roles = useSearchableResource<Role>({ fetcher: (search) => getRoles(1, search) });
 
   useEffect(() => {
-    if (params.id) {
-      getUser(params.id)
-        .then((user) => {
-          setUser(user);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
+    if (contextUser) {
+      setUser({
+        username: contextUser.username,
+        email: contextUser.email,
+        nameFirst: contextUser.nameFirst,
+        nameLast: contextUser.nameLast,
+        admin: contextUser.admin,
+        totpEnabled: contextUser.totpEnabled,
+        roleUuid: contextUser.role?.uuid ?? '',
+      });
     }
-  }, [params.id]);
+  }, [contextUser]);
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
-    if (user?.uuid) {
-      updateUser(user.uuid, user)
+    if (params?.id) {
+      updateUser(contextUser.uuid, user)
         .then(() => {
           addToast('User updated.', 'success');
         })
@@ -76,7 +85,7 @@ export default () => {
     await disableUserTwoFactor(params.id)
       .then(() => {
         addToast('User two factor disabled.', 'success');
-        user.totpEnabled = false;
+        setUser({ ...user, totpEnabled: false });
 
         setOpenModal(null);
       })
@@ -90,7 +99,7 @@ export default () => {
 
   const doDelete = async () => {
     load(true, setLoading);
-    await deleteUser(user.uuid)
+    await deleteUser(contextUser.uuid)
       .then(() => {
         addToast('User deleted.', 'success');
         navigate('/admin/users');
@@ -124,8 +133,7 @@ export default () => {
         Are you sure you want to remove the two factor of <Code>{user?.username}</Code>?
       </ConfirmationModal>
 
-      <Title order={1}>{params.id ? 'Update' : 'Create'} User</Title>
-      <Divider />
+      <Title order={2}>{params.id ? 'Update' : 'Create'} User</Title>
 
       <Stack>
         <Group grow>
@@ -163,14 +171,32 @@ export default () => {
           />
         </Group>
 
-        <TextInput
-          withAsterisk={!params.id}
-          label={'Password'}
-          placeholder={'Password'}
-          type={'password'}
-          value={user.password || ''}
-          onChange={(e) => setUser({ ...user, password: e.target.value || null })}
-        />
+        <Group grow>
+          <TextInput
+            withAsterisk={!params.id}
+            label={'Password'}
+            placeholder={'Password'}
+            type={'password'}
+            value={user.password || ''}
+            onChange={(e) => setUser({ ...user, password: e.target.value || null })}
+          />
+
+          <Select
+            withAsterisk
+            label={'Role'}
+            placeholder={'role'}
+            value={user.roleUuid}
+            onChange={(value) => setUser({ ...user, roleUuid: value })}
+            data={roles.items.map((nest) => ({
+              label: nest.name,
+              value: nest.uuid,
+            }))}
+            searchable
+            searchValue={roles.search}
+            onSearchChange={roles.setSearch}
+            allowDeselect
+          />
+        </Group>
 
         <Switch label={'Admin'} checked={user.admin} onChange={(e) => setUser({ ...user, admin: e.target.checked })} />
       </Stack>

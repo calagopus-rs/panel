@@ -681,9 +681,7 @@ interface FileOperationPull {
 
 type FileOperation = FileOperationCompress | FileOperationDecompress | FileOperationPull;
 
-interface User {
-  uuid: string;
-  avatar?: string;
+interface UpdateUser {
   username: string;
   email: string;
   nameFirst: string;
@@ -691,6 +689,13 @@ interface User {
   password?: string;
   admin: boolean;
   totpEnabled: boolean;
+  roleUuid: string;
+}
+
+interface User extends UpdateUser {
+  uuid: string;
+  role: Role;
+  avatar?: string;
   created: Date;
 }
 

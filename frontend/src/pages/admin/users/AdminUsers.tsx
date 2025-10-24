@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import UserView from '@/pages/admin/users/UserView';
 
 const UsersContainer = () => {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default () => {
     <Routes>
       <Route path={'/'} element={<UsersContainer />} />
       <Route path={'/new'} element={<UserCreateOrUpdate />} />
-      <Route path={'/:id'} element={<UserCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<UserView />} />
     </Routes>
   );
 };
