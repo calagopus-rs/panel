@@ -1,14 +1,15 @@
 import { create } from 'zustand';
-import { EggsSlice, createEggsSlice } from './slices/admin/eggs';
-import { LocationsSlice, createLocationsSlice } from './slices/admin/locations';
-import { NestsSlice, createNestsSlice } from './slices/admin/nests';
-import { SettingsSlice, createSettingsSlice } from './slices/admin/settings';
-import { UsersSlice, createUsersSlice } from './slices/admin/users';
-import { DatabaseHostsSlice, createDatabaseHostsSlice } from './slices/admin/database-hosts';
-import { NodesSlice, createNodesSlice } from './slices/admin/nodes';
-import { MountsSlice, createMountsSlice } from './slices/admin/mounts';
-import { ServersSlice, createServersSlice } from './slices/admin/servers';
-import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
+import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs';
+import { createBackupConfigurationsSlice, BackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
+import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts';
+import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations';
+import { createNestsSlice, NestsSlice } from '@/stores/slices/admin/nests';
+import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings';
+import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users';
+import { createNodesSlice, NodesSlice } from '@/stores/slices/admin/nodes';
+import { createRolesSlice, RolesSlice } from '@/stores/slices/admin/roles';
+import { createServersSlice, ServersSlice } from '@/stores/slices/admin/servers';
+import { createMountsSlice, MountsSlice } from '@/stores/slices/admin/mounts';
 
 export interface AdminStore
   extends BackupConfigurationsSlice,
@@ -19,6 +20,7 @@ export interface AdminStore
     SettingsSlice,
     UsersSlice,
     NodesSlice,
+    RolesSlice,
     ServersSlice,
     MountsSlice {}
 
@@ -31,6 +33,7 @@ export const useAdminStore = create<AdminStore>()((...a) => ({
   ...createSettingsSlice(...a),
   ...createUsersSlice(...a),
   ...createNodesSlice(...a),
+  ...createRolesSlice(...a),
   ...createServersSlice(...a),
   ...createMountsSlice(...a),
 }));

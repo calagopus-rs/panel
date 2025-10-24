@@ -1,0 +1,132 @@
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import Code from '@/elements/Code';
+import { Group, Stack, Title } from '@mantine/core';
+import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button';
+import { load } from '@/lib/debounce';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import TextArea from '@/elements/input/TextArea';
+import updateRole from '@/api/admin/roles/updateRole';
+import createRole from '@/api/admin/roles/createRole';
+import deleteRole from '@/api/admin/roles/deleteRole';
+
+export default ({ contextRole }: { contextRole?: Role }) => {
+  const params = useParams<'id'>();
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [loading, setLoading] = useState(false);
+  const [role, setRole] = useState<UpdateRole>({
+    name: '',
+    description: '',
+    adminPermissions: [],
+    serverPermissions: [],
+  } as UpdateRole);
+
+  useEffect(() => {
+    if (contextRole) {
+      setRole({
+        name: contextRole.name,
+        description: contextRole.description,
+        adminPermissions: contextRole.adminPermissions,
+        serverPermissions: contextRole.serverPermissions,
+      });
+    }
+  }, [contextRole]);
+
+  const doCreateOrUpdate = () => {
+    load(true, setLoading);
+    if (params?.id) {
+      updateRole(params.id, role)
+        .then(() => {
+          addToast('Role updated.', 'success');
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createRole(role)
+        .then((role) => {
+          addToast('Role created.', 'success');
+          navigate(`/admin/roles/${role.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    }
+  };
+
+  const doDelete = async () => {
+    load(true, setLoading);
+    await deleteRole(params.id)
+      .then(() => {
+        addToast('Role deleted.', 'success');
+        navigate('/admin/roles');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => {
+        load(false, setLoading);
+      });
+  };
+
+  return (
+    <>
+      <ConfirmationModal
+        opened={openModal === 'delete'}
+        onClose={() => setOpenModal(null)}
+        title={'Confirm Role Deletion'}
+        confirm={'Delete'}
+        onConfirmed={doDelete}
+      >
+        Are you sure you want to delete <Code>{role?.name}</Code>?
+      </ConfirmationModal>
+
+      <Stack>
+        <Title order={2}>{params.id ? 'Update' : 'Create'} Role</Title>
+
+        <Group grow>
+          <TextInput
+            withAsterisk
+            label={'Name'}
+            placeholder={'Name'}
+            value={role.name || ''}
+            onChange={(e) => setRole({ ...role, name: e.target.value })}
+          />
+        </Group>
+
+        <Group grow align={'start'}>
+          <TextArea
+            label={'Description'}
+            placeholder={'Description'}
+            value={role.description || ''}
+            rows={3}
+            onChange={(e) => setRole({ ...role, description: e.target.value || null })}
+          />
+        </Group>
+
+        <Group>
+          <Button onClick={doCreateOrUpdate} loading={loading}>
+            Save
+          </Button>
+          {params.id && (
+            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
+        </Group>
+      </Stack>
+    </>
+  );
+};

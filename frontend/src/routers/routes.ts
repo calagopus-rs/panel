@@ -44,6 +44,7 @@ import {
   faKey,
   faNetworkWired,
   faPlay,
+  faScroll,
   faServer,
   faStopwatch,
   faTerminal,
@@ -56,6 +57,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import React from 'react';
 import AdminBackupConfigurations from '@/pages/admin/backupConfigurations/AdminBackupConfigurations';
+import AdminRoles from '@/pages/admin/roles/AdminRoles';
 
 interface RouteDefinition {
   name: string | undefined;
@@ -188,6 +190,12 @@ const routes: Routes = {
       icon: faFolder,
       path: '/mounts/*',
       element: AdminMounts,
+    },
+    {
+      name: 'Roles',
+      icon: faScroll,
+      path: '/roles/*',
+      element: AdminRoles,
     },
     {
       name: 'Activity',

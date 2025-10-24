@@ -176,6 +176,18 @@ interface NodeMount {
   created: Date;
 }
 
+interface UpdateRole {
+  name: string;
+  description: string | null;
+  adminPermissions: string[];
+  serverPermissions: string[];
+}
+
+interface Role extends UpdateRole {
+  uuid: string;
+  created: Date;
+}
+
 interface UpdateAdminServer {
   externalId: string | null;
   name: string;
