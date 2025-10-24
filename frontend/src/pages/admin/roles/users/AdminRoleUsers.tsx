@@ -5,7 +5,7 @@ import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import getRoleUsers from '@/api/admin/roles/users/getRoleUsers';
-import UserRow from '@/pages/admin/users/UserRow';
+import UserRow, { userTableColumns } from '@/pages/admin/users/UserRow';
 
 export default ({ role }: { role: Role }) => {
   const [roleUsers, setRoleUsers] = useState<ResponseMeta<User>>(getEmptyPaginationSet());
@@ -22,7 +22,7 @@ export default ({ role }: { role: Role }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Username', 'Created']} pagination={roleUsers} onPageSelect={setPage}>
+        <Table columns={userTableColumns} pagination={roleUsers} onPageSelect={setPage}>
           {roleUsers.data.map((user) => (
             <UserRow key={user.uuid} user={user} />
           ))}

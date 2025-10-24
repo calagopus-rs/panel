@@ -1,7 +1,7 @@
 import Spinner from '@/elements/Spinner';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
-import NodeRow from './NodeRow';
+import NodeRow, { nodeTableColumns } from './NodeRow';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -43,7 +43,7 @@ const NodesContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['', 'Id', 'Name', 'Location', 'URL', 'Created']} pagination={nodes} onPageSelect={setPage}>
+        <Table columns={nodeTableColumns} pagination={nodes} onPageSelect={setPage}>
           {nodes.data.map((node) => (
             <NodeRow key={node.uuid} node={node} />
           ))}

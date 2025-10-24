@@ -3,7 +3,7 @@ import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
-import DatabaseHostRow from './DatabaseHostRow';
+import DatabaseHostRow, { databaseHostTableColumns } from './DatabaseHostRow';
 import { Group, TextInput, Title } from '@mantine/core';
 import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -42,7 +42,7 @@ const DatabaseHostsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Type', 'Address', 'Created']} pagination={databaseHosts} onPageSelect={setPage}>
+        <Table columns={databaseHostTableColumns} pagination={databaseHosts} onPageSelect={setPage}>
           {databaseHosts.data.map((dh) => (
             <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
           ))}

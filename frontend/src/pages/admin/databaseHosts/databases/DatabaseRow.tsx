@@ -10,6 +10,8 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import Tooltip from '@/elements/Tooltip';
 import { NavLink } from 'react-router';
 
+export const databaseTableColumns = ['Name', 'Server', 'Type', 'Address', 'Username', 'Size', 'Created'];
+
 export default ({ database }: { database: AdminServerDatabase }) => {
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);

@@ -12,6 +12,8 @@ import { useAdminStore } from '@/stores/admin';
 import { NavLink } from 'react-router';
 import deleteServerMount from '@/api/admin/servers/mounts/deleteServerMount';
 
+export const serverMountTableColumns = ['Id', 'Name', 'Source', 'Target', 'Added', ''];
+
 export default ({ server, mount }: { server: AdminServer; mount: AdminServerMount }) => {
   const { addToast } = useToast();
   const { removeServerMount } = useAdminStore();

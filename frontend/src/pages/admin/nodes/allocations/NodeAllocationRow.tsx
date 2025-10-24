@@ -5,6 +5,8 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
 
+export const nodeAllocationTableColumns = ['', 'Id', 'IP', 'IP Alias', 'Port', 'Created'];
+
 export default ({ allocation, ref }: { allocation: NodeAllocation; ref: React.Ref<HTMLTableRowElement> }) => {
   const { selectedNodeAllocations, addSelectedNodeAllocation, removeSelectedNodeAllocation } = useAdminStore();
 

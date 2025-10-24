@@ -7,7 +7,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import ServerMountRow from '@/pages/admin/servers/mounts/ServerMountRow';
+import ServerMountRow, { serverMountTableColumns } from '@/pages/admin/servers/mounts/ServerMountRow';
 import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
 import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -39,11 +39,7 @@ export default ({ server }: { server: AdminServer }) => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <Table
-            columns={['Id', 'Name', 'Source', 'Target', 'Added', '']}
-            pagination={serverMounts}
-            onPageSelect={setPage}
-          >
+          <Table columns={serverMountTableColumns} pagination={serverMounts} onPageSelect={setPage}>
             {serverMounts.data.map((mount) => (
               <ServerMountRow key={mount.mount.uuid} server={server} mount={mount} />
             ))}

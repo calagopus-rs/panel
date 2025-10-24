@@ -9,6 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 
+export const nodeTableColumns = ['', 'Id', 'Name', 'Location', 'URL', 'Created'];
+
 export default ({ node }: { node: Node }) => {
   const [version, setVersion] = useState<string | null>(null);
 

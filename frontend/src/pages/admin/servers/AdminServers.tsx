@@ -8,7 +8,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import TextInput from '@/elements/input/TextInput';
 import getServers from '@/api/admin/servers/getServers';
-import ServerRow from './ServerRow';
+import ServerRow, { serverTableColumns } from './ServerRow';
 import ServerCreateOrUpdate from './ServerCreateOrUpdate';
 import ServerView from './ServerView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -43,11 +43,7 @@ const ServersContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Id', 'Name', 'Node', 'Owner', 'Allocation', 'Created']}
-          pagination={servers}
-          onPageSelect={setPage}
-        >
+        <Table columns={serverTableColumns} pagination={servers} onPageSelect={setPage}>
           {servers.data.map((server) => (
             <ServerRow key={server.uuid} server={server} />
           ))}

@@ -5,7 +5,7 @@ import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases';
-import DatabaseRow from './DatabaseRow';
+import DatabaseRow, { databaseTableColumns } from './DatabaseRow';
 
 export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
   const [databaseHostDatabases, setDatabaseHostDatabases] =
@@ -23,11 +23,7 @@ export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Name', 'Server', 'Type', 'Address', 'Username', 'Size', 'Created']}
-          pagination={databaseHostDatabases}
-          onPageSelect={setPage}
-        >
+        <Table columns={databaseTableColumns} pagination={databaseHostDatabases} onPageSelect={setPage}>
           {databaseHostDatabases.data.map((database) => (
             <DatabaseRow key={database.uuid} database={database} />
           ))}

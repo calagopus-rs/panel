@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import NodeAllocationRow from './NodeAllocationRow';
+import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
 import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations';
 import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
 import SelectionArea from '@/elements/SelectionArea';
@@ -108,11 +108,7 @@ export default ({ node }: { node: Node }) => {
           className={'h-full'}
           disabled={!!openModal}
         >
-          <Table
-            columns={['', 'Id', 'IP', 'IP Alias', 'Port', 'Created']}
-            pagination={nodeAllocations}
-            onPageSelect={setPage}
-          >
+          <Table columns={nodeAllocationTableColumns} pagination={nodeAllocations} onPageSelect={setPage}>
             {nodeAllocations.data.map((allocation) => (
               <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
                 {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}

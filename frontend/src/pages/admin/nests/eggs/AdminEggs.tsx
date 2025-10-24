@@ -4,7 +4,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Route, Routes, useNavigate, useParams } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
-import EggRow from './EggRow';
+import EggRow, { eggTableColumns } from './EggRow';
 import getEggs from '@/api/admin/eggs/getEggs';
 import EggCreateOrUpdate from './EggCreateOrUpdate';
 import importEgg from '@/api/admin/eggs/importEgg';
@@ -84,7 +84,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Author', 'Description', 'Created']} pagination={eggs} onPageSelect={setPage}>
+        <Table columns={eggTableColumns} pagination={eggs} onPageSelect={setPage}>
           {eggs.data.map((egg) => (
             <EggRow key={egg.uuid} nest={nest} egg={egg} />
           ))}

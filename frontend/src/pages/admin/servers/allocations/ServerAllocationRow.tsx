@@ -19,6 +19,8 @@ import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 
+export const serverAllocationTableColumns = ['', 'Id', 'IP', 'IP Alias', 'Port', 'Notes', 'Created'];
+
 export default ({ server, allocation }: { server: AdminServer; allocation: ServerAllocation }) => {
   const { addToast } = useToast();
   const { serverAllocations, setServerAllocations, removeServerAllocation } = useAdminStore();

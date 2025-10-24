@@ -9,7 +9,7 @@ import Table from '@/elements/Table';
 import TextInput from '@/elements/input/TextInput';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import getRoles from '@/api/admin/roles/getRoles';
-import RoleRow from '@/pages/admin/roles/RoleRow';
+import RoleRow, { roleTableColumns } from '@/pages/admin/roles/RoleRow';
 import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
 import RoleView from '@/pages/admin/roles/RoleView';
 
@@ -43,11 +43,7 @@ const RolesContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Id', 'Name', 'Server Permissions', 'Admin Permissions', 'Created']}
-          pagination={roles}
-          onPageSelect={setPage}
-        >
+        <Table columns={roleTableColumns} pagination={roles} onPageSelect={setPage}>
           {roles.data.map((role) => (
             <RoleRow key={role.uuid} role={role} />
           ))}

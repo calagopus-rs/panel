@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import ServerRow from '@/pages/admin/servers/ServerRow';
+import ServerRow, { serverTableColumns } from '@/pages/admin/servers/ServerRow';
 import getBackupConfigurationServers from '@/api/admin/backup-configurations/servers/getBackupConfigurationServers';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
@@ -23,11 +23,7 @@ export default ({ backupConfiguration }: { backupConfiguration?: BackupConfigura
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Id', 'Name', 'Node', 'Owner', 'Allocation', 'Created']}
-          pagination={backupConfigurationServers}
-          onPageSelect={setPage}
-        >
+        <Table columns={serverTableColumns} pagination={backupConfigurationServers} onPageSelect={setPage}>
           {backupConfigurationServers.data.map((server) => (
             <ServerRow key={server.uuid} server={server} />
           ))}

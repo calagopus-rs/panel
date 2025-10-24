@@ -4,6 +4,8 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
+export const mountTableColumns = ['ID', 'Name', 'Source', 'Target', 'Created'];
+
 export default ({ mount }: { mount: Mount }) => {
   return (
     <TableRow>

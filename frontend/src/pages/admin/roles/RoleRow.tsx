@@ -4,6 +4,8 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
+export const roleTableColumns = ['Id', 'Name', 'Server Permissions', 'Admin Permissions', 'Created'];
+
 export default ({ role }: { role: Role }) => {
   return (
     <TableRow>

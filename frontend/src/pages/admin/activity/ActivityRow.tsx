@@ -5,6 +5,8 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { Group } from '@mantine/core';
 import { TableData, TableRow } from '@/elements/Table';
 
+export const activityTableColumns = ['Actor', 'Event', 'IP', 'When', ''];
+
 export default ({ activity }: { activity: AdminActivity }) => {
   return (
     <TableRow>

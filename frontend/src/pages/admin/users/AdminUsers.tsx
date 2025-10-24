@@ -1,7 +1,7 @@
 import Spinner from '@/elements/Spinner';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
-import UserRow from './UserRow';
+import UserRow, { userTableColumns } from './UserRow';
 import UserCreateOrUpdate from './UserCreateOrUpdate';
 import getUsers from '@/api/admin/users/getUsers';
 import { Group, Title } from '@mantine/core';
@@ -43,7 +43,7 @@ const UsersContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Username', 'Created']} pagination={users} onPageSelect={setPage}>
+        <Table columns={userTableColumns} pagination={users} onPageSelect={setPage}>
           {users.data.map((user) => (
             <UserRow key={user.uuid} user={user} />
           ))}

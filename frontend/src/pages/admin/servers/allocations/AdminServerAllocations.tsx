@@ -7,7 +7,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations';
-import ServerAllocationRow from './ServerAllocationRow';
+import ServerAllocationRow, { serverAllocationTableColumns } from './ServerAllocationRow';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -39,11 +39,7 @@ export default ({ server }: { server: AdminServer }) => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <Table
-            columns={['', 'Id', 'IP', 'IP Alias', 'Port', 'Notes', 'Created']}
-            pagination={serverAllocations}
-            onPageSelect={setPage}
-          >
+          <Table columns={serverAllocationTableColumns} pagination={serverAllocations} onPageSelect={setPage}>
             {serverAllocations.data.map((allocation) => (
               <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
             ))}

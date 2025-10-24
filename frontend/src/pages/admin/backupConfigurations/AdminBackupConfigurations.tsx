@@ -7,7 +7,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
-import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
+import BackupConfigurationRow, {
+  backupConfigurationTableColumns,
+} from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -42,7 +44,7 @@ const BackupConfigurationsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Disk', 'Created']} pagination={backupConfigurations} onPageSelect={setPage}>
+        <Table columns={backupConfigurationTableColumns} pagination={backupConfigurations} onPageSelect={setPage}>
           {backupConfigurations.data.map((bc) => (
             <BackupConfigurationRow key={bc.uuid} backupConfiguration={bc} />
           ))}

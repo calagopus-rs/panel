@@ -1,7 +1,7 @@
 import Spinner from '@/elements/Spinner';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
-import NestRow from './NestRow';
+import NestRow, { nestTableColumns } from './NestRow';
 import getNests from '@/api/admin/nests/getNests';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
@@ -43,7 +43,7 @@ const NestsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Author', 'Description', 'Created']} pagination={nests} onPageSelect={setPage}>
+        <Table columns={nestTableColumns} pagination={nests} onPageSelect={setPage}>
           {nests.data.map((nest) => (
             <NestRow key={nest.uuid} nest={nest} />
           ))}

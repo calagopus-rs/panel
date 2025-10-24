@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import LocationDatabaseHostRow from './LocationDatabaseHostRow';
+import LocationDatabaseHostRow, { locationDatabaseHostTableColumns } from './LocationDatabaseHostRow';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import LocationDatabaseHostCreateModal from './modals/LocationDatabaseHostCreateModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -45,11 +45,7 @@ export default ({ location }: { location: Location }) => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <Table
-            columns={['Id', 'Name', 'Type', 'Address', 'Added', '']}
-            pagination={locationDatabaseHosts}
-            onPageSelect={setPage}
-          >
+          <Table columns={locationDatabaseHostTableColumns} pagination={locationDatabaseHosts} onPageSelect={setPage}>
             {locationDatabaseHosts.data.map((databaseHost) => (
               <LocationDatabaseHostRow
                 key={databaseHost.databaseHost.uuid}

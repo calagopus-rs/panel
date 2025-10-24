@@ -4,6 +4,8 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
+export const eggTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
+
 export default ({ nest, egg }: { nest: Nest; egg: AdminNestEgg }) => {
   return (
     <TableRow>

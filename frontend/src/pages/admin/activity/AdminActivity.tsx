@@ -3,7 +3,7 @@ import Spinner from '@/elements/Spinner';
 import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
 import Table from '@/elements/Table';
-import ActivityRow from './ActivityRow';
+import ActivityRow, { activityTableColumns } from './ActivityRow';
 import TextInput from '@/elements/input/TextInput';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
@@ -27,7 +27,7 @@ export default () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['Actor', 'Event', 'IP', 'When', '']} pagination={activities} onPageSelect={setPage}>
+        <Table columns={activityTableColumns} pagination={activities} onPageSelect={setPage}>
           {activities.data.map((activity) => (
             <ActivityRow key={activity.created.toString()} activity={activity} />
           ))}

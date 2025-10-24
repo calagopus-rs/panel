@@ -8,7 +8,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import NodeMountRow from './NodeMountRow';
+import NodeMountRow, { nodeMountTableColumns } from './NodeMountRow';
 import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
 import NodeMountAddModal from './modals/NodeMountAddModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -41,11 +41,7 @@ export default ({ node }: { node: Node }) => {
         <Spinner.Centered />
       ) : (
         <ContextMenuProvider>
-          <Table
-            columns={['Id', 'Name', 'Source', 'Target', 'Added', '']}
-            pagination={nodeMounts}
-            onPageSelect={setPage}
-          >
+          <Table columns={nodeMountTableColumns} pagination={nodeMounts} onPageSelect={setPage}>
             {nodeMounts.data.map((mount) => (
               <NodeMountRow key={mount.mount.uuid} node={node} mount={mount} />
             ))}

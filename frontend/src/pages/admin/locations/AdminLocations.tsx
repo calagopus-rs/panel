@@ -2,7 +2,7 @@ import Spinner from '@/elements/Spinner';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import getLocations from '@/api/admin/locations/getLocations';
-import LocationRow from './LocationRow';
+import LocationRow, { locationTableColumns } from './LocationRow';
 import LocationCreateOrUpdate from './LocationCreateOrUpdate';
 import { Group, Title } from '@mantine/core';
 import Button from '@/elements/Button';
@@ -43,7 +43,7 @@ const LocationsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['Id', 'Name', 'Backup Disk', 'Created']} pagination={locations} onPageSelect={setPage}>
+        <Table columns={locationTableColumns} pagination={locations} onPageSelect={setPage}>
           {locations.data.map((location) => (
             <LocationRow key={location.uuid} location={location} />
           ))}

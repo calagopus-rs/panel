@@ -12,6 +12,8 @@ import { useAdminStore } from '@/stores/admin';
 import deleteNodeMount from '@/api/admin/nodes/mounts/deleteNodeMount';
 import { NavLink } from 'react-router';
 
+export const nodeMountTableColumns = ['Id', 'Name', 'Source', 'Target', 'Added', ''];
+
 export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
   const { addToast } = useToast();
   const { removeNodeMount } = useAdminStore();

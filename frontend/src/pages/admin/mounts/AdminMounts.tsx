@@ -2,7 +2,7 @@ import Spinner from '@/elements/Spinner';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import MountCreateOrUpdate from './MountCreateOrUpdate';
-import MountRow from './MountRow';
+import MountRow, { mountTableColumns } from './MountRow';
 import { Group, TextInput, Title } from '@mantine/core';
 import Table from '@/elements/Table';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -41,7 +41,7 @@ const MountsContainer = () => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table columns={['ID', 'Name', 'Source', 'Target', 'Created']} pagination={mounts} onPageSelect={setPage}>
+        <Table columns={mountTableColumns} pagination={mounts} onPageSelect={setPage}>
           {mounts.data.map((m) => (
             <MountRow key={m.uuid} mount={m} />
           ))}

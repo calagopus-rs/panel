@@ -5,6 +5,8 @@ import { backupDiskLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { NavLink } from 'react-router';
 
+export const backupConfigurationTableColumns = ['ID', 'Name', 'Disk', 'Created'];
+
 export default ({ backupConfiguration }: { backupConfiguration: BackupConfiguration }) => {
   return (
     <TableRow>

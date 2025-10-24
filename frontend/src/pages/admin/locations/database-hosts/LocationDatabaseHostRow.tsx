@@ -13,6 +13,8 @@ import { useAdminStore } from '@/stores/admin';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { NavLink } from 'react-router';
 
+export const locationDatabaseHostTableColumns = ['Id', 'Name', 'Type', 'Address', 'Added', ''];
+
 export default ({ location, databaseHost }: { location: Location; databaseHost: LocationDatabaseHost }) => {
   const { addToast } = useToast();
   const { removeLocationDatabaseHost } = useAdminStore();

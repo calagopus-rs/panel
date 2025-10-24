@@ -6,6 +6,8 @@ import { faCrown, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router';
 
+export const userTableColumns = ['ID', 'Username', 'Role', 'Created'];
+
 export default ({ user }: { user: User }) => {
   return (
     <TableRow>
@@ -34,6 +36,8 @@ export default ({ user }: { user: User }) => {
           )}
         </span>
       </TableData>
+
+      <TableData>{user.role?.name ?? '-'}</TableData>
 
       <TableData>
         <Tooltip label={formatDateTime(user.created)}>{formatTimestamp(user.created)}</Tooltip>

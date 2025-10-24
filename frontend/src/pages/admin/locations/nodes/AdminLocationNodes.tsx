@@ -4,7 +4,7 @@ import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes';
-import NodeRow from '../../nodes/NodeRow';
+import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ location }: { location: Location }) => {
@@ -22,11 +22,7 @@ export default ({ location }: { location: Location }) => {
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['', 'Id', 'Name', 'Location', 'URL', 'Created']}
-          pagination={locationNodes}
-          onPageSelect={setPage}
-        >
+        <Table columns={nodeTableColumns} pagination={locationNodes} onPageSelect={setPage}>
           {locationNodes.data.map((node) => (
             <NodeRow key={node.uuid} node={node} />
           ))}

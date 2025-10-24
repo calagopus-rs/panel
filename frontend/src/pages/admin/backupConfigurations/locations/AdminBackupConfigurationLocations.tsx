@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import LocationRow from '@/pages/admin/locations/LocationRow';
+import LocationRow, { locationTableColumns } from '@/pages/admin/locations/LocationRow';
 import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
@@ -23,11 +23,7 @@ export default ({ backupConfiguration }: { backupConfiguration?: BackupConfigura
       {loading ? (
         <Spinner.Centered />
       ) : (
-        <Table
-          columns={['Id', 'Name', 'Backup Disk', 'Created']}
-          pagination={backupConfigurationLocations}
-          onPageSelect={setPage}
-        >
+        <Table columns={locationTableColumns} pagination={backupConfigurationLocations} onPageSelect={setPage}>
           {backupConfigurationLocations.data.map((location) => (
             <LocationRow key={location.uuid} location={location} />
           ))}
