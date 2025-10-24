@@ -4,3 +4,4 @@ target/
 extensions/*
 !extensions/list.lib.rs
 !extensions/list.Cargo.toml
+**/.idea

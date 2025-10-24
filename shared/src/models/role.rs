@@ -68,7 +68,7 @@ impl Role {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO roles (name, description, admin_permissions, server_permissions)
-            VALUES ($1, $2, $3)
+            VALUES ($1, $2, $3, $4)
             RETURNING {}
             "#,
             Self::columns_sql(None)
