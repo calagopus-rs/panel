@@ -1,6 +1,6 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
+import { faCodeCommit, faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -9,6 +9,7 @@ import Spinner from '@/elements/Spinner';
 import getEgg from '@/api/admin/eggs/getEgg';
 import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
 import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
+import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables';
 
 export default ({ contextNest }: { contextNest: Nest }) => {
   const params = useParams<'eggId'>();
@@ -41,6 +42,11 @@ export default ({ contextNest }: { contextNest: Nest }) => {
             link: `/admin/nests/${contextNest.uuid}/eggs/${params.eggId}`,
           },
           {
+            name: 'Variables',
+            icon: faCodeCommit,
+            link: `/admin/nests/${contextNest.uuid}/eggs/${params.eggId}/variables`,
+          },
+          {
             name: 'Mounts',
             icon: faEgg,
             link: `/admin/nests/${contextNest.uuid}/eggs/${params.eggId}/mounts`,
@@ -50,6 +56,7 @@ export default ({ contextNest }: { contextNest: Nest }) => {
 
       <Routes>
         <Route path={'/'} element={<EggCreateOrUpdate contextNest={contextNest} contextEgg={egg} />} />
+        <Route path={'/variables'} element={<AdminEggVariables contextNest={contextNest} contextEgg={egg} />} />
         <Route path={'/mounts'} element={<AdminEggMounts contextNest={contextNest} contextEgg={egg} />} />
       </Routes>
     </>

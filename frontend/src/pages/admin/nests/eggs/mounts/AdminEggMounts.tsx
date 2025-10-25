@@ -33,7 +33,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: Ad
       />
 
       <Group justify={'space-between'} mb={'md'}>
-        <Title order={2}>Node Mounts</Title>
+        <Title order={2}>Egg Mounts</Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>

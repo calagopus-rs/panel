@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 
-export default async (data: AdminUpdateDatabaseHost): Promise<AdminDatabaseHost> => {
+export default async (data: UpdateAdminDatabaseHost): Promise<AdminDatabaseHost> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post('/api/admin/database-hosts', transformKeysToSnakeCase(data))

@@ -5,6 +5,7 @@ import { StateCreator } from 'zustand';
 export interface EggsSlice {
   eggs: ResponseMeta<AdminNestEgg>;
   eggMounts: ResponseMeta<NodeMount>;
+  eggVariables: NestEggVariable[];
 
   setEggs: (eggs: ResponseMeta<AdminNestEgg>) => void;
   addEgg: (egg: AdminNestEgg) => void;
@@ -13,11 +14,16 @@ export interface EggsSlice {
   setEggMounts: (mounts: ResponseMeta<NodeMount>) => void;
   addEggMount: (mount: NodeMount) => void;
   removeEggMount: (mount: NodeMount) => void;
+
+  setEggVariables: (variables: NestEggVariable[]) => void;
+  addEggVariable: (variables: NestEggVariable) => void;
+  removeEggVariable: (variables: NestEggVariable) => void;
 }
 
 export const createEggsSlice: StateCreator<AdminStore, [], [], EggsSlice> = (set): EggsSlice => ({
   eggs: getEmptyPaginationSet<AdminNestEgg>(),
   eggMounts: getEmptyPaginationSet<NodeMount>(),
+  eggVariables: [],
 
   setEggs: (value) => set((state) => ({ ...state, eggs: value })),
   addEgg: (egg) =>
@@ -53,5 +59,15 @@ export const createEggsSlice: StateCreator<AdminStore, [], [], EggsSlice> = (set
         data: state.eggMounts.data.filter((m) => m.mount.uuid !== mount.mount.uuid),
         total: state.eggMounts.total - 1,
       },
+    })),
+
+  setEggVariables: (value) => set((state) => ({ ...state, eggVariables: value })),
+  addEggVariable: (variable) =>
+    set((state) => ({
+      eggVariables: [variable, ...state.eggVariables],
+    })),
+  removeEggVariable: (variable) =>
+    set((state) => ({
+      eggVariables: state.eggVariables.filter((v) => v.uuid !== variable.uuid),
     })),
 });

@@ -22,14 +22,14 @@ export default () => {
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
-  const [mount, setMount] = useState<AdminUpdateMount>({
+  const [mount, setMount] = useState<UpdateAdminMount>({
     name: '',
     description: '',
     source: '',
     target: '',
     readOnly: false,
     userMountable: false,
-  } as AdminUpdateMount);
+  } as UpdateAdminMount);
 
   useEffect(() => {
     if (params.id) {

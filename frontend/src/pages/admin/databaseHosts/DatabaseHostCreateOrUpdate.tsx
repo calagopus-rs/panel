@@ -24,7 +24,7 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
-  const [databaseHost, setDatabaseHost] = useState<AdminUpdateDatabaseHost>({
+  const [databaseHost, setDatabaseHost] = useState<UpdateAdminDatabaseHost>({
     name: '',
     username: '',
     password: null,
@@ -34,7 +34,7 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
     publicHost: null,
     publicPort: null,
     type: 'mysql',
-  } as AdminUpdateDatabaseHost);
+  } as UpdateAdminDatabaseHost);
 
   useEffect(() => {
     setDatabaseHost({

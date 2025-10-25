@@ -19,7 +19,7 @@ interface BackupConfiguration extends UpdateBackupConfiguration {
   created: Date;
 }
 
-interface AdminUpdateDatabaseHost {
+interface UpdateAdminDatabaseHost {
   name: string;
   username: string;
   password: string;
@@ -31,7 +31,7 @@ interface AdminUpdateDatabaseHost {
   type: DatabaseType;
 }
 
-interface AdminDatabaseHost extends AdminUpdateDatabaseHost {
+interface AdminDatabaseHost extends UpdateAdminDatabaseHost {
   uuid: string;
   created: Date;
 }
@@ -48,7 +48,7 @@ interface Location extends UpdateLocation {
   created: Date;
 }
 
-interface AdminUpdateMount {
+interface UpdateAdminMount {
   name: string;
   description: string | null;
   source: string;
@@ -57,7 +57,7 @@ interface AdminUpdateMount {
   userMountable: boolean;
 }
 
-interface Mount extends AdminUpdateMount {
+interface Mount extends UpdateAdminMount {
   uuid: string;
   created: Date;
 }
@@ -116,8 +116,7 @@ interface AdminNestEgg extends AdminUpdateNestEgg {
   created: Date;
 }
 
-interface NestEggVariable {
-  uuid: string;
+interface UpdateNestEggVariable {
   name: string;
   description: string | null;
   order: number;
@@ -126,6 +125,10 @@ interface NestEggVariable {
   userViewable: boolean;
   userEditable: boolean;
   rules: string[];
+}
+
+interface NestEggVariable extends UpdateNestEggVariable {
+  uuid: string;
   created: Date;
 }
 
