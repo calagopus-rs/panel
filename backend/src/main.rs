@@ -107,7 +107,12 @@ async fn handle_request(
 }
 
 async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, StatusCode> {
-    let if_none_match = req.headers().get("If-None-Match").cloned();
+    let if_none_match = req
+        .headers()
+        .get("If-None-Match")
+        .map(|v| v.to_str().ok())
+        .flatten()
+        .map(|s| s.to_string());
     let mut response = next.run(req).await;
 
     if let Some(content_type) = response.headers().get("Content-Type")
@@ -140,29 +145,35 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
         );
     }
 
-    let (mut parts, body) = response.into_parts();
-    let body_bytes = axum::body::to_bytes(body, usize::MAX).await.unwrap();
+    let (etag, response) = if let Some(etag) = response.headers().get("ETag") {
+        (etag.to_str().unwrap().to_string(), response)
+    } else {
+        let (mut parts, body) = response.into_parts();
+        let body_bytes = axum::body::to_bytes(body, usize::MAX).await.unwrap();
 
-    let mut hash = sha2::Sha256::new();
-    hash.update(body_bytes.as_ref());
-    let hash = format!("{:x}", hash.finalize());
+        let mut hash = sha2::Sha256::new();
+        hash.update(body_bytes.as_ref());
+        let hash = format!("{:x}", hash.finalize());
 
-    parts.headers.insert("ETag", hash.parse().unwrap());
+        parts.headers.insert("ETag", hash.parse().unwrap());
 
-    if if_none_match == Some(hash.parse().unwrap()) {
+        (hash, Response::from_parts(parts, Body::from(body_bytes)))
+    };
+
+    if if_none_match == Some(etag) {
         let mut cached_response = Response::builder()
             .status(StatusCode::NOT_MODIFIED)
             .body(Body::empty())
             .unwrap();
 
-        for (key, value) in parts.headers.iter() {
+        for (key, value) in response.headers().iter() {
             cached_response.headers_mut().insert(key, value.clone());
         }
 
         return Ok(cached_response);
     }
 
-    Ok(Response::from_parts(parts, Body::from(body_bytes)))
+    Ok(response)
 }
 
 #[tokio::main]
