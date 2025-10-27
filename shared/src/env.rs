@@ -1,4 +1,5 @@
 use anyhow::Context;
+use colored::Colorize;
 use dotenvy::dotenv;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
@@ -35,6 +36,8 @@ pub struct Env {
     pub port: u16,
 
     pub app_debug: bool,
+    pub app_use_decryption_cache: bool,
+    pub app_use_internal_cache: bool,
     pub app_log_directory: String,
     pub app_encryption_key: String,
     pub server_name: Option<String>,
@@ -104,6 +107,16 @@ impl Env {
                 .trim_matches('"')
                 .parse()
                 .context("Invalid APP_DEBUG value")?,
+            app_use_decryption_cache: std::env::var("APP_USE_DECRYPTION_CACHE")
+                .unwrap_or("false".to_string())
+                .trim_matches('"')
+                .parse()
+                .context("Invalid APP_USE_DECRYPTION_CACHE value")?,
+            app_use_internal_cache: std::env::var("APP_USE_INTERNAL_CACHE")
+                .unwrap_or("true".to_string())
+                .trim_matches('"')
+                .parse()
+                .context("Invalid APP_USE_INTERNAL_CACHE value")?,
             app_log_directory: std::env::var("APP_LOG_DIRECTORY")
                 .unwrap_or("logs".to_string())
                 .trim_matches('"')
@@ -116,6 +129,13 @@ impl Env {
                 .ok()
                 .map(|s| s.trim_matches('"').to_string()),
         };
+
+        if env.app_encryption_key.to_lowercase() == "changeme" {
+            println!(
+                "{}", "You are using the default APP_ENCRYPTION_KEY. This is unsupported, please modify your .env or your docker compose file.".red()
+            );
+            std::process::exit(1);
+        }
 
         if !std::path::Path::new(&env.app_log_directory).exists() {
             std::fs::create_dir_all(&env.app_log_directory)

@@ -335,6 +335,13 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
             },
         ),
         (
+            "extensions",
+            PermissionGroup {
+                description: "Permissions that control the ability to manage extensions for the panel.",
+                permissions: IndexMap::from([("read", "Allows to view extensions for the panel.")]),
+            },
+        ),
+        (
             "activity",
             PermissionGroup {
                 description: "Permissions that control the ability to view the activity log for all admin operations.",

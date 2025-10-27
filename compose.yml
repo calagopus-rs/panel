@@ -1,0 +1,43 @@
+services:
+  web:
+    image: ghcr.io/calagopus-rs/panel:latest
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+      - REDIS_URL=redis://cache
+      - DATABASE_URL=postgresql://panel:panel@db/panel
+      - DATABASE_MIGRATE=true
+      - PORT=8000
+      - APP_DEBUG=false
+      - APP_ENCRYPTION_KEY=CHANGEME
+      - APP_USE_DECRYPTION_CACHE=true # caches decrypted values in memory and redis to improve performance, can be considered less secure
+      - APP_USE_INTERNAL_CACHE=true # caches short-lived values in app memory and redis instead of just redis, improves performance at the cost of higher memory usage
+    volumes:
+      - ./data:/var/lib/calagopus
+    depends_on:
+      - db
+      - cache
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Berlin
+      - POSTGRES_USER=panel
+      - POSTGRES_PASSWORD=panel
+      - POSTGRES_DB=panel
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  cache:
+    image: valkey/valkey:latest
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Berlin
+    volumes:
+      - ./cache:/data

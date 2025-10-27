@@ -110,8 +110,7 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
     let if_none_match = req
         .headers()
         .get("If-None-Match")
-        .map(|v| v.to_str().ok())
-        .flatten()
+        .and_then(|v| v.to_str().ok())
         .map(|s| s.to_string());
     let mut response = next.run(req).await;
 

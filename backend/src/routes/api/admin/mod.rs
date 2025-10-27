@@ -19,6 +19,7 @@ use utoipa_axum::router::OpenApiRouter;
 mod activity;
 mod backup_configurations;
 mod database_hosts;
+mod extensions;
 mod locations;
 mod mounts;
 mod nests;
@@ -37,10 +38,10 @@ pub async fn auth(
     next: Next,
 ) -> Result<Response, StatusCode> {
     if !user.admin
-        && !user
+        && user
             .role
             .as_ref()
-            .map_or(false, |r| !r.admin_permissions.is_empty())
+            .is_none_or(|r| r.admin_permissions.is_empty())
     {
         return Ok(ApiResponse::error("unauthorized")
             .with_status(StatusCode::UNAUTHORIZED)
@@ -77,6 +78,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/mounts", mounts::router(state))
         .nest("/users", users::router(state))
         .nest("/roles", roles::router(state))
+        .nest("/extensions", extensions::router(state))
         .nest("/activity", activity::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .route_layer(axum::middleware::from_fn_with_state(

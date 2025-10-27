@@ -1,7 +1,9 @@
 #![allow(unused_variables)]
 
 use crate::State;
+use serde::Serialize;
 use std::ops::{Deref, DerefMut};
+use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 
 pub mod manager;
@@ -175,12 +177,15 @@ pub trait Extension: Send + Sync {
     }
 }
 
+#[derive(ToSchema, Serialize)]
 pub struct ConstructedExtension {
     pub name: &'static str,
     pub description: &'static str,
     pub authors: &'static [&'static str],
     pub version: &'static str,
 
+    #[serde(skip)]
+    #[schema(ignore)]
     pub extension: Box<dyn Extension>,
 }
 

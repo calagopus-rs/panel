@@ -20,6 +20,7 @@ struct CacheEntry {
 pub struct Cache {
     pub client: Client,
 
+    use_internal_cache: bool,
     mutex_map: RwLock<HashMap<String, Arc<Mutex<()>>>>,
     memory_cache: Arc<RwLock<HashMap<String, CacheEntry>>>,
 }
@@ -44,6 +45,7 @@ impl Cache {
                 .await
                 .unwrap(),
             },
+            use_internal_cache: env.app_use_internal_cache,
             mutex_map: RwLock::new(HashMap::new()),
             memory_cache: Arc::new(RwLock::new(HashMap::new())),
         };
@@ -59,20 +61,22 @@ impl Cache {
             format!("(redis@{}, {}ms)", version, start.elapsed().as_millis()).bright_black()
         );
 
-        let memory_cache = instance.memory_cache.clone();
-        tokio::spawn(async move {
-            let mut interval = tokio::time::interval(Duration::from_secs(30));
+        if instance.use_internal_cache {
+            let memory_cache = instance.memory_cache.clone();
+            tokio::spawn(async move {
+                let mut interval = tokio::time::interval(Duration::from_secs(30));
 
-            loop {
-                interval.tick().await;
+                loop {
+                    interval.tick().await;
 
-                let now = std::time::Instant::now();
-                memory_cache
-                    .write()
-                    .await
-                    .retain(|_, entry| entry.expires_at > now);
-            }
-        });
+                    let now = std::time::Instant::now();
+                    memory_cache
+                        .write()
+                        .await
+                        .retain(|_, entry| entry.expires_at > now);
+                }
+            });
+        }
 
         instance
     }
@@ -148,18 +152,20 @@ impl Cache {
     {
         let now = std::time::Instant::now();
 
-        tracing::debug!("checking memory cache");
-        if let Some(entry) = self.memory_cache.read().await.get(key)
-            && entry.expires_at > now
-        {
-            tracing::debug!("found in memory cache");
-            match bincode::serde::decode_from_slice::<T, _>(
-                &entry.value,
-                bincode::config::standard(),
-            ) {
-                Ok((value, _)) => return Ok(value),
-                Err(err) => {
-                    tracing::warn!("failed to deserialize from memory cache: {:#?}", err);
+        if self.use_internal_cache && ttl < 60 {
+            tracing::debug!("checking memory cache");
+            if let Some(entry) = self.memory_cache.read().await.get(key)
+                && entry.expires_at > now
+            {
+                tracing::debug!("found in memory cache");
+                match bincode::serde::decode_from_slice::<T, _>(
+                    &entry.value,
+                    bincode::config::standard(),
+                ) {
+                    Ok((value, _)) => return Ok(value),
+                    Err(err) => {
+                        tracing::warn!("failed to deserialize from memory cache: {:#?}", err);
+                    }
                 }
             }
         }
@@ -196,7 +202,9 @@ impl Cache {
         let _guard = mutex.lock().await;
         tracing::debug!("locked mutex");
 
-        if let Some(entry) = self.memory_cache.read().await.get(key)
+        if self.use_internal_cache
+            && ttl < 60
+            && let Some(entry) = self.memory_cache.read().await.get(key)
             && entry.expires_at > now
         {
             tracing::debug!("found in memory cache after lock");
@@ -250,19 +258,23 @@ impl Cache {
             )
             .await?;
 
-        self.memory_cache.write().await.insert(
-            key.to_string(),
-            CacheEntry {
-                value: serialized,
-                expires_at: now + Duration::from_secs(ttl),
-            },
-        );
+        if self.use_internal_cache && ttl < 60 {
+            self.memory_cache.write().await.insert(
+                key.to_string(),
+                CacheEntry {
+                    value: serialized,
+                    expires_at: now + Duration::from_secs(ttl),
+                },
+            );
+        }
 
         Ok(result)
     }
 
     pub async fn invalidate(&self, key: &str) -> Result<(), anyhow::Error> {
-        self.memory_cache.write().await.remove(key);
+        if self.use_internal_cache {
+            self.memory_cache.write().await.remove(key);
+        }
         self.client.del(key).await?;
 
         Ok(())

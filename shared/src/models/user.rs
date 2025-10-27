@@ -235,6 +235,7 @@ impl BaseModel for User {
 }
 
 impl User {
+    #[allow(clippy::too_many_arguments)]
     pub async fn create(
         database: &crate::database::Database,
         role_uuid: Option<uuid::Uuid>,

@@ -11,6 +11,7 @@ pub struct Database {
     read: Option<sqlx::PgPool>,
 
     encryption_key: Arc<str>,
+    use_decryption_cache: bool,
     batch_actions: Arc<Mutex<HashMap<(&'static str, uuid::Uuid), EmptyFuture>>>,
 }
 
@@ -53,6 +54,7 @@ impl Database {
             },
 
             encryption_key: env.app_encryption_key.clone().into(),
+            use_decryption_cache: env.app_use_decryption_cache,
             batch_actions: Arc::new(Mutex::new(HashMap::new())),
         };
 
@@ -152,6 +154,29 @@ impl Database {
         &self,
         data: impl AsRef<[u8]> + Send + 'static,
     ) -> Result<String, anyhow::Error> {
+        if self.use_decryption_cache {
+            return self
+                .cache
+                .cached(
+                    &format!(
+                        "decryption_cache::{}",
+                        base32::encode(base32::Alphabet::Z, data.as_ref())
+                    ),
+                    30,
+                    || async {
+                        let encryption_key = self.encryption_key.clone();
+                        let data = data.as_ref().to_vec();
+
+                        tokio::task::spawn_blocking(move || {
+                            simple_crypt::decrypt(&data, encryption_key.as_bytes())
+                                .map(|s| String::from_utf8_lossy(&s).to_string())
+                        })
+                        .await?
+                    },
+                )
+                .await;
+        }
+
         let encryption_key = self.encryption_key.clone();
 
         tokio::task::spawn_blocking(move || {
