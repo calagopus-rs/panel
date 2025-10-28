@@ -190,13 +190,16 @@ impl Cache {
             return Ok(val);
         }
 
-        let mutex = self
-            .mutex_map
-            .write()
-            .await
-            .entry(key.to_string())
-            .or_insert_with(|| Arc::new(Mutex::new(())))
-            .clone();
+        let mutex = if let Some(mutex) = self.mutex_map.read().await.get(key).cloned() {
+            mutex
+        } else {
+            self.mutex_map
+                .write()
+                .await
+                .entry(key.to_string())
+                .or_insert_with(|| Arc::new(Mutex::new(())))
+                .clone()
+        };
 
         tracing::debug!("locking mutex");
         let _guard = mutex.lock().await;

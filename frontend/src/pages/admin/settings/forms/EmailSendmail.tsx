@@ -1,6 +1,6 @@
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -9,6 +9,15 @@ export default ({
   settings: MailModeSendmail;
   setSettings: Dispatch<SetStateAction<MailMode>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: MailModeSendmail) => ({
+      ...settings,
+      command: settings.command || 'sendmail',
+      fromAddress: settings.fromAddress || '',
+      fromName: settings.fromName || '',
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <TextInput

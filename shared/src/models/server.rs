@@ -898,11 +898,11 @@ impl Server {
 
                 if force {
                     transaction.commit().await?;
-                    return Ok(());
+                    Ok(())
+                } else {
+                    transaction.rollback().await?;
+                    Err(anyhow::anyhow!("status code {status}: {}", err.error))
                 }
-
-                transaction.rollback().await?;
-                Err(anyhow::anyhow!("status code {status}: {}", err.error))
             }
         }
     }

@@ -1,7 +1,7 @@
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -10,6 +10,15 @@ export default ({
   settings: CaptchaProviderRecaptcha;
   setSettings: Dispatch<SetStateAction<CaptchaProviderRecaptcha>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: CaptchaProviderRecaptcha) => ({
+      ...settings,
+      siteKey: settings.siteKey || '',
+      secretKey: settings.secretKey || '',
+      v3: settings.v3 ?? false,
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <Group grow>

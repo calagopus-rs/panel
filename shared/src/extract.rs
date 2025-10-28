@@ -37,7 +37,7 @@ where
     async fn from_request_parts(req: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         Self::from_extensions(&mut req.extensions).ok_or_else(|| {
             ConsumingExtensionError(format!(
-                "Extension of type `{}` was not found. Perhaps you forgot to add it? See `axum::Extension`.",
+                "Extension of type `{}` was not found. Perhaps you forgot to add it? See `shared::extract::ConsumingExtension`.",
                 std::any::type_name::<T>()
             ))
         })

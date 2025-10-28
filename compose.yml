@@ -14,6 +14,8 @@ services:
       - APP_USE_INTERNAL_CACHE=true # caches short-lived values in app memory and redis instead of just redis, improves performance at the cost of higher memory usage
     volumes:
       - ./data:/var/lib/calagopus
+    ports:
+      - 8000:8000
     depends_on:
       - db
       - cache

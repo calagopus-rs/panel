@@ -2,7 +2,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -11,6 +11,17 @@ export default ({
   settings: MailModeSmtp;
   setSettings: Dispatch<SetStateAction<MailMode>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: MailModeSmtp) => ({
+      ...settings,
+      host: settings.host || '',
+      port: settings.port || 587,
+      useTls: settings.useTls ?? true,
+      fromAddress: settings.fromAddress || '',
+      fromName: settings.fromName || '',
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <Group grow>

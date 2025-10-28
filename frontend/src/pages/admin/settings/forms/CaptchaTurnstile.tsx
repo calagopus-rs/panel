@@ -1,6 +1,6 @@
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -9,6 +9,14 @@ export default ({
   settings: CaptchaProviderTurnstile;
   setSettings: Dispatch<SetStateAction<CaptchaProviderTurnstile>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: CaptchaProviderTurnstile) => ({
+      ...settings,
+      siteKey: settings.siteKey || '',
+      secretKey: settings.secretKey || '',
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <Group grow>

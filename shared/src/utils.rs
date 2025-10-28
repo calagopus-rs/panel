@@ -25,7 +25,7 @@ pub fn extract_ip(headers: &HeaderMap) -> Option<IpAddr> {
 
 #[inline]
 pub fn slice_up_to(s: &str, max_len: usize) -> &str {
-    if max_len >= s.len() {
+    if max_len >= s.len() || s.is_empty() {
         return s;
     }
 

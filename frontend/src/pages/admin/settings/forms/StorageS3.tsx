@@ -1,7 +1,7 @@
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -10,6 +10,18 @@ export default ({
   settings: StorageDriverS3;
   setSettings: Dispatch<SetStateAction<StorageDriver>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: StorageDriverS3) => ({
+      ...settings,
+      accessKey: settings.accessKey || '',
+      secretKey: settings.secretKey || '',
+      bucket: settings.bucket || '',
+      region: settings.region || '',
+      endpoint: settings.endpoint || '',
+      pathStyle: settings.pathStyle || false,
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <Group grow>

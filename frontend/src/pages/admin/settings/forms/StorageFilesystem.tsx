@@ -1,6 +1,6 @@
 import TextInput from '@/elements/input/TextInput';
 import { Stack } from '@mantine/core';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 
 export default ({
   settings,
@@ -9,6 +9,13 @@ export default ({
   settings: StorageDriverFilesystem;
   setSettings: Dispatch<SetStateAction<StorageDriver>>;
 }) => {
+  useEffect(() => {
+    setSettings((settings: StorageDriverFilesystem) => ({
+      ...settings,
+      path: settings.path || '',
+    }));
+  }, []);
+
   return (
     <Stack mt={'md'}>
       <TextInput

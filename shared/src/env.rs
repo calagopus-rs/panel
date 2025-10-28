@@ -175,8 +175,7 @@ impl Env {
                     tracing::Level::INFO
                 })
                 .finish(),
-        )
-        .unwrap();
+        )?;
 
         Ok((env, _guard))
     }
