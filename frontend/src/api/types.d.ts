@@ -974,7 +974,7 @@ interface PermissionMap {
   };
 }
 
-interface Permissions {
+interface ApiPermissions {
   userPermissions: PermissionMap;
   adminPermissions: PermissionMap;
   serverPermissions: PermissionMap;
