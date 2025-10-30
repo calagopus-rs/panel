@@ -811,7 +811,7 @@ impl ValidateRule for In {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key).copied()
-            && self.options.iter().any(|option| option == &value)
+            && self.options.iter().any(|option| option == value)
         {
             return Ok(false);
         }
@@ -1277,7 +1277,7 @@ impl ValidateRule for NotIn {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key).copied()
-            && !self.options.iter().any(|option| option == &value)
+            && !self.options.iter().any(|option| option == value)
         {
             return Ok(false);
         }
