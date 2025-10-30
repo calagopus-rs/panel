@@ -1,16 +1,11 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 
-interface Data {
-  envVariable: string;
-  value: string;
-}
-
-export default async (uuid: string, data: Data): Promise<void> => {
+export default async (uuid: string, variables: EnvVariable[]): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .put(`/api/client/servers/${uuid}/startup/variables`, {
-        env_variable: data.envVariable,
-        value: data.value,
+        variables: transformKeysToSnakeCase(variables),
       })
       .then(() => resolve())
       .catch(reject);

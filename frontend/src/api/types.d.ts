@@ -654,6 +654,11 @@ interface ScheduleStatus {
   step: string | null;
 }
 
+interface EnvVariable {
+  envVariable: string;
+  value: string;
+}
+
 interface FileOperationCompress {
   type: 'compress';
   path: string;

@@ -66,14 +66,20 @@ mod put {
     use utoipa::ToSchema;
     use validator::Validate;
 
-    #[derive(ToSchema, Validate, Deserialize)]
-    pub struct Payload {
+    #[derive(ToSchema, Validate, Serialize, Deserialize)]
+    pub struct PayloadVariable {
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
         env_variable: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
+        #[validate(length(max = 4096))]
+        #[schema(max_length = 4096)]
         value: String,
+    }
+
+    #[derive(ToSchema, Validate, Deserialize)]
+    pub struct Payload {
+        #[schema(inline)]
+        variables: Vec<PayloadVariable>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -112,36 +118,24 @@ mod put {
         )
         .await?;
 
-        let variable_uuid = if let Some(variable) = variables
-            .iter()
-            .find(|variable| variable.variable.env_variable == data.env_variable)
-        {
-            if !variable.variable.user_editable {
-                return ApiResponse::error("variable is not editable")
-                    .with_status(StatusCode::BAD_REQUEST)
-                    .ok();
-            }
-
-            variable.variable.uuid
-        } else {
-            return ApiResponse::error("variable not found")
-                .with_status(StatusCode::NOT_FOUND)
-                .ok();
-        };
-
         let mut validator_variables = HashMap::new();
         validator_variables.reserve(variables.len());
 
-        for variable in variables {
-            let value = if variable.variable.env_variable == data.env_variable {
-                data.value.clone()
-            } else {
-                variable.value
-            };
-
+        for variable in variables.iter() {
             validator_variables.insert(
-                variable.variable.env_variable,
-                (variable.variable.rules, value),
+                variable.variable.env_variable.as_str(),
+                (
+                    variable.variable.rules.as_slice(),
+                    if let Some(value) = data
+                        .variables
+                        .iter()
+                        .find(|v| v.env_variable == variable.variable.env_variable)
+                    {
+                        value.value.as_str()
+                    } else {
+                        variable.value.as_str()
+                    },
+                ),
             );
         }
 
@@ -160,14 +154,29 @@ mod put {
                 .ok();
         }
 
-        ServerVariable::create(&state.database, server.uuid, variable_uuid, &data.value).await?;
+        for data_variable in &data.variables {
+            let variable_uuid = match variables
+                .iter()
+                .find(|v| v.variable.env_variable == data_variable.env_variable)
+            {
+                Some(variable) => variable.variable.uuid,
+                None => continue,
+            };
+
+            ServerVariable::create(
+                &state.database,
+                server.uuid,
+                variable_uuid,
+                &data_variable.value,
+            )
+            .await?;
+        }
 
         activity_logger
             .log(
-                "server:startup.variable",
+                "server:startup.variables",
                 serde_json::json!({
-                    "env_variable": data.env_variable,
-                    "value": data.value,
+                    "variables": data.variables
                 }),
             )
             .await;

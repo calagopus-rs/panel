@@ -14,30 +14,30 @@ pub fn validate_rules(rules: &[String]) -> Result<(), ValidationError> {
     Ok(())
 }
 
-pub struct Validator {
-    pub rules: HashMap<String, Vec<Box<dyn ValidateRule>>>,
-    pub data: HashMap<String, String>,
+pub struct Validator<'a> {
+    pub rules: HashMap<&'a str, Vec<Box<dyn ValidateRule>>>,
+    pub data: HashMap<&'a str, &'a str>,
 }
 
-impl Validator {
-    pub fn new(data: HashMap<String, (Vec<String>, String)>) -> Result<Self, String> {
-        let mut rules: HashMap<String, Vec<Box<dyn ValidateRule>>> = HashMap::new();
+impl<'a> Validator<'a> {
+    pub fn new(data: HashMap<&'a str, (&'a [String], &'a str)>) -> Result<Self, String> {
+        let mut rules: HashMap<&'a str, Vec<Box<dyn ValidateRule>>> = HashMap::new();
         for (key, (key_rules, _)) in &data {
             let mut rule_objects: Vec<Box<dyn ValidateRule>> = Vec::new();
             rule_objects.reserve_exact(key_rules.len());
-            for rule in key_rules {
+            for rule in key_rules.iter() {
                 match rules::parse_validation_rule(rule) {
                     Ok(parsed_rule) => rule_objects.push(parsed_rule),
                     Err(err) => return Err(format!("invalid rule '{rule}': {err}")),
                 }
             }
 
-            rules.insert(key.clone(), rule_objects);
+            rules.insert(key, rule_objects);
         }
 
         Ok(Self {
             rules,
-            data: data.into_iter().map(|(k, (_, v))| (k, v)).collect(),
+            data: data.iter().map(|(k, (_, v))| (*k, *v)).collect(),
         })
     }
 

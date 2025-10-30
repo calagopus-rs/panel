@@ -81,7 +81,7 @@ impl ValidateRule for Accepted {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        match data.data.get(key).map(String::as_str) {
+        match data.data.get(key).copied() {
             Some("true") | Some("1") | Some("yes") | Some("on") => Ok(false),
             _ => Err("value must be 'true', '1', 'yes', or 'on'".to_string()),
         }
@@ -118,10 +118,10 @@ impl ValidateRule for AcceptedIf {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
-            if let Some(value) = data.data.get(check_key)
+            if let Some(value) = data.data.get(check_key.as_str())
                 && value == check_value
             {
-                match data.data.get(key).map(String::as_str) {
+                match data.data.get(key).copied() {
                     Some("true") | Some("1") | Some("yes") | Some("on") => return Ok(false),
                     _ => {
                         return Err("must be 'true', '1', 'yes', or 'on'".to_string());
@@ -316,7 +316,7 @@ impl ValidateRule for Boolean {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        match data.data.get(key).map(String::as_str) {
+        match data.data.get(key).copied() {
             Some("true") | Some("1") | Some("yes") | Some("on") | Some("false") | Some("0")
             | Some("no") | Some("off") => Ok(false),
             _ => Err("must be a boolean (true/false, 1/0, yes/no, on/off)".to_string()),
@@ -340,7 +340,7 @@ impl ValidateRule for Confirmed {
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         let confirm_key = format!("{}{}", key, "_confirmation");
         if let Some(value) = data.data.get(key)
-            && let Some(confirm_value) = data.data.get(&confirm_key)
+            && let Some(confirm_value) = data.data.get(confirm_key.as_str())
             && value == confirm_value
         {
             return Ok(false);
@@ -419,7 +419,7 @@ impl ValidateRule for Declined {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        match data.data.get(key).map(String::as_str) {
+        match data.data.get(key).copied() {
             Some("false") | Some("0") | Some("no") | Some("off") => Ok(false),
             _ => Err("value must be 'false', '0', 'no', or 'off'".to_string()),
         }
@@ -456,10 +456,10 @@ impl ValidateRule for DeclinedIf {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
-            if let Some(value) = data.data.get(check_key)
+            if let Some(value) = data.data.get(check_key.as_str())
                 && value == check_value
             {
-                match data.data.get(key).map(String::as_str) {
+                match data.data.get(key).copied() {
                     Some("false") | Some("0") | Some("no") | Some("off") => return Ok(false),
                     _ => {
                         return Err("must be 'false', '0', 'no', or 'off'".to_string());
@@ -495,7 +495,7 @@ impl ValidateRule for Different {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key)
-            && let Some(other_value) = data.data.get(&self.other_key)
+            && let Some(other_value) = data.data.get(self.other_key.as_str())
             && value != other_value
         {
             return Ok(false);
@@ -810,8 +810,8 @@ impl ValidateRule for In {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(key)
-            && self.options.contains(value)
+        if let Some(value) = data.data.get(key).copied()
+            && self.options.iter().any(|option| option == &value)
         {
             return Ok(false);
         }
@@ -1276,8 +1276,8 @@ impl ValidateRule for NotIn {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(key)
-            && !self.options.contains(value)
+        if let Some(value) = data.data.get(key).copied()
+            && !self.options.iter().any(|option| option == &value)
         {
             return Ok(false);
         }
@@ -1336,7 +1336,7 @@ impl ValidateRule for Nullable {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(key)
+        if let Some(value) = data.data.get(key).copied()
             && (value.is_empty() || value == "null")
         {
             return Ok(true);
@@ -1459,7 +1459,7 @@ impl ValidateRule for RequiredIf {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         for (check_key, check_value) in &self.keys {
-            if let Some(value) = data.data.get(check_key)
+            if let Some(value) = data.data.get(check_key.as_str()).copied()
                 && value == check_value
             {
                 if let Some(field_value) = data.data.get(key)
@@ -1498,7 +1498,7 @@ impl ValidateRule for RequiredIfAccepted {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(&self.other_key)
+        if let Some(value) = data.data.get(self.other_key.as_str()).copied()
             && (value == "true" || value == "1" || value == "yes" || value == "on")
         {
             if let Some(field_value) = data.data.get(key)
@@ -1536,7 +1536,7 @@ impl ValidateRule for RequiredIfDeclined {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(&self.other_key)
+        if let Some(value) = data.data.get(self.other_key.as_str()).copied()
             && (value == "false" || value == "0" || value == "no" || value == "off")
         {
             if let Some(field_value) = data.data.get(key)
@@ -1575,7 +1575,7 @@ impl ValidateRule for Same {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key)
-            && let Some(other_value) = data.data.get(&self.other_key)
+            && let Some(other_value) = data.data.get(self.other_key.as_str())
             && value == other_value
         {
             return Ok(false);
@@ -1692,7 +1692,7 @@ impl ValidateRule for Timezone {
     }
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
-        if let Some(value) = data.data.get(key)
+        if let Some(value) = data.data.get(key).copied()
             && (value.parse::<chrono::FixedOffset>().is_ok() || value == "UTC")
         {
             return Ok(false);

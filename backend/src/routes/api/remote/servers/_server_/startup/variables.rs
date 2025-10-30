@@ -20,8 +20,8 @@ mod put {
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
         env_variable: String,
-        #[validate(length(max = 1024))]
-        #[schema(max_length = 1024)]
+        #[validate(length(max = 4096))]
+        #[schema(max_length = 4096)]
         value: String,
     }
 
@@ -77,15 +77,15 @@ mod put {
         let mut validator_variables = HashMap::new();
         validator_variables.reserve(variables.len());
 
-        for variable in variables {
+        for variable in variables.iter() {
             validator_variables.insert(
-                variable.variable.env_variable.clone(),
+                variable.variable.env_variable.as_str(),
                 (
-                    variable.variable.rules,
+                    variable.variable.rules.as_slice(),
                     if variable.variable.env_variable == data.env_variable {
-                        data.value.clone()
+                        data.value.as_str()
                     } else {
-                        variable.value
+                        variable.value.as_str()
                     },
                 ),
             );

@@ -1,27 +1,25 @@
 import Badge from '@/elements/Badge';
-import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
 import Tooltip from '@/elements/Tooltip';
 
 export default ({
   variable,
   overrideReadonly = false,
-  doUpdate,
+  loading = false,
+  value,
+  setValue,
 }: {
   variable: ServerVariable;
-  overrideReadonly: boolean;
-  doUpdate: (doLoading: (loading: boolean) => void, variable: ServerVariable, value: string) => void;
+  overrideReadonly?: boolean;
+  loading?: boolean;
+  value: string;
+  setValue: (value: string) => void;
 }) => {
-  const serverValue = variable.value ?? variable.defaultValue;
-  const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState(serverValue);
-
   return (
     <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
       <Title order={2} c={'white'}>
@@ -85,20 +83,6 @@ export default ({
         )}
         <p className={'text-gray-400 text-sm mt-4'}>{variable.description}</p>
       </div>
-
-      <Group pt={'md'} mt={'auto'}>
-        <Button
-          disabled={
-            (!variable.isEditable && !overrideReadonly) ||
-            (variable.rules.includes('required') && !value) ||
-            value === serverValue
-          }
-          onClick={() => doUpdate(setLoading, variable, value)}
-          loading={loading}
-        >
-          Save
-        </Button>
-      </Group>
     </Card>
   );
 };
