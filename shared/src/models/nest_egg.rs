@@ -160,8 +160,8 @@ pub struct ExportedNestEgg {
     #[schema(inline)]
     pub scripts: ExportedNestEggScripts,
 
-    #[validate(length(min = 1, max = 4096))]
-    #[schema(min_length = 1, max_length = 4096)]
+    #[validate(length(min = 1, max = 8192))]
+    #[schema(min_length = 1, max_length = 8192)]
     pub startup: String,
     #[serde(default)]
     pub force_outgoing_ip: bool,

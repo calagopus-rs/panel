@@ -17,8 +17,8 @@ mod put {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        #[validate(length(min = 1, max = 1024))]
-        #[schema(min_length = 1, max_length = 1024)]
+        #[validate(length(min = 1, max = 8192))]
+        #[schema(min_length = 1, max_length = 8192)]
         command: String,
     }
 
