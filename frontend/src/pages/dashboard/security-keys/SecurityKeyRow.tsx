@@ -36,6 +36,7 @@ export default ({ securityKey }: { securityKey: UserSecurityKey }) => {
         opened={openModal === 'edit'}
         onClose={() => setOpenModal(null)}
       />
+
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}

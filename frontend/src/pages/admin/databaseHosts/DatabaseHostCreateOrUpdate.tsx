@@ -93,7 +93,6 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteDatabaseHost(params.id)
       .then(() => {
         addToast('Database host deleted.', 'success');
@@ -101,9 +100,6 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

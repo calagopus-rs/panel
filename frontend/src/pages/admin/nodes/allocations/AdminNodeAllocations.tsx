@@ -69,6 +69,7 @@ export default ({ node }: { node: Node }) => {
         opened={openModal === 'create'}
         onClose={() => setOpenModal(null)}
       />
+
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}

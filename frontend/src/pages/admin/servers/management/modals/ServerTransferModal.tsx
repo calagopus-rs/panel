@@ -14,7 +14,6 @@ import Button from '@/elements/Button';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import Code from '@/elements/Code';
 import postTransfer from '@/api/admin/servers/postTransfer';
-import { load } from '@/lib/debounce';
 import { useNavigate } from 'react-router';
 import Modal from '@/elements/modals/Modal';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
@@ -25,7 +24,6 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'confirm'>(null);
-  const [loading, setLoading] = useState(false);
   const [selectedNodeUuid, setSelectedNodeUuid] = useState(null);
   const [selectedPrimaryAllocationUuid, setSelectedPrimaryAllocationUuid] = useState(null);
   const [selectedAllocationUuids, setSelectedAllocationUuids] = useState<string[]>([]);
@@ -51,10 +49,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
     setOpenModal(null);
   };
 
-  const doTransfer = () => {
-    load(true, setLoading);
-
-    postTransfer(server.uuid, {
+  const doTransfer = async () => {
+    await postTransfer(server.uuid, {
       nodeUuid: selectedNodeUuid,
       allocationUuid: selectedPrimaryAllocationUuid,
       allocationUuids: selectedAllocationUuids,
@@ -71,9 +67,6 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 
@@ -202,7 +195,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
             onChange={(value) => setMultiplexChannels(Number(value) || 0)}
           />
 
-          <Button color={'blue'} onClick={() => setOpenModal('confirm')} loading={loading} disabled={!selectedNodeUuid}>
+          <Button color={'blue'} onClick={() => setOpenModal('confirm')} disabled={!selectedNodeUuid}>
             Transfer
           </Button>
         </Stack>

@@ -10,8 +10,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const { addToast } = useToast();
   const { updateServer: updateStoreServer } = useAdminStore();
 
-  const doSuspend = () => {
-    updateServer(server.uuid, {
+  const doSuspend = async () => {
+    await updateServer(server.uuid, {
       suspended: true,
     })
       .then(() => {

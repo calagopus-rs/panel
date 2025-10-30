@@ -69,7 +69,6 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteBackupConfiguration(params.id)
       .then(() => {
         addToast('Backup configuration deleted.', 'success');
@@ -77,9 +76,6 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

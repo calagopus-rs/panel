@@ -18,8 +18,8 @@ export default ({ nest, egg, mount }: { nest: Nest; egg: AdminNestEgg; mount: No
 
   const [openModal, setOpenModal] = useState<'remove'>(null);
 
-  const doRemove = () => {
-    deleteEggMount(nest.uuid, egg.uuid, mount.mount.uuid)
+  const doRemove = async () => {
+    await deleteEggMount(nest.uuid, egg.uuid, mount.mount.uuid)
       .then(() => {
         removeEggMount(mount);
         addToast('Egg Mount deleted.', 'success');

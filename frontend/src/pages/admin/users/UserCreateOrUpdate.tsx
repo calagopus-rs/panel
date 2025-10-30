@@ -14,7 +14,6 @@ import Switch from '@/elements/input/Switch';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getNests from '@/api/admin/nests/getNests';
 import getRoles from '@/api/admin/roles/getRoles';
 import Select from '@/elements/input/Select';
 
@@ -81,7 +80,6 @@ export default ({ contextUser }: { contextUser?: User }) => {
   };
 
   const doDisableTwoFactor = async () => {
-    load(true, setLoading);
     await disableUserTwoFactor(params.id)
       .then(() => {
         addToast('User two factor disabled.', 'success');
@@ -91,14 +89,10 @@ export default ({ contextUser }: { contextUser?: User }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteUser(contextUser.uuid)
       .then(() => {
         addToast('User deleted.', 'success');
@@ -106,9 +100,6 @@ export default ({ contextUser }: { contextUser?: User }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

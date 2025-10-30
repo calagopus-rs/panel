@@ -48,6 +48,7 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
         propStep={step}
         onStepUpdate={onStepUpdate}
       />
+
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}

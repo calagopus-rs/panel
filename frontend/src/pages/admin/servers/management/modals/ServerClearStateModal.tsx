@@ -10,8 +10,8 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
   const { addToast } = useToast();
   const { updateServer } = useAdminStore();
 
-  const doClearState = () => {
-    clearServerState(server.uuid)
+  const doClearState = async () => {
+    await clearServerState(server.uuid)
       .then(() => {
         addToast('Server state cleared.', 'success');
         onClose();

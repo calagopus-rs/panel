@@ -66,7 +66,7 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
         </Stack>
 
         <Group mt={'md'}>
-          <Button color={'red'} disabled={loading || server.name != deleteServerName} onClick={doDelete}>
+          <Button color={'red'} disabled={server.name != deleteServerName} loading={loading} onClick={doDelete}>
             Okay
           </Button>
           <Button variant={'default'} onClick={() => onClose()}>

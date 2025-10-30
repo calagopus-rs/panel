@@ -33,6 +33,7 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
   return (
     <>
       <ApiKeyEditModal apiKey={apiKey} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
+
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}

@@ -66,8 +66,8 @@ export default ({ server, allocation }: { server: AdminServer; allocation: Serve
       });
   };
 
-  const doRemove = () => {
-    deleteServerAllocation(server.uuid, allocation.uuid)
+  const doRemove = async () => {
+    await deleteServerAllocation(server.uuid, allocation.uuid)
       .then(() => {
         removeServerAllocation(allocation);
         addToast('Allocation removed.', 'success');
@@ -99,6 +99,7 @@ export default ({ server, allocation }: { server: AdminServer; allocation: Serve
           </Group>
         </Stack>
       </Modal>
+
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}

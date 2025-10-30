@@ -108,7 +108,6 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteEgg(contextNest.uuid, contextEgg.uuid)
       .then(() => {
         addToast('Egg deleted.', 'success');
@@ -116,9 +115,6 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

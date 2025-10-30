@@ -79,7 +79,6 @@ export default ({ contextRole }: { contextRole?: Role }) => {
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteRole(params.id)
       .then(() => {
         addToast('Role deleted.', 'success');
@@ -87,9 +86,6 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

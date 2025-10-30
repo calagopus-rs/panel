@@ -50,6 +50,7 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
         opened={openModal === 'update'}
         onClose={() => setOpenModal(null)}
       />
+
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}

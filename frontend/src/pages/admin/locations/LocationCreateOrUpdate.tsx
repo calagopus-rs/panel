@@ -73,7 +73,6 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteLocation(params.id)
       .then(() => {
         addToast('Location deleted.', 'success');
@@ -81,9 +80,6 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

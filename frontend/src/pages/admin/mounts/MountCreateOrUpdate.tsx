@@ -72,7 +72,6 @@ export default () => {
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteMount(params.id)
       .then(() => {
         addToast('Mount deleted.', 'success');
@@ -80,9 +79,6 @@ export default () => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

@@ -55,7 +55,6 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteNest(nest.uuid)
       .then(() => {
         addToast('Nest deleted.', 'success');
@@ -63,9 +62,6 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

@@ -114,7 +114,6 @@ export default ({ contextNode }: { contextNode?: Node }) => {
   };
 
   const doDelete = async () => {
-    load(true, setLoading);
     await deleteNode(params.id)
       .then(() => {
         addToast('Node deleted.', 'success');
@@ -122,9 +121,6 @@ export default ({ contextNode }: { contextNode?: Node }) => {
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => {
-        load(false, setLoading);
       });
   };
 

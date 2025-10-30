@@ -33,6 +33,7 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
   return (
     <>
       <SshKeyEditModal sshKey={sshKey} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
+
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
