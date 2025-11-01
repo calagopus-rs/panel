@@ -776,6 +776,7 @@ export default () => {
                 columns={['', 'Name', 'Size', 'Modified', '']}
                 pagination={browsingEntries}
                 onPageSelect={onPageSelect}
+                allowSelect={false}
               >
                 {browsingEntries.data.map((file) => (
                   <SelectionArea.Selectable key={file.name} item={file}>

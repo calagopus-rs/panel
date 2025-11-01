@@ -89,12 +89,18 @@ interface TableProps {
   columns: string[];
   pagination?: ResponseMeta<unknown>;
   onPageSelect?: (page: number) => void;
+  allowSelect?: boolean;
   children: React.ReactNode;
 }
 
-export default ({ columns, pagination, onPageSelect, children }: TableProps) => {
+export default ({ columns, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {
   return (
-    <Table stickyHeader withTableBorder highlightOnHover={pagination?.total > 0} className={'select-none'}>
+    <Table
+      stickyHeader
+      withTableBorder
+      highlightOnHover={pagination?.total > 0}
+      className={allowSelect ? undefined : 'select-none'}
+    >
       <TableHead>
         {columns.map((column, index) => (
           <TableHeader name={column} key={`column-${index}`} />

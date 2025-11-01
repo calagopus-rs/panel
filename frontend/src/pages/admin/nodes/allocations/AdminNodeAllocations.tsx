@@ -109,7 +109,12 @@ export default ({ node }: { node: Node }) => {
           className={'h-full'}
           disabled={!!openModal}
         >
-          <Table columns={nodeAllocationTableColumns} pagination={nodeAllocations} onPageSelect={setPage}>
+          <Table
+            columns={nodeAllocationTableColumns}
+            pagination={nodeAllocations}
+            onPageSelect={setPage}
+            allowSelect={false}
+          >
             {nodeAllocations.data.map((allocation) => (
               <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
                 {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
