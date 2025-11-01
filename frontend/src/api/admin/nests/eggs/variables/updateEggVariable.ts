@@ -9,9 +9,7 @@ export default async (
 ): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/admin/nests/${nestUuid}/eggs/${eggUuid}/variables/${variableUuid}`, {
-        ...transformKeysToSnakeCase(data),
-      })
+      .patch(`/api/admin/nests/${nestUuid}/eggs/${eggUuid}/variables/${variableUuid}`, transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

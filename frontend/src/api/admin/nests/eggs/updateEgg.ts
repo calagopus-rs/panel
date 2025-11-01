@@ -5,7 +5,7 @@ export default async (nestUuid: string, eggUuid: string, data: AdminUpdateNestEg
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/admin/nests/${nestUuid}/eggs/${eggUuid}`, {
-        ...transformKeysToSnakeCase<object>(data),
+        ...transformKeysToSnakeCase(data),
         docker_images: data.dockerImages,
       })
       .then(() => resolve())

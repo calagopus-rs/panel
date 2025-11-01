@@ -38,7 +38,10 @@ export default ({
       <div className={'mt-4'}>
         {variable.rules.includes('boolean') ||
         (variable.rules.includes('string') &&
-          (variable.rules.includes('in:1,0') || variable.rules.includes('in:true,false'))) ? (
+          (variable.rules.includes('in:1,0') ||
+            variable.rules.includes('in:0,1') ||
+            variable.rules.includes('in:true,false') ||
+            variable.rules.includes('in:false,true'))) ? (
           <Switch
             name={variable.envVariable}
             defaultChecked={value === '1' || value === 'true'}

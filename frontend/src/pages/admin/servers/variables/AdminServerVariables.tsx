@@ -43,6 +43,23 @@ export default ({ server }: { server: AdminServer }) => {
       });
   };
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+
+        if (Object.keys(values).length > 0 && !loading) {
+          doUpdate();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [values, loading]);
+
   return (
     <>
       <Group justify={'space-between'} mb={'md'}>

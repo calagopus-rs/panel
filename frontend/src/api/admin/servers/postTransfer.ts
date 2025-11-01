@@ -8,7 +8,7 @@ interface Data {
   backups: string[];
   deleteSourceBackups: boolean;
   archiveFormat: ArchiveFormat;
-  compressionLevel: CompressionLevel;
+  compressionLevel: CompressionLevel | null;
   multiplexChannels: number;
 }
 

@@ -56,6 +56,14 @@ export default ({
     setSelectedPermissions(newSelected);
   };
 
+  const selectAllPermissions = () => {
+    setSelectedPermissions(
+      Object.entries(permissions).flatMap(([category, { permissions }]) =>
+        Object.keys(permissions).map((perm) => `${category}.${perm}`),
+      ),
+    );
+  };
+
   const getSelectedPermissionsList = () => {
     return Array.from(selectedPermissions).sort();
   };
@@ -166,13 +174,26 @@ export default ({
           )}
         </div>
 
-        {selectedPermissions.length > 0 && (
-          <div className={'mt-4'}>
-            <Button onClick={() => setSelectedPermissions([])} className={'w-full'}>
-              Clear All
-            </Button>
-          </div>
-        )}
+        <div className={'mt-4'}>
+          <Button
+            disabled={
+              selectedPermissions.length ===
+              Object.entries(permissions).flatMap(([_, { permissions }]) => Object.keys(permissions)).length
+            }
+            onClick={selectAllPermissions}
+            className={'w-full'}
+          >
+            Select All
+          </Button>
+          <Button
+            disabled={selectedPermissions.length === 0}
+            color={'red'}
+            onClick={() => setSelectedPermissions([])}
+            className={'w-full ml-2'}
+          >
+            Clear All
+          </Button>
+        </div>
       </Card>
     </div>
   );

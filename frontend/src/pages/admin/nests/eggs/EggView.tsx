@@ -6,7 +6,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
-import getEgg from '@/api/admin/eggs/getEgg';
+import getEgg from '@/api/admin/nests/eggs/getEgg';
 import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
 import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
 import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables';

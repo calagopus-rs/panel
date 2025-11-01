@@ -28,7 +28,7 @@ export default () => {
 
   const setDebouncedCommand = useCallback(
     debounce((command: string) => {
-      updateCommand(server.uuid, { command })
+      updateCommand(server.uuid, command)
         .then(() => {
           addToast('Startup command updated.', 'success');
           updateServer({ startup: command });
@@ -54,7 +54,7 @@ export default () => {
 
   useEffect(() => {
     if (dockerImage !== server.image) {
-      updateDockerImage(server.uuid, { image: dockerImage })
+      updateDockerImage(server.uuid, dockerImage)
         .then(() => {
           addToast('Docker image updated.', 'success');
           updateServer({ image: dockerImage });
@@ -86,6 +86,23 @@ export default () => {
         load(false, setLoading);
       });
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+        event.preventDefault();
+
+        if (Object.keys(values).length > 0 && !loading) {
+          doUpdate();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [values, loading]);
 
   return (
     <>
@@ -144,7 +161,6 @@ export default () => {
             key={variable.envVariable}
             variable={variable}
             loading={loading}
-            overrideReadonly
             value={values[variable.envVariable] ?? variable.value ?? variable.defaultValue ?? ''}
             setValue={(value) => setValues((prev) => ({ ...prev, [variable.envVariable]: value }))}
           />

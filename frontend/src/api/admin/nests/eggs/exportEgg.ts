@@ -5,7 +5,15 @@ export default async (nestUuid: string, eggUuid: string): Promise<object> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/admin/nests/${nestUuid}/eggs/${eggUuid}/export`)
-      .then(({ data }) => resolve(transformKeysToSnakeCase(data)))
+      .then(({ data }) =>
+        resolve({
+          ...transformKeysToSnakeCase(data),
+          config: {
+            ...transformKeysToSnakeCase(data.config),
+            files: data.config.files,
+          },
+        }),
+      )
       .catch(reject);
   });
 };

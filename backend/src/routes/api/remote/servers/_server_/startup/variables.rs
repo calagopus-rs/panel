@@ -112,11 +112,15 @@ mod put {
             &state.database,
             server.uuid,
             None,
-            "server:startup.variable",
+            "server:startup.variables",
             None,
             serde_json::json!({
-                "env_variable": data.env_variable,
-                "value": data.value,
+                "variables": [
+                    {
+                        "env_variable": data.env_variable,
+                        "value": data.value,
+                    }
+                ]
             }),
             chrono::Utc::now(),
         )

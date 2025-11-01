@@ -3,9 +3,9 @@ import { useToast } from '@/providers/ToastProvider';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import Code from '@/elements/Code';
-import deleteEgg from '@/api/admin/eggs/deleteEgg';
-import updateEgg from '@/api/admin/eggs/updateEgg';
-import createEgg from '@/api/admin/eggs/createEgg';
+import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
+import updateEgg from '@/api/admin/nests/eggs/updateEgg';
+import createEgg from '@/api/admin/nests/eggs/createEgg';
 import { Group, Stack } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import TagsInput from '@/elements/input/TagsInput';
@@ -16,7 +16,7 @@ import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
-import exportEgg from '@/api/admin/eggs/exportEgg';
+import exportEgg from '@/api/admin/nests/eggs/exportEgg';
 
 export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: AdminNestEgg }) => {
   const params = useParams<'eggId'>();

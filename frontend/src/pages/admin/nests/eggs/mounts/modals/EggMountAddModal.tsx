@@ -8,7 +8,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
-import createEggMount from '@/api/admin/eggs/mounts/createEggMount';
+import createEggMount from '@/api/admin/nests/eggs/mounts/createEggMount';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest; egg: AdminNestEgg }) => {

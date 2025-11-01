@@ -23,7 +23,7 @@ where
     T: Send + Sync + 'static,
 {
     fn from_extensions(extensions: &mut Extensions) -> Option<Self> {
-        extensions.remove::<T>().map(ConsumingExtension)
+        extensions.remove().map(ConsumingExtension)
     }
 }
 

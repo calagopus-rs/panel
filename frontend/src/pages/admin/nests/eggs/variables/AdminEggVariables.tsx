@@ -1,7 +1,7 @@
 import { Group, Title } from '@mantine/core';
 import { useAdminStore } from '@/stores/admin';
 import { useEffect } from 'react';
-import getEggVariables from '@/api/admin/eggs/variables/getEggVariables';
+import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
 import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

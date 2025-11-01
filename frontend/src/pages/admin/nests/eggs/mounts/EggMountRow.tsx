@@ -10,7 +10,7 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
 import { NavLink } from 'react-router';
-import deleteEggMount from '@/api/admin/eggs/mounts/deleteEggMount';
+import deleteEggMount from '@/api/admin/nests/eggs/mounts/deleteEggMount';
 
 export default ({ nest, egg, mount }: { nest: Nest; egg: AdminNestEgg; mount: NodeMount }) => {
   const { addToast } = useToast();

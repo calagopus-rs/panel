@@ -10,7 +10,7 @@ import Table from '@/elements/Table';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import EggMountAddModal from './modals/EggMountAddModal';
 import EggMountRow from './EggMountRow';
-import getEggMounts from '@/api/admin/eggs/mounts/getEggMounts';
+import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: AdminNestEgg }) => {

@@ -12,7 +12,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import getUsers from '@/api/admin/users/getUsers';
 import getNests from '@/api/admin/nests/getNests';
-import getEggs from '@/api/admin/eggs/getEggs';
+import getEggs from '@/api/admin/nests/eggs/getEggs';
 import { zones } from 'tzdata';
 import { load } from '@/lib/debounce';
 import updateServer from '@/api/admin/servers/updateServer';

@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 
 interface Data {
   name: string;
@@ -8,10 +9,7 @@ interface Data {
 export default async (uuid: string, backupUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/client/servers/${uuid}/backups/${backupUuid}`, {
-        name: data.name,
-        locked: data.locked,
-      })
+      .patch(`/api/client/servers/${uuid}/backups/${backupUuid}`, transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

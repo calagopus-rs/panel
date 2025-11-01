@@ -7,15 +7,15 @@ import TagsInput from '@/elements/input/TagsInput';
 import NumberInput from '@/elements/input/NumberInput';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
-import updateEggVariable from '@/api/admin/eggs/variables/updateEggVariable';
-import createEggVariable from '@/api/admin/eggs/variables/createEggVariable';
+import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
+import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
 import { httpErrorToHuman } from '@/api/axios';
 import { load } from '@/lib/debounce';
 import Button from '@/elements/Button';
 import { useAdminStore } from '@/stores/admin';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import Code from '@/elements/Code';
-import deleteEggVariable from '@/api/admin/eggs/variables/deleteEggVariable';
+import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
 import isEqual from 'react-fast-compare';
 
 export default ({

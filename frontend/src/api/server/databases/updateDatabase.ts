@@ -7,9 +7,7 @@ interface Data {
 export default async (uuid: string, databaseUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/client/servers/${uuid}/databases/${databaseUuid}`, {
-        locked: data.locked,
-      })
+      .patch(`/api/client/servers/${uuid}/databases/${databaseUuid}`, data)
       .then(() => resolve())
       .catch(reject);
   });

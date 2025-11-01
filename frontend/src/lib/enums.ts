@@ -34,6 +34,7 @@ import {
   faComputer,
   faUserSecret,
   faUnlockKeyhole,
+  faPuzzlePiece,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const captchaProviderTypeLabelMapping: Record<CaptchaProvider['type'], string> = {
@@ -289,6 +290,7 @@ export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
   nests: faKiwiBird,
   nodes: faServer,
   roles: faScroll,
+  extensions: faPuzzlePiece,
   schedules: faStopwatch,
   'security-keys': faUnlockKeyhole,
   servers: faComputer,

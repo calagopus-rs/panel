@@ -1,4 +1,5 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 
 interface Data {
   databaseHostUuid: string;
@@ -8,10 +9,7 @@ interface Data {
 export default async (uuid: string, data: Data): Promise<ServerDatabase> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/client/servers/${uuid}/databases`, {
-        database_host_uuid: data.databaseHostUuid,
-        name: data.name,
-      })
+      .post(`/api/client/servers/${uuid}/databases`, transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.database))
       .catch(reject);
   });

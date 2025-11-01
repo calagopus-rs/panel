@@ -130,6 +130,7 @@ mod put {
                         .variables
                         .iter()
                         .find(|v| v.env_variable == variable.variable.env_variable)
+                        && variable.variable.user_editable
                     {
                         value.value.as_str()
                     } else {
@@ -159,8 +160,8 @@ mod put {
                 .iter()
                 .find(|v| v.variable.env_variable == data_variable.env_variable)
             {
-                Some(variable) => variable.variable.uuid,
-                None => continue,
+                Some(variable) if variable.variable.user_editable => variable.variable.uuid,
+                _ => continue,
             };
 
             ServerVariable::create(
