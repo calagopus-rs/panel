@@ -25,7 +25,7 @@ export default ({ opened, onClose }: ModalProps) => {
           <TextInput label={'Host'} value={server.sftpHost} className={'pointer-events-none'} disabled />
         </CopyOnClick>
 
-        <CopyOnClick content={server.sftpHost} className={'col-span-4 text-left'}>
+        <CopyOnClick content={`${user.username}.${server.uuidShort}`} className={'col-span-4 text-left'}>
           <TextInput
             label={'Username'}
             value={`${user.username}.${server.uuidShort}`}
