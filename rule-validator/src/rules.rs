@@ -835,7 +835,7 @@ impl ValidateRule for Integer {
 
     fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
         if let Some(value) = data.data.get(key)
-            && value.chars().all(|c| c.is_ascii_digit())
+            && value.parse::<i64>().is_ok()
         {
             return Ok(false);
         }
