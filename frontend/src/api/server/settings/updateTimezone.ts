@@ -1,14 +1,10 @@
 import { axiosInstance } from '@/api/axios';
 
-interface Data {
-  timezone: string;
-}
-
-export default async (uuid: string, data: Data): Promise<void> => {
+export default async (uuid: string, timezone: string | null): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .put(`/api/client/servers/${uuid}/settings/timezone`, {
-        timezone: data.timezone,
+        timezone,
       })
       .then(() => resolve())
       .catch(reject);

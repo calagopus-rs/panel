@@ -382,7 +382,13 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   placeholder={'Europe/Amsterdam'}
                   value={server.timezone || ''}
                   onChange={(value) => setServer({ ...server, timezone: value })}
-                  data={timezones}
+                  data={[
+                    {
+                      label: 'System',
+                      value: '',
+                    },
+                    ...timezones,
+                  ]}
                   searchable
                 />
               </Group>

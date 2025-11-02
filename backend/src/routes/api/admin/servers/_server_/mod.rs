@@ -218,8 +218,8 @@ mod patch {
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         image: Option<String>,
-        #[validate(length(min = 3, max = 255))]
-        #[schema(min_length = 3, max_length = 255)]
+        #[validate(length(max = 255))]
+        #[schema(max_length = 255)]
         timezone: Option<String>,
 
         feature_limits: Option<shared::models::server::ApiServerFeatureLimits>,

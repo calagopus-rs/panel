@@ -27,7 +27,7 @@ export default () => {
 
   const doUpdate = () => {
     load(true, setLoading);
-    updateTimezone(server.uuid, { timezone })
+    updateTimezone(server.uuid, timezone || null)
       .then(() => {
         addToast('Server timezone updated.', 'success');
       })
@@ -65,7 +65,13 @@ export default () => {
               label={'Timezone'}
               value={timezone}
               onChange={(value) => setTimezone(value)}
-              data={timezones}
+              data={[
+                {
+                  label: 'System',
+                  value: '',
+                },
+                ...timezones,
+              ]}
               searchable
             />
             <Text>{time}</Text>
