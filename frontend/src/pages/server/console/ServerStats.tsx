@@ -5,16 +5,25 @@ import { useChart, useChartTickLabel } from './chart';
 import { bytesToString } from '@/lib/size';
 import { useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCloudArrowDown, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCloudArrowDown,
+  faCloudArrowUp,
+  faCloudDownload,
+  faMemory,
+  faMicrochip,
+  IconDefinition,
+} from '@fortawesome/free-solid-svg-icons';
 import Tooltip from '@/elements/Tooltip';
 import { hexToRgba } from '@/lib/color';
 import Card from '@/elements/Card';
 
 function ChartBlock({
+  icon,
   title,
   legend,
   children,
 }: {
+  icon: IconDefinition;
   title: string;
   legend?: React.ReactNode;
   children: React.ReactNode;
@@ -22,7 +31,9 @@ function ChartBlock({
   return (
     <Card className={'relative'}>
       <div className={'flex items-center justify-between px-4 py-2'}>
-        <h3 className={'transition-colors duration-100'}>{title}</h3>
+        <h3 className={'transition-colors duration-100'}>
+          <FontAwesomeIcon icon={icon} /> {title}
+        </h3>
         {legend && <span className={'text-sm flex items-center'}>{legend}</span>}
       </div>
       <div className={'z-10 ml-2 min-h-full'}>{children}</div>
@@ -78,13 +89,14 @@ export default () => {
 
   return (
     <div className={'grid grid-cols-1 md:grid-cols-3 gap-4'}>
-      <ChartBlock title={'CPU Load'}>
+      <ChartBlock icon={faMicrochip} title={'CPU Load'}>
         <Line {...cpu.props} />
       </ChartBlock>
-      <ChartBlock title={'Memory'}>
+      <ChartBlock icon={faMemory} title={'Memory Load'}>
         <Line {...memory.props} />
       </ChartBlock>
       <ChartBlock
+        icon={faCloudDownload}
         title={'Network'}
         legend={
           <>

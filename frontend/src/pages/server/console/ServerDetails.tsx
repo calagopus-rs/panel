@@ -19,7 +19,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover, ThemeIcon } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function StatCard({
   icon,
@@ -28,6 +28,7 @@ function StatCard({
   copyOnClick,
   popover,
   limit,
+  details,
 }: {
   icon: IconDefinition;
   label: string;
@@ -35,6 +36,7 @@ function StatCard({
   copyOnClick?: boolean;
   popover?: React.ReactNode;
   limit?: string;
+  details?: string;
 }) {
   return (
     <Card className={'flex flex-row! items-center'}>
@@ -58,11 +60,13 @@ function StatCard({
         <span className={'text-lg font-bold'}>
           {copyOnClick ? (
             <CopyOnClick content={value}>
-              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}
+              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}{' '}
+              {details && <span className={'text-sm text-gray-400'}>({details})</span>}
             </CopyOnClick>
           ) : (
             <>
-              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}
+              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}{' '}
+              {details && <span className={'text-sm text-gray-400'}>({details})</span>}
             </>
           )}
         </span>
@@ -78,9 +82,37 @@ export default () => {
 
   const [doNormalizeCpuLoad, setDoNormalizeCpuLoad] = useState(localStorage.getItem('normalize_cpu_load') === 'true');
 
+  const networkRef = useRef({
+    rxBytes: stats?.network.rxBytes,
+    txBytes: stats?.network.txBytes,
+    timestamp: Date.now(),
+    rxSpeed: 0,
+    txSpeed: 0,
+  });
+
   useEffect(() => {
     localStorage.setItem('normalize_cpu_load', String(doNormalizeCpuLoad));
   }, [doNormalizeCpuLoad]);
+
+  useEffect(() => {
+    if (!stats) return;
+
+    const now = Date.now();
+    const timeDelta = (now - networkRef.current.timestamp) / 1000;
+
+    if (timeDelta >= 0.5) {
+      const rxDelta = stats.network.rxBytes - networkRef.current.rxBytes;
+      const txDelta = stats.network.txBytes - networkRef.current.txBytes;
+
+      networkRef.current = {
+        rxBytes: stats.network.rxBytes,
+        txBytes: stats.network.txBytes,
+        timestamp: now,
+        rxSpeed: rxDelta / timeDelta,
+        txSpeed: txDelta / timeDelta,
+      };
+    }
+  }, [stats]);
 
   return (
     <div className={'flex flex-col space-y-4'}>
@@ -138,11 +170,13 @@ export default () => {
         icon={faCloudDownload}
         label={'Network (In)'}
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.rxBytes)}
+        details={state === 'offline' ? null : `${bytesToString(networkRef.current.rxSpeed, undefined, true)}/s`}
       />
       <StatCard
         icon={faCloudUpload}
         label={'Network (Out)'}
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.txBytes)}
+        details={state === 'offline' ? null : `${bytesToString(networkRef.current.txSpeed, undefined, true)}/s`}
       />
     </div>
   );
