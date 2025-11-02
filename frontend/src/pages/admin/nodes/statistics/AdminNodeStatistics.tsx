@@ -39,20 +39,24 @@ export default ({ node }: { node: Node }) => {
   const [statistics, setStatistics] = useState<NodeStatistics | null>(null);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const run = () => {
       axiosInstance
-        .get(`${new URL(node.publicUrl ?? node.url).origin}/api/stats`, {
+        .get(`${new URL(node.publicUrl ?? node.url).origin}/api/system/stats`, {
           headers: {
             Authorization: `Bearer ${node.token}`,
           },
         })
         .then(({ data }) => {
-          setStatistics(data);
+          setStatistics(data.stats);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         });
-    }, 1000);
+    };
+
+    run();
+
+    const interval = setInterval(run, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -65,7 +69,7 @@ export default ({ node }: { node: Node }) => {
         <Spinner.Centered />
       ) : (
         <div className={'grid grid-cols-1 xl:grid-cols-3 gap-4'}>
-          <Card className={'flex !flex-row'}>
+          <Card className={'flex flex-row!'}>
             <SemiCircleProgress
               value={statistics.cpu.used}
               label={<>{statistics.cpu.used.toFixed(1)}%</>}
@@ -78,7 +82,7 @@ export default ({ node }: { node: Node }) => {
               <p className={'text-xs'}>{statistics.cpu.threads} threads</p>
             </div>
           </Card>
-          <Card className={'flex !flex-row'}>
+          <Card className={'flex flex-row!'}>
             <SemiCircleProgress
               value={(statistics.memory.used / statistics.memory.total) * 100}
               label={<>{((statistics.memory.used / statistics.memory.total) * 100).toFixed(1)}%</>}
@@ -91,7 +95,7 @@ export default ({ node }: { node: Node }) => {
               <p className={'text-xs'}>{bytesToString(statistics.memory.total * 1024 * 1024)} total</p>
             </div>
           </Card>
-          <Card className={'flex !flex-row'}>
+          <Card className={'flex flex-row!'}>
             <SemiCircleProgress
               value={(statistics.disk.used / statistics.disk.total) * 100}
               label={<>{((statistics.disk.used / statistics.disk.total) * 100).toFixed(1)}%</>}
