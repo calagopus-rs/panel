@@ -44,7 +44,7 @@ export default () => {
       </Group>
 
       <div className={'grid xl:grid-cols-4 gap-4 mb-4'}>
-        <div className={'xl:col-span-3'} style={{ maxHeight: maxConsoleHeight }}>
+        <div className={'xl:col-span-3'} style={{ height: maxConsoleHeight }}>
           <Spinner.Suspense>
             <Console />
           </Spinner.Suspense>

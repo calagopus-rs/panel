@@ -89,6 +89,7 @@ mod post {
             data.config.allocations,
             &data.startup,
             data.force_outgoing_ip,
+            data.seperate_port,
             &data.features,
             data.docker_images,
             &data.file_denylist,
@@ -156,6 +157,7 @@ mod post {
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,
+                    "seperate_port": egg.seperate_port,
 
                     "features": egg.features,
                     "docker_images": egg.docker_images,

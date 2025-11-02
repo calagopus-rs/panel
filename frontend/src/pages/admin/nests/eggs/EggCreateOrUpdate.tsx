@@ -51,6 +51,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
     },
     startup: contextEgg?.startup || '',
     forceOutgoingIp: contextEgg?.forceOutgoingIp || false,
+    seperatePort: contextEgg?.seperatePort || false,
     features: contextEgg?.features || [],
     dockerImages: contextEgg?.dockerImages || {},
     fileDenylist: contextEgg?.fileDenylist || [],
@@ -274,6 +275,12 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
           label={'Force Outgoing IP'}
           checked={egg.forceOutgoingIp || false}
           onChange={(e) => setEgg({ ...egg, forceOutgoingIp: e.target.checked })}
+        />
+        <Switch
+          label={'Seperate IP and Port'}
+          description={'Seperates the primary IP and Port in the Console page instead of joining them with ":"'}
+          checked={egg.seperatePort || false}
+          onChange={(e) => setEgg({ ...egg, seperatePort: e.target.checked })}
         />
 
         <TagsInput

@@ -341,18 +341,19 @@ export const nestEggs = pgTable('nest_eggs', {
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
-	config_files: jsonb('config_files').notNull(),
-	config_startup: jsonb('config_startup').notNull(),
-	config_stop: jsonb('config_stop').notNull(),
-	config_script: jsonb('config_script').notNull(),
-	config_allocations: jsonb('config_allocations').default({}).notNull(),
+	configFiles: jsonb('config_files').notNull(),
+	configStartup: jsonb('config_startup').notNull(),
+	configStop: jsonb('config_stop').notNull(),
+	configScript: jsonb('config_script').notNull(),
+	configAllocations: jsonb('config_allocations').default({}).notNull(),
 
 	startup: text('startup').notNull(),
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
+	seperatePort: boolean('seperate_port').default(false).notNull(),
 
 	features: text('features').array().notNull(),
-	docker_images: json('docker_images').$type<Record<string, string>>().notNull(),
-	file_denylist: text('file_denylist').array().notNull(),
+	dockerImages: json('docker_images').$type<Record<string, string>>().notNull(),
+	fileDenylist: text('file_denylist').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (eggs) => [
@@ -475,7 +476,7 @@ export const serverSubusers = pgTable('server_subusers', {
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
 	permissions: varchar('permissions', { length: 32 }).array().notNull(),
-	ignored_files: text('ignored_files').array().notNull(),
+	ignoredFiles: text('ignored_files').array().notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverSubusers) => [

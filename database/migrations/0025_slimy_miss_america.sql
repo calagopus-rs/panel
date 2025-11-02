@@ -1,0 +1,1 @@
+ALTER TABLE "nest_eggs" ADD COLUMN "seperate_port" boolean DEFAULT false NOT NULL;

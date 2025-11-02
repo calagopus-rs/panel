@@ -207,7 +207,7 @@ export default function Terminal() {
   );
 
   return (
-    <Card className={'h-full flex flex-col font-mono text-sm relative !p-2'}>
+    <Card className={'h-full flex flex-col font-mono text-sm relative p-2!'}>
       {!socketConnected && <Spinner.Centered />}
 
       <div

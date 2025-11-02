@@ -1,5 +1,7 @@
+import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import CopyOnClick from '@/elements/CopyOnClick';
+import Checkbox from '@/elements/input/Checkbox';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { formatMiliseconds } from '@/lib/time';
@@ -8,6 +10,7 @@ import {
   faClock,
   faCloudDownload,
   faCloudUpload,
+  faCog,
   faEthernet,
   faHardDrive,
   faMemory,
@@ -15,28 +18,43 @@ import {
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ThemeIcon } from '@mantine/core';
+import { Popover, ThemeIcon } from '@mantine/core';
+import { useEffect, useState } from 'react';
 
 function StatCard({
   icon,
   label,
   value,
   copyOnClick,
+  popover,
   limit,
 }: {
   icon: IconDefinition;
   label: string;
   value: string;
   copyOnClick?: boolean;
+  popover?: React.ReactNode;
   limit?: string;
 }) {
   return (
-    <Card className={'flex !flex-row items-center'}>
+    <Card className={'flex flex-row! items-center'}>
       <ThemeIcon size={'xl'} radius={'md'}>
         <FontAwesomeIcon size={'xl'} icon={icon} />
       </ThemeIcon>
-      <div className={'flex flex-col ml-4'}>
-        <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
+      <div className={'flex flex-col ml-4 w-full'}>
+        <div className={'w-full flex justify-between'}>
+          <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
+          {popover && (
+            <Popover position={'bottom'} withArrow shadow={'md'}>
+              <Popover.Target>
+                <Button variant={'transparent'} size={'compact-xs'}>
+                  <FontAwesomeIcon size={'lg'} icon={faCog} />
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>{popover}</Popover.Dropdown>
+            </Popover>
+          )}
+        </div>
         <span className={'text-lg font-bold'}>
           {copyOnClick ? (
             <CopyOnClick content={value}>
@@ -58,9 +76,11 @@ export default () => {
   const stats = useServerStore((state) => state.stats);
   const state = useServerStore((state) => state.state);
 
-  const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
-  const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
-  const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited';
+  const [doNormalizeCpuLoad, setDoNormalizeCpuLoad] = useState(localStorage.getItem('normalize_cpu_load') === 'true');
+
+  useEffect(() => {
+    localStorage.setItem('normalize_cpu_load', String(doNormalizeCpuLoad));
+  }, [doNormalizeCpuLoad]);
 
   return (
     <div className={'flex flex-col space-y-4'}>
@@ -68,8 +88,16 @@ export default () => {
         icon={faEthernet}
         label={'Address'}
         copyOnClick={!!server.allocation}
-        value={server.allocation ? formatAllocation(server.allocation) : 'N/A'}
+        value={server.allocation ? formatAllocation(server.allocation, server.egg.seperatePort) : 'N/A'}
       />
+      {server.egg.seperatePort && server.allocation && (
+        <StatCard
+          icon={faEthernet}
+          label={'Port'}
+          copyOnClick={!!server.allocation}
+          value={server.allocation.port.toString()}
+        />
+      )}
       <StatCard
         icon={faClock}
         label={'Uptime'}
@@ -78,16 +106,34 @@ export default () => {
       <StatCard
         icon={faMicrochip}
         label={'CPU Load'}
-        value={state === 'offline' ? 'Offline' : `${stats?.cpuAbsolute.toFixed(2)}%`}
-        limit={state === 'offline' ? null : cpuLimit}
+        value={
+          state === 'offline'
+            ? 'Offline'
+            : doNormalizeCpuLoad
+              ? `${((stats?.cpuAbsolute / (server.limits.cpu || 100)) * 100).toFixed(2)}%`
+              : `${stats?.cpuAbsolute.toFixed(2)}%`
+        }
+        limit={doNormalizeCpuLoad ? null : server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited'}
+        popover={
+          <Checkbox
+            label={'Normalize CPU Load (shifted to max 100%)'}
+            checked={doNormalizeCpuLoad}
+            onChange={(e) => setDoNormalizeCpuLoad(e.target.checked)}
+          />
+        }
       />
       <StatCard
         icon={faMemory}
         label={'Memory Load'}
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.memoryBytes)}
-        limit={state === 'offline' ? null : memoryLimit}
+        limit={server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited'}
       />
-      <StatCard icon={faHardDrive} label={'Disk Usage'} value={bytesToString(stats?.diskBytes)} limit={diskLimit} />
+      <StatCard
+        icon={faHardDrive}
+        label={'Disk Usage'}
+        value={bytesToString(stats?.diskBytes)}
+        limit={server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited'}
+      />
       <StatCard
         icon={faCloudDownload}
         label={'Network (In)'}

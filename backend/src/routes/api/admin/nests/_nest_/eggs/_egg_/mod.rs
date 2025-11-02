@@ -205,6 +205,7 @@ mod patch {
         #[schema(min_length = 1, max_length = 255)]
         startup: Option<String>,
         force_outgoing_ip: Option<bool>,
+        seperate_port: Option<bool>,
 
         features: Option<Vec<String>>,
         docker_images: Option<IndexMap<String, String>>,
@@ -287,6 +288,9 @@ mod patch {
         if let Some(force_outgoing_ip) = data.force_outgoing_ip {
             egg.force_outgoing_ip = force_outgoing_ip;
         }
+        if let Some(seperate_port) = data.seperate_port {
+            egg.seperate_port = seperate_port;
+        }
         if let Some(features) = data.features {
             egg.features = features;
         }
@@ -300,12 +304,13 @@ mod patch {
         match sqlx::query!(
             "UPDATE nest_eggs
             SET
-                author = $1, name = $2, description = $3,
-                config_files = $4, config_startup = $5, config_stop = $6,
-                config_script = $7, config_allocations = $8, startup = $9,
-                force_outgoing_ip = $10, features = $11, docker_images = $12,
-                file_denylist = $13
-            WHERE nest_eggs.uuid = $14",
+                author = $2, name = $3, description = $4,
+                config_files = $5, config_startup = $6, config_stop = $7,
+                config_script = $8, config_allocations = $9, startup = $10,
+                force_outgoing_ip = $11, seperate_port = $12, features = $13,
+                docker_images = $14, file_denylist = $15
+            WHERE nest_eggs.uuid = $1",
+            egg.uuid,
             egg.author,
             egg.name,
             egg.description,
@@ -316,10 +321,10 @@ mod patch {
             serde_json::to_value(&egg.config_allocations).unwrap(),
             egg.startup,
             egg.force_outgoing_ip,
+            egg.seperate_port,
             &egg.features,
             serde_json::to_value(&egg.docker_images).unwrap(),
             &egg.file_denylist,
-            egg.uuid,
         )
         .execute(state.database.write())
         .await
@@ -358,6 +363,7 @@ mod patch {
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,
+                    "seperate_port": egg.seperate_port,
 
                     "features": egg.features,
                     "docker_images": egg.docker_images,
