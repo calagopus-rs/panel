@@ -17,10 +17,12 @@
 @theme {
   --font-sans: 'Helvetica', 'Arial', 'sans-serif';
   --font-logo: 'Odor Mean Chey', 'Helvetica', 'Arial', 'sans-serif';
+
+  --color-neutral-850: oklch(25.4% 0 0);
 }
 
 body {
-  @apply font-sans bg-neutral-800 text-neutral-200;
+  @apply font-sans bg-neutral-850 text-neutral-200;
 }
 
 h1,
