@@ -23,7 +23,7 @@ export default ({
   contextEgg,
   contextVariable,
 }: {
-  contextNest: Nest;
+  contextNest: AdminNest;
   contextEgg: AdminNestEgg;
   contextVariable?: NestEggVariable;
 }) => {

@@ -11,7 +11,7 @@ import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
 import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
 import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables';
 
-export default ({ contextNest }: { contextNest: Nest }) => {
+export default ({ contextNest }: { contextNest: AdminNest }) => {
   const params = useParams<'eggId'>();
   const { addToast } = useToast();
   const [egg, setEgg] = useState<AdminNestEgg | null>(null);

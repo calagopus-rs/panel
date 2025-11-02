@@ -1,7 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import Code from '@/elements/Code';
 import updateNest from '@/api/admin/nests/updateNest';
 import deleteNest from '@/api/admin/nests/deleteNest';
@@ -13,23 +13,22 @@ import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 
-export default ({ contextNest }: { contextNest?: Nest }) => {
-  const params = useParams<'nestId'>();
+export default ({ contextNest }: { contextNest?: AdminNest }) => {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
-  const [nest, setNest] = useState<Nest>({
+  const [nest, setNest] = useState<AdminUpdateNest>({
     author: contextNest?.author || '',
     name: contextNest?.name || '',
     description: contextNest?.description || '',
-  } as Nest);
+  });
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
-    if (params.nestId) {
-      updateNest(nest.uuid, nest)
+    if (contextNest) {
+      updateNest(contextNest.uuid, nest)
         .then(() => {
           addToast('Nest updated.', 'success');
         })
@@ -55,7 +54,7 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
   };
 
   const doDelete = async () => {
-    await deleteNest(nest.uuid)
+    await deleteNest(contextNest?.uuid)
       .then(() => {
         addToast('Nest deleted.', 'success');
         navigate('/admin/nests');
@@ -77,7 +76,7 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
         Are you sure you want to delete <Code>{nest?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2}>{params.nestId ? 'Update' : 'Create'} Nest</Title>
+      <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
 
       <Stack>
         <Group grow>
@@ -110,7 +109,7 @@ export default ({ contextNest }: { contextNest?: Nest }) => {
         <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
         </Button>
-        {params.nestId && (
+        {contextNest && (
           <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
           </Button>

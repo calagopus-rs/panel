@@ -62,11 +62,14 @@ interface Mount extends UpdateAdminMount {
   created: Date;
 }
 
-interface Nest {
-  uuid: string;
+interface AdminUpdateNest {
   author: string;
   name: string;
   description: string | null;
+}
+
+interface AdminNest extends AdminUpdateNest {
+  uuid: string;
   created: Date;
 }
 
@@ -222,7 +225,7 @@ interface AdminServer {
   owner: User;
   egg: AdminNestEgg;
   backupConfiguration: BackupConfiguration | null;
-  nest: Nest;
+  nest: AdminNest;
   status: ServerStatus | null;
   suspended: boolean;
   name: string;

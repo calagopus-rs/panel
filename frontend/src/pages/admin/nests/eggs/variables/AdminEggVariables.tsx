@@ -7,7 +7,7 @@ import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
-export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: AdminNestEgg }) => {
+export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg: AdminNestEgg }) => {
   const { eggVariables, setEggVariables, addEggVariable } = useAdminStore();
 
   useEffect(() => {
@@ -18,6 +18,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: Ad
 
   const addVariable = () => {
     addEggVariable({
+      uuid: '',
       name: '',
       description: null,
       order: 0,
@@ -26,6 +27,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: Ad
       userViewable: true,
       userEditable: false,
       rules: [],
+      created: new Date(),
     });
   };
 

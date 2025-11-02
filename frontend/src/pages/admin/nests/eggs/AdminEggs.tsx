@@ -1,14 +1,13 @@
 import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
-import { useState, useEffect, useRef, ChangeEvent } from 'react';
-import { Route, Routes, useNavigate, useParams } from 'react-router';
+import { useRef, ChangeEvent } from 'react';
+import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import EggRow, { eggTableColumns } from './EggRow';
 import getEggs from '@/api/admin/nests/eggs/getEggs';
 import EggCreateOrUpdate from './EggCreateOrUpdate';
 import importEgg from '@/api/admin/nests/eggs/importEgg';
-import getNest from '@/api/admin/nests/getNest';
 import { Group, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
@@ -18,7 +17,7 @@ import Table from '@/elements/Table';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
-const EggsContainer = ({ nest }: { nest: Nest }) => {
+const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { eggs, setEggs, addEgg } = useAdminStore();
@@ -26,7 +25,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
-    fetcher: (page, search) => getEggs(nest.uuid, page, search),
+    fetcher: (page, search) => getEggs(contextNest.uuid, page, search),
     setStoreData: setEggs,
   });
 
@@ -38,7 +37,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       const text = await file.text();
       const jsonData = JSON.parse(text);
 
-      importEgg(nest.uuid, jsonData)
+      importEgg(contextNest.uuid, jsonData)
         .then((data) => {
           addEgg(data);
           addToast('Egg imported.', 'success');
@@ -64,7 +63,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
             Import
           </Button>
           <Button
-            onClick={() => navigate(`/admin/nests/${nest.uuid}/eggs/new`)}
+            onClick={() => navigate(`/admin/nests/${contextNest.uuid}/eggs/new`)}
             color={'blue'}
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
@@ -86,7 +85,7 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
       ) : (
         <Table columns={eggTableColumns} pagination={eggs} onPageSelect={setPage}>
           {eggs.data.map((egg) => (
-            <EggRow key={egg.uuid} nest={nest} egg={egg} />
+            <EggRow key={egg.uuid} nest={contextNest} egg={egg} />
           ))}
         </Table>
       )}
@@ -94,30 +93,12 @@ const EggsContainer = ({ nest }: { nest: Nest }) => {
   );
 };
 
-export default () => {
-  const params = useParams<'nestId'>();
-  const { addToast } = useToast();
-  const [nest, setNest] = useState<Nest | null>(null);
-
-  useEffect(() => {
-    if (params.nestId) {
-      getNest(params.nestId)
-        .then((nest) => {
-          setNest(nest);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.nestId]);
-
-  return !nest ? (
-    <Spinner.Centered />
-  ) : (
+export default ({ contextNest }: { contextNest?: AdminNest }) => {
+  return (
     <Routes>
-      <Route path={'/'} element={<EggsContainer nest={nest} />} />
-      <Route path={'/new'} element={<EggCreateOrUpdate contextNest={nest} />} />
-      <Route path={'/:eggId/*'} element={<EggView contextNest={nest} />} />
+      <Route path={'/'} element={<EggsContainer contextNest={contextNest} />} />
+      <Route path={'/new'} element={<EggCreateOrUpdate contextNest={contextNest} />} />
+      <Route path={'/:eggId/*'} element={<EggView contextNest={contextNest} />} />
     </Routes>
   );
 };

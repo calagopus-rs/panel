@@ -6,7 +6,7 @@ import { NavLink } from 'react-router';
 
 export const nestTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
 
-export default ({ nest }: { nest: Nest }) => {
+export default ({ nest }: { nest: AdminNest }) => {
   return (
     <TableRow>
       <TableData>

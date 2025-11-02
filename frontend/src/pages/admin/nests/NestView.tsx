@@ -13,7 +13,7 @@ import Spinner from '@/elements/Spinner';
 export default () => {
   const params = useParams<'nestId'>();
   const { addToast } = useToast();
-  const [nest, setNest] = useState<Nest | null>(null);
+  const [nest, setNest] = useState<AdminNest | null>(null);
 
   useEffect(() => {
     if (params.nestId) {
@@ -50,7 +50,7 @@ export default () => {
 
       <Routes>
         <Route path={'/'} element={<NestCreateOrUpdate contextNest={nest} />} />
-        <Route path={'/eggs/*'} element={<AdminEggs />} />
+        <Route path={'/eggs/*'} element={<AdminEggs contextNest={nest} />} />
       </Routes>
     </>
   );

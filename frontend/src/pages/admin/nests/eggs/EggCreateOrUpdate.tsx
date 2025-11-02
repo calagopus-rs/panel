@@ -1,7 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate } from 'react-router';
 import Code from '@/elements/Code';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
 import updateEgg from '@/api/admin/nests/eggs/updateEgg';
@@ -18,23 +18,24 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import exportEgg from '@/api/admin/nests/eggs/exportEgg';
 
-export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: AdminNestEgg }) => {
-  const params = useParams<'eggId'>();
+export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
   const [loading, setLoading] = useState(false);
-  const [egg, setEgg] = useState<AdminNestEgg>({
+  const [egg, setEgg] = useState<AdminUpdateNestEgg>({
     author: contextEgg?.author || '',
     name: contextEgg?.name || '',
     description: contextEgg?.description || '',
     configFiles: contextEgg?.configFiles || [],
     configStartup: {
       done: contextEgg?.configStartup.done || [],
+      stripAnsi: contextEgg?.configStartup.stripAnsi || false,
     },
     configStop: {
       type: contextEgg?.configStop.type || '',
+      value: contextEgg?.configStop.value || '',
     },
     configScript: {
       container: contextEgg?.configScript.container || '',
@@ -55,7 +56,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
     features: contextEgg?.features || [],
     dockerImages: contextEgg?.dockerImages || {},
     fileDenylist: contextEgg?.fileDenylist || [],
-  } as AdminNestEgg);
+  });
 
   const doCreateOrUpdate = () => {
     load(true, setLoading);
@@ -87,7 +88,7 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
 
   const doExport = () => {
     load(true, setLoading);
-    exportEgg(contextNest.uuid, contextEgg.uuid)
+    exportEgg(contextNest?.uuid, contextEgg.uuid)
       .then((data) => {
         addToast('Egg exported.', 'success');
 
@@ -304,12 +305,12 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg?: A
         <Button onClick={doCreateOrUpdate} loading={loading}>
           Save
         </Button>
-        {params.eggId && (
+        {contextEgg && (
           <Button variant={'outline'} onClick={doExport} loading={loading}>
             Export
           </Button>
         )}
-        {params.eggId && (
+        {contextEgg && (
           <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
           </Button>
