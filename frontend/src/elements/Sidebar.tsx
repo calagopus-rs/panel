@@ -61,9 +61,8 @@ function Link({ to, end, icon, name }: LinkProps) {
     <NavLink to={to} end={end} className={'w-full'}>
       {({ isActive }) => (
         <Button
-          disabled={isActive}
-          color={'gray'}
-          className={'disabled:cursor-default!'}
+          color={isActive ? 'blue' : 'gray'}
+          className={isActive ? 'cursor-default!' : undefined}
           variant={'subtle'}
           fullWidth
           styles={{ label: { width: '100%' } }}

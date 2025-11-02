@@ -1,10 +1,8 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faX } from '@fortawesome/free-solid-svg-icons';
-import classNames from 'classnames';
+import Notification from '@/elements/Notification';
 
-type ToastType = 'success' | 'error' | 'warning' | 'loading' | 'info';
+type ToastType = 'success' | 'error' | 'warning';
 
 interface Toast {
   id: number;
@@ -15,7 +13,6 @@ interface Toast {
 interface ToastContextType {
   addToast: (message: string, type?: ToastType) => number;
   dismissToast: (id: number) => void;
-  promise: <T>(promise: Promise<T>, messages: { loading: string; success: string; error: string }) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -31,56 +28,34 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const addToast = useCallback((message: string, type: ToastType = 'info') => {
+  const addToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = toastId++;
     setToasts((prev) => [...prev, { id, message, type }]);
 
-    if (type !== 'loading') {
-      setTimeout(() => {
-        dismissToast(id);
-      }, toastTimeout);
-    }
+    setTimeout(() => {
+      dismissToast(id);
+    }, toastTimeout);
 
     return id;
   }, []);
 
-  const promise = useCallback(
-    async <T,>(promise: Promise<T>, messages: { loading: string; success: string; error: string }) => {
-      const id = addToast(messages.loading, 'loading');
-
-      try {
-        const result = await promise;
-        setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, message: messages.success, type: 'success' } : t)));
-        setTimeout(() => dismissToast(id), toastTimeout);
-        return result;
-      } catch (error) {
-        setToasts((prev) => prev.map((t) => (t.id === id ? { ...t, message: messages.error, type: 'error' } : t)));
-        setTimeout(() => dismissToast(id), toastTimeout);
-        throw error;
-      }
-    },
-    [addToast, dismissToast],
-  );
-
   const getToastColor = (type: ToastType) => {
     switch (type) {
       case 'success':
-        return 'bg-green-600';
+        return 'green';
       case 'error':
-        return 'bg-red-700';
-      case 'loading':
-        return 'bg-blue-600';
+        return 'red';
       case 'warning':
-        return 'bg-yellow-600';
+        return 'yellow';
       default:
-        return 'bg-gray-600';
+        return 'teal';
     }
   };
 
   return (
-    <ToastContext.Provider value={{ addToast, dismissToast, promise }}>
+    <ToastContext.Provider value={{ addToast, dismissToast }}>
       {children}
-      <div className={'fixed top-4 right-4 z-[999] space-y-2'}>
+      <div className={'fixed top-4 right-4 z-999 space-y-2'}>
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -89,14 +64,11 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              onClick={() => dismissToast(toast.id)}
-              className={classNames(
-                'text-white px-4 py-3 rounded-lg shadow cursor-pointer flex items-center justify-between gap-2 w-72',
-                getToastColor(toast.type),
-              )}
+              className={'w-72'}
             >
-              <span>{toast.message}</span>
-              <FontAwesomeIcon icon={faX} className={'w-4 h-4 text-white/60'} />
+              <Notification color={getToastColor(toast.type)} withCloseButton onClose={() => dismissToast(toast.id)}>
+                {toast.message}
+              </Notification>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -110,5 +82,6 @@ export const useToast = (): ToastContextType => {
   if (!context) {
     throw new Error('useToast must be used within a ToastProvider');
   }
+
   return context;
 };
