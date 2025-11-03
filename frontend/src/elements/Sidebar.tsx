@@ -10,6 +10,7 @@ import Badge from '@/elements/Badge';
 import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
 import CloseButton from '@/elements/CloseButton';
+import { useGlobalStore } from '@/stores/global';
 
 type SidebarProps = {
   children: React.ReactNode;
@@ -54,22 +55,31 @@ type LinkProps = {
   end?: boolean;
   icon: IconDefinition;
   name: string;
+  title?: string;
 };
 
-function Link({ to, end, icon, name }: LinkProps) {
+function Link({ to, end, icon, name, title = name }: LinkProps) {
+  const { settings } = useGlobalStore();
+
   return (
     <NavLink to={to} end={end} className={'w-full'}>
-      {({ isActive }) => (
-        <Button
-          color={isActive ? 'blue' : 'gray'}
-          className={isActive ? 'cursor-default!' : undefined}
-          variant={'subtle'}
-          fullWidth
-          styles={{ label: { width: '100%' } }}
-        >
-          <FontAwesomeIcon icon={icon} className={'mr-2'} /> {name}
-        </Button>
-      )}
+      {({ isActive }) => {
+        if (isActive) {
+          document.title = `${title} | ${settings.app.name}`;
+        }
+
+        return (
+          <Button
+            color={isActive ? 'blue' : 'gray'}
+            className={isActive ? 'cursor-default!' : undefined}
+            variant={'subtle'}
+            fullWidth
+            styles={{ label: { width: '100%' } }}
+          >
+            <FontAwesomeIcon icon={icon} className={'mr-2'} /> {name}
+          </Button>
+        );
+      }}
     </NavLink>
   );
 }

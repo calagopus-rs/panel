@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { AnimatePresence, motion } from 'motion/react';
 import Notification from '@/elements/Notification';
 
-type ToastType = 'success' | 'error' | 'warning';
+type ToastType = 'success' | 'error' | 'warning' | 'info';
 
 interface Toast {
   id: number;

@@ -642,7 +642,7 @@ export default () => {
 
                     return (
                       <div key={folderName} className={'flex flex-row items-center mb-3'}>
-                        <div className={'flex flex-col flex-grow'}>
+                        <div className={'flex flex-col grow'}>
                           <p className={'break-all mb-1'}>{statusText}</p>
                           <Progress value={progress} />
                         </div>
@@ -658,7 +658,7 @@ export default () => {
 
                     return (
                       <div key={key} className={'flex flex-row items-center mb-2'}>
-                        <div className={'flex flex-col flex-grow'}>
+                        <div className={'flex flex-col grow'}>
                           <p className={'break-all mb-1 text-sm'}>
                             {file.status === 'pending' ? 'Waiting: ' : 'Uploading: '}
                             {file.fileName}
@@ -675,7 +675,7 @@ export default () => {
 
                     return (
                       <div key={uuid} className={'flex flex-row items-center mb-2'}>
-                        <div className={'flex flex-col flex-grow'}>
+                        <div className={'flex flex-col grow'}>
                           <p className={'break-all mb-1'}>
                             {operation.type === 'compress'
                               ? `Compressing ${operation.path}`
@@ -762,7 +762,7 @@ export default () => {
         <Spinner.Centered />
       ) : (
         <>
-          <Card className='border border-b-0 border-[#424242] !rounded-b-none '>
+          <Card className={'border border-b-0 border-[#424242] rounded-b-none!'}>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
           <SelectionArea

@@ -83,6 +83,7 @@ export default () => {
 
         <Sidebar.Footer />
       </Sidebar>
+
       <div id={'server-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         {loading ? (
           <Container>
