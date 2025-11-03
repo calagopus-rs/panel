@@ -86,7 +86,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
             .filter((item) => !item.hidden)
             .map((item, idx) =>
               item.items?.length > 0 ? (
-                <Menu.Sub key={idx}>
+                <Menu.Sub key={idx} position={state.x + 300 > window.innerWidth ? 'left-start' : 'right-start'}>
                   <Menu.Sub.Target>
                     <Menu.Sub.Item
                       key={idx}
@@ -159,7 +159,7 @@ const ContextMenu = ({
     showMenu(
       x,
       y,
-      items.filter((item) => item), // Filter null values
+      items.filter((item) => item),
     );
   };
 
@@ -172,7 +172,8 @@ ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }
       className={'relative cursor-pointer w-10 text-center'}
       onClick={(e) => {
         e.stopPropagation();
-        const rect = e.target.getBoundingClientRect();
+
+        const rect = e.currentTarget.getBoundingClientRect();
         openMenu(rect.left, rect.bottom);
       }}
     >
