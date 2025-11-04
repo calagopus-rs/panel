@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { AnsiUp } from 'ansi_up';
+import DOMPurify from 'dompurify';
 import { useServerStore } from '@/stores/server';
 import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
 import Card from '@/elements/Card';
@@ -12,6 +13,48 @@ import Progress from '@/elements/Progress';
 
 const ansiUp = new AnsiUp();
 const MAX_LINES = 1000;
+
+const configureDOMPurify = () => {
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    if (node.tagName === 'A') {
+      node.setAttribute('target', '_blank');
+      node.setAttribute('rel', 'noopener noreferrer');
+      node.setAttribute('class', 'hover:text-blue-300 underline cursor-pointer');
+    }
+  });
+};
+
+configureDOMPurify();
+
+const URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*)/gi;
+
+const linkifyText = (html: string): string => {
+  const linked = html.replace(URL_REGEX, (url) => {
+    try {
+      const urlObj = new URL(url);
+      if (!['http:', 'https:'].includes(urlObj.protocol)) {
+        return url;
+      }
+    } catch {
+      return url;
+    }
+
+    const escapedHref = url
+      .replace(/&/g, '&amp;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    return `<a href="${escapedHref}">${url}</a>`;
+  });
+
+  return DOMPurify.sanitize(linked, {
+    ALLOWED_TAGS: ['a', 'span', 'div'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
+    ALLOWED_URI_REGEXP: /^https?:\/\//i,
+  });
+};
 
 interface TerminalLine {
   html: string;
@@ -84,7 +127,8 @@ export default function Terminal() {
   const addLine = useCallback(
     (text: string, prelude = false) => {
       const processed = text.replace(/(?:\r\n|\r|\n)$/im, '');
-      const html = ansiUp.ansi_to_html(processed);
+      const ansiHtml = ansiUp.ansi_to_html(processed);
+      const html = linkifyText(ansiHtml);
 
       setLines((prev) => {
         const newLine: TerminalLine = {
@@ -198,7 +242,7 @@ export default function Terminal() {
           dangerouslySetInnerHTML={{
             __html:
               line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m')
-                ? ansiUp.ansi_to_html(TERMINAL_PRELUDE) + line.html
+                ? linkifyText(ansiUp.ansi_to_html(TERMINAL_PRELUDE)) + line.html
                 : line.html,
           }}
         />

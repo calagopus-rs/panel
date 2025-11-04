@@ -35,6 +35,7 @@
     "cronstrue": "^3.9.0",
     "debounce": "^2.2.0",
     "deepmerge-ts": "^7.1.5",
+    "dompurify": "^3.3.0",
     "eslint-plugin-prettier": "^5.5.4",
     "events": "^3.3.0",
     "highlight.js": "^11.11.1",
