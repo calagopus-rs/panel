@@ -54,7 +54,7 @@ mod post {
             token.user.uuid,
             None,
             "auth:reset-password",
-            ip.0.into(),
+            Some(ip.0.into()),
             serde_json::json!({}),
         )
         .await

@@ -1,6 +1,8 @@
 use super::BaseModel;
 use crate::{
-    models::{ByUuid, user::User, user_password_reset::UserPasswordReset},
+    models::{
+        ByUuid, user::User, user_activity::UserActivity, user_password_reset::UserPasswordReset,
+    },
     storage::StorageUrlRetriever,
 };
 use rand::distr::SampleString;
@@ -111,6 +113,16 @@ impl ServerSubuser {
                                     urlencoding::encode(&token),
                                 ),
                             );
+
+                        UserActivity::log(
+                            database,
+                            user.uuid,
+                            None,
+                            "email:account-created",
+                            None,
+                            serde_json::json!({}),
+                        )
+                        .await?;
 
                         mail.send(
                             user.email.clone(),

@@ -183,6 +183,13 @@
       "when": 1762078402601,
       "tag": "0025_slimy_miss_america",
       "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1762284087238,
+      "tag": "0026_wild_felicia_hardy",
+      "breakpoints": false
     }
   ]
 }

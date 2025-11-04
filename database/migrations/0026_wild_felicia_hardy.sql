@@ -1,0 +1,1 @@
+ALTER TABLE "user_activities" ALTER COLUMN "ip" DROP NOT NULL;

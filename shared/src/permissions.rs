@@ -176,6 +176,7 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                     ("update", "Allows to modify users."),
                     ("disable-two-factor", "Allows to remove users' two-factor."),
                     ("delete", "Allows to delete users from the panel."),
+                    ("activity", "Allows to view a users' activity log."),
                 ]),
             },
         ),

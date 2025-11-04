@@ -23,7 +23,7 @@ impl UserActivityLogger {
             self.user_uuid,
             self.api_key_uuid,
             event,
-            self.ip.into(),
+            Some(self.ip.into()),
             data,
         )
         .await
@@ -42,7 +42,7 @@ pub struct UserActivity {
     pub api_key_uuid: Option<uuid::Uuid>,
 
     pub event: String,
-    pub ip: sqlx::types::ipnetwork::IpNetwork,
+    pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
     pub data: serde_json::Value,
 
     pub created: chrono::NaiveDateTime,
@@ -87,7 +87,7 @@ impl UserActivity {
         user_uuid: uuid::Uuid,
         api_key_uuid: Option<uuid::Uuid>,
         event: &str,
-        ip: sqlx::types::ipnetwork::IpNetwork,
+        ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
     ) -> Result<(), sqlx::Error> {
         sqlx::query(
@@ -145,7 +145,7 @@ impl UserActivity {
     pub fn into_api_object(self) -> ApiUserActivity {
         ApiUserActivity {
             event: self.event,
-            ip: self.ip.ip().to_string(),
+            ip: self.ip.map(|ip| ip.ip().to_string()),
             data: self.data,
             is_api: self.api_key_uuid.is_some(),
             created: self.created.and_utc(),
@@ -157,7 +157,7 @@ impl UserActivity {
 #[schema(title = "UserActivity")]
 pub struct ApiUserActivity {
     pub event: String,
-    pub ip: String,
+    pub ip: Option<String>,
     pub data: serde_json::Value,
 
     pub is_api: bool,

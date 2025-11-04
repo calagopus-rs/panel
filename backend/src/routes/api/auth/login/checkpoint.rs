@@ -91,7 +91,7 @@ mod post {
                     payload.user_uuid,
                     None,
                     "auth:success",
-                    ip.0.into(),
+                    Some(ip.0.into()),
                     serde_json::json!({
                         "using": "two_factor",
                     }),
@@ -118,7 +118,7 @@ mod post {
                         payload.user_uuid,
                         None,
                         "auth:success",
-                        ip.0.into(),
+                        Some(ip.0.into()),
                         serde_json::json!({
                             "using": "recovery_code",
                             "code": code,

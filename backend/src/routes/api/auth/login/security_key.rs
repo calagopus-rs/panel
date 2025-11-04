@@ -208,7 +208,7 @@ mod post {
             user.uuid,
             None,
             "auth:success",
-            ip.0.into(),
+            Some(ip.0.into()),
             serde_json::json!({
                 "using": "security-key",
                 "uuid": security_key.uuid,

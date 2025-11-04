@@ -1,6 +1,6 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faComputer } from '@fortawesome/free-solid-svg-icons';
+import { faBriefcase, faCog, faComputer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -9,6 +9,7 @@ import Spinner from '@/elements/Spinner';
 import getUser from '@/api/admin/users/getUser';
 import AdminUserServers from '@/pages/admin/users/servers/AdminUserServers';
 import UserCreateOrUpdate from '@/pages/admin/users/UserCreateOrUpdate';
+import AdminUserActivity from './activity/AdminUserActivity';
 
 export default () => {
   const params = useParams<'id'>();
@@ -45,12 +46,18 @@ export default () => {
             icon: faComputer,
             link: `/admin/users/${params.id}/servers`,
           },
+          {
+            name: 'Activity',
+            icon: faBriefcase,
+            link: `/admin/users/${params.id}/activity`,
+          },
         ]}
       />
 
       <Routes>
         <Route path={'/'} element={<UserCreateOrUpdate contextUser={user} />} />
         <Route path={'/servers'} element={<AdminUserServers user={user} />} />
+        <Route path={'/activity'} element={<AdminUserActivity user={user} />} />
       </Routes>
     </>
   );

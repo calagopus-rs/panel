@@ -95,7 +95,7 @@ export const userActivities = pgTable('user_activities', {
 	apiKeyUuid: uuid('api_key_uuid').references(() => userApiKeys.uuid, { onDelete: 'set null' }),
 
 	event: varchar('event', { length: 255 }).notNull(),
-	ip: inet('ip').notNull(),
+	ip: inet('ip'),
 	data: jsonb('data').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()

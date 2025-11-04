@@ -2,11 +2,11 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use axum::http::StatusCode;
+    use axum::http::{HeaderMap, StatusCode};
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{user::User, user_password_reset::UserPasswordReset},
+        models::{user::User, user_activity::UserActivity, user_password_reset::UserPasswordReset},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -31,6 +31,7 @@ mod post {
     pub async fn route(
         state: GetState,
         ip: shared::GetIp,
+        headers: HeaderMap,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         if let Err(errors) = shared::utils::validate_data(&data) {
@@ -76,6 +77,22 @@ mod post {
                         urlencoding::encode(&token),
                     ),
                 );
+
+            UserActivity::log(
+                &state.database,
+                user.uuid,
+                None,
+                "email:password-reset",
+                Some(ip.0.into()),
+                serde_json::json!({
+                    "user_agent": headers
+                        .get("User-Agent")
+                        .map(|ua| shared::utils::slice_up_to(ua.to_str().unwrap_or("unknown"), 255))
+                        .unwrap_or("unknown"),
+                }),
+            )
+            .await
+            .ok();
 
             state
                 .mail

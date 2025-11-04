@@ -40,11 +40,11 @@ function Sidebar({ children }: SidebarProps) {
       >
         <CloseButton size={'xl'} className={'absolute! right-4 z-10'} onClick={() => setIsMobileMenuOpen(false)} />
 
-        <div className={'h-full flex flex-col'}>{children}</div>
+        <div className={'h-full flex flex-col overflow-y-auto'}>{children}</div>
       </Drawer>
 
       <Card className={'mt-2 top-2 left-2 sticky! hidden! lg:block! h-[calc(100vh-1rem)] w-64!'} p={'sm'}>
-        <div className={'h-full flex flex-col'}>{children}</div>
+        <div className={'h-full flex flex-col overflow-y-auto'}>{children}</div>
       </Card>
     </>
   );
@@ -92,7 +92,7 @@ function Footer() {
   const { user, doLogout } = useAuth();
 
   return (
-    <Card className={'mt-auto flex-row! justify-between items-center'} p={'sm'}>
+    <Card className={'mt-auto flex-row! justify-between items-center min-h-fit'} p={'sm'}>
       <NavLink to={'/account'}>
         <div className={'flex items-center'}>
           <img
