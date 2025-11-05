@@ -21,15 +21,16 @@ services:
       - cache
 
   db:
-    image: postgres:17
+    image: pgautoupgrade/pgautoupgrade:18-alpine
     restart: unless-stopped
     environment:
       - TZ=Europe/Berlin
       - POSTGRES_USER=panel
       - POSTGRES_PASSWORD=panel
       - POSTGRES_DB=panel
+      - POSTGRES_DATA_DIR=/data
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./postgres:/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d postgres"]
       interval: 30s
