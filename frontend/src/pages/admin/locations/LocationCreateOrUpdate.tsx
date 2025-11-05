@@ -96,7 +96,9 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2}>{params.id ? 'Update' : 'Create'} Location</Title>
+        <Title order={2} mb={'md'}>
+          {params.id ? 'Update' : 'Create'} Location
+        </Title>
 
         <Group grow>
           <TextInput

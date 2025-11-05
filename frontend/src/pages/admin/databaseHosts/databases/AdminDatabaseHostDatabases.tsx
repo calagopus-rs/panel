@@ -18,7 +18,9 @@ export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
 
   return (
     <>
-      <Title order={2}>Database Host Databases</Title>
+      <Title order={2} mb={'md'}>
+        Database Host Databases
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

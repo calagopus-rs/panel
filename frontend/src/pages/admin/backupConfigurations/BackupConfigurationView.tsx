@@ -1,6 +1,6 @@
 import { Route, Routes, useParams } from 'react-router';
 import SubNavigation from '@/elements/SubNavigation';
-import { faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faChartBar, faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -8,6 +8,7 @@ import { Title } from '@mantine/core';
 import Spinner from '@/elements/Spinner';
 import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate';
 import getBackupConfiguration from '@/api/admin/backup-configurations/getBackupConfiguration';
+import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats';
 import AdminBackupConfigurationNodes from '@/pages/admin/backupConfigurations/nodes/AdminBackupConfigurationNodes';
 import AdminBackupConfigurationLocations from '@/pages/admin/backupConfigurations/locations/AdminBackupConfigurationLocations';
 import AdminBackupConfigurationServers from '@/pages/admin/backupConfigurations/servers/AdminBackupConfigurationServers';
@@ -43,6 +44,11 @@ export default () => {
             link: `/admin/backup-configurations/${params.id}`,
           },
           {
+            name: 'Stats',
+            icon: faChartBar,
+            link: `/admin/backup-configurations/${params.id}/stats`,
+          },
+          {
             name: 'Locations',
             icon: faEarthAmerica,
             link: `/admin/backup-configurations/${params.id}/locations`,
@@ -65,6 +71,7 @@ export default () => {
           path={'/'}
           element={<BackupConfigurationCreateOrUpdate contextBackupConfiguration={backupConfiguration} />}
         />
+        <Route path={'/stats'} element={<AdminBackupConfigurationStats backupConfiguration={backupConfiguration} />} />
         <Route
           path={'/locations'}
           element={<AdminBackupConfigurationLocations backupConfiguration={backupConfiguration} />}

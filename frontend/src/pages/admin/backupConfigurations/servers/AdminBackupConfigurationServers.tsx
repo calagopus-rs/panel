@@ -18,7 +18,9 @@ export default ({ backupConfiguration }: { backupConfiguration?: BackupConfigura
 
   return (
     <>
-      <Title order={2}>Backup Configuration Servers</Title>
+      <Title order={2} mb={'md'}>
+        Backup Configuration Servers
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

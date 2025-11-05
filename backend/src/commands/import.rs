@@ -1360,6 +1360,10 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                             "activity.read" => "activity.read",
                             _ => continue,
                         });
+
+                        if permission == "control.console" {
+                            permissions.insert("control.read-console");
+                        }
                     }
 
                     sqlx::query(

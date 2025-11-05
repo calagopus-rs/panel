@@ -76,7 +76,9 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
         Are you sure you want to delete <Code>{nest?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
+      <Title order={2} mb={'md'}>
+        {contextNest ? 'Update' : 'Create'} Nest
+      </Title>
 
       <Stack>
         <Group grow>

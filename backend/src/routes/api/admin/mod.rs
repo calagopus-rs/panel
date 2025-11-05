@@ -27,6 +27,7 @@ mod nodes;
 mod roles;
 mod servers;
 mod settings;
+mod stats;
 mod users;
 
 pub async fn auth(
@@ -65,6 +66,7 @@ pub async fn auth(
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
+        .nest("/stats", stats::router(state))
         .nest("/settings", settings::router(state))
         .nest("/locations", locations::router(state))
         .nest("/servers", servers::router(state))

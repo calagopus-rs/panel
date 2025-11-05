@@ -15,6 +15,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod locations;
 mod nodes;
 mod servers;
+mod stats;
 
 pub type GetBackupConfiguration = shared::extract::ConsumingExtension<BackupConfiguration>;
 
@@ -274,6 +275,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/stats", stats::router(state))
         .nest("/locations", locations::router(state))
         .nest("/nodes", nodes::router(state))
         .nest("/servers", servers::router(state))

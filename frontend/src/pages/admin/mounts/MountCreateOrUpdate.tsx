@@ -95,7 +95,9 @@ export default () => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2}>{params.id ? 'Update' : 'Create'} Mount</Title>
+        <Title order={2} mb={'md'}>
+          {params.id ? 'Update' : 'Create'} Mount
+        </Title>
 
         <Group grow align={'start'}>
           <TextInput

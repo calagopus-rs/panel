@@ -17,7 +17,9 @@ export default ({ location }: { location: Location }) => {
 
   return (
     <>
-      <Title order={2}>Location Nodes</Title>
+      <Title order={2} mb={'md'}>
+        Location Nodes
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

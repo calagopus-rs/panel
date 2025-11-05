@@ -343,6 +343,13 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
             },
         ),
         (
+            "stats",
+            PermissionGroup {
+                description: "Permissions that control the ability to view stats for the panel.",
+                permissions: IndexMap::from([("read", "Allows to view stats for the panel.")]),
+            },
+        ),
+        (
             "activity",
             PermissionGroup {
                 description: "Permissions that control the ability to view the activity log for all admin operations.",
