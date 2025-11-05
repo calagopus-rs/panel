@@ -17,7 +17,9 @@ export default ({ user }: { user: User }) => {
 
   return (
     <>
-      <Title order={2}>User Servers</Title>
+      <Title order={2} mb={'md'}>
+        User Servers
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

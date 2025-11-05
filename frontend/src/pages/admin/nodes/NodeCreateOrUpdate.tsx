@@ -69,7 +69,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
     }
   }, [contextNode]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateNode(params.id, node)
@@ -82,11 +82,22 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createNode(node)
         .then((node) => {
           addToast('Node created.', 'success');
           navigate(`/admin/nodes/${node.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createNode(node)
+        .then(() => {
+          addToast('Node created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -261,15 +272,20 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         />
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {params.id && (
+          {!contextNode && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextNode && (
             <Button color={'red'} variant={'outline'} onClick={doResetToken} loading={loading}>
               Reset Token
             </Button>
           )}
-          {params.id && (
+          {contextNode && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

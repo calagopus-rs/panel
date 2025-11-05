@@ -40,7 +40,7 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
     });
   }, [contextBackupConfiguration]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateBackupConfiguration(params.id, backupConfiguration)
@@ -53,11 +53,22 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createBackupConfiguration(backupConfiguration)
         .then((databaseHost) => {
           addToast('Backup configuration created.', 'success');
           navigate(`/admin/backup-configurations/${databaseHost.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createBackupConfiguration(backupConfiguration)
+        .then(() => {
+          addToast('Backup configuration created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -91,7 +102,9 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
         Are you sure you want to delete <Code>{backupConfiguration?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={1}>{params.id ? 'Update' : 'Create'} Backup Configuration</Title>
+      <Title order={1} mb={'md'}>
+        {params.id ? 'Update' : 'Create'} Backup Configuration
+      </Title>
       <Divider />
 
       <Stack>
@@ -127,10 +140,15 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
         </Group>
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {params.id && (
+          {!contextBackupConfiguration && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextBackupConfiguration && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

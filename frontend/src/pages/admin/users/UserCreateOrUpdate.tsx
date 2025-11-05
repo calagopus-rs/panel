@@ -51,7 +51,7 @@ export default ({ contextUser }: { contextUser?: User }) => {
     }
   }, [contextUser]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateUser(contextUser.uuid, user)
@@ -64,11 +64,22 @@ export default ({ contextUser }: { contextUser?: User }) => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createUser(user)
         .then((user) => {
           addToast('User created.', 'success');
           navigate(`/admin/users/${user.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createUser(user)
+        .then(() => {
+          addToast('User created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -193,10 +204,15 @@ export default ({ contextUser }: { contextUser?: User }) => {
       </Stack>
 
       <Group mt={'md'}>
-        <Button onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
-        {params.id && (
+        {!contextUser && (
+          <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            Save & Stay
+          </Button>
+        )}
+        {contextUser && (
           <Button
             color={'red'}
             variant={'outline'}

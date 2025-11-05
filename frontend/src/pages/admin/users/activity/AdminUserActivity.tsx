@@ -20,7 +20,9 @@ export default ({ user }: { user: User }) => {
 
   return (
     <>
-      <Title order={2}>User Activity</Title>
+      <Title order={2} mb={'md'}>
+        User Activity
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

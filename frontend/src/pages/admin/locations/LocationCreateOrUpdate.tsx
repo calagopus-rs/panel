@@ -44,7 +44,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
     }
   }, [contextLocation]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateLocation(params.id, location)
@@ -57,11 +57,22 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createLocation(location)
         .then((location) => {
           addToast('Location created.', 'success');
           navigate(`/admin/locations/${location.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createLocation(location)
+        .then(() => {
+          addToast('Location created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -140,10 +151,15 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         </Group>
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {params.id && (
+          {!contextLocation && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextLocation && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

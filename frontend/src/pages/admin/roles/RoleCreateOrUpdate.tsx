@@ -50,12 +50,24 @@ export default ({ contextRole }: { contextRole?: Role }) => {
     });
   }, []);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateRole(params.id, role)
         .then(() => {
           addToast('Role updated.', 'success');
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else if (!stay) {
+      createRole(role)
+        .then((role) => {
+          addToast('Role created.', 'success');
+          navigate(`/admin/roles/${role.uuid}`);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -150,10 +162,15 @@ export default ({ contextRole }: { contextRole?: Role }) => {
         </Group>
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {params.id && (
+          {!contextRole && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextRole && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

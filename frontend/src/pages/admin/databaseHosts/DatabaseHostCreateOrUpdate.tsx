@@ -50,7 +50,7 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
     });
   }, [contextDatabaseHost]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateDatabaseHost(params.id, databaseHost)
@@ -63,11 +63,22 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createDatabaseHost(databaseHost)
         .then((databaseHost) => {
           addToast('Database host created.', 'success');
           navigate(`/admin/database-hosts/${databaseHost.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createDatabaseHost(databaseHost)
+        .then(() => {
+          addToast('Database host created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -201,15 +212,20 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
         />
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {params.id && (
+          {!contextDatabaseHost && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextDatabaseHost && (
             <Button variant={'outline'} onClick={doTest} loading={loading}>
               Test
             </Button>
           )}
-          {params.id && (
+          {contextDatabaseHost && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

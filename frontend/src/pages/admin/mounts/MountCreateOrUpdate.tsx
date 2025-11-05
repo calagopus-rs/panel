@@ -43,7 +43,7 @@ export default () => {
     }
   }, [params.id]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateMount(params.id, mount)
@@ -56,11 +56,22 @@ export default () => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createMount(mount)
         .then((databaseHost) => {
           addToast('Mount created.', 'success');
           navigate(`/admin/mounts/${databaseHost.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createMount(mount)
+        .then(() => {
+          addToast('Mount created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -147,9 +158,14 @@ export default () => {
         </Group>
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
+          {!params.id && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
           {params.id && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete

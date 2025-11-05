@@ -25,7 +25,7 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
     description: contextNest?.description || '',
   });
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (contextNest) {
       updateNest(contextNest.uuid, nest)
@@ -38,11 +38,22 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createNest(nest)
         .then((nest) => {
           addToast('Nest created.', 'success');
           navigate(`/admin/nests/${nest.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createNest(nest)
+        .then(() => {
+          addToast('Nest created.', 'success');
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -108,9 +119,14 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
       </Stack>
 
       <Group mt={'md'}>
-        <Button onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
+        {!contextNest && (
+          <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            Save & Stay
+          </Button>
+        )}
         {contextNest && (
           <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
             Delete

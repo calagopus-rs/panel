@@ -79,7 +79,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
-  const nests = useSearchableResource<Nest>({ fetcher: (search) => getNests(1, search) });
+  const nests = useSearchableResource<AdminNest>({ fetcher: (search) => getNests(1, search) });
   const eggs = useSearchableResource<AdminNestEgg>({
     fetcher: (search) => getEggs(selectedNestUuid, 1, search),
     deps: [selectedNestUuid],
@@ -140,7 +140,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     });
   }, [server.eggUuid]);
 
-  const doCreateOrUpdate = () => {
+  const doCreateOrUpdate = (stay: boolean) => {
     load(true, setLoading);
     if (params?.id) {
       updateServer(params.id, server)
@@ -153,11 +153,30 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
         .finally(() => {
           load(false, setLoading);
         });
-    } else {
+    } else if (!stay) {
       createServer(server)
         .then((server) => {
           addToast('Server created.', 'success');
           navigate(`/admin/servers/${server.uuid}`);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => {
+          load(false, setLoading);
+        });
+    } else {
+      createServer(server)
+        .then(() => {
+          addToast('Server created.', 'success');
+          setServer({
+            ...server,
+            allocationUuid: null,
+            allocationUuids: [],
+          });
+
+          availablePrimaryAllocations.refetch();
+          availableAllocations.refetch();
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -518,9 +537,14 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
         </Group>
 
         <Group>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
+          {!contextServer && (
+            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
         </Group>
       </Stack>
     </>
