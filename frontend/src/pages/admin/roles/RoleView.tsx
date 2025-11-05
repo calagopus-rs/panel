@@ -27,11 +27,11 @@ export default () => {
     }
   }, [params.id]);
 
-  return !location ? (
+  return !role ? (
     <Spinner.Centered />
   ) : (
     <>
-      <Title order={1}>{location.name}</Title>
+      <Title order={1}>{role.name}</Title>
 
       <SubNavigation
         items={[
