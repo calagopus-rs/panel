@@ -82,7 +82,7 @@ export default () => {
 
       <div>
         <Title order={2} c={'white'} my={'md'}>
-          Backups Statistics
+          Backup Statistics
         </Title>
 
         {!backupStats ? (
