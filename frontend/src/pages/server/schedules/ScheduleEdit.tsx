@@ -10,7 +10,7 @@ import TextInput from '@/elements/input/TextInput';
 import Select from '@/elements/input/Select';
 import ScheduleConditionBuilder from './ScheduleConditionBuilder';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { load } from '@/lib/debounce';
 import updateSchedule from '@/api/server/schedules/updateSchedule';
 import { useToast } from '@/providers/ToastProvider';
@@ -200,6 +200,20 @@ export default () => {
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Add Trigger
+          </Button>
+          <Button
+            className={'ml-2'}
+            onClick={() =>
+              setSchedule((schedule) => ({
+                ...schedule,
+                triggers: [...schedule.triggers.slice(0, -1)],
+              }))
+            }
+            color={'red'}
+            variant={'light'}
+            leftSection={<FontAwesomeIcon icon={faMinus} />}
+          >
+            Remove Trigger
           </Button>
         </div>
 

@@ -9,7 +9,7 @@ import { load } from '@/lib/debounce';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, ModalProps, Text, Stack } from '@mantine/core';
 import { useState } from 'react';
@@ -169,6 +169,15 @@ export default ({ opened, onClose }: ModalProps) => {
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Add Trigger
+          </Button>
+          <Button
+            className={'ml-2'}
+            onClick={() => setTriggers((triggers) => [...triggers.slice(0, -1)])}
+            color={'red'}
+            variant={'light'}
+            leftSection={<FontAwesomeIcon icon={faMinus} />}
+          >
+            Remove Trigger
           </Button>
         </div>
 

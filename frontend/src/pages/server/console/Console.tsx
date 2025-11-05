@@ -224,7 +224,9 @@ export default function Terminal() {
         const command = inputRef.current.value.trim();
         if (!command) return;
 
-        setHistory((prev) => [command, ...prev].slice(0, 32));
+        if (history[0] !== command) {
+          setHistory((prev) => [command, ...prev].slice(0, 32));
+        }
         setHistoryIndex(-1);
         socketInstance?.send('send command', command);
         inputRef.current.value = '';
