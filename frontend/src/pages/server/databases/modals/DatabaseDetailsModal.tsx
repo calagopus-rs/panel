@@ -57,11 +57,11 @@ export default ({ database, opened, onClose }: Props) => {
         />
 
         <Group>
-          <Button variant={'default'} onClick={onClose}>
-            Close
-          </Button>
           <Button color={'red'} onClick={onRotatePassword} loading={loading} disabled={database.isLocked}>
             Rotate Password
+          </Button>
+          <Button variant={'default'} onClick={onClose}>
+            Close
           </Button>
         </Group>
       </Stack>

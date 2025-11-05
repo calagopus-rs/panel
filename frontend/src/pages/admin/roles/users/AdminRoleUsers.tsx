@@ -17,7 +17,9 @@ export default ({ role }: { role: Role }) => {
 
   return (
     <>
-      <Title order={2}>Role Users</Title>
+      <Title order={2} mb={'md'}>
+        Role Users
+      </Title>
 
       {loading ? (
         <Spinner.Centered />

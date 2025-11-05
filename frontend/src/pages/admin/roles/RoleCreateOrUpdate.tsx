@@ -102,7 +102,9 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2}>{params.id ? 'Update' : 'Create'} Role</Title>
+        <Title order={2} mb={'md'}>
+          {params.id ? 'Update' : 'Create'} Role
+        </Title>
 
         <Group grow>
           <TextInput

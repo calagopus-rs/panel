@@ -50,7 +50,11 @@ export default () => {
           />
 
           <Group mt='auto'>
-            <Button onClick={doUpdate} loading={loading}>
+            <Button
+              disabled={enabled === server.autoKill.enabled && seconds === server.autoKill.seconds}
+              onClick={doUpdate}
+              loading={loading}
+            >
               Save
             </Button>
           </Group>

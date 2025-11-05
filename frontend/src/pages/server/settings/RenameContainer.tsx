@@ -58,7 +58,11 @@ export default () => {
           />
 
           <Group h='100%'>
-            <Button disabled={!name} onClick={doUpdate} loading={loading}>
+            <Button
+              disabled={!name || (name === server.name && description === (server.description ?? ''))}
+              onClick={doUpdate}
+              loading={loading}
+            >
               Save
             </Button>
           </Group>

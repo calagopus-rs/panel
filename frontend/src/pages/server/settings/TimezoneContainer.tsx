@@ -78,7 +78,7 @@ export default () => {
           </Stack>
 
           <Group mt='auto'>
-            <Button onClick={doUpdate} loading={loading}>
+            <Button disabled={timezone === (server.timezone ?? '')} onClick={doUpdate} loading={loading}>
               Save
             </Button>
           </Group>
