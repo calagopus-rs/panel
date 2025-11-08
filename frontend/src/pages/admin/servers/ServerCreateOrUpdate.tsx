@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack, Group, Paper, Title, Alert } from '@mantine/core';
-import { useNavigate, useParams } from 'react-router';
 import TextInput from '@/elements/input/TextInput';
 import TextArea from '@/elements/input/TextArea';
 import NumberInput from '@/elements/input/NumberInput';
@@ -8,13 +7,10 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import Button from '@/elements/Button';
 import getNodes from '@/api/admin/nodes/getNodes';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import getUsers from '@/api/admin/users/getUsers';
 import getNests from '@/api/admin/nests/getNests';
 import getEggs from '@/api/admin/nests/eggs/getEggs';
 import { zones } from 'tzdata';
-import { load } from '@/lib/debounce';
 import updateServer from '@/api/admin/servers/updateServer';
 import createServer from '@/api/admin/servers/createServer';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
@@ -27,6 +23,8 @@ import { bytesToString, mbToBytes } from '@/lib/size';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { NIL as uuidNil } from 'uuid';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -36,46 +34,65 @@ const timezones = Object.keys(zones)
   }));
 
 export default ({ contextServer }: { contextServer?: AdminServer }) => {
-  const params = useParams<'id'>();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
+  const form = useForm<Partial<UpdateAdminServer>>({
+    initialValues: {
+      externalId: '',
+      name: '',
+      description: '',
+      startOnCompletion: true,
+      skipInstaller: false,
+      limits: {
+        cpu: 100,
+        memory: 1024,
+        swap: 0,
+        disk: 10240,
+        ioWeight: null,
+      },
+      pinnedCpus: [],
+      startup: '',
+      image: '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      featureLimits: {
+        allocations: 5,
+        databases: 5,
+        backups: 5,
+        schedules: 5,
+      },
+      nodeUuid: '',
+      ownerUuid: '',
+      eggUuid: '',
+      backupConfigurationUuid: uuidNil,
+      allocationUuid: null,
+      allocationUuids: [],
+    },
+  });
 
-  const [loading, setLoading] = useState(false);
+  const { loading, doCreateOrUpdate } = useResourceForm<Partial<UpdateAdminServer>, AdminServer>({
+    form,
+    createFn: () => createServer(form.values),
+    updateFn: () => updateServer(contextServer?.uuid, form.values),
+    doUpdate: !!contextServer,
+    basePath: '/admin/servers',
+    resourceName: 'Server',
+    toResetOnStay: ['allocationUuid', 'allocationUuids'],
+  });
+
+  useEffect(() => {
+    if (contextServer) {
+      form.setValues({
+        ...contextServer,
+        nodeUuid: contextServer.node.uuid,
+        ownerUuid: contextServer.owner.uuid,
+        eggUuid: contextServer.egg.uuid,
+        backupConfigurationUuid: contextServer.backupConfiguration?.uuid ?? uuidNil,
+      });
+    }
+  }, [contextServer]);
+
   const [memoryInput, setMemoryInput] = useState('');
   const [diskInput, setDiskInput] = useState('');
   const [swapInput, setSwapInput] = useState('');
   const [selectedNestUuid, setSelectedNestUuid] = useState<string>(contextServer?.nest.uuid ?? '');
-
-  const [server, setServer] = useState<Partial<UpdateAdminServer>>({
-    externalId: '',
-    name: '',
-    description: '',
-    startOnCompletion: true,
-    skipInstaller: false,
-    limits: {
-      cpu: 100,
-      memory: 1024,
-      swap: 0,
-      disk: 10240,
-      ioWeight: null,
-    },
-    pinnedCpus: [],
-    startup: '',
-    image: '',
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    featureLimits: {
-      allocations: 5,
-      databases: 5,
-      backups: 5,
-      schedules: 5,
-    },
-    nodeUuid: '',
-    ownerUuid: '',
-    eggUuid: '',
-    backupConfigurationUuid: uuidNil,
-    allocationUuid: null,
-    allocationUuids: [],
-  });
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
@@ -85,35 +102,18 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
-    deps: [server.nodeUuid],
+    fetcher: (search) => getAvailableNodeAllocations(form.values.nodeUuid, 1, search),
+    deps: [form.values.nodeUuid],
   });
   const availableAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(server.nodeUuid, 1, search),
-    deps: [server.nodeUuid],
+    fetcher: (search) => getAvailableNodeAllocations(form.values.nodeUuid, 1, search),
+    deps: [form.values.nodeUuid],
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
   });
 
   useEffect(() => {
-    if (contextServer) {
-      setServer({
-        externalId: contextServer.externalId,
-        name: contextServer.name,
-        description: contextServer.description,
-        limits: contextServer.limits,
-        pinnedCpus: contextServer.pinnedCpus,
-        startup: contextServer.startup,
-        image: contextServer.image,
-        timezone: contextServer.timezone,
-        featureLimits: contextServer.featureLimits,
-        nodeUuid: contextServer.node.uuid,
-        ownerUuid: contextServer.owner.uuid,
-        eggUuid: contextServer.egg.uuid,
-        backupConfigurationUuid: contextServer.backupConfiguration?.uuid ?? uuidNil,
-      });
-    }
     setMemoryInput(
       contextServer ? bytesToString(mbToBytes(contextServer?.limits.memory)) : bytesToString(mbToBytes(1024)),
     );
@@ -124,73 +124,23 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
   }, [contextServer]);
 
   useEffect(() => {
-    if (!server.eggUuid) {
+    if (!form.values.eggUuid) {
       return;
     }
 
-    const egg = eggs.items.find((egg) => egg.uuid === server.eggUuid);
+    const egg = eggs.items.find((egg) => egg.uuid === form.values.eggUuid);
     if (!egg) {
       return;
     }
 
-    setServer({
-      ...server,
-      image: Object.values(egg.dockerImages)[0] ?? '',
-      startup: egg.startup ?? '',
-    });
-  }, [server.eggUuid]);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateServer(params.id, server)
-        .then(() => {
-          addToast('Server updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createServer(server)
-        .then((server) => {
-          addToast('Server created.', 'success');
-          navigate(`/admin/servers/${server.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createServer(server)
-        .then(() => {
-          addToast('Server created.', 'success');
-          setServer({
-            ...server,
-            allocationUuid: null,
-            allocationUuids: [],
-          });
-
-          availablePrimaryAllocations.refetch();
-          availableAllocations.refetch();
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
+    form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
+    form.setFieldValue('startup', egg.startup);
+  }, [form.values.eggUuid]);
 
   return (
     <>
       <Stack>
-        <Title order={2}>{params.id ? 'Update' : 'Create'} Server</Title>
+        <Title order={2}>{contextServer ? 'Update' : 'Create'} Server</Title>
 
         {contextServer?.suspended && (
           <Alert title='Server Suspended' color='orange' icon={<FontAwesomeIcon icon={faCircleInfo} />}>
@@ -208,14 +158,12 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   withAsterisk
                   label={'Server Name'}
                   placeholder={'My Game Server'}
-                  value={server.name || ''}
-                  onChange={(e) => setServer({ ...server, name: e.target.value })}
+                  {...form.getInputProps('name')}
                 />
                 <TextInput
                   label={'External ID'}
                   placeholder={'Optional external identifier'}
-                  value={server.externalId || ''}
-                  onChange={(e) => setServer({ ...server, externalId: e.target.value })}
+                  {...form.getInputProps('externalId')}
                 />
               </Group>
 
@@ -223,8 +171,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 label='Description'
                 placeholder='Server description'
                 rows={3}
-                value={server.description || ''}
-                onChange={(e) => setServer({ ...server, description: e.target.value })}
+                {...form.getInputProps('description')}
               />
             </Stack>
           </Paper>
@@ -238,8 +185,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   withAsterisk
                   label={'Node'}
                   placeholder={'Node'}
-                  value={server.nodeUuid || ''}
-                  onChange={(value) => setServer({ ...server, nodeUuid: value })}
                   data={nodes.items.map((node) => ({
                     label: node.name,
                     value: node.uuid,
@@ -247,13 +192,12 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   searchable
                   searchValue={nodes.search}
                   onSearchChange={nodes.setSearch}
+                  {...form.getInputProps('nodeUuid')}
                 />
                 <Select
                   withAsterisk
                   label={'Owner'}
                   placeholder={'Owner'}
-                  value={server.ownerUuid || ''}
-                  onChange={(value) => setServer({ ...server, ownerUuid: value })}
                   data={users.items.map((user) => ({
                     label: user.username,
                     value: user.uuid,
@@ -261,6 +205,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   searchable
                   searchValue={users.search}
                   onSearchChange={users.setSearch}
+                  {...form.getInputProps('ownerUuid')}
                 />
               </Group>
 
@@ -283,8 +228,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   withAsterisk
                   label={'Egg'}
                   placeholder={'Egg'}
-                  value={server.eggUuid || ''}
-                  onChange={(value) => setServer({ ...server, eggUuid: value })}
                   disabled={!selectedNestUuid}
                   data={eggs.items.map((egg) => ({
                     label: egg.name,
@@ -293,6 +236,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   searchable
                   searchValue={eggs.search}
                   onSearchChange={eggs.setSearch}
+                  {...form.getInputProps('eggUuid')}
                 />
               </Group>
 
@@ -300,8 +244,6 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 <Select
                   allowDeselect
                   label={'Backup Configuration'}
-                  value={server.backupConfigurationUuid ?? uuidNil}
-                  onChange={(value) => setServer({ ...server, backupConfigurationUuid: value ?? uuidNil })}
                   data={[
                     {
                       label: 'Inherit from Node/Location',
@@ -315,6 +257,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   searchable
                   searchValue={backupConfigurations.search}
                   onSearchChange={backupConfigurations.setSearch}
+                  {...form.getInputProps('backupConfigurationUuid')}
                 />
               </Group>
             </Stack>
@@ -331,18 +274,15 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   withAsterisk
                   label={'CPU Limit (%)'}
                   placeholder={'100'}
-                  value={server.limits.cpu || 100}
                   min={0}
-                  onChange={(value) => setServer({ ...server, limits: { ...server.limits, cpu: Number(value) } })}
+                  {...form.getInputProps('limits.cpu')}
                 />
                 <SizeInput
                   withAsterisk
                   label={'Memory + Unit (e.g. 1 GiB)'}
                   value={memoryInput}
                   setState={setMemoryInput}
-                  onChange={(value) =>
-                    setServer({ ...server, limits: { ...server.limits, memory: value / 1024 / 1024 } })
-                  }
+                  onChange={(value) => form.setFieldValue('limits.memory', value / 1024 / 1024)}
                 />
               </Group>
 
@@ -352,26 +292,16 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Disk Space + Unit (e.g. 10 GiB)'}
                   value={diskInput}
                   setState={setDiskInput}
-                  onChange={(value) =>
-                    setServer({ ...server, limits: { ...server.limits, disk: value / 1024 / 1024 } })
-                  }
+                  onChange={(value) => form.setFieldValue('limits.disk', value / 1024 / 1024)}
                 />
                 <SizeInput
                   withAsterisk
                   label={'Swap + Unit (e.g. 500 MiB)'}
                   value={swapInput}
                   setState={setSwapInput}
-                  onChange={(value) =>
-                    setServer({ ...server, limits: { ...server.limits, swap: value / 1024 / 1024 } })
-                  }
+                  onChange={(value) => form.setFieldValue('limits.swap', value / 1024 / 1024)}
                 />
-                <NumberInput
-                  label={'IO Weight'}
-                  value={server.limits.ioWeight || null}
-                  onChange={(value) =>
-                    setServer({ ...server, limits: { ...server.limits, ioWeight: Number(value) || null } })
-                  }
-                />
+                <NumberInput label={'IO Weight'} {...form.getInputProps('limits.ioWeight')} />
               </Group>
             </Stack>
           </Paper>
@@ -385,22 +315,19 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   withAsterisk
                   label={'Docker Image'}
                   placeholder={'ghcr.io/...'}
-                  value={server.image || ''}
-                  onChange={(value) => setServer({ ...server, image: value })}
-                  data={Object.entries(eggs.items.find((egg) => egg.uuid === server.eggUuid)?.dockerImages || {}).map(
-                    ([label, value]) => ({
-                      label,
-                      value,
-                    }),
-                  )}
+                  data={Object.entries(
+                    eggs.items.find((egg) => egg.uuid === form.values.eggUuid)?.dockerImages || {},
+                  ).map(([label, value]) => ({
+                    label,
+                    value,
+                  }))}
                   searchable
+                  {...form.getInputProps('image')}
                 />
                 <Select
                   withAsterisk
                   label={'Timezone'}
                   placeholder={'Europe/Amsterdam'}
-                  value={server.timezone || ''}
-                  onChange={(value) => setServer({ ...server, timezone: value })}
                   data={[
                     {
                       label: 'System',
@@ -409,6 +336,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     ...timezones,
                   ]}
                   searchable
+                  {...form.getInputProps('timezone')}
                 />
               </Group>
 
@@ -417,8 +345,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                 placeholder={'npm start'}
                 required
                 rows={2}
-                value={server.startup || ''}
-                onChange={(event) => setServer({ ...server, startup: event.target.value })}
+                {...form.getInputProps('startup')}
               />
 
               {!contextServer && (
@@ -426,14 +353,12 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   <Switch
                     label={'Start on Completion'}
                     description={'Start server after installation completes'}
-                    checked={server.startOnCompletion}
-                    onChange={(event) => setServer({ ...server, startOnCompletion: event.target.checked })}
+                    {...form.getInputProps('startOnCompletion')}
                   />
                   <Switch
                     label={'Skip Installer'}
                     description={'Skip running the install script'}
-                    checked={server.skipInstaller}
-                    onChange={(event) => setServer({ ...server, skipInstaller: event.target.checked })}
+                    {...form.getInputProps('skipInstaller')}
                   />
                 </Group>
               )}
@@ -452,40 +377,28 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   label={'Allocations'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.allocations}
-                  onChange={(value) =>
-                    setServer({ ...server, featureLimits: { ...server.featureLimits, allocations: Number(value) } })
-                  }
+                  {...form.getInputProps('featureLimits.allocations')}
                 />
                 <NumberInput
                   withAsterisk
                   label={'Databases'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.databases}
-                  onChange={(value) =>
-                    setServer({ ...server, featureLimits: { ...server.featureLimits, databases: Number(value) } })
-                  }
+                  {...form.getInputProps('featureLimits.databases')}
                 />
                 <NumberInput
                   withAsterisk
                   label={'Backups'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.backups}
-                  onChange={(value) =>
-                    setServer({ ...server, featureLimits: { ...server.featureLimits, backups: Number(value) } })
-                  }
+                  {...form.getInputProps('featureLimits.backups')}
                 />
                 <NumberInput
                   withAsterisk
                   label={'Schedules'}
                   placeholder={'0'}
                   min={0}
-                  value={server.featureLimits.schedules}
-                  onChange={(value) =>
-                    setServer({ ...server, featureLimits: { ...server.featureLimits, schedules: Number(value) } })
-                  }
+                  {...form.getInputProps('featureLimits.schedules')}
                 />
               </Group>
             </Stack>
@@ -500,11 +413,9 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   <Select
                     label={'Primary Allocation'}
                     placeholder={'Primary Allocation'}
-                    value={server.allocationUuid}
-                    disabled={!server.nodeUuid}
-                    onChange={(value) => setServer({ ...server, allocationUuid: value })}
+                    disabled={!form.values.nodeUuid}
                     data={availablePrimaryAllocations.items
-                      .filter((alloc) => !server.allocationUuids.includes(alloc.uuid))
+                      .filter((alloc) => !form.values.allocationUuids.includes(alloc.uuid))
                       .map((alloc) => ({
                         label: formatAllocation(alloc),
                         value: alloc.uuid,
@@ -513,15 +424,14 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     searchValue={availablePrimaryAllocations.search}
                     onSearchChange={availablePrimaryAllocations.setSearch}
                     allowDeselect
+                    {...form.getInputProps('allocationUuid')}
                   />
                   <MultiSelect
                     label={'Additional Allocations'}
                     placeholder={'Additional Allocations'}
-                    value={server.allocationUuids}
-                    disabled={!server.nodeUuid}
-                    onChange={(value) => setServer({ ...server, allocationUuids: value })}
+                    disabled={!form.values.nodeUuid}
                     data={availableAllocations.items
-                      .filter((alloc) => alloc.uuid !== server.allocationUuid)
+                      .filter((alloc) => alloc.uuid !== form.values.allocationUuid)
                       .map((alloc) => ({
                         label: formatAllocation(alloc),
                         value: alloc.uuid,
@@ -529,6 +439,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                     searchable
                     searchValue={availableAllocations.search}
                     onSearchChange={availableAllocations.setSearch}
+                    {...form.getInputProps('allocationUuids')}
                   />
                 </Group>
               </Stack>

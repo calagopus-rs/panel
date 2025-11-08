@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import Button from '@/elements/Button';

@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
 import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
@@ -20,28 +19,50 @@ import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import { NIL as uuidNil } from 'uuid';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
-  const params = useParams<'id'>();
   const { addToast } = useToast();
-  const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [node, setNode] = useState<UpdateNode>({
-    locationUuid: '',
-    backupConfigurationUuid: uuidNil,
-    name: '',
-    public: false,
-    description: null,
-    publicUrl: null,
-    url: '',
-    sftpHost: null,
-    sftpPort: 2022,
-    maintenanceMessage: null,
-    memory: 8192,
-    disk: 10240,
-  } as UpdateNode);
+
+  const form = useForm<UpdateNode>({
+    initialValues: {
+      locationUuid: '',
+      backupConfigurationUuid: uuidNil,
+      name: '',
+      public: false,
+      description: null,
+      publicUrl: null,
+      url: '',
+      sftpHost: null,
+      sftpPort: 2022,
+      maintenanceMessage: null,
+      memory: 8192,
+      disk: 10240,
+    },
+  });
+
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateNode, Node>({
+    form,
+    createFn: () => createNode(form.values),
+    updateFn: () => updateNode(contextNode?.uuid, form.values),
+    deleteFn: () => deleteNode(contextNode?.uuid),
+    doUpdate: !!contextNode,
+    basePath: '/admin/nodes',
+    resourceName: 'Node',
+  });
+
+  useEffect(() => {
+    if (contextNode) {
+      form.setValues({
+        ...contextNode,
+        locationUuid: contextNode.location.uuid,
+        backupConfigurationUuid: contextNode.backupConfiguration?.uuid ?? uuidNil,
+      });
+    }
+  }, [contextNode]);
 
   const locations = useSearchableResource<Location>({
     fetcher: (search) => getLocations(1, search),
@@ -50,67 +71,9 @@ export default ({ contextNode }: { contextNode?: Node }) => {
     fetcher: (search) => getBackupConfigurations(1, search),
   });
 
-  useEffect(() => {
-    if (contextNode) {
-      setNode({
-        locationUuid: contextNode.location.uuid,
-        backupConfigurationUuid: contextNode.backupConfiguration?.uuid ?? uuidNil,
-        name: contextNode.name,
-        public: contextNode.public,
-        description: contextNode.description,
-        publicUrl: contextNode.publicUrl,
-        url: contextNode.url,
-        sftpHost: contextNode.sftpHost,
-        sftpPort: contextNode.sftpPort,
-        maintenanceMessage: contextNode.maintenanceMessage,
-        memory: contextNode.memory,
-        disk: contextNode.disk,
-      });
-    }
-  }, [contextNode]);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateNode(params.id, node)
-        .then(() => {
-          addToast('Node updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createNode(node)
-        .then((node) => {
-          addToast('Node created.', 'success');
-          navigate(`/admin/nodes/${node.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createNode(node)
-        .then(() => {
-          addToast('Node created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
-
   const doResetToken = () => {
     load(true, setLoading);
-    resetNodeToken(params.id)
+    resetNodeToken(contextNode.uuid)
       .then(({ tokenId, token }) => {
         addToast('Node token reset.', 'success');
         contextNode.tokenId = tokenId;
@@ -124,17 +87,6 @@ export default ({ contextNode }: { contextNode?: Node }) => {
       });
   };
 
-  const doDelete = async () => {
-    await deleteNode(params.id)
-      .then(() => {
-        addToast('Node deleted.', 'success');
-        navigate('/admin/nodes');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
       <ConfirmationModal
@@ -144,26 +96,18 @@ export default ({ contextNode }: { contextNode?: Node }) => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{node?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2}>{params.id ? 'Update' : 'Create'} Node</Title>
+        <Title order={2}>{contextNode ? 'Update' : 'Create'} Node</Title>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={node.name || ''}
-            onChange={(e) => setNode({ ...node, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <Select
             withAsterisk
             label={'Location'}
             placeholder={'Location'}
-            value={node.locationUuid}
-            onChange={(value) => setNode({ ...node, locationUuid: value })}
             data={locations.items.map((location) => ({
               label: location.name,
               value: location.uuid,
@@ -171,6 +115,7 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             searchable
             searchValue={locations.search}
             onSearchChange={locations.setSearch}
+            {...form.getInputProps('locationUuid')}
           />
         </Group>
 
@@ -180,33 +125,25 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             label={'URL'}
             description={'used for internal communication with the node'}
             placeholder={'URL'}
-            value={node.url || ''}
-            onChange={(e) => setNode({ ...node, url: e.target.value })}
+            {...form.getInputProps('url')}
           />
           <TextInput
             label={'Public URL'}
             description={'used for websocket/downloads'}
             placeholder={'URL'}
-            value={node.publicUrl || ''}
-            onChange={(e) => setNode({ ...node, publicUrl: e.target.value || null })}
+            {...form.getInputProps('publicUrl')}
           />
         </Group>
 
         <Group grow>
-          <TextInput
-            label={'SFTP Host'}
-            placeholder={'SFTP Host'}
-            value={node.sftpHost || ''}
-            onChange={(e) => setNode({ ...node, sftpHost: e.target.value || null })}
-          />
+          <TextInput label={'SFTP Host'} placeholder={'SFTP Host'} {...form.getInputProps('sftpHost')} />
           <NumberInput
             withAsterisk
             label={'SFTP Port'}
             placeholder={'SFTP Port'}
-            value={node.sftpPort}
             min={1}
             max={65535}
-            onChange={(value) => setNode({ ...node, sftpPort: value ? Number(value) : null })}
+            {...form.getInputProps('sftpPort')}
           />
         </Group>
 
@@ -215,17 +152,15 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             withAsterisk
             label={'Memory MB'}
             placeholder={'Memory MB'}
-            value={node.memory}
             min={1024}
-            onChange={(value) => setNode({ ...node, memory: Number(value) })}
+            {...form.getInputProps('memory')}
           />
           <NumberInput
             withAsterisk
             label={'Disk MB'}
             placeholder={'Disk MB'}
-            value={node.disk}
             min={1024}
-            onChange={(value) => setNode({ ...node, disk: Number(value) })}
+            {...form.getInputProps('disk')}
           />
         </Group>
 
@@ -233,8 +168,6 @@ export default ({ contextNode }: { contextNode?: Node }) => {
           <Select
             allowDeselect
             label={'Backup Configuration'}
-            value={node.backupConfigurationUuid ?? uuidNil}
-            onChange={(value) => setNode({ ...node, backupConfigurationUuid: value ?? uuidNil })}
             data={[
               {
                 label: 'Inherit from Location',
@@ -248,28 +181,18 @@ export default ({ contextNode }: { contextNode?: Node }) => {
             searchable
             searchValue={backupConfigurations.search}
             onSearchChange={backupConfigurations.setSearch}
+            {...form.getInputProps('backupConfigurationUuid')}
           />
           <TextInput
             label={'Maintenance Message'}
             placeholder={'Maintenance Message'}
-            value={node.maintenanceMessage || ''}
-            onChange={(e) => setNode({ ...node, maintenanceMessage: e.target.value || null })}
+            {...form.getInputProps('maintenanceMessage')}
           />
         </Group>
 
-        <TextArea
-          label={'Description'}
-          placeholder={'Description'}
-          value={node.description || ''}
-          rows={3}
-          onChange={(e) => setNode({ ...node, description: e.target.value || null })}
-        />
+        <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
 
-        <Switch
-          label={'Public'}
-          checked={node.public || false}
-          onChange={(e) => setNode({ ...node, public: e.target.checked })}
-        />
+        <Switch label={'Public'} {...form.getInputProps('public')} />
 
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>

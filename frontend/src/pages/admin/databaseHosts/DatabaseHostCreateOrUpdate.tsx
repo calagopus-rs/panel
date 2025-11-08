@@ -16,82 +16,53 @@ import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHost }) => {
-  const params = useParams<'id'>();
   const { addToast } = useToast();
-  const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [databaseHost, setDatabaseHost] = useState<UpdateAdminDatabaseHost>({
-    name: '',
-    username: '',
-    password: null,
-    host: '',
-    port: 3306,
-    public: false,
-    publicHost: null,
-    publicPort: null,
-    type: 'mysql',
-  } as UpdateAdminDatabaseHost);
+
+  const form = useForm<UpdateAdminDatabaseHost>({
+    initialValues: {
+      name: '',
+      username: '',
+      password: null,
+      host: '',
+      port: 3306,
+      public: false,
+      publicHost: null,
+      publicPort: null,
+      type: 'mysql',
+    },
+  });
+
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
+    UpdateAdminDatabaseHost,
+    AdminDatabaseHost
+  >({
+    form,
+    createFn: () => createDatabaseHost(form.values),
+    updateFn: () => updateDatabaseHost(contextDatabaseHost?.uuid, form.values),
+    deleteFn: () => deleteDatabaseHost(contextDatabaseHost?.uuid),
+    doUpdate: !!contextDatabaseHost,
+    basePath: '/admin/database-hosts',
+    resourceName: 'Database host',
+  });
 
   useEffect(() => {
-    setDatabaseHost({
-      name: contextDatabaseHost?.name ?? '',
-      username: contextDatabaseHost?.username ?? '',
-      password: null,
-      host: contextDatabaseHost?.host ?? '',
-      port: contextDatabaseHost?.port ?? 3306,
-      public: contextDatabaseHost?.public ?? false,
-      publicHost: contextDatabaseHost?.publicHost ?? null,
-      publicPort: contextDatabaseHost?.publicPort ?? null,
-      type: contextDatabaseHost?.type ?? 'mysql',
-    });
-  }, [contextDatabaseHost]);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateDatabaseHost(params.id, databaseHost)
-        .then(() => {
-          addToast('Database host updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createDatabaseHost(databaseHost)
-        .then((databaseHost) => {
-          addToast('Database host created.', 'success');
-          navigate(`/admin/database-hosts/${databaseHost.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createDatabaseHost(databaseHost)
-        .then(() => {
-          addToast('Database host created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
+    if (contextDatabaseHost) {
+      form.setValues({
+        ...contextDatabaseHost,
+        password: null,
+      });
     }
-  };
+  }, [contextDatabaseHost]);
 
   const doTest = () => {
     load(true, setLoading);
-    testDatabaseHost(params.id)
+    testDatabaseHost(contextDatabaseHost.uuid)
       .then(() => {
         addToast('Test successfully completed', 'success');
       })
@@ -100,17 +71,6 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
       })
       .finally(() => {
         load(false, setLoading);
-      });
-  };
-
-  const doDelete = async () => {
-    await deleteDatabaseHost(params.id)
-      .then(() => {
-        addToast('Database host deleted.', 'success');
-        navigate('/admin/database-hosts');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
       });
   };
 
@@ -123,23 +83,17 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{databaseHost?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Title order={2} mb={'md'}>
-        {params.id ? 'Update' : 'Create'} Database Host
+        {contextDatabaseHost ? 'Update' : 'Create'} Database Host
       </Title>
       <Divider mb={'md'} />
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={databaseHost.name || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <Select
             withAsterisk
             label={'Type'}
@@ -147,69 +101,38 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
               value,
               label,
             }))}
-            value={databaseHost.type || 'mysql'}
-            onChange={(value) => setDatabaseHost({ ...databaseHost, type: value as DatabaseType })}
-            disabled={params.id ? true : false}
+            disabled={!!contextDatabaseHost}
+            {...form.getInputProps('type')}
           />
         </Group>
 
         <Group grow>
+          <TextInput withAsterisk label={'Username'} placeholder={'Username'} {...form.getInputProps('username')} />
           <TextInput
-            withAsterisk
-            label={'Username'}
-            placeholder={'Username'}
-            value={databaseHost.username || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, username: e.target.value })}
-          />
-          <TextInput
-            withAsterisk={!params.id}
+            withAsterisk={!contextDatabaseHost}
             label={'Password'}
             placeholder={'Password'}
             type={'password'}
-            value={databaseHost.password || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, password: e.target.value })}
+            {...form.getInputProps('password')}
           />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Host'}
-            placeholder={'Host'}
-            value={databaseHost.host || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, host: e.target.value })}
-          />
-          <NumberInput
-            withAsterisk
-            label={'Port'}
-            placeholder={'Port'}
-            min={0}
-            value={databaseHost.port || 3306}
-            onChange={(value) => setDatabaseHost({ ...databaseHost, port: Number(value) || 0 })}
-          />
+          <TextInput withAsterisk label={'Host'} placeholder={'Host'} {...form.getInputProps('host')} />
+          <NumberInput withAsterisk label={'Port'} placeholder={'Port'} min={0} {...form.getInputProps('port')} />
         </Group>
 
         <Group grow>
-          <TextInput
-            label={'Public Host'}
-            placeholder={'Public Host'}
-            value={databaseHost.publicHost || ''}
-            onChange={(e) => setDatabaseHost({ ...databaseHost, publicHost: e.target.value || null })}
-          />
+          <TextInput label={'Public Host'} placeholder={'Public Host'} {...form.getInputProps('publicHost')} />
           <NumberInput
             label={'Public Port'}
             placeholder={'Public Port'}
             min={0}
-            value={databaseHost.publicPort || undefined}
-            onChange={(value) => setDatabaseHost({ ...databaseHost, publicPort: Number(value) || null })}
+            {...form.getInputProps('publicPort')}
           />
         </Group>
 
-        <Switch
-          label={'Public'}
-          checked={databaseHost.public || false}
-          onChange={(e) => setDatabaseHost({ ...databaseHost, public: e.target.checked })}
-        />
+        <Switch label={'Public'} {...form.getInputProps('public')} />
 
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
@@ -221,14 +144,14 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
             </Button>
           )}
           {contextDatabaseHost && (
-            <Button variant={'outline'} onClick={doTest} loading={loading}>
-              Test
-            </Button>
-          )}
-          {contextDatabaseHost && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
+            <>
+              <Button variant={'outline'} onClick={doTest} loading={loading}>
+                Test
+              </Button>
+              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            </>
           )}
         </Group>
       </Stack>

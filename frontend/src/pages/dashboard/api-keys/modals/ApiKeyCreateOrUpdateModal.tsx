@@ -7,7 +7,7 @@ import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import { Group, ModalProps, Stack, Title } from '@mantine/core';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import getPermissions from '@/api/getPermissions';
 import { useGlobalStore } from '@/stores/global';
 import PermissionSelector from '@/elements/PermissionSelector';

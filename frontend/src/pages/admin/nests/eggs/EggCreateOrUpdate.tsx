@@ -1,6 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import Code from '@/elements/Code';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
@@ -24,71 +24,62 @@ import jsYaml from 'js-yaml';
 
 export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
   const { addToast } = useToast();
-  const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [egg, setEgg] = useState<AdminUpdateNestEgg>({
-    author: contextEgg?.author || '',
-    name: contextEgg?.name || '',
-    description: contextEgg?.description || '',
-    configFiles: contextEgg?.configFiles || [],
-    configStartup: {
-      done: contextEgg?.configStartup.done || [],
-      stripAnsi: contextEgg?.configStartup.stripAnsi || false,
-    },
-    configStop: {
-      type: contextEgg?.configStop.type || '',
-      value: contextEgg?.configStop.value || '',
-    },
-    configScript: {
-      container: contextEgg?.configScript.container || '',
-      entrypoint: contextEgg?.configScript.entrypoint || '',
-      content: contextEgg?.configScript.content || '',
-    },
-    configAllocations: {
-      userSelfAssign: {
-        enabled: contextEgg?.configAllocations.userSelfAssign.enabled || false,
-        requirePrimaryAllocation: contextEgg?.configAllocations.userSelfAssign.requirePrimaryAllocation || false,
-        startPort: contextEgg?.configAllocations.userSelfAssign.startPort || 0,
-        endPort: contextEgg?.configAllocations.userSelfAssign.endPort || 0,
+
+  const form = useForm<AdminUpdateNestEgg>({
+    initialValues: {
+      author: contextEgg?.author || '',
+      name: contextEgg?.name || '',
+      description: contextEgg?.description || '',
+      configFiles: contextEgg?.configFiles || [],
+      configStartup: {
+        done: contextEgg?.configStartup.done || [],
+        stripAnsi: contextEgg?.configStartup.stripAnsi || false,
       },
+      configStop: {
+        type: contextEgg?.configStop.type || '',
+        value: contextEgg?.configStop.value || '',
+      },
+      configScript: {
+        container: contextEgg?.configScript.container || '',
+        entrypoint: contextEgg?.configScript.entrypoint || '',
+        content: contextEgg?.configScript.content || '',
+      },
+      configAllocations: {
+        userSelfAssign: {
+          enabled: contextEgg?.configAllocations.userSelfAssign.enabled || false,
+          requirePrimaryAllocation: contextEgg?.configAllocations.userSelfAssign.requirePrimaryAllocation || false,
+          startPort: contextEgg?.configAllocations.userSelfAssign.startPort || 0,
+          endPort: contextEgg?.configAllocations.userSelfAssign.endPort || 0,
+        },
+      },
+      startup: contextEgg?.startup || '',
+      forceOutgoingIp: contextEgg?.forceOutgoingIp || false,
+      separatePort: contextEgg?.separatePort || false,
+      features: contextEgg?.features || [],
+      dockerImages: contextEgg?.dockerImages || {},
+      fileDenylist: contextEgg?.fileDenylist || [],
     },
-    startup: contextEgg?.startup || '',
-    forceOutgoingIp: contextEgg?.forceOutgoingIp || false,
-    separatePort: contextEgg?.separatePort || false,
-    features: contextEgg?.features || [],
-    dockerImages: contextEgg?.dockerImages || {},
-    fileDenylist: contextEgg?.fileDenylist || [],
   });
 
-  const doCreateOrUpdate = () => {
-    load(true, setLoading);
-    if (contextEgg?.uuid) {
-      updateEgg(contextNest.uuid, contextEgg.uuid, egg)
-        .then(() => {
-          addToast('Egg updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createEgg(contextNest.uuid, egg)
-        .then((egg) => {
-          addToast('Egg created.', 'success');
-          navigate(`/admin/nests/${contextNest.uuid}/eggs/${egg.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<AdminUpdateNestEgg, AdminNestEgg>({
+    form,
+    createFn: () => createNest(form.values),
+    updateFn: () => updateNest(contextNest?.uuid, form.values),
+    deleteFn: () => deleteNest(contextNest?.uuid),
+    doUpdate: !!contextEgg,
+    basePath: `/admin/nests/${contextNest.uuid}/eggs`,
+    resourceName: 'Egg',
+  });
+
+  useEffect(() => {
+    if (contextNest) {
+      form.setValues({
+        ...contextNest,
+      });
     }
-  };
+  }, [contextNest]);
 
   const doExport = (format: 'json' | 'yaml') => {
     load(true, setLoading);
@@ -126,17 +117,6 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
       .finally(() => load(false, setLoading));
   };
 
-  const doDelete = async () => {
-    await deleteEgg(contextNest.uuid, contextEgg.uuid)
-      .then(() => {
-        addToast('Egg deleted.', 'success');
-        navigate(`/admin/nests/${contextNest.uuid}/eggs`);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
       <ConfirmationModal
@@ -146,34 +126,16 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{egg?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Author'}
-            placeholder={'Author'}
-            value={egg.author || ''}
-            onChange={(e) => setEgg({ ...egg, author: e.target.value })}
-          />
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={egg.name || ''}
-            onChange={(e) => setEgg({ ...egg, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Author'} placeholder={'Author'} {...form.getInputProps('author')} />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
         </Group>
 
-        <TextArea
-          label={'Description'}
-          placeholder={'Description'}
-          value={egg.description || ''}
-          rows={3}
-          onChange={(e) => setEgg({ ...egg, description: e.target.value || null })}
-        />
+        <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
 
         {/* TODO: configFiles */}
 
@@ -181,15 +143,10 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
           withAsterisk
           label={'Startup Done'}
           placeholder={'Startup Done'}
-          value={egg.configStartup?.done || []}
-          onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, done: e } })}
+          {...form.getInputProps('configStartup.done')}
         />
 
-        <Switch
-          label={'Strip ANSI from startup messages'}
-          checked={egg.configStartup?.stripAnsi || false}
-          onChange={(e) => setEgg({ ...egg, configStartup: { ...egg.configStartup, stripAnsi: e.target.checked } })}
-        />
+        <Switch label={'Strip ANSI from startup messages'} {...form.getInputProps('configStartup.stripAnsi')} />
 
         {/* TODO: configStop */}
 
@@ -198,15 +155,13 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
             withAsterisk
             label={'Install Script Container'}
             placeholder={'Install Script Container'}
-            value={egg.configScript?.container || ''}
-            onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, container: e.target.value } })}
+            {...form.getInputProps('configScript.container')}
           />
           <TextInput
             withAsterisk
             label={'Install Script Entrypoint'}
             placeholder={'Install Script Entrypoint'}
-            value={egg.configScript?.entrypoint || ''}
-            onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, entrypoint: e.target.value } })}
+            {...form.getInputProps('configScript.entrypoint')}
           />
         </Group>
 
@@ -214,112 +169,51 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
           withAsterisk
           label={'Install Script Content'}
           placeholder={'Install Script Content'}
-          value={egg.configScript?.content || ''}
           rows={6}
-          onChange={(e) => setEgg({ ...egg, configScript: { ...egg.configScript, content: e.target.value } })}
+          {...form.getInputProps('configScript.content')}
         />
 
-        <Switch
-          label={'Allocation Self Assign'}
-          checked={egg.configAllocations?.userSelfAssign?.enabled || false}
-          onChange={(e) =>
-            setEgg({
-              ...egg,
-              configAllocations: {
-                ...egg.configAllocations,
-                userSelfAssign: { ...egg.configAllocations.userSelfAssign, enabled: e.target.checked },
-              },
-            })
-          }
-        />
+        <Switch label={'Allocation Self Assign'} {...form.getInputProps('configAllocations.userSelfAssign.enabled')} />
 
         <Switch
           label={'Require Primary Allocation'}
-          checked={egg.configAllocations?.userSelfAssign?.requirePrimaryAllocation || false}
-          onChange={(e) =>
-            setEgg({
-              ...egg,
-              configAllocations: {
-                ...egg.configAllocations,
-                userSelfAssign: {
-                  ...egg.configAllocations.userSelfAssign,
-                  requirePrimaryAllocation: e.target.checked,
-                },
-              },
-            })
-          }
+          {...form.getInputProps('configAllocations.userSelfAssign.requirePrimaryAllocation')}
         />
 
         <Group grow>
           <NumberInput
             label={'Automatic Allocation Start'}
             placeholder={'Automatic Allocation Start'}
-            value={egg.configAllocations?.userSelfAssign?.startPort || 0}
-            onChange={(e) =>
-              setEgg({
-                ...egg,
-                configAllocations: {
-                  ...egg.configAllocations,
-                  userSelfAssign: { ...egg.configAllocations.userSelfAssign, startPort: Number(e) },
-                },
-              })
-            }
+            {...form.getInputProps('configAllocations.userSelfAssign.startPort')}
           />
           <NumberInput
             label={'Automatic Allocation End'}
             placeholder={'Automatic Allocation End'}
-            value={egg.configAllocations?.userSelfAssign?.endPort || 0}
-            onChange={(e) =>
-              setEgg({
-                ...egg,
-                configAllocations: {
-                  ...egg.configAllocations,
-                  userSelfAssign: { ...egg.configAllocations.userSelfAssign, endPort: Number(e) },
-                },
-              })
-            }
+            {...form.getInputProps('configAllocations.userSelfAssign.endPort')}
           />
         </Group>
 
-        <TextInput
-          withAsterisk
-          label={'Startup'}
-          placeholder={'Startup'}
-          value={egg.startup || ''}
-          onChange={(e) => setEgg({ ...egg, startup: e.target.value })}
-        />
+        <TextInput withAsterisk label={'Startup'} placeholder={'Startup'} {...form.getInputProps('startup')} />
 
-        <Switch
-          label={'Force Outgoing IP'}
-          checked={egg.forceOutgoingIp || false}
-          onChange={(e) => setEgg({ ...egg, forceOutgoingIp: e.target.checked })}
-        />
+        <Switch label={'Force Outgoing IP'} {...form.getInputProps('forceOutgoingIp')} />
         <Switch
           label={'Separate IP and Port'}
           description={'Separates the primary IP and Port in the Console page instead of joining them with ":"'}
-          checked={egg.separatePort || false}
-          onChange={(e) => setEgg({ ...egg, separatePort: e.target.checked })}
+          {...form.getInputProps('separatePort')}
         />
 
-        <TagsInput
-          label={'Features'}
-          placeholder={'Feature'}
-          value={egg.features || []}
-          onChange={(e) => setEgg({ ...egg, features: e })}
+        <TagsInput label={'Features'} placeholder={'Feature'} {...form.getInputProps('features')} />
+
+        <MultiKeyValueInput
+          options={form.values.dockerImages}
+          onChange={(e) => form.setFieldValue('dockerImages', e)}
         />
 
-        <MultiKeyValueInput options={egg.dockerImages || {}} onChange={(e) => setEgg({ ...egg, dockerImages: e })} />
-
-        <TagsInput
-          label={'File Deny List'}
-          placeholder={'File Deny List'}
-          value={egg.fileDenylist || []}
-          onChange={(e) => setEgg({ ...egg, fileDenylist: e })}
-        />
+        <TagsInput label={'File Deny List'} placeholder={'File Deny List'} {...form.getInputProps('fileDenylist')} />
       </Stack>
 
       <Group mt={'md'}>
-        <Button onClick={doCreateOrUpdate} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
         {contextEgg && (

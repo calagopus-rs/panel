@@ -1,105 +1,60 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
 import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import updateRole from '@/api/admin/roles/updateRole';
 import createRole from '@/api/admin/roles/createRole';
 import deleteRole from '@/api/admin/roles/deleteRole';
-import getPermissions from '@/api/getPermissions';
 import { useGlobalStore } from '@/stores/global';
 import PermissionSelector from '@/elements/PermissionSelector';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
+import getPermissions from '@/api/getPermissions';
+import { load } from '@/lib/debounce';
 
 export default ({ contextRole }: { contextRole?: Role }) => {
-  const params = useParams<'id'>();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState<UpdateRole>({
-    name: '',
-    description: '',
-    adminPermissions: [],
-    serverPermissions: [],
-  } as UpdateRole);
+
+  const form = useForm<UpdateRole>({
+    initialValues: {
+      name: '',
+      description: '',
+      adminPermissions: [],
+      serverPermissions: [],
+    },
+  });
+
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateRole, Role>({
+    form,
+    createFn: () => createRole(form.values),
+    updateFn: () => updateRole(contextRole?.uuid, form.values),
+    deleteFn: () => deleteRole(contextRole?.uuid),
+    doUpdate: !!contextRole,
+    basePath: '/admin/roles',
+    resourceName: 'Role',
+  });
 
   useEffect(() => {
     if (contextRole) {
-      setRole({
-        name: contextRole.name,
-        description: contextRole.description,
-        adminPermissions: contextRole.adminPermissions,
-        serverPermissions: contextRole.serverPermissions,
+      form.setValues({
+        ...contextRole,
       });
     }
   }, [contextRole]);
 
   useEffect(() => {
+    load(true, setLoading);
+
     getPermissions().then((res) => {
       setAvailablePermissions(res);
       load(false, setLoading);
     });
   }, []);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateRole(params.id, role)
-        .then(() => {
-          addToast('Role updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createRole(role)
-        .then((role) => {
-          addToast('Role created.', 'success');
-          navigate(`/admin/roles/${role.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createRole(role)
-        .then((role) => {
-          addToast('Role created.', 'success');
-          navigate(`/admin/roles/${role.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
-
-  const doDelete = async () => {
-    await deleteRole(params.id)
-      .then(() => {
-        addToast('Role deleted.', 'success');
-        navigate('/admin/roles');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
 
   return (
     <>
@@ -110,32 +65,20 @@ export default ({ contextRole }: { contextRole?: Role }) => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{role?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
         <Title order={2} mb={'md'}>
-          {params.id ? 'Update' : 'Create'} Role
+          {contextRole ? 'Update' : 'Create'} Role
         </Title>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={role.name || ''}
-            onChange={(e) => setRole({ ...role, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
         </Group>
 
         <Group grow align={'start'}>
-          <TextArea
-            label={'Description'}
-            placeholder={'Description'}
-            value={role.description || ''}
-            rows={3}
-            onChange={(e) => setRole({ ...role, description: e.target.value || null })}
-          />
+          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
         </Group>
 
         <Group grow align={'normal'}>
@@ -144,8 +87,8 @@ export default ({ contextRole }: { contextRole?: Role }) => {
             {availablePermissions?.serverPermissions && (
               <PermissionSelector
                 permissions={availablePermissions.serverPermissions}
-                selectedPermissions={role.serverPermissions}
-                setSelectedPermissions={(permissions) => setRole({ ...role, serverPermissions: permissions })}
+                selectedPermissions={form.values.serverPermissions}
+                setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
               />
             )}
           </Stack>
@@ -154,8 +97,8 @@ export default ({ contextRole }: { contextRole?: Role }) => {
             {availablePermissions?.adminPermissions && (
               <PermissionSelector
                 permissions={availablePermissions.adminPermissions}
-                selectedPermissions={role.adminPermissions}
-                setSelectedPermissions={(permissions) => setRole({ ...role, adminPermissions: permissions })}
+                selectedPermissions={form.values.adminPermissions}
+                setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
               />
             )}
           </Stack>

@@ -1,7 +1,7 @@
 import Modal from '@/elements/modals/Modal';
 import { Group, ModalProps, Stack } from '@mantine/core';
 import Button from '@/elements/Button';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
 import { useToast } from '@/providers/ToastProvider';

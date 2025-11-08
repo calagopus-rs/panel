@@ -1,98 +1,52 @@
 import createLocation from '@/api/admin/locations/createLocation';
 import updateLocation from '@/api/admin/locations/updateLocation';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useState } from 'react';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
 import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
 import TextInput from '@/elements/input/TextInput';
 import Select from '@/elements/input/Select';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import { NIL as uuidNil } from 'uuid';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
-  const params = useParams<'id'>();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState<UpdateLocation>({
-    name: '',
-    description: '',
-    backupConfigurationUuid: uuidNil,
-  } as UpdateLocation);
 
-  const backupConfigurations = useSearchableResource<BackupConfiguration>({
-    fetcher: (search) => getBackupConfigurations(1, search),
+  const form = useForm<UpdateLocation>({
+    initialValues: {
+      name: '',
+      description: '',
+      backupConfigurationUuid: uuidNil,
+    },
+  });
+
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateLocation, Location>({
+    form,
+    createFn: () => createLocation(form.values),
+    updateFn: () => updateLocation(contextLocation?.uuid, form.values),
+    deleteFn: () => deleteLocation(contextLocation?.uuid),
+    doUpdate: !!contextLocation,
+    basePath: '/admin/locations',
+    resourceName: 'Location',
   });
 
   useEffect(() => {
     if (contextLocation) {
-      setLocation({
-        name: contextLocation.name,
-        description: contextLocation.description,
-        backupConfigurationUuid: contextLocation.backupConfiguration?.uuid ?? uuidNil,
+      form.setValues({
+        ...contextLocation,
       });
     }
   }, [contextLocation]);
 
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateLocation(params.id, location)
-        .then(() => {
-          addToast('Location updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createLocation(location)
-        .then((location) => {
-          addToast('Location created.', 'success');
-          navigate(`/admin/locations/${location.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createLocation(location)
-        .then(() => {
-          addToast('Location created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
-
-  const doDelete = async () => {
-    await deleteLocation(params.id)
-      .then(() => {
-        addToast('Location deleted.', 'success');
-        navigate('/admin/locations');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
+  const backupConfigurations = useSearchableResource<BackupConfiguration>({
+    fetcher: (search) => getBackupConfigurations(1, search),
+  });
 
   return (
     <>
@@ -103,27 +57,19 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{location?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
         <Title order={2} mb={'md'}>
-          {params.id ? 'Update' : 'Create'} Location
+          {contextLocation ? 'Update' : 'Create'} Location
         </Title>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={location.name || ''}
-            onChange={(e) => setLocation({ ...location, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <Select
             allowDeselect
             label={'Backup Configuration'}
-            value={location.backupConfigurationUuid ?? uuidNil}
-            onChange={(value) => setLocation({ ...location, backupConfigurationUuid: value ?? uuidNil })}
             data={[
               {
                 label: 'None',
@@ -137,17 +83,12 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
             searchable
             searchValue={backupConfigurations.search}
             onSearchChange={backupConfigurations.setSearch}
+            {...form.getInputProps('backupConfigurationUuid')}
           />
         </Group>
 
         <Group grow align={'start'}>
-          <TextArea
-            label={'Description'}
-            placeholder={'Description'}
-            value={location.description || ''}
-            rows={3}
-            onChange={(e) => setLocation({ ...location, description: e.target.value || null })}
-          />
+          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
         </Group>
 
         <Group>

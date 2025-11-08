@@ -57,7 +57,7 @@ import {
   faWrench,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
-import React from 'react';
+import { FC } from 'react';
 import AdminBackupConfigurations from '@/pages/admin/backupConfigurations/AdminBackupConfigurations';
 import AdminRoles from '@/pages/admin/roles/AdminRoles';
 import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
@@ -66,7 +66,7 @@ interface RouteDefinition {
   name: string | undefined;
   icon?: IconDefinition;
   path: string;
-  element: React.FC;
+  element: FC;
   exact?: boolean;
 }
 

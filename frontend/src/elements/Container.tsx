@@ -1,11 +1,11 @@
 import { useGlobalStore } from '@/stores/global';
-import React, { useRef } from 'react';
+import { FC, ReactNode, useRef } from 'react';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: FC<LayoutProps> = ({ children }) => {
   const { settings } = useGlobalStore();
   const bodyRef = useRef<HTMLDivElement>(null);
 

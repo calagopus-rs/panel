@@ -1,6 +1,6 @@
-import React from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 
-type Callback<T> = ((value: T) => void) | React.Dispatch<React.SetStateAction<T>>;
+type Callback<T> = ((value: T) => void) | Dispatch<SetStateAction<T>>;
 
 export interface DialogProps {
   open: boolean;
@@ -20,18 +20,18 @@ export interface RenderDialogProps extends DialogProps {
   preventExternalClose?: boolean;
   title?: string;
   description?: string | undefined;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export type WrapperProps = Omit<RenderDialogProps, 'children' | 'open' | 'onClose'>;
 export interface DialogWrapperContextType {
   props: Readonly<WrapperProps>;
-  setProps: React.Dispatch<React.SetStateAction<WrapperProps>>;
+  setProps: Dispatch<SetStateAction<WrapperProps>>;
   close: () => void;
 }
 
 export interface DialogContextType {
-  setIcon: Callback<React.ReactNode>;
-  setFooter: Callback<React.ReactNode>;
+  setIcon: Callback<ReactNode>;
+  setFooter: Callback<ReactNode>;
   setIconPosition: Callback<IconPosition>;
 }

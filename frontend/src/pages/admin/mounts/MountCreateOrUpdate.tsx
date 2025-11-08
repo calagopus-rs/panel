@@ -1,97 +1,48 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import { useToast } from '@/providers/ToastProvider';
 import { Group, Title, Stack } from '@mantine/core';
-import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Switch from '@/elements/input/Switch';
-import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import createMount from '@/api/admin/mounts/createMount';
 import updateMount from '@/api/admin/mounts/updateMount';
-import getMount from '@/api/admin/mounts/getMount';
 import deleteMount from '@/api/admin/mounts/deleteMount';
 import TextArea from '@/elements/input/TextArea';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
-export default () => {
-  const params = useParams<'id'>();
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-
+export default ({ contextMount }: { contextMount?: Mount }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [mount, setMount] = useState<UpdateAdminMount>({
-    name: '',
-    description: '',
-    source: '',
-    target: '',
-    readOnly: false,
-    userMountable: false,
-  } as UpdateAdminMount);
+
+  const form = useForm<UpdateAdminMount>({
+    initialValues: {
+      name: '',
+      description: '',
+      source: '',
+      target: '',
+      readOnly: false,
+      userMountable: false,
+    },
+  });
+
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateAdminMount, Mount>({
+    form,
+    createFn: () => createMount(form.values),
+    updateFn: () => updateMount(contextMount?.uuid, form.values),
+    deleteFn: () => deleteMount(contextMount?.uuid),
+    doUpdate: !!contextMount,
+    basePath: '/admin/locations',
+    resourceName: 'Location',
+  });
 
   useEffect(() => {
-    if (params.id) {
-      getMount(params.id)
-        .then((mount) => {
-          setMount(mount);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
-    }
-  }, [params.id]);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateMount(params.id, mount)
-        .then(() => {
-          addToast('Mount updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createMount(mount)
-        .then((databaseHost) => {
-          addToast('Mount created.', 'success');
-          navigate(`/admin/mounts/${databaseHost.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createMount(mount)
-        .then(() => {
-          addToast('Mount created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
-
-  const doDelete = async () => {
-    await deleteMount(params.id)
-      .then(() => {
-        addToast('Mount deleted.', 'success');
-        navigate('/admin/mounts');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+    if (contextMount) {
+      form.setValues({
+        ...contextMount,
       });
-  };
+    }
+  }, [contextMount]);
 
   return (
     <>
@@ -102,71 +53,39 @@ export default () => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{mount?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
         <Title order={2} mb={'md'}>
-          {params.id ? 'Update' : 'Create'} Mount
+          {contextMount ? 'Update' : 'Create'} Mount
         </Title>
 
         <Group grow align={'start'}>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={mount.name || ''}
-            onChange={(e) => setMount({ ...mount, name: e.target.value })}
-          />
-          <TextArea
-            label={'Description'}
-            placeholder={'Description'}
-            value={mount.description || ''}
-            onChange={(e) => setMount({ ...mount, description: e.target.value || null })}
-            rows={3}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextArea label={'Description'} placeholder={'Description'} {...form.getInputProps('description')} rows={3} />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Source'}
-            placeholder={'Source'}
-            value={mount.source || ''}
-            onChange={(e) => setMount({ ...mount, source: e.target.value })}
-          />
-          <TextInput
-            withAsterisk
-            label={'Target'}
-            placeholder={'Target'}
-            value={mount.target || ''}
-            onChange={(e) => setMount({ ...mount, target: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Source'} placeholder={'Source'} {...form.getInputProps('source')} />
+          <TextInput withAsterisk label={'Target'} placeholder={'Target'} {...form.getInputProps('target')} />
         </Group>
 
         <Group grow>
-          <Switch
-            label={'Read Only'}
-            checked={mount.readOnly || false}
-            onChange={(e) => setMount({ ...mount, readOnly: e.target.checked })}
-          />
-          <Switch
-            label={'User Mountable'}
-            checked={mount.userMountable || false}
-            onChange={(e) => setMount({ ...mount, userMountable: e.target.checked })}
-          />
+          <Switch label={'Read Only'} {...form.getInputProps('readOnly')} />
+          <Switch label={'User Mountable'} {...form.getInputProps('userMountable')} />
         </Group>
 
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
           </Button>
-          {!params.id && (
+          {!contextMount && (
             <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
               Save & Stay
             </Button>
           )}
-          {params.id && (
+          {contextMount && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>

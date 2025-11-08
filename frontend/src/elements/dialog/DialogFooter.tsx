@@ -1,7 +1,7 @@
-import React, { useContext, useEffect } from 'react';
+import { ReactNode, useContext, useEffect } from 'react';
 import { DialogContext } from './';
 
-export default ({ children }: { children: React.ReactNode }) => {
+export default ({ children }: { children: ReactNode }) => {
   const { setFooter } = useContext(DialogContext);
 
   useEffect(() => {

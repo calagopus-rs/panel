@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { ReactNode, MouseEvent as ReactMouseEvent, useState } from 'react';
 import { DefaultMantineColor, Group, ModalProps } from '@mantine/core';
 import Modal from './Modal';
 import Button from '../Button';
@@ -7,14 +7,14 @@ import { load } from '@/lib/debounce';
 type ConfirmationProps = Omit<ModalProps, 'children'> & {
   confirm?: string | undefined;
   confirmColor?: DefaultMantineColor;
-  onConfirmed: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
-  children: React.ReactNode;
+  onConfirmed: (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
+  children: ReactNode;
 };
 
 export default ({ confirm = 'Okay', confirmColor = 'red', onConfirmed, children, ...props }: ConfirmationProps) => {
   const [loading, setLoading] = useState(false);
 
-  const onConfirmedAlt = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onConfirmedAlt = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
     const res = onConfirmed(e);
 
     if (res instanceof Promise) {

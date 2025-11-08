@@ -1,79 +1,44 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
 import Code from '@/elements/Code';
 import updateNest from '@/api/admin/nests/updateNest';
 import deleteNest from '@/api/admin/nests/deleteNest';
 import createNest from '@/api/admin/nests/createNest';
-import { load } from '@/lib/debounce';
 import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextNest }: { contextNest?: AdminNest }) => {
-  const { addToast } = useToast();
-  const navigate = useNavigate();
-
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [nest, setNest] = useState<AdminUpdateNest>({
-    author: contextNest?.author || '',
-    name: contextNest?.name || '',
-    description: contextNest?.description || '',
+
+  const form = useForm<AdminUpdateNest>({
+    initialValues: {
+      author: '',
+      name: '',
+      description: '',
+    },
   });
 
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (contextNest) {
-      updateNest(contextNest.uuid, nest)
-        .then(() => {
-          addToast('Nest updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createNest(nest)
-        .then((nest) => {
-          addToast('Nest created.', 'success');
-          navigate(`/admin/nests/${nest.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createNest(nest)
-        .then(() => {
-          addToast('Nest created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    }
-  };
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<AdminUpdateNest, AdminNest>({
+    form,
+    createFn: () => createNest(form.values),
+    updateFn: () => updateNest(contextNest?.uuid, form.values),
+    deleteFn: () => deleteNest(contextNest?.uuid),
+    doUpdate: !!contextNest,
+    basePath: '/admin/nests',
+    resourceName: 'Nest',
+  });
 
-  const doDelete = async () => {
-    await deleteNest(contextNest?.uuid)
-      .then(() => {
-        addToast('Nest deleted.', 'success');
-        navigate('/admin/nests');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
+  useEffect(() => {
+    if (contextNest) {
+      form.setValues({
+        ...contextNest,
       });
-  };
+    }
+  }, [contextNest]);
 
   return (
     <>
@@ -84,7 +49,7 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{nest?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Title order={2} mb={'md'}>
@@ -93,29 +58,11 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Author'}
-            placeholder={'Author'}
-            value={nest.author || ''}
-            onChange={(e) => setNest({ ...nest, author: e.target.value })}
-          />
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={nest.name || ''}
-            onChange={(e) => setNest({ ...nest, name: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Author'} placeholder={'Author'} {...form.getInputProps('author')} />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
         </Group>
 
-        <TextArea
-          label={'Description'}
-          placeholder={'Description'}
-          value={nest.description || ''}
-          rows={3}
-          onChange={(e) => setNest({ ...nest, description: e.target.value || null })}
-        />
+        <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
       </Stack>
 
       <Group mt={'md'}>

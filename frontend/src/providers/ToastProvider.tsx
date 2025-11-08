@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode, FC } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import Notification from '@/elements/Notification';
 
@@ -21,7 +21,7 @@ let toastId = 0;
 
 const toastTimeout = 7500;
 
-export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const dismissToast = useCallback((id: number) => {

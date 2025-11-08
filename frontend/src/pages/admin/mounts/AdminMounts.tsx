@@ -10,6 +10,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Button from '@/elements/Button';
 import getMounts from '@/api/admin/mounts/getMounts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import MountView from '@/pages/admin/mounts/MountView';
 
 const MountsContainer = () => {
   const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default () => {
     <Routes>
       <Route path={'/'} element={<MountsContainer />} />
       <Route path={'/new'} element={<MountCreateOrUpdate />} />
-      <Route path={'/:id'} element={<MountCreateOrUpdate />} />
+      <Route path={'/:id/*'} element={<MountView />} />
     </Routes>
   );
 };

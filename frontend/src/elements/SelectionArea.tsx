@@ -1,4 +1,15 @@
-import React, { Component, createContext, PureComponent } from 'react';
+import {
+  Component,
+  ContextType,
+  createContext,
+  createRef,
+  CSSProperties,
+  PureComponent,
+  ReactElement,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+  Ref,
+} from 'react';
 
 interface SelectionContextType<T> {
   registerSelectable: (id: string, element: HTMLElement, item: T) => void;
@@ -8,22 +19,22 @@ interface SelectionContextType<T> {
 const SelectionContext = createContext<SelectionContextType<unknown> | null>(null);
 
 interface SelectionAreaProps<T> {
-  children: React.ReactNode;
-  onSelectedStart?: (event: React.MouseEvent | MouseEvent) => void;
+  children: ReactNode;
+  onSelectedStart?: (event: ReactMouseEvent | MouseEvent) => void;
   onSelected?: (items: T[]) => void;
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
   disabled?: boolean;
 }
 
 interface SelectionAreaState {
   isSelecting: boolean;
-  selectionBoxStyle: React.CSSProperties;
+  selectionBoxStyle: CSSProperties;
 }
 
 interface SelectableProps<T> {
   item: T;
-  children: (ref: React.Ref<HTMLElement>) => React.ReactElement;
+  children: (ref: Ref<HTMLElement>) => ReactElement;
 }
 
 function hasSelectionChanged<T>(oldSelection: T[], newSelection: T[]): boolean {
@@ -32,7 +43,7 @@ function hasSelectionChanged<T>(oldSelection: T[], newSelection: T[]): boolean {
   return newSelection.some((item) => !oldSet.has(item));
 }
 
-class SelectionBox extends PureComponent<{ style: React.CSSProperties; isVisible: boolean }> {
+class SelectionBox extends PureComponent<{ style: CSSProperties; isVisible: boolean }> {
   render() {
     if (!this.props.isVisible) return null;
     return <div className={'selection-box'} style={this.props.style} />;
@@ -41,7 +52,7 @@ class SelectionBox extends PureComponent<{ style: React.CSSProperties; isVisible
 
 class Selectable<T> extends PureComponent<SelectableProps<T>> {
   static contextType = SelectionContext;
-  declare context: React.ContextType<typeof SelectionContext>;
+  declare context: ContextType<typeof SelectionContext>;
 
   private elementRef: HTMLElement | null = null;
   private readonly id = `selectable-${Math.random().toString(36).substr(2, 9)}`;
@@ -71,7 +82,7 @@ class Selectable<T> extends PureComponent<SelectableProps<T>> {
     }
   };
 
-  render(): React.ReactElement {
+  render(): ReactElement {
     return this.props.children(this.setRef);
   }
 }
@@ -79,7 +90,7 @@ class Selectable<T> extends PureComponent<SelectableProps<T>> {
 class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaState> {
   static Selectable = Selectable;
 
-  private containerRef = React.createRef<HTMLDivElement>();
+  private containerRef = createRef<HTMLDivElement>();
   private selectablesMap = new Map<string, { element: HTMLElement; item: T }>();
   private currentlySelected: T[] = [];
   private startPoint = { x: 0, y: 0 };
@@ -95,7 +106,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
     this.selectablesMap.delete(id);
   };
 
-  private readonly handleMouseDown = (e: React.MouseEvent<HTMLDivElement>): void => {
+  private readonly handleMouseDown = (e: ReactMouseEvent<HTMLDivElement>): void => {
     if (this.props.disabled || e.button !== 0) return;
 
     const containerRect = this.containerRef.current!.getBoundingClientRect();
@@ -216,7 +227,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
     return new DOMRect(left, top, width, height);
   }
 
-  private getSelectionBoxStyle(): React.CSSProperties {
+  private getSelectionBoxStyle(): CSSProperties {
     const left = Math.min(this.startPoint.x, this.endPoint.x);
     const top = Math.min(this.startPoint.y, this.endPoint.y);
     const width = Math.abs(this.endPoint.x - this.startPoint.x);
@@ -235,7 +246,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
     };
   }
 
-  render(): React.ReactNode {
+  render(): ReactNode {
     const { children, className = '', style = {} } = this.props;
     const contextValue = {
       registerSelectable: this.registerSelectable,
