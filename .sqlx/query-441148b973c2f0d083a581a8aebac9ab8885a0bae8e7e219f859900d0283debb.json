@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_sessions\n                                SET ip = $1, user_agent = $2, last_used = NOW()\n                                WHERE user_sessions.uuid = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Inet",
+        "Varchar",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "441148b973c2f0d083a581a8aebac9ab8885a0bae8e7e219f859900d0283debb"
+}

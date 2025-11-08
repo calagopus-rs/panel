@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_oauth_links\n                            SET last_used = NOW()\n                            WHERE user_oauth_links.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "606f522e7bf93ebea340c4db9262ad014967d438497387e663a07fba8217ac19"
+}

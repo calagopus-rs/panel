@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE oauth_providers\n            SET name = $2, description = $3, client_id = $4, client_secret = $5, auth_url = $6,\n                token_url = $7, scopes = $8, identifier_path = $9, email_path = $10, username_path = $11,\n                name_first_path = $12, name_last_path = $13, enabled = $14, login_only = $15,\n                link_viewable = $16, user_manageable = $17\n            WHERE oauth_providers.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Bytea",
+        "Varchar",
+        "Varchar",
+        "VarcharArray",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Bool",
+        "Bool",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f557df66f3b1061d219098d100ae2d1c32b85a0aa1417f3b2bbda34bc1969cfa"
+}
