@@ -1,7 +1,6 @@
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
 import Code from '@/elements/Code';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
 import updateEgg from '@/api/admin/nests/eggs/updateEgg';
@@ -21,6 +20,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import jsYaml from 'js-yaml';
+import { useResourceForm } from '@/plugins/useResourceForm';
+import { useForm } from '@mantine/form';
 
 export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
   const { addToast } = useToast();
@@ -29,45 +30,45 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
 
   const form = useForm<AdminUpdateNestEgg>({
     initialValues: {
-      author: contextEgg?.author || '',
-      name: contextEgg?.name || '',
-      description: contextEgg?.description || '',
-      configFiles: contextEgg?.configFiles || [],
+      author: '',
+      name: '',
+      description: '',
+      configFiles: [],
       configStartup: {
-        done: contextEgg?.configStartup.done || [],
-        stripAnsi: contextEgg?.configStartup.stripAnsi || false,
+        done: [],
+        stripAnsi: false,
       },
       configStop: {
-        type: contextEgg?.configStop.type || '',
-        value: contextEgg?.configStop.value || '',
+        type: '',
+        value: '',
       },
       configScript: {
-        container: contextEgg?.configScript.container || '',
-        entrypoint: contextEgg?.configScript.entrypoint || '',
-        content: contextEgg?.configScript.content || '',
+        container: '',
+        entrypoint: '',
+        content: '',
       },
       configAllocations: {
         userSelfAssign: {
-          enabled: contextEgg?.configAllocations.userSelfAssign.enabled || false,
-          requirePrimaryAllocation: contextEgg?.configAllocations.userSelfAssign.requirePrimaryAllocation || false,
-          startPort: contextEgg?.configAllocations.userSelfAssign.startPort || 0,
-          endPort: contextEgg?.configAllocations.userSelfAssign.endPort || 0,
+          enabled: false,
+          requirePrimaryAllocation: false,
+          startPort: 0,
+          endPort: 0,
         },
       },
-      startup: contextEgg?.startup || '',
-      forceOutgoingIp: contextEgg?.forceOutgoingIp || false,
-      separatePort: contextEgg?.separatePort || false,
-      features: contextEgg?.features || [],
-      dockerImages: contextEgg?.dockerImages || {},
-      fileDenylist: contextEgg?.fileDenylist || [],
+      startup: '',
+      forceOutgoingIp: false,
+      separatePort: false,
+      features: [],
+      dockerImages: {},
+      fileDenylist: [],
     },
   });
 
   const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<AdminUpdateNestEgg, AdminNestEgg>({
     form,
-    createFn: () => createNest(form.values),
-    updateFn: () => updateNest(contextNest?.uuid, form.values),
-    deleteFn: () => deleteNest(contextNest?.uuid),
+    createFn: () => createEgg(contextNest.uuid, form.values),
+    updateFn: () => updateEgg(contextNest.uuid, contextEgg.uuid, form.values),
+    deleteFn: () => deleteEgg(contextNest.uuid, contextEgg.uuid),
     doUpdate: !!contextEgg,
     basePath: `/admin/nests/${contextNest.uuid}/eggs`,
     resourceName: 'Egg',

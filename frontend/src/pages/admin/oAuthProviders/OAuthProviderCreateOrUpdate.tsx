@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
 import { useToast } from '@/providers/ToastProvider';
 import { Group, Title, Divider, Stack } from '@mantine/core';
-import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Switch from '@/elements/input/Switch';
-import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider';
 import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
@@ -21,97 +18,55 @@ import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { transformKeysToSnakeCase } from '@/api/transformers';
+import { useForm } from '@mantine/form';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthProvider }) => {
-  const params = useParams<'id'>();
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
-  const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
-  const [loading, setLoading] = useState(false);
-  const [oauthProvider, setOAuthProvider] = useState<UpdateAdminOAuthProvider>({
-    name: '',
-    description: '',
-    clientId: '',
-    clientSecret: '',
-    authUrl: '',
-    tokenUrl: '',
-    infoUrl: '',
-    scopes: [],
-    identifierPath: '',
-    emailPath: '',
-    usernamePath: '',
-    nameFirstPath: '',
-    nameLastPath: '',
-    enabled: true,
-    loginOnly: false,
-    linkViewable: true,
-    userManageable: true,
-    basicAuth: false,
+
+  const form = useForm<UpdateAdminOAuthProvider>({
+    initialValues: {
+      name: '',
+      description: '',
+      clientId: '',
+      clientSecret: '',
+      authUrl: '',
+      tokenUrl: '',
+      infoUrl: '',
+      scopes: [],
+      identifierPath: '',
+      emailPath: '',
+      usernamePath: '',
+      nameFirstPath: '',
+      nameLastPath: '',
+      enabled: true,
+      loginOnly: false,
+      linkViewable: true,
+      userManageable: true,
+      basicAuth: false,
+    },
+  });
+
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateAdminOAuthProvider, AdminOAuthProvider>({
+    form,
+    createFn: () => createOAuthProvider(form.values),
+    updateFn: () => updateOAuthProvider(contextOAuthProvider?.uuid, form.values),
+    deleteFn: () => deleteOAuthProvider(contextOAuthProvider?.uuid),
+    doUpdate: !!contextOAuthProvider,
+    basePath: '/admin/oauth-providers',
+    resourceName: 'OAuth Provider',
   });
 
   useEffect(() => {
-    setOAuthProvider({
-      name: contextOAuthProvider?.name ?? '',
-      description: contextOAuthProvider?.description ?? '',
-      clientId: contextOAuthProvider?.clientId ?? '',
-      clientSecret: contextOAuthProvider?.clientSecret ?? '',
-      authUrl: contextOAuthProvider?.authUrl ?? '',
-      tokenUrl: contextOAuthProvider?.tokenUrl ?? '',
-      infoUrl: contextOAuthProvider?.infoUrl ?? '',
-      scopes: contextOAuthProvider?.scopes ?? [],
-      identifierPath: contextOAuthProvider?.identifierPath ?? '',
-      emailPath: contextOAuthProvider?.emailPath ?? '',
-      usernamePath: contextOAuthProvider?.usernamePath ?? '',
-      nameFirstPath: contextOAuthProvider?.nameFirstPath ?? '',
-      nameLastPath: contextOAuthProvider?.nameLastPath ?? '',
-      enabled: contextOAuthProvider?.enabled ?? true,
-      loginOnly: contextOAuthProvider?.loginOnly ?? false,
-      linkViewable: contextOAuthProvider?.linkViewable ?? true,
-      userManageable: contextOAuthProvider?.userManageable ?? true,
-      basicAuth: contextOAuthProvider?.basicAuth ?? false,
-    });
-  }, [contextOAuthProvider]);
-
-  const doCreateOrUpdate = (stay: boolean) => {
-    load(true, setLoading);
-    if (params?.id) {
-      updateOAuthProvider(params.id, oauthProvider)
-        .then(() => {
-          addToast('OAuth provider updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else if (!stay) {
-      createOAuthProvider(oauthProvider)
-        .then((oauthProvider) => {
-          addToast('OAuth provider created.', 'success');
-          navigate(`/admin/oauth-providers/${oauthProvider.uuid}`);
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
-    } else {
-      createOAuthProvider(oauthProvider)
-        .then(() => {
-          addToast('OAuth provider created.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => {
-          load(false, setLoading);
-        });
+    if (contextOAuthProvider) {
+      form.setValues({
+        ...contextOAuthProvider,
+      });
     }
-  };
+  }, [contextOAuthProvider]);
 
   const doExport = (format: 'json' | 'yaml') => {
     addToast('OAuth Provider exported.', 'success');
@@ -153,17 +108,6 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
     }
   };
 
-  const doDelete = async () => {
-    await deleteOAuthProvider(params.id)
-      .then(() => {
-        addToast('OAuth provider deleted.', 'success');
-        navigate('/admin/oauth-providers');
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
-
   return (
     <>
       <ConfirmationModal
@@ -173,30 +117,18 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
         confirm={'Delete'}
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete <Code>{oauthProvider?.name}</Code>?
+        Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Title order={2} mb={'md'}>
-        {params.id ? 'Update' : 'Create'} OAuth Provider
+        {contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider
       </Title>
       <Divider mb={'md'} />
 
       <Stack>
         <Group grow align={'start'}>
-          <TextInput
-            withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
-            value={oauthProvider.name || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, name: e.target.value })}
-          />
-          <TextArea
-            label={'Description'}
-            placeholder={'Description'}
-            value={oauthProvider.description || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, description: e.target.value || null })}
-            rows={3}
-          />
+          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
         </Group>
 
         {contextOAuthProvider && (
@@ -209,53 +141,27 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
         )}
 
         <Group grow>
+          <TextInput withAsterisk label={'Client Id'} placeholder={'Client Id'} {...form.getInputProps('clientId')} />
           <TextInput
-            withAsterisk
-            label={'Client Id'}
-            placeholder={'Client Id'}
-            value={oauthProvider.clientId || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, clientId: e.target.value })}
-          />
-          <TextInput
-            withAsterisk={!params.id}
+            withAsterisk={!contextOAuthProvider}
             label={'Client Secret'}
             placeholder={'Client Secret'}
             type={'password'}
-            value={oauthProvider.clientSecret || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, clientSecret: e.target.value })}
+            {...form.getInputProps('clientSecret')}
           />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Auth URL'}
-            placeholder={'Auth URL'}
-            value={oauthProvider.authUrl || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, authUrl: e.target.value })}
-          />
-          <TextInput
-            withAsterisk
-            label={'Token URL'}
-            placeholder={'Token URL'}
-            value={oauthProvider.tokenUrl || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, tokenUrl: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Auth URL'} placeholder={'Auth URL'} {...form.getInputProps('authUrl')} />
+          <TextInput withAsterisk label={'Token URL'} placeholder={'Token URL'} {...form.getInputProps('tokenUrl')} />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label={'Info URL'}
-            placeholder={'Info URL'}
-            value={oauthProvider.infoUrl || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, infoUrl: e.target.value })}
-          />
+          <TextInput withAsterisk label={'Info URL'} placeholder={'Info URL'} {...form.getInputProps('infoUrl')} />
           <Switch
             label={'Basic Auth'}
             description={'Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'}
-            checked={oauthProvider.basicAuth || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, basicAuth: e.target.checked })}
+            {...form.getInputProps('basicAuth')}
           />
         </Group>
 
@@ -263,8 +169,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
           <TagsInput
             label={'Scopes'}
             description={'The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'}
-            value={oauthProvider.scopes}
-            onChange={(value) => setOAuthProvider({ ...oauthProvider, scopes: value })}
+            {...form.getInputProps('scopes')}
           />
           <TextInput
             withAsterisk
@@ -273,8 +178,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             description={
               'The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
             }
-            value={oauthProvider.identifierPath || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, identifierPath: e.target.value })}
+            {...form.getInputProps('identifierPath')}
           />
         </Group>
 
@@ -283,8 +187,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             label={'Email Path'}
             placeholder={'Email Path'}
             description={'The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'}
-            value={oauthProvider.emailPath || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, emailPath: e.target.value })}
+            {...form.getInputProps('emailPath')}
           />
           <TextInput
             withAsterisk
@@ -293,8 +196,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             description={
               'The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
             }
-            value={oauthProvider.usernamePath || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, usernamePath: e.target.value })}
+            {...form.getInputProps('usernamePath')}
           />
         </Group>
 
@@ -305,8 +207,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             description={
               'The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
             }
-            value={oauthProvider.nameFirstPath || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, nameFirstPath: e.target.value })}
+            {...form.getInputProps('nameFirstPath')}
           />
           <TextInput
             label={'Last Name Path'}
@@ -314,36 +215,25 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             description={
               'The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
             }
-            value={oauthProvider.nameLastPath || ''}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, nameLastPath: e.target.value })}
+            {...form.getInputProps('nameLastPath')}
           />
         </Group>
 
         <Group grow>
-          <Switch
-            label={'Enabled'}
-            checked={oauthProvider.enabled || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, enabled: e.target.checked })}
-          />
-          <Switch
-            label={'Only allow Login'}
-            checked={oauthProvider.loginOnly || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, loginOnly: e.target.checked })}
-          />
+          <Switch label={'Enabled'} {...form.getInputProps('enabled')} />
+          <Switch label={'Only allow Login'} {...form.getInputProps('loginOnly')} />
         </Group>
 
         <Group grow>
           <Switch
             label={'Link Viewable to User'}
             description={'Allows the User to see the Connection and its identifier in the Client UI'}
-            checked={oauthProvider.linkViewable || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, linkViewable: e.target.checked })}
+            {...form.getInputProps('linkViewable')}
           />
           <Switch
             label={'Link Manageable by User'}
             description={'Allows the User to connect and disconnect with this provider'}
-            checked={oauthProvider.userManageable || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, userManageable: e.target.checked })}
+            {...form.getInputProps('userManageable')}
           />
         </Group>
 
@@ -357,44 +247,44 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             </Button>
           )}
           {contextOAuthProvider && (
-            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
-              <ContextMenu
-                items={[
-                  {
-                    icon: faFileDownload,
-                    label: 'as JSON',
-                    onClick: () => doExport('json'),
-                    color: 'gray',
-                  },
-                  {
-                    icon: faFileDownload,
-                    label: 'as YAML',
-                    onClick: () => doExport('yaml'),
-                    color: 'gray',
-                  },
-                ]}
-              >
-                {({ openMenu }) => (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      openMenu(rect.left, rect.bottom);
-                    }}
-                    loading={loading}
-                    variant={'outline'}
-                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                  >
-                    Export
-                  </Button>
-                )}
-              </ContextMenu>
-            </ContextMenuProvider>
-          )}
-          {contextOAuthProvider && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
+            <>
+              <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+                <ContextMenu
+                  items={[
+                    {
+                      icon: faFileDownload,
+                      label: 'as JSON',
+                      onClick: () => doExport('json'),
+                      color: 'gray',
+                    },
+                    {
+                      icon: faFileDownload,
+                      label: 'as YAML',
+                      onClick: () => doExport('yaml'),
+                      color: 'gray',
+                    },
+                  ]}
+                >
+                  {({ openMenu }) => (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        openMenu(rect.left, rect.bottom);
+                      }}
+                      loading={loading}
+                      variant={'outline'}
+                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                    >
+                      Export
+                    </Button>
+                  )}
+                </ContextMenu>
+              </ContextMenuProvider>
+              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            </>
           )}
         </Group>
       </Stack>
