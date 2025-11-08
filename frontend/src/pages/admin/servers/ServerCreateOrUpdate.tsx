@@ -135,7 +135,7 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
 
     form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
     form.setFieldValue('startup', egg.startup);
-  }, [form.values.eggUuid]);
+  }, [form.values.eggUuid, eggs.items]);
 
   return (
     <>
