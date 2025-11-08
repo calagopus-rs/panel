@@ -51,12 +51,11 @@ mod get {
 
         permissions.has_user_permission("oauth-links.read")?;
 
-        let oauth_links = UserOAuthLink::by_user_uuid_with_pagination(
+        let oauth_links = UserOAuthLink::filtered_by_user_uuid_with_pagination(
             &state.database,
             user.uuid,
             params.page,
             params.per_page,
-            None,
         )
         .await?;
 
