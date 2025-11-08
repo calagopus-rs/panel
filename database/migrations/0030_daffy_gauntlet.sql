@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "user_oauth_links_oauth_provider_uuid_identifier_idx" ON "user_oauth_links" USING btree ("oauth_provider_uuid","identifier");

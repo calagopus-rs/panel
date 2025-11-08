@@ -21,6 +21,12 @@ mod delete {
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = CONFLICT, body = ApiError),
+    ), params(
+        (
+            "user" = uuid::Uuid,
+            description = "The user ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
     ))]
     pub async fn route(
         state: GetState,

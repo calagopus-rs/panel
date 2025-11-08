@@ -36,6 +36,39 @@ interface AdminDatabaseHost extends UpdateAdminDatabaseHost {
   created: Date;
 }
 
+interface UpdateAdminOAuthProvider {
+  name: string;
+  description: string | null;
+  clientId: string;
+  clientSecret: string;
+  authUrl: string;
+  tokenUrl: string;
+  infoUrl: string;
+  scopes: string[];
+  identifierPath: string;
+  usernamePath: string | null;
+  nameFirstPath: string | null;
+  nameLastPath: string | null;
+  enabled: boolean;
+  loginOnly: boolean;
+  linkViewable: boolean;
+  userManageable: boolean;
+  basicAuth: boolean;
+}
+
+interface AdminOAuthProvider extends UpdateAdminOAuthProvider {
+  uuid: string;
+  created: Date;
+}
+
+interface AdminUserOAuthLink {
+  uuid: string;
+  user: User;
+  identifier: string;
+  lastUsed: Date | null;
+  created: Date;
+}
+
 interface UpdateLocation {
   name: string;
   description: string | null;
@@ -271,6 +304,21 @@ interface NestEgg {
   dockerImages: {
     [key: string]: string;
   };
+  created: Date;
+}
+
+interface OAuthProvider {
+  uuid: string;
+  name: string;
+  linkViewable: boolean;
+  userManageable: boolean;
+}
+
+interface UserOAuthLink {
+  uuid: string;
+  oauthProvider: OAuthProvider;
+  identifier: string;
+  lastUsed: Date | null;
   created: Date;
 }
 

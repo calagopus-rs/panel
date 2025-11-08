@@ -5,6 +5,7 @@ mod checkpoint;
 mod security_key;
 
 mod post {
+    use crate::routes::api::auth::login::checkpoint::TwoFactorRequiredJwt;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -16,8 +17,6 @@ mod post {
     use tower_cookies::{Cookie, Cookies};
     use utoipa::ToSchema;
     use validator::Validate;
-
-    use crate::routes::api::auth::login::checkpoint::TwoFactorRequiredJwt;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {

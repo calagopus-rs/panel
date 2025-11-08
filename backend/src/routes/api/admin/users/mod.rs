@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _user_;
+mod external;
 
 mod get {
     use axum::{extract::Query, http::StatusCode};
@@ -99,6 +100,10 @@ mod post {
     pub struct Payload {
         role_uuid: Option<uuid::Uuid>,
 
+        #[validate(length(max = 255))]
+        #[schema(max_length = 255)]
+        external_id: Option<String>,
+
         #[validate(
             length(min = 3, max = 15),
             regex(path = "*shared::models::user::USERNAME_REGEX")
@@ -164,6 +169,7 @@ mod post {
         let user = match User::create(
             &state.database,
             role.as_ref().map(|role| role.uuid),
+            data.external_id.as_deref(),
             &data.username,
             &data.email,
             &data.name_first,
@@ -213,5 +219,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(post::route))
         .nest("/{user}", _user_::router(state))
+        .nest("/external", external::router(state))
         .with_state(state.clone())
 }

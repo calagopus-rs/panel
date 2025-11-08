@@ -126,10 +126,10 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
         Are you sure you want to delete <Code>{databaseHost?.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={1} mb={'md'}>
+      <Title order={2} mb={'md'}>
         {params.id ? 'Update' : 'Create'} Database Host
       </Title>
-      <Divider />
+      <Divider mb={'md'} />
 
       <Stack>
         <Group grow>

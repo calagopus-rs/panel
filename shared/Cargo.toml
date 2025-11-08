@@ -17,6 +17,7 @@ tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
 lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "sendmail-transport", "file-transport", "tokio1-rustls-tls", "tokio1"] }
 serde = { workspace = true }
+serde_json_path = "0.7.2"
 utoipa-axum = { workspace = true }
 serde_json = { workspace = true }
 base32 = "0.5.1"
@@ -42,3 +43,4 @@ urlencoding = { workspace = true }
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 futures-util = { workspace = true }
 bincode = { version = "2.0.1", features = ["serde"] }
+oauth2 = { workspace = true }

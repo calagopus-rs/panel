@@ -66,9 +66,7 @@ mod post {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
-
         let secure = settings.app.url.starts_with("https://");
-
         drop(settings);
 
         if let Err(error) = state.captcha.verify(ip, data.captcha).await {
@@ -79,6 +77,7 @@ mod post {
 
         let user = match User::create(
             &state.database,
+            None,
             None,
             &data.username,
             &data.email,

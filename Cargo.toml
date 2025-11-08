@@ -43,6 +43,7 @@ rust-s3 = { version = "0.37.0", default-features = false, features = ["tokio-rus
 rand = "0.9.0"
 rustis = "0.16.1"
 dotenvy = "0.15.7"
+oauth2 = "5.0.0"
 
 [profile.dev.package."*"]
 opt-level = 3

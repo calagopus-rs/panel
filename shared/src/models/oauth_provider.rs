@@ -1,0 +1,419 @@
+use crate::models::ByUuid;
+
+use super::BaseModel;
+use rand::distr::SampleString;
+use serde::{Deserialize, Serialize};
+use sqlx::{Row, postgres::PgRow};
+use std::collections::BTreeMap;
+use utoipa::ToSchema;
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct OAuthProvider {
+    pub uuid: uuid::Uuid,
+
+    pub name: String,
+    pub description: Option<String>,
+
+    pub client_id: String,
+    pub client_secret: Vec<u8>,
+    pub auth_url: String,
+    pub token_url: String,
+    pub info_url: String,
+    pub scopes: Vec<String>,
+
+    pub identifier_path: String,
+    pub email_path: Option<String>,
+    pub username_path: Option<String>,
+    pub name_first_path: Option<String>,
+    pub name_last_path: Option<String>,
+
+    pub enabled: bool,
+    pub login_only: bool,
+    pub link_viewable: bool,
+    pub user_manageable: bool,
+    pub basic_auth: bool,
+
+    pub created: chrono::NaiveDateTime,
+}
+
+impl BaseModel for OAuthProvider {
+    const NAME: &'static str = "oauth_provider";
+
+    #[inline]
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+        let prefix = prefix.unwrap_or_default();
+
+        BTreeMap::from([
+            ("oauth_providers.uuid", format!("{prefix}uuid")),
+            ("oauth_providers.name", format!("{prefix}name")),
+            (
+                "oauth_providers.description",
+                format!("{prefix}description"),
+            ),
+            ("oauth_providers.client_id", format!("{prefix}client_id")),
+            (
+                "oauth_providers.client_secret",
+                format!("{prefix}client_secret"),
+            ),
+            ("oauth_providers.auth_url", format!("{prefix}auth_url")),
+            ("oauth_providers.token_url", format!("{prefix}token_url")),
+            ("oauth_providers.info_url", format!("{prefix}info_url")),
+            ("oauth_providers.scopes", format!("{prefix}scopes")),
+            (
+                "oauth_providers.identifier_path",
+                format!("{prefix}identifier_path"),
+            ),
+            ("oauth_providers.email_path", format!("{prefix}email_path")),
+            (
+                "oauth_providers.username_path",
+                format!("{prefix}username_path"),
+            ),
+            (
+                "oauth_providers.name_first_path",
+                format!("{prefix}name_first_path"),
+            ),
+            (
+                "oauth_providers.name_last_path",
+                format!("{prefix}name_last_path"),
+            ),
+            ("oauth_providers.enabled", format!("{prefix}enabled")),
+            ("oauth_providers.login_only", format!("{prefix}login_only")),
+            (
+                "oauth_providers.link_viewable",
+                format!("{prefix}link_viewable"),
+            ),
+            (
+                "oauth_providers.user_manageable",
+                format!("{prefix}user_manageable"),
+            ),
+            ("oauth_providers.basic_auth", format!("{prefix}basic_auth")),
+            ("oauth_providers.created", format!("{prefix}created")),
+        ])
+    }
+
+    #[inline]
+    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+        let prefix = prefix.unwrap_or_default();
+
+        Self {
+            uuid: row.get(format!("{prefix}uuid").as_str()),
+            name: row.get(format!("{prefix}name").as_str()),
+            description: row.get(format!("{prefix}description").as_str()),
+            client_id: row.get(format!("{prefix}client_id").as_str()),
+            client_secret: row.get(format!("{prefix}client_secret").as_str()),
+            auth_url: row.get(format!("{prefix}auth_url").as_str()),
+            token_url: row.get(format!("{prefix}token_url").as_str()),
+            info_url: row.get(format!("{prefix}info_url").as_str()),
+            scopes: row.get(format!("{prefix}scopes").as_str()),
+            identifier_path: row.get(format!("{prefix}identifier_path").as_str()),
+            email_path: row.get(format!("{prefix}email_path").as_str()),
+            username_path: row.get(format!("{prefix}username_path").as_str()),
+            name_first_path: row.get(format!("{prefix}name_first_path").as_str()),
+            name_last_path: row.get(format!("{prefix}name_last_path").as_str()),
+            enabled: row.get(format!("{prefix}enabled").as_str()),
+            login_only: row.get(format!("{prefix}login_only").as_str()),
+            link_viewable: row.get(format!("{prefix}link_viewable").as_str()),
+            user_manageable: row.get(format!("{prefix}user_manageable").as_str()),
+            basic_auth: row.get(format!("{prefix}basic_auth").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
+        }
+    }
+}
+
+impl OAuthProvider {
+    #[allow(clippy::too_many_arguments)]
+    pub async fn create(
+        database: &crate::database::Database,
+        name: &str,
+        description: Option<&str>,
+        client_id: &str,
+        client_secret: &str,
+        auth_url: &str,
+        token_url: &str,
+        info_url: &str,
+        scopes: &[String],
+        identifier_path: &str,
+        email_path: Option<&str>,
+        username_path: Option<&str>,
+        name_first_path: Option<&str>,
+        name_last_path: Option<&str>,
+        enabled: bool,
+        login_only: bool,
+        link_viewable: bool,
+        user_manageable: bool,
+        basic_auth: bool,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            INSERT INTO oauth_providers (
+                name, description, client_id, client_secret, auth_url,
+                token_url, info_url, scopes, identifier_path, email_path,
+                username_path, name_first_path, name_last_path, enabled,
+                login_only, link_viewable, user_manageable, basic_auth
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+            RETURNING {}
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(name)
+        .bind(description)
+        .bind(client_id)
+        .bind(
+            database
+                .encrypt(client_secret.to_string())
+                .await
+                .map_err(|err| sqlx::Error::Encode(err.into()))?,
+        )
+        .bind(auth_url)
+        .bind(token_url)
+        .bind(info_url)
+        .bind(scopes)
+        .bind(identifier_path)
+        .bind(email_path)
+        .bind(username_path)
+        .bind(name_first_path)
+        .bind(name_last_path)
+        .bind(enabled)
+        .bind(login_only)
+        .bind(link_viewable)
+        .bind(user_manageable)
+        .bind(basic_auth)
+        .fetch_one(database.write())
+        .await?;
+
+        Ok(Self::map(None, &row))
+    }
+
+    pub async fn all_with_pagination(
+        database: &crate::database::Database,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM oauth_providers
+            WHERE ($1 IS NULL OR oauth_providers.name ILIKE '%' || $1 || '%')
+            ORDER BY oauth_providers.created
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn all_by_usable(
+        database: &crate::database::Database,
+    ) -> Result<Vec<Self>, sqlx::Error> {
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM oauth_providers
+            WHERE oauth_providers.enabled = true
+            ORDER BY oauth_providers.created
+            "#,
+            Self::columns_sql(None)
+        ))
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+    }
+
+    pub async fn delete_by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            r#"
+            DELETE FROM oauth_providers
+            WHERE oauth_providers.uuid = $1
+            "#,
+        )
+        .bind(uuid)
+        .execute(database.write())
+        .await?;
+
+        Ok(())
+    }
+
+    pub fn extract_identifier(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
+        Ok(
+            match serde_json_path::JsonPath::parse(&self.identifier_path)?
+                .query(value)
+                .first()
+                .ok_or_else(|| anyhow::anyhow!("unable to extract identifier from {:?}", value))?
+            {
+                serde_json::Value::String(string) => string.clone(),
+                val => val.to_string(),
+            },
+        )
+    }
+
+    pub fn extract_email(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
+        Ok(serde_json_path::JsonPath::parse(match &self.email_path {
+            Some(path) => path,
+            None => {
+                return Err(anyhow::anyhow!(
+                    "no email path defined, unable to register user"
+                ));
+            }
+        })?
+        .query(value)
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("unable to extract email from {:?}", value))?
+        .to_string())
+    }
+
+    pub fn extract_username(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
+        Ok(serde_json_path::JsonPath::parse(match &self.username_path {
+            Some(path) => path,
+            None => return Ok(rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 10)),
+        })?
+        .query(value)
+        .first()
+        .ok_or_else(|| anyhow::anyhow!("unable to extract username from {:?}", value))?
+        .to_string())
+    }
+
+    pub fn extract_name_first(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
+        Ok(
+            serde_json_path::JsonPath::parse(match &self.name_first_path {
+                Some(path) => path,
+                None => return Ok("First".to_string()),
+            })?
+            .query(value)
+            .first()
+            .ok_or_else(|| anyhow::anyhow!("unable to extract first name from {:?}", value))?
+            .to_string(),
+        )
+    }
+
+    pub fn extract_name_last(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
+        Ok(
+            serde_json_path::JsonPath::parse(match &self.name_last_path {
+                Some(path) => path,
+                None => return Ok("Last".to_string()),
+            })?
+            .query(value)
+            .first()
+            .ok_or_else(|| anyhow::anyhow!("unable to extract last name from {:?}", value))?
+            .to_string(),
+        )
+    }
+
+    #[inline]
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiOAuthProvider, anyhow::Error> {
+        Ok(AdminApiOAuthProvider {
+            uuid: self.uuid,
+            name: self.name,
+            description: self.description,
+            client_id: self.client_id,
+            client_secret: database.decrypt(self.client_secret).await?,
+            auth_url: self.auth_url,
+            token_url: self.token_url,
+            info_url: self.info_url,
+            scopes: self.scopes,
+            identifier_path: self.identifier_path,
+            username_path: self.username_path,
+            name_first_path: self.name_first_path,
+            name_last_path: self.name_last_path,
+            enabled: self.enabled,
+            login_only: self.login_only,
+            link_viewable: self.link_viewable,
+            user_manageable: self.user_manageable,
+            basic_auth: self.basic_auth,
+            created: self.created.and_utc(),
+        })
+    }
+
+    #[inline]
+    pub fn into_api_object(self) -> ApiOAuthProvider {
+        ApiOAuthProvider {
+            uuid: self.uuid,
+            name: self.name,
+            link_viewable: self.link_viewable,
+            user_manageable: self.user_manageable,
+        }
+    }
+}
+
+#[async_trait::async_trait]
+impl ByUuid for OAuthProvider {
+    async fn by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM oauth_providers
+            WHERE oauth_providers.uuid = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(uuid)
+        .fetch_one(database.read())
+        .await?;
+
+        Ok(Self::map(None, &row))
+    }
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "AdminOAuthProvider")]
+pub struct AdminApiOAuthProvider {
+    pub uuid: uuid::Uuid,
+
+    pub name: String,
+    pub description: Option<String>,
+
+    pub client_id: String,
+    pub client_secret: String,
+    pub auth_url: String,
+    pub token_url: String,
+    pub info_url: String,
+    pub scopes: Vec<String>,
+
+    pub identifier_path: String,
+    pub username_path: Option<String>,
+    pub name_first_path: Option<String>,
+    pub name_last_path: Option<String>,
+
+    pub enabled: bool,
+    pub login_only: bool,
+    pub link_viewable: bool,
+    pub user_manageable: bool,
+    pub basic_auth: bool,
+
+    pub created: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "OAuthProvider")]
+pub struct ApiOAuthProvider {
+    pub uuid: uuid::Uuid,
+
+    pub name: String,
+
+    pub link_viewable: bool,
+    pub user_manageable: bool,
+}

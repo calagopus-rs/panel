@@ -1,0 +1,1 @@
+ALTER TABLE "oauth_providers" ADD COLUMN "email_path" varchar(255);

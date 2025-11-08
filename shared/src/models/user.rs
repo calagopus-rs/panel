@@ -239,6 +239,7 @@ impl User {
     pub async fn create(
         database: &crate::database::Database,
         role_uuid: Option<uuid::Uuid>,
+        external_id: Option<&str>,
         username: &str,
         email: &str,
         name_first: &str,
@@ -248,12 +249,13 @@ impl User {
     ) -> Result<uuid::Uuid, sqlx::Error> {
         let row = sqlx::query(
             r#"
-            INSERT INTO users (role_uuid, username, email, name_first, name_last, password, admin)
-            VALUES ($1, $2, $3, $4, $5, crypt($6, gen_salt('bf', 8)), $7)
+            INSERT INTO users (role_uuid, external_id, username, email, name_first, name_last, password, admin)
+            VALUES ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8)), $8)
             RETURNING users.uuid
             "#,
         )
         .bind(role_uuid)
+        .bind(external_id)
         .bind(username)
         .bind(email)
         .bind(name_first)
@@ -264,6 +266,27 @@ impl User {
         .await?;
 
         Ok(row.get("uuid"))
+    }
+
+    pub async fn by_external_id(
+        database: &crate::database::Database,
+        external_id: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM users
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            JOIN user_security_keys ON user_security_keys.user_uuid = users.uuid
+            WHERE users.external_id = $1
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(external_id)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
     }
 
     pub async fn by_session_cached(
@@ -280,12 +303,12 @@ impl User {
             .cached(&format!("user::session::{session}"), 15, || async {
                 let row = sqlx::query(&format!(
                     r#"
-                SELECT {}, {}
-                FROM users
-                LEFT JOIN roles ON roles.uuid = users.role_uuid
-                JOIN user_sessions ON user_sessions.user_uuid = users.uuid
-                WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
-                "#,
+                    SELECT {}, {}
+                    FROM users
+                    LEFT JOIN roles ON roles.uuid = users.role_uuid
+                    JOIN user_sessions ON user_sessions.user_uuid = users.uuid
+                    WHERE user_sessions.key_id = $1 AND user_sessions.key = crypt($2, user_sessions.key)
+                    "#,
                     Self::columns_sql(None),
                     super::user_session::UserSession::columns_sql(Some("session_"))
                 ))

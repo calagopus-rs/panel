@@ -1,6 +1,7 @@
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminDatabaseHosts from '@/pages/admin/databaseHosts/AdminDatabaseHosts';
+import AdminOAuthProviders from '@/pages/admin/oAuthProviders/AdminOAuthProviders';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import AdminNests from '@/pages/admin/nests/AdminNests';
@@ -12,6 +13,7 @@ import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';
 import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys';
+import DashboardOAuthLinks from '@/pages/dashboard/oauth-links/DashboardOAuthLinks';
 import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions';
 import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
@@ -38,6 +40,7 @@ import {
   faDatabase,
   faEarthAmerica,
   faFileZipper,
+  faFingerprint,
   faFolder,
   faFolderOpen,
   faKey,
@@ -117,6 +120,12 @@ const routes: Routes = {
       element: DashboardSshKeys,
     },
     {
+      name: 'OAuth Links',
+      icon: faFingerprint,
+      path: '/oauth-links',
+      element: DashboardOAuthLinks,
+    },
+    {
       name: 'Sessions',
       icon: faUserSecret,
       path: '/sessions',
@@ -178,6 +187,12 @@ const routes: Routes = {
       icon: faDatabase,
       path: '/database-hosts/*',
       element: AdminDatabaseHosts,
+    },
+    {
+      name: 'OAuth Providers',
+      icon: faFingerprint,
+      path: '/oauth-providers/*',
+      element: AdminOAuthProviders,
     },
     {
       name: 'Backup Configs',

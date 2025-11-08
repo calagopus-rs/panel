@@ -17,6 +17,7 @@ use std::ops::{Deref, DerefMut};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod activity;
+mod oauth_links;
 mod servers;
 mod two_factor;
 
@@ -42,7 +43,7 @@ pub type GetParamUser = shared::extract::ConsumingExtension<ParamUser>;
 pub async fn auth(
     state: GetState,
     permissions: GetPermissionManager,
-    Path(user): Path<uuid::Uuid>,
+    Path(user): Path<Vec<String>>,
     mut req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
@@ -50,6 +51,14 @@ pub async fn auth(
         return Ok(err.into_response());
     }
 
+    let user = match uuid::Uuid::parse_str(&user[0]) {
+        Ok(user) => user,
+        Err(_) => {
+            return Ok(ApiResponse::error("invalid user uuid")
+                .with_status(StatusCode::BAD_REQUEST)
+                .into_response());
+        }
+    };
     let user = User::by_uuid_optional(&state.database, user).await;
     let user = match user {
         Ok(Some(user)) => user,
@@ -190,6 +199,10 @@ mod patch {
     pub struct Payload {
         role_uuid: Option<uuid::Uuid>,
 
+        #[validate(length(max = 255))]
+        #[schema(max_length = 255)]
+        external_id: Option<String>,
+
         #[validate(
             length(min = 3, max = 15),
             regex(path = "*shared::models::user::USERNAME_REGEX")
@@ -259,6 +272,13 @@ mod patch {
                 user.role = Some(role);
             }
         }
+        if let Some(external_id) = data.external_id {
+            if external_id.is_empty() {
+                user.external_id = None;
+            } else {
+                user.external_id = Some(external_id);
+            }
+        }
         if let Some(username) = data.username {
             user.username = username;
         }
@@ -289,10 +309,11 @@ mod patch {
 
         match sqlx::query!(
             "UPDATE users
-            SET role_uuid = $2, username = $3, email = $4, name_first = $5, name_last = $6, admin = $7
+            SET role_uuid = $2, external_id = $3, username = $4, email = $5, name_first = $6, name_last = $7, admin = $8
             WHERE users.uuid = $1",
             user.uuid,
             user.role.as_ref().map(|role| role.uuid),
+            user.external_id,
             user.username,
             user.email,
             user.name_first,
@@ -304,7 +325,7 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) if err.to_string().contains("unique constraint") => {
-                return ApiResponse::error("user with email/username already exists")
+                return ApiResponse::error("user with email/username/external_id already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();
             }
@@ -344,6 +365,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/two-factor", two_factor::router(state))
         .nest("/servers", servers::router(state))
         .nest("/activity", activity::router(state))
+        .nest("/oauth-links", oauth_links::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

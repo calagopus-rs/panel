@@ -24,6 +24,7 @@ mod locations;
 mod mounts;
 mod nests;
 mod nodes;
+mod oauth_providers;
 mod roles;
 mod servers;
 mod settings;
@@ -77,6 +78,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
             "/backup-configurations",
             backup_configurations::router(state),
         )
+        .nest("/oauth-providers", oauth_providers::router(state))
         .nest("/mounts", mounts::router(state))
         .nest("/users", users::router(state))
         .nest("/roles", roles::router(state))

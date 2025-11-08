@@ -190,6 +190,69 @@
       "when": 1762284087238,
       "tag": "0026_wild_felicia_hardy",
       "breakpoints": false
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1762453469180,
+      "tag": "0027_serious_overlord",
+      "breakpoints": false
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1762453937724,
+      "tag": "0028_jittery_lorna_dane",
+      "breakpoints": false
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1762455365033,
+      "tag": "0029_safe_master_mold",
+      "breakpoints": false
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1762455812502,
+      "tag": "0030_daffy_gauntlet",
+      "breakpoints": false
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1762511806426,
+      "tag": "0031_careless_mister_fear",
+      "breakpoints": false
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1762526506226,
+      "tag": "0032_soft_true_believers",
+      "breakpoints": false
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1762530384298,
+      "tag": "0033_ordinary_william_stryker",
+      "breakpoints": false
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1762530893890,
+      "tag": "0034_whole_pet_avengers",
+      "breakpoints": false
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1762554119564,
+      "tag": "0035_cloudy_hercules",
+      "breakpoints": false
     }
   ]
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "oauth_providers" ALTER COLUMN "client_secret" SET DATA TYPE bytea USING client_secret::bytea;

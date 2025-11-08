@@ -121,6 +121,20 @@ pub static USER_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
             },
         ),
         (
+            "oauth-links",
+            PermissionGroup {
+                description: "Permissions that control the ability to manage oauth links on an account.",
+                permissions: IndexMap::from([
+                    (
+                        "create",
+                        "Allows to create new oauth links for the account.",
+                    ),
+                    ("read", "Allows to view oauth links for the account."),
+                    ("delete", "Allows to delete oauth links from the account."),
+                ]),
+            },
+        ),
+        (
             "sessions",
             PermissionGroup {
                 description: "Permissions that control the ability to manage sessions on an account.",
@@ -177,6 +191,10 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                     ("disable-two-factor", "Allows to remove users' two-factor."),
                     ("delete", "Allows to delete users from the panel."),
                     ("activity", "Allows to view a users' activity log."),
+                    (
+                        "oauth-links",
+                        "Allows to view and manage a users' oauth links.",
+                    ),
                 ]),
             },
         ),
@@ -320,6 +338,21 @@ pub static ADMIN_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                     ("update", "Allows to modify database hosts."),
                     ("delete", "Allows to delete database hosts from the panel."),
                     ("test", "Allows testing the database hosts' connection."),
+                ]),
+            },
+        ),
+        (
+            "oauth-providers",
+            PermissionGroup {
+                description: "Permissions that control the ability to manage oauth providers for the panel.",
+                permissions: IndexMap::from([
+                    (
+                        "create",
+                        "Allows to create new oauth providers for the panel.",
+                    ),
+                    ("read", "Allows to view oauth providers for the panel."),
+                    ("update", "Allows to modify oauth providers."),
+                    ("delete", "Allows to delete oauth providers from the panel."),
                 ]),
             },
         ),

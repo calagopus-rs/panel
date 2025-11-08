@@ -1,0 +1,322 @@
+use crate::{
+    models::{ByUuid, Fetchable},
+    storage::StorageUrlRetriever,
+};
+
+use super::BaseModel;
+use serde::{Deserialize, Serialize};
+use sqlx::{Row, postgres::PgRow};
+use std::collections::BTreeMap;
+use utoipa::ToSchema;
+
+#[derive(Serialize, Deserialize)]
+pub struct UserOAuthLink {
+    pub uuid: uuid::Uuid,
+    pub user: Fetchable<super::user::User>,
+    pub oauth_provider: Fetchable<super::oauth_provider::OAuthProvider>,
+
+    pub identifier: String,
+
+    pub last_used: Option<chrono::NaiveDateTime>,
+    pub created: chrono::NaiveDateTime,
+}
+
+impl BaseModel for UserOAuthLink {
+    const NAME: &'static str = "user_oauth_link";
+
+    #[inline]
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+        let prefix = prefix.unwrap_or_default();
+
+        BTreeMap::from([
+            ("user_oauth_links.uuid", format!("{prefix}uuid")),
+            ("user_oauth_links.user_uuid", format!("{prefix}user_uuid")),
+            (
+                "user_oauth_links.oauth_provider_uuid",
+                format!("{prefix}oauth_provider_uuid"),
+            ),
+            ("user_oauth_links.identifier", format!("{prefix}identifier")),
+            ("user_oauth_links.last_used", format!("{prefix}last_used")),
+            ("user_oauth_links.created", format!("{prefix}created")),
+        ])
+    }
+
+    #[inline]
+    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+        let prefix = prefix.unwrap_or_default();
+
+        Self {
+            uuid: row.get(format!("{prefix}uuid").as_str()),
+            user: super::user::User::get_fetchable(row.get(format!("{prefix}user_uuid").as_str())),
+            oauth_provider: super::oauth_provider::OAuthProvider::get_fetchable(
+                row.get(format!("{prefix}oauth_provider_uuid").as_str()),
+            ),
+            identifier: row.get(format!("{prefix}identifier").as_str()),
+            last_used: row.get(format!("{prefix}last_used").as_str()),
+            created: row.get(format!("{prefix}created").as_str()),
+        }
+    }
+}
+
+impl UserOAuthLink {
+    pub async fn create(
+        database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
+        oauth_provider_uuid: uuid::Uuid,
+        identifier: &str,
+    ) -> Result<Self, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            INSERT INTO user_oauth_links (user_uuid, oauth_provider_uuid, identifier, created)
+            VALUES ($1, $2, $3, NOW())
+            RETURNING {}
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(user_uuid)
+        .bind(oauth_provider_uuid)
+        .bind(identifier)
+        .fetch_one(database.write())
+        .await?;
+
+        Ok(Self::map(None, &row))
+    }
+
+    pub async fn by_oauth_provider_uuid_identifier(
+        database: &crate::database::Database,
+        oauth_provider_uuid: uuid::Uuid,
+        identifier: &str,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM user_oauth_links
+            WHERE user_oauth_links.oauth_provider_uuid = $1 AND user_oauth_links.identifier = $2
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(oauth_provider_uuid)
+        .bind(identifier)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_oauth_provider_uuid_uuid(
+        database: &crate::database::Database,
+        oauth_provider_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM user_oauth_links
+            WHERE user_oauth_links.oauth_provider_uuid = $1 AND user_oauth_links.uuid = $2
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(oauth_provider_uuid)
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_user_uuid_uuid(
+        database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, sqlx::Error> {
+        let row = sqlx::query(&format!(
+            r#"
+            SELECT {}
+            FROM user_oauth_links
+            WHERE user_oauth_links.user_uuid = $1 AND user_oauth_links.uuid = $2
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(user_uuid)
+        .bind(uuid)
+        .fetch_optional(database.read())
+        .await?;
+
+        Ok(row.map(|row| Self::map(None, &row)))
+    }
+
+    pub async fn by_user_uuid_with_pagination(
+        database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM user_oauth_links
+            WHERE user_oauth_links.user_uuid = $1 AND ($2 IS NULL OR user_oauth_links.identifier ILIKE '%' || $2 || '%')
+            ORDER BY user_oauth_links.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(user_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn filtered_by_user_uuid_with_pagination(
+        database: &crate::database::Database,
+        user_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM user_oauth_links
+            INNER JOIN oauth_providers ON user_oauth_links.oauth_provider_uuid = oauth_providers.uuid
+            WHERE user_oauth_links.user_uuid = $1 AND oauth_providers.link_viewable = true
+            ORDER BY user_oauth_links.created
+            LIMIT $2 OFFSET $3
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(user_uuid)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn by_oauth_provider_uuid_with_pagination(
+        database: &crate::database::Database,
+        oauth_provider_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM user_oauth_links
+            WHERE user_oauth_links.oauth_provider_uuid = $1 AND ($2 IS NULL OR user_oauth_links.identifier ILIKE '%' || $2 || '%')
+            ORDER BY user_oauth_links.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(oauth_provider_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn delete_by_uuid(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<(), sqlx::Error> {
+        sqlx::query(
+            r#"
+            DELETE FROM user_oauth_links
+            WHERE user_oauth_links.uuid = $1
+            "#,
+        )
+        .bind(uuid)
+        .execute(database.write())
+        .await?;
+
+        Ok(())
+    }
+
+    #[inline]
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> Result<AdminApiUserOAuthLink, anyhow::Error> {
+        Ok(AdminApiUserOAuthLink {
+            uuid: self.uuid,
+            user: self
+                .user
+                .fetch(database)
+                .await?
+                .into_api_full_object(storage_url_retriever),
+            identifier: self.identifier,
+            last_used: self.last_used.map(|dt| dt.and_utc()),
+            created: self.created.and_utc(),
+        })
+    }
+
+    #[inline]
+    pub async fn into_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<ApiUserOAuthLink, anyhow::Error> {
+        Ok(ApiUserOAuthLink {
+            uuid: self.uuid,
+            oauth_provider: self.oauth_provider.fetch(database).await?.into_api_object(),
+            identifier: self.identifier,
+            last_used: self.last_used.map(|dt| dt.and_utc()),
+            created: self.created.and_utc(),
+        })
+    }
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "AdminUserOAuthLink")]
+pub struct AdminApiUserOAuthLink {
+    pub uuid: uuid::Uuid,
+    pub user: super::user::ApiFullUser,
+
+    pub identifier: String,
+
+    pub last_used: Option<chrono::DateTime<chrono::Utc>>,
+    pub created: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "UserOAuthLink")]
+pub struct ApiUserOAuthLink {
+    pub uuid: uuid::Uuid,
+    pub oauth_provider: super::oauth_provider::ApiOAuthProvider,
+
+    pub identifier: String,
+
+    pub last_used: Option<chrono::DateTime<chrono::Utc>>,
+    pub created: chrono::DateTime<chrono::Utc>,
+}

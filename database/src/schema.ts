@@ -123,12 +123,13 @@ export const userSessions = pgTable('user_sessions', {
 export const userRecoveryCodes = pgTable('user_recovery_codes', {
 	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
 
-	code: text('code').notNull(),
+	code: char('code', { length: 10 }).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (userRecoveryCodes) => [
-	index('user_recovery_codes_user_uuid_idx').on(userRecoveryCodes.userUuid),
-	uniqueIndex('user_recovery_codes_user_uuid_code_idx').on(userRecoveryCodes.userUuid, userRecoveryCodes.code)
+	primaryKey({ name: 'user_recovery_codes_user_uuid_code_idx', columns: [userRecoveryCodes.userUuid, userRecoveryCodes.code] }),
+
+	index('user_recovery_codes_user_uuid_idx').on(userRecoveryCodes.userUuid)
 ])
 
 export const userPasswordResets = pgTable('user_password_resets', {
@@ -198,10 +199,26 @@ export const userApiKeys = pgTable('user_api_keys', {
 	uniqueIndex('user_api_keys_key_idx').on(userApiKeys.key)
 ])
 
+export const userOauthLinks = pgTable('user_oauth_links', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
+	oauthProviderUuid: uuid('oauth_provider_uuid').references(() => oauthProviders.uuid, { onDelete: 'cascade' }).notNull(),
+
+	identifier: varchar('identifier', { length: 255 }).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull(),
+	lastUsed: timestamp('last_used')
+}, (userOauthLinks) => [
+	index('user_oauth_links_user_uuid_idx').on(userOauthLinks.userUuid),
+	index('user_oauth_links_oauth_provider_uuid_idx').on(userOauthLinks.oauthProviderUuid),
+	uniqueIndex('user_oauth_links_user_uuid_oauth_provider_uuid_idx').on(userOauthLinks.userUuid, userOauthLinks.oauthProviderUuid),
+	uniqueIndex('user_oauth_links_oauth_provider_uuid_identifier_idx').on(userOauthLinks.oauthProviderUuid, userOauthLinks.identifier)
+])
+
 export const roles = pgTable('roles', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	admin_permissions: varchar('admin_permissions', { length: 64 }).array().notNull(),
@@ -212,10 +229,40 @@ export const roles = pgTable('roles', {
 	uniqueIndex('roles_name_idx').on(roles.name)
 ])
 
+export const oauthProviders = pgTable('oauth_providers', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	description: text('description'),
+
+	clientId: varchar('client_id', { length: 255 }).notNull(),
+	clientSecret: bytea('client_secret').notNull(),
+	authUrl: varchar('auth_url', { length: 255 }).notNull(),
+	tokenUrl: varchar('token_url', { length: 255 }).notNull(),
+	infoUrl: varchar('info_url', { length: 64 }).notNull(),
+	scopes: varchar('scopes', { length: 64 }).array().notNull(),
+
+	identifierPath: varchar('identifier_path', { length: 255 }).notNull(),
+	emailPath: varchar('email_path', { length: 255 }),
+	usernamePath: varchar('username_path', { length: 255 }),
+	nameFirstPath: varchar('name_first_path', { length: 255 }),
+	nameLastPath: varchar('name_last_path', { length: 255 }),
+
+	enabled: boolean('enabled').default(false).notNull(),
+	loginOnly: boolean('login_only').default(false).notNull(),
+	linkViewable: boolean('link_viewable').default(false).notNull(),
+	userManageable: boolean('user_manageable').default(false).notNull(),
+	basicAuth: boolean('basic_auth').default(false).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (oauthProviders) => [
+	uniqueIndex('oauth_providers_name_idx').on(oauthProviders.name)
+])
+
 export const mounts = pgTable('mounts', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
-	name: varchar('name', { length: 255 }).notNull(),
+	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
 	source: varchar('source', { length: 255 }).notNull(),
@@ -236,8 +283,8 @@ export const backupConfigurations = pgTable('backup_configurations', {
 	name: varchar('name', { length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	description: text('description'),
 
-	backup_disk: backupDiskEnum('backup_disk').default('LOCAL').notNull(),
-	backup_configs: jsonb('backup_configs').default({}).notNull(),
+	backupDisk: backupDiskEnum('backup_disk').default('LOCAL').notNull(),
+	backupConfigs: jsonb('backup_configs').default({}).notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (backupConfigurations) => [
@@ -253,6 +300,7 @@ export const locations = pgTable('locations', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locations) => [
+	index('locations_backup_configuration_uuid_idx').on(locations.backupConfigurationUuid),
 	uniqueIndex('locations_name_idx').on(locations.name)
 ])
 
@@ -263,6 +311,9 @@ export const locationDatabaseHosts = pgTable('location_database_hosts', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (locationDatabaseHosts) => [
 	primaryKey({ name: 'location_database_hosts_pk', columns: [locationDatabaseHosts.locationUuid, locationDatabaseHosts.databaseHostUuid] }),
+
+	index('location_database_hosts_location_uuid_idx').on(locationDatabaseHosts.locationUuid),
+	index('location_database_hosts_database_host_uuid_idx').on(locationDatabaseHosts.databaseHostUuid)
 ])
 
 export const nodes = pgTable('nodes', {
@@ -289,6 +340,8 @@ export const nodes = pgTable('nodes', {
 
 	created: timestamp('created').default(sql`now()`).notNull(),
 }, (nodes) => [
+	index('nodes_location_uuid_idx').on(nodes.locationUuid),
+	index('nodes_backup_configuration_uuid_idx').on(nodes.backupConfigurationUuid),
 	uniqueIndex('nodes_uuid_idx').on(nodes.uuid),
 	uniqueIndex('nodes_name_idx').on(nodes.name),
 	uniqueIndex('nodes_token_id_idx').on(nodes.tokenId),
@@ -312,7 +365,7 @@ export const nodeAllocations = pgTable('node_allocations', {
 	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
 
 	ip: inet('ip').notNull(),
-	ipAlias: varchar('ip_alias', { length: 255 * UTF8_MAX_SCALAR_SIZE }),
+	ipAlias: varchar('ip_alias', { length: 255 }),
 	port: integer('port').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
@@ -452,10 +505,13 @@ export const servers = pgTable('servers', {
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (servers) => [
-	index('servers_node_uuid_idx').on(servers.nodeUuid),
-	uniqueIndex('servers_uuid_short_idx').on(servers.uuidShort),
 	index('servers_external_id_idx').on(servers.externalId),
+	index('servers_allocation_uuid_idx').on(servers.allocationUuid),
+	index('servers_node_uuid_idx').on(servers.nodeUuid),
 	index('servers_owner_uuid_idx').on(servers.ownerUuid),
+	index('servers_egg_uuid_idx').on(servers.eggUuid),
+	index('servers_backup_configuration_uuid_idx').on(servers.backupConfigurationUuid),
+	uniqueIndex('servers_uuid_short_idx').on(servers.uuidShort)
 ])
 
 export const serverAllocations = pgTable('server_allocations', {
@@ -555,6 +611,9 @@ export const serverBackups = pgTable('server_backups', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverBackups) => [
 	index('server_backups_server_uuid_idx').on(serverBackups.serverUuid),
+	index('server_backups_node_uuid_idx').on(serverBackups.nodeUuid),
+	index('server_backups_backup_configuration_uuid_idx').on(serverBackups.backupConfigurationUuid),
+	index('server_backups_successful_idx').on(serverBackups.successful),
 	uniqueIndex('server_backups_uuid_idx').on(serverBackups.uuid)
 ])
 
@@ -566,12 +625,13 @@ export const serverDatabases = pgTable('server_databases', {
 	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
 	locked: boolean('locked').default(false).notNull(),
 
-	username: varchar('username', { length: 31 }).notNull(),
+	username: char('username', { length: 20 }).notNull(),
 	password: bytea('password').notNull(),
 
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverDatabases) => [
 	index('server_databases_server_uuid_idx').on(serverDatabases.serverUuid),
+	index('server_databases_database_host_uuid_idx').on(serverDatabases.databaseHostUuid),
 	uniqueIndex('server_databases_server_uuid_database_idx').on(serverDatabases.serverUuid, serverDatabases.name)
 ])
 
@@ -590,7 +650,7 @@ export const serverSchedules = pgTable('server_schedules', {
 	created: timestamp('created').default(sql`now()`).notNull()
 }, (serverSchedules) => [
 	index('server_schedules_server_uuid_idx').on(serverSchedules.serverUuid),
-	index('server_schedules_uuid_enabled_idx').on(serverSchedules.uuid, serverSchedules.enabled),
+	index('server_schedules_enabled_idx').on(serverSchedules.enabled),
 	uniqueIndex('server_schedules_server_uuid_name_idx').on(serverSchedules.serverUuid, serverSchedules.name)
 ])
 

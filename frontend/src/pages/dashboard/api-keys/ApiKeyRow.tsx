@@ -40,7 +40,7 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm SSH Key Deletion'}
+        title={'Confirm API Key Deletion'}
         confirm={'Delete'}
         onConfirmed={doDelete}
       >

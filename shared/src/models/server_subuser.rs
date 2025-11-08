@@ -86,7 +86,7 @@ impl ServerSubuser {
                 let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);
 
                 let user = match User::create(
-                    database, None, &username, email, "Server", "Subuser", &password, false,
+                    database, None, None, &username, email, "Server", "Subuser", &password, false,
                 )
                 .await
                 {

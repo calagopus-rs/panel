@@ -18,6 +18,7 @@ pub mod nest_egg_variable;
 pub mod node;
 pub mod node_allocation;
 pub mod node_mount;
+pub mod oauth_provider;
 pub mod role;
 pub mod server;
 pub mod server_activity;
@@ -32,6 +33,7 @@ pub mod server_variable;
 pub mod user;
 pub mod user_activity;
 pub mod user_api_key;
+pub mod user_oauth_link;
 pub mod user_password_reset;
 pub mod user_recovery_code;
 pub mod user_security_key;
@@ -170,6 +172,18 @@ pub trait ByUuid: BaseModel {
             Err(sqlx::Error::RowNotFound) => Ok(None),
             Err(err) => Err(err),
         }
+    }
+
+    async fn by_uuid_optional_cached(
+        database: &crate::database::Database,
+        uuid: uuid::Uuid,
+    ) -> Result<Option<Self>, anyhow::Error> {
+        database
+            .cache
+            .cached(&format!("{}::{uuid}", Self::NAME), 10, || {
+                Self::by_uuid_optional(database, uuid)
+            })
+            .await
     }
 
     #[inline]

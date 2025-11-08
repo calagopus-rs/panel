@@ -85,11 +85,15 @@ pub async fn auth(
             })
             .await;
 
+        let settings = state.settings.get().await;
+        let secure = settings.app.url.starts_with("https://");
+        drop(settings);
+
         cookies.add(
             Cookie::build(("session", session_id.value().to_string()))
                 .http_only(true)
                 .same_site(tower_cookies::cookie::SameSite::Lax)
-                .secure(true)
+                .secure(secure)
                 .path("/")
                 .expires(
                     tower_cookies::cookie::time::OffsetDateTime::now_utc()
