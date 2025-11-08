@@ -143,7 +143,7 @@ interface AdminUpdateNestEgg {
   };
   startup: string;
   forceOutgoingIp: boolean;
-  seperatePort: boolean;
+  separatePort: boolean;
   features: string[];
   dockerImages: Record<string, string>;
   fileDenylist: string[];
@@ -300,7 +300,7 @@ interface NestEgg {
   name: string;
   description: string | null;
   startup: string;
-  seperatePort: boolean;
+  separatePort: boolean;
   features: string[];
   dockerImages: {
     [key: string]: string;

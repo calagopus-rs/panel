@@ -127,7 +127,7 @@ mod post {
         #[schema(min_length = 1, max_length = 4096)]
         startup: String,
         force_outgoing_ip: bool,
-        seperate_port: bool,
+        separate_port: bool,
 
         features: Vec<String>,
         docker_images: IndexMap<String, String>,
@@ -184,7 +184,7 @@ mod post {
             data.config_allocations,
             &data.startup,
             data.force_outgoing_ip,
-            data.seperate_port,
+            data.separate_port,
             &data.features,
             data.docker_images,
             &data.file_denylist,
@@ -225,7 +225,7 @@ mod post {
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,
-                    "seperate_port": egg.seperate_port,
+                    "separate_port": egg.separate_port,
 
                     "features": egg.features,
                     "docker_images": egg.docker_images,

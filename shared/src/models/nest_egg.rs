@@ -166,7 +166,7 @@ pub struct ExportedNestEgg {
     #[serde(default)]
     pub force_outgoing_ip: bool,
     #[serde(default)]
-    pub seperate_port: bool,
+    pub separate_port: bool,
 
     #[serde(default)]
     pub features: Vec<String>,
@@ -194,7 +194,7 @@ pub struct NestEgg {
 
     pub startup: String,
     pub force_outgoing_ip: bool,
-    pub seperate_port: bool,
+    pub separate_port: bool,
 
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
@@ -231,7 +231,7 @@ impl BaseModel for NestEgg {
                 "nest_eggs.force_outgoing_ip",
                 format!("{prefix}force_outgoing_ip"),
             ),
-            ("nest_eggs.seperate_port", format!("{prefix}seperate_port")),
+            ("nest_eggs.separate_port", format!("{prefix}separate_port")),
             ("nest_eggs.features", format!("{prefix}features")),
             ("nest_eggs.docker_images", format!("{prefix}docker_images")),
             ("nest_eggs.file_denylist", format!("{prefix}file_denylist")),
@@ -267,7 +267,7 @@ impl BaseModel for NestEgg {
             .unwrap(),
             startup: row.get(format!("{prefix}startup").as_str()),
             force_outgoing_ip: row.get(format!("{prefix}force_outgoing_ip").as_str()),
-            seperate_port: row.get(format!("{prefix}seperate_port").as_str()),
+            separate_port: row.get(format!("{prefix}separate_port").as_str()),
             features: row.get(format!("{prefix}features").as_str()),
             docker_images: serde_json::from_value(
                 row.get(format!("{prefix}docker_images").as_str()),
@@ -294,7 +294,7 @@ impl NestEgg {
         config_allocations: NestEggConfigAllocations,
         startup: &str,
         force_outgoing_ip: bool,
-        seperate_port: bool,
+        separate_port: bool,
         features: &[String],
         docker_images: IndexMap<String, String>,
         file_denylist: &[String],
@@ -304,7 +304,7 @@ impl NestEgg {
             INSERT INTO nest_eggs (
                 nest_uuid, author, name, description, config_files, config_startup,
                 config_stop, config_script, config_allocations, startup, force_outgoing_ip,
-                seperate_port, features, docker_images, file_denylist
+                separate_port, features, docker_images, file_denylist
             )
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
             RETURNING {}
@@ -322,7 +322,7 @@ impl NestEgg {
         .bind(serde_json::to_value(config_allocations).unwrap())
         .bind(startup)
         .bind(force_outgoing_ip)
-        .bind(seperate_port)
+        .bind(separate_port)
         .bind(features)
         .bind(serde_json::to_value(docker_images).unwrap())
         .bind(file_denylist)
@@ -457,7 +457,7 @@ impl NestEgg {
             },
             startup: self.startup,
             force_outgoing_ip: self.force_outgoing_ip,
-            seperate_port: self.seperate_port,
+            separate_port: self.separate_port,
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
@@ -485,7 +485,7 @@ impl NestEgg {
             config_allocations: self.config_allocations,
             startup: self.startup,
             force_outgoing_ip: self.force_outgoing_ip,
-            seperate_port: self.seperate_port,
+            separate_port: self.separate_port,
             features: self.features,
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
@@ -500,7 +500,7 @@ impl NestEgg {
             name: self.name,
             description: self.description,
             startup: self.startup,
-            seperate_port: self.seperate_port,
+            separate_port: self.separate_port,
             features: self.features,
             docker_images: self.docker_images,
             created: self.created.and_utc(),
@@ -552,7 +552,7 @@ pub struct AdminApiNestEgg {
 
     pub startup: String,
     pub force_outgoing_ip: bool,
-    pub seperate_port: bool,
+    pub separate_port: bool,
 
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
@@ -570,7 +570,7 @@ pub struct ApiNestEgg {
     pub description: Option<String>,
 
     pub startup: String,
-    pub seperate_port: bool,
+    pub separate_port: bool,
 
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,

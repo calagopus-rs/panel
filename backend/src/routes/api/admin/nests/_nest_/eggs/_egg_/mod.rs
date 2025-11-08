@@ -205,7 +205,7 @@ mod patch {
         #[schema(min_length = 1, max_length = 255)]
         startup: Option<String>,
         force_outgoing_ip: Option<bool>,
-        seperate_port: Option<bool>,
+        separate_port: Option<bool>,
 
         features: Option<Vec<String>>,
         docker_images: Option<IndexMap<String, String>>,
@@ -288,8 +288,8 @@ mod patch {
         if let Some(force_outgoing_ip) = data.force_outgoing_ip {
             egg.force_outgoing_ip = force_outgoing_ip;
         }
-        if let Some(seperate_port) = data.seperate_port {
-            egg.seperate_port = seperate_port;
+        if let Some(separate_port) = data.separate_port {
+            egg.separate_port = separate_port;
         }
         if let Some(features) = data.features {
             egg.features = features;
@@ -307,7 +307,7 @@ mod patch {
                 author = $2, name = $3, description = $4,
                 config_files = $5, config_startup = $6, config_stop = $7,
                 config_script = $8, config_allocations = $9, startup = $10,
-                force_outgoing_ip = $11, seperate_port = $12, features = $13,
+                force_outgoing_ip = $11, separate_port = $12, features = $13,
                 docker_images = $14, file_denylist = $15
             WHERE nest_eggs.uuid = $1",
             egg.uuid,
@@ -321,7 +321,7 @@ mod patch {
             serde_json::to_value(&egg.config_allocations).unwrap(),
             egg.startup,
             egg.force_outgoing_ip,
-            egg.seperate_port,
+            egg.separate_port,
             &egg.features,
             serde_json::to_value(&egg.docker_images).unwrap(),
             &egg.file_denylist,
@@ -363,7 +363,7 @@ mod patch {
 
                     "startup": egg.startup,
                     "force_outgoing_ip": egg.force_outgoing_ip,
-                    "seperate_port": egg.seperate_port,
+                    "separate_port": egg.separate_port,
 
                     "features": egg.features,
                     "docker_images": egg.docker_images,

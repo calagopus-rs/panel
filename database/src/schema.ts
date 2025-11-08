@@ -402,7 +402,7 @@ export const nestEggs = pgTable('nest_eggs', {
 
 	startup: text('startup').notNull(),
 	forceOutgoingIp: boolean('force_outgoing_ip').default(false).notNull(),
-	seperatePort: boolean('seperate_port').default(false).notNull(),
+	separatePort: boolean('separate_port').default(false).notNull(),
 
 	features: text('features').array().notNull(),
 	dockerImages: json('docker_images').$type<Record<string, string>>().notNull(),

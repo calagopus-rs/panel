@@ -120,9 +120,9 @@ export default () => {
         icon={faEthernet}
         label={'Address'}
         copyOnClick={!!server.allocation}
-        value={server.allocation ? formatAllocation(server.allocation, server.egg.seperatePort) : 'N/A'}
+        value={server.allocation ? formatAllocation(server.allocation, server.egg.separatePort) : 'N/A'}
       />
-      {server.egg.seperatePort && server.allocation && (
+      {server.egg.separatePort && server.allocation && (
         <StatCard
           icon={faEthernet}
           label={'Port'}

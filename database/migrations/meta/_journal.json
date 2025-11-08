@@ -253,6 +253,13 @@
       "when": 1762554119564,
       "tag": "0035_cloudy_hercules",
       "breakpoints": false
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1762631160819,
+      "tag": "0036_fresh_bloodstrike",
+      "breakpoints": false
     }
   ]
 }

@@ -1,6 +1,6 @@
-export function formatAllocation(allocation?: ServerAllocation | NodeAllocation | null, seperatePort: boolean = false) {
+export function formatAllocation(allocation?: ServerAllocation | NodeAllocation | null, separatePort: boolean = false) {
   return allocation
-    ? seperatePort
+    ? separatePort
       ? allocation.ipAlias || allocation.ip
       : `${allocation.ipAlias || allocation.ip}:${allocation.port}`
     : 'None';

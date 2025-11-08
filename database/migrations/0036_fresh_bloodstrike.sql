@@ -1,0 +1,1 @@
+ALTER TABLE "nest_eggs" RENAME COLUMN "seperate_port" TO "separate_port";
