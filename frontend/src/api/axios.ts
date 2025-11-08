@@ -11,7 +11,10 @@ export const axiosInstance: AxiosInstance = axios.create({
 // Auto transform all data to camel case keys
 axiosInstance.interceptors.response.use(
   (response) => {
-    response.data = transformKeysToCamelCase(response.data);
+    if (!response.request.responseURL.endsWith('/export')) {
+      response.data = transformKeysToCamelCase(response.data);
+    }
+
     return response;
   },
   (error) => {

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Menu } from '@mantine/core';
+import { Menu, MenuProps } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 
@@ -28,7 +28,7 @@ interface ContextMenuContextType {
 
 const ContextMenuContext = createContext<ContextMenuContextType | null>(null);
 
-export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
+export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNode; menuProps?: MenuProps }) => {
   const [state, setState] = useState<ContextMenuState>({
     visible: false,
     x: 0,
@@ -65,6 +65,7 @@ export const ContextMenuProvider = ({ children }: { children: ReactNode }) => {
         withinPortal
         closeOnClickOutside
         transitionProps={{ transition: 'scale-y', duration: 200 }}
+        {...menuProps}
       >
         <Menu.Target>
           <div

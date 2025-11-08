@@ -11,9 +11,10 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faFileDownload, faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import jsYaml from 'js-yaml';
 
 export default ({ schedule }: { schedule: ServerSchedule }) => {
   const { addToast } = useToast();
@@ -35,21 +36,34 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
       });
   };
 
-  const doExport = () => {
+  const doExport = (format: 'json' | 'yaml') => {
     exportSchedule(server.uuid, schedule.uuid)
       .then((data) => {
         addToast('Schedule exported.', 'success');
 
-        const jsonData = JSON.stringify(data, undefined, 2);
-        const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
-        const downloadLink = document.createElement('a');
-        downloadLink.href = fileURL;
-        downloadLink.download = `schedule-${schedule.uuid}.json`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
+        if (format === 'json') {
+          const jsonData = JSON.stringify(data, undefined, 2);
+          const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
+          const downloadLink = document.createElement('a');
+          downloadLink.href = fileURL;
+          downloadLink.download = `schedule-${schedule.uuid}.json`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
 
-        URL.revokeObjectURL(fileURL);
-        downloadLink.remove();
+          URL.revokeObjectURL(fileURL);
+          downloadLink.remove();
+        } else {
+          const yamlData = jsYaml.dump(data, { flowLevel: -1, forceQuotes: true });
+          const fileURL = URL.createObjectURL(new Blob([yamlData], { type: 'text/plain' }));
+          const downloadLink = document.createElement('a');
+          downloadLink.href = fileURL;
+          downloadLink.download = `schedule-${schedule.uuid}.yml`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+
+          URL.revokeObjectURL(fileURL);
+          downloadLink.remove();
+        }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -103,7 +117,21 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
           {
             icon: faShareAlt,
             label: 'Export',
-            onClick: doExport,
+            onClick: () => {},
+            items: [
+              {
+                icon: faFileDownload,
+                label: 'as JSON',
+                onClick: () => doExport('json'),
+                color: 'gray',
+              },
+              {
+                icon: faFileDownload,
+                label: 'as YAML',
+                onClick: () => doExport('yaml'),
+                color: 'gray',
+              },
+            ],
           },
           {
             icon: faTrash,

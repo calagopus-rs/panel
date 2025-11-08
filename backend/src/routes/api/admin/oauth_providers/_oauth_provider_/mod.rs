@@ -193,10 +193,10 @@ mod patch {
         username_path: Option<String>,
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        first_name_path: Option<String>,
+        name_first_path: Option<String>,
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        last_name_path: Option<String>,
+        name_last_path: Option<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -289,18 +289,18 @@ mod patch {
                 oauth_provider.username_path = Some(username_path);
             }
         }
-        if let Some(first_name_path) = data.first_name_path {
-            if first_name_path.is_empty() {
+        if let Some(name_first_path) = data.name_first_path {
+            if name_first_path.is_empty() {
                 oauth_provider.name_first_path = None;
             } else {
-                oauth_provider.name_first_path = Some(first_name_path);
+                oauth_provider.name_first_path = Some(name_first_path);
             }
         }
-        if let Some(last_name_path) = data.last_name_path {
-            if last_name_path.is_empty() {
+        if let Some(name_last_path) = data.name_last_path {
+            if name_last_path.is_empty() {
                 oauth_provider.name_last_path = None;
             } else {
-                oauth_provider.name_last_path = Some(last_name_path);
+                oauth_provider.name_last_path = Some(name_last_path);
             }
         }
 
@@ -370,8 +370,8 @@ mod patch {
                     "identifier_path": oauth_provider.identifier_path,
                     "email_path": oauth_provider.email_path,
                     "username_path": oauth_provider.username_path,
-                    "first_name_path": oauth_provider.name_first_path,
-                    "last_name_path": oauth_provider.name_last_path,
+                    "name_first_path": oauth_provider.name_first_path,
+                    "name_last_path": oauth_provider.name_last_path,
                 }),
             )
             .await;

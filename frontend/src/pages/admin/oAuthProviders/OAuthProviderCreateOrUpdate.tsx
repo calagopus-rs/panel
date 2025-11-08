@@ -14,10 +14,18 @@ import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider
 import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider';
 import TextArea from '@/elements/input/TextArea';
 import TagsInput from '@/elements/input/TagsInput';
+import Card from '@/elements/Card';
+import { useGlobalStore } from '@/stores/global';
+import jsYaml from 'js-yaml';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 
 export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthProvider }) => {
   const params = useParams<'id'>();
   const { addToast } = useToast();
+  const { settings } = useGlobalStore();
   const navigate = useNavigate();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -32,6 +40,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
     infoUrl: '',
     scopes: [],
     identifierPath: '',
+    emailPath: '',
     usernamePath: '',
     nameFirstPath: '',
     nameLastPath: '',
@@ -53,6 +62,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
       infoUrl: contextOAuthProvider?.infoUrl ?? '',
       scopes: contextOAuthProvider?.scopes ?? [],
       identifierPath: contextOAuthProvider?.identifierPath ?? '',
+      emailPath: contextOAuthProvider?.emailPath ?? '',
       usernamePath: contextOAuthProvider?.usernamePath ?? '',
       nameFirstPath: contextOAuthProvider?.nameFirstPath ?? '',
       nameLastPath: contextOAuthProvider?.nameLastPath ?? '',
@@ -103,6 +113,46 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
     }
   };
 
+  const doExport = (format: 'json' | 'yaml') => {
+    addToast('OAuth Provider exported.', 'success');
+
+    let data: AdminOAuthProvider = JSON.parse(JSON.stringify(contextOAuthProvider));
+    data.uuid = undefined;
+    data.created = undefined;
+    data.clientId = undefined;
+    data.clientSecret = undefined;
+    data.description = data.description || null;
+    data.emailPath = data.emailPath || null;
+    data.usernamePath = data.usernamePath || null;
+    data.nameFirstPath = data.nameFirstPath || null;
+    data.nameLastPath = data.nameLastPath || null;
+    data = transformKeysToSnakeCase(data);
+
+    if (format === 'json') {
+      const jsonData = JSON.stringify(data, undefined, 2);
+      const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = `oauth-provider-${contextOAuthProvider.uuid}.json`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      URL.revokeObjectURL(fileURL);
+      downloadLink.remove();
+    } else {
+      const yamlData = jsYaml.dump(data, { flowLevel: -1, forceQuotes: true });
+      const fileURL = URL.createObjectURL(new Blob([yamlData], { type: 'text/plain' }));
+      const downloadLink = document.createElement('a');
+      downloadLink.href = fileURL;
+      downloadLink.download = `oauth-provider-${contextOAuthProvider.uuid}.yml`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+
+      URL.revokeObjectURL(fileURL);
+      downloadLink.remove();
+    }
+  };
+
   const doDelete = async () => {
     await deleteOAuthProvider(params.id)
       .then(() => {
@@ -148,6 +198,15 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             rows={3}
           />
         </Group>
+
+        {contextOAuthProvider && (
+          <Card className={'flex flex-row! items-center justify-between'}>
+            <Title order={4}>Redirect URL</Title>
+            <Code>
+              {settings.app.url}/api/auth/oauth/{contextOAuthProvider.uuid}
+            </Code>
+          </Card>
+        )}
 
         <Group grow>
           <TextInput
@@ -200,24 +259,35 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
           />
         </Group>
 
-        <TagsInput
-          label={'Scopes'}
-          value={oauthProvider.scopes}
-          onChange={(value) => setOAuthProvider({ ...oauthProvider, scopes: value })}
-        />
-
         <Group grow>
+          <TagsInput
+            label={'Scopes'}
+            description={'The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'}
+            value={oauthProvider.scopes}
+            onChange={(value) => setOAuthProvider({ ...oauthProvider, scopes: value })}
+          />
           <TextInput
             withAsterisk
             label={'Identifier Path'}
-            placeholder={'Auth URL'}
+            placeholder={'Identifier Path'}
             description={
               'The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
             }
             value={oauthProvider.identifierPath || ''}
             onChange={(e) => setOAuthProvider({ ...oauthProvider, identifierPath: e.target.value })}
           />
+        </Group>
+
+        <Group grow>
           <TextInput
+            label={'Email Path'}
+            placeholder={'Email Path'}
+            description={'The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'}
+            value={oauthProvider.emailPath || ''}
+            onChange={(e) => setOAuthProvider({ ...oauthProvider, emailPath: e.target.value })}
+          />
+          <TextInput
+            withAsterisk
             label={'Username Path'}
             placeholder={'Username Path'}
             description={
@@ -285,6 +355,41 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
               Save & Stay
             </Button>
+          )}
+          {contextOAuthProvider && (
+            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+              <ContextMenu
+                items={[
+                  {
+                    icon: faFileDownload,
+                    label: 'as JSON',
+                    onClick: () => doExport('json'),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faFileDownload,
+                    label: 'as YAML',
+                    onClick: () => doExport('yaml'),
+                    color: 'gray',
+                  },
+                ]}
+              >
+                {({ openMenu }) => (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      openMenu(rect.left, rect.bottom);
+                    }}
+                    loading={loading}
+                    variant={'outline'}
+                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                  >
+                    Export
+                  </Button>
+                )}
+              </ContextMenu>
+            </ContextMenuProvider>
           )}
           {contextOAuthProvider && (
             <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>

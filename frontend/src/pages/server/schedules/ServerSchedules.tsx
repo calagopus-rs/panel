@@ -15,6 +15,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import importSchedule from '@/api/server/schedules/importSchedule';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import jsYaml from 'js-yaml';
 
 export default () => {
   const { addToast } = useToast();
@@ -33,11 +34,23 @@ export default () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    try {
-      const text = await file.text();
-      const jsonData = JSON.parse(text);
+    event.target.value = null;
 
-      importSchedule(server.uuid, jsonData)
+    try {
+      const text = await file.text().then((t) => t.trim());
+      let data: object;
+      try {
+        if (text.startsWith('{')) {
+          data = JSON.parse(text);
+        } else {
+          data = jsYaml.load(text) as object;
+        }
+      } catch (err) {
+        addToast(`Failed to parse schedule: ${err}`, 'error');
+        return;
+      }
+
+      importSchedule(server.uuid, data)
         .then((data) => {
           addSchedule(data);
           addToast('Schedule imported.', 'success');
@@ -70,7 +83,7 @@ export default () => {
 
           <input
             type={'file'}
-            accept={'application/json'}
+            accept={'.json,.yml,.yaml'}
             ref={fileInputRef}
             className={'hidden'}
             onChange={handleFileUpload}

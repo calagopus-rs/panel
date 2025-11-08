@@ -11,6 +11,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct ResponseApp<'a> {
+        url: &'a str,
         name: &'a str,
         registration_enabled: bool,
     }
@@ -46,6 +47,7 @@ mod get {
             version: &state.version,
             captcha_provider: settings.captcha_provider.to_public_provider(),
             app: ResponseApp {
+                url: &settings.app.url,
                 name: &settings.app.name,
                 registration_enabled: settings.app.registration_enabled,
             },

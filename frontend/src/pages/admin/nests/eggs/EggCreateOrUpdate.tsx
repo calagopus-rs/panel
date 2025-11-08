@@ -17,6 +17,10 @@ import { load } from '@/lib/debounce';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import TextArea from '@/elements/input/TextArea';
 import exportEgg from '@/api/admin/nests/eggs/exportEgg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import jsYaml from 'js-yaml';
 
 export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
   const { addToast } = useToast();
@@ -86,22 +90,35 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
     }
   };
 
-  const doExport = () => {
+  const doExport = (format: 'json' | 'yaml') => {
     load(true, setLoading);
     exportEgg(contextNest?.uuid, contextEgg.uuid)
       .then((data) => {
         addToast('Egg exported.', 'success');
 
-        const jsonData = JSON.stringify(data, undefined, 2);
-        const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
-        const downloadLink = document.createElement('a');
-        downloadLink.href = fileURL;
-        downloadLink.download = `egg-${contextEgg.uuid}.json`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
+        if (format === 'json') {
+          const jsonData = JSON.stringify(data, undefined, 2);
+          const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
+          const downloadLink = document.createElement('a');
+          downloadLink.href = fileURL;
+          downloadLink.download = `egg-${contextEgg.uuid}.json`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
 
-        URL.revokeObjectURL(fileURL);
-        downloadLink.remove();
+          URL.revokeObjectURL(fileURL);
+          downloadLink.remove();
+        } else {
+          const yamlData = jsYaml.dump(data, { flowLevel: -1, forceQuotes: true });
+          const fileURL = URL.createObjectURL(new Blob([yamlData], { type: 'text/plain' }));
+          const downloadLink = document.createElement('a');
+          downloadLink.href = fileURL;
+          downloadLink.download = `egg-${contextEgg.uuid}.yml`;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+
+          URL.revokeObjectURL(fileURL);
+          downloadLink.remove();
+        }
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -306,9 +323,39 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
           Save
         </Button>
         {contextEgg && (
-          <Button variant={'outline'} onClick={doExport} loading={loading}>
-            Export
-          </Button>
+          <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+            <ContextMenu
+              items={[
+                {
+                  icon: faFileDownload,
+                  label: 'as JSON',
+                  onClick: () => doExport('json'),
+                  color: 'gray',
+                },
+                {
+                  icon: faFileDownload,
+                  label: 'as YAML',
+                  onClick: () => doExport('yaml'),
+                  color: 'gray',
+                },
+              ]}
+            >
+              {({ openMenu }) => (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    openMenu(rect.left, rect.bottom);
+                  }}
+                  loading={loading}
+                  variant={'outline'}
+                  rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                >
+                  Export
+                </Button>
+              )}
+            </ContextMenu>
+          </ContextMenuProvider>
         )}
         {contextEgg && (
           <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>

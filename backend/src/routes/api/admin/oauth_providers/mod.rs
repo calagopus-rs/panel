@@ -131,10 +131,10 @@ mod post {
         username_path: Option<String>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        first_name_path: Option<String>,
+        name_first_path: Option<String>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        last_name_path: Option<String>,
+        name_last_path: Option<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -174,8 +174,8 @@ mod post {
             &data.identifier_path,
             data.email_path.as_deref(),
             data.username_path.as_deref(),
-            data.first_name_path.as_deref(),
-            data.last_name_path.as_deref(),
+            data.name_first_path.as_deref(),
+            data.name_last_path.as_deref(),
             data.enabled,
             data.login_only,
             data.link_viewable,
@@ -222,8 +222,8 @@ mod post {
                     "identifier_path": oauth_provider.identifier_path,
                     "email_path": oauth_provider.email_path,
                     "username_path": oauth_provider.username_path,
-                    "first_name_path": oauth_provider.name_first_path,
-                    "last_name_path": oauth_provider.name_last_path,
+                    "name_first_path": oauth_provider.name_first_path,
+                    "name_last_path": oauth_provider.name_last_path,
                 }),
             )
             .await;

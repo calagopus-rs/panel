@@ -333,6 +333,7 @@ impl OAuthProvider {
             info_url: self.info_url,
             scopes: self.scopes,
             identifier_path: self.identifier_path,
+            email_path: self.email_path,
             username_path: self.username_path,
             name_first_path: self.name_first_path,
             name_last_path: self.name_last_path,
@@ -394,6 +395,7 @@ pub struct AdminApiOAuthProvider {
     pub scopes: Vec<String>,
 
     pub identifier_path: String,
+    pub email_path: Option<String>,
     pub username_path: Option<String>,
     pub name_first_path: Option<String>,
     pub name_last_path: Option<String>,

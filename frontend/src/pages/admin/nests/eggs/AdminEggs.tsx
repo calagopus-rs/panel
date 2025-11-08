@@ -16,6 +16,7 @@ import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import jsYaml from 'js-yaml';
 
 const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
   const navigate = useNavigate();
@@ -33,11 +34,23 @@ const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    try {
-      const text = await file.text();
-      const jsonData = JSON.parse(text);
+    event.target.value = null;
 
-      importEgg(contextNest.uuid, jsonData)
+    try {
+      const text = await file.text().then((t) => t.trim());
+      let data: object;
+      try {
+        if (text.startsWith('{')) {
+          data = JSON.parse(text);
+        } else {
+          data = jsYaml.load(text) as object;
+        }
+      } catch (err) {
+        addToast(`Failed to parse egg: ${err}`, 'error');
+        return;
+      }
+
+      importEgg(contextNest.uuid, data)
         .then((data) => {
           addEgg(data);
           addToast('Egg imported.', 'success');
@@ -72,7 +85,7 @@ const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
 
           <input
             type={'file'}
-            accept={'application/json'}
+            accept={'.json,.yml,.yaml'}
             ref={fileInputRef}
             className={'hidden'}
             onChange={handleFileUpload}

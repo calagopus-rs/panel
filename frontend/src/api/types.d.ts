@@ -46,6 +46,7 @@ interface UpdateAdminOAuthProvider {
   infoUrl: string;
   scopes: string[];
   identifierPath: string;
+  emailPath: string | null;
   usernamePath: string | null;
   nameFirstPath: string | null;
   nameLastPath: string | null;
@@ -974,6 +975,7 @@ interface PublicSettings {
   version: string;
   captchaProvider: PublicCaptchaProvider;
   app: {
+    url: string;
     name: string;
     registrationEnabled: boolean;
   };
