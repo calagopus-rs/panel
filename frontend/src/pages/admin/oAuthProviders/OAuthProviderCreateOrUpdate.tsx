@@ -267,7 +267,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
             label={'Link Viewable to User'}
             description={'Allows the User to see the Connection and its identifier in the Client UI'}
             checked={oauthProvider.linkViewable || false}
-            onChange={(e) => setOAuthProvider({ ...oauthProvider, enabled: e.target.checked })}
+            onChange={(e) => setOAuthProvider({ ...oauthProvider, linkViewable: e.target.checked })}
           />
           <Switch
             label={'Link Manageable by User'}
