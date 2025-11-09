@@ -43,4 +43,3 @@ urlencoding = { workspace = true }
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 futures-util = { workspace = true }
 bincode = { version = "2.0.1", features = ["serde"] }
-oauth2 = { workspace = true }

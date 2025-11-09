@@ -20,7 +20,7 @@ sqlx = { version = "0.8", features = ["runtime-tokio", "tls-rustls-ring-webpki",
 tokio = { version = "1.43.0", features = ["full"] }
 tokio-util = { version = "0.7.16", features = ["full"] }
 async-trait = "0.1.89"
-axum-extra = { version = "0.10.1", features = ["query"] }
+axum-extra = { version = "0.12.1", features = ["query"] }
 anyhow = "1.0.98"
 utoipa = { version = "5.3.1", features = ["axum_extras", "preserve_order", "chrono", "indexmap", "uuid", "rc_schema"] }
 utoipa-axum = "0.2.0"

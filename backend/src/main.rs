@@ -496,12 +496,34 @@ async fn main() {
 
     let router = router.route("/openapi.json", get(|| async move { axum::Json(openapi) }));
 
-    axum::serve(
-        listener,
-        ServiceExt::<Request>::into_make_service_with_connect_info::<SocketAddr>(
-            NormalizePathLayer::trim_trailing_slash().layer(router),
-        ),
-    )
-    .await
-    .unwrap();
+    let http_server = async {
+        axum::serve(
+            listener,
+            ServiceExt::<Request>::into_make_service_with_connect_info::<SocketAddr>(
+                NormalizePathLayer::trim_trailing_slash().layer(router),
+            ),
+        )
+        .await
+        .unwrap();
+    };
+
+    #[cfg(not(unix))]
+    let sigterm_fut = futures_util::future::pending();
+    #[cfg(unix)]
+    let sigterm_fut = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .unwrap()
+            .recv()
+            .await;
+    };
+
+    tokio::select! {
+        _ = http_server => {},
+        _ = tokio::signal::ctrl_c() => {
+            tracing::info!("CTRL-C received, shutting down...");
+        },
+        _ = sigterm_fut => {
+            tracing::info!("SIGTERM received, shutting down...");
+        }
+    }
 }
