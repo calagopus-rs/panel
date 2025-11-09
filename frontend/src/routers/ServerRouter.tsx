@@ -1,21 +1,22 @@
-import Sidebar from '@/elements/Sidebar';
+import { faArrowUpRightFromSquare, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router';
-import NotFound from '@/pages/NotFound';
-import { faArrowUpRightFromSquare, faServer } from '@fortawesome/free-solid-svg-icons';
-import { useServerStore } from '@/stores/server';
-import Spinner from '@/elements/Spinner';
-import WebsocketHandler from '@/pages/server/WebsocketHandler';
-import WebsocketListener from '@/pages/server/WebsocketListener';
 import getServer from '@/api/server/getServer';
-import routes, { to } from './routes';
 import Can from '@/elements/Can';
 import Container from '@/elements/Container';
-import { load } from '@/lib/debounce';
 import Notification from '@/elements/Notification';
 import Progress from '@/elements/Progress';
+import Sidebar from '@/elements/Sidebar';
+import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
+import { to } from '@/lib/routes';
+import NotFound from '@/pages/NotFound';
+import WebsocketHandler from '@/pages/server/WebsocketHandler';
+import WebsocketListener from '@/pages/server/WebsocketListener';
 import { useAuth } from '@/providers/AuthProvider';
+import serverRoutes from '@/routers/routes/serverRoutes';
 import { useGlobalStore } from '@/stores/global';
+import { useServerStore } from '@/stores/server';
 
 export default () => {
   const params = useParams<'id'>();
@@ -58,7 +59,7 @@ export default () => {
 
         <Sidebar.Divider />
 
-        {routes.server
+        {serverRoutes
           .filter((route) => !!route.name)
           .map((route) =>
             route.permission ? (
@@ -109,7 +110,7 @@ export default () => {
               ) : null}
 
               <Routes>
-                {routes.server.map(({ path, element: Element }) => (
+                {serverRoutes.map(({ path, element: Element }) => (
                   <Route key={path} path={path} element={<Element />} />
                 ))}
                 <Route path={'*'} element={<NotFound />} />

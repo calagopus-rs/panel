@@ -1,10 +1,3 @@
-import { useServerStore } from '@/stores/server';
-import { Line } from 'react-chartjs-2';
-import 'chart.js/auto';
-import { useChart, useChartTickLabel } from './chart';
-import { bytesToString } from '@/lib/size';
-import { useEffect, useRef } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCloudArrowDown,
   faCloudArrowUp,
@@ -13,9 +6,15 @@ import {
   faMicrochip,
   IconDefinition,
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactNode, useEffect, useRef } from 'react';
+import { Line } from 'react-chartjs-2';
+import Card from '@/elements/Card';
 import Tooltip from '@/elements/Tooltip';
 import { hexToRgba } from '@/lib/color';
-import Card from '@/elements/Card';
+import { bytesToString } from '@/lib/size';
+import { useServerStore } from '@/stores/server';
+import { useChart, useChartTickLabel } from './chart';
 
 function ChartBlock({
   icon,
@@ -25,8 +24,8 @@ function ChartBlock({
 }: {
   icon: IconDefinition;
   title: string;
-  legend?: React.ReactNode;
-  children: React.ReactNode;
+  legend?: ReactNode;
+  children: ReactNode;
 }) {
   return (
     <Card className={'relative'}>

@@ -1,13 +1,13 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
 import { Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
+import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
-import Button from '@/elements/Button';
-import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings';
-import { network } from '@rjweb/utils';
+import { isIP } from '@/lib/ip';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
 export default () => {
   const { addToast } = useToast();
@@ -31,7 +31,7 @@ export default () => {
   };
 
   const doAutofill = () => {
-    if (network.isIP(window.location.hostname)) {
+    if (isIP(window.location.hostname)) {
       addToast('Cannot use Webauthn on an IP Address', 'error');
       return;
     }

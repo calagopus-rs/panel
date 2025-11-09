@@ -1,20 +1,22 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import getSettings from './api/getSettings';
 import Spinner from './elements/Spinner';
 import AuthProvider from './providers/AuthProvider';
 import { ToastProvider } from './providers/ToastProvider';
-import AdminRouter from './routers/AdminRouter';
-import AuthenticationRouter from './routers/AuthenticationRouter';
-import DashboardRouter from './routers/DashboardRouter';
 import AdminRoute from './routers/guards/AdminRoute';
 import AuthenticatedRoute from './routers/guards/AuthenticatedRoute';
 import UnauthenticatedRoute from './routers/guards/UnauthenticatedRoute';
-import ServerRouter from './routers/ServerRouter';
 import { useGlobalStore } from './stores/global';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
+import { lazy } from 'react';
 import ErrorBoundary from './elements/ErrorBoundary';
+
+const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter'));
+const DashboardRouter = lazy(() => import('./routers/DashboardRouter'));
+const AdminRouter = lazy(() => import('./routers/AdminRouter'));
+const ServerRouter = lazy(() => import('./routers/ServerRouter'));
 
 export default function App() {
   const { settings, setSettings } = useGlobalStore();
@@ -29,20 +31,22 @@ export default function App() {
         <ToastProvider>
           <BrowserRouter>
             <AuthProvider>
-              <Routes>
-                <Route element={<UnauthenticatedRoute />}>
-                  <Route path={'/auth/*'} element={<AuthenticationRouter />} />
-                </Route>
-
-                <Route element={<AuthenticatedRoute />}>
-                  <Route path={'/server/:id/*'} element={<ServerRouter />} />
-                  <Route path={'/*'} element={<DashboardRouter />} />
-
-                  <Route element={<AdminRoute />}>
-                    <Route path={'/admin/*'} element={<AdminRouter />} />
+              <Suspense fallback={<Spinner.Centered />}>
+                <Routes>
+                  <Route element={<UnauthenticatedRoute />}>
+                    <Route path={'/auth/*'} element={<AuthenticationRouter />} />
                   </Route>
-                </Route>
-              </Routes>
+
+                  <Route element={<AuthenticatedRoute />}>
+                    <Route path={'/server/:id/*'} element={<ServerRouter />} />
+                    <Route path={'/*'} element={<DashboardRouter />} />
+
+                    <Route element={<AdminRoute />}>
+                      <Route path={'/admin/*'} element={<AdminRouter />} />
+                    </Route>
+                  </Route>
+                </Routes>
+              </Suspense>
             </AuthProvider>
           </BrowserRouter>
         </ToastProvider>

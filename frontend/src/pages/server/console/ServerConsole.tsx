@@ -1,13 +1,13 @@
-import Console from './Console';
+import { Group, Title } from '@mantine/core';
+import debounce from 'debounce';
+import { useEffect, useRef, useState } from 'react';
+import Can from '@/elements/Can';
 import Spinner from '@/elements/Spinner';
+import { useServerStore } from '@/stores/server';
+import Console from './Console';
 import ServerDetails from './ServerDetails';
 import ServerPowerControls from './ServerPowerControls';
 import ServerStats from './ServerStats';
-import { useServerStore } from '@/stores/server';
-import Can from '@/elements/Can';
-import { Group, Title } from '@mantine/core';
-import { useEffect, useRef, useState } from 'react';
-import debounce from 'debounce';
 
 export default () => {
   const server = useServerStore((state) => state.server);

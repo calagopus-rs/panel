@@ -22,7 +22,6 @@
     "@mantine/hooks": "^8.3.6",
     "@marsidev/react-turnstile": "^1.3.1",
     "@monaco-editor/react": "^4.7.0",
-    "@rjweb/utils": "^1.12.29",
     "@robloche/chartjs-plugin-streaming": "^3.1.0",
     "@tailwindcss/vite": "^4.1.16",
     "ansi_up": "^6.0.6",
@@ -73,9 +72,13 @@
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite": "^7.1.12",
+    "vite-bundle-analyzer": "^1.2.3",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@tailwindcss/oxide", "esbuild"]
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
+      "esbuild"
+    ]
   }
 }

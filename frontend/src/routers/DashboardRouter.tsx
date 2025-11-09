@@ -1,11 +1,12 @@
-import Sidebar from '@/elements/Sidebar';
-import DashboardHome from '@/pages/dashboard/home/DashboardHome';
-import { NavLink, Route, Routes } from 'react-router';
-import NotFound from '@/pages/NotFound';
 import { faGraduationCap, faServer } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '@/providers/AuthProvider';
-import routes, { to } from './routes';
+import { NavLink, Route, Routes } from 'react-router';
 import Container from '@/elements/Container';
+import Sidebar from '@/elements/Sidebar';
+import { to } from '@/lib/routes';
+import DashboardHome from '@/pages/dashboard/home/DashboardHome';
+import NotFound from '@/pages/NotFound';
+import { useAuth } from '@/providers/AuthProvider';
+import accountRoutes from '@/routers/routes/accountRoutes';
 import { useGlobalStore } from '@/stores/global';
 
 export default () => {
@@ -29,7 +30,7 @@ export default () => {
 
         <Sidebar.Divider />
 
-        {routes.account
+        {accountRoutes
           .filter((route) => !!route.name)
           .map((route) => (
             <Sidebar.Link
@@ -47,7 +48,7 @@ export default () => {
         <Container>
           <Routes>
             <Route path={''} element={<DashboardHome />} />
-            {routes.account.map(({ path, element: Element }) => (
+            {accountRoutes.map(({ path, element: Element }) => (
               <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
             ))}
             <Route path={'*'} element={<NotFound />} />

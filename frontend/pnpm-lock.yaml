@@ -41,9 +41,6 @@ importers:
       '@monaco-editor/react':
         specifier: ^4.7.0
         version: 4.7.0(monaco-editor@0.52.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      '@rjweb/utils':
-        specifier: ^1.12.29
-        version: 1.12.29
       '@robloche/chartjs-plugin-streaming':
         specifier: ^3.1.0
         version: 3.1.0(chart.js@4.5.1)
@@ -189,6 +186,9 @@ importers:
       vite:
         specifier: ^7.1.12
         version: 7.1.12(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2)
+      vite-bundle-analyzer:
+        specifier: ^1.2.3
+        version: 1.2.3
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -711,10 +711,6 @@ packages:
     resolution: {integrity: sha512-famxyD5emrGGpFuUlgOP6fVW2h/ZaF405G5KDi3zPHzyjAWys/8W6NAVJtNbkCkhedmvL0xOhvt8feGXyXaw5w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  '@rjweb/utils@1.12.29':
-    resolution: {integrity: sha512-iBE0VN4FKYKpMtgrT0KgfscRfIyC6xPnxLF2v/05rSet+bukfqEbfceLfFh5V6U9sH3ncTlZ56kzUsCOvoJsSA==}
-    engines: {node: '>=18.0.0'}
 
   '@robloche/chartjs-plugin-streaming@3.1.0':
     resolution: {integrity: sha512-6tTRo0eyw7klsk2ayjrZmJga+NqawDxwXlMOsQGAqJ8kZj9szNwlfD9EmTP2MDA8Sh8qFezxE6LYU6UUoothkg==}
@@ -2296,9 +2292,6 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
-  ts-arithmetic@0.1.1:
-    resolution: {integrity: sha512-3VqgsRgzaYfj+zKWn+7O66ifHwbOOnT2BoOrHwdEUBz7az0DetoZOS20+juNJh1klgzvWEi2Qxden41pomOUAQ==}
-
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
@@ -2421,6 +2414,10 @@ packages:
 
   uuid@13.0.0:
     resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
+
+  vite-bundle-analyzer@1.2.3:
+    resolution: {integrity: sha512-8nhwDGHWMKKgg6oegAOpDgTT7/yzTVzeYzLF4y8WBJoYu9gO7h29UpHiQnXD2rAvfQzDy5Wqe/Za5cgqhnxi5g==}
     hasBin: true
 
   vite-tsconfig-paths@5.1.4:
@@ -2996,10 +2993,6 @@ snapshots:
   '@react-types/shared@3.32.1(react@19.2.0)':
     dependencies:
       react: 19.2.0
-
-  '@rjweb/utils@1.12.29':
-    dependencies:
-      ts-arithmetic: 0.1.1
 
   '@robloche/chartjs-plugin-streaming@3.1.0(chart.js@4.5.1)':
     dependencies:
@@ -4698,8 +4691,6 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  ts-arithmetic@0.1.1: {}
-
   tsconfck@3.1.6(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
@@ -4818,6 +4809,8 @@ snapshots:
       react: 19.2.0
 
   uuid@13.0.0: {}
+
+  vite-bundle-analyzer@1.2.3: {}
 
   vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@24.9.2)(jiti@2.6.1)(lightningcss@1.30.2)):
     dependencies:

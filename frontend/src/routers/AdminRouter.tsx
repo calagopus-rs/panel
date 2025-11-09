@@ -1,9 +1,10 @@
-import Sidebar from '@/elements/Sidebar';
-import { NavLink, Route, Routes } from 'react-router';
-import NotFound from '@/pages/NotFound';
 import { faReply } from '@fortawesome/free-solid-svg-icons';
-import routes, { to } from './routes';
+import { NavLink, Route, Routes } from 'react-router';
 import Container from '@/elements/Container';
+import Sidebar from '@/elements/Sidebar';
+import { to } from '@/lib/routes';
+import NotFound from '@/pages/NotFound';
+import adminRoutes from '@/routers/routes/adminRoutes';
 import { useGlobalStore } from '@/stores/global';
 
 export default () => {
@@ -25,7 +26,7 @@ export default () => {
 
         <Sidebar.Divider />
 
-        {routes.admin
+        {adminRoutes
           .filter((route) => !!route.name)
           .map((route) => (
             <Sidebar.Link
@@ -42,7 +43,7 @@ export default () => {
       <div id={'admin-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         <Container>
           <Routes>
-            {routes.admin.map(({ path, element: Element }) => (
+            {adminRoutes.map(({ path, element: Element }) => (
               <Route key={path} path={path} element={<Element />} />
             ))}
             <Route path={'*'} element={<NotFound />} />

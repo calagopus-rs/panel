@@ -1,5 +1,3 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import {
   faCog,
   faExternalLink,
@@ -8,18 +6,20 @@ import {
   faNetworkWired,
   faPenRuler,
 } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import NodeCreateOrUpdate from './NodeCreateOrUpdate';
+import { lazy, useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getNode from '@/api/admin/nodes/getNode';
-import AdminNodeMounts from './mounts/AdminNodeMounts';
-import AdminNodeStatistics from './statistics/AdminNodeStatistics';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
+import { useToast } from '@/providers/ToastProvider';
 import AdminNodeAllocations from './allocations/AdminNodeAllocations';
 import AdminNodeConfiguration from './configuration/AdminNodeConfiguration';
 import AdminNodeLogs from './logs/AdminNodeLogs';
+import AdminNodeMounts from './mounts/AdminNodeMounts';
+import NodeCreateOrUpdate from './NodeCreateOrUpdate';
+import AdminNodeStatistics from './statistics/AdminNodeStatistics';
 
 export default () => {
   const params = useParams<'id'>();
