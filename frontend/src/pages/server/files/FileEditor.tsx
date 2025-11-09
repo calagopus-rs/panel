@@ -15,9 +15,6 @@ import { load } from '@/lib/debounce';
 
 export default () => {
   const params = useParams<'action'>();
-  if (!['new', 'edit'].includes(params.action)) {
-    return <NotFound />;
-  }
 
   const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
@@ -74,6 +71,10 @@ export default () => {
       }
     });
   };
+
+  if (!['new', 'edit'].includes(params.action)) {
+    return <NotFound />;
+  }
 
   return loading ? (
     <div className={'w-full h-screen flex items-center justify-center'}>

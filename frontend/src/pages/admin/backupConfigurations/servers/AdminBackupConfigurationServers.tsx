@@ -8,8 +8,9 @@ import getBackupConfigurationServers from '@/api/admin/backup-configurations/ser
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default ({ backupConfiguration }: { backupConfiguration?: BackupConfiguration }) => {
-  const [backupConfigurationServers, setBackupConfigurationServers] =
-    useState<ResponseMeta<AdminServer>>(getEmptyPaginationSet());
+  const [backupConfigurationServers, setBackupConfigurationServers] = useState<ResponseMeta<AdminServer>>(
+    getEmptyPaginationSet(),
+  );
 
   const { loading, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getBackupConfigurationServers(backupConfiguration.uuid, page, search),

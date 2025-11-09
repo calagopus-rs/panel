@@ -117,7 +117,7 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
           {
             icon: faShareAlt,
             label: 'Export',
-            onClick: () => {},
+            onClick: () => null,
             items: [
               {
                 icon: faFileDownload,

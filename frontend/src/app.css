@@ -1,22 +1,26 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @font-face {
-  font-family: 'Helvetica';
+  font-family: "Helvetica";
   font-style: normal;
   font-weight: normal;
-  src: local('Helvetica'), url('/fonts/Helvetica.woff') format('woff');
+  src:
+    local("Helvetica"),
+    url("/fonts/Helvetica.woff") format("woff");
 }
 
 @font-face {
-  font-family: 'Odor Mean Chey';
+  font-family: "Odor Mean Chey";
   font-style: normal;
   font-weight: normal;
-  src: local('Odor Mean Chey'), url('/fonts/OdorMeanChey.ttf') format('truetype');
+  src:
+    local("Odor Mean Chey"),
+    url("/fonts/OdorMeanChey.ttf") format("truetype");
 }
 
 @theme {
-  --font-sans: 'Helvetica', 'Arial', 'sans-serif';
-  --font-logo: 'Odor Mean Chey', 'Helvetica', 'Arial', 'sans-serif';
+  --font-sans: "Helvetica", "Arial", "sans-serif";
+  --font-logo: "Odor Mean Chey", "Helvetica", "Arial", "sans-serif";
 
   --color-neutral-850: oklch(25.4% 0 0);
 }

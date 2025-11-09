@@ -8,8 +8,9 @@ import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHost
 import DatabaseRow, { databaseTableColumns } from './DatabaseRow';
 
 export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
-  const [databaseHostDatabases, setDatabaseHostDatabases] =
-    useState<ResponseMeta<AdminServerDatabase>>(getEmptyPaginationSet());
+  const [databaseHostDatabases, setDatabaseHostDatabases] = useState<ResponseMeta<AdminServerDatabase>>(
+    getEmptyPaginationSet(),
+  );
 
   const { loading, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getDatabaseHostDatabases(databaseHost.uuid, page, search),

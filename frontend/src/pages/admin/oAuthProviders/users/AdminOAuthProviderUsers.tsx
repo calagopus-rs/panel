@@ -8,8 +8,9 @@ import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow'
 import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers';
 
 export default ({ oauthProvider }: { oauthProvider?: AdminOAuthProvider }) => {
-  const [oauthProviderUsers, setOAuthProviderUsers] =
-    useState<ResponseMeta<AdminUserOAuthLink>>(getEmptyPaginationSet());
+  const [oauthProviderUsers, setOAuthProviderUsers] = useState<ResponseMeta<AdminUserOAuthLink>>(
+    getEmptyPaginationSet(),
+  );
 
   const { loading, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getOAuthProviderUsers(oauthProvider.uuid, page, search),

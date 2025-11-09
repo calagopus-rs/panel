@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from 'axios';
 import { transformKeysToCamelCase } from './transformers';
 
@@ -29,8 +28,8 @@ axiosInstance.interceptors.response.use(
  * Converts an error into a human readable response. Mostly just a generic helper to
  * make sure we display the message from the server back to the user if we can.
  */
-export function httpErrorToHuman(error: any): string {
-  if (error.response && error.response.data) {
+export function httpErrorToHuman(error: object): string {
+  if ('response' in error && typeof error.response === 'object' && 'data' in error.response && error.response.data) {
     let { data } = error.response;
 
     // Some non-JSON requests can still return the error as a JSON block. In those cases, attempt
@@ -43,21 +42,23 @@ export function httpErrorToHuman(error: any): string {
       }
     }
 
-    if (data.errors && data.errors[0] && data.errors[0].detail) {
-      return data.errors[0].detail;
-    }
+    if (typeof data === 'object') {
+      if ('errors' in data && Array.isArray(data.errors) && data.errors[0] && typeof data.errors[0] === 'string') {
+        return data.errors[0];
+      }
 
-    if (data.errors && data.errors[0] && typeof data.errors[0] === 'string') {
-      return data.errors[0];
-    }
-
-    // Errors from wings directory, mostly just for file uploads.
-    if (data.error && typeof data.error === 'string') {
-      return data.error;
+      // Errors from wings directory, mostly just for file uploads.
+      if ('error' in data && typeof data.error === 'string') {
+        return data.error;
+      }
     }
   }
 
-  return error.message;
+  if ('message' in error && typeof error.message === 'string') {
+    return error.message;
+  } else {
+    return String(error);
+  }
 }
 
 export function getPaginationSet(data: ResponseMeta<unknown>) {

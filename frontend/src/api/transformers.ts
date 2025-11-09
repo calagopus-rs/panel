@@ -12,7 +12,7 @@ export const transformKeysToCamelCase = (obj: object): object => {
   } else if (obj !== null && typeof obj === 'object') {
     const newObj: Record<string, object> = {};
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.hasOwn(obj, key)) {
         const newKey = toCamelCase(key);
         newObj[newKey] = transformKeysToCamelCase(obj[key]);
       }
@@ -28,7 +28,7 @@ export const transformKeysToSnakeCase = (obj: object) => {
   } else if (obj !== null && typeof obj === 'object') {
     const newObj: Record<string, object> = {};
     for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      if (Object.hasOwn(obj, key)) {
         const newKey = toSnakeCase(key);
         newObj[newKey] = transformKeysToSnakeCase(obj[key]);
       }

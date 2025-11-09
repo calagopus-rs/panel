@@ -85,7 +85,7 @@ export default () => {
                 </div>
                 <div className={'mt-2'}>
                   <CopyOnClick content={token.secret}>
-                    <Code>{token?.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
+                    <Code>{token.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
                   </CopyOnClick>
                 </div>
               </div>
