@@ -37,6 +37,7 @@ pub mod user_oauth_link;
 pub mod user_password_reset;
 pub mod user_recovery_code;
 pub mod user_security_key;
+pub mod user_server_group;
 pub mod user_session;
 pub mod user_ssh_key;
 

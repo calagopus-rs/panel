@@ -215,6 +215,20 @@ export const userOauthLinks = pgTable('user_oauth_links', {
 	uniqueIndex('user_oauth_links_oauth_provider_uuid_identifier_idx').on(userOauthLinks.oauthProviderUuid, userOauthLinks.identifier)
 ])
 
+export const userServerGroups = pgTable('user_server_groups', {
+	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
+	userUuid: uuid('user_uuid').references(() => users.uuid, { onDelete: 'cascade' }).notNull(),
+
+	name: varchar('name', { length: 31 * UTF8_MAX_SCALAR_SIZE }).notNull(),
+	order: smallint('order_').default(0).notNull(),
+
+	serverOrder: uuid('server_order').array().default([]).notNull(),
+
+	created: timestamp('created').default(sql`now()`).notNull()
+}, (serverGroups) => [
+	index('server_groups_user_uuid_idx').on(serverGroups.userUuid)
+])
+
 export const roles = pgTable('roles', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
 
@@ -362,7 +376,7 @@ export const nodeMounts = pgTable('node_mounts', {
 
 export const nodeAllocations = pgTable('node_allocations', {
 	uuid: uuid('uuid').default(sql`gen_random_uuid()`).primaryKey().notNull(),
-	nodeUuid: uuid('node_uuid').references(() => nodes.uuid).notNull(),
+	nodeUuid: uuid('node_uuid').references(() => nodes.uuid, { onDelete: 'cascade' }).notNull(),
 
 	ip: inet('ip').notNull(),
 	ipAlias: varchar('ip_alias', { length: 255 }),

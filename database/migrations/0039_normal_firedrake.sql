@@ -1,0 +1,1 @@
+ALTER TABLE "user_server_groups" ALTER COLUMN "uuid" SET DEFAULT gen_random_uuid();

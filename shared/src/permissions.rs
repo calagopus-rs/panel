@@ -76,6 +76,24 @@ pub static USER_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
             },
         ),
         (
+            "servers",
+            PermissionGroup {
+                description: "Permissions that control the ability to list servers and manage server groups.",
+                permissions: IndexMap::from([
+                    (
+                        "create",
+                        "Allows to create new server groups for the account.",
+                    ),
+                    (
+                        "read",
+                        "Allows to view servers and server groups for the account.",
+                    ),
+                    ("update", "Allows to modify server groups."),
+                    ("delete", "Allows to delete server groups from the account."),
+                ]),
+            },
+        ),
+        (
             "api-keys",
             PermissionGroup {
                 description: "Permissions that control the ability to manage api keys on an account. API Keys will never be able to edit themselves, or assign permissions they do not have themselves.",
@@ -100,7 +118,7 @@ pub static USER_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                         "Allows to create new security keys for the account.",
                     ),
                     ("read", "Allows to view security keys for the account."),
-                    ("update", "Allows to modify other security keys."),
+                    ("update", "Allows to modify security keys."),
                     ("delete", "Allows to delete security keys from the account."),
                 ]),
             },

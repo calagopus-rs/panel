@@ -2,13 +2,18 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 pub mod _server_;
+mod groups;
 
 mod get {
     use axum::{extract::Query, http::StatusCode};
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{Pagination, server::Server, user::GetUser},
+        models::{
+            Pagination,
+            server::Server,
+            user::{GetPermissionManager, GetUser},
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -64,6 +69,7 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         Query(params): Query<Params>,
     ) -> ApiResponseResult {
@@ -72,6 +78,8 @@ mod get {
                 .with_status(StatusCode::BAD_REQUEST)
                 .ok();
         }
+
+        permissions.has_user_permission("servers.read")?;
 
         let servers = if params.other && user.admin {
             Server::by_not_user_uuid_with_pagination(
@@ -105,6 +113,7 @@ mod get {
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
+        .nest("/groups", groups::router(state))
         .nest("/{server}", _server_::router(state))
         .with_state(state.clone())
 }

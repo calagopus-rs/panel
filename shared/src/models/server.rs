@@ -580,6 +580,51 @@ impl Server {
         })
     }
 
+    pub async fn by_user_uuid_server_order_with_pagination(
+        database: &crate::database::Database,
+        owner_uuid: uuid::Uuid,
+        server_order: &[uuid::Uuid],
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM servers
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+            LEFT JOIN server_subusers ON server_subusers.server_uuid = servers.uuid AND server_subusers.user_uuid = $1
+            WHERE servers.uuid = ANY($2)
+                AND (servers.owner_uuid = $1 OR server_subusers.user_uuid = $1)
+                AND ($3 IS NULL OR servers.name ILIKE '%' || $3 || '%' OR users.username ILIKE '%' || $3 || '%' OR users.email ILIKE '%' || $3 || '%')
+            ORDER BY array_position($2, servers.uuid), servers.created
+            LIMIT $4 OFFSET $5
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(owner_uuid)
+        .bind(server_order)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
     pub async fn by_user_uuid_with_pagination(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,

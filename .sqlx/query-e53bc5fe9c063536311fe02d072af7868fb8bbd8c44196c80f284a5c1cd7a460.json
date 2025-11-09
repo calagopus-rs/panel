@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_server_groups\n            SET name = $2, server_order = $3\n            WHERE user_server_groups.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "UuidArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e53bc5fe9c063536311fe02d072af7868fb8bbd8c44196c80f284a5c1cd7a460"
+}
