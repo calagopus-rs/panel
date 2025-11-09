@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Group, Title, Stack } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';

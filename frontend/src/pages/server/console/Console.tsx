@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnsiUp } from 'ansi_up';
 import DOMPurify from 'dompurify';
 import { useServerStore } from '@/stores/server';

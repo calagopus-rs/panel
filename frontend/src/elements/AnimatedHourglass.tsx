@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { faHourglassEnd, faHourglassHalf, faHourglassStart } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHourglassStart, faHourglassHalf, faHourglassEnd } from '@fortawesome/free-solid-svg-icons';
+import { useEffect, useState } from 'react';
 
 export default () => {
   const [stage, setStage] = useState(0);

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs';
-import { createBackupConfigurationsSlice, BackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
+import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
 import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts';
 import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders';
 import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations';

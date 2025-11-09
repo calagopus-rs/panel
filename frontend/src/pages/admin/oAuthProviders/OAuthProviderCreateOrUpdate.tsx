@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Title, Divider, Stack } from '@mantine/core';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';

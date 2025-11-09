@@ -1,7 +1,7 @@
-import { useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { useGlobalStore } from '@/stores/global';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
+import { useGlobalStore } from '@/stores/global';
 
 const Captcha = forwardRef((_, ref) => {
   const { captchaProvider } = useGlobalStore((state) => state.settings);

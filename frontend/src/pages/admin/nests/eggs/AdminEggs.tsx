@@ -1,7 +1,7 @@
 import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
-import { useRef, ChangeEvent } from 'react';
+import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
 import { useAdminStore } from '@/stores/admin';
 import EggRow, { eggTableColumns } from './EggRow';

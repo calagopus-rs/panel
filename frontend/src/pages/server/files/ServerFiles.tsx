@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback, Ref } from 'react';
+import { Ref, useCallback, useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
 import FileRow from './FileRow';
 import { useServerStore } from '@/stores/server';
@@ -6,29 +6,28 @@ import loadDirectory from '@/api/server/files/loadDirectory';
 import { FileBreadcrumbs } from './FileBreadcrumbs';
 import Spinner from '@/elements/Spinner';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import { httpErrorToHuman, axiosInstance } from '@/api/axios';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import FileActionBar from './FileActionBar';
 import getBackup from '@/api/server/backups/getBackup';
-import { Card, Group, Popover, Title, UnstyledButton } from '@mantine/core';
+import { Card, Group, Popover, Text, Title, UnstyledButton } from '@mantine/core';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faChevronDown,
   faDownload,
   faFileCirclePlus,
-  faFolderPlus,
-  faUpload,
-  faFolderOpen,
   faFileUpload,
-  faChevronDown,
+  faFolderOpen,
+  faFolderPlus,
   faServer,
+  faUpload,
 } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DirectoryNameModal from './modals/DirectoryNameModal';
 import PullFileModal from './modals/PullFileModal';
 import { load } from '@/lib/debounce';
 import RingProgress from '@/elements/RingProgress';
-import { Text } from '@mantine/core';
 import cancelOperation from '@/api/server/files/cancelOperation';
 import CloseButton from '@/elements/CloseButton';
 import Progress from '@/elements/Progress';

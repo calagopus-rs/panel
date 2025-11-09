@@ -1,5 +1,5 @@
-import { useGlobalStore } from '@/stores/global';
 import { FC, ReactNode, useRef } from 'react';
+import { useGlobalStore } from '@/stores/global';
 
 interface LayoutProps {
   children: ReactNode;

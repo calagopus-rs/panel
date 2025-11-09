@@ -4,7 +4,7 @@ import Spinner from '@/elements/Spinner';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useGlobalStore } from '@/stores/global';
-import { faMicrochip, faMemory, faHardDrive } from '@fortawesome/free-solid-svg-icons';
+import { faHardDrive, faMemory, faMicrochip } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';

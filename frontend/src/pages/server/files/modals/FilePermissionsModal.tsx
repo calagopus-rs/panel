@@ -11,7 +11,7 @@ import { permissionStringToNumber } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { Group, ModalProps, Stack, Title } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 type Props = ModalProps & {
   file: DirectoryEntry;

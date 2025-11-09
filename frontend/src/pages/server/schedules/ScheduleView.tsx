@@ -7,24 +7,24 @@ import triggerSchedule from '@/api/server/schedules/triggerSchedule';
 import Button from '@/elements/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+  faBolt,
+  faChevronDown,
+  faClock,
   faClockRotateLeft,
+  faExclamationTriangle,
+  faHdd,
+  faInfoCircle,
+  faMemory,
+  faMicrochip,
   faPencil,
   faPlay,
-  faClock,
-  faBolt,
+  faPlayCircle,
   faServer,
   faSkull,
-  faMemory,
-  faHdd,
-  faExclamationTriangle,
-  faMicrochip,
-  faInfoCircle,
-  faPlayCircle,
-  faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
-import { Group, Stack, Text, Title, Timeline, Tabs, Alert, Grid, ThemeIcon } from '@mantine/core';
+import { Alert, Grid, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
 import {
   scheduleComparatorLabelMapping,
   scheduleComparatorOperatorMapping,

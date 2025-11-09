@@ -1,9 +1,9 @@
 import {
   Component,
   ContextType,
+  CSSProperties,
   createContext,
   createRef,
-  CSSProperties,
   PureComponent,
   ReactElement,
   MouseEvent as ReactMouseEvent,
@@ -75,16 +75,16 @@ class Selectable<T> extends PureComponent<SelectableProps<T>> {
     }
   }
 
+  render(): ReactElement {
+    return this.props.children(this.setRef);
+  }
+
   private readonly setRef = (element: HTMLElement | null): void => {
     this.elementRef = element;
     if (element && this.context) {
       this.context.registerSelectable(this.id, element, this.props.item);
     }
   };
-
-  render(): ReactElement {
-    return this.props.children(this.setRef);
-  }
 }
 
 class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaState> {
@@ -97,6 +97,41 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
   private endPoint = { x: 0, y: 0 };
   private mouseDown = false;
   private readonly SELECTION_THRESHOLD = 5;
+
+  constructor(props: SelectionAreaProps<T>) {
+    super(props);
+    this.state = {
+      isSelecting: false,
+      selectionBoxStyle: { display: 'none' },
+    };
+  }
+
+  componentWillUnmount(): void {
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('mouseup', this.handleMouseUp);
+  }
+
+  render(): ReactNode {
+    const { children, className = '', style = {} } = this.props;
+    const contextValue = {
+      registerSelectable: this.registerSelectable,
+      unregisterSelectable: this.unregisterSelectable,
+    };
+
+    return (
+      <SelectionContext.Provider value={contextValue}>
+        <div
+          ref={this.containerRef}
+          className={`selection-area ${className}`}
+          style={{ position: 'relative', ...style }}
+          onMouseDown={this.handleMouseDown}
+        >
+          {children}
+          <SelectionBox style={this.state.selectionBoxStyle} isVisible={this.state.isSelecting} />
+        </div>
+      </SelectionContext.Provider>
+    );
+  }
 
   private readonly registerSelectable = (id: string, element: HTMLElement, item: T): void => {
     this.selectablesMap.set(id, { element, item });
@@ -184,19 +219,6 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
     this.mouseDown = false;
   };
 
-  constructor(props: SelectionAreaProps<T>) {
-    super(props);
-    this.state = {
-      isSelecting: false,
-      selectionBoxStyle: { display: 'none' },
-    };
-  }
-
-  componentWillUnmount(): void {
-    window.removeEventListener('mousemove', this.handleMouseMove);
-    window.removeEventListener('mouseup', this.handleMouseUp);
-  }
-
   private doIntersect(rect1: DOMRect, rect2: DOMRect): boolean {
     return !(
       rect1.right < rect2.left ||
@@ -244,28 +266,6 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
       pointerEvents: 'none',
       zIndex: 1000,
     };
-  }
-
-  render(): ReactNode {
-    const { children, className = '', style = {} } = this.props;
-    const contextValue = {
-      registerSelectable: this.registerSelectable,
-      unregisterSelectable: this.unregisterSelectable,
-    };
-
-    return (
-      <SelectionContext.Provider value={contextValue}>
-        <div
-          ref={this.containerRef}
-          className={`selection-area ${className}`}
-          style={{ position: 'relative', ...style }}
-          onMouseDown={this.handleMouseDown}
-        >
-          {children}
-          <SelectionBox style={this.state.selectionBoxStyle} isVisible={this.state.isSelecting} />
-        </div>
-      </SelectionContext.Provider>
-    );
   }
 }
 

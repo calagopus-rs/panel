@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { TextInput, Button, Group, Stack, TagsInput } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
+import { Button, Group, Stack, TagsInput, TextInput } from '@mantine/core';
 
 interface MultiKeyValueInputProps {
   options: Record<string, string>; // { key: value, ... }

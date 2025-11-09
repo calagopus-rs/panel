@@ -1,7 +1,7 @@
-import { NavLink, useLocation } from 'react-router';
 import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Tabs } from '@mantine/core';
+import { NavLink, useLocation } from 'react-router';
 
 interface Props {
   items: {

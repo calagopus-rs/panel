@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Title, Divider, Stack } from '@mantine/core';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import { httpErrorToHuman } from '@/api/axios';
 import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
 import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';

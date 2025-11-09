@@ -1,10 +1,10 @@
+import { Group, Title } from '@mantine/core';
 import Badge from '@/elements/Badge';
 import Card from '@/elements/Card';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Group, Title } from '@mantine/core';
 import Tooltip from '@/elements/Tooltip';
 
 export default ({

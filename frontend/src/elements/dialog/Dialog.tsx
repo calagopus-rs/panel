@@ -1,9 +1,9 @@
 import { MouseEvent as ReactMouseEvent, ReactNode, useRef, useState } from 'react';
 import {
+  Description as HDescription,
   Dialog as HDialog,
   DialogPanel as HDialogPanel,
   DialogTitle as HDialogTitle,
-  Description as HDescription,
 } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { AnimatePresence, Easing, motion } from 'motion/react';

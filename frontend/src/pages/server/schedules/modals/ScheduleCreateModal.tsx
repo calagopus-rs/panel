@@ -11,7 +11,7 @@ import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, ModalProps, Text, Stack } from '@mantine/core';
+import { Group, ModalProps, Stack, Text } from '@mantine/core';
 import { useState } from 'react';
 
 export default ({ opened, onClose }: ModalProps) => {

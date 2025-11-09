@@ -1,5 +1,5 @@
-import { useToast } from '@/providers/ToastProvider';
 import classNames from 'classnames';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({
   content,

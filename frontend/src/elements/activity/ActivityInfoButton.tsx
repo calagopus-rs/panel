@@ -1,12 +1,12 @@
 import { faInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Stack } from '@mantine/core';
-import { useState } from 'react';
-import Modal from '../modals/Modal';
-import Code from '../Code';
-import Button from '../Button';
 import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
+import { useState } from 'react';
+import Button from '../Button';
+import Code from '../Code';
+import Modal from '../modals/Modal';
 import 'highlight.js/styles/a11y-dark.min.css';
 
 hljs.registerLanguage('json', json);

@@ -1,9 +1,9 @@
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
 import { faChevronDown, faChevronUp, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Title } from '@mantine/core';
 import { useState } from 'react';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import { permissionCategoryIconMapping } from '@/lib/enums';
 
 export default ({

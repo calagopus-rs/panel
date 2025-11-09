@@ -1,15 +1,15 @@
-import { NavLink } from 'react-router';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import Card from '@/elements/Card';
 import { faArrowRightFromBracket, faBars, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '@/providers/AuthProvider';
-import { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
-import Button from '@/elements/Button';
+import { useEffect, useState } from 'react';
+import { NavLink } from 'react-router';
 import Badge from '@/elements/Badge';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import CloseButton from '@/elements/CloseButton';
 import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
-import CloseButton from '@/elements/CloseButton';
+import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 
 type SidebarProps = {

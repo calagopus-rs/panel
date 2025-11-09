@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { createBackupsSlice, BackupsSlice } from '@/stores/slices/server/backups';
-import { createAllocationsSlice, AllocationsSlice } from '@/stores/slices/server/allocations';
+import { BackupsSlice, createBackupsSlice } from '@/stores/slices/server/backups';
+import { AllocationsSlice, createAllocationsSlice } from '@/stores/slices/server/allocations';
 import { createDatabasesSlice, DatabasesSlice } from '@/stores/slices/server/databases';
 import { createFilesSlice, FilesSlice } from '@/stores/slices/server/files';
 import { createSchedulesSlice, SchedulesSlice } from '@/stores/slices/server/schedules';

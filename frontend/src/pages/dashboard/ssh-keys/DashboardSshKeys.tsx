@@ -1,5 +1,5 @@
 import Spinner from '@/elements/Spinner';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUserStore } from '@/stores/user';
 import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
 import { Group, Title } from '@mantine/core';

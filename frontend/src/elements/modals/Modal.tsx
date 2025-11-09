@@ -1,5 +1,5 @@
-import { forwardRef } from 'react';
 import { Modal, ModalProps } from '@mantine/core';
+import { forwardRef } from 'react';
 
 export default forwardRef<HTMLDivElement, ModalProps>(({ children, className, ...rest }, ref) => {
   return (

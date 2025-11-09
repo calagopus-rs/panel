@@ -1,11 +1,11 @@
-import logout from '@/api/me/logout';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useToast } from './ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { useNavigate } from 'react-router';
+import { httpErrorToHuman } from '@/api/axios';
 import getMe from '@/api/me/getMe';
+import logout from '@/api/me/logout';
 import Spinner from '@/elements/Spinner';
 import { load } from '@/lib/debounce';
+import { useToast } from './ToastProvider';
 
 interface AuthContextType {
   user: User | null;
@@ -14,6 +14,7 @@ interface AuthContextType {
   doLogin: (user: User) => void;
   doLogout: () => void;
 }
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {

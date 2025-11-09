@@ -1,7 +1,7 @@
-import { forwardRef } from 'react';
 import { Progress, ProgressProps } from '@mantine/core';
-import AnimatedHourglass from './AnimatedHourglass';
 import classNames from 'classnames';
+import { forwardRef } from 'react';
+import AnimatedHourglass from './AnimatedHourglass';
 
 export default forwardRef<HTMLDivElement, ProgressProps & { hourglass?: boolean }>(
   ({ value, className, hourglass = true, ...rest }, ref) => {

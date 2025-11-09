@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { createApiKeysSlice, ApiKeySlice } from '@/stores/slices/user/apiKeys';
+import { ApiKeySlice, createApiKeysSlice } from '@/stores/slices/user/apiKeys';
 import { createSessionsSlice, SessionSlice } from '@/stores/slices/user/sessions';
 import { createSshKeysSlice, SshKeySlice } from '@/stores/slices/user/sshKeys';
 import { createSecurityKeysSlice, SecurityKeySlice } from '@/stores/slices/user/securityKeys';

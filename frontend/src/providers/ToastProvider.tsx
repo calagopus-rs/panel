@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useCallback, ReactNode, FC } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
+import { createContext, FC, ReactNode, useCallback, useContext, useState } from 'react';
 import Notification from '@/elements/Notification';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';

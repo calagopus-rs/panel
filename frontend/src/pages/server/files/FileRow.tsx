@@ -8,16 +8,16 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import {
-  faFolder,
-  faFile,
-  faTrash,
   faAnglesUp,
-  faFileShield,
   faCopy,
-  faFileZipper,
   faEnvelopesBulk,
+  faFile,
   faFileArrowDown,
   faFilePen,
+  faFileShield,
+  faFileZipper,
+  faFolder,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
