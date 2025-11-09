@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_server_groups\n            SET order_ = array_position($1, user_server_groups.uuid)\n            WHERE user_server_groups.uuid = ANY($1) AND user_server_groups.user_uuid = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cf5f432ea63351319327be4c0ec7f0a161183fa19fe5920932e4786d3fd3fcbf"
+}
