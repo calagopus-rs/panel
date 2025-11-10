@@ -1,18 +1,18 @@
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Alert, Divider, Stack, Text, Title } from '@mantine/core';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import AuthWrapper from './AuthWrapper';
-import { useAuth } from '@/providers/AuthProvider';
-import Captcha from '@/elements/Captcha';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { Alert, Divider, Stack, Text, Title } from '@mantine/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
-import Card from '@/elements/Card';
-import PasswordInput from '@/elements/input/PasswordInput';
 import register from '@/api/auth/register';
 import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Captcha from '@/elements/Captcha';
+import Card from '@/elements/Card';
+import PasswordInput from '@/elements/input/PasswordInput';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
+import { useAuth } from '@/providers/AuthProvider';
+import AuthWrapper from './AuthWrapper';
 
 export default () => {
   const { doLogin } = useAuth();
@@ -30,14 +30,16 @@ export default () => {
   const submit = () => {
     load(true, setLoading);
 
-    register({ username, email, name_first: nameFirst, name_last: nameLast, password })
-      .then((response) => {
-        doLogin(response.user!);
-      })
-      .catch((msg) => {
-        setError(httpErrorToHuman(msg));
-      })
-      .finally(() => load(false, setLoading));
+    captchaRef.current?.getToken().then((token) => {
+      register({ username, email, name_first: nameFirst, name_last: nameLast, password, captcha: token })
+        .then((response) => {
+          doLogin(response.user!);
+        })
+        .catch((msg) => {
+          setError(httpErrorToHuman(msg));
+        })
+        .finally(() => load(false, setLoading));
+    });
   };
 
   return (
@@ -60,7 +62,7 @@ export default () => {
               Register
             </Title>
             <Text c={'dimmed'} ta={'center'}>
-              Please enter your details
+              Please enter your details to register
             </Text>
 
             <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />

@@ -237,12 +237,14 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
           <Switch
             label={'Link Viewable to User'}
             description={'Allows the User to see the Connection and its identifier in the Client UI'}
-            {...form.getInputProps('linkViewable')}
+            checked={form.values.linkViewable}
+            onChange={(e) => form.setFieldValue('linkViewable', e.target.checked)}
           />
           <Switch
             label={'Link Manageable by User'}
             description={'Allows the User to connect and disconnect with this provider'}
-            {...form.getInputProps('userManageable')}
+            checked={form.values.userManageable}
+            onChange={(e) => form.setFieldValue('userManageable', e.target.checked)}
           />
         </Group>
 
