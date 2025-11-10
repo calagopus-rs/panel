@@ -51,7 +51,7 @@ mod delete {
 
         activity_logger
             .log(
-                "user:session.delete",
+                "session:delete",
                 serde_json::json!({
                     "uuid": session.uuid,
                     "user_agent": session.user_agent,

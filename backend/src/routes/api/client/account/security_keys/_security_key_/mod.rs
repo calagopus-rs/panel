@@ -56,7 +56,7 @@ mod delete {
         if security_key.registration.is_none() {
             activity_logger
                 .log(
-                    "user:security-key.delete",
+                    "security-key:delete",
                     serde_json::json!({
                         "uuid": security_key.uuid,
                         "name": security_key.name,

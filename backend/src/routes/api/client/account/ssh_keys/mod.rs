@@ -158,7 +158,7 @@ mod post {
 
         activity_logger
             .log(
-                "user:ssh-key.create",
+                "ssh-key:create",
                 serde_json::json!({
                     "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,

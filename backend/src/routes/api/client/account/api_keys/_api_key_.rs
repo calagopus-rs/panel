@@ -52,7 +52,7 @@ mod delete {
 
         activity_logger
             .log(
-                "user:api-key.delete",
+                "api-key:delete",
                 serde_json::json!({
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,

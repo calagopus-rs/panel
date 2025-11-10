@@ -82,7 +82,7 @@ mod put {
         .await?;
 
         activity_logger
-            .log("user:account.update-avatar", serde_json::json!({}))
+            .log("account:update-avatar", serde_json::json!({}))
             .await;
 
         ApiResponse::json(Response {

@@ -165,7 +165,7 @@ mod post {
         .await?;
 
         activity_logger
-            .log("user:account.two-factor.enable", serde_json::json!({}))
+            .log("account:two-factor.enable", serde_json::json!({}))
             .await;
 
         ApiResponse::json(Response { recovery_codes }).ok()
@@ -285,7 +285,7 @@ mod delete {
         .await?;
 
         activity_logger
-            .log("user:account.two-factor.disable", serde_json::json!({}))
+            .log("account:two-factor.disable", serde_json::json!({}))
             .await;
 
         ApiResponse::json(Response {}).ok()

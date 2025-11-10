@@ -85,7 +85,7 @@ mod put {
 
             activity_logger
                 .log(
-                    "user:account.email-changed",
+                    "account:email-changed",
                     serde_json::json!({
                         "old": user.email,
                         "new": data.email,

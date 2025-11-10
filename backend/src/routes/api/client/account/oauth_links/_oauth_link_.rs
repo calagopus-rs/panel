@@ -104,7 +104,7 @@ mod delete {
 
         activity_logger
             .log(
-                "account:oauth-link.delete",
+                "oauth-link:delete",
                 serde_json::json!({
                     "uuid": oauth_link.uuid,
                     "oauth_provider": oauth_link.oauth_provider.fetch_cached(&state.database).await?.name,

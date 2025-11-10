@@ -92,7 +92,7 @@ mod post {
 
         activity_logger
             .log(
-                "user:security-key.create",
+                "security-key:create",
                 serde_json::json!({
                     "uuid": security_key.uuid,
                     "name": security_key.name,

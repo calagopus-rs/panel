@@ -183,7 +183,7 @@ mod post {
 
         activity_logger
             .log(
-                "user:api-key.create",
+                "api-key:create",
                 serde_json::json!({
                     "uuid": api_key.uuid,
                     "identifier": api_key.key_start,

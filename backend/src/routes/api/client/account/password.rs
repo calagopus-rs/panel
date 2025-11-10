@@ -60,7 +60,7 @@ mod put {
             .await?;
 
         activity_logger
-            .log("user:account.password-changed", serde_json::json!({}))
+            .log("account:password-changed", serde_json::json!({}))
             .await;
 
         ApiResponse::json(Response {}).ok()

@@ -258,7 +258,7 @@ mod post {
 
         activity_logger
             .log(
-                "user:ssh-key.import",
+                "ssh-key:import",
                 serde_json::json!({
                     "provider": data.provider,
                     "username": data.username,

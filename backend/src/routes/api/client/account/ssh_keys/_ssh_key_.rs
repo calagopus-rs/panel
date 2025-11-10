@@ -51,7 +51,7 @@ mod delete {
 
         activity_logger
             .log(
-                "user:ssh-key.delete",
+                "ssh-key:delete",
                 serde_json::json!({
                     "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,
@@ -158,7 +158,7 @@ mod patch {
 
         activity_logger
             .log(
-                "user:ssh-key.update",
+                "ssh-key:update",
                 serde_json::json!({
                     "uuid": ssh_key.uuid,
                     "fingerprint": ssh_key.fingerprint,
