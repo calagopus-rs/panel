@@ -60,7 +60,7 @@ export default () => {
               Register
             </Title>
             <Text c={'dimmed'} ta={'center'}>
-              Please enter your details
+              Please enter your details to register
             </Text>
 
             <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />
