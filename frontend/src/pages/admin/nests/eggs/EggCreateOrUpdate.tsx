@@ -75,12 +75,12 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
   });
 
   useEffect(() => {
-    if (contextNest) {
+    if (contextEgg) {
       form.setValues({
-        ...contextNest,
+        ...contextEgg,
       });
     }
-  }, [contextNest]);
+  }, [contextEgg]);
 
   const doExport = (format: 'json' | 'yaml') => {
     load(true, setLoading);
