@@ -57,9 +57,7 @@ export default ({ contextMount }: { contextMount?: Mount }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2} mb={'md'}>
-          {contextMount ? 'Update' : 'Create'} Mount
-        </Title>
+        <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
 
         <Group grow align={'start'}>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />

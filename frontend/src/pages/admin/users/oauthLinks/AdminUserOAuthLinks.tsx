@@ -26,7 +26,7 @@ export default ({ user }: { user: User }) => {
     <>
       <UserOAuthLinkAddModal user={user} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>User OAuth Links</Title>
         <Group>
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>

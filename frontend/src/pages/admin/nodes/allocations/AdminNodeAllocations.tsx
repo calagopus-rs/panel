@@ -82,7 +82,7 @@ export default ({ node }: { node: Node }) => {
         allocations from <Code>{node.name}</Code>?
       </ConfirmationModal>
 
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>Node Allocations</Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

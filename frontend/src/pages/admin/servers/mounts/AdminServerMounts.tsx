@@ -26,7 +26,7 @@ export default ({ server }: { server: AdminServer }) => {
     <>
       <ServerMountAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>Server Mounts</Title>
         <Group>
           <Button onClick={() => setOpenModal('add')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>

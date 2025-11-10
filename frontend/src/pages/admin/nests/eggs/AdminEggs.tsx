@@ -65,10 +65,8 @@ const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={2} c={'white'}>
-          Eggs
-        </Title>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
+        <Title order={2}>Eggs</Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>

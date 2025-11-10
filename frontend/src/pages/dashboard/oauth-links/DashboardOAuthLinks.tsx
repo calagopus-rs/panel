@@ -29,7 +29,7 @@ export default () => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={1} c={'white'}>
           OAuth Links
         </Title>

@@ -52,11 +52,9 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2} mb={'md'}>
-        {contextNest ? 'Update' : 'Create'} Nest
-      </Title>
-
       <Stack>
+        <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
+
         <Group grow>
           <TextInput withAsterisk label={'Author'} placeholder={'Author'} {...form.getInputProps('author')} />
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />

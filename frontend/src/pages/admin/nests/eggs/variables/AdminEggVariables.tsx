@@ -33,7 +33,7 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>Egg Variables</Title>
         <Button onClick={addVariable} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
           Add

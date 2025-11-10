@@ -106,11 +106,9 @@ export default () => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
-          Startup
-        </Title>
-      </Group>
+      <Title order={1} c={'white'} mb={'md'}>
+        Startup
+      </Title>
 
       <div className={'grid grid-cols-3 gap-4'}>
         <Card className={'flex flex-col justify-between rounded-md p-4 h-full col-span-2'}>

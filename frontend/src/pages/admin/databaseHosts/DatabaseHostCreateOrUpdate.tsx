@@ -1,4 +1,4 @@
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
@@ -85,12 +85,9 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2} mb={'md'}>
-        {contextDatabaseHost ? 'Update' : 'Create'} Database Host
-      </Title>
-      <Divider mb={'md'} />
-
       <Stack>
+        <Title order={2}>{contextDatabaseHost ? 'Update' : 'Create'} Database Host</Title>
+
         <Group grow>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <Select

@@ -1,7 +1,7 @@
 import { faChevronDown, faChevronUp, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Title } from '@mantine/core';
-import { useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import { permissionCategoryIconMapping } from '@/lib/enums';
@@ -17,72 +17,88 @@ export default ({
 }) => {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
-  const toggleCategory = (category: string) => {
-    const newExpanded = expandedCategories;
-    if (newExpanded.includes(category)) {
-      newExpanded.splice(newExpanded.indexOf(category), 1);
-    } else {
-      newExpanded.push(category);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const togglePermission = (permissionKey: string) => {
-    const newSelected = selectedPermissions;
-    if (newSelected.includes(permissionKey)) {
-      newSelected.splice(newSelected.indexOf(permissionKey), 1);
-    } else {
-      newSelected.push(permissionKey);
-    }
-    setSelectedPermissions(newSelected);
-  };
-
-  const toggleAllInCategory = (category: string) => {
-    const categoryPermissions = Object.keys(permissions[category].permissions);
-    const allSelected = categoryPermissions.every((perm) => selectedPermissions.includes(`${category}.${perm}`));
-
-    const newSelected = selectedPermissions;
-
-    if (allSelected) {
-      categoryPermissions.forEach((perm) => {
-        newSelected.splice(newSelected.indexOf(`${category}.${perm}`, 1));
-      });
-    } else {
-      categoryPermissions.forEach((perm) => {
-        newSelected.push(`${category}.${perm}`);
-      });
-    }
-
-    setSelectedPermissions(newSelected);
-  };
-
-  const selectAllPermissions = () => {
-    setSelectedPermissions(
-      Object.entries(permissions).flatMap(([category, { permissions }]) =>
-        Object.keys(permissions).map((perm) => `${category}.${perm}`),
-      ),
+  // Memoize all permission keys
+  const allPermissionKeys = useMemo(() => {
+    return Object.entries(permissions).flatMap(([category, { permissions: perms }]) =>
+      Object.keys(perms).map((perm) => `${category}.${perm}`),
     );
-  };
+  }, [permissions]);
 
-  const getSelectedPermissionsList = () => {
-    return Array.from(selectedPermissions).sort();
-  };
+  // Toggle category expansion (fixed: now creates new array)
+  const toggleCategory = useCallback((category: string) => {
+    setExpandedCategories((prev) => {
+      if (prev.includes(category)) {
+        return prev.filter((cat) => cat !== category);
+      }
+      return [...prev, category];
+    });
+  }, []);
 
-  const getCategorySelectionState = (category: string) => {
-    const categoryPermissions = Object.keys(permissions[category].permissions);
-    const selectedCount = categoryPermissions.filter((perm) =>
-      selectedPermissions.includes(`${category}.${perm}`),
-    ).length;
+  // Toggle individual permission (fixed: now creates new array)
+  const togglePermission = useCallback(
+    (permissionKey: string) => {
+      setSelectedPermissions(
+        selectedPermissions.includes(permissionKey)
+          ? selectedPermissions.filter((perm) => perm !== permissionKey)
+          : [...selectedPermissions, permissionKey],
+      );
+    },
+    [selectedPermissions, setSelectedPermissions],
+  );
 
-    if (selectedCount === 0) return 'none';
-    if (selectedCount === categoryPermissions.length) return 'all';
-    return 'partial';
-  };
+  // Toggle all permissions in a category (fixed: logic and array mutation)
+  const toggleAllInCategory = useCallback(
+    (category: string) => {
+      const categoryPermissions = Object.keys(permissions[category].permissions).map((perm) => `${category}.${perm}`);
+
+      const allSelected = categoryPermissions.every((perm) => selectedPermissions.includes(perm));
+
+      if (allSelected) {
+        // Remove all category permissions
+        setSelectedPermissions(selectedPermissions.filter((perm) => !categoryPermissions.includes(perm)));
+      } else {
+        // Add all category permissions (avoiding duplicates)
+        const newPermissions = new Set([...selectedPermissions, ...categoryPermissions]);
+        setSelectedPermissions(Array.from(newPermissions));
+      }
+    },
+    [permissions, selectedPermissions, setSelectedPermissions],
+  );
+
+  // Select all permissions
+  const selectAllPermissions = useCallback(() => {
+    setSelectedPermissions(allPermissionKeys);
+  }, [allPermissionKeys, setSelectedPermissions]);
+
+  // Clear all permissions
+  const clearAllPermissions = useCallback(() => {
+    setSelectedPermissions([]);
+  }, [setSelectedPermissions]);
+
+  // Get sorted selected permissions list (memoized)
+  const sortedSelectedPermissions = useMemo(() => {
+    return [...selectedPermissions].sort();
+  }, [selectedPermissions]);
+
+  // Get category selection state (memoized per category)
+  const getCategorySelectionState = useCallback(
+    (category: string) => {
+      const categoryPermissions = Object.keys(permissions[category].permissions);
+      const selectedCount = categoryPermissions.filter((perm) =>
+        selectedPermissions.includes(`${category}.${perm}`),
+      ).length;
+
+      if (selectedCount === 0) return 'none';
+      if (selectedCount === categoryPermissions.length) return 'all';
+      return 'partial';
+    },
+    [permissions, selectedPermissions],
+  );
 
   return (
     <div className={'grid grid-cols-1 gap-6'}>
       <div className={'space-y-4'}>
-        {Object.entries(permissions).map(([category, { description, permissions }]) => {
+        {Object.entries(permissions).map(([category, { description, permissions: perms }]) => {
           const isExpanded = expandedCategories.includes(category);
           const selectionState = getCategorySelectionState(category);
 
@@ -104,20 +120,20 @@ export default ({
                     indeterminate={selectionState === 'partial'}
                     checked={selectionState === 'all'}
                   />
-                  <button onClick={() => toggleCategory(category)} className={'p-1 hover:bg-gray-600 rounded'}>
+                  <ActionIcon variant={'subtle'} onClick={() => toggleCategory(category)}>
                     {isExpanded ? (
                       <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
                     ) : (
                       <FontAwesomeIcon icon={faChevronDown} className={'w-4 h-4 text-gray-200'} />
                     )}
-                  </button>
+                  </ActionIcon>
                 </div>
               </div>
 
               {isExpanded && (
                 <div className={'p-4'}>
                   <div className={'space-y-3'}>
-                    {Object.entries(permissions).map(([permission, permDescription]) => {
+                    {Object.entries(perms).map(([permission, permDescription]) => {
                       const permissionKey = `${category}.${permission}`;
                       const isSelected = selectedPermissions.includes(permissionKey);
 
@@ -133,8 +149,7 @@ export default ({
                             <Checkbox.Indicator />
                             <div>
                               <div className={'text-gray-50 font-bold'}>
-                                {permission[0].toUpperCase()}
-                                {permission.slice(1)}
+                                {permission.charAt(0).toUpperCase() + permission.slice(1)}
                               </div>
                               <div className={'text-sm text-gray-200 mt-1'}>{permDescription}</div>
                             </div>
@@ -159,7 +174,7 @@ export default ({
             <p className={'text-gray-200 text-sm'}>No permissions selected</p>
           ) : (
             <div className={'space-y-1'}>
-              {getSelectedPermissionsList().map((permission) => (
+              {sortedSelectedPermissions.map((permission) => (
                 <Card key={permission} className={'border border-neutral-600'} padding={'xs'}>
                   <Group justify={'space-between'}>
                     <span className={'text-sm font-mono text-white'}>{permission}</span>
@@ -174,22 +189,16 @@ export default ({
           )}
         </div>
 
-        <div className={'mt-4'}>
-          <Button
-            disabled={
-              selectedPermissions.length ===
-              Object.entries(permissions).flatMap(([_, { permissions }]) => Object.keys(permissions)).length
-            }
-            onClick={selectAllPermissions}
-            className={'w-full'}
-          >
+        <div className={'mt-4 flex flex-row'}>
+          <Button disabled={selectedPermissions.length === allPermissionKeys.length} onClick={selectAllPermissions}>
             Select All
           </Button>
           <Button
             disabled={selectedPermissions.length === 0}
             color={'red'}
-            onClick={() => setSelectedPermissions([])}
-            className={'w-full ml-2'}
+            variant={'outline'}
+            onClick={clearAllPermissions}
+            className={'ml-2'}
           >
             Clear All
           </Button>

@@ -91,9 +91,9 @@ export default ({ contextUser }: { contextUser?: User }) => {
         Are you sure you want to remove the two factor of <Code>{form.values.username}</Code>?
       </ConfirmationModal>
 
-      <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
-
       <Stack>
+        <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
+
         <Group grow>
           <TextInput withAsterisk label={'Username'} placeholder={'Username'} {...form.getInputProps('username')} />
           <TextInput

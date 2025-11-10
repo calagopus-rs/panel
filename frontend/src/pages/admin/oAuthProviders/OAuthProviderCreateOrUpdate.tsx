@@ -120,12 +120,9 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={2} mb={'md'}>
-        {contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider
-      </Title>
-      <Divider mb={'md'} />
-
       <Stack>
+        <Title order={2}>{contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider</Title>
+
         <Group grow align={'start'}>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />

@@ -12,6 +12,7 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import Table from '@/elements/Table';
 import DatabaseCreateModal from './modals/DatabaseCreateModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import ConditionalTooltip from '@/elements/ConditionalTooltip';
 
 export default () => {
   const { server, databases, setDatabases } = useServerStore();
@@ -27,15 +28,28 @@ export default () => {
     <>
       <DatabaseCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={1} c={'white'}>
           Databases
+          <p className={'text-xs text-gray-300!'}>
+            {databases.total} of {server.featureLimits.databases} maximum databases created.
+          </p>
         </Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
+          <ConditionalTooltip
+            enabled={databases.total >= server.featureLimits.databases}
+            label={`This server is limited to ${server.featureLimits.databases} databases.`}
+          >
+            <Button
+              disabled={databases.total >= server.featureLimits.databases}
+              onClick={() => setOpenModal('create')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faPlus} />}
+            >
+              Create
+            </Button>
+          </ConditionalTooltip>
         </Group>
       </Group>
 

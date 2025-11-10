@@ -62,7 +62,7 @@ export default ({ server }: { server: AdminServer }) => {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>Server Variables</Title>
         <Group>
           <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color={'blue'}>

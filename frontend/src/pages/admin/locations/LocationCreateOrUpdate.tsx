@@ -62,9 +62,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2} mb={'md'}>
-          {contextLocation ? 'Update' : 'Create'} Location
-        </Title>
+        <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
 
         <Group grow>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />

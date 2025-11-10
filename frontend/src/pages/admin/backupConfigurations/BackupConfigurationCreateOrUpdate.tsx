@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
@@ -57,12 +57,9 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Title order={1} mb={'md'}>
-        {contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration
-      </Title>
-      <Divider />
-
       <Stack>
+        <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
+
         <Group grow>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
           <Select
@@ -76,11 +73,9 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
             {...form.getInputProps('backupDisk')}
           />
         </Group>
-
         <Group grow align={'start'}>
           <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
         </Group>
-
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
             Save
@@ -96,7 +91,6 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
             </Button>
           )}
         </Group>
-
         {form.values.backupDisk === 's3' || form.values.backupConfigs?.s3 ? (
           <BackupS3
             backupConfig={

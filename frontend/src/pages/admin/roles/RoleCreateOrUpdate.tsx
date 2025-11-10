@@ -69,9 +69,7 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2} mb={'md'}>
-          {contextRole ? 'Update' : 'Create'} Role
-        </Title>
+        <Title order={2}>{contextRole ? 'Update' : 'Create'} Role</Title>
 
         <Group grow>
           <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />

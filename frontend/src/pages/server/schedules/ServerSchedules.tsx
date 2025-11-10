@@ -16,6 +16,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import importSchedule from '@/api/server/schedules/importSchedule';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import jsYaml from 'js-yaml';
+import ConditionalTooltip from '@/elements/ConditionalTooltip';
 
 export default () => {
   const { addToast } = useToast();
@@ -67,9 +68,12 @@ export default () => {
     <>
       <ScheduleCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} mb={'md'}>
+      <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={1} c={'white'}>
           Schedules
+          <p className={'text-xs text-gray-300!'}>
+            {schedules.total} of {server.featureLimits.schedules} maximum schedules created.
+          </p>
         </Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
@@ -77,9 +81,19 @@ export default () => {
             <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
             Import
           </Button>
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
+          <ConditionalTooltip
+            enabled={schedules.total >= server.featureLimits.schedules}
+            label={`This server is limited to ${server.featureLimits.schedules} schedules.`}
+          >
+            <Button
+              disabled={schedules.total >= server.featureLimits.schedules}
+              onClick={() => setOpenModal('create')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faPlus} />}
+            >
+              Create
+            </Button>
+          </ConditionalTooltip>
 
           <input
             type={'file'}
