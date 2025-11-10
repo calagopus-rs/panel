@@ -1,30 +1,30 @@
-import { useEffect, useState } from 'react';
-import { Alert, Group, Paper, Stack, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import TextArea from '@/elements/input/TextArea';
-import NumberInput from '@/elements/input/NumberInput';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import Button from '@/elements/Button';
-import getNodes from '@/api/admin/nodes/getNodes';
-import getUsers from '@/api/admin/users/getUsers';
-import getNests from '@/api/admin/nests/getNests';
-import getEggs from '@/api/admin/nests/eggs/getEggs';
-import { zones } from 'tzdata';
-import updateServer from '@/api/admin/servers/updateServer';
-import createServer from '@/api/admin/servers/createServer';
-import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
-import { formatAllocation } from '@/lib/server';
-import MultiSelect from '@/elements/input/MultiSelect';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
-import SizeInput from '@/elements/input/SizeInput';
-import { bytesToString, mbToBytes } from '@/lib/size';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Alert, Group, Paper, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
+import { zones } from 'tzdata';
 import { NIL as uuidNil } from 'uuid';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import { useForm } from '@mantine/form';
+import getEggs from '@/api/admin/nests/eggs/getEggs';
+import getNests from '@/api/admin/nests/getNests';
+import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
+import getNodes from '@/api/admin/nodes/getNodes';
+import createServer from '@/api/admin/servers/createServer';
+import updateServer from '@/api/admin/servers/updateServer';
+import getUsers from '@/api/admin/users/getUsers';
+import Button from '@/elements/Button';
+import MultiSelect from '@/elements/input/MultiSelect';
+import NumberInput from '@/elements/input/NumberInput';
+import Select from '@/elements/input/Select';
+import SizeInput from '@/elements/input/SizeInput';
+import Switch from '@/elements/input/Switch';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import { formatAllocation } from '@/lib/server';
+import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -36,9 +36,9 @@ const timezones = Object.keys(zones)
 export default ({ contextServer }: { contextServer?: AdminServer }) => {
   const form = useForm<Partial<UpdateAdminServer>>({
     initialValues: {
-      externalId: '',
+      externalId: null,
       name: '',
-      description: '',
+      description: null,
       startOnCompletion: true,
       skipInstaller: false,
       limits: {
@@ -353,12 +353,14 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
                   <Switch
                     label={'Start on Completion'}
                     description={'Start server after installation completes'}
-                    {...form.getInputProps('startOnCompletion')}
+                    checked={form.values.startOnCompletion}
+                    onChange={(e) => form.setFieldValue('startOnCompletion', e.target.checked)}
                   />
                   <Switch
                     label={'Skip Installer'}
                     description={'Skip running the install script'}
-                    {...form.getInputProps('skipInstaller')}
+                    checked={form.values.skipInstaller}
+                    onChange={(e) => form.setFieldValue('skipInstaller', e.target.checked)}
                   />
                 </Group>
               )}

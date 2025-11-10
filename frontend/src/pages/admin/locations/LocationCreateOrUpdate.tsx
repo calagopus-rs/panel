@@ -1,19 +1,19 @@
-import createLocation from '@/api/admin/locations/createLocation';
-import updateLocation from '@/api/admin/locations/updateLocation';
-import { useEffect, useState } from 'react';
-import deleteLocation from '@/api/admin/locations/deleteLocation';
-import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Select from '@/elements/input/Select';
-import Button from '@/elements/Button';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import TextArea from '@/elements/input/TextArea';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import { NIL as uuidNil } from 'uuid';
 import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
+import { NIL as uuidNil } from 'uuid';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import createLocation from '@/api/admin/locations/createLocation';
+import deleteLocation from '@/api/admin/locations/deleteLocation';
+import updateLocation from '@/api/admin/locations/updateLocation';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import Select from '@/elements/input/Select';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -21,7 +21,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   const form = useForm<UpdateLocation>({
     initialValues: {
       name: '',
-      description: '',
+      description: null,
       backupConfigurationUuid: uuidNil,
     },
   });
@@ -40,6 +40,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
     if (contextLocation) {
       form.setValues({
         ...contextLocation,
+        backupConfigurationUuid: contextLocation.backupConfiguration?.uuid ?? uuidNil,
       });
     }
   }, [contextLocation]);

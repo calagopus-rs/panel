@@ -1,26 +1,26 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Select from '@/elements/input/Select';
-import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import TextArea from '@/elements/input/TextArea';
-import updateNode from '@/api/admin/nodes/updateNode';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
+import { NIL as uuidNil } from 'uuid';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
+import getLocations from '@/api/admin/locations/getLocations';
 import createNode from '@/api/admin/nodes/createNode';
 import deleteNode from '@/api/admin/nodes/deleteNode';
-import getLocations from '@/api/admin/locations/getLocations';
-import NumberInput from '@/elements/input/NumberInput';
-import Switch from '@/elements/input/Switch';
 import resetNodeToken from '@/api/admin/nodes/resetNodeToken';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import { NIL as uuidNil } from 'uuid';
-import { useForm } from '@mantine/form';
+import updateNode from '@/api/admin/nodes/updateNode';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import NumberInput from '@/elements/input/NumberInput';
+import Select from '@/elements/input/Select';
+import Switch from '@/elements/input/Switch';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({ contextNode }: { contextNode?: Node }) => {
   const { addToast } = useToast();
@@ -192,7 +192,11 @@ export default ({ contextNode }: { contextNode?: Node }) => {
 
         <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
 
-        <Switch label={'Public'} {...form.getInputProps('public')} />
+        <Switch
+          label={'Public'}
+          checked={form.values.public}
+          onChange={(e) => form.setFieldValue('public', e.target.checked)}
+        />
 
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>

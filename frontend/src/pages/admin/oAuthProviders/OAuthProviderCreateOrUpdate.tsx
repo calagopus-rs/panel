@@ -1,25 +1,25 @@
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { Divider, Group, Stack, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Switch from '@/elements/input/Switch';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider';
-import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
-import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider';
-import TextArea from '@/elements/input/TextArea';
-import TagsInput from '@/elements/input/TagsInput';
-import Card from '@/elements/Card';
-import { useGlobalStore } from '@/stores/global';
-import jsYaml from 'js-yaml';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { transformKeysToSnakeCase } from '@/api/transformers';
+import { Divider, Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import jsYaml from 'js-yaml';
+import { useEffect, useState } from 'react';
+import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
+import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider';
+import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider';
+import { transformKeysToSnakeCase } from '@/api/transformers';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import Code from '@/elements/Code';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import Switch from '@/elements/input/Switch';
+import TagsInput from '@/elements/input/TagsInput';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
 
 export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthProvider }) => {
   const { addToast } = useToast();
@@ -30,7 +30,7 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
   const form = useForm<UpdateAdminOAuthProvider>({
     initialValues: {
       name: '',
-      description: '',
+      description: null,
       clientId: '',
       clientSecret: '',
       authUrl: '',
@@ -38,10 +38,10 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
       infoUrl: '',
       scopes: [],
       identifierPath: '',
-      emailPath: '',
-      usernamePath: '',
-      nameFirstPath: '',
-      nameLastPath: '',
+      emailPath: null,
+      usernamePath: null,
+      nameFirstPath: null,
+      nameLastPath: null,
       enabled: true,
       loginOnly: false,
       linkViewable: true,
@@ -161,7 +161,8 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
           <Switch
             label={'Basic Auth'}
             description={'Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'}
-            {...form.getInputProps('basicAuth')}
+            checked={form.values.basicAuth}
+            onChange={(e) => form.setFieldValue('basicAuth', e.target.checked)}
           />
         </Group>
 
@@ -220,8 +221,16 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
         </Group>
 
         <Group grow>
-          <Switch label={'Enabled'} {...form.getInputProps('enabled')} />
-          <Switch label={'Only allow Login'} {...form.getInputProps('loginOnly')} />
+          <Switch
+            label={'Enabled'}
+            checked={form.values.enabled}
+            onChange={(e) => form.setFieldValue('enabled', e.target.checked)}
+          />
+          <Switch
+            label={'Only allow Login'}
+            checked={form.values.loginOnly}
+            onChange={(e) => form.setFieldValue('loginOnly', e.target.checked)}
+          />
         </Group>
 
         <Group grow>

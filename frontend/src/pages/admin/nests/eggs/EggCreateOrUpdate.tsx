@@ -1,27 +1,27 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
-import Code from '@/elements/Code';
-import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
-import updateEgg from '@/api/admin/nests/eggs/updateEgg';
-import createEgg from '@/api/admin/nests/eggs/createEgg';
-import { Group, Stack } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import TagsInput from '@/elements/input/TagsInput';
-import Switch from '@/elements/input/Switch';
-import NumberInput from '@/elements/input/NumberInput';
-import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
-import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import TextArea from '@/elements/input/TextArea';
-import exportEgg from '@/api/admin/nests/eggs/exportEgg';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import jsYaml from 'js-yaml';
-import { useResourceForm } from '@/plugins/useResourceForm';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import jsYaml from 'js-yaml';
+import { useEffect, useState } from 'react';
+import createEgg from '@/api/admin/nests/eggs/createEgg';
+import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
+import exportEgg from '@/api/admin/nests/eggs/exportEgg';
+import updateEgg from '@/api/admin/nests/eggs/updateEgg';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
+import NumberInput from '@/elements/input/NumberInput';
+import Switch from '@/elements/input/Switch';
+import TagsInput from '@/elements/input/TagsInput';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { load } from '@/lib/debounce';
+import { useResourceForm } from '@/plugins/useResourceForm';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
   const { addToast } = useToast();
@@ -32,7 +32,7 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
     initialValues: {
       author: '',
       name: '',
-      description: '',
+      description: null,
       configFiles: [],
       configStartup: {
         done: [],
@@ -40,7 +40,7 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
       },
       configStop: {
         type: '',
-        value: '',
+        value: null,
       },
       configScript: {
         container: '',
@@ -147,7 +147,11 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
           {...form.getInputProps('configStartup.done')}
         />
 
-        <Switch label={'Strip ANSI from startup messages'} {...form.getInputProps('configStartup.stripAnsi')} />
+        <Switch
+          label={'Strip ANSI from startup messages'}
+          checked={form.values.configStartup.stripAnsi}
+          onChange={(e) => form.setFieldValue('configStartup.stripAnsi', e.target.checked)}
+        />
 
         {/* TODO: configStop */}
 
@@ -174,11 +178,18 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
           {...form.getInputProps('configScript.content')}
         />
 
-        <Switch label={'Allocation Self Assign'} {...form.getInputProps('configAllocations.userSelfAssign.enabled')} />
+        <Switch
+          label={'Allocation Self Assign'}
+          checked={form.values.configAllocations.userSelfAssign.enabled}
+          onChange={(e) => form.setFieldValue('configAllocations.userSelfAssign.enabled', e.target.checked)}
+        />
 
         <Switch
           label={'Require Primary Allocation'}
-          {...form.getInputProps('configAllocations.userSelfAssign.requirePrimaryAllocation')}
+          checked={form.values.configAllocations.userSelfAssign.requirePrimaryAllocation}
+          onChange={(e) =>
+            form.setFieldValue('configAllocations.userSelfAssign.requirePrimaryAllocation', e.target.checked)
+          }
         />
 
         <Group grow>
@@ -196,11 +207,16 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
 
         <TextInput withAsterisk label={'Startup'} placeholder={'Startup'} {...form.getInputProps('startup')} />
 
-        <Switch label={'Force Outgoing IP'} {...form.getInputProps('forceOutgoingIp')} />
+        <Switch
+          label={'Force Outgoing IP'}
+          checked={form.values.forceOutgoingIp}
+          onChange={(e) => form.setFieldValue('forceOutgoingIp', e.target.checked)}
+        />
         <Switch
           label={'Separate IP and Port'}
           description={'Separates the primary IP and Port in the Console page instead of joining them with ":"'}
-          {...form.getInputProps('separatePort')}
+          checked={form.values.separatePort}
+          onChange={(e) => form.setFieldValue('separatePort', e.target.checked)}
         />
 
         <TagsInput label={'Features'} placeholder={'Feature'} {...form.getInputProps('features')} />

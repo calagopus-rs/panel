@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
 import { Group, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
+import createMount from '@/api/admin/mounts/createMount';
+import deleteMount from '@/api/admin/mounts/deleteMount';
+import updateMount from '@/api/admin/mounts/updateMount';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
 import Switch from '@/elements/input/Switch';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import createMount from '@/api/admin/mounts/createMount';
-import updateMount from '@/api/admin/mounts/updateMount';
-import deleteMount from '@/api/admin/mounts/deleteMount';
 import TextArea from '@/elements/input/TextArea';
-import { useForm } from '@mantine/form';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextMount }: { contextMount?: Mount }) => {
@@ -18,7 +18,7 @@ export default ({ contextMount }: { contextMount?: Mount }) => {
   const form = useForm<UpdateAdminMount>({
     initialValues: {
       name: '',
-      description: '',
+      description: null,
       source: '',
       target: '',
       readOnly: false,
@@ -72,8 +72,16 @@ export default ({ contextMount }: { contextMount?: Mount }) => {
         </Group>
 
         <Group grow>
-          <Switch label={'Read Only'} {...form.getInputProps('readOnly')} />
-          <Switch label={'User Mountable'} {...form.getInputProps('userMountable')} />
+          <Switch
+            label={'Read Only'}
+            checked={form.values.readOnly}
+            onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
+          />
+          <Switch
+            label={'User Mountable'}
+            checked={form.values.userMountable}
+            onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
+          />
         </Group>
 
         <Group>
