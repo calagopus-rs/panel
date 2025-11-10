@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateAllocation from '@/api/server/allocations/updateAllocation';
 import Button from '@/elements/Button';
@@ -7,14 +9,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   allocation: ServerAllocation;
 };
 
-export default ({ allocation, opened, onClose }: Props) => {
+export default function AllocationEditModal({ allocation, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, setServer, allocations, setAllocations } = useServerStore();
 
@@ -69,4 +69,4 @@ export default ({ allocation, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

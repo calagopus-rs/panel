@@ -1,15 +1,15 @@
+import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepWriteFile({
   action,
   setAction,
 }: {
   action: ScheduleActionWriteFile;
   setAction: (action: ScheduleActionWriteFile) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -40,4 +40,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

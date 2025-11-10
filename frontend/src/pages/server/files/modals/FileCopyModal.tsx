@@ -1,3 +1,6 @@
+import { Group, ModalProps } from '@mantine/core';
+import { join } from 'pathe';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import copyFile from '@/api/server/files/copyFile';
 import Button from '@/elements/Button';
@@ -7,15 +10,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
-import { join } from 'pathe';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   file: DirectoryEntry;
 };
 
-export default ({ file, opened, onClose }: Props) => {
+export default function FileCopyModal({ file, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingEntries, addBrowsingEntry } = useServerStore();
 
@@ -107,4 +107,4 @@ export default ({ file, opened, onClose }: Props) => {
       </Group>
     </Modal>
   );
-};
+}

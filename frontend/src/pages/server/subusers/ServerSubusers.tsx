@@ -1,24 +1,24 @@
-import getSubusers from '@/api/server/subusers/getSubusers';
-import Spinner from '@/elements/Spinner';
-import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
-import SubuserRow from './SubuserRow';
-import createSubuser from '@/api/server/subusers/createSubuser';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import getPermissions from '@/api/getPermissions';
-import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import getPermissions from '@/api/getPermissions';
+import createSubuser from '@/api/server/subusers/createSubuser';
+import getSubusers from '@/api/server/subusers/getSubusers';
 import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
+import { useServerStore } from '@/stores/server';
+import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
+import SubuserRow from './SubuserRow';
 
-export default () => {
+export default function ServerSubusers() {
   const { addToast } = useToast();
   const { server, subusers, setSubusers, addSubuser } = useServerStore();
   const { setAvailablePermissions } = useGlobalStore();
@@ -85,4 +85,4 @@ export default () => {
       )}
     </>
   );
-};
+}

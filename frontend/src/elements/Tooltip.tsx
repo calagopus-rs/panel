@@ -1,10 +1,12 @@
-import { Tooltip, TooltipProps } from '@mantine/core';
+import { Tooltip as MantineTooltip, TooltipProps } from '@mantine/core';
 import { forwardRef } from 'react';
 
-export default forwardRef<HTMLDivElement, TooltipProps>(({ children, className, ...rest }, ref) => {
+const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(({ children, className, ...rest }, ref) => {
   return (
-    <Tooltip ref={ref} className={className} {...rest}>
+    <MantineTooltip ref={ref} className={className} {...rest}>
       <div>{children}</div>
-    </Tooltip>
+    </MantineTooltip>
   );
 });
+
+export default Tooltip;

@@ -1,12 +1,12 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
 import { ModalProps } from '@mantine/core';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Code from '@/elements/Code';
 import updateServer from '@/api/admin/servers/updateServer';
+import { httpErrorToHuman } from '@/api/axios';
+import Code from '@/elements/Code';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
+export default function ServerUnsuspendModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();
   const { updateServer: updateStoreServer } = useAdminStore();
 
@@ -40,4 +40,4 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       </ConfirmationModal>
     </>
   );
-};
+}

@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import UserRow, { userTableColumns } from './UserRow';
-import UserCreateOrUpdate from './UserCreateOrUpdate';
-import getUsers from '@/api/admin/users/getUsers';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
+import getUsers from '@/api/admin/users/getUsers';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import UserView from '@/pages/admin/users/UserView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import UserCreateOrUpdate from './UserCreateOrUpdate';
+import UserRow, { userTableColumns } from './UserRow';
 
-const UsersContainer = () => {
+function UsersContainer() {
   const navigate = useNavigate();
   const { users, setUsers } = useAdminStore();
 
@@ -51,9 +51,9 @@ const UsersContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminUsers() {
   return (
     <Routes>
       <Route path={'/'} element={<UsersContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:id/*'} element={<UserView />} />
     </Routes>
   );
-};
+}

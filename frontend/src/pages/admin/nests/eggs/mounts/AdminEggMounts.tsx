@@ -1,19 +1,25 @@
-import { useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import EggMountAddModal from './modals/EggMountAddModal';
-import EggMountRow from './EggMountRow';
-import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import EggMountRow from './EggMountRow';
+import EggMountAddModal from './modals/EggMountAddModal';
 
-export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: AdminNestEgg }) => {
+export default function AdminEggMounts({
+  contextNest,
+  contextEgg,
+}: {
+  contextNest: AdminNest;
+  contextEgg: AdminNestEgg;
+}) {
   const { eggMounts, setEggMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
@@ -59,4 +65,4 @@ export default ({ contextNest, contextEgg }: { contextNest: Nest; contextEgg: Ad
       )}
     </>
   );
-};
+}

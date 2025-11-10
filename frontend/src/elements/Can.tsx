@@ -1,12 +1,12 @@
-import { memo } from 'react';
+import { memo, ReactNode } from 'react';
 import isEqual from 'react-fast-compare';
 import { usePermissions } from '@/plugins/usePermissions';
 
 interface Props {
   action: string | string[];
   matchAny?: boolean;
-  renderOnError?: React.ReactNode | null;
-  children: React.ReactNode;
+  renderOnError?: ReactNode | null;
+  children: ReactNode;
 }
 
 const Can = ({ action, matchAny = false, renderOnError, children }: Props) => {

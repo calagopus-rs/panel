@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { Button, Group, Stack, TagsInput, TextInput } from '@mantine/core';
+import { useEffect, useRef, useState } from 'react';
 
 interface MultiKeyValueInputProps {
   options: Record<string, string>; // { key: value, ... }
@@ -10,14 +10,14 @@ interface MultiKeyValueInputProps {
   placeholderValue?: string;
 }
 
-export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
+export default function MultiKeyValueInput({
   options,
   onChange,
   transformValue,
   hideKey,
   placeholderKey = 'Key',
   placeholderValue = 'Value',
-}) => {
+}: MultiKeyValueInputProps) {
   const [selectedOptions, setSelectedOptions] = useState<
     {
       key: string;
@@ -110,4 +110,4 @@ export const MultiKeyValueInput: React.FC<MultiKeyValueInputProps> = ({
       </Group>
     </Stack>
   );
-};
+}

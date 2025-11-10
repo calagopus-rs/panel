@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { useToast } from '@/providers/ToastProvider';
 
-export default ({
+export default function CopyOnClick({
   content,
   className,
   children,
@@ -9,7 +9,7 @@ export default ({
   content: string;
   className?: string;
   children: React.ReactNode;
-}) => {
+}) {
   const { addToast } = useToast();
 
   const handleCopy = (e: React.MouseEvent) => {
@@ -35,4 +35,4 @@ export default ({
       {children}
     </button>
   );
-};
+}

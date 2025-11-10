@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
 import Button from '@/elements/Button';
@@ -6,14 +8,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   sshKey: UserSshKey;
 };
 
-export default ({ sshKey, opened, onClose }: Props) => {
+export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { updateSshKey: updateStateSshKey } = useUserStore();
 
@@ -58,4 +58,4 @@ export default ({ sshKey, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

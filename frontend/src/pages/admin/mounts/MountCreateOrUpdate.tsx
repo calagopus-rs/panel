@@ -12,7 +12,7 @@ import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
-export default ({ contextMount }: { contextMount?: Mount }) => {
+export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const form = useForm<UpdateAdminMount>({
@@ -100,4 +100,4 @@ export default ({ contextMount }: { contextMount?: Mount }) => {
       </Stack>
     </>
   );
-};
+}

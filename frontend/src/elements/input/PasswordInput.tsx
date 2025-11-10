@@ -1,6 +1,8 @@
+import { PasswordInput as MantinePasswordInput, PasswordInputProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { PasswordInput, PasswordInputProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, PasswordInputProps>(({ className, ...rest }, ref) => {
-  return <PasswordInput ref={ref} className={className} {...rest} />;
+const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(({ className, ...rest }, ref) => {
+  return <MantinePasswordInput ref={ref} className={className} {...rest} />;
 });
+
+export default PasswordInput;

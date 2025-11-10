@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createBackup from '@/api/server/backups/createBackup';
 import Button from '@/elements/Button';
@@ -8,10 +10,8 @@ import { load } from '@/lib/debounce';
 import { generateBackupName } from '@/lib/server';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function BackupCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, addBackup } = useServerStore();
 
@@ -63,4 +63,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Stack>
     </Modal>
   );
-};
+}

@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
+import { useEffect, useState } from 'react';
 import getBackupConfigurationStats, {
   BackupStats,
 } from '@/api/admin/backup-configurations/getBackupConfigurationStats';
-import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
+import Spinner from '@/elements/Spinner';
+import { useToast } from '@/providers/ToastProvider';
 
-export default ({ backupConfiguration }: { backupConfiguration?: BackupConfiguration }) => {
+export default function AdminBackupConfigurationStats({
+  backupConfiguration,
+}: {
+  backupConfiguration?: BackupConfiguration;
+}) {
   const { addToast } = useToast();
 
   const [stats, setStats] = useState<Record<'today' | 'week' | 'month', BackupStats> | null>(null);
@@ -123,4 +127,4 @@ export default ({ backupConfiguration }: { backupConfiguration?: BackupConfigura
       )}
     </>
   );
-};
+}

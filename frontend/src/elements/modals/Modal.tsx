@@ -1,9 +1,9 @@
-import { Modal, ModalProps } from '@mantine/core';
+import { Modal as MantineModal, ModalProps } from '@mantine/core';
 import { forwardRef } from 'react';
 
-export default forwardRef<HTMLDivElement, ModalProps>(({ children, className, ...rest }, ref) => {
+const Modal = forwardRef<HTMLDivElement, ModalProps>(({ children, className, ...rest }, ref) => {
   return (
-    <Modal
+    <MantineModal
       centered
       overlayProps={{
         backgroundOpacity: 0.55,
@@ -14,6 +14,8 @@ export default forwardRef<HTMLDivElement, ModalProps>(({ children, className, ..
       {...rest}
     >
       {children}
-    </Modal>
+    </MantineModal>
   );
 });
+
+export default Modal;

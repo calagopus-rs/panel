@@ -1,19 +1,19 @@
-import Badge from '@/elements/Badge';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import { scheduleStepIconMapping, scheduleStepLabelMapping } from '@/lib/enums';
-import { formatMiliseconds } from '@/lib/time';
 import { faGear, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Stack, Text, ThemeIcon } from '@mantine/core';
 import { join } from 'pathe';
 import { useState } from 'react';
-import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { httpErrorToHuman } from '@/api/axios';
 import deleteScheduleStep from '@/api/server/schedules/steps/deleteScheduleStep';
+import Badge from '@/elements/Badge';
+import Card from '@/elements/Card';
+import Code from '@/elements/Code';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { scheduleStepIconMapping, scheduleStepLabelMapping } from '@/lib/enums';
+import { formatMiliseconds } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { httpErrorToHuman } from '@/api/axios';
+import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
 
 interface Props {
   schedule: ServerSchedule;
@@ -22,7 +22,7 @@ interface Props {
   onStepDelete: (stepUuid: string) => void;
 }
 
-export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
+export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }: Props) {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -142,4 +142,4 @@ export default ({ schedule, step, onStepUpdate, onStepDelete }: Props) => {
       </Group>
     </Card>
   );
-};
+}

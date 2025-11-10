@@ -1,15 +1,15 @@
+import { Stack } from '@mantine/core';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepWaitForConsoleLine({
   action,
   setAction,
 }: {
   action: ScheduleActionWaitForConsoleLine;
   setAction: (action: ScheduleActionWaitForConsoleLine) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -33,4 +33,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

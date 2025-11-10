@@ -1,11 +1,11 @@
-import Captcha from '@/elements/Captcha';
-import { useRef, useState } from 'react';
 import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
-import Modal from '@/elements/modals/Modal';
-import TextInput from '@/elements/input/TextInput';
+import { useRef, useState } from 'react';
 import Button from '@/elements/Button';
-import { useGlobalStore } from '@/stores/global';
+import Captcha from '@/elements/Captcha';
+import TextInput from '@/elements/input/TextInput';
+import Modal from '@/elements/modals/Modal';
 import PermissionSelector from '@/elements/PermissionSelector';
+import { useGlobalStore } from '@/stores/global';
 
 type Props = ModalProps & {
   subuser?: ServerSubuser;
@@ -13,7 +13,7 @@ type Props = ModalProps & {
   onUpdate?: (permissions: string[], ignoredFiles: string[]) => void;
 };
 
-export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
+export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate, opened, onClose }: Props) {
   const { availablePermissions } = useGlobalStore();
 
   const [email, setEmail] = useState('');
@@ -73,4 +73,4 @@ export default ({ subuser, onCreate, onUpdate, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

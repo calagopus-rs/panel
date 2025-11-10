@@ -1,18 +1,18 @@
-import Spinner from '@/elements/Spinner';
-import { useUserStore } from '@/stores/user';
-import { Group, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown, faFingerprint } from '@fortawesome/free-solid-svg-icons';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import getOAuthLinks from '@/api/me/oauth-links/getOAuthLinks';
-import OAuthLinkRow from './OAuthLinkRow';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import getOAuthProviders from '@/api/auth/getOAuthProviders';
+import getOAuthLinks from '@/api/me/oauth-links/getOAuthLinks';
+import Button from '@/elements/Button';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useUserStore } from '@/stores/user';
+import OAuthLinkRow from './OAuthLinkRow';
 
-export default () => {
+export default function DashboardOAuthLinks() {
   const { oauthLinks, setOAuthLinks } = useUserStore();
   const [oAuthProviders, setOAuthProviders] = useState<OAuthProvider[]>([]);
 
@@ -86,4 +86,4 @@ export default () => {
       )}
     </>
   );
-};
+}

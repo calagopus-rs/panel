@@ -1,13 +1,13 @@
+import { Group } from '@mantine/core';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { Group } from '@mantine/core';
-import { TableData, TableRow } from '@/elements/Table';
 
 export const activityTableColumns = ['Actor', 'Event', 'IP', 'When', ''];
 
-export default ({ activity }: { activity: AdminActivity }) => {
+export default function ActivityRow({ activity }: { activity: AdminActivity }) {
   return (
     <TableRow>
       <TableData>
@@ -31,4 +31,4 @@ export default ({ activity }: { activity: AdminActivity }) => {
       </TableData>
     </TableRow>
   );
-};
+}

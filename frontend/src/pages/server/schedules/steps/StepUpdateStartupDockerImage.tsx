@@ -1,15 +1,15 @@
+import { Stack } from '@mantine/core';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import { useServerStore } from '@/stores/server';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepUpdateStartupDockerImage({
   action,
   setAction,
 }: {
   action: ScheduleActionUpdateStartupDockerImage;
   setAction: (action: ScheduleActionUpdateStartupDockerImage) => void;
-}) => {
+}) {
   const server = useServerStore((state) => state.server);
 
   return (
@@ -36,4 +36,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

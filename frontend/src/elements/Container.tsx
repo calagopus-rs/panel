@@ -1,11 +1,11 @@
-import { FC, ReactNode, useRef } from 'react';
+import { ReactNode, useRef } from 'react';
 import { useGlobalStore } from '@/stores/global';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
-const Layout: FC<LayoutProps> = ({ children }) => {
+export default function Container({ children }: LayoutProps) {
   const { settings } = useGlobalStore();
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -31,6 +31,4 @@ const Layout: FC<LayoutProps> = ({ children }) => {
       </div>
     </div>
   );
-};
-
-export default Layout;
+}

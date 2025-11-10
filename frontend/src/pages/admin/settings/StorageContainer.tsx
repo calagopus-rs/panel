@@ -1,23 +1,23 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
-import { transformKeysToSnakeCase } from '@/api/transformers';
-import { httpErrorToHuman } from '@/api/axios';
-import { load } from '@/lib/debounce';
 import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import updateStorageSettings from '@/api/admin/settings/updateStorageSettings';
+import { httpErrorToHuman } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
+import { load } from '@/lib/debounce';
 import { storageDriverTypeLabelMapping } from '@/lib/enums';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 import StorageFilesystem from './forms/StorageFilesystem';
 import StorageS3 from './forms/StorageS3';
-import updateStorageSettings from '@/api/admin/settings/updateStorageSettings';
 
-export default () => {
+export default function StorageContainer() {
   const { addToast } = useToast();
   const { storageDriver } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<StorageDriver>(storageDriver);
+  const [settings, setSettings] = useState<AdminSettings['storageDriver']>(storageDriver);
 
   const doUpdate = () => {
     load(true, setLoading);
@@ -42,7 +42,7 @@ export default () => {
       <Select
         label={'Driver'}
         value={settings.type}
-        onChange={(value) => setSettings((settings) => ({ ...settings, type: value }))}
+        onChange={(value: StorageDriverType) => setSettings((settings) => ({ ...settings, type: value }))}
         data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
           value,
           label,
@@ -62,4 +62,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

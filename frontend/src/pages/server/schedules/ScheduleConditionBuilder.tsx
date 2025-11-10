@@ -1,17 +1,17 @@
-import { ActionIcon, Group, Paper, Select, Stack, Text } from '@mantine/core';
-import NumberInput from '@/elements/input/NumberInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon, Group, Paper, Select, Stack, Text } from '@mantine/core';
+import { useState } from 'react';
+import Button from '@/elements/Button';
+import NumberInput from '@/elements/input/NumberInput';
+import SizeInput from '@/elements/input/SizeInput';
+import TextInput from '@/elements/input/TextInput';
 import {
   scheduleComparatorLabelMapping,
   scheduleConditionLabelMapping,
   serverPowerStateLabelMapping,
 } from '@/lib/enums';
 import { bytesToString } from '@/lib/size';
-import TextInput from '@/elements/input/TextInput';
-import { useState } from 'react';
-import SizeInput from '@/elements/input/SizeInput';
 
 const maxConditionDepth = 3;
 
@@ -21,7 +21,7 @@ interface ConditionBuilderProps {
   depth?: number;
 }
 
-const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionBuilderProps) => {
+export default function ScheduleConditionBuilder({ condition, onChange, depth = 0 }: ConditionBuilderProps) {
   const [sizeInput, setSizeInput] = useState(
     condition.type === 'memory_usage' || condition.type === 'disk_usage' ? bytesToString(condition.value) : '',
   );
@@ -194,6 +194,4 @@ const ScheduleConditionBuilder = ({ condition, onChange, depth = 0 }: ConditionB
       </Stack>
     </Paper>
   );
-};
-
-export default ScheduleConditionBuilder;
+}

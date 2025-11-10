@@ -1,12 +1,12 @@
 import { faChevronDown, faChevronUp, faX } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Title } from '@mantine/core';
-import { useMemo, useState, useCallback } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import { permissionCategoryIconMapping } from '@/lib/enums';
 
-export default ({
+export default function PermissionSelector({
   permissions,
   selectedPermissions,
   setSelectedPermissions,
@@ -14,7 +14,7 @@ export default ({
   permissions: PermissionMap;
   selectedPermissions: string[];
   setSelectedPermissions: (selected: string[]) => void;
-}) => {
+}) {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
   // Memoize all permission keys
@@ -206,4 +206,4 @@ export default ({
       </Card>
     </div>
   );
-};
+}

@@ -1,14 +1,14 @@
-import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
 import { Dispatch, SetStateAction, useEffect } from 'react';
+import TextInput from '@/elements/input/TextInput';
 
-export default ({
+export default function EmailSendmail({
   settings,
   setSettings,
 }: {
   settings: MailModeSendmail;
   setSettings: Dispatch<SetStateAction<MailMode>>;
-}) => {
+}) {
   useEffect(() => {
     setSettings((settings: MailModeSendmail) => ({
       ...settings,
@@ -44,4 +44,4 @@ export default ({
       </Group>
     </Stack>
   );
-};
+}

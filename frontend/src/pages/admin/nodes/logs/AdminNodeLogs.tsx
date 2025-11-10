@@ -1,14 +1,14 @@
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import Select from '@/elements/input/Select';
-import { bytesToString } from '@/lib/size';
-import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { Editor } from '@monaco-editor/react';
+import { useEffect, useState } from 'react';
 import stripAnsi from 'strip-ansi';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
+import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
+import { bytesToString } from '@/lib/size';
+import { useToast } from '@/providers/ToastProvider';
 
 interface NodeLog {
   name: string;
@@ -16,7 +16,7 @@ interface NodeLog {
   lastModified: Date;
 }
 
-export default ({ node }: { node: Node }) => {
+export default function AdminNodeLogs({ node }: { node: Node }) {
   const { addToast } = useToast();
 
   const [logs, setLogs] = useState<NodeLog[]>([]);
@@ -137,4 +137,4 @@ export default ({ node }: { node: Node }) => {
       )}
     </>
   );
-};
+}

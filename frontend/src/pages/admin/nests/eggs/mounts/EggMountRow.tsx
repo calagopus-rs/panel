@@ -1,18 +1,18 @@
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import { NavLink } from 'react-router';
+import deleteEggMount from '@/api/admin/nests/eggs/mounts/deleteEggMount';
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { NavLink } from 'react-router';
-import deleteEggMount from '@/api/admin/nests/eggs/mounts/deleteEggMount';
 
-export default ({ nest, egg, mount }: { nest: Nest; egg: AdminNestEgg; mount: NodeMount }) => {
+export default function EggMountRow({ nest, egg, mount }: { nest: AdminNest; egg: AdminNestEgg; mount: NodeMount }) {
   const { addToast } = useToast();
   const { removeEggMount } = useAdminStore();
 
@@ -85,4 +85,4 @@ export default ({ nest, egg, mount }: { nest: Nest; egg: AdminNestEgg; mount: No
       </ContextMenu>
     </>
   );
-};
+}

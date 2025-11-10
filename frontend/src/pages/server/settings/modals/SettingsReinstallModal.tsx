@@ -1,3 +1,6 @@
+import { Group, ModalProps } from '@mantine/core';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import reinstallServer from '@/api/server/settings/reinstallServer';
 import Button from '@/elements/Button';
@@ -6,11 +9,8 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function SettingsReinstallModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
@@ -53,4 +53,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Group>
     </Modal>
   );
-};
+}

@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations';
-import ServerAllocationRow, { serverAllocationTableColumns } from './ServerAllocationRow';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import ServerAllocationRow, { serverAllocationTableColumns } from './ServerAllocationRow';
 
-export default ({ server }: { server: AdminServer }) => {
+export default function AdminServerAllocations({ server }: { server: AdminServer }) {
   const { serverAllocations, setServerAllocations } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
@@ -48,4 +48,4 @@ export default ({ server }: { server: AdminServer }) => {
       )}
     </>
   );
-};
+}

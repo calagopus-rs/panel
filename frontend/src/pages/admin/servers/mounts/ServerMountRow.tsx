@@ -1,20 +1,20 @@
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import { NavLink } from 'react-router';
+import deleteServerMount from '@/api/admin/servers/mounts/deleteServerMount';
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { NavLink } from 'react-router';
-import deleteServerMount from '@/api/admin/servers/mounts/deleteServerMount';
 
 export const serverMountTableColumns = ['Id', 'Name', 'Source', 'Target', 'Added', ''];
 
-export default ({ server, mount }: { server: AdminServer; mount: AdminServerMount }) => {
+export default function ServerMountRow({ server, mount }: { server: AdminServer; mount: AdminServerMount }) {
   const { addToast } = useToast();
   const { removeServerMount } = useAdminStore();
 
@@ -87,4 +87,4 @@ export default ({ server, mount }: { server: AdminServer; mount: AdminServerMoun
       </ContextMenu>
     </>
   );
-};
+}

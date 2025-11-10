@@ -1,15 +1,15 @@
 import { Group, Title } from '@mantine/core';
-import VariableContainer from '@/elements/VariableContainer';
-import { useAdminStore } from '@/stores/admin';
-import { load } from '@/lib/debounce';
-import { httpErrorToHuman } from '@/api/axios';
-import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables';
-import { useToast } from '@/providers/ToastProvider';
 import { useEffect, useState } from 'react';
 import getServerVariables from '@/api/admin/servers/variables/getServerVariables';
+import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
+import VariableContainer from '@/elements/VariableContainer';
+import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
-export default ({ server }: { server: AdminServer }) => {
+export default function AdminServerVariables({ server }: { server: AdminServer }) {
   const { addToast } = useToast();
   const { serverVariables, setServerVariables, updateServerVariable } = useAdminStore();
   const [values, setValues] = useState<Record<string, string>>({});
@@ -85,4 +85,4 @@ export default ({ server }: { server: AdminServer }) => {
       </div>
     </>
   );
-};
+}

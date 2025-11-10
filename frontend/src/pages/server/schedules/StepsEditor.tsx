@@ -1,17 +1,17 @@
-import { useServerStore } from '@/stores/server';
+import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import Spinner from '@/elements/Spinner';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import { useServerStore } from '@/stores/server';
 import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
 import StepCard from './StepCard';
 
-export default () => {
+export default function StepsEditor() {
   const params = useParams<'id'>();
   const navigate = useNavigate();
   const server = useServerStore((state) => state.server);
@@ -104,4 +104,4 @@ export default () => {
       </Stack>
     </>
   );
-};
+}

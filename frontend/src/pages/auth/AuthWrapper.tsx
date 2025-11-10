@@ -1,6 +1,7 @@
+import { ReactNode } from 'react';
 import minecraftBackground from '@/assets/minecraft_background.webp';
 
-export default ({ title, children }: { title?: string; children: React.ReactNode }) => {
+export default function AuthWrapper({ title, children }: { title?: string; children: ReactNode }) {
   return (
     <div className={'flex items-center justify-center h-screen'}>
       <img
@@ -16,4 +17,4 @@ export default ({ title, children }: { title?: string; children: React.ReactNode
       </div>
     </div>
   );
-};
+}

@@ -1,17 +1,17 @@
+import { Stack } from '@mantine/core';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import { archiveFormatLabelMapping } from '@/lib/enums';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepCompressFiles({
   action,
   setAction,
 }: {
   action: ScheduleActionCompressFiles;
   setAction: (action: ScheduleActionCompressFiles) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -57,4 +57,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

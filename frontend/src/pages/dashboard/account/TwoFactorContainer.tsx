@@ -1,10 +1,10 @@
 import { Grid, Title } from '@mantine/core';
+import Card from '@/elements/Card';
+import { useAuth } from '@/providers/AuthProvider';
 import TwoFactorDisableButton from './actions/TwoFactorDisableButton';
 import TwoFactorSetupButton from './actions/TwoFactorSetupButton';
-import { useAuth } from '@/providers/AuthProvider';
-import Card from '@/elements/Card';
 
-export default () => {
+export default function TwoFactorContainer() {
   const { user } = useAuth();
 
   return (
@@ -29,4 +29,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

@@ -1,3 +1,5 @@
+import { Group, ModalProps } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import deleteFiles from '@/api/server/files/deleteFiles';
 import Button from '@/elements/Button';
@@ -6,14 +8,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps } from '@mantine/core';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   files: DirectoryEntry[];
 };
 
-export default ({ files, opened, onClose }: Props) => {
+export default function FileDeleteModal({ files, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingEntries, setBrowsingEntries, setSelectedFiles } = useServerStore();
 
@@ -72,4 +72,4 @@ export default ({ files, opened, onClose }: Props) => {
       </Group>
     </Modal>
   );
-};
+}

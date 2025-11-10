@@ -1,16 +1,16 @@
+import { faHardDrive, faMemory, faMicrochip } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
+import { useEffect, useState } from 'react';
+import { NavLink } from 'react-router';
 import getServerResourceUsage from '@/api/server/getServerResourceUsage';
 import CopyOnClick from '@/elements/CopyOnClick';
 import Spinner from '@/elements/Spinner';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useGlobalStore } from '@/stores/global';
-import { faHardDrive, faMemory, faMicrochip } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import classNames from 'classnames';
-import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router';
 
-export default ({ server }: { server: Server }) => {
+export default function ServerItem({ server }: { server: Server }) {
   const { serverListDesign } = useGlobalStore();
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
@@ -115,4 +115,4 @@ export default ({ server }: { server: Server }) => {
       </div>
     </NavLink>
   );
-};
+}

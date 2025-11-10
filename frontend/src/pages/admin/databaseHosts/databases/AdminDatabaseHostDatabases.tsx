@@ -1,13 +1,13 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Title } from '@mantine/core';
+import { useState } from 'react';
+import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases';
+import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases';
 import DatabaseRow, { databaseTableColumns } from './DatabaseRow';
 
-export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
+export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseHost?: AdminDatabaseHost }) {
   const [databaseHostDatabases, setDatabaseHostDatabases] = useState<ResponseMeta<AdminServerDatabase>>(
     getEmptyPaginationSet(),
   );
@@ -34,4 +34,4 @@ export default ({ databaseHost }: { databaseHost?: AdminDatabaseHost }) => {
       )}
     </>
   );
-};
+}

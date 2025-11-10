@@ -1,24 +1,24 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { Ref, useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { MouseEvent as ReactMouseEvent, Ref, useState } from 'react';
+import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
+import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import SelectionArea from '@/elements/SelectionArea';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
-import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations';
-import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
-import SelectionArea from '@/elements/SelectionArea';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
-import TextInput from '@/elements/input/TextInput';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
+import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
 
-export default ({ node }: { node: Node }) => {
+export default function AdminNodeAllocations({ node }: { node: Node }) {
   const { addToast } = useToast();
   const {
     nodeAllocations,
@@ -36,7 +36,7 @@ export default ({ node }: { node: Node }) => {
     setStoreData: setNodeAllocations,
   });
 
-  const onSelectedStart = (event: React.MouseEvent | MouseEvent) => {
+  const onSelectedStart = (event: ReactMouseEvent | MouseEvent) => {
     setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : new Set());
   };
 
@@ -125,4 +125,4 @@ export default ({ node }: { node: Node }) => {
       )}
     </>
   );
-};
+}

@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const roleTableColumns = ['Id', 'Name', 'Server Permissions', 'Admin Permissions', 'Created'];
 
-export default ({ role }: { role: Role }) => {
+export default function RoleRow({ role }: { role: Role }) {
   return (
     <TableRow>
       <TableData>
@@ -26,4 +26,4 @@ export default ({ role }: { role: Role }) => {
       </TableData>
     </TableRow>
   );
-};
+}

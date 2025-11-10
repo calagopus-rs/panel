@@ -1,16 +1,16 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import OAuthProviderCreateOrUpdate from './OAuthProviderCreateOrUpdate';
-import AdminOAuthProviderUsers from '@/pages/admin/oAuthProviders/users/AdminOAuthProviderUsers';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getOAuthProvider from '@/api/admin/oauth-providers/getOAuthProvider';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
+import AdminOAuthProviderUsers from '@/pages/admin/oAuthProviders/users/AdminOAuthProviderUsers';
+import { useToast } from '@/providers/ToastProvider';
+import OAuthProviderCreateOrUpdate from './OAuthProviderCreateOrUpdate';
 
-export default () => {
+export default function OAuthProviderView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [oauthProvider, setOAuthProvider] = useState<AdminOAuthProvider | null>(null);
@@ -54,4 +54,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

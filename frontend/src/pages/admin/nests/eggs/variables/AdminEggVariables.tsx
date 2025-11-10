@@ -1,13 +1,19 @@
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
-import { useAdminStore } from '@/stores/admin';
 import { useEffect } from 'react';
 import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
-import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
 import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
+import { useAdminStore } from '@/stores/admin';
 
-export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg: AdminNestEgg }) => {
+export default function AdminEggVariables({
+  contextNest,
+  contextEgg,
+}: {
+  contextNest: AdminNest;
+  contextEgg: AdminNestEgg;
+}) {
   const { eggVariables, setEggVariables, addEggVariable } = useAdminStore();
 
   useEffect(() => {
@@ -51,4 +57,4 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
       </div>
     </>
   );
-};
+}

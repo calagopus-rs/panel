@@ -1,4 +1,4 @@
-export default ({ title, description }: { title: string; description: string }) => {
+export default function ScreenBlock({ title, description }: { title: string; description: string }) {
   return (
     <>
       <div className={'flex items-center justify-center'}>
@@ -11,4 +11,4 @@ export default ({ title, description }: { title: string; description: string }) 
       </div>
     </>
   );
-};
+}

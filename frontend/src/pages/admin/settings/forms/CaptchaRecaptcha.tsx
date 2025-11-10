@@ -1,15 +1,15 @@
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
 import { Dispatch, SetStateAction, useEffect } from 'react';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
 
-export default ({
+export default function CaptchaRecaptcha({
   settings,
   setSettings,
 }: {
   settings: CaptchaProviderRecaptcha;
   setSettings: Dispatch<SetStateAction<CaptchaProviderRecaptcha>>;
-}) => {
+}) {
   useEffect(() => {
     setSettings((settings: CaptchaProviderRecaptcha) => ({
       ...settings,
@@ -46,4 +46,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

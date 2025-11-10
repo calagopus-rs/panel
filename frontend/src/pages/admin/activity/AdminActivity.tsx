@@ -1,13 +1,13 @@
-import getAdminActivity from '@/api/admin/getAdminActivity';
-import Spinner from '@/elements/Spinner';
-import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import ActivityRow, { activityTableColumns } from './ActivityRow';
+import { useState } from 'react';
+import getAdminActivity from '@/api/admin/getAdminActivity';
 import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import ActivityRow, { activityTableColumns } from './ActivityRow';
 
-export default () => {
+export default function AdminActivity() {
   const [activities, setActivities] = useState<ResponseMeta<AdminActivity>>();
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
@@ -35,4 +35,4 @@ export default () => {
       )}
     </>
   );
-};
+}

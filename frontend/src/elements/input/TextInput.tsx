@@ -1,6 +1,8 @@
+import { TextInput as MantineTextInput, TextInputProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { TextInput, TextInputProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, TextInputProps>(({ className, ...rest }, ref) => {
-  return <TextInput ref={ref} className={className} {...rest} />;
+const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({ className, ...rest }, ref) => {
+  return <MantineTextInput ref={ref} className={className} {...rest} />;
 });
+
+export default TextInput;

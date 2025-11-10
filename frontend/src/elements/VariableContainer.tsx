@@ -7,7 +7,7 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Tooltip from '@/elements/Tooltip';
 
-export default ({
+export default function VariableContainer({
   variable,
   overrideReadonly = false,
   loading = false,
@@ -19,7 +19,7 @@ export default ({
   loading?: boolean;
   value: string;
   setValue: (value: string) => void;
-}) => {
+}) {
   return (
     <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
       <Title order={2} c={'white'}>
@@ -88,4 +88,4 @@ export default ({
       </div>
     </Card>
   );
-};
+}

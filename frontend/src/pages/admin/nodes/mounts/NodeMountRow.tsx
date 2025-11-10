@@ -1,20 +1,20 @@
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import { NavLink } from 'react-router';
+import deleteNodeMount from '@/api/admin/nodes/mounts/deleteNodeMount';
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import deleteNodeMount from '@/api/admin/nodes/mounts/deleteNodeMount';
-import { NavLink } from 'react-router';
 
 export const nodeMountTableColumns = ['Id', 'Name', 'Source', 'Target', 'Added', ''];
 
-export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
+export default function NodeMountRow({ node, mount }: { node: Node; mount: NodeMount }) {
   const { addToast } = useToast();
   const { removeNodeMount } = useAdminStore();
 
@@ -87,4 +87,4 @@ export default ({ node, mount }: { node: Node; mount: NodeMount }) => {
       </ContextMenu>
     </>
   );
-};
+}

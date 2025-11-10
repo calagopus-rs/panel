@@ -1,18 +1,18 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faBriefcase, faCog, faComputer, faFingerprint } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getUser from '@/api/admin/users/getUser';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
 import AdminUserServers from '@/pages/admin/users/servers/AdminUserServers';
 import UserCreateOrUpdate from '@/pages/admin/users/UserCreateOrUpdate';
-import AdminUserOAuthLinks from './oauthLinks/AdminUserOAuthLinks';
+import { useToast } from '@/providers/ToastProvider';
 import AdminUserActivity from './activity/AdminUserActivity';
+import AdminUserOAuthLinks from './oauthLinks/AdminUserOAuthLinks';
 
-export default () => {
+export default function UserView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [user, setUser] = useState<User | null>(null);
@@ -68,4 +68,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

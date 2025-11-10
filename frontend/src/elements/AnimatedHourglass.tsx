@@ -2,7 +2,7 @@ import { faHourglassEnd, faHourglassHalf, faHourglassStart } from '@fortawesome/
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
 
-export default () => {
+export default function AnimatedHourglass() {
   const [stage, setStage] = useState(0);
   const [rotation, setRotation] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -57,4 +57,4 @@ export default () => {
       <FontAwesomeIcon icon={getIcon()} size={'xl'} className={'animate-pulse'} />
     </div>
   );
-};
+}

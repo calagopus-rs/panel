@@ -1,19 +1,19 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import SshKeyEditModal from './modals/SshKeyEditModal';
-import { useUserStore } from '@/stores/user';
+import { httpErrorToHuman } from '@/api/axios';
 import deleteSshKey from '@/api/me/ssh-keys/deleteSshKey';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
+import CopyOnClick from '@/elements/CopyOnClick';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import CopyOnClick from '@/elements/CopyOnClick';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
+import SshKeyEditModal from './modals/SshKeyEditModal';
 
-export default ({ sshKey }: { sshKey: UserSshKey }) => {
+export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
   const { addToast } = useToast();
   const { removeSshKey } = useUserStore();
 
@@ -77,4 +77,4 @@ export default ({ sshKey }: { sshKey: UserSshKey }) => {
       </ContextMenu>
     </>
   );
-};
+}

@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import NodeRow, { nodeTableColumns } from './NodeRow';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import TextInput from '@/elements/input/TextInput';
-import NodeView from './NodeView';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
 import getNodes from '@/api/admin/nodes/getNodes';
-import NodeCreateOrUpdate from './NodeCreateOrUpdate';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import NodeCreateOrUpdate from './NodeCreateOrUpdate';
+import NodeRow, { nodeTableColumns } from './NodeRow';
+import NodeView from './NodeView';
 
-const NodesContainer = () => {
+function NodesContainer() {
   const navigate = useNavigate();
   const { nodes, setNodes } = useAdminStore();
 
@@ -51,9 +51,9 @@ const NodesContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminNodes() {
   return (
     <Routes>
       <Route path={'/'} element={<NodesContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:id/*'} element={<NodeView />} />
     </Routes>
   );
-};
+}

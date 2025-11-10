@@ -1,20 +1,20 @@
-import Spinner from '@/elements/Spinner';
-import { useServerStore } from '@/stores/server';
-import { useState } from 'react';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import DatabaseRow from './DatabaseRow';
-import getDatabases from '@/api/server/databases/getDatabases';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import DatabaseCreateModal from './modals/DatabaseCreateModal';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getDatabases from '@/api/server/databases/getDatabases';
+import Button from '@/elements/Button';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useServerStore } from '@/stores/server';
+import DatabaseRow from './DatabaseRow';
+import DatabaseCreateModal from './modals/DatabaseCreateModal';
 
-export default () => {
+export default function ServerDatabases() {
   const { server, databases, setDatabases } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
@@ -70,4 +70,4 @@ export default () => {
       )}
     </>
   );
-};
+}

@@ -1,24 +1,24 @@
-import getSchedules from '@/api/server/schedules/getSchedules';
-import { useServerStore } from '@/stores/server';
-import { useRef, useState } from 'react';
-import ScheduleRow from './ScheduleRow';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import jsYaml from 'js-yaml';
+import { useRef, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import getSchedules from '@/api/server/schedules/getSchedules';
+import importSchedule from '@/api/server/schedules/importSchedule';
+import Button from '@/elements/Button';
+import ConditionalTooltip from '@/elements/ConditionalTooltip';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import ScheduleCreateModal from './modals/ScheduleCreateModal';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
-import importSchedule from '@/api/server/schedules/importSchedule';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import jsYaml from 'js-yaml';
-import ConditionalTooltip from '@/elements/ConditionalTooltip';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import ScheduleCreateModal from './modals/ScheduleCreateModal';
+import ScheduleRow from './ScheduleRow';
 
-export default () => {
+export default function ServerSchedules() {
   const { addToast } = useToast();
   const { server, schedules, setSchedules, addSchedule } = useServerStore();
 
@@ -122,4 +122,4 @@ export default () => {
       )}
     </>
   );
-};
+}

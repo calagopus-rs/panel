@@ -1,14 +1,16 @@
-import { CloseButton as MantineCloseButton, CloseButtonProps as MantineCloseButtonProps } from '@mantine/core';
-import { forwardRef } from 'react';
+import { CloseButtonProps, CloseButton as MantineCloseButton } from '@mantine/core';
+import { forwardRef, MouseEvent as ReactMouseEvent } from 'react';
 
-export interface ButtonProps extends Omit<MantineCloseButtonProps, 'onClick'> {
-  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
+export interface ButtonProps extends Omit<CloseButtonProps, 'onClick'> {
+  onClick?: (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
 }
 
-export default forwardRef<HTMLButtonElement, ButtonProps>(({ children, className, onClick, ...rest }, ref) => {
+const CloseButton = forwardRef<HTMLButtonElement, ButtonProps>(({ children, className, onClick, ...rest }, ref) => {
   return (
     <MantineCloseButton ref={ref} className={className} onClick={onClick} {...rest}>
       {children}
     </MantineCloseButton>
   );
 });
+
+export default CloseButton;

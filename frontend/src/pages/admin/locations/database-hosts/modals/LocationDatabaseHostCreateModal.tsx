@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import createLocationDatabaseHost from '@/api/admin/locations/database-hosts/createLocationDatabaseHost';
 import { httpErrorToHuman } from '@/api/axios';
@@ -6,13 +8,15 @@ import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
 
-export default ({ location, opened, onClose }: ModalProps & { location: Location }) => {
+export default function LocationDatabaseHostCreateModal({
+  location,
+  opened,
+  onClose,
+}: ModalProps & { location: Location }) {
   const { addToast } = useToast();
   const { addLocationDatabaseHost } = useAdminStore();
 
@@ -78,4 +82,4 @@ export default ({ location, opened, onClose }: ModalProps & { location: Location
       </Stack>
     </Modal>
   );
-};
+}

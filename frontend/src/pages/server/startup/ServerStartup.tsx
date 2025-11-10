@@ -1,22 +1,22 @@
-import getVariables from '@/api/server/startup/getVariables';
-import { useServerStore } from '@/stores/server';
-import { useCallback, useEffect, useState } from 'react';
-import { useGlobalStore } from '@/stores/global';
-import { useToast } from '@/providers/ToastProvider';
-import updateDockerImage from '@/api/server/startup/updateDockerImage';
-import { httpErrorToHuman } from '@/api/axios';
-import updateCommand from '@/api/server/startup/updateCommand';
-import debounce from 'debounce';
 import { Group, Title } from '@mantine/core';
-import Card from '@/elements/Card';
-import TextArea from '@/elements/input/TextArea';
-import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
+import debounce from 'debounce';
+import { useCallback, useEffect, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import getVariables from '@/api/server/startup/getVariables';
+import updateCommand from '@/api/server/startup/updateCommand';
+import updateDockerImage from '@/api/server/startup/updateDockerImage';
 import updateVariables from '@/api/server/startup/updateVariables';
-import VariableContainer from '@/elements/VariableContainer';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import Select from '@/elements/input/Select';
+import TextArea from '@/elements/input/TextArea';
+import VariableContainer from '@/elements/VariableContainer';
+import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
+import { useServerStore } from '@/stores/server';
 
-export default () => {
+export default function ServerStartup() {
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
   const { server, updateServer, variables, setVariables, updateVariable } = useServerStore();
@@ -166,4 +166,4 @@ export default () => {
       </div>
     </>
   );
-};
+}

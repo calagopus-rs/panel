@@ -2,15 +2,15 @@ import { faTableCellsLarge, faTableList } from '@fortawesome/free-solid-svg-icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
-import ServerItem from './ServerItem';
 import getServers from '@/api/server/getServers';
-import Spinner from '@/elements/Spinner';
-import { useGlobalStore } from '@/stores/global';
-import { load } from '@/lib/debounce';
 import Switch from '@/elements/input/Switch';
+import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
+import { useGlobalStore } from '@/stores/global';
+import ServerItem from './ServerItem';
 
-export default () => {
+export default function DashboardHome() {
   const { serverListDesign, serverListShowOthers, setServerListDesign, setServerListShowOthers } = useGlobalStore();
   const { user } = useAuth();
 
@@ -67,4 +67,4 @@ export default () => {
       )}
     </>
   );
-};
+}

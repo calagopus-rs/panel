@@ -1,21 +1,21 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import { faAnglesDown, faAnglesUp, faArchive, faFileDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnimatePresence, motion } from 'motion/react';
-import { createPortal } from 'react-dom';
+import { join } from 'pathe';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import downloadFiles from '@/api/server/files/downloadFiles';
-import ArchiveCreateModal from './modals/ArchiveCreateModal';
-import FileDeleteModal from './modals/FileDeleteModal';
+import renameFiles from '@/api/server/files/renameFiles';
 import Button from '@/elements/Button';
 import { load } from '@/lib/debounce';
-import renameFiles from '@/api/server/files/renameFiles';
-import { join } from 'pathe';
-import { useSearchParams } from 'react-router';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import ArchiveCreateModal from './modals/ArchiveCreateModal';
+import FileDeleteModal from './modals/FileDeleteModal';
 
-export default () => {
+export default function FileActionBar() {
   const [searchParams, _] = useSearchParams();
   const { addToast } = useToast();
   const {
@@ -179,4 +179,4 @@ export default () => {
     </AnimatePresence>,
     document.body,
   );
-};
+}

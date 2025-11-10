@@ -1,12 +1,12 @@
 import { Button as MantineButton, ButtonProps as MantineButtonProps } from '@mantine/core';
 import classNames from 'classnames';
-import { forwardRef } from 'react';
+import { forwardRef, MouseEvent as ReactMouseEvent } from 'react';
 
 export interface ButtonProps extends Omit<MantineButtonProps, 'onClick'> {
-  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
+  onClick?: (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
 }
 
-export default forwardRef<HTMLButtonElement, ButtonProps>(
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ children, className, onClick, loading, disabled, ...rest }, ref) => {
     return (
       <MantineButton
@@ -22,3 +22,5 @@ export default forwardRef<HTMLButtonElement, ButtonProps>(
     );
   },
 );
+
+export default Button;

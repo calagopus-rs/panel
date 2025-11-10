@@ -1,5 +1,3 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import {
   faCodeCommit,
   faCog,
@@ -8,19 +6,21 @@ import {
   faNetworkWired,
   faWrench,
 } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getServer from '@/api/admin/servers/getServer';
-import ServerCreateOrUpdate from './ServerCreateOrUpdate';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
 import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations';
+import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement';
 import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts';
 import AdminServerVariables from '@/pages/admin/servers/variables/AdminServerVariables';
-import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement';
+import { useToast } from '@/providers/ToastProvider';
+import ServerCreateOrUpdate from './ServerCreateOrUpdate';
 
-export default () => {
+export default function ServerView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [server, setServer] = useState<AdminServer | null>(null);
@@ -87,4 +87,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

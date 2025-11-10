@@ -1,13 +1,13 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Title } from '@mantine/core';
+import { useState } from 'react';
+import getRoleUsers from '@/api/admin/roles/users/getRoleUsers';
+import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import getRoleUsers from '@/api/admin/roles/users/getRoleUsers';
 import UserRow, { userTableColumns } from '@/pages/admin/users/UserRow';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
-export default ({ role }: { role: Role }) => {
+export default function AdminRoleUsers({ role }: { role: Role }) {
   const [roleUsers, setRoleUsers] = useState<ResponseMeta<User>>(getEmptyPaginationSet());
 
   const { loading, setPage } = useSearchablePaginatedTable({
@@ -32,4 +32,4 @@ export default ({ role }: { role: Role }) => {
       )}
     </>
   );
-};
+}

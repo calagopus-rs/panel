@@ -1,16 +1,16 @@
+import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Dispatch } from 'react';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Divider, Group, Stack, Title } from '@mantine/core';
-import { Dispatch } from 'react';
 
-export default ({
+export default function BackupS3({
   backupConfig,
   setBackupConfigs,
 }: {
-  backupConfig: LocationConfigBackupConfigsS3;
-  setBackupConfigs: Dispatch<LocationConfigBackupConfigsS3>;
-}) => {
+  backupConfig: BackupDiskConfigurationS3;
+  setBackupConfigs: Dispatch<BackupDiskConfigurationS3>;
+}) {
   return (
     <Stack gap={'xs'}>
       <Stack gap={0}>
@@ -79,4 +79,4 @@ export default ({
       </Stack>
     </Stack>
   );
-};
+}

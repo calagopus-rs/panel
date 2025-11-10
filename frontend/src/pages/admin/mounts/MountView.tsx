@@ -1,15 +1,15 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getMount from '@/api/admin/mounts/getMount';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
 import MountCreateOrUpdate from '@/pages/admin/mounts/MountCreateOrUpdate';
+import { useToast } from '@/providers/ToastProvider';
 
-export default () => {
+export default function MountView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [mount, setMount] = useState<Mount | null>(null);
@@ -47,4 +47,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

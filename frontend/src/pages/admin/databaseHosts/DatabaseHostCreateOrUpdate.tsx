@@ -18,7 +18,11 @@ import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
-export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHost }) => {
+export default function DatabaseHostCreateOrUpdate({
+  contextDatabaseHost,
+}: {
+  contextDatabaseHost?: AdminDatabaseHost;
+}) {
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -157,4 +161,4 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
       </Stack>
     </>
   );
-};
+}

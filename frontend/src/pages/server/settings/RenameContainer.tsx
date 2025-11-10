@@ -1,16 +1,16 @@
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import renameServer from '@/api/server/settings/renameServer';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Stack, Title } from '@mantine/core';
-import Card from '@/elements/Card';
-import { useState } from 'react';
 
-export default () => {
+export default function RenameContainer() {
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
 
@@ -70,4 +70,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

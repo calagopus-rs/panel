@@ -1,18 +1,18 @@
+import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Alert, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import AuthWrapper from './AuthWrapper';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import resetPassword from '@/api/auth/resetPassword';
-import TextInput from '@/elements/input/TextInput';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import { Alert, Stack, Text, Title } from '@mantine/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 import Card from '@/elements/Card';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import AuthWrapper from './AuthWrapper';
 
-export default () => {
+export default function ResetPassword() {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -88,4 +88,4 @@ export default () => {
       </Stack>
     </AuthWrapper>
   );
-};
+}

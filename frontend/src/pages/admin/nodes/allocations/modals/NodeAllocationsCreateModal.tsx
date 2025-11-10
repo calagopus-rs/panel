@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import createNodeAllocations from '@/api/admin/nodes/allocations/createNodeAllocations';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
@@ -6,15 +8,13 @@ import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
 
-export default ({
+export default function NodeAllocationsCreateModal({
   node,
   loadAllocations,
   opened,
   onClose,
-}: ModalProps & { node: Node; loadAllocations: () => void }) => {
+}: ModalProps & { node: Node; loadAllocations: () => void }) {
   const { addToast } = useToast();
 
   const [ip, setIp] = useState('');
@@ -107,4 +107,4 @@ export default ({
       </Stack>
     </Modal>
   );
-};
+}

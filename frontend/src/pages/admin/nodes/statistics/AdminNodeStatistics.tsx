@@ -1,11 +1,11 @@
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useEffect, useState } from 'react';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import SemiCircleProgress from '@/elements/SemiCircleProgress';
+import { useEffect, useState } from 'react';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
+import SemiCircleProgress from '@/elements/SemiCircleProgress';
+import Spinner from '@/elements/Spinner';
 import { bytesToString } from '@/lib/size';
+import { useToast } from '@/providers/ToastProvider';
 
 interface NodeStatistics {
   cpu: {
@@ -33,7 +33,7 @@ interface NodeStatistics {
   };
 }
 
-export default ({ node }: { node: Node }) => {
+export default function AdminNodeStatistics({ node }: { node: Node }) {
   const { addToast } = useToast();
 
   const [statistics, setStatistics] = useState<NodeStatistics | null>(null);
@@ -112,4 +112,4 @@ export default ({ node }: { node: Node }) => {
       )}
     </>
   );
-};
+}

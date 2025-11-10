@@ -1,3 +1,5 @@
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
@@ -6,10 +8,8 @@ import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
-import { Grid, Group, Stack, Title } from '@mantine/core';
-import { useState } from 'react';
 
-export default () => {
+export default function PasswordContainer() {
   const { addToast } = useToast();
 
   const [currentPassword, setCurrentPassword] = useState('');
@@ -77,4 +77,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

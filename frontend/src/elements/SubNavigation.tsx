@@ -12,7 +12,7 @@ interface Props {
   }[];
 }
 
-export default ({ items }: Props) => {
+export default function SubNavigation({ items }: Props) {
   const location = useLocation();
   const activeItem =
     items.filter((item) => location.pathname.startsWith(item.link)).sort((a, b) => b.link.length - a.link.length)[0] ??
@@ -31,4 +31,4 @@ export default ({ items }: Props) => {
       </Tabs.List>
     </Tabs>
   );
-};
+}

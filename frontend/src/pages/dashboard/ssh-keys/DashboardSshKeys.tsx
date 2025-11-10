@@ -1,20 +1,20 @@
-import Spinner from '@/elements/Spinner';
-import { useState } from 'react';
-import { useUserStore } from '@/stores/user';
-import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import SshKeyRow from './SshKeyRow';
-import SshKeyCreateModal from './modals/SshKeyCreateModal';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faPlus } from '@fortawesome/free-solid-svg-icons';
-import SshKeyImportModal from './modals/SshKeyImportModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useUserStore } from '@/stores/user';
+import SshKeyCreateModal from './modals/SshKeyCreateModal';
+import SshKeyImportModal from './modals/SshKeyImportModal';
+import SshKeyRow from './SshKeyRow';
 
-export default () => {
+export default function DashboardSshKeys() {
   const { sshKeys, setSshKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create' | 'import'>(null);
@@ -61,4 +61,4 @@ export default () => {
       )}
     </>
   );
-};
+}

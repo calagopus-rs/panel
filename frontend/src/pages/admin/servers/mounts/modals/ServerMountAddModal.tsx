@@ -1,17 +1,17 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import createServerMount from '@/api/admin/servers/mounts/createServerMount';
+import getAvailableServerMounts from '@/api/admin/servers/mounts/getAvailableServerMounts';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import createServerMount from '@/api/admin/servers/mounts/createServerMount';
-import getAvailableServerMounts from '@/api/admin/servers/mounts/getAvailableServerMounts';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
 
-export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
+export default function ServerMountAddModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();
   const { addServerMount } = useAdminStore();
 
@@ -76,4 +76,4 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       </Stack>
     </Modal>
   );
-};
+}

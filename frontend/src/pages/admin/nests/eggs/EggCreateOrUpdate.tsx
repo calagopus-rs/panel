@@ -12,7 +12,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
+import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
@@ -23,7 +23,13 @@ import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
-export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEgg?: AdminNestEgg }) => {
+export default function EggCreateOrUpdate({
+  contextNest,
+  contextEgg,
+}: {
+  contextNest: AdminNest;
+  contextEgg?: AdminNestEgg;
+}) {
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -276,4 +282,4 @@ export default ({ contextNest, contextEgg }: { contextNest: AdminNest; contextEg
       </Group>
     </>
   );
-};
+}

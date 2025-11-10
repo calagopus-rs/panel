@@ -1,11 +1,11 @@
-import PasswordContainer from './PasswordContainer';
-import EmailContainer from './EmailContainer';
-import TwoFactorContainer from './TwoFactorContainer';
-import AccountContainer from './AccountContainer';
 import { Grid } from '@mantine/core';
+import AccountContainer from './AccountContainer';
 import AvatarContainer from './AvatarContainer';
+import EmailContainer from './EmailContainer';
+import PasswordContainer from './PasswordContainer';
+import TwoFactorContainer from './TwoFactorContainer';
 
-export default () => {
+export default function DashboardAccount() {
   return (
     <Grid grow>
       <PasswordContainer />
@@ -15,4 +15,4 @@ export default () => {
       <AvatarContainer />
     </Grid>
   );
-};
+}

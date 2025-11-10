@@ -1,11 +1,3 @@
-import Spinner from '@/elements/Spinner';
-import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import getSchedule from '@/api/server/schedules/getSchedule';
-import triggerSchedule from '@/api/server/schedules/triggerSchedule';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBolt,
   faChevronDown,
@@ -22,23 +14,31 @@ import {
   faServer,
   faSkull,
 } from '@fortawesome/free-solid-svg-icons';
-import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
-import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Grid, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import getSchedule from '@/api/server/schedules/getSchedule';
+import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import triggerSchedule from '@/api/server/schedules/triggerSchedule';
+import AnimatedHourglass from '@/elements/AnimatedHourglass';
+import Badge from '@/elements/Badge';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import Code from '@/elements/Code';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import Spinner from '@/elements/Spinner';
+import Tooltip from '@/elements/Tooltip';
+import { load } from '@/lib/debounce';
 import {
   scheduleComparatorLabelMapping,
   scheduleComparatorOperatorMapping,
   scheduleStepIconMapping,
 } from '@/lib/enums';
 import { bytesToString } from '@/lib/size';
-import Tooltip from '@/elements/Tooltip';
-import Card from '@/elements/Card';
-import Badge from '@/elements/Badge';
-import Code from '@/elements/Code';
-import { load } from '@/lib/debounce';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import AnimatedHourglass from '@/elements/AnimatedHourglass';
+import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
 
 interface DetailCardProps {
   icon: React.ReactNode;
@@ -385,7 +385,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
   );
 }
 
-export default () => {
+export default function ScheduleView() {
   const params = useParams<'id'>();
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -599,4 +599,4 @@ export default () => {
       </Tabs>
     </Stack>
   );
-};
+}

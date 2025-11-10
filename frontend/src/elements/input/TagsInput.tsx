@@ -1,6 +1,8 @@
+import { TagsInput as MantineTagsInput, TagsInputProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { TagsInput, TagsInputProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, TagsInputProps>(({ className, ...rest }, ref) => {
-  return <TagsInput ref={ref} className={className} {...rest} />;
+const TagsInput = forwardRef<HTMLInputElement, TagsInputProps>(({ className, ...rest }, ref) => {
+  return <MantineTagsInput ref={ref} className={className} {...rest} />;
 });
+
+export default TagsInput;

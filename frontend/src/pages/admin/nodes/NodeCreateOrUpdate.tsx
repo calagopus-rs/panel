@@ -22,7 +22,7 @@ import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 
-export default ({ contextNode }: { contextNode?: Node }) => {
+export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node }) {
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -221,4 +221,4 @@ export default ({ contextNode }: { contextNode?: Node }) => {
       </Stack>
     </>
   );
-};
+}

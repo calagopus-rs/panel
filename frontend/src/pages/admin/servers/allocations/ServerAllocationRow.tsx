@@ -1,27 +1,33 @@
+import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Stack } from '@mantine/core';
+import { useState } from 'react';
+import deleteServerAllocation from '@/api/admin/servers/allocations/deleteServerAllocation';
+import updateServerAllocation from '@/api/admin/servers/allocations/updateServerAllocation';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
 import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import Modal from '@/elements/modals/Modal';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import ContextMenu from '@/elements/ContextMenu';
-import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { load } from '@/lib/debounce';
 import { formatAllocation } from '@/lib/server';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteServerAllocation from '@/api/admin/servers/allocations/deleteServerAllocation';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import updateServerAllocation from '@/api/admin/servers/allocations/updateServerAllocation';
-import Modal from '@/elements/modals/Modal';
-import { Group, Stack } from '@mantine/core';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 
 export const serverAllocationTableColumns = ['', 'Id', 'IP', 'IP Alias', 'Port', 'Notes', 'Created'];
 
-export default ({ server, allocation }: { server: AdminServer; allocation: ServerAllocation }) => {
+export default function ServerAllocationRow({
+  server,
+  allocation,
+}: {
+  server: AdminServer;
+  allocation: ServerAllocation;
+}) {
   const { addToast } = useToast();
   const { serverAllocations, setServerAllocations, removeServerAllocation } = useAdminStore();
 
@@ -150,4 +156,4 @@ export default ({ server, allocation }: { server: AdminServer; allocation: Serve
       </ContextMenu>
     </>
   );
-};
+}

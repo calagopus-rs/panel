@@ -1,3 +1,6 @@
+import { Group, ModalProps, Switch } from '@mantine/core';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import restoreBackup from '@/api/server/backups/restoreBackup';
 import Button from '@/elements/Button';
@@ -5,15 +8,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Switch } from '@mantine/core';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
 
 type Props = ModalProps & {
   backup: ServerBackup;
 };
 
-export default ({ backup, opened, onClose }: Props) => {
+export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
@@ -57,4 +57,4 @@ export default ({ backup, opened, onClose }: Props) => {
       </Group>
     </Modal>
   );
-};
+}

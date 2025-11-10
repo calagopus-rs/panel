@@ -1,17 +1,17 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteOAuthLink from '@/api/me/oauth-links/deleteOAuthLink';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useUserStore } from '@/stores/user';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import deleteOAuthLink from '@/api/me/oauth-links/deleteOAuthLink';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 
-export default ({ oauthLink }: { oauthLink: UserOAuthLink }) => {
+export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }) {
   const { addToast } = useToast();
   const { removeOAuthLink } = useUserStore();
 
@@ -84,4 +84,4 @@ export default ({ oauthLink }: { oauthLink: UserOAuthLink }) => {
       </ContextMenu>
     </>
   );
-};
+}

@@ -1,17 +1,17 @@
+import { faGlobe, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
+import { NavLink } from 'react-router';
 import { axiosInstance } from '@/api/axios';
 import Code from '@/elements/Code';
 import Spinner from '@/elements/Spinner';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { faGlobe, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useEffect, useState } from 'react';
-import { NavLink } from 'react-router';
 
 export const nodeTableColumns = ['', 'Id', 'Name', 'Location', 'URL', 'Created'];
 
-export default ({ node }: { node: Node }) => {
+export default function NodeRow({ node }: { node: Node }) {
   const [version, setVersion] = useState<string | null>(null);
 
   useEffect(() => {
@@ -86,4 +86,4 @@ export default ({ node }: { node: Node }) => {
       </TableData>
     </TableRow>
   );
-};
+}

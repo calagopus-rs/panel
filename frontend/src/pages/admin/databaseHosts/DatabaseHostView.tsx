@@ -1,16 +1,16 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faDatabase } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
-import AdminDatabaseHostDatabases from '@/pages/admin/databaseHosts/databases/AdminDatabaseHostDatabases';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getDatabaseHost from '@/api/admin/database-hosts/getDatabaseHost';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
+import AdminDatabaseHostDatabases from '@/pages/admin/databaseHosts/databases/AdminDatabaseHostDatabases';
+import { useToast } from '@/providers/ToastProvider';
+import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
 
-export default () => {
+export default function DatabaseHostView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [databaseHost, setDatabaseHost] = useState<AdminDatabaseHost | null>(null);
@@ -54,4 +54,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

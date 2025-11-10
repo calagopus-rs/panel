@@ -1,15 +1,15 @@
+import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepCreateBackup({
   action,
   setAction,
 }: {
   action: ScheduleActionCreateBackup;
   setAction: (action: ScheduleActionCreateBackup) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -36,4 +36,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

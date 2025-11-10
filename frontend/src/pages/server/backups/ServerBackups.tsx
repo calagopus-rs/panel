@@ -1,20 +1,20 @@
-import { useServerStore } from '@/stores/server';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackups from '@/api/server/backups/getBackups';
-import BackupRow from './BackupRow';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
 import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import Spinner from '@/elements/Spinner';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import BackupCreateModal from './modals/BackupCreateModal';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useServerStore } from '@/stores/server';
+import BackupRow from './BackupRow';
+import BackupCreateModal from './modals/BackupCreateModal';
 
-export default () => {
+export default function ServerBackups() {
   const { server, backups, setBackups } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
@@ -70,4 +70,4 @@ export default () => {
       )}
     </>
   );
-};
+}

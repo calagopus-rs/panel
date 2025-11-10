@@ -1,15 +1,15 @@
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
 import { Dispatch, SetStateAction, useEffect } from 'react';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
 
-export default ({
+export default function StorageS3({
   settings,
   setSettings,
 }: {
   settings: StorageDriverS3;
   setSettings: Dispatch<SetStateAction<StorageDriver>>;
-}) => {
+}) {
   useEffect(() => {
     setSettings((settings: StorageDriverS3) => ({
       ...settings,
@@ -74,4 +74,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

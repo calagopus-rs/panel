@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import getLocations from '@/api/admin/locations/getLocations';
-import LocationRow, { locationTableColumns } from './LocationRow';
-import LocationCreateOrUpdate from './LocationCreateOrUpdate';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
+import getLocations from '@/api/admin/locations/getLocations';
+import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import LocationView from './LocationView';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import LocationCreateOrUpdate from './LocationCreateOrUpdate';
+import LocationRow, { locationTableColumns } from './LocationRow';
+import LocationView from './LocationView';
 
-const LocationsContainer = () => {
+function LocationsContainer() {
   const navigate = useNavigate();
   const { locations, setLocations } = useAdminStore();
 
@@ -51,9 +51,9 @@ const LocationsContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminLocations() {
   return (
     <Routes>
       <Route path={'/'} element={<LocationsContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:id/*'} element={<LocationView />} />
     </Routes>
   );
-};
+}

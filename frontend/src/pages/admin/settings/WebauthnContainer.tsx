@@ -9,7 +9,7 @@ import { isIP } from '@/lib/ip';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export default () => {
+export default function WebauthnContainer() {
   const { addToast } = useToast();
   const { webauthn } = useAdminStore();
 
@@ -77,4 +77,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

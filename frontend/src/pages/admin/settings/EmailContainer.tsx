@@ -1,19 +1,19 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
-import { transformKeysToSnakeCase } from '@/api/transformers';
 import { httpErrorToHuman } from '@/api/axios';
-import EmailSmtp from './forms/EmailSmtp';
-import { load } from '@/lib/debounce';
-import { Group, Title } from '@mantine/core';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
+import { load } from '@/lib/debounce';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
-import EmailSendmail from './forms/EmailSendmail';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 import EmailFile from './forms/EmailFile';
+import EmailSendmail from './forms/EmailSendmail';
+import EmailSmtp from './forms/EmailSmtp';
 
-export default () => {
+export default function EmailContainer() {
   const { addToast } = useToast();
   const { mailMode } = useAdminStore();
 
@@ -65,4 +65,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

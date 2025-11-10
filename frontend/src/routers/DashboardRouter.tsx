@@ -9,7 +9,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import accountRoutes from '@/routers/routes/accountRoutes';
 import { useGlobalStore } from '@/stores/global';
 
-export default () => {
+export default function DashboardRouter() {
   const { user } = useAuth();
   const { settings } = useGlobalStore();
 
@@ -57,4 +57,4 @@ export default () => {
       </div>
     </div>
   );
-};
+}

@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack, Text } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import deleteDatabase from '@/api/server/databases/deleteDatabase';
 import Button from '@/elements/Button';
@@ -7,14 +9,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   database: ServerDatabase;
 };
 
-export default ({ database, opened, onClose }: Props) => {
+export default function DatabaseDeleteModal({ database, opened, onClose }: Props) {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
   const { removeDatabase } = useServerStore();
@@ -65,4 +65,4 @@ export default ({ database, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

@@ -1,19 +1,19 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faChartBar, faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
 import getBackupConfiguration from '@/api/admin/backup-configurations/getBackupConfiguration';
-import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats';
-import AdminBackupConfigurationNodes from '@/pages/admin/backupConfigurations/nodes/AdminBackupConfigurationNodes';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
 import AdminBackupConfigurationLocations from '@/pages/admin/backupConfigurations/locations/AdminBackupConfigurationLocations';
+import AdminBackupConfigurationNodes from '@/pages/admin/backupConfigurations/nodes/AdminBackupConfigurationNodes';
 import AdminBackupConfigurationServers from '@/pages/admin/backupConfigurations/servers/AdminBackupConfigurationServers';
+import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats';
+import { useToast } from '@/providers/ToastProvider';
+import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate';
 
-export default () => {
+export default function BackupConfigurationView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [backupConfiguration, setBackupConfiguration] = useState<BackupConfiguration | null>(null);
@@ -84,4 +84,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

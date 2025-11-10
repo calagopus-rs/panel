@@ -1,18 +1,18 @@
-import { useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import ServerMountRow, { serverMountTableColumns } from '@/pages/admin/servers/mounts/ServerMountRow';
-import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
 import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal';
+import ServerMountRow, { serverMountTableColumns } from '@/pages/admin/servers/mounts/ServerMountRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
 
-export default ({ server }: { server: AdminServer }) => {
+export default function AdminServerMounts({ server }: { server: AdminServer }) {
   const { serverMounts, setServerMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
@@ -48,4 +48,4 @@ export default ({ server }: { server: AdminServer }) => {
       )}
     </>
   );
-};
+}

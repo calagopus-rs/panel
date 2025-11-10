@@ -1,18 +1,18 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
-import { transformKeysToSnakeCase } from '@/api/transformers';
-import { httpErrorToHuman } from '@/api/axios';
-import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
-import CaptchaTurnstile from './forms/CaptchaTurnstile';
-import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
 import { Group, Title } from '@mantine/core';
-import Select from '@/elements/input/Select';
+import { useState } from 'react';
+import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
+import { httpErrorToHuman } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import { captchaProviderTypeLabelMapping } from '@/lib/enums';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
+import CaptchaTurnstile from './forms/CaptchaTurnstile';
 
-export default () => {
+export default function CaptchaContainer() {
   const { addToast } = useToast();
   const { captchaProvider } = useAdminStore();
 
@@ -62,4 +62,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

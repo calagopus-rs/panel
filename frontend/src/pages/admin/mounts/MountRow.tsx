@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const mountTableColumns = ['ID', 'Name', 'Source', 'Target', 'Created'];
 
-export default ({ mount }: { mount: Mount }) => {
+export default function MountRow({ mount }: { mount: Mount }) {
   return (
     <TableRow>
       <TableData>
@@ -27,4 +27,4 @@ export default ({ mount }: { mount: Mount }) => {
       </TableData>
     </TableRow>
   );
-};
+}

@@ -1,18 +1,18 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteSession from '@/api/me/sessions/deleteSession';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
+import CopyOnClick from '@/elements/CopyOnClick';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useUserStore } from '@/stores/user';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import CopyOnClick from '@/elements/CopyOnClick';
-import deleteSession from '@/api/me/sessions/deleteSession';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 
-export default ({ session }: { session: UserSession }) => {
+export default function SessionRow({ session }: { session: UserSession }) {
   const { addToast } = useToast();
   const { removeSession } = useUserStore();
 
@@ -78,4 +78,4 @@ export default ({ session }: { session: UserSession }) => {
       </ContextMenu>
     </>
   );
-};
+}

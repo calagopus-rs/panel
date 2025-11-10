@@ -1,13 +1,13 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const databaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Created'];
 
-export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
+export default function DatabaseHostRow({ databaseHost }: { databaseHost: AdminDatabaseHost }) {
   return (
     <TableRow>
       <TableData>
@@ -31,4 +31,4 @@ export default ({ databaseHost }: { databaseHost: AdminDatabaseHost }) => {
       </TableData>
     </TableRow>
   );
-};
+}

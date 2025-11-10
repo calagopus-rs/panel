@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createDatabase from '@/api/server/databases/createDatabase';
 import getDatabaseHosts from '@/api/server/databases/getDatabaseHosts';
@@ -9,10 +11,8 @@ import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, addDatabase } = useServerStore();
 
@@ -84,4 +84,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Stack>
     </Modal>
   );
-};
+}

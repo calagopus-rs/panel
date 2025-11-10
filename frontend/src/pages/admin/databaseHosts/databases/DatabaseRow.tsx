@@ -1,18 +1,18 @@
+import { useEffect, useState } from 'react';
+import { NavLink } from 'react-router';
+import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
-import { useEffect, useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
-import { bytesToString } from '@/lib/size';
-import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
 import Spinner from '@/elements/Spinner';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { NavLink } from 'react-router';
+import { databaseTypeLabelMapping } from '@/lib/enums';
+import { bytesToString } from '@/lib/size';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 
 export const databaseTableColumns = ['Name', 'Server', 'Type', 'Address', 'Username', 'Size', 'Created'];
 
-export default ({ database }: { database: AdminServerDatabase }) => {
+export default function DatabaseRow({ database }: { database: AdminServerDatabase }) {
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
   const host = `${database.host}:${database.port}`;
@@ -55,4 +55,4 @@ export default ({ database }: { database: AdminServerDatabase }) => {
       </TableRow>
     </>
   );
-};
+}

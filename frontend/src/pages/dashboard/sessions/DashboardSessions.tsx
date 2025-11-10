@@ -1,14 +1,14 @@
-import Spinner from '@/elements/Spinner';
-import { useUserStore } from '@/stores/user';
 import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import getSessions from '@/api/me/sessions/getSessions';
-import SessionRow from './SessionRow';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useUserStore } from '@/stores/user';
+import SessionRow from './SessionRow';
 
-export default () => {
+export default function DashboardSessions() {
   const { sessions, setSessions } = useUserStore();
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
@@ -44,4 +44,4 @@ export default () => {
       )}
     </>
   );
-};
+}

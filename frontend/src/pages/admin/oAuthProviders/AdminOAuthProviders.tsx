@@ -1,24 +1,24 @@
-import Spinner from '@/elements/Spinner';
+import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, TextInput, Title } from '@mantine/core';
+import jsYaml from 'js-yaml';
+import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
+import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
+import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
+import { httpErrorToHuman } from '@/api/axios';
+import { transformKeysToCamelCase } from '@/api/transformers';
+import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './OAuthProviderCreateOrUpdate';
 import DatabaseHostRow, { oauthProviderTableColumns } from './OAuthProviderRow';
-import { Group, TextInput, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
-import Button from '@/elements/Button';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import DatabaseHostView from './OAuthProviderView';
-import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
-import { ChangeEvent, useRef } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import jsYaml from 'js-yaml';
-import { httpErrorToHuman } from '@/api/axios';
-import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
-import { transformKeysToCamelCase } from '@/api/transformers';
 
-const OAuthProvidersContainer = () => {
+function OAuthProvidersContainer() {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { oauthProviders, addOAuthProvider, setOAuthProviders } = useAdminStore();
@@ -108,9 +108,9 @@ const OAuthProvidersContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminOAuthProviders() {
   return (
     <Routes>
       <Route path={'/'} element={<OAuthProvidersContainer />} />
@@ -118,4 +118,4 @@ export default () => {
       <Route path={'/:id/*'} element={<DatabaseHostView />} />
     </Routes>
   );
-};
+}

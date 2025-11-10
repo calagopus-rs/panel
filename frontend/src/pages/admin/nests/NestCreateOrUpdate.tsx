@@ -11,7 +11,7 @@ import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
-export default ({ contextNest }: { contextNest?: AdminNest }) => {
+export default function NestCreateOrUpdate({ contextNest }: { contextNest?: AdminNest }) {
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const form = useForm<AdminUpdateNest>({
@@ -80,4 +80,4 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
       </Group>
     </>
   );
-};
+}

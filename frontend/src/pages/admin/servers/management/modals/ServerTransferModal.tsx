@@ -1,25 +1,25 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useState } from 'react';
 import { ModalProps, Stack } from '@mantine/core';
-import getNodes from '@/api/admin/nodes/getNodes';
-import Select from '@/elements/input/Select';
-import { formatAllocation } from '@/lib/server';
-import MultiSelect from '@/elements/input/MultiSelect';
-import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
-import getBackups from '@/api/server/backups/getBackups';
-import Switch from '@/elements/input/Switch';
-import { archiveFormatLabelMapping, compressionLevelLabelMapping } from '@/lib/enums';
-import Button from '@/elements/Button';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Code from '@/elements/Code';
-import postTransfer from '@/api/admin/servers/postTransfer';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import Modal from '@/elements/modals/Modal';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
+import getNodes from '@/api/admin/nodes/getNodes';
+import postTransfer from '@/api/admin/servers/postTransfer';
+import { httpErrorToHuman } from '@/api/axios';
+import getBackups from '@/api/server/backups/getBackups';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import MultiSelect from '@/elements/input/MultiSelect';
 import NumberInput from '@/elements/input/NumberInput';
+import Select from '@/elements/input/Select';
+import Switch from '@/elements/input/Switch';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import Modal from '@/elements/modals/Modal';
+import { archiveFormatLabelMapping, compressionLevelLabelMapping } from '@/lib/enums';
+import { formatAllocation } from '@/lib/server';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
 
-export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
+export default function ServerTransferModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -202,4 +202,4 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       </Modal>
     </>
   );
-};
+}

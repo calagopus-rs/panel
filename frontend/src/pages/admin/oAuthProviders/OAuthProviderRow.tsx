@@ -1,8 +1,8 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const oauthProviderTableColumns = [
   'ID',
@@ -14,7 +14,7 @@ export const oauthProviderTableColumns = [
   'Created',
 ];
 
-export default ({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) => {
+export default function OAuthProviderRow({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) {
   return (
     <TableRow>
       <TableData>
@@ -36,4 +36,4 @@ export default ({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) => {
       </TableData>
     </TableRow>
   );
-};
+}

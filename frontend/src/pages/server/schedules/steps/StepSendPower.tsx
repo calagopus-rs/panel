@@ -1,15 +1,15 @@
+import { Stack } from '@mantine/core';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import { serverPowerActionLabelMapping } from '@/lib/enums';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepSendPower({
   action,
   setAction,
 }: {
   action: ScheduleActionSendPower;
   setAction: (action: ScheduleActionSendPower) => void;
-}) => {
+}) {
   return (
     <Stack>
       <Select
@@ -31,4 +31,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

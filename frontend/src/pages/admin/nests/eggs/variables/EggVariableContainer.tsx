@@ -1,24 +1,24 @@
-import Card from '@/elements/Card';
 import { Grid, Group, Stack } from '@mantine/core';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
+import { useEffect, useState } from 'react';
+import isEqual from 'react-fast-compare';
+import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
+import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
+import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import Code from '@/elements/Code';
+import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
-import NumberInput from '@/elements/input/NumberInput';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
-import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
-import { httpErrorToHuman } from '@/api/axios';
-import { load } from '@/lib/debounce';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Code from '@/elements/Code';
-import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
-import isEqual from 'react-fast-compare';
+import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
-export default ({
+export default function EggVariableContainer({
   contextNest,
   contextEgg,
   contextVariable,
@@ -26,7 +26,7 @@ export default ({
   contextNest: AdminNest;
   contextEgg: AdminNestEgg;
   contextVariable?: NestEggVariable;
-}) => {
+}) {
   const { addToast } = useToast();
   const { eggVariables, setEggVariables, addEggVariable, removeEggVariable } = useAdminStore();
 
@@ -209,4 +209,4 @@ export default ({
       </Card>
     </>
   );
-};
+}

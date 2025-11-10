@@ -1,12 +1,3 @@
-import { httpErrorToHuman } from '@/api/axios';
-import ContextMenu from '@/elements/ContextMenu';
-import Checkbox from '@/elements/input/Checkbox';
-import Tooltip from '@/elements/Tooltip';
-import { isArchiveType, isEditableFile } from '@/lib/files';
-import { bytesToString } from '@/lib/size';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import {
   faAnglesUp,
   faCopy,
@@ -23,16 +14,25 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
 import { MouseEventHandler, ReactNode, Ref, useEffect, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
+import { httpErrorToHuman } from '@/api/axios';
 import decompressFile from '@/api/server/files/decompressFile';
 import downloadFiles from '@/api/server/files/downloadFiles';
-import { useGlobalStore } from '@/stores/global';
+import ContextMenu from '@/elements/ContextMenu';
+import Checkbox from '@/elements/input/Checkbox';
 import { TableData, TableRow } from '@/elements/Table';
+import Tooltip from '@/elements/Tooltip';
+import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
+import { isArchiveType, isEditableFile } from '@/lib/files';
+import { bytesToString } from '@/lib/size';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
+import { useServerStore } from '@/stores/server';
 import ArchiveCreateModal from './modals/ArchiveCreateModal';
 import FileCopyModal from './modals/FileCopyModal';
 import FileDeleteModal from './modals/FileDeleteModal';
 import FilePermissionsModal from './modals/FilePermissionsModal';
 import FileRenameModal from './modals/FileRenameModal';
-import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
 function FileTableRow({
   file,
@@ -98,7 +98,7 @@ function FileTableRow({
   );
 }
 
-export default ({
+export default function FileRow({
   file,
   setChildOpenModal,
   ref,
@@ -106,7 +106,7 @@ export default ({
   file: DirectoryEntry;
   setChildOpenModal: (open: boolean) => void;
   ref: React.Ref<HTMLTableRowElement>;
-}) => {
+}) {
   const { addToast } = useToast();
   const {
     server,
@@ -273,4 +273,4 @@ export default ({
       </ContextMenu>
     </>
   );
-};
+}

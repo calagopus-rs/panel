@@ -1,18 +1,18 @@
-import Modal from '@/elements/modals/Modal';
 import { Group, ModalProps, Stack } from '@mantine/core';
-import Button from '@/elements/Button';
 import { useEffect, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
-import { useToast } from '@/providers/ToastProvider';
-import MultiSelect from '@/elements/input/MultiSelect';
-import { formatAllocation } from '@/lib/server';
-import { load } from '@/lib/debounce';
 import createServerAllocation from '@/api/admin/servers/allocations/createServerAllocation';
-import { useAdminStore } from '@/stores/admin';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import MultiSelect from '@/elements/input/MultiSelect';
+import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
+import { formatAllocation } from '@/lib/server';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
-export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
+export default function ServerAllocationAddModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();
   const { addServerAllocation } = useAdminStore();
 
@@ -83,4 +83,4 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       </Stack>
     </Modal>
   );
-};
+}

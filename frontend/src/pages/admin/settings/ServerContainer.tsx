@@ -1,17 +1,17 @@
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import updateServerSettings from '@/api/admin/settings/updateServerSettings';
 import { Group, Stack, Title } from '@mantine/core';
-import Switch from '@/elements/input/Switch';
+import { useState } from 'react';
+import updateServerSettings from '@/api/admin/settings/updateServerSettings';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
-import { bytesToString } from '@/lib/size';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
+import Switch from '@/elements/input/Switch';
+import { load } from '@/lib/debounce';
+import { bytesToString } from '@/lib/size';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
-export default () => {
+export default function ServerContainer() {
   const { addToast } = useToast();
   const { server } = useAdminStore();
 
@@ -87,4 +87,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

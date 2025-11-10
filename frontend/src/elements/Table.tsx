@@ -1,5 +1,5 @@
 import { Center, Group, Pagination as MantinePagination, Table, TableTdProps, TableTrProps, Text } from '@mantine/core';
-import { forwardRef } from 'react';
+import { forwardRef, ReactNode } from 'react';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
@@ -9,7 +9,7 @@ export const TableHeader = ({ name }: { name?: string }) => {
   return <Table.Th>{name}</Table.Th>;
 };
 
-export const TableHead = ({ children }: { children: React.ReactNode }) => {
+export const TableHead = ({ children }: { children: ReactNode }) => {
   return (
     <Table.Thead>
       <Table.Tr>{children}</Table.Tr>
@@ -17,7 +17,7 @@ export const TableHead = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const TableBody = ({ children }: { children: React.ReactNode }) => {
+export const TableBody = ({ children }: { children: ReactNode }) => {
   return <Table.Tbody>{children}</Table.Tbody>;
 };
 
@@ -90,7 +90,7 @@ interface TableProps {
   pagination?: ResponseMeta<unknown>;
   onPageSelect?: (page: number) => void;
   allowSelect?: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default ({ columns, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {

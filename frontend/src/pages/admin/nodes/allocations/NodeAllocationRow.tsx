@@ -1,3 +1,4 @@
+import { Ref } from 'react';
 import Code from '@/elements/Code';
 import Checkbox from '@/elements/input/Checkbox';
 import { TableData, TableRow } from '@/elements/Table';
@@ -7,7 +8,13 @@ import { useAdminStore } from '@/stores/admin';
 
 export const nodeAllocationTableColumns = ['', 'Id', 'IP', 'IP Alias', 'Port', 'Created'];
 
-export default ({ allocation, ref }: { allocation: NodeAllocation; ref: React.Ref<HTMLTableRowElement> }) => {
+export default function NodeAllocationRow({
+  allocation,
+  ref,
+}: {
+  allocation: NodeAllocation;
+  ref: Ref<HTMLTableRowElement>;
+}) {
   const { selectedNodeAllocations, addSelectedNodeAllocation, removeSelectedNodeAllocation } = useAdminStore();
 
   return (
@@ -57,4 +64,4 @@ export default ({ allocation, ref }: { allocation: NodeAllocation; ref: React.Re
       </TableRow>
     </>
   );
-};
+}

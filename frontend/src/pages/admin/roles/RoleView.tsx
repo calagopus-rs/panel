@@ -1,16 +1,16 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
+import getRole from '@/api/admin/roles/getRole';
+import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
 import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
 import AdminRoleUsers from '@/pages/admin/roles/users/AdminRoleUsers';
-import getRole from '@/api/admin/roles/getRole';
+import { useToast } from '@/providers/ToastProvider';
 
-export default () => {
+export default function RoleView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [role, setRole] = useState<Role | null>(null);
@@ -54,4 +54,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

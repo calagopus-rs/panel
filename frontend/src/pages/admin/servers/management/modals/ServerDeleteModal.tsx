@@ -1,16 +1,16 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { useState } from 'react';
 import { Group, ModalProps, Stack } from '@mantine/core';
-import Switch from '@/elements/input/Switch';
-import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import Modal from '@/elements/modals/Modal';
 import deleteServer from '@/api/admin/servers/deleteServer';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
+import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
 
-export default ({ server, opened, onClose }: ModalProps & { server: AdminServer }) => {
+export default function ServerDeleteModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -76,4 +76,4 @@ export default ({ server, opened, onClose }: ModalProps & { server: AdminServer 
       </Modal>
     </>
   );
-};
+}

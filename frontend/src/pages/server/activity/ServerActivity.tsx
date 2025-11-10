@@ -1,3 +1,5 @@
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
 import getServerActivity from '@/api/server/getServerActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
@@ -6,12 +8,10 @@ import Spinner from '@/elements/Spinner';
 import Table, { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useServerStore } from '@/stores/server';
-import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useServerStore } from '@/stores/server';
 
-export default () => {
+export default function ServerActivity() {
   const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>();
   const server = useServerStore((state) => state.server);
 
@@ -60,4 +60,4 @@ export default () => {
       )}
     </>
   );
-};
+}

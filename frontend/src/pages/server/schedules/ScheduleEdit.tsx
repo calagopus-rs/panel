@@ -1,22 +1,22 @@
-import Spinner from '@/elements/Spinner';
-import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
-import getSchedule from '@/api/server/schedules/getSchedule';
-import Button from '@/elements/Button';
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Switch, Text, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Select from '@/elements/input/Select';
-import ScheduleConditionBuilder from './ScheduleConditionBuilder';
-import { serverPowerStateLabelMapping } from '@/lib/enums';
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { load } from '@/lib/debounce';
-import updateSchedule from '@/api/server/schedules/updateSchedule';
-import { useToast } from '@/providers/ToastProvider';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
+import getSchedule from '@/api/server/schedules/getSchedule';
+import updateSchedule from '@/api/server/schedules/updateSchedule';
+import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import { load } from '@/lib/debounce';
+import { serverPowerStateLabelMapping } from '@/lib/enums';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import ScheduleConditionBuilder from './ScheduleConditionBuilder';
 
-export default () => {
+export default function ScheduleEdit() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
@@ -233,4 +233,4 @@ export default () => {
       </Stack>
     </>
   );
-};
+}

@@ -18,7 +18,7 @@ import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 
-export default ({ contextUser }: { contextUser?: User }) => {
+export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User }) {
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor'>(null);
@@ -174,4 +174,4 @@ export default ({ contextUser }: { contextUser?: User }) => {
       </Group>
     </>
   );
-};
+}

@@ -1,17 +1,17 @@
+import { Stack, Title } from '@mantine/core';
+import hljs from 'highlight.js/lib/core';
+import yaml from 'highlight.js/lib/languages/yaml';
 import Card from '@/elements/Card';
 import Code from '@/elements/Code';
 import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
-import { Stack, Title } from '@mantine/core';
-import hljs from 'highlight.js/lib/core';
-import yaml from 'highlight.js/lib/languages/yaml';
 import 'highlight.js/styles/a11y-dark.min.css';
 import jsYaml from 'js-yaml';
 import { useState } from 'react';
 
 hljs.registerLanguage('yaml', yaml);
 
-export default ({ node }: { node: Node }) => {
+export default function AdminNodeConfiguration({ node }: { node: Node }) {
   const [remote, setRemote] = useState(window.location.origin);
   const [apiPort, setApiPort] = useState(parseInt(new URL(node.url).port || '8080'));
   const [sftpPort, setSftpPort] = useState(node.sftpPort);
@@ -90,4 +90,4 @@ export default ({ node }: { node: Node }) => {
       </div>
     </>
   );
-};
+}

@@ -1,3 +1,6 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { join } from 'pathe';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import compressFiles from '@/api/server/files/compressFiles';
 import Button from '@/elements/Button';
@@ -10,15 +13,12 @@ import { archiveFormatLabelMapping } from '@/lib/enums';
 import { generateArchiveName } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { join } from 'pathe';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   files: DirectoryEntry[];
 };
 
-export default ({ files, opened, onClose }: Props) => {
+export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory } = useServerStore();
 
@@ -94,4 +94,4 @@ export default ({ files, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

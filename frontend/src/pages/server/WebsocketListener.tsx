@@ -1,11 +1,11 @@
+import { useEffect } from 'react';
+import { useSearchParams } from 'react-router';
 import { transformKeysToCamelCase } from '@/api/transformers';
 import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { useEffect } from 'react';
-import { useSearchParams } from 'react-router';
 
-export default () => {
+export default function WebsocketListener() {
   const [searchParams, _] = useSearchParams();
   const { addToast } = useToast();
   const {
@@ -186,4 +186,4 @@ export default () => {
   });
 
   return null;
-};
+}

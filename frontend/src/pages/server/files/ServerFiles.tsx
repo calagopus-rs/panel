@@ -1,18 +1,3 @@
-import { Ref, useCallback, useEffect, useRef, useState } from 'react';
-import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
-import FileRow from './FileRow';
-import { useServerStore } from '@/stores/server';
-import loadDirectory from '@/api/server/files/loadDirectory';
-import { FileBreadcrumbs } from './FileBreadcrumbs';
-import Spinner from '@/elements/Spinner';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import FileActionBar from './FileActionBar';
-import getBackup from '@/api/server/backups/getBackup';
-import { Card, Group, Popover, Text, Title, UnstyledButton } from '@mantine/core';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faChevronDown,
   faDownload,
@@ -23,17 +8,32 @@ import {
   faServer,
   faUpload,
 } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Card, Group, Popover, Text, Title, UnstyledButton } from '@mantine/core';
+import { Ref, useCallback, useEffect, useRef, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios';
+import getBackup from '@/api/server/backups/getBackup';
+import cancelOperation from '@/api/server/files/cancelOperation';
+import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
+import loadDirectory from '@/api/server/files/loadDirectory';
+import Button from '@/elements/Button';
+import CloseButton from '@/elements/CloseButton';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import Progress from '@/elements/Progress';
+import RingProgress from '@/elements/RingProgress';
+import SelectionArea from '@/elements/SelectionArea';
+import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
+import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import FileActionBar from './FileActionBar';
+import FileBreadcrumbs from './FileBreadcrumbs';
+import FileRow from './FileRow';
 import DirectoryNameModal from './modals/DirectoryNameModal';
 import PullFileModal from './modals/PullFileModal';
-import { load } from '@/lib/debounce';
-import RingProgress from '@/elements/RingProgress';
-import cancelOperation from '@/api/server/files/cancelOperation';
-import CloseButton from '@/elements/CloseButton';
-import Progress from '@/elements/Progress';
-import SelectionArea from '@/elements/SelectionArea';
-import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
-import { useDropzone } from 'react-dropzone';
 import SftpDetailsModal from './modals/SftpDetailsModal';
 
 interface FileUploadProgress {
@@ -51,7 +51,7 @@ interface BatchInfo {
   status: 'pending' | 'uploading' | 'completed' | 'cancelled';
 }
 
-export default () => {
+export default function ServerFiles() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const navigate = useNavigate();
@@ -791,4 +791,4 @@ export default () => {
       )}
     </div>
   );
-};
+}

@@ -1,14 +1,14 @@
+import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepCreateDirectory({
   action,
   setAction,
 }: {
   action: ScheduleActionCreateDirectory;
   setAction: (action: ScheduleActionCreateDirectory) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -32,4 +32,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

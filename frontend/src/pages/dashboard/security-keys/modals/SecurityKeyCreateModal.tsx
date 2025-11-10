@@ -1,3 +1,5 @@
+import { Group, ModalProps } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createSecurityKey from '@/api/me/security-keys/createSecurityKey';
 import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey';
@@ -8,10 +10,8 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
-import { Group, ModalProps } from '@mantine/core';
-import { useState } from 'react';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { addSecurityKey } = useUserStore();
 
@@ -73,4 +73,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Group>
     </Modal>
   );
-};
+}

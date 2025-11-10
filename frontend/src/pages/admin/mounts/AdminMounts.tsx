@@ -1,18 +1,18 @@
-import Spinner from '@/elements/Spinner';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
+import getMounts from '@/api/admin/mounts/getMounts';
+import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import MountView from '@/pages/admin/mounts/MountView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import MountCreateOrUpdate from './MountCreateOrUpdate';
 import MountRow, { mountTableColumns } from './MountRow';
-import { Group, TextInput, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Button from '@/elements/Button';
-import getMounts from '@/api/admin/mounts/getMounts';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import MountView from '@/pages/admin/mounts/MountView';
 
-const MountsContainer = () => {
+function MountsContainer() {
   const navigate = useNavigate();
   const { mounts, setMounts } = useAdminStore();
 
@@ -50,9 +50,9 @@ const MountsContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminMounts() {
   return (
     <Routes>
       <Route path={'/'} element={<MountsContainer />} />
@@ -60,4 +60,4 @@ export default () => {
       <Route path={'/:id/*'} element={<MountView />} />
     </Routes>
   );
-};
+}

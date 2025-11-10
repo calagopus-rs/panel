@@ -1,24 +1,24 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
+import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import EggRow, { eggTableColumns } from './EggRow';
 import getEggs from '@/api/admin/nests/eggs/getEggs';
-import EggCreateOrUpdate from './EggCreateOrUpdate';
 import importEgg from '@/api/admin/nests/eggs/importEgg';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import jsYaml from 'js-yaml';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import EggCreateOrUpdate from './EggCreateOrUpdate';
+import EggRow, { eggTableColumns } from './EggRow';
 
-const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
+function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { eggs, setEggs, addEgg } = useAdminStore();
@@ -102,9 +102,9 @@ const EggsContainer = ({ contextNest }: { contextNest: AdminNest }) => {
       )}
     </>
   );
-};
+}
 
-export default ({ contextNest }: { contextNest?: AdminNest }) => {
+export default function AdminEggs({ contextNest }: { contextNest?: AdminNest }) {
   return (
     <Routes>
       <Route path={'/'} element={<EggsContainer contextNest={contextNest} />} />
@@ -112,4 +112,4 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
       <Route path={'/:eggId/*'} element={<EggView contextNest={contextNest} />} />
     </Routes>
   );
-};
+}

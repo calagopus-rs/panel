@@ -14,7 +14,7 @@ import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthWrapper from './AuthWrapper';
 
-export default () => {
+export default function Register() {
   const { doLogin } = useAuth();
   const navigate = useNavigate();
 
@@ -86,4 +86,4 @@ export default () => {
       </Stack>
     </AuthWrapper>
   );
-};
+}

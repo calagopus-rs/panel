@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import NestRow, { nestTableColumns } from './NestRow';
-import getNests from '@/api/admin/nests/getNests';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
+import getNests from '@/api/admin/nests/getNests';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import NestCreateOrUpdate from './NestCreateOrUpdate';
-import NestView from './NestView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import NestCreateOrUpdate from './NestCreateOrUpdate';
+import NestRow, { nestTableColumns } from './NestRow';
+import NestView from './NestView';
 
-const NestsContainer = () => {
+function NestsContainer() {
   const navigate = useNavigate();
   const { nests, setNests } = useAdminStore();
 
@@ -51,9 +51,9 @@ const NestsContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminNests() {
   return (
     <Routes>
       <Route path={'/'} element={<NestsContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:nestId/*'} element={<NestView />} />
     </Routes>
   );
-};
+}

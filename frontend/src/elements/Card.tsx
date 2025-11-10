@@ -1,6 +1,8 @@
-import { Card, CardProps } from '@mantine/core';
+import { CardProps, Card as MantineCard } from '@mantine/core';
 import { forwardRef } from 'react';
 
-export default forwardRef<HTMLDivElement, CardProps>(({ className, ...rest }, ref) => {
-  return <Card ref={ref} className={className} withBorder {...rest} />;
+const Card = forwardRef<HTMLDivElement, CardProps>(({ className, ...rest }, ref) => {
+  return <MantineCard ref={ref} className={className} withBorder {...rest} />;
 });
+
+export default Card;

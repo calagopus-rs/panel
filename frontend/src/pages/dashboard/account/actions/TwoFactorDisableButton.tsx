@@ -1,3 +1,5 @@
+import { Group, Stack, Text } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import Button from '@/elements/Button';
@@ -6,10 +8,8 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Stack, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
 
-export default () => {
+export default function TwoFactorDisableButton() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -86,4 +86,4 @@ export default () => {
       </Button>
     </>
   );
-};
+}

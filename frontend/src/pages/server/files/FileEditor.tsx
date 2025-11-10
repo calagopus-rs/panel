@@ -1,19 +1,19 @@
-import getFileContent from '@/api/server/files/getFileContent';
-import Spinner from '@/elements/Spinner';
-import { getLanguageFromExtension } from '@/lib/files';
-import { useServerStore } from '@/stores/server';
 import { Editor } from '@monaco-editor/react';
+import { join } from 'pathe';
 import { useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
-import { FileBreadcrumbs } from './FileBreadcrumbs';
+import getFileContent from '@/api/server/files/getFileContent';
 import saveFileContent from '@/api/server/files/saveFileContent';
-import { join } from 'pathe';
-import NotFound from '@/pages/NotFound';
-import FileNameModal from './modals/FileNameModal';
 import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
 import { load } from '@/lib/debounce';
+import { getLanguageFromExtension } from '@/lib/files';
+import NotFound from '@/pages/NotFound';
+import { useServerStore } from '@/stores/server';
+import FileBreadcrumbs from './FileBreadcrumbs';
+import FileNameModal from './modals/FileNameModal';
 
-export default () => {
+export default function FileEditor() {
   const params = useParams<'action'>();
 
   const [searchParams, _] = useSearchParams();
@@ -126,4 +126,4 @@ export default () => {
       </div>
     </div>
   );
-};
+}

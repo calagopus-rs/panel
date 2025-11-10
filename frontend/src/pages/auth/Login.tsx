@@ -1,26 +1,26 @@
+import { faExclamationTriangle, faFingerprint, faUser } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Alert, Center, Divider, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
-import AuthWrapper from './AuthWrapper';
-import { useAuth } from '@/providers/AuthProvider';
-import Captcha from '@/elements/Captcha';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { Alert, Center, Divider, Stack, Text, Title } from '@mantine/core';
-import Card from '@/elements/Card';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExclamationTriangle, faFingerprint, faUser } from '@fortawesome/free-solid-svg-icons';
+import checkpointLogin from '@/api/auth/checkpointLogin';
+import getOAuthProviders from '@/api/auth/getOAuthProviders';
 import getSecurityKeys from '@/api/auth/getSecurityKeys';
+import login from '@/api/auth/login';
 import postSecurityKeyChallenge from '@/api/auth/postSecurityKeyChallenge';
 import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Captcha from '@/elements/Captcha';
+import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
-import login from '@/api/auth/login';
 import PinInput from '@/elements/input/PinInput';
-import checkpointLogin from '@/api/auth/checkpointLogin';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
+import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
-import getOAuthProviders from '@/api/auth/getOAuthProviders';
+import AuthWrapper from './AuthWrapper';
 
-export default () => {
+export default function Login() {
   const { doLogin } = useAuth();
   const { settings } = useGlobalStore();
   const navigate = useNavigate();
@@ -380,4 +380,4 @@ export default () => {
       </Stack>
     </AuthWrapper>
   );
-};
+}

@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import TextInput from '@/elements/input/TextInput';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
 import getRoles from '@/api/admin/roles/getRoles';
-import RoleRow, { roleTableColumns } from '@/pages/admin/roles/RoleRow';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
+import RoleRow, { roleTableColumns } from '@/pages/admin/roles/RoleRow';
 import RoleView from '@/pages/admin/roles/RoleView';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
 
-const RolesContainer = () => {
+function RolesContainer() {
   const navigate = useNavigate();
   const { roles, setRoles } = useAdminStore();
 
@@ -51,9 +51,9 @@ const RolesContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminRoles() {
   return (
     <Routes>
       <Route path={'/'} element={<RolesContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:id/*'} element={<RoleView />} />
     </Routes>
   );
-};
+}

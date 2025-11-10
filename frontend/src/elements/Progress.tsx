@@ -1,9 +1,9 @@
-import { Progress, ProgressProps } from '@mantine/core';
+import { Progress as MantineProgress, ProgressProps } from '@mantine/core';
 import classNames from 'classnames';
 import { forwardRef } from 'react';
 import AnimatedHourglass from './AnimatedHourglass';
 
-export default forwardRef<HTMLDivElement, ProgressProps & { hourglass?: boolean }>(
+const Progress = forwardRef<HTMLDivElement, ProgressProps & { hourglass?: boolean }>(
   ({ value, className, hourglass = true, ...rest }, ref) => {
     return (
       <div className={classNames('flex flex-row items-center', className)}>
@@ -13,12 +13,14 @@ export default forwardRef<HTMLDivElement, ProgressProps & { hourglass?: boolean 
           </span>
         )}
 
-        <Progress.Root size={'xl'} className={'flex-grow'} ref={ref} {...rest}>
-          <Progress.Section value={value} color={'blue'}>
-            <Progress.Label>{value.toFixed(1)}%</Progress.Label>
-          </Progress.Section>
-        </Progress.Root>
+        <MantineProgress.Root size={'xl'} className={'flex-grow'} ref={ref} {...rest}>
+          <MantineProgress.Section value={value} color={'blue'}>
+            <MantineProgress.Label>{value.toFixed(1)}%</MantineProgress.Label>
+          </MantineProgress.Section>
+        </MantineProgress.Root>
       </div>
     );
   },
 );
+
+export default Progress;

@@ -1,20 +1,20 @@
+import { faEye, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
+import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import CopyOnClick from '@/elements/CopyOnClick';
-import { faEye, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
-import DatabaseDetailsModal from './modals/DatabaseDetailsModal';
-import DatabaseDeleteModal from './modals/DatabaseDeleteModal';
-import { bytesToString } from '@/lib/size';
-import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
-import { useServerStore } from '@/stores/server';
 import Spinner from '@/elements/Spinner';
+import { TableData, TableRow } from '@/elements/Table';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { bytesToString } from '@/lib/size';
+import { useServerStore } from '@/stores/server';
+import DatabaseDeleteModal from './modals/DatabaseDeleteModal';
+import DatabaseDetailsModal from './modals/DatabaseDetailsModal';
 import DatabaseEditModal from './modals/DatabaseEditModal';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export default ({ database }: { database: ServerDatabase }) => {
+export default function DatabaseRow({ database }: { database: ServerDatabase }) {
   const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete'>(null);
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
@@ -81,4 +81,4 @@ export default ({ database }: { database: ServerDatabase }) => {
       </ContextMenu>
     </>
   );
-};
+}

@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateSecurityKey from '@/api/me/security-keys/updateSecurityKey';
 import Button from '@/elements/Button';
@@ -6,14 +8,12 @@ import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
 
 type Props = ModalProps & {
   securityKey: UserSecurityKey;
 };
 
-export default ({ securityKey, opened, onClose }: Props) => {
+export default function SecurityKeyEditModal({ securityKey, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { updateSecurityKey: updateStateSecurityKey } = useUserStore();
 
@@ -58,4 +58,4 @@ export default ({ securityKey, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

@@ -1,18 +1,18 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
+import createUserOAuthLink from '@/api/admin/users/oauthLinks/createUserOAuthLink';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
+import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
-import createUserOAuthLink from '@/api/admin/users/oauthLinks/createUserOAuthLink';
-import TextInput from '@/elements/input/TextInput';
 
-export default ({ user, opened, onClose }: ModalProps & { user: User }) => {
+export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalProps & { user: User }) {
   const { addToast } = useToast();
   const { addUserOAuthLink } = useAdminStore();
 
@@ -86,4 +86,4 @@ export default ({ user, opened, onClose }: ModalProps & { user: User }) => {
       </Stack>
     </Modal>
   );
-};
+}

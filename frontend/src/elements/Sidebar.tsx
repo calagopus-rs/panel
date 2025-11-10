@@ -1,7 +1,7 @@
 import { faArrowRightFromBracket, faBars, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
@@ -13,7 +13,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 
 type SidebarProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 function Sidebar({ children }: SidebarProps) {

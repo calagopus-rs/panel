@@ -1,18 +1,18 @@
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks';
-import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
 import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
 import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
 
-export default ({ user }: { user: User }) => {
+export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
@@ -48,4 +48,4 @@ export default ({ user }: { user: User }) => {
       )}
     </>
   );
-};
+}

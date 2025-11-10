@@ -1,8 +1,3 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import {
   faFileArrowDown,
   faLock,
@@ -14,19 +9,24 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
+import { createSearchParams, useNavigate } from 'react-router';
+import { httpErrorToHuman } from '@/api/axios';
 import deleteBackup from '@/api/server/backups/deleteBackup';
+import downloadBackup from '@/api/server/backups/downloadBackup';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import Progress from '@/elements/Progress';
+import { TableData, TableRow } from '@/elements/Table';
+import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 import { bytesToString } from '@/lib/size';
 import { formatTimestamp } from '@/lib/time';
-import downloadBackup from '@/api/server/backups/downloadBackup';
-import { createSearchParams, useNavigate } from 'react-router';
-import { TableData, TableRow } from '@/elements/Table';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
 import BackupEditModal from './modals/BackupEditModal';
 import BackupRestoreModal from './modals/BackupRestoreModal';
-import Progress from '@/elements/Progress';
-import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
 
-export default ({ backup }: { backup: ServerBackupWithProgress }) => {
+export default function BackupRow({ backup }: { backup: ServerBackupWithProgress }) {
   const { addToast } = useToast();
   const { server, removeBackup } = useServerStore();
   const navigate = useNavigate();
@@ -152,4 +152,4 @@ export default ({ backup }: { backup: ServerBackupWithProgress }) => {
       </ContextMenu>
     </>
   );
-};
+}

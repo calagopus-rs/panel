@@ -1,13 +1,17 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Title } from '@mantine/core';
+import { useState } from 'react';
+import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
+import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import LocationRow, { locationTableColumns } from '@/pages/admin/locations/LocationRow';
-import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
-export default ({ backupConfiguration }: { backupConfiguration?: BackupConfiguration }) => {
+export default function AdminBackupConfigurationLocations({
+  backupConfiguration,
+}: {
+  backupConfiguration?: BackupConfiguration;
+}) {
   const [backupConfigurationLocations, setBackupConfigurationLocations] = useState<ResponseMeta<Location>>(
     getEmptyPaginationSet(),
   );
@@ -34,4 +38,4 @@ export default ({ backupConfiguration }: { backupConfiguration?: BackupConfigura
       )}
     </>
   );
-};
+}

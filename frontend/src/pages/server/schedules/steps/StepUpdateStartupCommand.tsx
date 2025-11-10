@@ -1,14 +1,14 @@
+import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepUpdateStartupCommand({
   action,
   setAction,
 }: {
   action: ScheduleActionUpdateStartupCommand;
   setAction: (action: ScheduleActionUpdateStartupCommand) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextArea
@@ -30,4 +30,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

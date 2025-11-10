@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { useState } from 'react';
-import { useUserStore } from '@/stores/user';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import SshKeyRow from './SecurityKeyRow';
-import SecurityKeyCreateModal from './modals/SecurityKeyCreateModal';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
 import getSecurityKeys from '@/api/me/security-keys/getSecurityKeys';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useUserStore } from '@/stores/user';
+import SecurityKeyCreateModal from './modals/SecurityKeyCreateModal';
+import SshKeyRow from './SecurityKeyRow';
 
-export default () => {
+export default function DashboardSecurityKeys() {
   const { securityKeys, setSecurityKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
@@ -52,4 +52,4 @@ export default () => {
       )}
     </>
   );
-};
+}

@@ -1,20 +1,20 @@
-import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/Table';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import Tooltip from '@/elements/Tooltip';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
 import { NavLink } from 'react-router';
+import deleteUserOAuthLink from '@/api/admin/users/oauthLinks/deleteUserOAuthLink';
+import { httpErrorToHuman } from '@/api/axios';
+import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import deleteUserOAuthLink from '@/api/admin/users/oauthLinks/deleteUserOAuthLink';
+import { TableData, TableRow } from '@/elements/Table';
+import Tooltip from '@/elements/Tooltip';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
-import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
 import { useAdminStore } from '@/stores/admin';
 
 export const userOAuthLinkTableColumns = ['ID', 'OAuth Provider', 'Identifier', 'Last Used', 'Created', ''];
 
-export default ({ user, userOAuthLink }: { user: User; userOAuthLink: UserOAuthLink }) => {
+export default function UserOAuthLinkRow({ user, userOAuthLink }: { user: User; userOAuthLink: UserOAuthLink }) {
   const { addToast } = useToast();
   const { removeUserOAuthLink } = useAdminStore();
 
@@ -99,4 +99,4 @@ export default ({ user, userOAuthLink }: { user: User; userOAuthLink: UserOAuthL
       </ContextMenu>
     </>
   );
-};
+}

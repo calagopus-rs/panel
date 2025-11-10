@@ -1,14 +1,14 @@
-import TextInput from '@/elements/input/TextInput';
 import { Group, Stack } from '@mantine/core';
 import { Dispatch, SetStateAction, useEffect } from 'react';
+import TextInput from '@/elements/input/TextInput';
 
-export default ({
+export default function CaptchaTurnstile({
   settings,
   setSettings,
 }: {
   settings: CaptchaProviderTurnstile;
   setSettings: Dispatch<SetStateAction<CaptchaProviderTurnstile>>;
-}) => {
+}) {
   useEffect(() => {
     setSettings((settings: CaptchaProviderTurnstile) => ({
       ...settings,
@@ -38,4 +38,4 @@ export default ({
       </Group>
     </Stack>
   );
-};
+}

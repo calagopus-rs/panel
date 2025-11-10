@@ -1,9 +1,9 @@
+import { Select as MantineSelect, SelectProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { Select, SelectProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, SelectProps>(({ className, allowDeselect = false, ...rest }, ref) => {
+const Select = forwardRef<HTMLInputElement, SelectProps>(({ className, allowDeselect = false, ...rest }, ref) => {
   return (
-    <Select
+    <MantineSelect
       ref={ref}
       className={className}
       allowDeselect={allowDeselect}
@@ -12,3 +12,5 @@ export default forwardRef<HTMLInputElement, SelectProps>(({ className, allowDese
     />
   );
 });
+
+export default Select;

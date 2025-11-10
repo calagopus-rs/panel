@@ -1,17 +1,17 @@
-import { httpErrorToHuman } from '@/api/axios';
-import deleteAllocation from '@/api/server/allocations/deleteAllocation';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteAllocation from '@/api/server/allocations/deleteAllocation';
 import Badge from '@/elements/Badge';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
 import AllocationEditModal from './modals/AllocationEditModal';
 
-export default ({ allocation }: { allocation: ServerAllocation }) => {
+export default function AllocationRow({ allocation }: { allocation: ServerAllocation }) {
   const { addToast } = useToast();
   const { server, removeAllocation } = useServerStore();
 
@@ -76,4 +76,4 @@ export default ({ allocation }: { allocation: ServerAllocation }) => {
       </ContextMenu>
     </>
   );
-};
+}

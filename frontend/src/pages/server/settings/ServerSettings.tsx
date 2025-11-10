@@ -1,10 +1,10 @@
-import RenameContainer from './RenameContainer';
-import TimezoneContainer from './TimezoneContainer';
+import { Grid, Group, Title } from '@mantine/core';
 import AutokillContainer from './AutokillContainer';
 import ReinstallContainer from './ReinstallContainer';
-import { Grid, Group, Title } from '@mantine/core';
+import RenameContainer from './RenameContainer';
+import TimezoneContainer from './TimezoneContainer';
 
-export default () => {
+export default function ServerSettings() {
   return (
     <>
       <Group justify={'space-between'} mb={'md'}>
@@ -21,4 +21,4 @@ export default () => {
       </Grid>
     </>
   );
-};
+}

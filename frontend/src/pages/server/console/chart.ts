@@ -1,17 +1,17 @@
+import StreamingPlugin from '@robloche/chartjs-plugin-streaming';
 import {
-  Chart as ChartJS,
   ChartData,
   ChartDataset,
+  Chart as ChartJS,
   ChartOptions,
   Filler,
   LinearScale,
   LineElement,
   PointElement,
 } from 'chart.js';
-import StreamingPlugin from '@robloche/chartjs-plugin-streaming';
 import 'chartjs-adapter-moment';
-import { useState } from 'react';
 import { deepmerge, deepmergeCustom } from 'deepmerge-ts';
+import { useState } from 'react';
 import { hexToRgba } from '@/lib/color';
 
 ChartJS.register(LineElement, PointElement, Filler, LinearScale, StreamingPlugin);

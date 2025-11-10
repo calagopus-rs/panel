@@ -1,14 +1,14 @@
+import { faExternalLink } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, ModalProps } from '@mantine/core';
 import Button from '@/elements/Button';
 import CopyOnClick from '@/elements/CopyOnClick';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useAuth } from '@/providers/AuthProvider';
 import { useServerStore } from '@/stores/server';
-import { faExternalLink } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, ModalProps } from '@mantine/core';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
   const { user } = useAuth();
   const { server } = useServerStore();
 
@@ -54,4 +54,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Group>
     </Modal>
   );
-};
+}

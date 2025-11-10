@@ -1,21 +1,21 @@
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
 import { httpErrorToHuman } from '@/api/axios';
 import createAllocation from '@/api/server/allocations/createAllocation';
 import getAllocations from '@/api/server/allocations/getAllocations';
+import Button from '@/elements/Button';
+import ConditionalTooltip from '@/elements/ConditionalTooltip';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import AllocationRow from './AllocationRow';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import ConditionalTooltip from '@/elements/ConditionalTooltip';
 
-export default () => {
+export default function ServerNetwork() {
   const { addToast } = useToast();
   const { server, allocations, setAllocations, addAllocation } = useServerStore();
 
@@ -75,4 +75,4 @@ export default () => {
       )}
     </>
   );
-};
+}

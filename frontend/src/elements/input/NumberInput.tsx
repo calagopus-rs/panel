@@ -1,6 +1,8 @@
+import { NumberInput as MantineNumberInput, NumberInputProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { NumberInput, NumberInputProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, NumberInputProps>(({ className, ...rest }, ref) => {
-  return <NumberInput ref={ref} className={className} {...rest} />;
+const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(({ className, ...rest }, ref) => {
+  return <MantineNumberInput ref={ref} className={className} {...rest} />;
 });
+
+export default NumberInput;

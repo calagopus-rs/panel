@@ -1,16 +1,16 @@
-import { MultiKeyValueInput } from '@/elements/input/MultiKeyValueInput';
-import NumberInput from '@/elements/input/NumberInput';
-import TextInput from '@/elements/input/TextInput';
 import { Divider, Group, Stack, Title } from '@mantine/core';
 import { Dispatch } from 'react';
+import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput';
+import NumberInput from '@/elements/input/NumberInput';
+import TextInput from '@/elements/input/TextInput';
 
-export default ({
+export default function BackupRestic({
   backupConfig,
   setBackupConfigs,
 }: {
-  backupConfig: LocationConfigBackupConfigsRestic;
-  setBackupConfigs: Dispatch<LocationConfigBackupConfigsRestic>;
-}) => {
+  backupConfig: BackupDiskConfigurationRestic;
+  setBackupConfigs: Dispatch<BackupDiskConfigurationRestic>;
+}) {
   return (
     <Stack gap={'xs'}>
       <Stack gap={0}>
@@ -59,4 +59,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

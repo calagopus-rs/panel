@@ -1,3 +1,5 @@
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateEmail from '@/api/me/account/updateEmail';
 import Button from '@/elements/Button';
@@ -6,10 +8,8 @@ import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Grid, Group, Stack, Title } from '@mantine/core';
-import { useState } from 'react';
 
-export default () => {
+export default function EmailContainer() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -64,4 +64,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

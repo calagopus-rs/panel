@@ -1,13 +1,13 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Title } from '@mantine/core';
+import { useState } from 'react';
+import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes';
+import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes';
-import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
 
-export default ({ location }: { location: Location }) => {
+export default function AdminLocationNodes({ location }: { location: Location }) {
   const [locationNodes, setLocationNodes] = useState<ResponseMeta<Node>>(getEmptyPaginationSet());
 
   const { loading, setPage } = useSearchablePaginatedTable({
@@ -32,4 +32,4 @@ export default ({ location }: { location: Location }) => {
       )}
     </>
   );
-};
+}

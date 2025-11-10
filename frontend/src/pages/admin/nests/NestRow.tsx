@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const nestTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
 
-export default ({ nest }: { nest: AdminNest }) => {
+export default function NestRow({ nest }: { nest: AdminNest }) {
   return (
     <TableRow>
       <TableData>
@@ -26,4 +26,4 @@ export default ({ nest }: { nest: AdminNest }) => {
       </TableData>
     </TableRow>
   );
-};
+}

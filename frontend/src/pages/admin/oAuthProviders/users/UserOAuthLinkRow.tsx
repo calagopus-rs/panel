@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
 import Tooltip from '@/elements/Tooltip';
-import { NavLink } from 'react-router';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 
 export const userOAuthLinkTableColumns = ['ID', 'User', 'Identifier', 'Last Used', 'Created'];
 
-export default ({ userOAuthLink }: { userOAuthLink: AdminUserOAuthLink }) => {
+export default function UserOAuthLinkRow({ userOAuthLink }: { userOAuthLink: AdminUserOAuthLink }) {
   return (
     <TableRow>
       <TableData>
@@ -39,4 +39,4 @@ export default ({ userOAuthLink }: { userOAuthLink: AdminUserOAuthLink }) => {
       </TableData>
     </TableRow>
   );
-};
+}

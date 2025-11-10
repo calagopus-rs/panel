@@ -1,14 +1,14 @@
+import { faCrown, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { faCrown, faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { NavLink } from 'react-router';
 
 export const userTableColumns = ['ID', 'Username', 'Role', 'Created'];
 
-export default ({ user }: { user: User }) => {
+export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>
       <TableData>
@@ -44,4 +44,4 @@ export default ({ user }: { user: User }) => {
       </TableData>
     </TableRow>
   );
-};
+}

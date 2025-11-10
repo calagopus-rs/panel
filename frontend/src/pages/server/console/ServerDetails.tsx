@@ -1,11 +1,3 @@
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import CopyOnClick from '@/elements/CopyOnClick';
-import Checkbox from '@/elements/input/Checkbox';
-import { formatAllocation } from '@/lib/server';
-import { bytesToString, mbToBytes } from '@/lib/size';
-import { formatMiliseconds } from '@/lib/time';
-import { useServerStore } from '@/stores/server';
 import {
   faClock,
   faCloudDownload,
@@ -20,6 +12,14 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover, ThemeIcon } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
+import Button from '@/elements/Button';
+import Card from '@/elements/Card';
+import CopyOnClick from '@/elements/CopyOnClick';
+import Checkbox from '@/elements/input/Checkbox';
+import { formatAllocation } from '@/lib/server';
+import { bytesToString, mbToBytes } from '@/lib/size';
+import { formatMiliseconds } from '@/lib/time';
+import { useServerStore } from '@/stores/server';
 
 function StatCard({
   icon,
@@ -75,7 +75,7 @@ function StatCard({
   );
 }
 
-export default () => {
+export default function ServerDetails() {
   const server = useServerStore((state) => state.server);
   const stats = useServerStore((state) => state.stats);
   const state = useServerStore((state) => state.state);
@@ -180,4 +180,4 @@ export default () => {
       />
     </div>
   );
-};
+}

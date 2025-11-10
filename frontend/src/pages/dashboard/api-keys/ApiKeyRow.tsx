@@ -1,19 +1,19 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteApiKey from '@/api/me/api-keys/deleteApiKey';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
+import CopyOnClick from '@/elements/CopyOnClick';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useUserStore } from '@/stores/user';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import deleteApiKey from '@/api/me/api-keys/deleteApiKey';
-import CopyOnClick from '@/elements/CopyOnClick';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
 
-export default ({ apiKey }: { apiKey: UserApiKey }) => {
+export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
   const { addToast } = useToast();
   const { removeApiKey } = useUserStore();
 
@@ -92,4 +92,4 @@ export default ({ apiKey }: { apiKey: UserApiKey }) => {
       </ContextMenu>
     </>
   );
-};
+}

@@ -1,24 +1,24 @@
+import { Group, ModalProps, Stack, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
+import getPermissions from '@/api/getPermissions';
 import createApiKey from '@/api/me/api-keys/createApiKey';
+import updateApiKey from '@/api/me/api-keys/updateApiKey';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
-import { Group, ModalProps, Stack, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import getPermissions from '@/api/getPermissions';
-import { useGlobalStore } from '@/stores/global';
 import PermissionSelector from '@/elements/PermissionSelector';
+import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
-import updateApiKey from '@/api/me/api-keys/updateApiKey';
+import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
+import { useUserStore } from '@/stores/user';
 
 type Props = ModalProps & {
   contextApiKey?: UserApiKey;
 };
 
-export default ({ contextApiKey, opened, onClose }: Props) => {
+export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { addApiKey, updateApiKey: updateStateApiKey } = useUserStore();
 
@@ -136,4 +136,4 @@ export default ({ contextApiKey, opened, onClose }: Props) => {
       </Stack>
     </Modal>
   );
-};
+}

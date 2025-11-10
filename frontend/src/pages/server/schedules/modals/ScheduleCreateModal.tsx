@@ -1,3 +1,7 @@
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, ModalProps, Stack, Text } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createSchedule from '@/api/server/schedules/createSchedule';
 import Button from '@/elements/Button';
@@ -9,12 +13,8 @@ import { load } from '@/lib/debounce';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, ModalProps, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
 
-export default ({ opened, onClose }: ModalProps) => {
+export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, addSchedule } = useServerStore();
 
@@ -192,4 +192,4 @@ export default ({ opened, onClose }: ModalProps) => {
       </Stack>
     </Modal>
   );
-};
+}

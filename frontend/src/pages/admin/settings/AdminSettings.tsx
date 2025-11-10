@@ -1,22 +1,22 @@
+import { faAt, faDatabase, faLayerGroup, faRobot, faServer, faUserCheck } from '@fortawesome/free-solid-svg-icons';
+import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { useAdminStore } from '@/stores/admin';
+import { Route, Routes } from 'react-router';
 import getSettings from '@/api/admin/settings/getSettings';
 import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import SubNavigation from '@/elements/SubNavigation';
-import { faAt, faDatabase, faLayerGroup, faRobot, faServer, faUserCheck } from '@fortawesome/free-solid-svg-icons';
-import { Route, Routes } from 'react-router';
-import EmailContainer from './EmailContainer';
 import Spinner from '@/elements/Spinner';
-import ApplicationContainer from './ApplicationContainer';
-import WebauthnContainer from './WebauthnContainer';
-import ServerContainer from './ServerContainer';
-import CaptchaContainer from './CaptchaContainer';
-import { Title } from '@mantine/core';
+import SubNavigation from '@/elements/SubNavigation';
 import { load } from '@/lib/debounce';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import ApplicationContainer from './ApplicationContainer';
+import CaptchaContainer from './CaptchaContainer';
+import EmailContainer from './EmailContainer';
+import ServerContainer from './ServerContainer';
 import StorageContainer from './StorageContainer';
+import WebauthnContainer from './WebauthnContainer';
 
-export default () => {
+export default function AdminSettings() {
   const { addToast } = useToast();
   const { setSettings } = useAdminStore();
 
@@ -84,4 +84,4 @@ export default () => {
       )}
     </>
   );
-};
+}

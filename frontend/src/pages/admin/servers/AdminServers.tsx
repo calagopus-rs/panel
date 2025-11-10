@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import { Group, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Table from '@/elements/Table';
-import TextInput from '@/elements/input/TextInput';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
 import getServers from '@/api/admin/servers/getServers';
-import ServerRow, { serverTableColumns } from './ServerRow';
-import ServerCreateOrUpdate from './ServerCreateOrUpdate';
-import ServerView from './ServerView';
+import Button from '@/elements/Button';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import ServerCreateOrUpdate from './ServerCreateOrUpdate';
+import ServerRow, { serverTableColumns } from './ServerRow';
+import ServerView from './ServerView';
 
-const ServersContainer = () => {
+function ServersContainer() {
   const navigate = useNavigate();
   const { servers, setServers } = useAdminStore();
 
@@ -51,9 +51,9 @@ const ServersContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminServers() {
   return (
     <Routes>
       <Route path={'/'} element={<ServersContainer />} />
@@ -61,4 +61,4 @@ export default () => {
       <Route path={'/:id/*'} element={<ServerView />} />
     </Routes>
   );
-};
+}

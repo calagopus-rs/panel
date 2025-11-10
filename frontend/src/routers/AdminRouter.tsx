@@ -7,7 +7,7 @@ import NotFound from '@/pages/NotFound';
 import adminRoutes from '@/routers/routes/adminRoutes';
 import { useGlobalStore } from '@/stores/global';
 
-export default () => {
+export default function AdminRouter() {
   const { settings } = useGlobalStore();
 
   return (
@@ -52,4 +52,4 @@ export default () => {
       </div>
     </div>
   );
-};
+}

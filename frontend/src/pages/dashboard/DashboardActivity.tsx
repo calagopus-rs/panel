@@ -1,3 +1,5 @@
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
 import getUserActivity from '@/api/me/getUserActivity';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
@@ -6,11 +8,9 @@ import Spinner from '@/elements/Spinner';
 import Table, { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
-export default () => {
+export default function DashboardActivity() {
   const [activities, setActivities] = useState<ResponseMeta<UserActivity>>();
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
@@ -60,4 +60,4 @@ export default () => {
       )}
     </>
   );
-};
+}

@@ -1,3 +1,6 @@
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useRef, useState } from 'react';
+import AvatarEditor from 'react-avatar-editor';
 import { httpErrorToHuman } from '@/api/axios';
 import removeAvatar from '@/api/me/account/removeAvatar';
 import updateAvatar from '@/api/me/account/updateAvatar';
@@ -7,11 +10,8 @@ import FileInput from '@/elements/input/FileInput';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Grid, Group, Stack, Title } from '@mantine/core';
-import { useRef, useState } from 'react';
-import AvatarEditor from 'react-avatar-editor';
 
-export default () => {
+export default function AvatarContainer() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -93,4 +93,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

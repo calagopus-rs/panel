@@ -9,7 +9,7 @@ import ServerDetails from './ServerDetails';
 import ServerPowerControls from './ServerPowerControls';
 import ServerStats from './ServerStats';
 
-export default () => {
+export default function ServerConsole() {
   const server = useServerStore((state) => state.server);
 
   const [maxConsoleHeight, setMaxConsoleHeight] = useState<number | null>(null);
@@ -58,4 +58,4 @@ export default () => {
       <ServerStats />
     </>
   );
-};
+}

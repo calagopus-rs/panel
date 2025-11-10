@@ -1,11 +1,11 @@
+import { Route, Routes } from 'react-router';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import Login from '@/pages/auth/Login';
 import Register from '@/pages/auth/Register';
 import ResetPassword from '@/pages/auth/ResetPassword';
 import NotFound from '@/pages/NotFound';
-import { Route, Routes } from 'react-router';
 
-export default () => {
+export default function AuthenticationRouter() {
   return (
     <>
       <Routes>
@@ -17,4 +17,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

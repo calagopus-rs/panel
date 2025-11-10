@@ -1,3 +1,7 @@
+import { faSave } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Divider, Group, ModalProps, Stack, Text } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createScheduleStep from '@/api/server/schedules/steps/createScheduleStep';
 import updateScheduleStep from '@/api/server/schedules/steps/updateScheduleStep';
@@ -5,29 +9,25 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
+import { load } from '@/lib/debounce';
 import { scheduleStepDefaultMapping, scheduleStepLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faSave } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Divider, Group, ModalProps, Stack, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import { load } from '@/lib/debounce';
-import StepSleep from '../steps/StepSleep';
-import StepSendPower from '../steps/StepSendPower';
-import StepSendCommand from '../steps/StepSendCommand';
+import StepCompressFiles from '../steps/StepCompressFiles';
+import StepCopyFile from '../steps/StepCopyFile';
 import StepCreateBackup from '../steps/StepCreateBackup';
 import StepCreateDirectory from '../steps/StepCreateDirectory';
-import StepWriteFile from '../steps/StepWriteFile';
-import StepCopyFile from '../steps/StepCopyFile';
+import StepDecompressFile from '../steps/StepDecompressFile';
 import StepDeleteFiles from '../steps/StepDeleteFiles';
-import StepCompressFiles from '../steps/StepCompressFiles';
-import StepUpdateStartupVariable from '../steps/StepUpdateStartupVariable';
+import StepRenameFiles from '../steps/StepRenameFiles';
+import StepSendCommand from '../steps/StepSendCommand';
+import StepSendPower from '../steps/StepSendPower';
+import StepSleep from '../steps/StepSleep';
 import StepUpdateStartupCommand from '../steps/StepUpdateStartupCommand';
 import StepUpdateStartupDockerImage from '../steps/StepUpdateStartupDockerImage';
-import StepDecompressFile from '../steps/StepDecompressFile';
-import StepRenameFiles from '../steps/StepRenameFiles';
+import StepUpdateStartupVariable from '../steps/StepUpdateStartupVariable';
 import StepWaitForConsoleLine from '../steps/StepWaitForConsoleLine';
+import StepWriteFile from '../steps/StepWriteFile';
 
 type Props = ModalProps & {
   schedule: ServerSchedule;
@@ -36,7 +36,14 @@ type Props = ModalProps & {
   onStepUpdate?: (step: ScheduleStep) => void;
 };
 
-export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClose }: Props) => {
+export default function StepCreateOrUpdateModal({
+  schedule,
+  propStep,
+  onStepCreate,
+  onStepUpdate,
+  opened,
+  onClose,
+}: Props) {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -157,4 +164,4 @@ export default ({ schedule, propStep, onStepCreate, onStepUpdate, opened, onClos
       </Stack>
     </Modal>
   );
-};
+}

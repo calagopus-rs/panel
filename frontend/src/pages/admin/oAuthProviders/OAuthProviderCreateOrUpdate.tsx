@@ -1,6 +1,6 @@
 import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Divider, Group, Stack, Title } from '@mantine/core';
+import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
 import { useEffect, useState } from 'react';
@@ -21,7 +21,11 @@ import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
 
-export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthProvider }) => {
+export default function OAuthProviderCreateOrUpdate({
+  contextOAuthProvider,
+}: {
+  contextOAuthProvider?: AdminOAuthProvider;
+}) {
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
 
@@ -298,4 +302,4 @@ export default ({ contextOAuthProvider }: { contextOAuthProvider?: AdminOAuthPro
       </Stack>
     </>
   );
-};
+}

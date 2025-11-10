@@ -3,7 +3,7 @@ import getWebsocketToken from '@/api/server/getWebsocketToken';
 import { Websocket } from '@/plugins/Websocket';
 import { useServerStore } from '@/stores/server';
 
-export default () => {
+export default function WebsocketHandler() {
   let updatingToken = false;
 
   const { uuid } = useServerStore((state) => state.server);
@@ -92,4 +92,4 @@ export default () => {
   }, [uuid]);
 
   return null;
-};
+}

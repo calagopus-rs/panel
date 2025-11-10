@@ -1,3 +1,5 @@
+import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import updateAutokill from '@/api/server/settings/updateAutokill';
 import Button from '@/elements/Button';
@@ -7,10 +9,8 @@ import Switch from '@/elements/input/Switch';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Stack, Title } from '@mantine/core';
-import { useState } from 'react';
 
-export default () => {
+export default function AutokillContainer() {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -62,4 +62,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

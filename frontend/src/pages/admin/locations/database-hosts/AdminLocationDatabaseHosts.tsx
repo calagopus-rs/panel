@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLocationDatabaseHosts';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLocationDatabaseHosts';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import LocationDatabaseHostRow, { locationDatabaseHostTableColumns } from './LocationDatabaseHostRow';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import LocationDatabaseHostCreateModal from './modals/LocationDatabaseHostCreateModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import LocationDatabaseHostRow, { locationDatabaseHostTableColumns } from './LocationDatabaseHostRow';
+import LocationDatabaseHostCreateModal from './modals/LocationDatabaseHostCreateModal';
 
-export default ({ location }: { location: Location }) => {
+export default function AdminLocationDatabaseHosts({ location }: { location: Location }) {
   const { locationDatabaseHosts, setLocationDatabaseHosts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
@@ -58,4 +58,4 @@ export default ({ location }: { location: Location }) => {
       )}
     </>
   );
-};
+}

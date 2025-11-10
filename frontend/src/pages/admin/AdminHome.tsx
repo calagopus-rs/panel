@@ -1,13 +1,13 @@
+import { Group, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import getBackupStats, { BackupStats } from '@/api/admin/stats/getBackupStats';
 import getGeneralStats, { GeneralStats } from '@/api/admin/stats/getGeneralStats';
 import { httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
 
-export default () => {
+export default function AdminHome() {
   const { addToast } = useToast();
 
   const [generalStats, setGeneralStats] = useState<GeneralStats | null>(null);
@@ -180,4 +180,4 @@ export default () => {
       </div>
     </>
   );
-};
+}

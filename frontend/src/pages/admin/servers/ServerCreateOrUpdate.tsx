@@ -33,7 +33,7 @@ const timezones = Object.keys(zones)
     label: zone,
   }));
 
-export default ({ contextServer }: { contextServer?: AdminServer }) => {
+export default function ServerCreateOrUpdate({ contextServer }: { contextServer?: AdminServer }) {
   const form = useForm<Partial<UpdateAdminServer>>({
     initialValues: {
       externalId: null,
@@ -462,4 +462,4 @@ export default ({ contextServer }: { contextServer?: AdminServer }) => {
       </Stack>
     </>
   );
-};
+}

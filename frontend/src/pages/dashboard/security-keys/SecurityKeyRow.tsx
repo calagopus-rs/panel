@@ -1,18 +1,18 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
+import { httpErrorToHuman } from '@/api/axios';
+import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import SecurityKeyEditModal from './modals/SecurityKeyEditModal';
-import { useUserStore } from '@/stores/user';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
+import SecurityKeyEditModal from './modals/SecurityKeyEditModal';
 
-export default ({ securityKey }: { securityKey: UserSecurityKey }) => {
+export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecurityKey }) {
   const { addToast } = useToast();
   const { removeSecurityKey } = useUserStore();
 
@@ -82,4 +82,4 @@ export default ({ securityKey }: { securityKey: UserSecurityKey }) => {
       </ContextMenu>
     </>
   );
-};
+}

@@ -1,6 +1,8 @@
+import { CheckboxProps, Checkbox as MantineCheckbox } from '@mantine/core';
 import { forwardRef } from 'react';
-import { Checkbox, CheckboxProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, CheckboxProps>(({ className, ...rest }, ref) => {
-  return <Checkbox ref={ref} className={className} {...rest} />;
+const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(({ className, ...rest }, ref) => {
+  return <MantineCheckbox ref={ref} className={className} {...rest} />;
 });
+
+export default Checkbox;

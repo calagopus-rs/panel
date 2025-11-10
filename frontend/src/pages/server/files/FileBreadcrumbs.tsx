@@ -1,10 +1,10 @@
+import classNames from 'classnames';
+import { Fragment } from 'react/jsx-runtime';
+import { createSearchParams, NavLink } from 'react-router';
 import Checkbox from '@/elements/input/Checkbox';
 import { useServerStore } from '@/stores/server';
-import classNames from 'classnames';
-import { createSearchParams, NavLink } from 'react-router';
-import { Fragment } from 'react/jsx-runtime';
 
-export function FileBreadcrumbs({
+export default function FileBreadcrumbs({
   path,
   browsingBackup,
   hideSelectAll,

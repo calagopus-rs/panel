@@ -1,14 +1,14 @@
 import { Grid, Stack, Text, Title } from '@mantine/core';
-import Card from '@/elements/Card';
 import { useState } from 'react';
-import ServerTransferModal from '@/pages/admin/servers/management/modals/ServerTransferModal';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import ServerDeleteModal from '@/pages/admin/servers/management/modals/ServerDeleteModal';
 import ServerSuspendModal from '@/pages/admin/servers/management/modals/ServerSuspendModal';
+import ServerTransferModal from '@/pages/admin/servers/management/modals/ServerTransferModal';
 import ServerUnsuspendModal from '@/pages/admin/servers/management/modals/ServerUnsuspendModal';
 import ServerClearStateModal from './modals/ServerClearStateModal';
 
-export default ({ server }: { server: AdminServer }) => {
+export default function AdminServerManagement({ server }: { server: AdminServer }) {
   const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'clear-state' | 'delete'>(null);
 
   return (
@@ -85,4 +85,4 @@ export default ({ server }: { server: AdminServer }) => {
       </Grid>
     </>
   );
-};
+}

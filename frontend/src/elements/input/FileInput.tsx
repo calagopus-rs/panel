@@ -1,6 +1,8 @@
+import { FileInputProps, FileInput as MantineFileInput } from '@mantine/core';
 import { forwardRef } from 'react';
-import { FileInput, FileInputProps } from '@mantine/core';
 
-export default forwardRef<HTMLButtonElement, FileInputProps>(({ className, ...rest }, ref) => {
-  return <FileInput ref={ref} className={className} {...rest} />;
+const FileInput = forwardRef<HTMLButtonElement, FileInputProps>(({ className, ...rest }, ref) => {
+  return <MantineFileInput ref={ref} className={className} {...rest} />;
 });
+
+export default FileInput;

@@ -1,15 +1,15 @@
-import TextInput from '@/elements/input/TextInput';
 import { TextInputProps } from '@mantine/core';
+import TextInput from '@/elements/input/TextInput';
 import { parseSize } from '@/lib/size';
 
-export default ({
+export default function SizeInput({
   setState,
   onChange,
   ...rest
 }: Omit<TextInputProps, 'onChange'> & {
   setState: (value: string) => void;
   onChange: (value: number) => void;
-}) => {
+}) {
   return (
     <TextInput
       {...rest}
@@ -28,4 +28,4 @@ export default ({
       }}
     />
   );
-};
+}

@@ -1,16 +1,16 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getUserActivity from '@/api/admin/users/getUserActivity';
+import { getEmptyPaginationSet } from '@/api/axios';
+import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
+import Code from '@/elements/Code';
 import Spinner from '@/elements/Spinner';
 import Table, { TableData, TableRow } from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import getUserActivity from '@/api/admin/users/getUserActivity';
-import Code from '@/elements/Code';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
-export default ({ user }: { user: User }) => {
+export default function AdminUserActivity({ user }: { user: User }) {
   const [userActivity, setUserActivity] = useState<ResponseMeta<UserActivity>>(getEmptyPaginationSet());
 
   const { loading, setPage } = useSearchablePaginatedTable({
@@ -55,4 +55,4 @@ export default ({ user }: { user: User }) => {
       )}
     </>
   );
-};
+}

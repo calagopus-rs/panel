@@ -1,13 +1,13 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { backupDiskLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const backupConfigurationTableColumns = ['ID', 'Name', 'Disk', 'Created'];
 
-export default ({ backupConfiguration }: { backupConfiguration: BackupConfiguration }) => {
+export default function BackupConfigurationRow({ backupConfiguration }: { backupConfiguration: BackupConfiguration }) {
   return (
     <TableRow>
       <TableData>
@@ -29,4 +29,4 @@ export default ({ backupConfiguration }: { backupConfiguration: BackupConfigurat
       </TableData>
     </TableRow>
   );
-};
+}

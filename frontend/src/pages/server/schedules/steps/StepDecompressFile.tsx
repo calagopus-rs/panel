@@ -1,14 +1,14 @@
+import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepDecompressFile({
   action,
   setAction,
 }: {
   action: ScheduleActionDecompressFile;
   setAction: (action: ScheduleActionDecompressFile) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -37,4 +37,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

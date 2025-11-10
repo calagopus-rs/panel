@@ -15,7 +15,7 @@ import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useGlobalStore } from '@/stores/global';
 
-export default ({ contextRole }: { contextRole?: Role }) => {
+export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role }) {
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
 
   const [openModal, setOpenModal] = useState<'delete'>(null);
@@ -120,4 +120,4 @@ export default ({ contextRole }: { contextRole?: Role }) => {
       </Stack>
     </>
   );
-};
+}

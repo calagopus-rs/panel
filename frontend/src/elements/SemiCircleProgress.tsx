@@ -1,6 +1,8 @@
-import { SemiCircleProgress, SemiCircleProgressProps } from '@mantine/core';
+import { SemiCircleProgress as MantineSemiCircleProgress, SemiCircleProgressProps } from '@mantine/core';
 import { forwardRef } from 'react';
 
-export default forwardRef<HTMLDivElement, SemiCircleProgressProps>(({ className, ...rest }, ref) => {
-  return <SemiCircleProgress ref={ref} className={className} transitionDuration={100} {...rest} />;
+const SemiCircleProgress = forwardRef<HTMLDivElement, SemiCircleProgressProps>(({ className, ...rest }, ref) => {
+  return <MantineSemiCircleProgress ref={ref} className={className} transitionDuration={100} {...rest} />;
 });
+
+export default SemiCircleProgress;

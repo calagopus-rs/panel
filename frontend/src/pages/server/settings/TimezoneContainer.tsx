@@ -1,3 +1,6 @@
+import { Grid, Group, Stack, Text, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { zones } from 'tzdata';
 import { httpErrorToHuman } from '@/api/axios';
 import updateTimezone from '@/api/server/settings/updateTimezone';
 import Button from '@/elements/Button';
@@ -6,9 +9,6 @@ import Select from '@/elements/input/Select';
 import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Grid, Group, Stack, Text, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import { zones } from 'tzdata';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -17,7 +17,7 @@ const timezones = Object.keys(zones)
     label: zone,
   }));
 
-export default () => {
+export default function TimezoneContainer() {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
@@ -86,4 +86,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

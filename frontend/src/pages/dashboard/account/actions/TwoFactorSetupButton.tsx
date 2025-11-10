@@ -1,3 +1,6 @@
+import { Group, Modal as MantineModal, Stack, Text, useModalsStack } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import QRCode from 'react-qr-code';
 import { httpErrorToHuman } from '@/api/axios';
 import enableTwoFactor from '@/api/me/account/enableTwoFactor';
 import getTwoFactor from '@/api/me/account/getTwoFactor';
@@ -11,16 +14,13 @@ import Spinner from '@/elements/Spinner';
 import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import { Group, Modal as MantineModal, Stack, Text, useModalsStack } from '@mantine/core';
-import { useEffect, useState } from 'react';
-import QRCode from 'react-qr-code';
 
 export interface TwoFactorSetupResponse {
   otpUrl: string;
   secret: string;
 }
 
-export default () => {
+export default function TwoFactorSetupButton() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
@@ -157,4 +157,4 @@ export default () => {
       <Button onClick={() => stageStack.open('setup')}>Enable Two-Step</Button>
     </>
   );
-};
+}

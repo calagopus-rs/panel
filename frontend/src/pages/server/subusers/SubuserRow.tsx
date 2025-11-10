@@ -1,18 +1,18 @@
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
 import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import updateSubuser from '@/api/server/subusers/updateSubuser';
+import { httpErrorToHuman } from '@/api/axios';
 import deleteSubuser from '@/api/server/subusers/deleteSubuser';
+import updateSubuser from '@/api/server/subusers/updateSubuser';
+import Code from '@/elements/Code';
+import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
 import { TableData, TableRow } from '@/elements/Table';
+import { useToast } from '@/providers/ToastProvider';
+import { useServerStore } from '@/stores/server';
+import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
 
-export default ({ subuser }: { subuser: ServerSubuser }) => {
+export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
   const { addToast } = useToast();
   const { server, removeSubuser } = useServerStore();
 
@@ -94,4 +94,4 @@ export default ({ subuser }: { subuser: ServerSubuser }) => {
       </ContextMenu>
     </>
   );
-};
+}

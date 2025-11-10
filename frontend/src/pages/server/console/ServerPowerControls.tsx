@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react';
 import Button from '@/elements/Button';
 import Can from '@/elements/Can';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useServerStore } from '@/stores/server';
-import { useEffect, useState } from 'react';
 
-export default () => {
+export default function ServerPowerControls() {
   const [open, setOpen] = useState(false);
   const state = useServerStore((state) => state.state);
   const instance = useServerStore((state) => state.socketInstance);
@@ -69,4 +69,4 @@ export default () => {
       </Can>
     </div>
   );
-};
+}

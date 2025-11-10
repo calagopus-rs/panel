@@ -1,15 +1,15 @@
+import { Group, Stack, Title } from '@mantine/core';
+import { useState } from 'react';
+import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
+import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
-import { Group, Stack, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Switch from '@/elements/input/Switch';
-import { load } from '@/lib/debounce';
-import Button from '@/elements/Button';
 
-export default () => {
+export default function ApplicationContainer() {
   const { addToast } = useToast();
   const { app } = useAdminStore();
 
@@ -77,4 +77,4 @@ export default () => {
       </Group>
     </>
   );
-};
+}

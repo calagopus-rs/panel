@@ -1,17 +1,17 @@
-import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
-import AuthWrapper from './AuthWrapper';
-import forgotPassword from '@/api/auth/forgotPassword';
-import { httpErrorToHuman } from '@/api/axios';
-import Captcha from '@/elements/Captcha';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import { Alert, Card, Divider, Stack, Text, Title } from '@mantine/core';
 import { faExclamationTriangle, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Alert, Card, Divider, Stack, Text, Title } from '@mantine/core';
+import { useRef, useState } from 'react';
+import { useNavigate } from 'react-router';
+import forgotPassword from '@/api/auth/forgotPassword';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Captcha from '@/elements/Captcha';
+import TextInput from '@/elements/input/TextInput';
 import { load } from '@/lib/debounce';
+import AuthWrapper from './AuthWrapper';
 
-export default () => {
+export default function ForgotPassword() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
@@ -89,4 +89,4 @@ export default () => {
       </Stack>
     </AuthWrapper>
   );
-};
+}

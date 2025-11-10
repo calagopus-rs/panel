@@ -1,12 +1,12 @@
 import NumberInput from '@/elements/input/NumberInput';
 
-export default ({
+export default function StepSleep({
   action,
   setAction,
 }: {
   action: ScheduleActionSleep;
   setAction: (action: ScheduleActionSleep) => void;
-}) => {
+}) {
   return (
     <NumberInput
       withAsterisk
@@ -17,4 +17,4 @@ export default ({
       onChange={(value) => setAction({ ...action, duration: Number(value) })}
     />
   );
-};
+}

@@ -1,17 +1,22 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
 import getMounts from '@/api/admin/mounts/getMounts';
+import createEggMount from '@/api/admin/nests/eggs/mounts/createEggMount';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { load } from '@/lib/debounce';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { Group, ModalProps, Stack } from '@mantine/core';
-import { useState } from 'react';
-import createEggMount from '@/api/admin/nests/eggs/mounts/createEggMount';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
 
-export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest; egg: AdminNestEgg }) => {
+export default function EggMountAddModal({
+  nest,
+  egg,
+  opened,
+  onClose,
+}: ModalProps & { nest: AdminNest; egg: AdminNestEgg }) {
   const { addToast } = useToast();
   const { addEggMount } = useAdminStore();
 
@@ -67,4 +72,4 @@ export default ({ nest, egg, opened, onClose }: ModalProps & { nest: Nest; egg: 
       </Stack>
     </Modal>
   );
-};
+}

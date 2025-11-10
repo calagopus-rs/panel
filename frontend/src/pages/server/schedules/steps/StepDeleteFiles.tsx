@@ -1,14 +1,14 @@
+import { Stack } from '@mantine/core';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
-import { Stack } from '@mantine/core';
 
-export default ({
+export default function StepDeleteFiles({
   action,
   setAction,
 }: {
   action: ScheduleActionDeleteFiles;
   setAction: (action: ScheduleActionDeleteFiles) => void;
-}) => {
+}) {
   return (
     <Stack>
       <TextInput
@@ -27,4 +27,4 @@ export default ({
       />
     </Stack>
   );
-};
+}

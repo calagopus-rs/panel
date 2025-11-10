@@ -1,19 +1,19 @@
-import Spinner from '@/elements/Spinner';
-import { useState } from 'react';
-import { useUserStore } from '@/stores/user';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import ApiKeyRow from './ApiKeyRow';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
 import getApiKeys from '@/api/me/api-keys/getApiKeys';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useUserStore } from '@/stores/user';
+import ApiKeyRow from './ApiKeyRow';
 
-export default () => {
+export default function DashboardApiKeys() {
   const { apiKeys, setApiKeys } = useUserStore();
 
   const [openModal, setOpenModal] = useState<'create'>(null);
@@ -56,4 +56,4 @@ export default () => {
       )}
     </>
   );
-};
+}

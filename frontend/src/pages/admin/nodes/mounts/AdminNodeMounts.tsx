@@ -1,19 +1,19 @@
-import { useState } from 'react';
-import { Group, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import { useAdminStore } from '@/stores/admin';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, Title } from '@mantine/core';
+import { useState } from 'react';
+import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
+import Button from '@/elements/Button';
+import { ContextMenuProvider } from '@/elements/ContextMenu';
+import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import NodeMountRow, { nodeMountTableColumns } from './NodeMountRow';
-import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
-import NodeMountAddModal from './modals/NodeMountAddModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
+import NodeMountAddModal from './modals/NodeMountAddModal';
+import NodeMountRow, { nodeMountTableColumns } from './NodeMountRow';
 
-export default ({ node }: { node: Node }) => {
+export default function AdminNodeMounts({ node }: { node: Node }) {
   const { nodeMounts, setNodeMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
@@ -50,4 +50,4 @@ export default ({ node }: { node: Node }) => {
       )}
     </>
   );
-};
+}

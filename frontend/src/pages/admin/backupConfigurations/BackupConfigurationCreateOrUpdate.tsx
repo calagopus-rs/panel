@@ -1,21 +1,25 @@
-import { useEffect, useState } from 'react';
 import { Group, Stack, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Select from '@/elements/input/Select';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { backupDiskLabelMapping } from '@/lib/enums';
-import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
 import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
 import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration';
+import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import Select from '@/elements/input/Select';
 import TextArea from '@/elements/input/TextArea';
-import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { backupDiskLabelMapping } from '@/lib/enums';
 import BackupRestic from '@/pages/admin/locations/forms/BackupRestic';
-import { useForm } from '@mantine/form';
+import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
-export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: BackupConfiguration }) => {
+export default function BackupConfigurationCreateOrUpdate({
+  contextBackupConfiguration,
+}: {
+  contextBackupConfiguration?: BackupConfiguration;
+}) {
   const [openModal, setOpenModal] = useState<'delete'>(null);
 
   const form = useForm<UpdateBackupConfiguration>({
@@ -122,4 +126,4 @@ export default ({ contextBackupConfiguration }: { contextBackupConfiguration?: B
       </Stack>
     </>
   );
-};
+}

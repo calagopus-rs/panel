@@ -1,15 +1,15 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AnsiUp } from 'ansi_up';
 import DOMPurify from 'dompurify';
-import { useServerStore } from '@/stores/server';
-import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
-import Card from '@/elements/Card';
-import Spinner from '@/elements/Spinner';
-import TextInput from '@/elements/input/TextInput';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowDown } from '@fortawesome/free-solid-svg-icons';
+import Card from '@/elements/Card';
+import TextInput from '@/elements/input/TextInput';
 import Progress from '@/elements/Progress';
+import Spinner from '@/elements/Spinner';
+import { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
+import { useServerStore } from '@/stores/server';
 
 const ansiUp = new AnsiUp();
 const MAX_LINES = 1000;

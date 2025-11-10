@@ -1,21 +1,27 @@
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { useState } from 'react';
+import { NavLink } from 'react-router';
+import deleteLocationDatabaseHost from '@/api/admin/locations/database-hosts/deleteLocationDatabaseHost';
 import { httpErrorToHuman } from '@/api/axios';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
-import { useToast } from '@/providers/ToastProvider';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { TableData, TableRow } from '@/elements/Table';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import deleteLocationDatabaseHost from '@/api/admin/locations/database-hosts/deleteLocationDatabaseHost';
-import { useAdminStore } from '@/stores/admin';
 import { databaseTypeLabelMapping } from '@/lib/enums';
-import { NavLink } from 'react-router';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
 export const locationDatabaseHostTableColumns = ['Id', 'Name', 'Type', 'Address', 'Added', ''];
 
-export default ({ location, databaseHost }: { location: Location; databaseHost: LocationDatabaseHost }) => {
+export default function LocationDatabaseHostRow({
+  location,
+  databaseHost,
+}: {
+  location: Location;
+  databaseHost: LocationDatabaseHost;
+}) {
   const { addToast } = useToast();
   const { removeLocationDatabaseHost } = useAdminStore();
 
@@ -88,4 +94,4 @@ export default ({ location, databaseHost }: { location: Location; databaseHost: 
       </ContextMenu>
     </>
   );
-};
+}

@@ -40,7 +40,7 @@ function ChartBlock({
   );
 }
 
-export default () => {
+export default function ServerStats() {
   const server = useServerStore((state) => state.server);
   const stats = useServerStore((state) => state.stats);
 
@@ -112,4 +112,4 @@ export default () => {
       </ChartBlock>
     </div>
   );
-};
+}

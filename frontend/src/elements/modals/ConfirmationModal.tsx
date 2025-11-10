@@ -11,7 +11,13 @@ type ConfirmationProps = Omit<ModalProps, 'children'> & {
   children: ReactNode;
 };
 
-export default ({ confirm = 'Okay', confirmColor = 'red', onConfirmed, children, ...props }: ConfirmationProps) => {
+export default function ConfirmationModal({
+  confirm = 'Okay',
+  confirmColor = 'red',
+  onConfirmed,
+  children,
+  ...props
+}: ConfirmationProps) {
   const [loading, setLoading] = useState(false);
 
   const onConfirmedAlt = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -37,4 +43,4 @@ export default ({ confirm = 'Okay', confirmColor = 'red', onConfirmed, children,
       </Group>
     </Modal>
   );
-};
+}

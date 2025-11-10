@@ -1,16 +1,16 @@
-import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
 import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
+import { Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { Route, Routes, useParams } from 'react-router';
+import getNest from '@/api/admin/nests/getNest';
+import { httpErrorToHuman } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import SubNavigation from '@/elements/SubNavigation';
+import { useToast } from '@/providers/ToastProvider';
 import AdminEggs from './eggs/AdminEggs';
 import NestCreateOrUpdate from './NestCreateOrUpdate';
-import { useEffect, useState } from 'react';
-import getNest from '@/api/admin/nests/getNest';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
-import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
 
-export default () => {
+export default function NestView() {
   const params = useParams<'nestId'>();
   const { addToast } = useToast();
   const [nest, setNest] = useState<AdminNest | null>(null);
@@ -54,4 +54,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

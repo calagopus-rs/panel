@@ -1,6 +1,8 @@
+import { MultiSelect as MantineMultiSelect, MultiSelectProps } from '@mantine/core';
 import { forwardRef } from 'react';
-import { MultiSelect, MultiSelectProps } from '@mantine/core';
 
-export default forwardRef<HTMLInputElement, MultiSelectProps>(({ className, ...rest }, ref) => {
-  return <MultiSelect ref={ref} className={className} nothingFoundMessage={'No results found'} {...rest} />;
+const MultiSelect = forwardRef<HTMLInputElement, MultiSelectProps>(({ className, ...rest }, ref) => {
+  return <MantineMultiSelect ref={ref} className={className} nothingFoundMessage={'No results found'} {...rest} />;
 });
+
+export default MultiSelect;

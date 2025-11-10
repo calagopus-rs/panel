@@ -1,3 +1,5 @@
+import { Group, ModalProps, Stack, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import chmodFiles from '@/api/server/files/chmodFiles';
 import Badge from '@/elements/Badge';
@@ -10,14 +12,12 @@ import { load } from '@/lib/debounce';
 import { permissionStringToNumber } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { Group, ModalProps, Stack, Title } from '@mantine/core';
-import { useEffect, useState } from 'react';
 
 type Props = ModalProps & {
   file: DirectoryEntry;
 };
 
-export default ({ file, opened, onClose }: Props) => {
+export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory } = useServerStore();
 
@@ -182,4 +182,4 @@ export default ({ file, opened, onClose }: Props) => {
       </Group>
     </Modal>
   );
-};
+}

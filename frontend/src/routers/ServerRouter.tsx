@@ -18,7 +18,7 @@ import serverRoutes from '@/routers/routes/serverRoutes';
 import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
 
-export default () => {
+export default function ServerRouter() {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
@@ -123,4 +123,4 @@ export default () => {
       </div>
     </div>
   );
-};
+}

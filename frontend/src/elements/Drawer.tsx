@@ -1,9 +1,9 @@
-import { Drawer, DrawerProps } from '@mantine/core';
+import { DrawerProps, Drawer as MantineDrawer } from '@mantine/core';
 import { forwardRef } from 'react';
 
-export default forwardRef<HTMLDivElement, DrawerProps>(({ children, className, ...rest }, ref) => {
+const Drawer = forwardRef<HTMLDivElement, DrawerProps>(({ children, className, ...rest }, ref) => {
   return (
-    <Drawer
+    <MantineDrawer
       overlayProps={{
         backgroundOpacity: 0.55,
         blur: 3,
@@ -13,6 +13,8 @@ export default forwardRef<HTMLDivElement, DrawerProps>(({ children, className, .
       {...rest}
     >
       {children}
-    </Drawer>
+    </MantineDrawer>
   );
 });
+
+export default Drawer;

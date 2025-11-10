@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { Grid, Group, Title } from '@mantine/core';
-import Card from '@/elements/Card';
+import { useState } from 'react';
 import Button from '@/elements/Button';
+import Card from '@/elements/Card';
 import SettingsReinstallModal from './modals/SettingsReinstallModal';
 
-export default () => {
+export default function ReinstallContainer() {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -24,4 +24,4 @@ export default () => {
       </Card>
     </Grid.Col>
   );
-};
+}

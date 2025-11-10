@@ -1,3 +1,7 @@
+import { faFileDownload, faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
+import jsYaml from 'js-yaml';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import deleteSchedule from '@/api/server/schedules/deleteSchedule';
 import exportSchedule from '@/api/server/schedules/exportSchedule';
@@ -11,12 +15,8 @@ import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import { faFileDownload, faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import jsYaml from 'js-yaml';
 
-export default ({ schedule }: { schedule: ServerSchedule }) => {
+export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) {
   const { addToast } = useToast();
   const navigate = useNavigate();
   const { server, removeSchedule } = useServerStore();
@@ -178,4 +178,4 @@ export default ({ schedule }: { schedule: ServerSchedule }) => {
       </ContextMenu>
     </>
   );
-};
+}

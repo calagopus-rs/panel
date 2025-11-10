@@ -7,7 +7,7 @@ import {
   faPenRuler,
 } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
-import { lazy, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
 import getNode from '@/api/admin/nodes/getNode';
 import { httpErrorToHuman } from '@/api/axios';
@@ -21,7 +21,7 @@ import AdminNodeMounts from './mounts/AdminNodeMounts';
 import NodeCreateOrUpdate from './NodeCreateOrUpdate';
 import AdminNodeStatistics from './statistics/AdminNodeStatistics';
 
-export default () => {
+export default function NodeView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
   const [node, setNode] = useState<Node | null>(null);
@@ -89,4 +89,4 @@ export default () => {
       </Routes>
     </>
   );
-};
+}

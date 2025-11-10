@@ -1,20 +1,20 @@
-import Spinner from '@/elements/Spinner';
-import { Route, Routes, useNavigate } from 'react-router';
-import { useAdminStore } from '@/stores/admin';
-import { Group, TextInput, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, TextInput, Title } from '@mantine/core';
+import { Route, Routes, useNavigate } from 'react-router';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
 import BackupConfigurationRow, {
   backupConfigurationTableColumns,
 } from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAdminStore } from '@/stores/admin';
 
-const BackupConfigurationsContainer = () => {
+function BackupConfigurationsContainer() {
   const navigate = useNavigate();
   const { backupConfigurations, setBackupConfigurations } = useAdminStore();
 
@@ -52,9 +52,9 @@ const BackupConfigurationsContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminBackupConfigurations() {
   return (
     <Routes>
       <Route path={'/'} element={<BackupConfigurationsContainer />} />
@@ -62,4 +62,4 @@ export default () => {
       <Route path={'/:id/*'} element={<BackupConfigurationView />} />
     </Routes>
   );
-};
+}

@@ -1,18 +1,18 @@
-import Spinner from '@/elements/Spinner';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
+import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
+import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import Table from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
-import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import DatabaseHostRow, { databaseHostTableColumns } from './DatabaseHostRow';
-import { Group, TextInput, Title } from '@mantine/core';
-import Table from '@/elements/Table';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import Button from '@/elements/Button';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import DatabaseHostView from './DatabaseHostView';
 
-const DatabaseHostsContainer = () => {
+function DatabaseHostsContainer() {
   const navigate = useNavigate();
   const { databaseHosts, setDatabaseHosts } = useAdminStore();
 
@@ -50,9 +50,9 @@ const DatabaseHostsContainer = () => {
       )}
     </>
   );
-};
+}
 
-export default () => {
+export default function AdminDatabaseHosts() {
   return (
     <Routes>
       <Route path={'/'} element={<DatabaseHostsContainer />} />
@@ -60,4 +60,4 @@ export default () => {
       <Route path={'/:id/*'} element={<DatabaseHostView />} />
     </Routes>
   );
-};
+}

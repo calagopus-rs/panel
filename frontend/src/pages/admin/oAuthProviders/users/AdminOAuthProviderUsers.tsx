@@ -1,13 +1,13 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { useState } from 'react';
 import { Title } from '@mantine/core';
+import { useState } from 'react';
+import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers';
+import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
-import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers';
 
-export default ({ oauthProvider }: { oauthProvider?: AdminOAuthProvider }) => {
+export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvider?: AdminOAuthProvider }) {
   const [oauthProviderUsers, setOAuthProviderUsers] = useState<ResponseMeta<AdminUserOAuthLink>>(
     getEmptyPaginationSet(),
   );
@@ -34,4 +34,4 @@ export default ({ oauthProvider }: { oauthProvider?: AdminOAuthProvider }) => {
       )}
     </>
   );
-};
+}

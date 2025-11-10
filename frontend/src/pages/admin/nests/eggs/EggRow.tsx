@@ -1,12 +1,12 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
 export const eggTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
 
-export default ({ nest, egg }: { nest: AdminNest; egg: AdminNestEgg }) => {
+export default function EggRow({ nest, egg }: { nest: AdminNest; egg: AdminNestEgg }) {
   return (
     <TableRow>
       <TableData>
@@ -29,4 +29,4 @@ export default ({ nest, egg }: { nest: AdminNest; egg: AdminNestEgg }) => {
       </TableData>
     </TableRow>
   );
-};
+}
