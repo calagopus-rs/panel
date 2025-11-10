@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react';
-import Code from '@/elements/Code';
-import updateNest from '@/api/admin/nests/updateNest';
-import deleteNest from '@/api/admin/nests/deleteNest';
-import createNest from '@/api/admin/nests/createNest';
 import { Group, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
+import createNest from '@/api/admin/nests/createNest';
+import deleteNest from '@/api/admin/nests/deleteNest';
+import updateNest from '@/api/admin/nests/updateNest';
 import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import TextArea from '@/elements/input/TextArea';
-import { useForm } from '@mantine/form';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default ({ contextNest }: { contextNest?: AdminNest }) => {
@@ -18,7 +18,7 @@ export default ({ contextNest }: { contextNest?: AdminNest }) => {
     initialValues: {
       author: '',
       name: '',
-      description: '',
+      description: null,
     },
   });
 

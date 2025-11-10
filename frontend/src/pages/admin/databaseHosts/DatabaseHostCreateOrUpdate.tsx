@@ -1,22 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
 import { Divider, Group, Stack, Title } from '@mantine/core';
-import { httpErrorToHuman } from '@/api/axios';
-import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
 import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
 import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost';
 import testDatabaseHost from '@/api/admin/database-hosts/testDatabaseHost';
+import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
 import NumberInput from '@/elements/input/NumberInput';
-import Switch from '@/elements/input/Switch';
 import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
-import { useForm } from '@mantine/form';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHost }) => {
   const { addToast } = useToast();
@@ -131,7 +131,11 @@ export default ({ contextDatabaseHost }: { contextDatabaseHost?: AdminDatabaseHo
           />
         </Group>
 
-        <Switch label={'Public'} {...form.getInputProps('public')} />
+        <Switch
+          label={'Public'}
+          checked={form.values.public}
+          onChange={(e) => form.setFieldValue('public', e.target.checked)}
+        />
 
         <Group>
           <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>

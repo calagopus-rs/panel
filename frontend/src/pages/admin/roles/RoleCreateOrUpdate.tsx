@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import Code from '@/elements/Code';
 import { Group, Stack, Title } from '@mantine/core';
-import TextInput from '@/elements/input/TextInput';
-import Button from '@/elements/Button';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import TextArea from '@/elements/input/TextArea';
-import updateRole from '@/api/admin/roles/updateRole';
+import { useForm } from '@mantine/form';
+import { useEffect, useState } from 'react';
 import createRole from '@/api/admin/roles/createRole';
 import deleteRole from '@/api/admin/roles/deleteRole';
-import { useGlobalStore } from '@/stores/global';
-import PermissionSelector from '@/elements/PermissionSelector';
-import { useForm } from '@mantine/form';
-import { useResourceForm } from '@/plugins/useResourceForm';
+import updateRole from '@/api/admin/roles/updateRole';
 import getPermissions from '@/api/getPermissions';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import PermissionSelector from '@/elements/PermissionSelector';
 import { load } from '@/lib/debounce';
+import { useResourceForm } from '@/plugins/useResourceForm';
+import { useGlobalStore } from '@/stores/global';
 
 export default ({ contextRole }: { contextRole?: Role }) => {
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
@@ -23,7 +23,7 @@ export default ({ contextRole }: { contextRole?: Role }) => {
   const form = useForm<UpdateRole>({
     initialValues: {
       name: '',
-      description: '',
+      description: null,
       adminPermissions: [],
       serverPermissions: [],
     },

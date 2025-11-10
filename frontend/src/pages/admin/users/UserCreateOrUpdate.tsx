@@ -1,21 +1,22 @@
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { Group, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
-import Code from '@/elements/Code';
-import updateUser from '@/api/admin/users/updateUser';
+import { NIL as uuidNil } from 'uuid';
+import getRoles from '@/api/admin/roles/getRoles';
 import createUser from '@/api/admin/users/createUser';
 import deleteUser from '@/api/admin/users/deleteUser';
-import { Group, Stack, Title } from '@mantine/core';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Switch from '@/elements/input/Switch';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getRoles from '@/api/admin/roles/getRoles';
+import updateUser from '@/api/admin/users/updateUser';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
 import Select from '@/elements/input/Select';
-import { useForm } from '@mantine/form';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
 
 export default ({ contextUser }: { contextUser?: User }) => {
   const { addToast } = useToast();
@@ -28,10 +29,10 @@ export default ({ contextUser }: { contextUser?: User }) => {
       email: '',
       nameFirst: '',
       nameLast: '',
-      password: '',
+      password: null,
       admin: false,
       totpEnabled: false,
-      roleUuid: '',
+      roleUuid: uuidNil,
     },
   });
 
@@ -49,7 +50,7 @@ export default ({ contextUser }: { contextUser?: User }) => {
     if (contextUser) {
       form.setValues({
         ...contextUser,
-        roleUuid: contextUser.role?.uuid ?? '',
+        roleUuid: contextUser.role?.uuid ?? uuidNil,
       });
     }
   }, [contextUser]);
@@ -124,7 +125,6 @@ export default ({ contextUser }: { contextUser?: User }) => {
           />
 
           <Select
-            withAsterisk
             label={'Role'}
             placeholder={'Role'}
             data={roles.items.map((nest) => ({
@@ -139,7 +139,11 @@ export default ({ contextUser }: { contextUser?: User }) => {
           />
         </Group>
 
-        <Switch label={'Admin'} {...form.getInputProps('admin')} />
+        <Switch
+          label={'Admin'}
+          checked={form.values.admin}
+          onChange={(e) => form.setFieldValue('admin', e.target.checked)}
+        />
       </Stack>
 
       <Group mt={'md'}>
