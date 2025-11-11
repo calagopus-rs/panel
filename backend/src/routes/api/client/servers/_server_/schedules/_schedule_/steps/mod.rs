@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _step_;
+mod order;
 
 mod get {
     use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
@@ -193,6 +194,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(post::route))
+        .nest("/order", order::router(state))
         .nest("/{step}", _step_::router(state))
         .with_state(state.clone())
 }

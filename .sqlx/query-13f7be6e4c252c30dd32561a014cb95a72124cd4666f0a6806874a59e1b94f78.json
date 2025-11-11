@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE server_schedule_steps\n            SET order_ = array_position($1, server_schedule_steps.uuid)\n            WHERE server_schedule_steps.uuid = ANY($1) AND server_schedule_steps.schedule_uuid = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "13f7be6e4c252c30dd32561a014cb95a72124cd4666f0a6806874a59e1b94f78"
+}
