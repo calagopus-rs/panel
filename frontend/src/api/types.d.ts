@@ -327,6 +327,14 @@ declare global {
     created: Date;
   }
 
+  interface UserServerGroup {
+    uuid: string;
+    name: string;
+    order: number;
+    serverOrder: string[];
+    created: Date;
+  }
+
   interface Server {
     uuid: string;
     uuidShort: string;

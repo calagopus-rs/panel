@@ -3,11 +3,12 @@ import { NavLink, Route, Routes } from 'react-router';
 import Container from '@/elements/Container';
 import Sidebar from '@/elements/Sidebar';
 import { to } from '@/lib/routes';
-import DashboardHome from '@/pages/dashboard/home/DashboardHome';
 import NotFound from '@/pages/NotFound';
 import { useAuth } from '@/providers/AuthProvider';
 import accountRoutes from '@/routers/routes/accountRoutes';
 import { useGlobalStore } from '@/stores/global';
+import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll';
+import DashboardHome from '@/pages/dashboard/home/DashboardHome';
 
 export default function DashboardRouter() {
   const { user } = useAuth();
@@ -48,6 +49,7 @@ export default function DashboardRouter() {
         <Container>
           <Routes>
             <Route path={''} element={<DashboardHome />} />
+            <Route path={'/all'} element={<DashboardHomeAll />} />
             {accountRoutes.map(({ path, element: Element }) => (
               <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
             ))}

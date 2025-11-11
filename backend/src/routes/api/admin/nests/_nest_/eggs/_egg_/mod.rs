@@ -201,8 +201,8 @@ mod patch {
         #[schema(inline)]
         config_allocations: Option<shared::models::nest_egg::NestEggConfigAllocations>,
 
-        #[validate(length(min = 1, max = 255))]
-        #[schema(min_length = 1, max_length = 255)]
+        #[validate(length(min = 1, max = 4096))]
+        #[schema(min_length = 1, max_length = 4096)]
         startup: Option<String>,
         force_outgoing_ip: Option<bool>,
         separate_port: Option<bool>,

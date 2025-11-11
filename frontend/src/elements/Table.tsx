@@ -57,23 +57,27 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
   const isFirstPage = data.page === 1;
   const isLastPage = data.page >= totalPages;
 
-  return (
+  const inner = (
+    <Group justify={'space-between'}>
+      <p className={'text-sm leading-5 text-gray-400'}>
+        Showing&nbsp;
+        <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
+        &nbsp;to&nbsp;
+        <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
+        &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
+      </p>
+      {isFirstPage && isLastPage ? null : (
+        <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
+      )}
+    </Group>
+  );
+
+  return columns.length > 0 ? (
     <Table.Tr>
-      <Table.Td colSpan={columns.length}>
-        <Group justify={'space-between'}>
-          <p className={'text-sm leading-5 text-gray-400'}>
-            Showing&nbsp;
-            <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
-            &nbsp;to&nbsp;
-            <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
-            &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
-          </p>
-          {isFirstPage && isLastPage ? null : (
-            <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
-          )}
-        </Group>
-      </Table.Td>
+      <Table.Td colSpan={columns.length}>{inner}</Table.Td>
     </Table.Tr>
+  ) : (
+    inner
   );
 }
 

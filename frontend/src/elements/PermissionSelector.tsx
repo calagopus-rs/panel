@@ -17,14 +17,12 @@ export default function PermissionSelector({
 }) {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
 
-  // Memoize all permission keys
   const allPermissionKeys = useMemo(() => {
     return Object.entries(permissions).flatMap(([category, { permissions: perms }]) =>
       Object.keys(perms).map((perm) => `${category}.${perm}`),
     );
   }, [permissions]);
 
-  // Toggle category expansion (fixed: now creates new array)
   const toggleCategory = useCallback((category: string) => {
     setExpandedCategories((prev) => {
       if (prev.includes(category)) {
@@ -34,7 +32,6 @@ export default function PermissionSelector({
     });
   }, []);
 
-  // Toggle individual permission (fixed: now creates new array)
   const togglePermission = useCallback(
     (permissionKey: string) => {
       setSelectedPermissions(
@@ -46,7 +43,6 @@ export default function PermissionSelector({
     [selectedPermissions, setSelectedPermissions],
   );
 
-  // Toggle all permissions in a category (fixed: logic and array mutation)
   const toggleAllInCategory = useCallback(
     (category: string) => {
       const categoryPermissions = Object.keys(permissions[category].permissions).map((perm) => `${category}.${perm}`);
@@ -54,10 +50,8 @@ export default function PermissionSelector({
       const allSelected = categoryPermissions.every((perm) => selectedPermissions.includes(perm));
 
       if (allSelected) {
-        // Remove all category permissions
         setSelectedPermissions(selectedPermissions.filter((perm) => !categoryPermissions.includes(perm)));
       } else {
-        // Add all category permissions (avoiding duplicates)
         const newPermissions = new Set([...selectedPermissions, ...categoryPermissions]);
         setSelectedPermissions(Array.from(newPermissions));
       }
@@ -65,22 +59,18 @@ export default function PermissionSelector({
     [permissions, selectedPermissions, setSelectedPermissions],
   );
 
-  // Select all permissions
   const selectAllPermissions = useCallback(() => {
     setSelectedPermissions(allPermissionKeys);
   }, [allPermissionKeys, setSelectedPermissions]);
 
-  // Clear all permissions
   const clearAllPermissions = useCallback(() => {
     setSelectedPermissions([]);
   }, [setSelectedPermissions]);
 
-  // Get sorted selected permissions list (memoized)
   const sortedSelectedPermissions = useMemo(() => {
     return [...selectedPermissions].sort();
   }, [selectedPermissions]);
 
-  // Get category selection state (memoized per category)
   const getCategorySelectionState = useCallback(
     (category: string) => {
       const categoryPermissions = Object.keys(permissions[category].permissions);

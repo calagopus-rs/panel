@@ -1,6 +1,14 @@
-import { faHardDrive, faMemory, faMicrochip } from '@fortawesome/free-solid-svg-icons';
+import {
+  faAdd,
+  faCartPlus,
+  faExternalLink,
+  faHardDrive,
+  faInfoCircle,
+  faMemory,
+  faMicrochip,
+  faTriangleExclamation,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import getServerResourceUsage from '@/api/server/getServerResourceUsage';
@@ -8,111 +16,185 @@ import CopyOnClick from '@/elements/CopyOnClick';
 import Spinner from '@/elements/Spinner';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
-import { useGlobalStore } from '@/stores/global';
+import Card from '@/elements/Card';
+import Divider from '@/elements/Divider';
+import Badge from '@/elements/Badge';
+import Button from '@/elements/Button';
+import { useUserStore } from '@/stores/user';
+import Tooltip from '@/elements/Tooltip';
+import { ActionIcon } from '@mantine/core';
+import ServerAddGroupModal from './modals/ServerAddGroupModal';
 
-export default function ServerItem({ server }: { server: Server }) {
-  const { serverListDesign } = useGlobalStore();
+const statusToColor = (status: ServerPowerState) => {
+  switch (status) {
+    case 'running':
+      return 'green';
+    case 'starting':
+      return 'yellow';
+    case 'stopping':
+      return 'red';
+    default:
+      return 'red';
+  }
+};
+
+const statusToText = (status: ServerPowerState) => {
+  switch (status) {
+    case 'running':
+      return 'Online';
+    case 'starting':
+      return 'Starting';
+    case 'stopping':
+      return 'Stopping';
+    default:
+      return 'Offline';
+  }
+};
+
+export default function ServerItem({
+  server,
+  showGroupAddButton = false,
+}: {
+  server: Server;
+  showGroupAddButton?: boolean;
+}) {
+  const { serverGroups } = useUserStore();
+
+  const [openModal, setOpenModal] = useState<'add-group'>(null);
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {
     getServerResourceUsage(server.uuid).then(setStats);
-  }, []);
-
-  const statusToColor = (status: ServerPowerState) => {
-    switch (status) {
-      case 'running':
-        return ['bg-emerald-400/30', 'bg-emerald-500'];
-      case 'starting':
-        return ['bg-yellow-400/30', 'bg-yellow-500'];
-      case 'stopping':
-        return ['bg-rose-400/30', 'bg-rose-500'];
-      default:
-        return ['bg-rose-400/30', 'bg-rose-500'];
-    }
-  };
-
-  const statusToText = (status: ServerPowerState) => {
-    switch (status) {
-      case 'running':
-        return 'Online';
-      case 'starting':
-        return 'Starting';
-      case 'stopping':
-        return 'Stopping';
-      default:
-        return 'Offline';
-    }
-  };
+  }, [server]);
 
   const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
   const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
-  const cpuLimit = server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited';
+  const cpuLimit = server.limits.cpu !== 0 ? `${server.limits.cpu}%` : 'Unlimited';
 
   return (
-    <NavLink
-      to={`/server/${server.uuidShort}`}
-      className={classNames(
-        serverListDesign === 'grid' ? 'flex flex-col' : 'grid lg:grid-cols-2 xl:grid-cols-3 justify-between',
-        'bg-gray-700 outline-2 outline-transparent hover:outline-gray-400 transition-colors duration-200 rounded',
-      )}
-    >
-      <div className={classNames('px-6 py-4', [serverListDesign === 'row' && 'xl:col-span-2'])}>
-        <div className={classNames('flex items-center gap-2', [serverListDesign === 'grid' && 'justify-between'])}>
-          <span className={'text-xl font-medium truncate'} title={server.name}>
+    <>
+      <ServerAddGroupModal server={server} opened={openModal === 'add-group'} onClose={() => setOpenModal(null)} />
+
+      <Card className={'hover:border-gray-300! duration-200'}>
+        <div className={'flex items-center gap-2 justify-between'}>
+          <span className={'text-xl font-medium truncate flex flex-row'} title={server.name}>
             {server.name}
-          </span>
-          <div
-            className={classNames(
-              'rounded-full px-2 py-1 text-xs flex items-center gap-1',
-              statusToColor(stats?.state)[0],
+            {serverGroups.every((g) => !g.serverOrder.includes(server.uuid)) && (
+              <Tooltip className={'ml-2'} label={'This server is not in any group'}>
+                <FontAwesomeIcon size={'sm'} icon={faInfoCircle} />
+              </Tooltip>
             )}
-          >
-            <div className={classNames('size-2 rounded-full', statusToColor(stats?.state)[1])}></div>
-            <span>{statusToText(stats?.state)}</span>
+          </span>
+          <div className={'flex flex-row gap-2 items-center'}>
+            {server.allocation ? (
+              server.egg.separatePort ? (
+                <div className={'flex flex-row gap-2'}>
+                  <CopyOnClick content={server.allocation.ip} className={'w-fit'}>
+                    <Card p={'xs'}>
+                      <p className={'text-sm text-gray-400'}>{server.allocation.ip}</p>
+                    </Card>
+                  </CopyOnClick>
+                  <CopyOnClick content={server.allocation.port.toString()} className={'w-fit'}>
+                    <Card p={'xs'}>
+                      <p className={'text-sm text-gray-400'}>{server.allocation.port.toString()}</p>
+                    </Card>
+                  </CopyOnClick>
+                </div>
+              ) : (
+                <CopyOnClick content={formatAllocation(server.allocation)} className={'w-fit'}>
+                  <Card p={'xs'}>
+                    <p className={'text-sm text-gray-400'}>{formatAllocation(server.allocation)}</p>
+                  </Card>
+                </CopyOnClick>
+              )
+            ) : (
+              <Card p={'xs'} className={'opacity-0'}>
+                No Allocation
+              </Card>
+            )}
+
+            <Badge color={statusToColor(stats?.state)}>{statusToText(stats?.state)}</Badge>
           </div>
         </div>
-        {/* <CopyOnClick content={formatAllocation(getPrimaryAllocation(server.allocation))}>
-          <p className="text-sm text-gray-400">{formatAllocation(getPrimaryAllocation(server.allocations))}</p>
-        </CopyOnClick> */}
-        <CopyOnClick content={formatAllocation(server.allocation)}>
-          <p className={'text-sm text-gray-400'}>{formatAllocation(server.allocation)}</p>
-        </CopyOnClick>
-      </div>
-      <div
-        className={classNames('p-4 grid gap-2 sm:grid-cols-3 bg-gray-800/50', [
-          serverListDesign === 'grid' && 'rounded-b-md',
-        ])}
-      >
-        {stats === null ? (
-          <div className={'col-span-3 flex flex-col items-center justify-center'}>
-            <Spinner />
+
+        <Divider my={'md'} />
+
+        <div className={'flex flex-row justify-between'}>
+          {server.status === 'installing' ? (
+            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+              <Spinner />
+              <p className={'ml-2'}>Installing</p>
+            </div>
+          ) : server.status === 'restoring_backup' ? (
+            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+              <Spinner />
+              <p className={'ml-2'}>Restoring Backup</p>
+            </div>
+          ) : server.status === 'install_failed' ? (
+            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+              <FontAwesomeIcon size={'2x'} icon={faTriangleExclamation} color={'yellow'} />
+              <p className={'ml-2'}>Install Failed</p>
+            </div>
+          ) : server.status === 'reinstall_failed' ? (
+            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+              <FontAwesomeIcon size={'2x'} icon={faTriangleExclamation} color={'yellow'} />
+              <p className={'ml-2'}>Reinstall Failed</p>
+            </div>
+          ) : stats === null ? (
+            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+              <Spinner />
+            </div>
+          ) : (
+            <div className={'flex flex-row'}>
+              <div className={'flex gap-2 text-sm justify-center items-center'}>
+                <FontAwesomeIcon icon={faMicrochip} className={'size-5 flex-none'} />
+                <div>
+                  <span className={'mr-1'}>{stats.cpuAbsolute.toFixed(2)}%</span>
+                  <span className={'inline-block text-xs text-gray-400'}>/ {cpuLimit}</span>
+                </div>
+              </div>
+
+              <Divider mx={'sm'} orientation={'vertical'} />
+
+              <div className={'flex gap-2 text-sm justify-center items-center'}>
+                <FontAwesomeIcon icon={faMemory} className={'size-5 flex-none'} />
+                <div>
+                  <span className={'mr-1'}>{bytesToString(stats.memoryBytes)}</span>
+                  <span className={'inline-block text-xs text-gray-400'}>/ {memoryLimit}</span>
+                </div>
+              </div>
+
+              <Divider mx={'sm'} orientation={'vertical'} />
+
+              <div className={'flex gap-2 text-sm justify-center items-center'}>
+                <FontAwesomeIcon icon={faHardDrive} className={'size-5 flex-none'} />
+                <div>
+                  <span className={'mr-1'}>{bytesToString(stats.diskBytes)}</span>
+                  <span className={'inline-block text-xs text-gray-400'}>/ {diskLimit}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className={'flex flex-row items-center gap-2'}>
+            {showGroupAddButton && (
+              <Tooltip label={serverGroups.length === 0 ? 'No groups available to add to' : 'Add to Group'}>
+                <ActionIcon size={'lg'} disabled={serverGroups.length === 0} onClick={() => setOpenModal('add-group')}>
+                  <FontAwesomeIcon icon={faAdd} />
+                </ActionIcon>
+              </Tooltip>
+            )}
+            <NavLink to={`/server/${server.uuidShort}`}>
+              <Button className={'hidden! md:block!'} leftSection={<FontAwesomeIcon icon={faExternalLink} />}>
+                View Server
+              </Button>
+              <ActionIcon size={'lg'} className={'md:hidden!'}>
+                <FontAwesomeIcon icon={faExternalLink} />
+              </ActionIcon>
+            </NavLink>
           </div>
-        ) : (
-          <>
-            <div className={'flex gap-2 text-sm justify-center items-center'}>
-              <FontAwesomeIcon icon={faMicrochip} className={'size-5 flex-none'} />
-              <div>
-                <span className={'mr-1'}>{stats.cpuAbsolute.toFixed(2)}%</span>
-                <span className={'inline-block text-xs text-gray-400'}>/ {cpuLimit}</span>
-              </div>
-            </div>
-            <div className={'flex gap-2 text-sm justify-center items-center'}>
-              <FontAwesomeIcon icon={faMemory} className={'size-5 flex-none'} />
-              <div>
-                <span className={'mr-1'}>{bytesToString(stats.memoryBytes)}</span>
-                <span className={'inline-block text-xs text-gray-400'}>/ {memoryLimit}</span>
-              </div>
-            </div>
-            <div className={'flex gap-2 text-sm justify-center items-center'}>
-              <FontAwesomeIcon icon={faHardDrive} className={'size-5 flex-none'} />
-              <div>
-                <span className={'mr-1'}>{bytesToString(stats.diskBytes)}</span>
-                <span className={'inline-block text-xs text-gray-400'}>/ {diskLimit}</span>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </NavLink>
+        </div>
+      </Card>
+    </>
   );
 }

@@ -11,6 +11,7 @@ interface UseSearchablePaginatedTableOptions<T> {
   deps?: unknown[];
   debounceMs?: number;
   initialPage?: number;
+  modifyParams?: boolean;
 }
 
 export function useSearchablePaginatedTable<T>({
@@ -19,6 +20,7 @@ export function useSearchablePaginatedTable<T>({
   deps = [],
   debounceMs = 150,
   initialPage = 1,
+  modifyParams = true,
 }: UseSearchablePaginatedTableOptions<T>) {
   const { addToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,15 +30,19 @@ export function useSearchablePaginatedTable<T>({
   const [page, setPage] = useState(initialPage);
 
   useEffect(() => {
-    const urlPage = Number(searchParams.get('page')) || initialPage;
-    const urlSearch = searchParams.get('search') || '';
-    setPage(urlPage);
-    setSearch(urlSearch);
-  }, []);
+    if (modifyParams) {
+      const urlPage = Number(searchParams.get('page')) || initialPage;
+      const urlSearch = searchParams.get('search') || '';
+      setPage(urlPage);
+      setSearch(urlSearch);
+    }
+  }, [modifyParams]);
 
   useEffect(() => {
-    setSearchParams({ page: page.toString(), search });
-  }, [page, search]);
+    if (modifyParams) {
+      setSearchParams({ page: page.toString(), search });
+    }
+  }, [modifyParams, page, search]);
 
   const fetchData = useCallback(
     (p: number, s: string) => {

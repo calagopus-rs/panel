@@ -2,10 +2,12 @@ import classNames from 'classnames';
 import { useToast } from '@/providers/ToastProvider';
 
 export default function CopyOnClick({
+  enabled = true,
   content,
   className,
   children,
 }: {
+  enabled?: boolean;
   content: string;
   className?: string;
   children: React.ReactNode;
@@ -30,9 +32,11 @@ export default function CopyOnClick({
       });
   };
 
-  return (
+  return enabled ? (
     <button onClick={handleCopy} className={classNames('cursor-pointer', className)}>
       {children}
     </button>
+  ) : (
+    children
   );
 }

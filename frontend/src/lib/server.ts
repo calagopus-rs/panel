@@ -3,7 +3,7 @@ export function formatAllocation(allocation?: ServerAllocation | NodeAllocation 
     ? separatePort
       ? allocation.ipAlias || allocation.ip
       : `${allocation.ipAlias || allocation.ip}:${allocation.port}`
-    : 'None';
+    : 'No Allocation';
 }
 
 export function generateBackupName() {

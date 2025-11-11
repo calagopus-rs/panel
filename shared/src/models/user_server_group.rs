@@ -160,7 +160,7 @@ impl UserServerGroup {
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "ServerAllocation")]
+#[schema(title = "UserServerGroup")]
 pub struct ApiUserServerGroup {
     pub uuid: uuid::Uuid,
 
