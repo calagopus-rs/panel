@@ -14,6 +14,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:8000',
+      '/assets': 'http://localhost:8000',
       '/avatars': 'http://localhost:8000',
     },
     allowedHosts: true,

@@ -77,25 +77,27 @@ impl Storage {
 
         match &settings.storage_driver {
             super::settings::StorageDriver::Filesystem { path: base_path } => {
-                let path = Path::new(base_path).join(path);
+                let base_filesystem = crate::cap::CapFilesystem::new(base_path.into()).await?;
 
-                if let Err(err) = tokio::fs::remove_file(&path).await
-                    && err.kind() != std::io::ErrorKind::NotFound
+                if let Err(err) = base_filesystem.async_remove_file(&path).await
+                    && err
+                        .downcast_ref::<std::io::Error>()
+                        .is_none_or(|e| e.kind() != std::io::ErrorKind::NotFound)
                 {
-                    return Err(err.into());
+                    return Err(err);
                 }
 
-                if let Some(parent) = path.parent().map(|p| p.to_path_buf()) {
+                if let Some(parent) = Path::new(path).parent().map(|p| p.to_path_buf()) {
                     tokio::spawn(async move {
                         tokio::time::sleep(std::time::Duration::from_secs(10)).await;
 
-                        let mut directory = match tokio::fs::read_dir(&parent).await {
+                        let mut directory = match base_filesystem.async_read_dir(&parent).await {
                             Ok(directory) => directory,
                             Err(_) => return,
                         };
 
-                        if directory.next_entry().await.is_ok_and(|e| e.is_none()) {
-                            tokio::fs::remove_dir(parent).await.ok();
+                        if directory.next_entry().await.is_none() {
+                            base_filesystem.async_remove_dir(parent).await.ok();
                         }
                     });
                 }
@@ -128,7 +130,7 @@ impl Storage {
     pub async fn store(
         &self,
         path: &str,
-        data: &[u8],
+        data: Vec<u8>,
         content_type: &str,
     ) -> Result<(), anyhow::Error> {
         if path.is_empty() || path.contains("..") || path.starts_with("/") {
@@ -141,12 +143,13 @@ impl Storage {
 
         match &settings.storage_driver {
             super::settings::StorageDriver::Filesystem { path: base_path } => {
-                let full_path = Path::new(base_path).join(path);
-                if let Some(parent) = full_path.parent() {
-                    tokio::fs::create_dir_all(parent).await?;
+                let base_filesystem = crate::cap::CapFilesystem::new(base_path.into()).await?;
+
+                if let Some(parent) = Path::new(path).parent() {
+                    base_filesystem.async_create_dir_all(parent).await?;
                 }
 
-                tokio::fs::write(full_path, data).await?;
+                base_filesystem.async_write(path, data).await?;
             }
             super::settings::StorageDriver::S3 {
                 access_key,
@@ -167,7 +170,7 @@ impl Storage {
                 )?;
 
                 s3_client
-                    .put_object_with_content_type(path, data, content_type)
+                    .put_object_with_content_type(path, &data, content_type)
                     .await?;
             }
         }

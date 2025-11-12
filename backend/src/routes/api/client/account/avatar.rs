@@ -67,7 +67,7 @@ mod put {
         let avatar_path = format!("avatars/{}/{}.webp", user.uuid, identifier_random);
 
         tokio::try_join!(
-            state.storage.store(&avatar_path, &data, "image/webp"),
+            state.storage.store(&avatar_path, data, "image/webp"),
             state.storage.remove(user.avatar.as_deref()),
         )?;
 

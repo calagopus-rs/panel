@@ -3,6 +3,7 @@ use std::{sync::Arc, time::Instant};
 use utoipa::ToSchema;
 
 pub mod cache;
+pub mod cap;
 pub mod captcha;
 pub mod database;
 pub mod deserialize;
@@ -71,3 +72,27 @@ pub struct AppState {
 
 pub type State = Arc<AppState>;
 pub type GetState = axum::extract::State<State>;
+
+#[inline(always)]
+#[cold]
+fn cold_path() {}
+
+#[inline(always)]
+pub fn likely(b: bool) -> bool {
+    if b {
+        true
+    } else {
+        cold_path();
+        false
+    }
+}
+
+#[inline(always)]
+pub fn unlikely(b: bool) -> bool {
+    if b {
+        cold_path();
+        true
+    } else {
+        false
+    }
+}

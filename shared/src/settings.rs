@@ -2,10 +2,13 @@ use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     ops::{Deref, DerefMut},
+    path::PathBuf,
     sync::Arc,
 };
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use utoipa::ToSchema;
+
+use crate::cap::CapFilesystem;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -22,6 +25,17 @@ pub enum StorageDriver {
         endpoint: String,
         path_style: bool,
     },
+}
+
+impl StorageDriver {
+    pub async fn get_cap_filesystem(&self) -> Option<Result<CapFilesystem, std::io::Error>> {
+        match self {
+            StorageDriver::Filesystem { path } => {
+                Some(CapFilesystem::new(PathBuf::from(path)).await)
+            }
+            _ => None,
+        }
+    }
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]

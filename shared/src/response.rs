@@ -53,6 +53,20 @@ impl ApiResponse {
     }
 
     #[inline]
+    pub fn with_optional_header(mut self, key: &'static str, value: Option<&str>) -> Self {
+        let value = match value {
+            Some(value) => value,
+            None => return self,
+        };
+
+        if let Ok(header_value) = axum::http::HeaderValue::from_str(value) {
+            self.headers.insert(key, header_value);
+        }
+
+        self
+    }
+
+    #[inline]
     pub fn ok(self) -> ApiResponseResult {
         Ok(self)
     }

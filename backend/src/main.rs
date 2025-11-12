@@ -13,7 +13,7 @@ use include_dir::{Dir, include_dir};
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
 use shared::{ApiError, GetState, response::ApiResponse};
-use std::{net::SocketAddr, sync::Arc, time::Instant};
+use std::{net::SocketAddr, path::PathBuf, sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
 use tower_http::normalize_path::NormalizePathLayer;
@@ -362,27 +362,27 @@ async fn main() {
             "/avatars/{user}/{file}",
             get(
                 |state: GetState, Path::<(uuid::Uuid, String)>((user, file))| async move {
-                    let settings = state.settings.get().await;
-
                     if file.len() != 13 || file.contains("..") || !file.ends_with(".webp") {
                         return ApiResponse::error("file not found")
                             .with_status(StatusCode::NOT_FOUND)
                             .ok();
                     }
 
-                    let base_path = match &settings.storage_driver {
-                        shared::settings::StorageDriver::Filesystem { path } => {
-                            std::path::Path::new(path)
-                        }
-                        _ => {
+                    let settings = state.settings.get().await;
+
+                    let base_filesystem = match settings.storage_driver.get_cap_filesystem().await {
+                        Some(filesystem) => filesystem?,
+                        None => {
                             return ApiResponse::error("file not found")
                                 .with_status(StatusCode::NOT_FOUND)
                                 .ok();
                         }
                     };
 
-                    let path = base_path.join(format!("avatars/{user}/{file}"));
-                    let size = match tokio::fs::metadata(&path).await {
+                    drop(settings);
+
+                    let path = PathBuf::from(format!("avatars/{user}/{file}"));
+                    let size = match base_filesystem.async_metadata(&path).await {
                         Ok(metadata) => metadata.len(),
                         Err(_) => {
                             return ApiResponse::error("file not found")
@@ -391,7 +391,7 @@ async fn main() {
                         }
                     };
 
-                    let tokio_file = match tokio::fs::File::open(path).await {
+                    let tokio_file = match base_filesystem.async_open(path).await {
                         Ok(file) => file,
                         Err(_) => {
                             return ApiResponse::error("file not found")
@@ -409,7 +409,7 @@ async fn main() {
                 },
             ),
         )
-        .fallback(|req: Request<Body>| async move {
+        .fallback(|state: GetState, req: Request<Body>| async move {
             if !req.uri().path().starts_with("/api") {
                 let path = &req.uri().path()[1..];
 
@@ -417,6 +417,62 @@ async fn main() {
                     Some(entry) => entry,
                     None => FRONTEND_ASSETS.get_entry("index.html").unwrap(),
                 };
+
+                if entry.as_file().is_none() && path.starts_with("assets") {
+                    let settings = state.settings.get().await;
+
+                    let base_filesystem = match settings.storage_driver.get_cap_filesystem().await {
+                        Some(filesystem) => filesystem?,
+                        None => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    drop(settings);
+
+                    let metadata = match base_filesystem.async_metadata(path).await {
+                        Ok(metadata) => metadata,
+                        Err(_) => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    let tokio_file = match base_filesystem.async_open(path).await {
+                        Ok(file) => file,
+                        Err(_) => {
+                            return ApiResponse::error("file not found")
+                                .with_status(StatusCode::NOT_FOUND)
+                                .ok();
+                        }
+                    };
+
+                    let modified = if let Ok(modified) = metadata.modified() {
+                        let modified = chrono::DateTime::from_timestamp(
+                            modified
+                                .into_std()
+                                .duration_since(std::time::UNIX_EPOCH)
+                                .unwrap_or_default()
+                                .as_secs() as i64,
+                            0,
+                        )
+                        .unwrap_or_default();
+
+                        Some(modified.to_rfc2822())
+                    } else {
+                        None
+                    };
+
+                    return ApiResponse::new(Body::from_stream(tokio_util::io::ReaderStream::new(
+                        tokio_file,
+                    )))
+                    .with_header("Content-Length", &metadata.len().to_string())
+                    .with_optional_header("Last-Modified", modified.as_deref())
+                    .ok();
+                }
 
                 let file = match entry {
                     include_dir::DirEntry::File(file) => file,
@@ -426,8 +482,8 @@ async fn main() {
                     },
                 };
 
-                return Response::builder()
-                    .header(
+                return ApiResponse::new(Body::from(file.contents()))
+                    .with_header(
                         "Content-Type",
                         match infer::get(file.contents()) {
                             Some(kind) => kind.mime_type(),
@@ -444,17 +500,12 @@ async fn main() {
                             },
                         },
                     )
-                    .body(Body::from(file.contents()))
-                    .unwrap();
+                    .ok();
             }
 
-            Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .header("Content-Type", "application/json")
-                .body(Body::from(
-                    ApiError::new_value(&["route not found"]).to_string(),
-                ))
-                .unwrap()
+            ApiResponse::error("route not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .ok()
         })
         .layer(axum::middleware::from_fn(handle_request))
         .layer(CookieManagerLayer::new())
