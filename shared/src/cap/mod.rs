@@ -1,7 +1,6 @@
-use cap_std::fs::{Metadata, OpenOptions, PermissionsExt};
+use cap_std::fs::{Metadata, OpenOptions};
 use std::{
     collections::VecDeque,
-    os::unix::fs::PermissionsExt as StdPermissionsExt,
     path::{Path, PathBuf},
     sync::Arc,
 };
@@ -488,101 +487,6 @@ impl CapFilesystem {
         let bytes_copied = inner.copy(from, &to_inner, to)?;
 
         Ok(bytes_copied)
-    }
-
-    pub async fn async_set_permissions(
-        &self,
-        path: impl AsRef<Path>,
-        permissions: cap_std::fs::Permissions,
-    ) -> Result<(), anyhow::Error> {
-        let path = self.relative_path(path.as_ref());
-
-        if path.components().next().is_none() {
-            tokio::fs::set_permissions(
-                &*self.base_path,
-                std::fs::Permissions::from_mode(permissions.mode()),
-            )
-            .await?;
-        } else {
-            let inner = self.async_get_inner().await?;
-
-            tokio::task::spawn_blocking(move || inner.set_permissions(path, permissions)).await??;
-        }
-
-        Ok(())
-    }
-
-    pub fn set_permissions(
-        &self,
-        path: impl AsRef<Path>,
-        permissions: cap_std::fs::Permissions,
-    ) -> Result<(), anyhow::Error> {
-        let path = self.relative_path(path.as_ref());
-
-        let inner = self.get_inner()?;
-        inner.set_permissions(path, permissions)?;
-
-        Ok(())
-    }
-
-    pub async fn async_symlink(
-        &self,
-        target: impl AsRef<Path>,
-        link: impl AsRef<Path>,
-    ) -> Result<(), anyhow::Error> {
-        let target = self.relative_path(target.as_ref());
-        let link = self.relative_path(link.as_ref());
-
-        let inner = self.async_get_inner().await?;
-        tokio::task::spawn_blocking(move || inner.symlink(target, link)).await??;
-
-        Ok(())
-    }
-
-    pub fn symlink(
-        &self,
-        target: impl AsRef<Path>,
-        link: impl AsRef<Path>,
-    ) -> Result<(), anyhow::Error> {
-        let target = self.relative_path(target.as_ref());
-        let link = self.relative_path(link.as_ref());
-
-        let inner = self.get_inner()?;
-        inner.symlink(target, link)?;
-
-        Ok(())
-    }
-
-    pub async fn async_hard_link(
-        &self,
-        target: impl AsRef<Path>,
-        dst_dir: &CapFilesystem,
-        link: impl AsRef<Path>,
-    ) -> Result<(), anyhow::Error> {
-        let target = self.relative_path(target.as_ref());
-        let link = self.relative_path(link.as_ref());
-
-        let inner = self.async_get_inner().await?;
-        let dst_inner = dst_dir.async_get_inner().await?;
-        tokio::task::spawn_blocking(move || inner.hard_link(target, &dst_inner, link)).await??;
-
-        Ok(())
-    }
-
-    pub fn hard_link(
-        &self,
-        target: impl AsRef<Path>,
-        dst_dir: &CapFilesystem,
-        link: impl AsRef<Path>,
-    ) -> Result<(), anyhow::Error> {
-        let target = self.relative_path(target.as_ref());
-        let link = self.relative_path(link.as_ref());
-
-        let inner = self.get_inner()?;
-        let dst_inner = dst_dir.get_inner()?;
-        inner.hard_link(target, &dst_inner, link)?;
-
-        Ok(())
     }
 
     pub async fn async_read_dir_all(
