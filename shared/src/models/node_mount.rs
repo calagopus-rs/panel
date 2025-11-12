@@ -96,6 +96,7 @@ impl NodeMount {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_mounts
+            JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
             WHERE node_mounts.node_uuid = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
             ORDER BY node_mounts.created
             LIMIT $3 OFFSET $4
