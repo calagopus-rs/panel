@@ -6,11 +6,11 @@ interface Data {
   order: number;
 }
 
-export default async (serverUuid: string, scheduleUuid: string, data: Data): Promise<ServerSchedule> => {
+export default async (serverUuid: string, scheduleUuid: string, data: Data): Promise<ScheduleStep> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${serverUuid}/schedules/${scheduleUuid}/steps`, transformKeysToSnakeCase(data))
-      .then(({ data }) => resolve(data.subuser))
+      .then(({ data }) => resolve(data.scheduleStep))
       .catch(reject);
   });
 };

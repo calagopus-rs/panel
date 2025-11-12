@@ -65,12 +65,7 @@ export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }:
             <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type] || faGear} />
           </ThemeIcon>
           <Stack gap={4}>
-            <Group gap={'sm'}>
-              <Badge variant={'light'} size={'sm'}>
-                Step {step.order}
-              </Badge>
-              <Text fw={600}>{scheduleStepLabelMapping[step.action.type] || step.action.type}</Text>
-            </Group>
+            <Text fw={600}>{scheduleStepLabelMapping[step.action.type] || step.action.type}</Text>
             <Text size={'sm'} c={'dimmed'}>
               {step.action.type === 'sleep' ? (
                 <span>Sleep for {formatMiliseconds(step.action.duration)}</span>

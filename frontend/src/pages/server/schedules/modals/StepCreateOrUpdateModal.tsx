@@ -6,7 +6,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import createScheduleStep from '@/api/server/schedules/steps/createScheduleStep';
 import updateScheduleStep from '@/api/server/schedules/steps/updateScheduleStep';
 import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { scheduleStepDefaultMapping, scheduleStepLabelMapping } from '@/lib/enums';
@@ -31,6 +30,7 @@ import StepWriteFile from '../steps/StepWriteFile';
 type Props = ModalProps & {
   schedule: ServerSchedule;
   propStep?: ScheduleStep;
+  nextStepOrder?: number;
   onStepCreate?: (step: ScheduleStep) => void;
   onStepUpdate?: (step: ScheduleStep) => void;
 };
@@ -38,6 +38,7 @@ type Props = ModalProps & {
 export default function StepCreateOrUpdateModal({
   schedule,
   propStep,
+  nextStepOrder,
   onStepCreate,
   onStepUpdate,
   opened,
@@ -82,8 +83,8 @@ export default function StepCreateOrUpdateModal({
         })
         .finally(() => setLoading(false));
     } else {
-      createScheduleStep(server.uuid, schedule.uuid, step)
-        .then(() => {
+      createScheduleStep(server.uuid, schedule.uuid, { ...step, order: nextStepOrder })
+        .then((step) => {
           onClose();
           addToast('Schedule step created.', 'success');
           onStepCreate?.(step);
@@ -98,14 +99,6 @@ export default function StepCreateOrUpdateModal({
   return (
     <Modal opened={opened} onClose={onClose} title={step ? 'Edit Schedule Step' : 'Create Schedule Step'} size={'lg'}>
       <Stack gap={'md'}>
-        <NumberInput
-          label={'Step Order'}
-          placeholder={'1'}
-          min={1}
-          value={step?.order || 1}
-          onChange={(value) => setStep({ ...step, order: Number(value) })}
-        />
-
         <Select
           label={'Action Type'}
           data={Object.entries(scheduleStepLabelMapping).map(([value, label]) => ({
