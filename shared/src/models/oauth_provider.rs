@@ -257,8 +257,12 @@ impl OAuthProvider {
             match serde_json_path::JsonPath::parse(&self.identifier_path)?
                 .query(value)
                 .first()
-                .ok_or_else(|| anyhow::anyhow!("unable to extract identifier from {:?}", value))?
-            {
+                .ok_or_else(|| {
+                    crate::response::DisplayError::new(format!(
+                        "unable to extract identifier from {:?}",
+                        value
+                    ))
+                })? {
                 serde_json::Value::String(string) => string.clone(),
                 val => val.to_string(),
             },
@@ -269,14 +273,17 @@ impl OAuthProvider {
         Ok(serde_json_path::JsonPath::parse(match &self.email_path {
             Some(path) => path,
             None => {
-                return Err(anyhow::anyhow!(
-                    "no email path defined, unable to register user"
-                ));
+                return Err(crate::response::DisplayError::new(
+                    "no email path defined, unable to register",
+                )
+                .into());
             }
         })?
         .query(value)
         .first()
-        .ok_or_else(|| anyhow::anyhow!("unable to extract email from {:?}", value))?
+        .ok_or_else(|| {
+            crate::response::DisplayError::new(format!("unable to extract email from {:?}", value))
+        })?
         .to_string())
     }
 
@@ -287,7 +294,12 @@ impl OAuthProvider {
         })?
         .query(value)
         .first()
-        .ok_or_else(|| anyhow::anyhow!("unable to extract username from {:?}", value))?
+        .ok_or_else(|| {
+            crate::response::DisplayError::new(format!(
+                "unable to extract username from {:?}",
+                value
+            ))
+        })?
         .to_string())
     }
 
@@ -299,7 +311,12 @@ impl OAuthProvider {
             })?
             .query(value)
             .first()
-            .ok_or_else(|| anyhow::anyhow!("unable to extract first name from {:?}", value))?
+            .ok_or_else(|| {
+                crate::response::DisplayError::new(format!(
+                    "unable to extract first name from {:?}",
+                    value
+                ))
+            })?
             .to_string(),
         )
     }
@@ -312,7 +329,12 @@ impl OAuthProvider {
             })?
             .query(value)
             .first()
-            .ok_or_else(|| anyhow::anyhow!("unable to extract last name from {:?}", value))?
+            .ok_or_else(|| {
+                crate::response::DisplayError::new(format!(
+                    "unable to extract last name from {:?}",
+                    value
+                ))
+            })?
             .to_string(),
         )
     }

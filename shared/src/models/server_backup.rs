@@ -139,7 +139,10 @@ impl ServerBackup {
     ) -> Result<Self, anyhow::Error> {
         let backup_configuration =
             server.backup_configuration(database).await.ok_or_else(|| {
-                anyhow::anyhow!("no backup configuration available, unable to create backup")
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to create backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
             })?;
 
         let row = sqlx::query(&format!(
@@ -233,7 +236,10 @@ impl ServerBackup {
     ) -> Result<Self, anyhow::Error> {
         let backup_configuration =
             server.backup_configuration(database).await.ok_or_else(|| {
-                anyhow::anyhow!("no backup configuration available, unable to create backup")
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to create backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
             })?;
 
         let row = sqlx::query(&format!(
@@ -419,7 +425,10 @@ impl ServerBackup {
         let backup_configuration = self
             .backup_configuration
             .ok_or_else(|| {
-                anyhow::anyhow!("no backup configuration available, unable to create backup")
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to restore backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
             })?
             .fetch_cached(database)
             .await?;
@@ -475,7 +484,10 @@ impl ServerBackup {
         let backup_configuration = self
             .backup_configuration
             .ok_or_else(|| {
-                anyhow::anyhow!("no backup configuration available, unable to create backup")
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to delete backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
             })?
             .fetch_cached(database)
             .await?;
@@ -539,7 +551,10 @@ impl ServerBackup {
         let backup_configuration = self
             .backup_configuration
             .ok_or_else(|| {
-                anyhow::anyhow!("no backup configuration available, unable to create backup")
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to delete backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
             })?
             .fetch_cached(database)
             .await?;

@@ -1,5 +1,6 @@
 use crate::ApiError;
 use axum::response::IntoResponse;
+use std::{borrow::Cow, fmt::Display};
 
 pub type ApiResponseResult = Result<ApiResponse, ApiResponse>;
 
@@ -83,7 +84,11 @@ where
         tracing::error!("a request error occurred: {:#?}", err);
         sentry_anyhow::capture_anyhow(&err);
 
-        ApiResponse::json(ApiError::new_value(&["internal server error"]))
+        if let Ok(error) = err.downcast::<DisplayError>() {
+            return ApiResponse::error(&error.message).with_status(error.status);
+        }
+
+        ApiResponse::error("internal server error")
             .with_status(axum::http::StatusCode::INTERNAL_SERVER_ERROR)
     }
 }
@@ -96,5 +101,38 @@ impl IntoResponse for ApiResponse {
         *response.headers_mut() = self.headers;
 
         response
+    }
+}
+
+#[derive(Debug)]
+pub struct DisplayError<'a> {
+    status: axum::http::StatusCode,
+    message: Cow<'a, str>,
+}
+
+impl<'a> DisplayError<'a> {
+    pub fn new(message: impl Into<Cow<'a, str>>) -> Self {
+        Self {
+            status: axum::http::StatusCode::BAD_REQUEST,
+            message: message.into(),
+        }
+    }
+
+    pub fn with_status(mut self, status: axum::http::StatusCode) -> Self {
+        self.status = status;
+
+        self
+    }
+}
+
+impl<'a> Display for DisplayError<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DisplayError").finish()
+    }
+}
+
+impl<'a> From<DisplayError<'a>> for anyhow::Error {
+    fn from(value: DisplayError<'a>) -> Self {
+        anyhow::anyhow!(value)
     }
 }
