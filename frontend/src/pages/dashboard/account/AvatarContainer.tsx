@@ -36,7 +36,7 @@ export default function AvatarContainer() {
           .finally(() => setLoading(false));
       });
     } catch (err) {
-      load(false, setLoading);
+      setLoading(false);
       console.error(err);
     }
   };

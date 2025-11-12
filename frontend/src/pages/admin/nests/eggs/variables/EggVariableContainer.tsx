@@ -69,7 +69,7 @@ export default function EggVariableContainer({
           addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
-          load(false, setLoading);
+          setLoading(false);
         });
     } else {
       createEggVariable(contextNest.uuid, contextEgg.uuid, variable)
@@ -81,7 +81,7 @@ export default function EggVariableContainer({
           addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
-          load(false, setLoading);
+          setLoading(false);
         });
     }
   };

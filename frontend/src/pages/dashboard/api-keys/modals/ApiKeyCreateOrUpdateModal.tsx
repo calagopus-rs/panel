@@ -46,7 +46,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   useEffect(() => {
     getPermissions().then((res) => {
       setAvailablePermissions(res);
-      load(false, setLoading);
+      setLoading(false);
     });
   }, []);
 
@@ -64,7 +64,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
-          load(false, setLoading);
+          setLoading(false);
         });
     } else {
       createApiKey(apiKey)
@@ -77,7 +77,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           addToast(httpErrorToHuman(msg), 'error');
         })
         .finally(() => {
-          load(false, setLoading);
+          setLoading(false);
         });
     }
   };

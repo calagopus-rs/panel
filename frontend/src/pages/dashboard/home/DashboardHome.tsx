@@ -1,23 +1,15 @@
-import { useEffect, useState } from 'react';
-import DashboardHomeTitle from './DashboardHomeTitle';
-import { useUserStore } from '@/stores/user';
-import { useToast } from '@/providers/ToastProvider';
-import getServerGroups from '@/api/me/servers/groups/getServerGroups';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import ServerGroupItem from './ServerGroupItem';
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DropAnimation,
+  defaultDropAnimationSideEffects,
   KeyboardSensor,
   PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
-  DragOverlay,
-  defaultDropAnimationSideEffects,
-  DropAnimation,
 } from '@dnd-kit/core';
 import {
   arrayMove,
@@ -27,11 +19,19 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import getServerGroups from '@/api/me/servers/groups/getServerGroups';
 import updateServerGroupsOrder from '@/api/me/servers/groups/updateServerGroupsOrder';
+import Button from '@/elements/Button';
+import Spinner from '@/elements/Spinner';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
+import DashboardHomeTitle from './DashboardHomeTitle';
+import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
+import ServerGroupItem from './ServerGroupItem';
 
 const dropAnimationConfig: DropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -106,7 +106,7 @@ export default function DashboardHome() {
   useEffect(() => {
     getServerGroups()
       .then((response) => {
-        load(false, setLoading);
+        setLoading(false);
         setServerGroups(response);
       })
       .catch((msg) => {

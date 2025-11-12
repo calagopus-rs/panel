@@ -51,7 +51,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
 
     getPermissions().then((res) => {
       setAvailablePermissions(res);
-      load(false, setLoading);
+      setLoading(false);
     });
   }, []);
 

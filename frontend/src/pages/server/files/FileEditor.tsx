@@ -42,7 +42,7 @@ export default function FileEditor() {
     getFileContent(server.uuid, join(browsingDirectory, fileName)).then((content) => {
       setContent(content);
       setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
-      load(false, setLoading);
+      setLoading(false);
     });
   }, [fileName]);
 
@@ -57,7 +57,7 @@ export default function FileEditor() {
     setLoading(true);
 
     saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
-      load(false, setLoading);
+      setLoading(false);
       setNameModalOpen(false);
 
       if (name) {

@@ -36,19 +36,19 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
                 deleteSecurityKey(key.uuid);
               })
               .finally(() => {
-                load(false, setLoading);
+                setLoading(false);
               });
           })
           .catch((error) => {
             console.error(error);
             addToast('Security Key add operation was aborted.', 'error');
             deleteSecurityKey(key.uuid);
-            load(false, setLoading);
+            setLoading(false);
           });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
-        load(false, setLoading);
+        setLoading(false);
       });
   };
 

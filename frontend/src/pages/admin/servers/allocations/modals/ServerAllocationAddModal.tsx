@@ -43,7 +43,7 @@ export default function ServerAllocationAddModal({ server, opened, onClose }: Mo
           didError = true;
         })
         .finally(() => {
-          load(false, setLoading);
+          setLoading(false);
         });
     }
 
