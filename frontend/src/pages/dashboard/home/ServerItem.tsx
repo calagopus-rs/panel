@@ -89,9 +89,9 @@ export default function ServerItem({
             {server.allocation ? (
               server.egg.separatePort ? (
                 <div className={'flex flex-row gap-2'}>
-                  <CopyOnClick content={server.allocation.ip} className={'w-fit'}>
+                  <CopyOnClick content={server.allocation.ipAlias ?? server.allocation.ip} className={'w-fit'}>
                     <Card p={'xs'}>
-                      <p className={'text-sm text-gray-400'}>{server.allocation.ip}</p>
+                      <p className={'text-sm text-gray-400'}>{server.allocation.ipAlias ?? server.allocation.ip}</p>
                     </Card>
                   </CopyOnClick>
                   <CopyOnClick content={server.allocation.port.toString()} className={'w-fit'}>
