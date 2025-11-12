@@ -75,7 +75,7 @@ mod post {
                 .ok();
         }
 
-        let user = match User::create(
+        let user = match User::create_automatic_admin(
             &state.database,
             None,
             None,
@@ -84,7 +84,6 @@ mod post {
             &data.name_first,
             &data.name_last,
             &data.password,
-            false,
         )
         .await
         {

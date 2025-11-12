@@ -1,4 +1,3 @@
-// DashboardHome.tsx (refactored)
 import { useEffect, useMemo, useState } from 'react';
 import DashboardHomeTitle from './DashboardHomeTitle';
 import { useUserStore } from '@/stores/user';
