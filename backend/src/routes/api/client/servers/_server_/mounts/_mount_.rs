@@ -54,7 +54,12 @@ mod delete {
                 }
             };
 
-        if !server_mount.mount.user_mountable {
+        if !server_mount
+            .mount
+            .fetch_cached(&state.database)
+            .await?
+            .user_mountable
+        {
             return ApiResponse::json(ApiError::new_value(&["mount not found"]))
                 .with_status(StatusCode::NOT_FOUND)
                 .ok();

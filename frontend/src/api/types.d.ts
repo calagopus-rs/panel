@@ -2,6 +2,10 @@ import { IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FC } from 'react';
 
 declare global {
+  type AndCreated<T extends object> = T & {
+    created: Date;
+  };
+
   interface AdminActivity {
     user?: User;
     event: string;

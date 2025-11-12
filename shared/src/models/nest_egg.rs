@@ -1,4 +1,4 @@
-use crate::models::ByUuid;
+use crate::models::{ByUuid, Fetchable};
 
 use super::BaseModel;
 use indexmap::IndexMap;
@@ -181,6 +181,7 @@ pub struct ExportedNestEgg {
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NestEgg {
     pub uuid: uuid::Uuid,
+    pub nest: Fetchable<super::nest::Nest>,
 
     pub author: String,
     pub name: String,
@@ -212,6 +213,7 @@ impl BaseModel for NestEgg {
 
         BTreeMap::from([
             ("nest_eggs.uuid", format!("{prefix}uuid")),
+            ("nest_eggs.nest_uuid", format!("{prefix}nest_uuid")),
             ("nest_eggs.author", format!("{prefix}author")),
             ("nest_eggs.name", format!("{prefix}name")),
             ("nest_eggs.description", format!("{prefix}description")),
@@ -246,6 +248,7 @@ impl BaseModel for NestEgg {
 
         Self {
             uuid: row.get(format!("{prefix}uuid").as_str()),
+            nest: super::nest::Nest::get_fetchable(row.get(format!("{prefix}nest_uuid").as_str())),
             author: row.get(format!("{prefix}author").as_str()),
             name: row.get(format!("{prefix}name").as_str()),
             description: row.get(format!("{prefix}description").as_str()),

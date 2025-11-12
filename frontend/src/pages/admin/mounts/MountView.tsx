@@ -1,4 +1,4 @@
-import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faComputer, faEgg, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
@@ -8,6 +8,9 @@ import Spinner from '@/elements/Spinner';
 import SubNavigation from '@/elements/SubNavigation';
 import MountCreateOrUpdate from '@/pages/admin/mounts/MountCreateOrUpdate';
 import { useToast } from '@/providers/ToastProvider';
+import AdminMountNestEggs from './nest-eggs/AdminMountNestEggs';
+import AdminMountNodes from './nodes/AdminMountNodes';
+import AdminMountServers from './servers/AdminMountServers';
 
 export default function MountView() {
   const params = useParams<'id'>();
@@ -39,11 +42,29 @@ export default function MountView() {
             icon: faCog,
             link: `/admin/mounts/${params.id}`,
           },
+          {
+            name: 'Nest Eggs',
+            icon: faEgg,
+            link: `/admin/mounts/${params.id}/nest-eggs`,
+          },
+          {
+            name: 'Nodes',
+            icon: faServer,
+            link: `/admin/mounts/${params.id}/nodes`,
+          },
+          {
+            name: 'Servers',
+            icon: faComputer,
+            link: `/admin/mounts/${params.id}/servers`,
+          },
         ]}
       />
 
       <Routes>
         <Route path={'/'} element={<MountCreateOrUpdate contextMount={mount} />} />
+        <Route path={'/nest-eggs'} element={<AdminMountNestEggs mount={mount} />} />
+        <Route path={'/nodes'} element={<AdminMountNodes mount={mount} />} />
+        <Route path={'/servers'} element={<AdminMountServers mount={mount} />} />
       </Routes>
     </>
   );

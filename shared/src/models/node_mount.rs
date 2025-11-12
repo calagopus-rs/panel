@@ -1,3 +1,5 @@
+use crate::models::{ByUuid, Fetchable};
+
 use super::BaseModel;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -6,7 +8,8 @@ use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct NodeMount {
-    pub mount: super::mount::Mount,
+    pub mount: Fetchable<super::mount::Mount>,
+    pub node: Fetchable<super::node::Node>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -18,11 +21,11 @@ impl BaseModel for NodeMount {
     fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
         let prefix = prefix.unwrap_or_default();
 
-        let mut columns = BTreeMap::from([("node_mounts.created", format!("{prefix}created"))]);
-
-        columns.extend(super::mount::Mount::columns(Some("mount_")));
-
-        columns
+        BTreeMap::from([
+            ("node_mounts.mount_uuid", format!("{prefix}mount_uuid")),
+            ("node_mounts.node_uuid", format!("{prefix}node_uuid")),
+            ("node_mounts.created", format!("{prefix}created")),
+        ])
     }
 
     #[inline]
@@ -30,7 +33,10 @@ impl BaseModel for NodeMount {
         let prefix = prefix.unwrap_or_default();
 
         Self {
-            mount: super::mount::Mount::map(Some("mount_"), row),
+            mount: super::mount::Mount::get_fetchable(
+                row.get(format!("{prefix}mount_uuid").as_str()),
+            ),
+            node: super::node::Node::get_fetchable(row.get(format!("{prefix}node_uuid").as_str())),
             created: row.get(format!("{prefix}created").as_str()),
         }
     }
@@ -65,7 +71,6 @@ impl NodeMount {
             r#"
             SELECT {}
             FROM node_mounts
-            JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
             WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
             "#,
             Self::columns_sql(None)
@@ -91,7 +96,6 @@ impl NodeMount {
             r#"
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM node_mounts
-            JOIN mounts ON mounts.uuid = node_mounts.mount_uuid
             WHERE node_mounts.node_uuid = $1 AND ($2 IS NULL OR mounts.name ILIKE '%' || $2 || '%')
             ORDER BY node_mounts.created
             LIMIT $3 OFFSET $4
@@ -99,6 +103,41 @@ impl NodeMount {
             Self::columns_sql(None)
         ))
         .bind(node_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows.first().map_or(0, |row| row.get("total_count")),
+            per_page,
+            page,
+            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+        })
+    }
+
+    pub async fn by_mount_uuid_with_pagination(
+        database: &crate::database::Database,
+        mount_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM node_mounts
+            JOIN nodes ON nodes.uuid = node_mounts.node_uuid
+            WHERE node_mounts.mount_uuid = $1 AND ($2 IS NULL OR nodes.name ILIKE '%' || $2 || '%')
+            ORDER BY node_mounts.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(mount_uuid)
         .bind(search)
         .bind(per_page)
         .bind(offset)
@@ -133,16 +172,47 @@ impl NodeMount {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiNodeMount {
-        AdminApiNodeMount {
-            mount: self.mount.into_admin_api_object(),
+    pub async fn into_admin_node_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiNodeNodeMount, anyhow::Error> {
+        Ok(AdminApiNodeNodeMount {
+            node: self
+                .node
+                .fetch_cached(database)
+                .await?
+                .into_admin_api_object(database)
+                .await?,
             created: self.created.and_utc(),
-        }
+        })
+    }
+
+    #[inline]
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiNodeMount, anyhow::Error> {
+        Ok(AdminApiNodeMount {
+            mount: self
+                .mount
+                .fetch_cached(database)
+                .await?
+                .into_admin_api_object(),
+            created: self.created.and_utc(),
+        })
     }
 }
 
 #[derive(ToSchema, Serialize)]
-#[schema(title = "NodeMount")]
+#[schema(title = "AdminNodeNodeMount")]
+pub struct AdminApiNodeNodeMount {
+    pub node: super::node::AdminApiNode,
+
+    pub created: chrono::DateTime<chrono::Utc>,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "AdminNodeMount")]
 pub struct AdminApiNodeMount {
     pub mount: super::mount::AdminApiMount,
 

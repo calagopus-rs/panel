@@ -1,12 +1,56 @@
 use super::State;
+use axum::{
+    extract::{Path, Request},
+    http::StatusCode,
+    middleware::Next,
+    response::{IntoResponse, Response},
+};
+use shared::{
+    GetState,
+    models::{ByUuid, mount::Mount, user::GetPermissionManager},
+    response::ApiResponse,
+};
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod nest_eggs;
+mod nodes;
+mod servers;
+
+pub type GetMount = shared::extract::ConsumingExtension<Mount>;
+
+pub async fn auth(
+    state: GetState,
+    permissions: GetPermissionManager,
+    Path(mount): Path<uuid::Uuid>,
+    mut req: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    if let Err(err) = permissions.has_server_permission("mounts.read") {
+        return Ok(err.into_response());
+    }
+
+    let mount = Mount::by_uuid_optional(&state.database, mount).await;
+    let mount = match mount {
+        Ok(Some(mount)) => mount,
+        Ok(None) => {
+            return Ok(ApiResponse::error("mount not found")
+                .with_status(StatusCode::NOT_FOUND)
+                .into_response());
+        }
+        Err(err) => return Ok(ApiResponse::from(err).into_response()),
+    };
+
+    req.extensions_mut().insert(mount);
+
+    Ok(next.run(req).await)
+}
+
 mod get {
-    use axum::{extract::Path, http::StatusCode};
+    use crate::routes::api::admin::mounts::_mount_::GetMount;
     use serde::Serialize;
     use shared::{
-        ApiError, GetState,
-        models::{ByUuid, mount::Mount, user::GetPermissionManager},
+        ApiError,
+        models::user::GetPermissionManager,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -26,37 +70,23 @@ mod get {
             example = "1",
         ),
     ))]
-    pub async fn route(
-        state: GetState,
-        permissions: GetPermissionManager,
-        Path(mount): Path<uuid::Uuid>,
-    ) -> ApiResponseResult {
+    pub async fn route(permissions: GetPermissionManager, mount: GetMount) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.read")?;
 
-        let mount = match Mount::by_uuid_optional(&state.database, mount).await? {
-            Some(mount) => mount,
-            None => {
-                return ApiResponse::error("mount not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
-
         ApiResponse::json(Response {
-            mount: mount.into_admin_api_object(),
+            mount: mount.0.into_admin_api_object(),
         })
         .ok()
     }
 }
 
 mod delete {
-    use axum::{extract::Path, http::StatusCode};
+    use crate::routes::api::admin::mounts::_mount_::GetMount;
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
         models::{
-            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount,
-            user::GetPermissionManager,
+            admin_activity::GetAdminActivityLogger, mount::Mount, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -80,18 +110,9 @@ mod delete {
         state: GetState,
         permissions: GetPermissionManager,
         activity_logger: GetAdminActivityLogger,
-        Path(mount): Path<uuid::Uuid>,
+        mount: GetMount,
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.delete")?;
-
-        let mount = match Mount::by_uuid_optional(&state.database, mount).await? {
-            Some(mount) => mount,
-            None => {
-                return ApiResponse::error("mount not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
 
         Mount::delete_by_uuid(&state.database, mount.uuid).await?;
 
@@ -110,14 +131,12 @@ mod delete {
 }
 
 mod patch {
-    use axum::{extract::Path, http::StatusCode};
+    use crate::routes::api::admin::mounts::_mount_::GetMount;
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{
-            ByUuid, admin_activity::GetAdminActivityLogger, mount::Mount,
-            user::GetPermissionManager,
-        },
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -161,20 +180,11 @@ mod patch {
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
-        Path(mount): Path<uuid::Uuid>,
         activity_logger: GetAdminActivityLogger,
+        mut mount: GetMount,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.update")?;
-
-        let mut mount = match Mount::by_uuid_optional(&state.database, mount).await? {
-            Some(mount) => mount,
-            None => {
-                return ApiResponse::error("mount not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
 
         if let Err(errors) = shared::utils::validate_data(&data) {
             return ApiResponse::json(ApiError::new_strings_value(errors))
@@ -261,5 +271,9 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/nest-eggs", nest_eggs::router(state))
+        .nest("/nodes", nodes::router(state))
+        .nest("/servers", servers::router(state))
+        .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }

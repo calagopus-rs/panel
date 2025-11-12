@@ -75,16 +75,9 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            mounts: Pagination {
-                total: mounts.total,
-                per_page: mounts.per_page,
-                page: mounts.page,
-                data: mounts
-                    .data
-                    .into_iter()
-                    .map(|mount| mount.into_admin_api_object())
-                    .collect(),
-            },
+            mounts: mounts
+                .try_async_map(|mount| mount.into_admin_api_object(&state.database))
+                .await?,
         })
         .ok()
     }

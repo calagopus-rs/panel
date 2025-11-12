@@ -2,12 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
+    use crate::routes::api::admin::mounts::_mount_::GetMount;
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
         models::{
-            Pagination, PaginationParamsWithSearch, server::GetServer, server_mount::ServerMount,
+            Pagination, PaginationParamsWithSearch, server_mount::ServerMount,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -17,15 +18,16 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        mounts: Pagination<shared::models::server_mount::AdminApiServerMount>,
+        server_mounts: Pagination<shared::models::server_mount::AdminApiServerServerMount>,
     }
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "server" = uuid::Uuid,
-            description = "The server ID",
+            "mount" = uuid::Uuid,
+            description = "The mount ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
@@ -46,7 +48,7 @@ mod get {
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
-        server: GetServer,
+        mount: GetMount,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = shared::utils::validate_data(&params) {
@@ -55,20 +57,25 @@ mod get {
                 .ok();
         }
 
-        permissions.has_admin_permission("servers.mounts")?;
+        permissions.has_admin_permission("servers.read")?;
 
-        let mounts = ServerMount::available_by_server_with_pagination(
+        let server_mounts = ServerMount::by_mount_uuid_with_pagination(
             &state.database,
-            &server,
+            mount.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
         )
         .await?;
 
+        let storage_url_retriever = state.storage.retrieve_urls().await;
+
         ApiResponse::json(Response {
-            mounts: mounts
-                .try_async_map(|mount| mount.into_admin_api_object(&state.database))
+            server_mounts: server_mounts
+                .try_async_map(|server_mount| {
+                    server_mount
+                        .into_admin_server_api_object(&state.database, &storage_url_retriever)
+                })
                 .await?,
         })
         .ok()
