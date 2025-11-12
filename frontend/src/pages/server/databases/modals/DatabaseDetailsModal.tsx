@@ -5,7 +5,6 @@ import rotateDatabasePassword from '@/api/server/databases/rotateDatabasePasswor
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -24,7 +23,7 @@ export default function DatabaseDetailsModal({ database, opened, onClose }: Prop
   }@${host}/${database.name}`;
 
   const onRotatePassword = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     rotateDatabasePassword(server.uuid, database.uuid)
       .then((password) => {
@@ -37,9 +36,7 @@ export default function DatabaseDetailsModal({ database, opened, onClose }: Prop
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 
 export default function NodeAllocationsCreateModal({
@@ -56,7 +55,7 @@ export default function NodeAllocationsCreateModal({
   }, [ports]);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createNodeAllocations(node.uuid, {
       ip,
@@ -72,9 +71,7 @@ export default function NodeAllocationsCreateModal({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

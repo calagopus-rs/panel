@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import Switch from '@/elements/input/Switch';
-import { load } from '@/lib/debounce';
 import { bytesToString } from '@/lib/size';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -22,7 +21,8 @@ export default function ServerContainer() {
   );
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
+
     updateServerSettings(serverSettings)
       .then(() => {
         addToast('Server settings updated.', 'success');
@@ -30,9 +30,7 @@ export default function ServerContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

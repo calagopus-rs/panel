@@ -5,7 +5,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -21,7 +20,7 @@ export default function EmailContainer() {
   const [settings, setSettings] = useState<MailMode>(mailMode);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateEmailSettings(transformKeysToSnakeCase({ ...settings } as MailMode))
       .then(() => {
         addToast('Email settings updated.', 'success');
@@ -29,9 +28,7 @@ export default function EmailContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

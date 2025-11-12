@@ -5,7 +5,6 @@ import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -19,7 +18,7 @@ export default function AccountContainer() {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateAccount({ username, nameFirst, nameLast })
       .then(() => {
@@ -30,7 +29,7 @@ export default function AccountContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

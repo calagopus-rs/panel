@@ -8,7 +8,6 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -21,7 +20,7 @@ export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
   const [loading, setLoading] = useState(false);
 
   const makeDirectory = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createDirectory(server.uuid, browsingDirectory, dirName)
       .then(() => {
@@ -31,7 +30,7 @@ export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

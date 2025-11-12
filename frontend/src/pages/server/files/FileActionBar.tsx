@@ -9,7 +9,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import downloadFiles from '@/api/server/files/downloadFiles';
 import renameFiles from '@/api/server/files/renameFiles';
 import Button from '@/elements/Button';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import ArchiveCreateModal from './modals/ArchiveCreateModal';
@@ -34,7 +33,7 @@ export default function FileActionBar() {
   const [loading, setLoading] = useState(false);
 
   const doMove = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     renameFiles({
       uuid: server.uuid,
@@ -57,11 +56,11 @@ export default function FileActionBar() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   const doDownload = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     downloadFiles(
       server.uuid,
@@ -77,7 +76,7 @@ export default function FileActionBar() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

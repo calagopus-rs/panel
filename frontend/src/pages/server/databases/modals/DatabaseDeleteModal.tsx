@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -23,7 +22,7 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
   const [loading, setLoading] = useState(false);
 
   const doDelete = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     deleteDatabase(server.uuid, database.uuid)
       .then(() => {
@@ -35,7 +34,7 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
         console.error(error);
         addToast(httpErrorToHuman(error), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -9,7 +9,6 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -33,7 +32,7 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
   };
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createSchedule(server.uuid, { name, enabled, triggers, condition })
       .then((schedule) => {
@@ -44,7 +43,7 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

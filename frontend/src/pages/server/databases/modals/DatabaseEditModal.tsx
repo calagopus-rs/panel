@@ -5,7 +5,6 @@ import updateDatabase from '@/api/server/databases/updateDatabase';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -21,7 +20,7 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateDatabase(server.uuid, database.uuid, { locked })
       .then(() => {
@@ -32,7 +31,7 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

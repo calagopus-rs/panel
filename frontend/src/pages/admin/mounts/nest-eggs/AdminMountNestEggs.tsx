@@ -1,11 +1,10 @@
 import { Title } from '@mantine/core';
 import { useState } from 'react';
+import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import EggRow, { eggTableColumns } from '../../nests/eggs/EggRow';
-import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs';
 
 export default function AdminMountNestEggs({ mount }: { mount?: Mount }) {
   const [mountNestEggs, setMountNestEggs] = useState<
@@ -23,15 +22,11 @@ export default function AdminMountNestEggs({ mount }: { mount?: Mount }) {
         Mount Nest Eggs
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={eggTableColumns} pagination={mountNestEggs} onPageSelect={setPage}>
-          {mountNestEggs.data.map((nestEggMount) => (
-            <EggRow key={nestEggMount.nestEgg.uuid} nest={nestEggMount.nest} egg={nestEggMount.nestEgg} />
-          ))}
-        </Table>
-      )}
+      <Table columns={eggTableColumns} loading={loading} pagination={mountNestEggs} onPageSelect={setPage}>
+        {mountNestEggs.data.map((nestEggMount) => (
+          <EggRow key={nestEggMount.nestEgg.uuid} nest={nestEggMount.nest} egg={nestEggMount.nestEgg} />
+        ))}
+      </Table>
     </>
   );
 }

@@ -5,7 +5,6 @@ import renameFiles from '@/api/server/files/renameFiles';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -21,7 +20,7 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
   const [loading, setLoading] = useState(false);
 
   const doRename = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     renameFiles({
       uuid: server.uuid,
@@ -51,7 +50,7 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

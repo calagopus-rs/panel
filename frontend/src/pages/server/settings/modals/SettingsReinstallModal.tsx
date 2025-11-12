@@ -6,7 +6,6 @@ import reinstallServer from '@/api/server/settings/reinstallServer';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -19,7 +18,7 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
   const [loading, setLoading] = useState(false);
 
   const doReinstall = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     reinstallServer(server.uuid, { truncateDirectory: truncate })
       .then(() => {
@@ -31,7 +30,7 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

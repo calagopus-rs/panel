@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getServers from '@/api/admin/servers/getServers';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -40,15 +39,11 @@ function ServersContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={serverTableColumns} pagination={servers} onPageSelect={setPage}>
-          {servers.data.map((server) => (
-            <ServerRow key={server.uuid} server={server} />
-          ))}
-        </Table>
-      )}
+      <Table columns={serverTableColumns} loading={loading} pagination={servers} onPageSelect={setPage}>
+        {servers.data.map((server) => (
+          <ServerRow key={server.uuid} server={server} />
+        ))}
+      </Table>
     </>
   );
 }

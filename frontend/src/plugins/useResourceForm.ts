@@ -1,5 +1,4 @@
 import { UseFormReturnType } from '@mantine/form';
-import { load } from '@/lib/debounce';
 import { useState } from 'react';
 import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
@@ -37,7 +36,7 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
   const [loading, setLoading] = useState(false);
 
   const doCreateOrUpdate = (stay: boolean, args?: CArgs | UArgs) => {
-    load(true, setLoading);
+    setLoading(true);
 
     if (doUpdate) {
       updateFn(args as UArgs)
@@ -45,7 +44,7 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
           addToast(`${resourceName} updated.`, 'success');
         })
         .catch((msg) => addToast(httpErrorToHuman(msg), 'error'))
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     } else {
       createFn(args as CArgs)
         .then((result: U) => {
@@ -57,7 +56,7 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
           }
         })
         .catch((msg) => addToast(httpErrorToHuman(msg), 'error'))
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     }
   };
 

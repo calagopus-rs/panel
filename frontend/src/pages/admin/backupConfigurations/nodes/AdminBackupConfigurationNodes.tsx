@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationNodes from '@/api/admin/backup-configurations/nodes/getBackupConfigurationNodes';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
@@ -25,15 +24,11 @@ export default function AdminBackupConfigurationNodes({
         Backup Configuration Nodes
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={nodeTableColumns} pagination={backupConfigurationNodes} onPageSelect={setPage}>
-          {backupConfigurationNodes.data.map((node) => (
-            <NodeRow key={node.uuid} node={node} />
-          ))}
-        </Table>
-      )}
+      <Table columns={nodeTableColumns} loading={loading} pagination={backupConfigurationNodes} onPageSelect={setPage}>
+        {backupConfigurationNodes.data.map((node) => (
+          <NodeRow key={node.uuid} node={node} />
+        ))}
+      </Table>
     </>
   );
 }

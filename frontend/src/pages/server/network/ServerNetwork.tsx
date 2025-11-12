@@ -62,17 +62,18 @@ export default function ServerNetwork() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={['Hostname', 'Port', 'Note', '', '']} pagination={allocations} onPageSelect={setPage}>
-            {allocations.data.map((allocation) => (
-              <AllocationRow key={allocation.uuid} allocation={allocation} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Hostname', 'Port', 'Note', '', '']}
+          loading={loading}
+          pagination={allocations}
+          onPageSelect={setPage}
+        >
+          {allocations.data.map((allocation) => (
+            <AllocationRow key={allocation.uuid} allocation={allocation} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

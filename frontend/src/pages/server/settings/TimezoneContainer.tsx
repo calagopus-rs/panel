@@ -6,7 +6,6 @@ import updateTimezone from '@/api/server/settings/updateTimezone';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -26,7 +25,7 @@ export default function TimezoneContainer() {
   const [time, setTime] = useState('');
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateTimezone(server.uuid, timezone || null)
       .then(() => {
         addToast('Server timezone updated.', 'success');
@@ -34,9 +33,7 @@ export default function TimezoneContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

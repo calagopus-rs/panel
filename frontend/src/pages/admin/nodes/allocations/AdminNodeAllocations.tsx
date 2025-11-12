@@ -10,7 +10,6 @@ import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import SelectionArea from '@/elements/SelectionArea';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
@@ -100,29 +99,26 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <SelectionArea
-          onSelectedStart={onSelectedStart}
-          onSelected={onSelected}
-          className={'h-full'}
-          disabled={!!openModal}
+      <SelectionArea
+        onSelectedStart={onSelectedStart}
+        onSelected={onSelected}
+        className={'h-full'}
+        disabled={!!openModal}
+      >
+        <Table
+          columns={nodeAllocationTableColumns}
+          loading={loading}
+          pagination={nodeAllocations}
+          onPageSelect={setPage}
+          allowSelect={false}
         >
-          <Table
-            columns={nodeAllocationTableColumns}
-            pagination={nodeAllocations}
-            onPageSelect={setPage}
-            allowSelect={false}
-          >
-            {nodeAllocations.data.map((allocation) => (
-              <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
-                {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
-              </SelectionArea.Selectable>
-            ))}
-          </Table>
-        </SelectionArea>
-      )}
+          {nodeAllocations.data.map((allocation) => (
+            <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
+              {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
+            </SelectionArea.Selectable>
+          ))}
+        </Table>
+      </SelectionArea>
     </>
   );
 }

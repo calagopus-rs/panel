@@ -10,7 +10,6 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
-import { load } from '@/lib/debounce';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -29,7 +28,7 @@ export default function ScheduleEdit() {
   }, [params.id]);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateSchedule(server.uuid, schedule.uuid, schedule)
       .then(() => {
@@ -38,7 +37,7 @@ export default function ScheduleEdit() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return !schedule ? (

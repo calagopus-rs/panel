@@ -6,7 +6,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -30,7 +29,7 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
   }, [opened]);
 
   const doAdd = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createServerMount(server.uuid, { mountUuid: selectedMount.mount.uuid })
       .then(() => {
@@ -42,9 +41,7 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

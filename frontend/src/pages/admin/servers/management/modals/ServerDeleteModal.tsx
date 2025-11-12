@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 
 export default function ServerDeleteModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
@@ -20,7 +19,7 @@ export default function ServerDeleteModal({ server, opened, onClose }: ModalProp
   const [deleteServerName, setDeleteServerName] = useState('');
 
   const doDelete = () => {
-    load(true, setLoading);
+    setLoading(true);
     deleteServer(server.uuid, {
       force: deleteDoForce,
       deleteBackups: deleteDoDeleteBackups,
@@ -33,9 +32,7 @@ export default function ServerDeleteModal({ server, opened, onClose }: ModalProp
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

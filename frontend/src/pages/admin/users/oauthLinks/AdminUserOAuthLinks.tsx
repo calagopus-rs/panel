@@ -5,7 +5,6 @@ import { useState } from 'react';
 import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -35,17 +34,13 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={userOAuthLinkTableColumns} pagination={userOAuthLinks} onPageSelect={setPage}>
-            {userOAuthLinks.data.map((userOAuthLink) => (
-              <UserOAuthLinkRow key={userOAuthLink.uuid} user={user} userOAuthLink={userOAuthLink} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table columns={userOAuthLinkTableColumns} loading={loading} pagination={userOAuthLinks} onPageSelect={setPage}>
+          {userOAuthLinks.data.map((userOAuthLink) => (
+            <UserOAuthLinkRow key={userOAuthLink.uuid} user={user} userOAuthLink={userOAuthLink} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

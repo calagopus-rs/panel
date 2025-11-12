@@ -2,9 +2,8 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getUserServers from '@/api/admin/users/servers/getUserServers';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import ServerRow from '@/pages/admin/servers/ServerRow';
+import ServerRow, { serverTableColumns } from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 
 export default function AdminUserServers({ user }: { user: User }) {
@@ -21,19 +20,11 @@ export default function AdminUserServers({ user }: { user: User }) {
         User Servers
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table
-          columns={['Id', 'Name', 'Node', 'Owner', 'Allocation', 'Created']}
-          pagination={userServers}
-          onPageSelect={setPage}
-        >
-          {userServers.data.map((server) => (
-            <ServerRow key={server.uuid} server={server} />
-          ))}
-        </Table>
-      )}
+      <Table columns={serverTableColumns} loading={loading} pagination={userServers} onPageSelect={setPage}>
+        {userServers.data.map((server) => (
+          <ServerRow key={server.uuid} server={server} />
+        ))}
+      </Table>
     </>
   );
 }

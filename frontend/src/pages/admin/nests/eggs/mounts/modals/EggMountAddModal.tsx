@@ -6,7 +6,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -26,7 +25,7 @@ export default function EggMountAddModal({
   const mounts = useSearchableResource<Mount>({ fetcher: (search) => getMounts(1, search) });
 
   const doAdd = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createEggMount(nest.uuid, egg.uuid, mount.uuid)
       .then(() => {
@@ -38,9 +37,7 @@ export default function EggMountAddModal({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

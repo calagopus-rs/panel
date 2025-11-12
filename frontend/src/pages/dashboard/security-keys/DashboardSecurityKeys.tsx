@@ -6,7 +6,6 @@ import getSecurityKeys from '@/api/me/security-keys/getSecurityKeys';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useUserStore } from '@/stores/user';
@@ -39,17 +38,18 @@ export default function DashboardSecurityKeys() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={['Name', 'Last Used', 'Created', '']} pagination={securityKeys} onPageSelect={setPage}>
-            {securityKeys.data.map((key) => (
-              <SshKeyRow key={key.uuid} securityKey={key} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Last Used', 'Created', '']}
+          loading={loading}
+          pagination={securityKeys}
+          onPageSelect={setPage}
+        >
+          {securityKeys.data.map((key) => (
+            <SshKeyRow key={key.uuid} securityKey={key} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

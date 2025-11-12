@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 
 export default function PasswordContainer() {
@@ -18,7 +17,7 @@ export default function PasswordContainer() {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updatePassword(currentPassword, newPassword)
       .then(() => {
@@ -31,7 +30,7 @@ export default function PasswordContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

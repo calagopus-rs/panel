@@ -6,7 +6,6 @@ import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -48,21 +47,18 @@ export default function AdminEggMounts({
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Id', 'Name', 'Source', 'Target', 'Added', '']}
-            pagination={eggMounts}
-            onPageSelect={setPage}
-          >
-            {eggMounts.data.map((mount) => (
-              <EggMountRow key={mount.mount.uuid} nest={contextNest} egg={contextEgg} mount={mount} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['ID', 'Name', 'Source', 'Target', 'Added', '']}
+          loading={loading}
+          pagination={eggMounts}
+          onPageSelect={setPage}
+        >
+          {eggMounts.data.map((mount) => (
+            <EggMountRow key={mount.mount.uuid} nest={contextNest} egg={contextEgg} mount={mount} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

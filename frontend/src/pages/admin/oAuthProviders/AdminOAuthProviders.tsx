@@ -9,7 +9,6 @@ import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
 import { httpErrorToHuman } from '@/api/axios';
 import { transformKeysToCamelCase } from '@/api/transformers';
 import Button from '@/elements/Button';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
@@ -97,15 +96,11 @@ function OAuthProvidersContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={oauthProviderTableColumns} pagination={oauthProviders} onPageSelect={setPage}>
-          {oauthProviders.data.map((oauthProvider) => (
-            <DatabaseHostRow key={oauthProvider.uuid} oauthProvider={oauthProvider} />
-          ))}
-        </Table>
-      )}
+      <Table columns={oauthProviderTableColumns} loading={loading} pagination={oauthProviders} onPageSelect={setPage}>
+        {oauthProviders.data.map((oauthProvider) => (
+          <DatabaseHostRow key={oauthProvider.uuid} oauthProvider={oauthProvider} />
+        ))}
+      </Table>
     </>
   );
 }

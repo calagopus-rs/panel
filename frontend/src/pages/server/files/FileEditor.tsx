@@ -6,7 +6,6 @@ import getFileContent from '@/api/server/files/getFileContent';
 import saveFileContent from '@/api/server/files/saveFileContent';
 import Button from '@/elements/Button';
 import Spinner from '@/elements/Spinner';
-import { load } from '@/lib/debounce';
 import { getLanguageFromExtension } from '@/lib/files';
 import NotFound from '@/pages/NotFound';
 import { useServerStore } from '@/stores/server';
@@ -39,7 +38,7 @@ export default function FileEditor() {
     if (!browsingDirectory || !fileName) return;
     if (params.action === 'new') return;
 
-    load(true, setLoading);
+    setLoading(true);
     getFileContent(server.uuid, join(browsingDirectory, fileName)).then((content) => {
       setContent(content);
       setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
@@ -55,7 +54,7 @@ export default function FileEditor() {
     if (!editorRef.current) return;
 
     const currentContent = editorRef.current.getValue();
-    load(true, setLoading);
+    setLoading(true);
 
     saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
       load(false, setLoading);

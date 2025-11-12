@@ -5,7 +5,6 @@ import updateServerVariables from '@/api/admin/servers/variables/updateServerVar
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import VariableContainer from '@/elements/VariableContainer';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
@@ -22,7 +21,7 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
   }, []);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateServerVariables(
       server.uuid,
       Object.entries(values).map(([envVariable, value]) => ({ envVariable, value })),
@@ -38,9 +37,7 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

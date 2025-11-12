@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -19,7 +18,7 @@ export default function AutokillContainer() {
   const [seconds, setSeconds] = useState(server.autoKill.seconds);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateAutokill(server.uuid, { enabled, seconds })
       .then(() => {
         addToast('Server auto-kill updated.', 'success');
@@ -27,9 +26,7 @@ export default function AutokillContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

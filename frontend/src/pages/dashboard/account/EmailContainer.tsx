@@ -5,7 +5,6 @@ import updateEmail from '@/api/me/account/updateEmail';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -18,7 +17,7 @@ export default function EmailContainer() {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateEmail(email, password)
       .then(() => {
@@ -30,7 +29,7 @@ export default function EmailContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -1,6 +1,5 @@
 import { DefaultMantineColor, Group, ModalProps } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, ReactNode, useState } from 'react';
-import { load } from '@/lib/debounce';
 import Button from '../Button';
 import Modal from './Modal';
 
@@ -24,9 +23,9 @@ export default function ConfirmationModal({
     const res = onConfirmed(e);
 
     if (res instanceof Promise) {
-      load(true, setLoading);
+      setLoading(true);
 
-      Promise.resolve(res).finally(() => load(false, setLoading));
+      Promise.resolve(res).finally(() => setLoading(false));
     }
   };
 

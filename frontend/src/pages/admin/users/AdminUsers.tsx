@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getUsers from '@/api/admin/users/getUsers';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import UserView from '@/pages/admin/users/UserView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -40,15 +39,11 @@ function UsersContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={userTableColumns} pagination={users} onPageSelect={setPage}>
-          {users.data.map((user) => (
-            <UserRow key={user.uuid} user={user} />
-          ))}
-        </Table>
-      )}
+      <Table columns={userTableColumns} loading={loading} pagination={users} onPageSelect={setPage}>
+        {users.data.map((user) => (
+          <UserRow key={user.uuid} user={user} />
+        ))}
+      </Table>
     </>
   );
 }

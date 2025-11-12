@@ -12,7 +12,7 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const nodeMountTableColumns = ['Id', 'Name', 'Source', 'Target', 'Added', ''];
+export const nodeMountTableColumns = ['ID', 'Name', 'Source', 'Target', 'Added', ''];
 
 export default function NodeMountRow({ node, mount }: { node: Node; mount: NodeMount }) {
   const { addToast } = useToast();

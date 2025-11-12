@@ -5,7 +5,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
 import { storageDriverTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -20,7 +19,7 @@ export default function StorageContainer() {
   const [settings, setSettings] = useState<AdminSettings['storageDriver']>(storageDriver);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateStorageSettings(transformKeysToSnakeCase({ ...settings } as StorageDriver))
       .then(() => {
         addToast('Storage settings updated.', 'success');
@@ -28,9 +27,7 @@ export default function StorageContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

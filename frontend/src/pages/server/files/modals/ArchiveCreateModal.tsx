@@ -8,7 +8,6 @@ import Code from '@/elements/Code';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { archiveFormatLabelMapping } from '@/lib/enums';
 import { generateArchiveName } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
@@ -27,7 +26,7 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
   const [loading, setLoading] = useState(false);
 
   const doArchive = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     compressFiles(server.uuid, {
       name: fileName
@@ -44,7 +43,7 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getRoleUsers from '@/api/admin/roles/users/getRoleUsers';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import UserRow, { userTableColumns } from '@/pages/admin/users/UserRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -21,15 +20,11 @@ export default function AdminRoleUsers({ role }: { role: Role }) {
         Role Users
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={userTableColumns} pagination={roleUsers} onPageSelect={setPage}>
-          {roleUsers.data.map((user) => (
-            <UserRow key={user.uuid} user={user} />
-          ))}
-        </Table>
-      )}
+      <Table columns={userTableColumns} loading={loading} pagination={roleUsers} onPageSelect={setPage}>
+        {roleUsers.data.map((user) => (
+          <UserRow key={user.uuid} user={user} />
+        ))}
+      </Table>
     </>
   );
 }

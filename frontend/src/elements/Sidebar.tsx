@@ -1,8 +1,8 @@
 import { faArrowRightFromBracket, faBars, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
-import { ReactNode, useEffect, useState } from 'react';
-import { NavLink } from 'react-router';
+import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
@@ -59,10 +59,18 @@ type LinkProps = {
 };
 
 function Link({ to, end, icon, name, title = name }: LinkProps) {
+  const navigate = useNavigate();
   const { settings } = useGlobalStore();
 
+  const doNavigate = (e: ReactMouseEvent) => {
+    e.preventDefault();
+    startTransition(() => {
+      navigate(to);
+    });
+  };
+
   return (
-    <NavLink to={to} end={end} className={'w-full'}>
+    <NavLink to={to} end={end} onClick={doNavigate} className={'w-full'}>
       {({ isActive }) => {
         if (isActive) {
           document.title = `${title} | ${settings.app.name}`;

@@ -9,7 +9,6 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { scheduleStepDefaultMapping, scheduleStepLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -69,7 +68,7 @@ export default function StepCreateOrUpdateModal({
   }, [propStep, opened]);
 
   const doCreateOrUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     if (propStep) {
       updateScheduleStep(server.uuid, schedule.uuid, propStep.uuid, step)
@@ -81,7 +80,7 @@ export default function StepCreateOrUpdateModal({
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     } else {
       createScheduleStep(server.uuid, schedule.uuid, step)
         .then(() => {
@@ -92,7 +91,7 @@ export default function StepCreateOrUpdateModal({
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     }
   };
 

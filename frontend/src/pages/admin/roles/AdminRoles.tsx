@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getRoles from '@/api/admin/roles/getRoles';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
 import RoleRow, { roleTableColumns } from '@/pages/admin/roles/RoleRow';
@@ -40,15 +39,11 @@ function RolesContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={roleTableColumns} pagination={roles} onPageSelect={setPage}>
-          {roles.data.map((role) => (
-            <RoleRow key={role.uuid} role={role} />
-          ))}
-        </Table>
-      )}
+      <Table columns={roleTableColumns} loading={loading} pagination={roles} onPageSelect={setPage}>
+        {roles.data.map((role) => (
+          <RoleRow key={role.uuid} role={role} />
+        ))}
+      </Table>
     </>
   );
 }

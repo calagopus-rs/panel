@@ -14,7 +14,6 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
@@ -59,7 +58,7 @@ export default function EggVariableContainer({
   }, [contextVariable]);
 
   const doCreateOrUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     if (contextVariable?.uuid) {
       updateEggVariable(contextNest.uuid, contextEgg.uuid, contextVariable.uuid, variable)

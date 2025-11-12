@@ -6,7 +6,6 @@ import getApiKeys from '@/api/me/api-keys/getApiKeys';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -39,21 +38,18 @@ export default function DashboardApiKeys() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Name', 'Key', 'User / Server / Admin Permissions', 'Last Used', 'Created', '']}
-            pagination={apiKeys}
-            onPageSelect={setPage}
-          >
-            {apiKeys.data.map((key) => (
-              <ApiKeyRow key={key.uuid} apiKey={key} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Key', 'User / Server / Admin Permissions', 'Last Used', 'Created', '']}
+          loading={loading}
+          pagination={apiKeys}
+          onPageSelect={setPage}
+        >
+          {apiKeys.data.map((key) => (
+            <ApiKeyRow key={key.uuid} apiKey={key} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

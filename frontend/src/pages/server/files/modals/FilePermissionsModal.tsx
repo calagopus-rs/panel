@@ -8,7 +8,6 @@ import Card from '@/elements/Card';
 import Code from '@/elements/Code';
 import Checkbox from '@/elements/input/Checkbox';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { permissionStringToNumber } from '@/lib/files';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -111,7 +110,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   const doChmod = () => {
     const newPermissions = getOctalValue();
 
-    load(true, setLoading);
+    setLoading(true);
 
     chmodFiles({
       uuid: server.uuid,
@@ -125,7 +124,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

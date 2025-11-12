@@ -13,13 +13,12 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import Modal from '@/elements/modals/Modal';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
-import { load } from '@/lib/debounce';
 import { formatAllocation } from '@/lib/server';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const serverAllocationTableColumns = ['', 'Id', 'IP', 'IP Alias', 'Port', 'Notes', 'Created'];
+export const serverAllocationTableColumns = ['', 'ID', 'IP', 'IP Alias', 'Port', 'Notes', 'Created'];
 
 export default function ServerAllocationRow({
   server,
@@ -36,7 +35,7 @@ export default function ServerAllocationRow({
   const [allocationNote, setAllocationNote] = useState(allocation.notes ?? '');
 
   const doEdit = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateServerAllocation(server.uuid, allocation.uuid, { notes: allocationNote })
       .then(() => {
@@ -50,9 +49,7 @@ export default function ServerAllocationRow({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   const doSetPrimary = () => {

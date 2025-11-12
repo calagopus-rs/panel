@@ -5,7 +5,6 @@ import deleteFiles from '@/api/server/files/deleteFiles';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -20,7 +19,7 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
   const [loading, setLoading] = useState(false);
 
   const doDelete = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     deleteFiles(
       server.uuid,
@@ -39,7 +38,7 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
   return (
     <Modal title={'Delete File'} onClose={onClose} opened={opened}>

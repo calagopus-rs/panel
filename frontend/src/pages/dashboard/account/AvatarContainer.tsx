@@ -7,7 +7,6 @@ import updateAvatar from '@/api/me/account/updateAvatar';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import FileInput from '@/elements/input/FileInput';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -21,7 +20,7 @@ export default function AvatarContainer() {
   const editor = useRef<AvatarEditor>(null);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     try {
       editor.current?.getImageScaledToCanvas().toBlob((blob) => {
@@ -34,7 +33,7 @@ export default function AvatarContainer() {
           .catch((msg) => {
             addToast(httpErrorToHuman(msg), 'error');
           })
-          .finally(() => load(false, setLoading));
+          .finally(() => setLoading(false));
       });
     } catch (err) {
       load(false, setLoading);

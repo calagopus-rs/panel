@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 
@@ -19,7 +18,7 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
   const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createSshKey(name, pubKey)
       .then((key) => {
@@ -31,9 +30,7 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -1,11 +1,11 @@
 import { Title } from '@mantine/core';
 import { useState } from 'react';
+import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
-import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes';
 
 export default function AdminMountNodes({ mount }: { mount?: Mount }) {
   const [mountNodes, setMountNodes] = useState<ResponseMeta<AndCreated<{ node: Node }>>>(getEmptyPaginationSet());
@@ -21,15 +21,11 @@ export default function AdminMountNodes({ mount }: { mount?: Mount }) {
         Mount Nodes
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={nodeTableColumns} pagination={mountNodes} onPageSelect={setPage}>
-          {mountNodes.data.map((nodeMount) => (
-            <NodeRow key={nodeMount.node.uuid} node={nodeMount.node} />
-          ))}
-        </Table>
-      )}
+      <Table columns={nodeTableColumns} loading={loading} pagination={mountNodes} onPageSelect={setPage}>
+        {mountNodes.data.map((nodeMount) => (
+          <NodeRow key={nodeMount.node.uuid} node={nodeMount.node} />
+        ))}
+      </Table>
     </>
   );
 }

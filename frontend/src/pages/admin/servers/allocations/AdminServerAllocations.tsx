@@ -5,7 +5,6 @@ import { useState } from 'react';
 import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -35,17 +34,18 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={serverAllocationTableColumns} pagination={serverAllocations} onPageSelect={setPage}>
-            {serverAllocations.data.map((allocation) => (
-              <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={serverAllocationTableColumns}
+          loading={loading}
+          pagination={serverAllocations}
+          onPageSelect={setPage}
+        >
+          {serverAllocations.data.map((allocation) => (
+            <ServerAllocationRow key={allocation.uuid} server={server} allocation={allocation} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

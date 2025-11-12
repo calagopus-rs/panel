@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getLocations from '@/api/admin/locations/getLocations';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -40,15 +39,11 @@ function LocationsContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={locationTableColumns} pagination={locations} onPageSelect={setPage}>
-          {locations.data.map((location) => (
-            <LocationRow key={location.uuid} location={location} />
-          ))}
-        </Table>
-      )}
+      <Table columns={locationTableColumns} loading={loading} pagination={locations} onPageSelect={setPage}>
+        {locations.data.map((location) => (
+          <LocationRow key={location.uuid} location={location} />
+        ))}
+      </Table>
     </>
   );
 }

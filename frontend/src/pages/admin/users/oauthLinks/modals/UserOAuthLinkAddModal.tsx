@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -32,7 +31,7 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
   }, [opened]);
 
   const doAdd = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createUserOAuthLink(user.uuid, selectedOAuthProvider.uuid, identifier)
       .then((oauthLink) => {
@@ -44,9 +43,7 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

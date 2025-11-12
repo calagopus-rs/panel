@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import updateServerGroup from '@/api/me/servers/groups/updateServerGroup';
@@ -21,7 +20,7 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
   const [loading, setLoading] = useState(false);
 
   const doAdd = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateServerGroup(selectedServerGroup.uuid, { serverOrder: [...selectedServerGroup.serverOrder, server.uuid] })
       .then(() => {
@@ -33,7 +32,7 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

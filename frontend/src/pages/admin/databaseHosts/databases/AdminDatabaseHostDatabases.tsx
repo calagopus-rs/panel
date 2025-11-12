@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import DatabaseRow, { databaseTableColumns } from './DatabaseRow';
@@ -23,15 +22,11 @@ export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseH
         Database Host Databases
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={databaseTableColumns} pagination={databaseHostDatabases} onPageSelect={setPage}>
-          {databaseHostDatabases.data.map((database) => (
-            <DatabaseRow key={database.uuid} database={database} />
-          ))}
-        </Table>
-      )}
+      <Table columns={databaseTableColumns} loading={loading} pagination={databaseHostDatabases} onPageSelect={setPage}>
+        {databaseHostDatabases.data.map((database) => (
+          <DatabaseRow key={database.uuid} database={database} />
+        ))}
+      </Table>
     </>
   );
 }

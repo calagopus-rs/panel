@@ -26,7 +26,6 @@ import RingProgress from '@/elements/RingProgress';
 import SelectionArea from '@/elements/SelectionArea';
 import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import FileActionBar from './FileActionBar';
@@ -96,7 +95,7 @@ export default function ServerFiles() {
   };
 
   const loadDirectoryData = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     loadDirectory(server.uuid, browsingDirectory, page)
       .then((data) => {
@@ -105,7 +104,7 @@ export default function ServerFiles() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   const doCancelOperation = (uuid: string) => {
@@ -464,7 +463,7 @@ export default function ServerFiles() {
 
   useEffect(() => {
     if (browsingDirectory?.startsWith('/.backups/') && !browsingBackup && !loading) {
-      load(true, setLoading);
+      setLoading(true);
 
       let backupUuid = browsingDirectory.slice('/.backups/'.length);
       if (backupUuid.includes('/')) {
@@ -478,7 +477,7 @@ export default function ServerFiles() {
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     } else if (!browsingDirectory?.startsWith('/.backups/') && browsingBackup) {
       setBrowsingBackup(null);
     }

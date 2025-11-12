@@ -5,7 +5,6 @@ import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 
@@ -21,7 +20,7 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateSshKey(sshKey.uuid, name)
       .then(() => {
@@ -33,7 +32,7 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

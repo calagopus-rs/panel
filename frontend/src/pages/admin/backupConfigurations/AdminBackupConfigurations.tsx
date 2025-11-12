@@ -4,7 +4,6 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import Button from '@/elements/Button';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
 import BackupConfigurationRow, {
@@ -41,15 +40,16 @@ function BackupConfigurationsContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={backupConfigurationTableColumns} pagination={backupConfigurations} onPageSelect={setPage}>
-          {backupConfigurations.data.map((bc) => (
-            <BackupConfigurationRow key={bc.uuid} backupConfiguration={bc} />
-          ))}
-        </Table>
-      )}
+      <Table
+        columns={backupConfigurationTableColumns}
+        loading={loading}
+        pagination={backupConfigurations}
+        onPageSelect={setPage}
+      >
+        {backupConfigurations.data.map((bc) => (
+          <BackupConfigurationRow key={bc.uuid} backupConfiguration={bc} />
+        ))}
+      </Table>
     </>
   );
 }

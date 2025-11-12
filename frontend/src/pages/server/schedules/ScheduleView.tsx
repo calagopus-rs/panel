@@ -29,7 +29,6 @@ import Code from '@/elements/Code';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import Spinner from '@/elements/Spinner';
 import Tooltip from '@/elements/Tooltip';
-import { load } from '@/lib/debounce';
 import {
   scheduleComparatorLabelMapping,
   scheduleComparatorOperatorMapping,
@@ -404,13 +403,13 @@ export default function ScheduleView() {
 
   const doTriggerSchedule = (skipCondition: boolean) => {
     if (params.id) {
-      load(true, setLoading);
+      setLoading(true);
 
       triggerSchedule(server.uuid, params.id, skipCondition)
         .then(() => {
           addToast('Schedule triggered.', 'success');
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     }
   };
 

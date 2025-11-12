@@ -2,7 +2,6 @@ import { Group, Title } from '@mantine/core';
 import getSessions from '@/api/me/sessions/getSessions';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useUserStore } from '@/stores/user';
@@ -27,21 +26,18 @@ export default function DashboardSessions() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
-            pagination={sessions}
-            onPageSelect={setPage}
-          >
-            {sessions.data.map((session) => (
-              <SessionRow key={session.uuid} session={session} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['IP', 'This Device?', 'User Agent', 'Last Used', '']}
+          loading={loading}
+          pagination={sessions}
+          onPageSelect={setPage}
+        >
+          {sessions.data.map((session) => (
+            <SessionRow key={session.uuid} session={session} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

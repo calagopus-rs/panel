@@ -8,7 +8,6 @@ import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import PermissionSelector from '@/elements/PermissionSelector';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
@@ -52,7 +51,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   }, []);
 
   const doCreateOrUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     if (contextApiKey) {
       updateApiKey(contextApiKey.uuid, apiKey)

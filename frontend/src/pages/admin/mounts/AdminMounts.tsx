@@ -4,7 +4,6 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getMounts from '@/api/admin/mounts/getMounts';
 import Button from '@/elements/Button';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import MountView from '@/pages/admin/mounts/MountView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -39,15 +38,11 @@ function MountsContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={mountTableColumns} pagination={mounts} onPageSelect={setPage}>
-          {mounts.data.map((m) => (
-            <MountRow key={m.uuid} mount={m} />
-          ))}
-        </Table>
-      )}
+      <Table columns={mountTableColumns} loading={loading} pagination={mounts} onPageSelect={setPage}>
+        {mounts.data.map((m) => (
+          <MountRow key={m.uuid} mount={m} />
+        ))}
+      </Table>
     </>
   );
 }

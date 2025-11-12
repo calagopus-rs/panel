@@ -5,7 +5,6 @@ import disableTwoFactor from '@/api/me/account/disableTwoFactor';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -28,7 +27,7 @@ export default function TwoFactorDisableButton() {
   }, [open]);
 
   const doDisable = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     disableTwoFactor(code, password)
       .then(() => {
@@ -39,9 +38,7 @@ export default function TwoFactorDisableButton() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

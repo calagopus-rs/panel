@@ -4,7 +4,6 @@ import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings'
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { isIP } from '@/lib/ip';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -17,7 +16,7 @@ export default function WebauthnContainer() {
   const [webauthnSettings, setWebauthnSettings] = useState<AdminSettings['webauthn']>(webauthn);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateWebauthnSettings(webauthnSettings)
       .then(() => {
         addToast('Webauthn settings updated.', 'success');
@@ -25,9 +24,7 @@ export default function WebauthnContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   const doAutofill = () => {

@@ -13,7 +13,6 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
@@ -64,7 +63,7 @@ export default function DatabaseHostCreateOrUpdate({
   }, [contextDatabaseHost]);
 
   const doTest = () => {
-    load(true, setLoading);
+    setLoading(true);
     testDatabaseHost(contextDatabaseHost.uuid)
       .then(() => {
         addToast('Test successfully completed', 'success');
@@ -72,9 +71,7 @@ export default function DatabaseHostCreateOrUpdate({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

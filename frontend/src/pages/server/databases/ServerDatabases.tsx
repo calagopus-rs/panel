@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useServerStore } from '@/stores/server';
@@ -53,21 +52,18 @@ export default function ServerDatabases() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Name', 'Type', 'Address', 'Username', 'Size', 'Locked?', '']}
-            pagination={databases}
-            onPageSelect={setPage}
-          >
-            {databases.data.map((database) => (
-              <DatabaseRow database={database} key={database.uuid} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Type', 'Address', 'Username', 'Size', 'Locked?', '']}
+          loading={loading}
+          pagination={databases}
+          onPageSelect={setPage}
+        >
+          {databases.data.map((database) => (
+            <DatabaseRow database={database} key={database.uuid} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

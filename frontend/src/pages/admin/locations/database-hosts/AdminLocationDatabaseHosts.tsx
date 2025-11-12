@@ -41,21 +41,22 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={locationDatabaseHostTableColumns} pagination={locationDatabaseHosts} onPageSelect={setPage}>
-            {locationDatabaseHosts.data.map((databaseHost) => (
-              <LocationDatabaseHostRow
-                key={databaseHost.databaseHost.uuid}
-                location={location}
-                databaseHost={databaseHost}
-              />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={locationDatabaseHostTableColumns}
+          loading={loading}
+          pagination={locationDatabaseHosts}
+          onPageSelect={setPage}
+        >
+          {locationDatabaseHosts.data.map((databaseHost) => (
+            <LocationDatabaseHostRow
+              key={databaseHost.databaseHost.uuid}
+              location={location}
+              databaseHost={databaseHost}
+            />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

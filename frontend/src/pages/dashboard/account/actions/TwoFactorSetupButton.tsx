@@ -11,7 +11,6 @@ import NumberInput from '@/elements/input/NumberInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import Spinner from '@/elements/Spinner';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -51,7 +50,7 @@ export default function TwoFactorSetupButton() {
   }, [open]);
 
   const doEnable = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     enableTwoFactor(code, password)
       .then(({ recoveryCodes }) => {
@@ -62,9 +61,7 @@ export default function TwoFactorSetupButton() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

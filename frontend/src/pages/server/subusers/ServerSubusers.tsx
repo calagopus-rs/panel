@@ -68,21 +68,18 @@ export default function ServerSubusers() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
-            pagination={subusers}
-            onPageSelect={setPage}
-          >
-            {subusers.data.map((su) => (
-              <SubuserRow subuser={su} key={su.user.uuid} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
+          loading={loading}
+          pagination={subusers}
+          onPageSelect={setPage}
+        >
+          {subusers.data.map((su) => (
+            <SubuserRow subuser={su} key={su.user.uuid} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

@@ -17,7 +17,6 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
@@ -72,7 +71,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
   });
 
   const doResetToken = () => {
-    load(true, setLoading);
+    setLoading(true);
     resetNodeToken(contextNode.uuid)
       .then(({ tokenId, token }) => {
         addToast('Node token reset.', 'success');
@@ -82,9 +81,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

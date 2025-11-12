@@ -4,7 +4,6 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import Button from '@/elements/Button';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -39,15 +38,11 @@ function DatabaseHostsContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={databaseHostTableColumns} pagination={databaseHosts} onPageSelect={setPage}>
-          {databaseHosts.data.map((dh) => (
-            <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
-          ))}
-        </Table>
-      )}
+      <Table columns={databaseHostTableColumns} loading={loading} pagination={databaseHosts} onPageSelect={setPage}>
+        {databaseHosts.data.map((dh) => (
+          <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
+        ))}
+      </Table>
     </>
   );
 }

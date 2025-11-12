@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { sshKeyProviderLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
@@ -20,7 +19,7 @@ export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
   const [loading, setLoading] = useState(false);
 
   const doImport = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     importSshKeys(provider, username)
       .then((keys) => {
@@ -34,9 +33,7 @@ export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

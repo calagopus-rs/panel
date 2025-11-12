@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationServers from '@/api/admin/backup-configurations/servers/getBackupConfigurationServers';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import ServerRow, { serverTableColumns } from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -27,15 +26,16 @@ export default function AdminBackupConfigurationServers({
         Backup Configuration Servers
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={serverTableColumns} pagination={backupConfigurationServers} onPageSelect={setPage}>
-          {backupConfigurationServers.data.map((server) => (
-            <ServerRow key={server.uuid} server={server} />
-          ))}
-        </Table>
-      )}
+      <Table
+        columns={serverTableColumns}
+        loading={loading}
+        pagination={backupConfigurationServers}
+        onPageSelect={setPage}
+      >
+        {backupConfigurationServers.data.map((server) => (
+          <ServerRow key={server.uuid} server={server} />
+        ))}
+      </Table>
     </>
   );
 }

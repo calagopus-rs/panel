@@ -11,7 +11,6 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import PermissionSelector from '@/elements/PermissionSelector';
-import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useGlobalStore } from '@/stores/global';
 
@@ -48,7 +47,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
   }, [contextRole]);
 
   useEffect(() => {
-    load(true, setLoading);
+    setLoading(true);
 
     getPermissions().then((res) => {
       setAvailablePermissions(res);

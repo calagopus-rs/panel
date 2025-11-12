@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -19,7 +18,7 @@ export default function RenameContainer() {
   const [description, setDescription] = useState(server.description || '');
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     renameServer(server.uuid, { name, description })
       .then(() => {
         addToast('Server renamed.', 'success');
@@ -28,9 +27,7 @@ export default function RenameContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

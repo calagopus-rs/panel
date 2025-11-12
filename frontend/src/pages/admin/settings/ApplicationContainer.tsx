@@ -5,7 +5,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
@@ -17,7 +16,7 @@ export default function ApplicationContainer() {
   const [appSettings, setAppSettings] = useState<AdminSettings['app']>(app);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateApplicationSettings(appSettings)
       .then(() => {
         addToast('Application settings updated.', 'success');
@@ -25,9 +24,7 @@ export default function ApplicationContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

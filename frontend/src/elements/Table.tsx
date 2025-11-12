@@ -1,5 +1,6 @@
 import { Center, Group, Pagination as MantinePagination, Table, TableTdProps, TableTrProps, Text } from '@mantine/core';
 import { forwardRef, ReactNode } from 'react';
+import Spinner from '@/elements/Spinner';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
@@ -91,13 +92,14 @@ export const NoItems = () => {
 
 interface TableProps {
   columns: string[];
+  loading?: boolean;
   pagination?: ResponseMeta<unknown>;
   onPageSelect?: (page: number) => void;
   allowSelect?: boolean;
   children: ReactNode;
 }
 
-export default ({ columns, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {
+export default ({ columns, loading, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {
   return (
     <Table
       stickyHeader
@@ -111,7 +113,13 @@ export default ({ columns, pagination, onPageSelect, allowSelect = true, childre
         ))}
       </TableHead>
       <Table.Tbody>
-        {pagination?.total === 0 ? (
+        {loading ? (
+          <Table.Tr>
+            <Table.Td colSpan={columns.length}>
+              <Spinner.Centered />
+            </Table.Td>
+          </Table.Tr>
+        ) : pagination?.total === 0 ? (
           <Table.Tr>
             <Table.Td colSpan={columns.length}>
               <NoItems />

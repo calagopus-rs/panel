@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -64,7 +63,7 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
   };
 
   const doCopy = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     copyFile(server.uuid, join(browsingDirectory, file.name), newFileName || null)
       .then((entry) => {
@@ -75,7 +74,7 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

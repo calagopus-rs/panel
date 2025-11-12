@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -23,7 +22,7 @@ export default function AllocationEditModal({ allocation, opened, onClose }: Pro
   const [loading, setLoading] = useState(false);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     updateAllocation(server.uuid, allocation.uuid, { notes, primary })
       .then(() => {
@@ -43,7 +42,7 @@ export default function AllocationEditModal({ allocation, opened, onClose }: Pro
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

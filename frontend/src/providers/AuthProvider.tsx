@@ -4,7 +4,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import getMe from '@/api/me/getMe';
 import logout from '@/api/me/logout';
 import Spinner from '@/elements/Spinner';
-import { load } from '@/lib/debounce';
 import { useToast } from './ToastProvider';
 
 interface AuthContextType {

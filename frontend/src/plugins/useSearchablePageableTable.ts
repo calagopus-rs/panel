@@ -54,7 +54,7 @@ export function useSearchablePaginatedTable<T>({
         .catch((err) => {
           addToast(httpErrorToHuman(err), 'error');
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     },
     [addToast, setStoreData, ...deps],
   );

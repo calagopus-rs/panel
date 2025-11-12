@@ -5,7 +5,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
-import { load } from '@/lib/debounce';
 import { captchaProviderTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -20,7 +19,8 @@ export default function CaptchaContainer() {
   const [settings, setSettings] = useState<AdminSettings['captchaProvider']>(captchaProvider);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
+
     updateCaptchaSettings(transformKeysToSnakeCase({ ...settings } as CaptchaProvider))
       .then(() => {
         addToast('Captcha settings updated.', 'success');
@@ -28,9 +28,7 @@ export default function CaptchaContainer() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

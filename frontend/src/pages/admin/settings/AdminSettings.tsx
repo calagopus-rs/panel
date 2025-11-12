@@ -6,7 +6,6 @@ import getSettings from '@/api/admin/settings/getSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Spinner from '@/elements/Spinner';
 import SubNavigation from '@/elements/SubNavigation';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import ApplicationContainer from './ApplicationContainer';
@@ -28,7 +27,7 @@ export default function AdminSettings() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   }, []);
 
   return (

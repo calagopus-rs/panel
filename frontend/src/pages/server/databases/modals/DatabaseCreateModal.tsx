@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -26,7 +25,7 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   }, []);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createDatabase(server.uuid, { databaseHostUuid: host, name })
       .then((database) => {
@@ -37,7 +36,7 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

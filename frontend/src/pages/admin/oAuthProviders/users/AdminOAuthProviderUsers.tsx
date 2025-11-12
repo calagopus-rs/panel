@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
@@ -23,15 +22,16 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
         OAuth Provider Users
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={userOAuthLinkTableColumns} pagination={oauthProviderUsers} onPageSelect={setPage}>
-          {oauthProviderUsers.data.map((userOAuthLink) => (
-            <UserOAuthLinkRow key={userOAuthLink.uuid} userOAuthLink={userOAuthLink} />
-          ))}
-        </Table>
-      )}
+      <Table
+        columns={userOAuthLinkTableColumns}
+        loading={loading}
+        pagination={oauthProviderUsers}
+        onPageSelect={setPage}
+      >
+        {oauthProviderUsers.data.map((userOAuthLink) => (
+          <UserOAuthLinkRow key={userOAuthLink.uuid} userOAuthLink={userOAuthLink} />
+        ))}
+      </Table>
     </>
   );
 }

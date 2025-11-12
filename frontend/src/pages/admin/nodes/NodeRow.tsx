@@ -9,7 +9,7 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const nodeTableColumns = ['', 'Id', 'Name', 'Location', 'URL', 'Created'];
+export const nodeTableColumns = ['', 'ID', 'Name', 'Location', 'URL', 'Created'];
 
 export default function NodeRow({ node }: { node: Node }) {
   const [version, setVersion] = useState<string | null>(null);

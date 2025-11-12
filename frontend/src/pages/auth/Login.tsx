@@ -15,7 +15,6 @@ import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import PinInput from '@/elements/input/PinInput';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import AuthWrapper from './AuthWrapper';
@@ -51,7 +50,7 @@ export default function Login() {
       return;
     }
 
-    load(true, setLoading);
+    setLoading(true);
     setError('');
 
     getSecurityKeys(username)
@@ -67,13 +66,11 @@ export default function Login() {
       .catch((err) => {
         setError(err.message);
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   const doPasskeyAuth = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     if (!window.navigator.credentials) {
       setError('Your browser does not support passkeys.');
@@ -124,13 +121,11 @@ export default function Login() {
 
         setError(message);
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   const doSubmitPassword = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     captchaRef.current?.getToken().then((token) => {
       login({ user: username, password, captcha: token })
@@ -146,12 +141,12 @@ export default function Login() {
         .catch((msg) => {
           setError(httpErrorToHuman(msg));
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     });
   };
 
   const doSubmitTotp = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     checkpointLogin({ code: totpCode, confirmation_token: twoFactorToken })
       .then((response) => {
@@ -160,7 +155,7 @@ export default function Login() {
       .catch((msg) => {
         setError(httpErrorToHuman(msg));
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

@@ -19,7 +19,6 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { load } from '@/lib/debounce';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -89,7 +88,8 @@ export default function EggCreateOrUpdate({
   }, [contextEgg]);
 
   const doExport = (format: 'json' | 'yaml') => {
-    load(true, setLoading);
+    setLoading(true);
+
     exportEgg(contextNest?.uuid, contextEgg.uuid)
       .then((data) => {
         addToast('Egg exported.', 'success');
@@ -121,7 +121,7 @@ export default function EggCreateOrUpdate({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

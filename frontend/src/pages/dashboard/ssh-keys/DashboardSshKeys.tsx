@@ -6,7 +6,6 @@ import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useUserStore } from '@/stores/user';
@@ -48,17 +47,18 @@ export default function DashboardSshKeys() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={['Name', 'Fingerprint', 'Created', '']} pagination={sshKeys} onPageSelect={setPage}>
-            {sshKeys.data.map((key) => (
-              <SshKeyRow key={key.uuid} sshKey={key} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Fingerprint', 'Created', '']}
+          loading={loading}
+          pagination={sshKeys}
+          onPageSelect={setPage}
+        >
+          {sshKeys.data.map((key) => (
+            <SshKeyRow key={key.uuid} sshKey={key} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

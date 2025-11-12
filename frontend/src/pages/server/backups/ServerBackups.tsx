@@ -7,7 +7,6 @@ import Button from '@/elements/Button';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useServerStore } from '@/stores/server';
@@ -53,21 +52,18 @@ export default function ServerBackups() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Name', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
-            pagination={backups}
-            onPageSelect={setPage}
-          >
-            {backups.data.map((backup) => (
-              <BackupRow backup={backup} key={backup.uuid} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
+          loading={loading}
+          pagination={backups}
+          onPageSelect={setPage}
+        >
+          {backups.data.map((backup) => (
+            <BackupRow backup={backup} key={backup.uuid} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

@@ -4,7 +4,6 @@ import getUserActivity from '@/api/admin/users/getUserActivity';
 import { getEmptyPaginationSet } from '@/api/axios';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
 import Code from '@/elements/Code';
-import Spinner from '@/elements/Spinner';
 import Table, { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
@@ -24,35 +23,36 @@ export default function AdminUserActivity({ user }: { user: User }) {
         User Activity
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={['Actor', 'Event', 'IP', 'When', '']} pagination={userActivity} onPageSelect={setPage}>
-          {userActivity.data.map((activity) => (
-            <TableRow key={activity.created.toString()}>
-              <TableData>{activity.isApi ? 'API' : 'Web'}</TableData>
+      <Table
+        columns={['Actor', 'Event', 'IP', 'When', '']}
+        loading={loading}
+        pagination={userActivity}
+        onPageSelect={setPage}
+      >
+        {userActivity.data.map((activity) => (
+          <TableRow key={activity.created.toString()}>
+            <TableData>{activity.isApi ? 'API' : 'Web'}</TableData>
 
-              <TableData>
-                <Code>{activity.event}</Code>
-              </TableData>
+            <TableData>
+              <Code>{activity.event}</Code>
+            </TableData>
 
-              <TableData>
-                <Code>{activity.ip}</Code>
-              </TableData>
+            <TableData>
+              <Code>{activity.ip}</Code>
+            </TableData>
 
-              <TableData>
-                <Tooltip label={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
-              </TableData>
+            <TableData>
+              <Tooltip label={formatDateTime(activity.created)}>{formatTimestamp(activity.created)}</Tooltip>
+            </TableData>
 
-              <TableData>
-                <Group gap={4} justify={'right'} wrap={'nowrap'}>
-                  {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
-                </Group>
-              </TableData>
-            </TableRow>
-          ))}
-        </Table>
-      )}
+            <TableData>
+              <Group gap={4} justify={'right'} wrap={'nowrap'}>
+                {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
+              </Group>
+            </TableData>
+          </TableRow>
+        ))}
+      </Table>
     </>
   );
 }

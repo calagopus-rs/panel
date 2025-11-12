@@ -8,7 +8,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Captcha from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import AuthWrapper from './AuthWrapper';
 
 export default function ForgotPassword() {
@@ -22,7 +21,7 @@ export default function ForgotPassword() {
   const captchaRef = useRef(null);
 
   const submit = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     captchaRef.current?.getToken().then((token) => {
       forgotPassword(email, token)
@@ -33,7 +32,7 @@ export default function ForgotPassword() {
         .catch((msg) => {
           setError(httpErrorToHuman(msg));
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     });
   };
 

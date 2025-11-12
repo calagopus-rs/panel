@@ -7,7 +7,6 @@ import postSecurityKeyChallenge from '@/api/me/security-keys/postSecurityKeyChal
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 
@@ -19,7 +18,7 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
   const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createSecurityKey(name)
       .then(([key, options]) => {

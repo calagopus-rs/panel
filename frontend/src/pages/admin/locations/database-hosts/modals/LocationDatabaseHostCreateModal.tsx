@@ -6,7 +6,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
@@ -28,7 +27,7 @@ export default function LocationDatabaseHostCreateModal({
   });
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createLocationDatabaseHost(location.uuid, databaseHost.uuid)
       .then(() => {
@@ -40,9 +39,7 @@ export default function LocationDatabaseHostCreateModal({
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (

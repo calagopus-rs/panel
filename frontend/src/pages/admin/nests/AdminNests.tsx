@@ -5,7 +5,6 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getNests from '@/api/admin/nests/getNests';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -40,15 +39,11 @@ function NestsContainer() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={nestTableColumns} pagination={nests} onPageSelect={setPage}>
-          {nests.data.map((nest) => (
-            <NestRow key={nest.uuid} nest={nest} />
-          ))}
-        </Table>
-      )}
+      <Table columns={nestTableColumns} loading={loading} pagination={nests} onPageSelect={setPage}>
+        {nests.data.map((nest) => (
+          <NestRow key={nest.uuid} nest={nest} />
+        ))}
+      </Table>
     </>
   );
 }

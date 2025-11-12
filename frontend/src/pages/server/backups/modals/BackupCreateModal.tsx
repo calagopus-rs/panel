@@ -6,7 +6,6 @@ import Button from '@/elements/Button';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { generateBackupName } from '@/lib/server';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
@@ -20,7 +19,7 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
   const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createBackup(server.uuid, { name, ignoredFiles })
       .then((backup) => {
@@ -31,7 +30,7 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

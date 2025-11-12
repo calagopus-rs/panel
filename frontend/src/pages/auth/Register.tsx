@@ -10,7 +10,6 @@ import Captcha from '@/elements/Captcha';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthWrapper from './AuthWrapper';
 
@@ -28,7 +27,7 @@ export default function Register() {
   const captchaRef = useRef(null);
 
   const submit = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     captchaRef.current?.getToken().then((token) => {
       register({ username, email, name_first: nameFirst, name_last: nameLast, password, captcha: token })
@@ -38,7 +37,7 @@ export default function Register() {
         .catch((msg) => {
           setError(httpErrorToHuman(msg));
         })
-        .finally(() => load(false, setLoading));
+        .finally(() => setLoading(false));
     });
   };
 

@@ -105,21 +105,18 @@ export default function ServerSchedules() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Name', 'Last Run', 'Last Failure', 'Status', 'Created', '']}
-            pagination={schedules}
-            onPageSelect={setPage}
-          >
-            {schedules.data.map((schedule) => (
-              <ScheduleRow key={schedule.uuid} schedule={schedule} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Name', 'Last Run', 'Last Failure', 'Status', 'Created', '']}
+          loading={loading}
+          pagination={schedules}
+          onPageSelect={setPage}
+        >
+          {schedules.data.map((schedule) => (
+            <ScheduleRow key={schedule.uuid} schedule={schedule} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

@@ -6,7 +6,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import MultiSelect from '@/elements/input/MultiSelect';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { formatAllocation } from '@/lib/server';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
@@ -31,7 +30,7 @@ export default function ServerAllocationAddModal({ server, opened, onClose }: Mo
   }, [opened]);
 
   const doAdd = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     let didError = false;
     for (const allocationUuid of selectedAllocationUuids) {

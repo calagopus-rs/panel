@@ -6,7 +6,6 @@ import { axiosInstance, httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Spinner from '@/elements/Spinner';
-import { load } from '@/lib/debounce';
 import { bytesToString } from '@/lib/size';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -46,7 +45,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
   }, [selectedLog]);
 
   const doDownload = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     axiosInstance
       .get(`${new URL(node.publicUrl ?? node.url).origin}/api/system/logs/${selectedLog.name}`, {
@@ -69,11 +68,11 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   const doView = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     axiosInstance
       .get(`${new URL(node.publicUrl ?? node.url).origin}/api/system/logs/${selectedLog.name}`, {
@@ -88,7 +87,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

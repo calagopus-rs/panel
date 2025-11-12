@@ -11,7 +11,6 @@ import Card from '@/elements/Card';
 import Select from '@/elements/input/Select';
 import TextArea from '@/elements/input/TextArea';
 import VariableContainer from '@/elements/VariableContainer';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
@@ -66,7 +65,7 @@ export default function ServerStartup() {
   }, [dockerImage]);
 
   const doUpdate = () => {
-    load(true, setLoading);
+    setLoading(true);
     updateVariables(
       server.uuid,
       Object.entries(values).map(([envVariable, value]) => ({ envVariable, value })),
@@ -82,9 +81,7 @@ export default function ServerStartup() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => {

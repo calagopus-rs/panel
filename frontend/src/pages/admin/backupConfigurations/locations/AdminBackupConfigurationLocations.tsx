@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import LocationRow, { locationTableColumns } from '@/pages/admin/locations/LocationRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -27,15 +26,16 @@ export default function AdminBackupConfigurationLocations({
         Backup Configuration Locations
       </Title>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={locationTableColumns} pagination={backupConfigurationLocations} onPageSelect={setPage}>
-          {backupConfigurationLocations.data.map((location) => (
-            <LocationRow key={location.uuid} location={location} />
-          ))}
-        </Table>
-      )}
+      <Table
+        columns={locationTableColumns}
+        loading={loading}
+        pagination={backupConfigurationLocations}
+        onPageSelect={setPage}
+      >
+        {backupConfigurationLocations.data.map((location) => (
+          <LocationRow key={location.uuid} location={location} />
+        ))}
+      </Table>
     </>
   );
 }

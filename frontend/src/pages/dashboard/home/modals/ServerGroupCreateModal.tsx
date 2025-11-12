@@ -4,7 +4,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 import createServerGroup from '@/api/me/servers/groups/createServerGroup';
@@ -17,7 +16,7 @@ export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) 
   const [loading, setLoading] = useState(false);
 
   const doCreate = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     createServerGroup(name, [])
       .then((serverGroup) => {
@@ -27,7 +26,7 @@ export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) 
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

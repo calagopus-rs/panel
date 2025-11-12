@@ -13,7 +13,7 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const locationDatabaseHostTableColumns = ['Id', 'Name', 'Type', 'Address', 'Added', ''];
+export const locationDatabaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Added', ''];
 
 export default function LocationDatabaseHostRow({
   location,

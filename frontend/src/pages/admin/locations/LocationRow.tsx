@@ -1,10 +1,10 @@
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { NavLink } from 'react-router';
 
-export const locationTableColumns = ['Id', 'Name', 'Backup Disk', 'Created'];
+export const locationTableColumns = ['ID', 'Name', 'Backup Disk', 'Created'];
 
 export default ({ location }: { location: Location }) => {
   return (

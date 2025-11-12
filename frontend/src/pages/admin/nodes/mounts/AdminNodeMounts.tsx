@@ -6,7 +6,6 @@ import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -37,17 +36,13 @@ export default function AdminNodeMounts({ node }: { node: Node }) {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table columns={nodeMountTableColumns} pagination={nodeMounts} onPageSelect={setPage}>
-            {nodeMounts.data.map((mount) => (
-              <NodeMountRow key={mount.mount.uuid} node={node} mount={mount} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table columns={nodeMountTableColumns} loading={loading} pagination={nodeMounts} onPageSelect={setPage}>
+          {nodeMounts.data.map((mount) => (
+            <NodeMountRow key={mount.mount.uuid} node={node} mount={mount} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

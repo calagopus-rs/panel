@@ -6,7 +6,6 @@ import getOAuthProviders from '@/api/auth/getOAuthProviders';
 import getOAuthLinks from '@/api/me/oauth-links/getOAuthLinks';
 import Button from '@/elements/Button';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useUserStore } from '@/stores/user';
@@ -69,21 +68,18 @@ export default function DashboardOAuthLinks() {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <ContextMenuProvider>
-          <Table
-            columns={['Provider Name', 'Identifier', 'Last Used', 'Created', '']}
-            pagination={oauthLinks}
-            onPageSelect={setPage}
-          >
-            {oauthLinks.data.map((link) => (
-              <OAuthLinkRow key={link.uuid} oauthLink={link} />
-            ))}
-          </Table>
-        </ContextMenuProvider>
-      )}
+      <ContextMenuProvider>
+        <Table
+          columns={['Provider Name', 'Identifier', 'Last Used', 'Created', '']}
+          loading={loading}
+          pagination={oauthLinks}
+          onPageSelect={setPage}
+        >
+          {oauthLinks.data.map((link) => (
+            <OAuthLinkRow key={link.uuid} oauthLink={link} />
+          ))}
+        </Table>
+      </ContextMenuProvider>
     </>
   );
 }

@@ -8,7 +8,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
-import { load } from '@/lib/debounce';
 import { useToast } from '@/providers/ToastProvider';
 import AuthWrapper from './AuthWrapper';
 
@@ -30,7 +29,7 @@ export default function ResetPassword() {
   }, []);
 
   const submit = () => {
-    load(true, setLoading);
+    setLoading(true);
 
     resetPassword(token, password)
       .then(() => {
@@ -40,7 +39,7 @@ export default function ResetPassword() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   };
 
   return (

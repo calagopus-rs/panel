@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { load } from '@/lib/debounce';
 import DashboardHomeTitle from './DashboardHomeTitle';
 import { useUserStore } from '@/stores/user';
 import { useToast } from '@/providers/ToastProvider';
@@ -113,9 +112,7 @@ export default function DashboardHome() {
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       })
-      .finally(() => {
-        load(false, setLoading);
-      });
+      .finally(() => setLoading(false));
   }, [addToast, setServerGroups]);
 
   const handleDragStart = (event: DragEndEvent) => {

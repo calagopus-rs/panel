@@ -9,7 +9,6 @@ import importEgg from '@/api/admin/nests/eggs/importEgg';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -91,15 +90,11 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
         </Group>
       </Group>
 
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <Table columns={eggTableColumns} pagination={eggs} onPageSelect={setPage}>
-          {eggs.data.map((egg) => (
-            <EggRow key={egg.uuid} nest={contextNest} egg={egg} />
-          ))}
-        </Table>
-      )}
+      <Table columns={eggTableColumns} loading={loading} pagination={eggs} onPageSelect={setPage}>
+        {eggs.data.map((egg) => (
+          <EggRow key={egg.uuid} nest={contextNest} egg={egg} />
+        ))}
+      </Table>
     </>
   );
 }
