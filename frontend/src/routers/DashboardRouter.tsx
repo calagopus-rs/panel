@@ -1,14 +1,16 @@
 import { faGraduationCap, faServer } from '@fortawesome/free-solid-svg-icons';
+import { Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import Container from '@/elements/Container';
 import Sidebar from '@/elements/Sidebar';
+import Spinner from '@/elements/Spinner';
 import { to } from '@/lib/routes';
+import DashboardHome from '@/pages/dashboard/home/DashboardHome';
+import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll';
 import NotFound from '@/pages/NotFound';
 import { useAuth } from '@/providers/AuthProvider';
 import accountRoutes from '@/routers/routes/accountRoutes';
 import { useGlobalStore } from '@/stores/global';
-import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll';
-import DashboardHome from '@/pages/dashboard/home/DashboardHome';
 
 export default function DashboardRouter() {
   const { user } = useAuth();
@@ -47,14 +49,16 @@ export default function DashboardRouter() {
       </Sidebar>
       <div id={'dashboard-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         <Container>
-          <Routes>
-            <Route path={''} element={<DashboardHome />} />
-            <Route path={'/all'} element={<DashboardHomeAll />} />
-            {accountRoutes.map(({ path, element: Element }) => (
-              <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
-            ))}
-            <Route path={'*'} element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<Spinner.Centered />}>
+            <Routes>
+              <Route path={''} element={<DashboardHome />} />
+              <Route path={'/all'} element={<DashboardHomeAll />} />
+              {accountRoutes.map(({ path, element: Element }) => (
+                <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
+              ))}
+              <Route path={'*'} element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </Container>
       </div>
     </div>

@@ -2,7 +2,6 @@ import { Group, Title } from '@mantine/core';
 import debounce from 'debounce';
 import { useEffect, useRef, useState } from 'react';
 import Can from '@/elements/Can';
-import Spinner from '@/elements/Spinner';
 import { useServerStore } from '@/stores/server';
 import Console from './Console';
 import ServerDetails from './ServerDetails';
@@ -45,9 +44,7 @@ export default function ServerConsole() {
 
       <div className={'grid xl:grid-cols-4 gap-4 mb-4'}>
         <div className={'xl:col-span-3'} style={{ height: maxConsoleHeight }}>
-          <Spinner.Suspense>
-            <Console />
-          </Spinner.Suspense>
+          <Console />
         </div>
 
         <div className={'h-fit'} ref={statsRef}>

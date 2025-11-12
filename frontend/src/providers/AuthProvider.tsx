@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import getMe from '@/api/me/getMe';
@@ -17,7 +17,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
 
@@ -30,7 +30,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .catch(() => {
         setUser(null);
       })
-      .finally(() => load(false, setLoading));
+      .finally(() => setLoading(false));
   }, []);
 
   const doLogin = (user: User) => {

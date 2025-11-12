@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { ClipLoader } from 'react-spinners';
 
 function Spinner({ size }: { size?: number }) {
@@ -11,7 +11,7 @@ Spinner.Centered = ({ size }: { size?: number }) => (
   </div>
 );
 
-Spinner.Suspense = ({ children }: { children: React.ReactNode }) => (
+Spinner.Suspense = ({ children }: { children: ReactNode }) => (
   <Suspense
     fallback={
       <div className={'flex items-center justify-center'}>

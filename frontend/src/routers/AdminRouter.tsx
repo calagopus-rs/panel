@@ -1,7 +1,9 @@
 import { faReply } from '@fortawesome/free-solid-svg-icons';
+import { Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import Container from '@/elements/Container';
 import Sidebar from '@/elements/Sidebar';
+import Spinner from '@/elements/Spinner';
 import { to } from '@/lib/routes';
 import NotFound from '@/pages/NotFound';
 import adminRoutes from '@/routers/routes/adminRoutes';
@@ -42,12 +44,14 @@ export default function AdminRouter() {
       </Sidebar>
       <div id={'admin-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
         <Container>
-          <Routes>
-            {adminRoutes.map(({ path, element: Element }) => (
-              <Route key={path} path={path} element={<Element />} />
-            ))}
-            <Route path={'*'} element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={<Spinner.Centered />}>
+            <Routes>
+              {adminRoutes.map(({ path, element: Element }) => (
+                <Route key={path} path={path} element={<Element />} />
+              ))}
+              <Route path={'*'} element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </Container>
       </div>
     </div>
