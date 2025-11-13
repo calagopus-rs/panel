@@ -1,6 +1,4 @@
-use crate::models::{ByUuid, Fetchable};
-
-use super::BaseModel;
+use crate::prelude::*;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -243,42 +241,43 @@ impl BaseModel for NestEgg {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            nest: super::nest::Nest::get_fetchable(row.get(format!("{prefix}nest_uuid").as_str())),
-            author: row.get(format!("{prefix}author").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            config_files: serde_json::from_value(row.get(format!("{prefix}config_files").as_str()))
-                .unwrap(),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            nest: super::nest::Nest::get_fetchable(
+                row.try_get(format!("{prefix}nest_uuid").as_str())?,
+            ),
+            author: row.try_get(format!("{prefix}author").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            config_files: serde_json::from_value(
+                row.try_get(format!("{prefix}config_files").as_str())?,
+            )?,
             config_startup: serde_json::from_value(
-                row.get(format!("{prefix}config_startup").as_str()),
-            )
-            .unwrap(),
-            config_stop: serde_json::from_value(row.get(format!("{prefix}config_stop").as_str()))
-                .unwrap(),
+                row.try_get(format!("{prefix}config_startup").as_str())?,
+            )?,
+            config_stop: serde_json::from_value(
+                row.try_get(format!("{prefix}config_stop").as_str())?,
+            )?,
             config_script: serde_json::from_value(
-                row.get(format!("{prefix}config_script").as_str()),
-            )
-            .unwrap(),
+                row.try_get(format!("{prefix}config_script").as_str())?,
+            )?,
             config_allocations: serde_json::from_value(
-                row.get(format!("{prefix}config_allocations").as_str()),
-            )
-            .unwrap(),
-            startup: row.get(format!("{prefix}startup").as_str()),
-            force_outgoing_ip: row.get(format!("{prefix}force_outgoing_ip").as_str()),
-            separate_port: row.get(format!("{prefix}separate_port").as_str()),
-            features: row.get(format!("{prefix}features").as_str()),
+                row.try_get(format!("{prefix}config_allocations").as_str())?,
+            )?,
+            startup: row.try_get(format!("{prefix}startup").as_str())?,
+            force_outgoing_ip: row.try_get(format!("{prefix}force_outgoing_ip").as_str())?,
+            separate_port: row.try_get(format!("{prefix}separate_port").as_str())?,
+            features: row.try_get(format!("{prefix}features").as_str())?,
             docker_images: serde_json::from_value(
-                row.get(format!("{prefix}docker_images").as_str()),
+                row.try_get(format!("{prefix}docker_images").as_str())?,
             )
             .unwrap_or_default(),
-            file_denylist: row.get(format!("{prefix}file_denylist").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            file_denylist: row.try_get(format!("{prefix}file_denylist").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -301,7 +300,7 @@ impl NestEgg {
         features: &[String],
         docker_images: IndexMap<String, String>,
         file_denylist: &[String],
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_eggs (
@@ -318,21 +317,21 @@ impl NestEgg {
         .bind(author)
         .bind(name)
         .bind(description)
-        .bind(serde_json::to_value(config_files).unwrap())
-        .bind(serde_json::to_value(config_startup).unwrap())
-        .bind(serde_json::to_value(config_stop).unwrap())
-        .bind(serde_json::to_value(config_script).unwrap())
-        .bind(serde_json::to_value(config_allocations).unwrap())
+        .bind(serde_json::to_value(config_files)?)
+        .bind(serde_json::to_value(config_startup)?)
+        .bind(serde_json::to_value(config_stop)?)
+        .bind(serde_json::to_value(config_script)?)
+        .bind(serde_json::to_value(config_allocations)?)
         .bind(startup)
         .bind(force_outgoing_ip)
         .bind(separate_port)
         .bind(features)
-        .bind(serde_json::to_value(docker_images).unwrap())
+        .bind(serde_json::to_value(docker_images)?)
         .bind(file_denylist)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_nest_uuid_with_pagination(
@@ -341,7 +340,7 @@ impl NestEgg {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -362,10 +361,15 @@ impl NestEgg {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -373,7 +377,7 @@ impl NestEgg {
         database: &crate::database::Database,
         nest_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -387,7 +391,7 @@ impl NestEgg {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn count_by_nest_uuid(
@@ -410,7 +414,7 @@ impl NestEgg {
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM nest_eggs
@@ -428,7 +432,7 @@ impl NestEgg {
     pub async fn into_exported(
         self,
         database: &crate::database::Database,
-    ) -> Result<ExportedNestEgg, sqlx::Error> {
+    ) -> Result<ExportedNestEgg, crate::database::DatabaseError> {
         Ok(ExportedNestEgg {
             author: self.author,
             name: self.name,
@@ -516,7 +520,7 @@ impl ByUuid for NestEgg {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -529,7 +533,7 @@ impl ByUuid for NestEgg {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

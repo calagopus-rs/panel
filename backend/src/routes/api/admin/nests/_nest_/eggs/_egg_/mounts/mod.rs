@@ -150,7 +150,7 @@ mod post {
 
         match NestEggMount::create(&state.database, egg.uuid, mount.uuid).await {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("mount already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

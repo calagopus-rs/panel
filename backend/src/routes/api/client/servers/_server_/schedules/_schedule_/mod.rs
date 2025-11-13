@@ -262,8 +262,8 @@ mod patch {
             WHERE server_schedules.uuid = $5",
             &schedule.name,
             schedule.enabled,
-            serde_json::to_value(&schedule.triggers).unwrap(),
-            serde_json::to_value(&schedule.condition).unwrap(),
+            serde_json::to_value(&schedule.triggers)?,
+            serde_json::to_value(&schedule.condition)?,
             schedule.uuid,
         )
         .execute(state.database.write())

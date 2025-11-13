@@ -1,9 +1,4 @@
-use crate::{
-    models::{ByUuid, Fetchable},
-    storage::StorageUrlRetriever,
-};
-
-use super::BaseModel;
+use crate::{prelude::*, storage::StorageUrlRetriever};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -32,20 +27,20 @@ impl BaseModel for ServerMount {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
+        Ok(Self {
             mount: super::mount::Mount::get_fetchable(
                 row.try_get(format!("{prefix}mount_uuid").as_str())
-                    .unwrap_or_else(|_| row.get("alt_mount_uuid")),
+                    .or_else(|_| row.try_get("alt_mount_uuid"))?,
             ),
             server: super::server::Server::get_fetchable_from_row(
                 row,
                 format!("{prefix}server_uuid"),
             ),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -54,7 +49,7 @@ impl ServerMount {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO server_mounts (server_uuid, mount_uuid)
@@ -73,7 +68,7 @@ impl ServerMount {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -87,7 +82,7 @@ impl ServerMount {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -96,7 +91,7 @@ impl ServerMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -118,10 +113,15 @@ impl ServerMount {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -131,7 +131,7 @@ impl ServerMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -158,10 +158,15 @@ impl ServerMount {
         ?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -171,7 +176,7 @@ impl ServerMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -198,10 +203,15 @@ impl ServerMount {
         ?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -211,7 +221,7 @@ impl ServerMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -233,10 +243,15 @@ impl ServerMount {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -244,7 +259,7 @@ impl ServerMount {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM server_mounts

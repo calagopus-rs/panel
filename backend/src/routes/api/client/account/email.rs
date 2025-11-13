@@ -10,6 +10,7 @@ mod put {
             user::{GetPermissionManager, GetUser},
             user_activity::GetUserActivityLogger,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -69,7 +70,7 @@ mod put {
             .await
             {
                 Ok(_) => {}
-                Err(err) if err.to_string().contains("unique constraint") => {
+                Err(err) if err.is_unique_violation() => {
                     return ApiResponse::error("email already in use")
                         .with_status(StatusCode::CONFLICT)
                         .ok();

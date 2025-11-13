@@ -85,7 +85,7 @@ mod patch {
             SET action = $2, order_ = $3
             WHERE server_schedule_steps.uuid = $1",
             schedule_step.uuid,
-            serde_json::to_value(&schedule_step.action).unwrap(),
+            serde_json::to_value(&schedule_step.action)?,
             schedule_step.order
         )
         .execute(state.database.write())

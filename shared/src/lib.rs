@@ -14,6 +14,7 @@ pub mod jwt;
 pub mod mail;
 pub mod models;
 pub mod permissions;
+pub mod prelude;
 pub mod response;
 pub mod settings;
 pub mod storage;

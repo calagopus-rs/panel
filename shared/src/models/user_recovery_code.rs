@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -25,13 +25,13 @@ impl BaseModel for UserRecoveryCode {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            code: row.get(format!("{prefix}code").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            code: row.try_get(format!("{prefix}code").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -39,7 +39,7 @@ impl UserRecoveryCode {
     pub async fn create_all(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
-    ) -> Result<Vec<String>, sqlx::Error> {
+    ) -> Result<Vec<String>, crate::database::DatabaseError> {
         let mut codes = Vec::new();
         codes.reserve_exact(10);
 
@@ -71,7 +71,7 @@ impl UserRecoveryCode {
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         code: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             DELETE FROM user_recovery_codes
@@ -85,13 +85,13 @@ impl UserRecoveryCode {
         .fetch_optional(database.write())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn delete_by_user_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM user_recovery_codes

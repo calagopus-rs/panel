@@ -1,10 +1,4 @@
-use super::BaseModel;
-use crate::{
-    models::{
-        ByUuid, user::User, user_activity::UserActivity, user_password_reset::UserPasswordReset,
-    },
-    storage::StorageUrlRetriever,
-};
+use crate::{prelude::*, storage::StorageUrlRetriever};
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -46,15 +40,15 @@ impl BaseModel for ServerSubuser {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            user: super::user::User::map(Some("user_"), row),
-            permissions: row.get(format!("{prefix}permissions").as_str()),
-            ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            user: super::user::User::map(Some("user_"), row)?,
+            permissions: row.try_get(format!("{prefix}permissions").as_str())?,
+            ignored_files: row.try_get(format!("{prefix}ignored_files").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -67,7 +61,7 @@ impl ServerSubuser {
         email: &str,
         permissions: &[String],
         ignored_files: &[String],
-    ) -> Result<String, sqlx::Error> {
+    ) -> Result<String, crate::database::DatabaseError> {
         let user = match super::user::User::by_email(database, email).await? {
             Some(user) => user,
             None => {
@@ -85,12 +79,12 @@ impl ServerSubuser {
                 );
                 let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);
 
-                let user = match User::create(
+                let user = match super::user::User::create(
                     database, None, None, &username, email, "Server", "Subuser", &password, false,
                 )
                 .await
                 {
-                    Ok(user_uuid) => User::by_uuid(database, user_uuid).await?,
+                    Ok(user_uuid) => super::user::User::by_uuid(database, user_uuid).await?,
                     Err(err) => {
                         tracing::error!(username = %username, email = %email, "failed to create subuser user: {:#?}", err);
 
@@ -98,7 +92,9 @@ impl ServerSubuser {
                     }
                 };
 
-                match UserPasswordReset::create(database, user.uuid).await {
+                match super::user_password_reset::UserPasswordReset::create(database, user.uuid)
+                    .await
+                {
                     Ok(token) => {
                         let settings = settings.get().await;
 
@@ -114,7 +110,7 @@ impl ServerSubuser {
                                 ),
                             );
 
-                        UserActivity::log(
+                        super::user_activity::UserActivity::log(
                             database,
                             user.uuid,
                             None,
@@ -149,7 +145,8 @@ impl ServerSubuser {
         if server.owner.uuid == user.uuid {
             return Err(sqlx::Error::InvalidArgument(
                 "cannot create subuser for server owner".into(),
-            ));
+            )
+            .into());
         }
 
         sqlx::query(
@@ -172,7 +169,7 @@ impl ServerSubuser {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         username: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -188,7 +185,7 @@ impl ServerSubuser {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -197,7 +194,7 @@ impl ServerSubuser {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -220,10 +217,15 @@ impl ServerSubuser {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -231,7 +233,7 @@ impl ServerSubuser {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         user_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM server_subusers

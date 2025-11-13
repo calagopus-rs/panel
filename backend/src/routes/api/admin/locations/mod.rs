@@ -147,7 +147,7 @@ mod post {
         .await
         {
             Ok(location) => location,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("location with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

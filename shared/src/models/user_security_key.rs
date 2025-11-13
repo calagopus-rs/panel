@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -38,17 +38,17 @@ impl BaseModel for UserSecurityKey {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
             passkey: if row
                 .try_get::<serde_json::Value, _>(format!("{prefix}passkey").as_str())
                 .is_ok()
             {
-                serde_json::from_value(row.get(format!("{prefix}passkey").as_str())).ok()
+                serde_json::from_value(row.try_get(format!("{prefix}passkey").as_str())?).ok()
             } else {
                 None
             },
@@ -56,13 +56,13 @@ impl BaseModel for UserSecurityKey {
                 .try_get::<serde_json::Value, _>(format!("{prefix}registration").as_str())
                 .is_ok()
             {
-                serde_json::from_value(row.get(format!("{prefix}registration").as_str())).ok()
+                serde_json::from_value(row.try_get(format!("{prefix}registration").as_str())?).ok()
             } else {
                 None
             },
-            last_used: row.get(format!("{prefix}last_used").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -72,7 +72,7 @@ impl UserSecurityKey {
         user_uuid: uuid::Uuid,
         name: &str,
         registration: webauthn_rs::prelude::PasskeyRegistration,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO user_security_keys (user_uuid, name, credential_id, registration, created)
@@ -84,18 +84,18 @@ impl UserSecurityKey {
         .bind(user_uuid)
         .bind(name)
         .bind(rand::random_iter::<u8>().take(16).collect::<Vec<u8>>())
-        .bind(serde_json::to_value(registration).unwrap())
+        .bind(serde_json::to_value(registration)?)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -109,7 +109,7 @@ impl UserSecurityKey {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_user_uuid_with_pagination(
@@ -118,7 +118,7 @@ impl UserSecurityKey {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -139,17 +139,22 @@ impl UserSecurityKey {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM user_security_keys

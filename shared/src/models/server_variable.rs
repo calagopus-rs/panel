@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -33,10 +33,10 @@ impl BaseModel for ServerVariable {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        let variable = super::nest_egg_variable::NestEggVariable::map(Some("variable_"), row);
+        let variable = super::nest_egg_variable::NestEggVariable::map(Some("variable_"), row)?;
         let value = row
             .try_get(format!("{prefix}value").as_str())
             .unwrap_or_else(|_| {
@@ -46,13 +46,13 @@ impl BaseModel for ServerVariable {
                     .unwrap_or_else(|| "".to_string())
             });
 
-        Self {
+        Ok(Self {
             variable,
             value,
             created: row
                 .try_get(format!("{prefix}created").as_str())
                 .unwrap_or_else(|_| chrono::Utc::now().naive_utc()),
-        }
+        })
     }
 }
 
@@ -62,7 +62,7 @@ impl ServerVariable {
         server_uuid: uuid::Uuid,
         variable_uuid: uuid::Uuid,
         value: &str,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO server_variables (server_uuid, variable_uuid, value)
@@ -83,7 +83,7 @@ impl ServerVariable {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         egg_uuid: uuid::Uuid,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -99,7 +99,9 @@ impl ServerVariable {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     #[inline]

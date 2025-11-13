@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -33,15 +33,15 @@ impl BaseModel for UserPasswordReset {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            user: super::user::User::map(Some("user_"), row),
-            token: row.get(format!("{prefix}token").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            user: super::user::User::map(Some("user_"), row)?,
+            token: row.try_get(format!("{prefix}token").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -88,7 +88,7 @@ impl UserPasswordReset {
     pub async fn delete_by_token(
         database: &crate::database::Database,
         token: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {} FROM user_password_resets
@@ -120,6 +120,6 @@ impl UserPasswordReset {
         .execute(database.write())
         .await?;
 
-        Ok(Some(Self::map(None, &row)))
+        Ok(Some(Self::map(None, &row)?))
     }
 }

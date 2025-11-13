@@ -75,6 +75,7 @@ mod patch {
             user_activity::GetUserActivityLogger,
             user_api_key::UserApiKey,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use std::sync::Arc;
@@ -184,7 +185,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("api key with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

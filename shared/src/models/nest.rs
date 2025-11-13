@@ -1,4 +1,4 @@
-use super::*;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -32,16 +32,16 @@ impl BaseModel for Nest {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            author: row.get(format!("{prefix}author").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            author: row.try_get(format!("{prefix}author").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -51,7 +51,7 @@ impl Nest {
         author: &str,
         name: &str,
         description: Option<&str>,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nests (author, name, description)
@@ -66,7 +66,7 @@ impl Nest {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn all_with_pagination(
@@ -74,7 +74,7 @@ impl Nest {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -94,17 +94,22 @@ impl Nest {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM nests
@@ -135,7 +140,7 @@ impl ByUuid for Nest {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -148,7 +153,7 @@ impl ByUuid for Nest {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

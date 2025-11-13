@@ -1,4 +1,4 @@
-use super::{BaseModel, ByUuid, Fetchable};
+use crate::prelude::*;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -96,11 +96,11 @@ impl BaseModel for ServerBackup {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
             server: super::server::Server::get_fetchable_from_row(
                 row,
                 format!("{prefix}server_uuid"),
@@ -110,23 +110,25 @@ impl BaseModel for ServerBackup {
                     row,
                     format!("{prefix}backup_configuration_uuid"),
                 ),
-            node: super::node::Node::get_fetchable(row.get(format!("{prefix}node_uuid").as_str())),
-            name: row.get(format!("{prefix}name").as_str()),
-            successful: row.get(format!("{prefix}successful").as_str()),
-            browsable: row.get(format!("{prefix}browsable").as_str()),
-            streaming: row.get(format!("{prefix}streaming").as_str()),
-            locked: row.get(format!("{prefix}locked").as_str()),
-            ignored_files: row.get(format!("{prefix}ignored_files").as_str()),
-            checksum: row.get(format!("{prefix}checksum").as_str()),
-            bytes: row.get(format!("{prefix}bytes").as_str()),
-            files: row.get(format!("{prefix}files").as_str()),
-            disk: row.get(format!("{prefix}disk").as_str()),
-            upload_id: row.get(format!("{prefix}upload_id").as_str()),
-            upload_path: row.get(format!("{prefix}upload_path").as_str()),
-            completed: row.get(format!("{prefix}completed").as_str()),
-            deleted: row.get(format!("{prefix}deleted").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            node: super::node::Node::get_fetchable(
+                row.try_get(format!("{prefix}node_uuid").as_str())?,
+            ),
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            successful: row.try_get(format!("{prefix}successful").as_str())?,
+            browsable: row.try_get(format!("{prefix}browsable").as_str())?,
+            streaming: row.try_get(format!("{prefix}streaming").as_str())?,
+            locked: row.try_get(format!("{prefix}locked").as_str())?,
+            ignored_files: row.try_get(format!("{prefix}ignored_files").as_str())?,
+            checksum: row.try_get(format!("{prefix}checksum").as_str())?,
+            bytes: row.try_get(format!("{prefix}bytes").as_str())?,
+            files: row.try_get(format!("{prefix}files").as_str())?,
+            disk: row.try_get(format!("{prefix}disk").as_str())?,
+            upload_id: row.try_get(format!("{prefix}upload_id").as_str())?,
+            upload_path: row.try_get(format!("{prefix}upload_path").as_str())?,
+            completed: row.try_get(format!("{prefix}completed").as_str())?,
+            deleted: row.try_get(format!("{prefix}deleted").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -225,7 +227,7 @@ impl ServerBackup {
             }
         });
 
-        Ok(Self::map(None, &row))
+        Ok(Self::map(None, &row)?)
     }
 
     pub async fn create_raw(
@@ -260,14 +262,14 @@ impl ServerBackup {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Ok(Self::map(None, &row)?)
     }
 
     pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -281,14 +283,14 @@ impl ServerBackup {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_node_uuid_uuid(
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -302,7 +304,7 @@ impl ServerBackup {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -311,7 +313,7 @@ impl ServerBackup {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -335,10 +337,15 @@ impl ServerBackup {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -348,7 +355,7 @@ impl ServerBackup {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -373,17 +380,22 @@ impl ServerBackup {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn all_by_server_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -396,7 +408,9 @@ impl ServerBackup {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn count_by_server_uuid(
@@ -632,7 +646,7 @@ impl ServerBackup {
         .await?;
 
         if let Some(row) = row {
-            let backup = Self::map(None, &row);
+            let backup = Self::map(None, &row)?;
 
             backup.delete(database, server).await
         } else {
@@ -678,7 +692,7 @@ impl ByUuid for ServerBackup {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -691,7 +705,7 @@ impl ByUuid for ServerBackup {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

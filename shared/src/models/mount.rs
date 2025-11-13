@@ -1,6 +1,4 @@
-use crate::models::ByUuid;
-
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -42,19 +40,19 @@ impl BaseModel for Mount {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            source: row.get(format!("{prefix}source").as_str()),
-            target: row.get(format!("{prefix}target").as_str()),
-            read_only: row.get(format!("{prefix}read_only").as_str()),
-            user_mountable: row.get(format!("{prefix}user_mountable").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            source: row.try_get(format!("{prefix}source").as_str())?,
+            target: row.try_get(format!("{prefix}target").as_str())?,
+            read_only: row.try_get(format!("{prefix}read_only").as_str())?,
+            user_mountable: row.try_get(format!("{prefix}user_mountable").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -67,7 +65,7 @@ impl Mount {
         target: &str,
         read_only: bool,
         user_mountable: bool,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO mounts (name, description, source, target, read_only, user_mountable)
@@ -85,7 +83,7 @@ impl Mount {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_node_uuid_egg_uuid_uuid(
@@ -93,7 +91,7 @@ impl Mount {
         node_uuid: uuid::Uuid,
         egg_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -110,7 +108,7 @@ impl Mount {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn all_with_pagination(
@@ -118,7 +116,7 @@ impl Mount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -138,17 +136,22 @@ impl Mount {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM mounts
@@ -182,7 +185,7 @@ impl ByUuid for Mount {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -195,7 +198,7 @@ impl ByUuid for Mount {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

@@ -178,12 +178,12 @@ mod post {
         .await
         {
             Ok(username) => username,
-            Err(sqlx::Error::InvalidArgument(err)) => {
+            Err(shared::database::DatabaseError::Sqlx(sqlx::Error::InvalidArgument(err))) => {
                 return ApiResponse::error(&err)
                     .with_status(StatusCode::BAD_REQUEST)
                     .ok();
             }
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("subuser with email already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

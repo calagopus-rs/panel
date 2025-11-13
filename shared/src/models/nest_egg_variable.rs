@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -82,21 +82,21 @@ impl BaseModel for NestEggVariable {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            order: row.get(format!("{prefix}order").as_str()),
-            env_variable: row.get(format!("{prefix}env_variable").as_str()),
-            default_value: row.get(format!("{prefix}default_value").as_str()),
-            user_viewable: row.get(format!("{prefix}user_viewable").as_str()),
-            user_editable: row.get(format!("{prefix}user_editable").as_str()),
-            rules: row.get(format!("{prefix}rules").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            order: row.try_get(format!("{prefix}order").as_str())?,
+            env_variable: row.try_get(format!("{prefix}env_variable").as_str())?,
+            default_value: row.try_get(format!("{prefix}default_value").as_str())?,
+            user_viewable: row.try_get(format!("{prefix}user_viewable").as_str())?,
+            user_editable: row.try_get(format!("{prefix}user_editable").as_str())?,
+            rules: row.try_get(format!("{prefix}rules").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -113,7 +113,7 @@ impl NestEggVariable {
         user_viewable: bool,
         user_editable: bool,
         rules: &[String],
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_egg_variables (
@@ -137,14 +137,14 @@ impl NestEggVariable {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_egg_uuid_uuid(
         database: &crate::database::Database,
         egg_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -158,13 +158,13 @@ impl NestEggVariable {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn all_by_egg_uuid(
         database: &crate::database::Database,
         egg_uuid: uuid::Uuid,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -178,13 +178,15 @@ impl NestEggVariable {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM nest_egg_variables

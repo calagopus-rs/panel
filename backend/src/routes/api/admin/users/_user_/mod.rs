@@ -190,6 +190,7 @@ mod patch {
         models::{
             ByUuid, admin_activity::GetAdminActivityLogger, role::Role, user::GetPermissionManager,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -324,7 +325,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("user with email/username/external_id already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

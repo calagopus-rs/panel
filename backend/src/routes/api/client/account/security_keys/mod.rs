@@ -156,7 +156,7 @@ mod post {
                 .await
             {
                 Ok(security_key) => security_key,
-                Err(err) if err.to_string().contains("unique constraint") => {
+                Err(err) if err.is_unique_violation() => {
                     return ApiResponse::error("security key with name already exists")
                         .with_status(StatusCode::CONFLICT)
                         .ok();

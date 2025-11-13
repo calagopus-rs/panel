@@ -142,7 +142,7 @@ mod post {
         let ssh_key =
             match UserSshKey::create(&state.database, user.uuid, &data.name, public_key).await {
                 Ok(ssh_key) => ssh_key,
-                Err(err) if err.to_string().contains("unique constraint") => {
+                Err(err) if err.is_unique_violation() => {
                     return ApiResponse::error("ssh key with name or fingerprint already exists")
                         .with_status(StatusCode::CONFLICT)
                         .ok();

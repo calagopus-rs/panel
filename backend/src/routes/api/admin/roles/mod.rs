@@ -134,7 +134,7 @@ mod post {
         .await
         {
             Ok(role) => role,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("role with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

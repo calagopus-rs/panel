@@ -88,7 +88,7 @@ mod post {
         .await
         {
             Ok(user_uuid) => User::by_uuid(&state.database, user_uuid).await?,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("user with username or email already exists")
                     .with_status(StatusCode::BAD_REQUEST)
                     .ok();

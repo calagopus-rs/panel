@@ -1,9 +1,11 @@
-use futures_util::StreamExt;
+use futures_util::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sqlx::{Row, postgres::PgRow};
 use std::{collections::BTreeMap, marker::PhantomData};
 use utoipa::ToSchema;
 use validator::Validate;
+
+use crate::database::DatabaseError;
 
 pub mod admin_activity;
 pub mod backup_configurations;
@@ -44,9 +46,11 @@ pub mod user_ssh_key;
 #[derive(ToSchema, Validate, Deserialize)]
 pub struct PaginationParams {
     #[validate(range(min = 1))]
+    #[schema(minimum = 1)]
     #[serde(default = "Pagination::default_page")]
     pub page: i64,
     #[validate(range(min = 1, max = 100))]
+    #[schema(minimum = 1, maximum = 100)]
     #[serde(default = "Pagination::default_per_page")]
     pub per_page: i64,
 }
@@ -54,12 +58,15 @@ pub struct PaginationParams {
 #[derive(ToSchema, Validate, Deserialize)]
 pub struct PaginationParamsWithSearch {
     #[validate(range(min = 1))]
+    #[schema(minimum = 1)]
     #[serde(default = "Pagination::default_page")]
     pub page: i64,
     #[validate(range(min = 1, max = 100))]
+    #[schema(minimum = 1, maximum = 100)]
     #[serde(default = "Pagination::default_per_page")]
     pub per_page: i64,
-    #[validate(length(min = 1, max = 100))]
+    #[validate(length(min = 1, max = 128))]
+    #[schema(min_length = 1, max_length = 128)]
     #[serde(
         default,
         deserialize_with = "crate::deserialize::deserialize_string_option"
@@ -93,10 +100,14 @@ impl<T: Serialize> Pagination<T> {
         self,
         mapper: impl Fn(T) -> Fut,
     ) -> Pagination<R> {
-        let results: Vec<R> = futures_util::stream::iter(self.data.into_iter().map(mapper))
-            .buffered(10)
-            .collect()
-            .await;
+        let mut results = Vec::new();
+        results.reserve_exact(self.data.len());
+        let mut result_stream =
+            futures_util::stream::iter(self.data.into_iter().map(mapper)).buffered(25);
+
+        while let Some(result) = result_stream.next().await {
+            results.push(result);
+        }
 
         Pagination {
             total: self.total,
@@ -115,8 +126,8 @@ impl<T: Serialize> Pagination<T> {
         let mut result_stream =
             futures_util::stream::iter(self.data.into_iter().map(mapper)).buffered(25);
 
-        while let Some(result) = result_stream.next().await {
-            results.push(result?);
+        while let Some(result) = result_stream.try_next().await? {
+            results.push(result);
         }
 
         Ok(Pagination {
@@ -142,7 +153,7 @@ pub trait BaseModel: Serialize + DeserializeOwned {
             .join(", ")
     }
 
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self;
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError>;
 }
 
 #[async_trait::async_trait]
@@ -150,7 +161,7 @@ pub trait ByUuid: BaseModel {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error>;
+    ) -> Result<Self, DatabaseError>;
 
     async fn by_uuid_cached(
         database: &crate::database::Database,
@@ -167,10 +178,10 @@ pub trait ByUuid: BaseModel {
     async fn by_uuid_optional(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, DatabaseError> {
         match Self::by_uuid(database, uuid).await {
             Ok(res) => Ok(Some(res)),
-            Err(sqlx::Error::RowNotFound) => Ok(None),
+            Err(DatabaseError::Sqlx(sqlx::Error::RowNotFound)) => Ok(None),
             Err(err) => Err(err),
         }
     }
@@ -216,7 +227,7 @@ pub struct Fetchable<M: ByUuid> {
 
 impl<M: ByUuid + Send> Fetchable<M> {
     #[inline]
-    pub async fn fetch(&self, database: &crate::database::Database) -> Result<M, sqlx::Error> {
+    pub async fn fetch(&self, database: &crate::database::Database) -> Result<M, DatabaseError> {
         M::by_uuid(database, self.uuid).await
     }
 
@@ -232,11 +243,15 @@ impl<M: ByUuid + Send> Fetchable<M> {
     pub async fn fetch_optional(
         &self,
         database: &crate::database::Database,
-    ) -> Result<Option<M>, sqlx::Error> {
-        match M::by_uuid(database, self.uuid).await {
-            Ok(res) => Ok(Some(res)),
-            Err(sqlx::Error::RowNotFound) => Ok(None),
-            Err(err) => Err(err),
-        }
+    ) -> Result<Option<M>, DatabaseError> {
+        M::by_uuid_optional(database, self.uuid).await
+    }
+
+    #[inline]
+    pub async fn fetch_optional_cached(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<Option<M>, anyhow::Error> {
+        M::by_uuid_optional_cached(database, self.uuid).await
     }
 }

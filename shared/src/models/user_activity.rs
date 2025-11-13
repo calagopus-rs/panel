@@ -1,6 +1,4 @@
-use crate::State;
-
-use super::BaseModel;
+use crate::{State, prelude::*};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -68,16 +66,16 @@ impl BaseModel for UserActivity {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            api_key_uuid: row.get(format!("{prefix}api_key_uuid").as_str()),
-            event: row.get(format!("{prefix}event").as_str()),
-            ip: row.get(format!("{prefix}ip").as_str()),
-            data: row.get(format!("{prefix}data").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            api_key_uuid: row.try_get(format!("{prefix}api_key_uuid").as_str())?,
+            event: row.try_get(format!("{prefix}event").as_str())?,
+            ip: row.try_get(format!("{prefix}ip").as_str())?,
+            data: row.try_get(format!("{prefix}data").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -89,7 +87,7 @@ impl UserActivity {
         event: &str,
         ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO user_activities (user_uuid, api_key_uuid, event, ip, data, created)
@@ -113,7 +111,7 @@ impl UserActivity {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -134,10 +132,15 @@ impl UserActivity {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 

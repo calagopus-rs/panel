@@ -79,6 +79,7 @@ mod patch {
             user_activity::GetUserActivityLogger,
             user_security_key::UserSecurityKey,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -155,7 +156,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("ssh key with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

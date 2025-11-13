@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -38,14 +38,14 @@ impl BaseModel for LocationDatabaseHost {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            location_uuid: row.get(format!("{prefix}location_uuid").as_str()),
-            database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            location_uuid: row.try_get(format!("{prefix}location_uuid").as_str())?,
+            database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row)?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -54,7 +54,7 @@ impl LocationDatabaseHost {
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
         database_host_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO location_database_hosts (location_uuid, database_host_uuid)
@@ -73,7 +73,7 @@ impl LocationDatabaseHost {
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
         database_host_uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -88,7 +88,7 @@ impl LocationDatabaseHost {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_location_uuid_with_pagination(
@@ -97,7 +97,7 @@ impl LocationDatabaseHost {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -119,17 +119,22 @@ impl LocationDatabaseHost {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn all_public_by_location_uuid(
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -144,14 +149,16 @@ impl LocationDatabaseHost {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn delete_by_uuids(
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
         database_host_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM location_database_hosts

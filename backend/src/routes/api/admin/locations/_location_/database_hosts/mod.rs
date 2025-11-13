@@ -132,7 +132,7 @@ mod post {
             .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("database host already exists in this location")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

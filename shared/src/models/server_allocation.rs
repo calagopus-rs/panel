@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -35,15 +35,15 @@ impl BaseModel for ServerAllocation {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            allocation: super::node_allocation::NodeAllocation::map(Some("allocation_"), row),
-            notes: row.get(format!("{prefix}notes").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            allocation: super::node_allocation::NodeAllocation::map(Some("allocation_"), row)?,
+            notes: row.try_get(format!("{prefix}notes").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -52,7 +52,7 @@ impl ServerAllocation {
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         allocation_uuid: uuid::Uuid,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
             INSERT INTO server_allocations (server_uuid, allocation_uuid)
@@ -65,13 +65,13 @@ impl ServerAllocation {
         .fetch_one(database.write())
         .await?;
 
-        Ok(row.get("uuid"))
+        Ok(row.try_get("uuid")?)
     }
 
     pub async fn create_random(
         database: &crate::database::Database,
         server: &super::server::Server,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
             INSERT INTO server_allocations (server_uuid, allocation_uuid)
@@ -101,7 +101,7 @@ impl ServerAllocation {
     pub async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -115,14 +115,14 @@ impl ServerAllocation {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         allocation_uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -137,7 +137,7 @@ impl ServerAllocation {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -146,7 +146,7 @@ impl ServerAllocation {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -168,10 +168,15 @@ impl ServerAllocation {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -195,7 +200,7 @@ impl ServerAllocation {
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM server_allocations

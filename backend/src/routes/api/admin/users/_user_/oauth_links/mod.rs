@@ -154,7 +154,7 @@ mod post {
         .await
         {
             Ok(oauth_link) => oauth_link,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("oauth link with provider + identifier already exists")
                     .ok();
             }

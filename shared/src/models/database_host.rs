@@ -1,6 +1,4 @@
-use crate::models::ByUuid;
-
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::{
@@ -98,22 +96,22 @@ impl BaseModel for DatabaseHost {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            public: row.get(format!("{prefix}public").as_str()),
-            r#type: row.get(format!("{prefix}type").as_str()),
-            public_host: row.get(format!("{prefix}public_host").as_str()),
-            host: row.get(format!("{prefix}host").as_str()),
-            public_port: row.get(format!("{prefix}public_port").as_str()),
-            port: row.get(format!("{prefix}port").as_str()),
-            username: row.get(format!("{prefix}username").as_str()),
-            password: row.get(format!("{prefix}password").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            public: row.try_get(format!("{prefix}public").as_str())?,
+            r#type: row.try_get(format!("{prefix}type").as_str())?,
+            public_host: row.try_get(format!("{prefix}public_host").as_str())?,
+            host: row.try_get(format!("{prefix}host").as_str())?,
+            public_port: row.try_get(format!("{prefix}public_port").as_str())?,
+            port: row.try_get(format!("{prefix}port").as_str())?,
+            username: row.try_get(format!("{prefix}username").as_str())?,
+            password: row.try_get(format!("{prefix}password").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -130,7 +128,7 @@ impl DatabaseHost {
         port: i32,
         username: &str,
         password: &str,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO database_hosts (name, public, type, public_host, host, public_port, port, username, password)
@@ -147,17 +145,17 @@ impl DatabaseHost {
         .bind(public_port)
         .bind(port)
         .bind(username)
-        .bind(database.encrypt(password.to_string()).await.unwrap())
+        .bind(database.encrypt(password.to_string()).await?)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn get_connection(
         &self,
         database: &crate::database::Database,
-    ) -> Result<DatabasePool, sqlx::Error> {
+    ) -> Result<DatabasePool, crate::database::DatabaseError> {
         let mut clients = DATABASE_CLIENTS.lock().await;
 
         if let Some((last_used, pool)) = clients.get_mut(&self.uuid) {
@@ -168,7 +166,7 @@ impl DatabaseHost {
 
         drop(clients);
 
-        let password = database.decrypt(self.password.clone()).await.unwrap();
+        let password = database.decrypt(self.password.clone()).await?;
 
         let pool = match self.r#type {
             DatabaseType::Mysql => {
@@ -206,7 +204,7 @@ impl DatabaseHost {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -226,10 +224,15 @@ impl DatabaseHost {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -237,7 +240,7 @@ impl DatabaseHost {
         database: &crate::database::Database,
         location_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -252,13 +255,13 @@ impl DatabaseHost {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM database_hosts
@@ -305,7 +308,7 @@ impl ByUuid for DatabaseHost {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -318,7 +321,7 @@ impl ByUuid for DatabaseHost {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

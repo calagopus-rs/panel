@@ -88,6 +88,7 @@ mod patch {
             admin_activity::GetAdminActivityLogger, nest_egg_variable::NestEggVariable,
             user::GetPermissionManager,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -221,7 +222,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("variable with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

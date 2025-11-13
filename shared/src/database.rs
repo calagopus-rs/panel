@@ -1,6 +1,6 @@
 use colored::Colorize;
 use sqlx::postgres::PgPoolOptions;
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, fmt::Display, sync::Arc};
 use tokio::sync::Mutex;
 
 type EmptyFuture = Box<dyn Future<Output = ()> + Send>;
@@ -200,5 +200,86 @@ impl Database {
     {
         let mut actions = self.batch_actions.lock().await;
         actions.insert((key, uuid), Box::new(action));
+    }
+}
+
+#[derive(Debug)]
+pub enum DatabaseError {
+    Sqlx(sqlx::Error),
+    Serde(serde_json::Error),
+    Any(anyhow::Error),
+}
+
+impl Display for DatabaseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Sqlx(sqlx_value) => sqlx_value.fmt(f),
+            Self::Serde(serde_value) => serde_value.fmt(f),
+            Self::Any(any_value) => any_value.fmt(f),
+        }
+    }
+}
+
+impl From<anyhow::Error> for DatabaseError {
+    #[inline]
+    fn from(value: anyhow::Error) -> Self {
+        Self::Any(value)
+    }
+}
+
+impl From<serde_json::Error> for DatabaseError {
+    #[inline]
+    fn from(value: serde_json::Error) -> Self {
+        Self::Serde(value)
+    }
+}
+
+impl From<sqlx::Error> for DatabaseError {
+    #[inline]
+    fn from(value: sqlx::Error) -> Self {
+        Self::Sqlx(value)
+    }
+}
+
+impl DatabaseError {
+    #[inline]
+    pub fn is_unique_violation(&self) -> bool {
+        match self {
+            Self::Sqlx(sqlx_value) => sqlx_value
+                .as_database_error()
+                .is_some_and(|e| e.is_unique_violation()),
+            _ => false,
+        }
+    }
+
+    #[inline]
+    pub fn is_foreign_key_violation(&self) -> bool {
+        match self {
+            Self::Sqlx(sqlx_value) => sqlx_value
+                .as_database_error()
+                .is_some_and(|e| e.is_foreign_key_violation()),
+            _ => false,
+        }
+    }
+
+    #[inline]
+    pub fn is_check_violation(&self) -> bool {
+        match self {
+            Self::Sqlx(sqlx_value) => sqlx_value
+                .as_database_error()
+                .is_some_and(|e| e.is_check_violation()),
+            _ => false,
+        }
+    }
+}
+
+impl From<DatabaseError> for anyhow::Error {
+    #[inline]
+    fn from(value: DatabaseError) -> Self {
+        match value {
+            DatabaseError::Sqlx(sqlx_value) => anyhow::anyhow!(sqlx_value),
+            DatabaseError::Serde(serde_value) => anyhow::anyhow!(serde_value),
+            DatabaseError::Any(any_value) => any_value,
+        }
     }
 }

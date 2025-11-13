@@ -1,4 +1,4 @@
-use super::{BaseModel, ByUuid, Fetchable};
+use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -70,36 +70,37 @@ impl BaseModel for Node {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            location: super::location::Location::map(Some("location_"), row),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            location: super::location::Location::map(Some("location_"), row)?,
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
                     format!("{prefix}node_backup_configuration_uuid"),
                 ),
-            name: row.get(format!("{prefix}name").as_str()),
-            public: row.get(format!("{prefix}public").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            public: row.try_get(format!("{prefix}public").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
             public_url: row
-                .get::<Option<String>, _>(format!("{prefix}public_url").as_str())
-                .map(|url| url.parse().unwrap()),
+                .try_get::<Option<String>, _>(format!("{prefix}public_url").as_str())?
+                .try_map(|url| url.parse())
+                .map_err(anyhow::Error::new)?,
             url: row
-                .get::<String, _>(format!("{prefix}url").as_str())
+                .try_get::<String, _>(format!("{prefix}url").as_str())?
                 .parse()
-                .unwrap(),
-            sftp_host: row.get(format!("{prefix}sftp_host").as_str()),
-            sftp_port: row.get(format!("{prefix}sftp_port").as_str()),
-            maintenance_message: row.get(format!("{prefix}maintenance_message").as_str()),
-            memory: row.get(format!("{prefix}memory").as_str()),
-            disk: row.get(format!("{prefix}disk").as_str()),
-            token_id: row.get(format!("{prefix}token_id").as_str()),
-            token: row.get(format!("{prefix}token").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+                .map_err(anyhow::Error::new)?,
+            sftp_host: row.try_get(format!("{prefix}sftp_host").as_str())?,
+            sftp_port: row.try_get(format!("{prefix}sftp_port").as_str())?,
+            maintenance_message: row.try_get(format!("{prefix}maintenance_message").as_str())?,
+            memory: row.try_get(format!("{prefix}memory").as_str())?,
+            disk: row.try_get(format!("{prefix}disk").as_str())?,
+            token_id: row.try_get(format!("{prefix}token_id").as_str())?,
+            token: row.try_get(format!("{prefix}token").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -119,7 +120,7 @@ impl Node {
         maintenance_message: Option<&str>,
         memory: i64,
         disk: i64,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let token_id = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 16);
         let token = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 64);
 
@@ -143,7 +144,7 @@ impl Node {
         .bind(memory)
         .bind(disk)
         .bind(token_id)
-        .bind(database.encrypt(token).await.unwrap())
+        .bind(database.encrypt(token).await?)
         .fetch_one(database.write())
         .await?;
 
@@ -171,18 +172,20 @@ impl Node {
                 .fetch_optional(database.read())
                 .await?;
 
-                Ok::<_, anyhow::Error>(if let Some(node) = row.map(|row| Self::map(None, &row)) {
-                    if constant_time_eq::constant_time_eq(
-                        database.decrypt(node.token.clone()).await?.as_bytes(),
-                        token.as_bytes(),
-                    ) {
-                        Some(node)
+                Ok::<_, anyhow::Error>(
+                    if let Some(node) = row.try_map(|row| Self::map(None, &row))? {
+                        if constant_time_eq::constant_time_eq(
+                            database.decrypt(node.token.clone()).await?.as_bytes(),
+                            token.as_bytes(),
+                        ) {
+                            Some(node)
+                        } else {
+                            None
+                        }
                     } else {
                         None
-                    }
-                } else {
-                    None
-                })
+                    },
+                )
             })
             .await
     }
@@ -193,7 +196,7 @@ impl Node {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -215,10 +218,15 @@ impl Node {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -228,7 +236,7 @@ impl Node {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -250,10 +258,15 @@ impl Node {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -262,7 +275,7 @@ impl Node {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -283,10 +296,15 @@ impl Node {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -310,7 +328,7 @@ impl Node {
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM nodes
@@ -446,7 +464,7 @@ impl ByUuid for Node {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {}
@@ -461,7 +479,7 @@ impl ByUuid for Node {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

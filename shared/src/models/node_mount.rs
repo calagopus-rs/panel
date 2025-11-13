@@ -1,6 +1,4 @@
-use crate::models::{ByUuid, Fetchable};
-
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -29,16 +27,18 @@ impl BaseModel for NodeMount {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
+        Ok(Self {
             mount: super::mount::Mount::get_fetchable(
-                row.get(format!("{prefix}mount_uuid").as_str()),
+                row.try_get(format!("{prefix}mount_uuid").as_str())?,
             ),
-            node: super::node::Node::get_fetchable(row.get(format!("{prefix}node_uuid").as_str())),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            node: super::node::Node::get_fetchable(
+                row.try_get(format!("{prefix}node_uuid").as_str())?,
+            ),
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -47,7 +47,7 @@ impl NodeMount {
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO node_mounts (node_uuid, mount_uuid)
@@ -66,7 +66,7 @@ impl NodeMount {
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -80,7 +80,7 @@ impl NodeMount {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_node_uuid_with_pagination(
@@ -89,7 +89,7 @@ impl NodeMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -111,10 +111,15 @@ impl NodeMount {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -124,7 +129,7 @@ impl NodeMount {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -146,10 +151,15 @@ impl NodeMount {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -157,7 +167,7 @@ impl NodeMount {
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         mount_uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM node_mounts

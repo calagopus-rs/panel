@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -49,19 +49,23 @@ impl BaseModel for UserApiKey {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            key_start: row.get(format!("{prefix}key_start").as_str()),
-            user_permissions: Arc::new(row.get(format!("{prefix}user_permissions").as_str())),
-            admin_permissions: Arc::new(row.get(format!("{prefix}admin_permissions").as_str())),
-            server_permissions: Arc::new(row.get(format!("{prefix}server_permissions").as_str())),
-            last_used: row.get(format!("{prefix}last_used").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            key_start: row.try_get(format!("{prefix}key_start").as_str())?,
+            user_permissions: Arc::new(row.try_get(format!("{prefix}user_permissions").as_str())?),
+            admin_permissions: Arc::new(
+                row.try_get(format!("{prefix}admin_permissions").as_str())?,
+            ),
+            server_permissions: Arc::new(
+                row.try_get(format!("{prefix}server_permissions").as_str())?,
+            ),
+            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -73,7 +77,7 @@ impl UserApiKey {
         user_permissions: &[String],
         admin_permissions: &[String],
         server_permissions: &[String],
-    ) -> Result<(String, Self), sqlx::Error> {
+    ) -> Result<(String, Self), crate::database::DatabaseError> {
         let key = format!(
             "clgp_{}",
             rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 43)
@@ -97,14 +101,14 @@ impl UserApiKey {
         .fetch_one(database.write())
         .await?;
 
-        Ok((key, Self::map(None, &row)))
+        Ok((key, Self::map(None, &row)?))
     }
 
     pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -118,7 +122,7 @@ impl UserApiKey {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_user_uuid_with_pagination(
@@ -127,7 +131,7 @@ impl UserApiKey {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -148,17 +152,22 @@ impl UserApiKey {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM user_api_keys

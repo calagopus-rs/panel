@@ -172,6 +172,7 @@ mod patch {
     use shared::{
         ApiError, GetState,
         models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -314,23 +315,23 @@ mod patch {
             egg.author,
             egg.name,
             egg.description,
-            serde_json::to_value(&egg.config_files).unwrap(),
-            serde_json::to_value(&egg.config_startup).unwrap(),
-            serde_json::to_value(&egg.config_stop).unwrap(),
-            serde_json::to_value(&egg.config_script).unwrap(),
-            serde_json::to_value(&egg.config_allocations).unwrap(),
+            serde_json::to_value(&egg.config_files)?,
+            serde_json::to_value(&egg.config_startup)?,
+            serde_json::to_value(&egg.config_stop)?,
+            serde_json::to_value(&egg.config_script)?,
+            serde_json::to_value(&egg.config_allocations)?,
             egg.startup,
             egg.force_outgoing_ip,
             egg.separate_port,
             &egg.features,
-            serde_json::to_value(&egg.docker_images).unwrap(),
+            serde_json::to_value(&egg.docker_images)?,
             &egg.file_denylist,
         )
         .execute(state.database.write())
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("egg with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

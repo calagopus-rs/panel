@@ -1,5 +1,4 @@
-use super::BaseModel;
-use crate::{State, storage::StorageUrlRetriever};
+use crate::{State, prelude::*, storage::StorageUrlRetriever};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -72,24 +71,24 @@ impl BaseModel for AdminActivity {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
+        Ok(Self {
             user: if row
                 .try_get::<uuid::Uuid, _>("user_uuid".to_string().as_str())
                 .is_ok()
             {
-                Some(super::user::User::map(Some("user_"), row))
+                Some(super::user::User::map(Some("user_"), row)?)
             } else {
                 None
             },
-            api_key_uuid: row.get(format!("{prefix}api_key_uuid").as_str()),
-            event: row.get(format!("{prefix}event").as_str()),
-            ip: row.get(format!("{prefix}ip").as_str()),
-            data: row.get(format!("{prefix}data").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            api_key_uuid: row.try_get(format!("{prefix}api_key_uuid").as_str())?,
+            event: row.try_get(format!("{prefix}event").as_str())?,
+            ip: row.try_get(format!("{prefix}ip").as_str())?,
+            data: row.try_get(format!("{prefix}data").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -101,7 +100,7 @@ impl AdminActivity {
         event: &str,
         ip: Option<sqlx::types::ipnetwork::IpNetwork>,
         data: serde_json::Value,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             INSERT INTO admin_activities (user_uuid, api_key_uuid, event, ip, data)
@@ -124,7 +123,7 @@ impl AdminActivity {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -146,10 +145,15 @@ impl AdminActivity {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 

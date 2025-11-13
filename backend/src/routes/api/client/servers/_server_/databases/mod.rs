@@ -218,7 +218,7 @@ mod post {
                         database_uuid
                     )
                 })?,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("database with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

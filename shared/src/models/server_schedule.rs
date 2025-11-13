@@ -1,4 +1,4 @@
-use super::BaseModel;
+use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -56,21 +56,19 @@ impl BaseModel for ServerSchedule {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            enabled: row.get(format!("{prefix}enabled").as_str()),
-            triggers: serde_json::from_value(row.get(format!("{prefix}triggers").as_str()))
-                .unwrap(),
-            condition: serde_json::from_value(row.get(format!("{prefix}condition").as_str()))
-                .unwrap(),
-            last_run: row.get(format!("{prefix}last_run").as_str()),
-            last_failure: row.get(format!("{prefix}last_failure").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            enabled: row.try_get(format!("{prefix}enabled").as_str())?,
+            triggers: serde_json::from_value(row.try_get(format!("{prefix}triggers").as_str())?)?,
+            condition: serde_json::from_value(row.try_get(format!("{prefix}condition").as_str())?)?,
+            last_run: row.try_get(format!("{prefix}last_run").as_str())?,
+            last_failure: row.try_get(format!("{prefix}last_failure").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -82,7 +80,7 @@ impl ServerSchedule {
         enabled: bool,
         triggers: Vec<wings_api::ScheduleTrigger>,
         condition: wings_api::ScheduleCondition,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO server_schedules (server_uuid, name, enabled, triggers, condition, created)
@@ -94,18 +92,18 @@ impl ServerSchedule {
         .bind(server_uuid)
         .bind(name)
         .bind(enabled)
-        .bind(serde_json::to_value(triggers).unwrap())
-        .bind(serde_json::to_value(condition).unwrap())
+        .bind(serde_json::to_value(triggers)?)
+        .bind(serde_json::to_value(condition)?)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -118,14 +116,14 @@ impl ServerSchedule {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -139,7 +137,7 @@ impl ServerSchedule {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_with_pagination(
@@ -148,7 +146,7 @@ impl ServerSchedule {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -169,10 +167,15 @@ impl ServerSchedule {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -196,7 +199,7 @@ impl ServerSchedule {
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM server_schedules
@@ -214,7 +217,7 @@ impl ServerSchedule {
     pub async fn into_exported(
         self,
         database: &crate::database::Database,
-    ) -> Result<ExportedServerSchedule, sqlx::Error> {
+    ) -> Result<ExportedServerSchedule, crate::database::DatabaseError> {
         Ok(ExportedServerSchedule {
             name: self.name,
             enabled: self.enabled,

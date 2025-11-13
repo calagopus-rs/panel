@@ -111,7 +111,7 @@ mod post {
                     .await
                     {
                         Ok(ssh_key) => ssh_key,
-                        Err(err) if err.to_string().contains("unique constraint") => continue,
+                        Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
                             tracing::error!("failed to create ssh key: {:#?}", err);
 
@@ -180,7 +180,7 @@ mod post {
                     .await
                     {
                         Ok(ssh_key) => ssh_key,
-                        Err(err) if err.to_string().contains("unique constraint") => continue,
+                        Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
                             tracing::error!("failed to create ssh key: {:#?}", err);
 
@@ -241,7 +241,7 @@ mod post {
                     .await
                     {
                         Ok(ssh_key) => ssh_key,
-                        Err(err) if err.to_string().contains("unique constraint") => continue,
+                        Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
                             tracing::error!("failed to create ssh key: {:#?}", err);
 

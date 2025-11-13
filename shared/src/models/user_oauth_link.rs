@@ -1,9 +1,4 @@
-use crate::{
-    models::{ByUuid, Fetchable},
-    storage::StorageUrlRetriever,
-};
-
-use super::BaseModel;
+use crate::{prelude::*, storage::StorageUrlRetriever};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -42,19 +37,21 @@ impl BaseModel for UserOAuthLink {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            user: super::user::User::get_fetchable(row.get(format!("{prefix}user_uuid").as_str())),
-            oauth_provider: super::oauth_provider::OAuthProvider::get_fetchable(
-                row.get(format!("{prefix}oauth_provider_uuid").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            user: super::user::User::get_fetchable(
+                row.try_get(format!("{prefix}user_uuid").as_str())?,
             ),
-            identifier: row.get(format!("{prefix}identifier").as_str()),
-            last_used: row.get(format!("{prefix}last_used").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            oauth_provider: super::oauth_provider::OAuthProvider::get_fetchable(
+                row.try_get(format!("{prefix}oauth_provider_uuid").as_str())?,
+            ),
+            identifier: row.try_get(format!("{prefix}identifier").as_str())?,
+            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -64,7 +61,7 @@ impl UserOAuthLink {
         user_uuid: uuid::Uuid,
         oauth_provider_uuid: uuid::Uuid,
         identifier: &str,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO user_oauth_links (user_uuid, oauth_provider_uuid, identifier, created)
@@ -79,14 +76,14 @@ impl UserOAuthLink {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn by_oauth_provider_uuid_identifier(
         database: &crate::database::Database,
         oauth_provider_uuid: uuid::Uuid,
         identifier: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -100,14 +97,14 @@ impl UserOAuthLink {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_oauth_provider_uuid_uuid(
         database: &crate::database::Database,
         oauth_provider_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -121,14 +118,14 @@ impl UserOAuthLink {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_user_uuid_uuid(
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -142,7 +139,7 @@ impl UserOAuthLink {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_user_uuid_with_pagination(
@@ -151,7 +148,7 @@ impl UserOAuthLink {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -172,10 +169,15 @@ impl UserOAuthLink {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -184,7 +186,7 @@ impl UserOAuthLink {
         user_uuid: uuid::Uuid,
         page: i64,
         per_page: i64,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -205,10 +207,15 @@ impl UserOAuthLink {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -218,7 +225,7 @@ impl UserOAuthLink {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -239,17 +246,22 @@ impl UserOAuthLink {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM user_oauth_links
@@ -273,7 +285,7 @@ impl UserOAuthLink {
             uuid: self.uuid,
             user: self
                 .user
-                .fetch(database)
+                .fetch_cached(database)
                 .await?
                 .into_api_full_object(storage_url_retriever),
             identifier: self.identifier,
@@ -289,7 +301,11 @@ impl UserOAuthLink {
     ) -> Result<ApiUserOAuthLink, anyhow::Error> {
         Ok(ApiUserOAuthLink {
             uuid: self.uuid,
-            oauth_provider: self.oauth_provider.fetch(database).await?.into_api_object(),
+            oauth_provider: self
+                .oauth_provider
+                .fetch_cached(database)
+                .await?
+                .into_api_object(),
             identifier: self.identifier,
             last_used: self.last_used.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),

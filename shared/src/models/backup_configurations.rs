@@ -1,6 +1,4 @@
-use crate::models::ByUuid;
-
-use super::BaseModel;
+use crate::prelude::*;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -202,20 +200,20 @@ impl BaseModel for BackupConfiguration {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            backup_disk: row.get(format!("{prefix}backup_disk").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            backup_disk: row.try_get(format!("{prefix}backup_disk").as_str())?,
             backup_configs: serde_json::from_value(
                 row.get(format!("{prefix}backup_configs").as_str()),
             )
             .unwrap_or_default(),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -226,8 +224,8 @@ impl BackupConfiguration {
         description: Option<&str>,
         backup_disk: super::server_backup::BackupDisk,
         mut backup_configs: BackupConfigs,
-    ) -> Result<Self, sqlx::Error> {
-        backup_configs.encrypt(database).await.unwrap();
+    ) -> Result<Self, crate::database::DatabaseError> {
+        backup_configs.encrypt(database).await?;
 
         let row = sqlx::query(&format!(
             r#"
@@ -240,11 +238,11 @@ impl BackupConfiguration {
         .bind(name)
         .bind(description)
         .bind(backup_disk)
-        .bind(serde_json::to_value(backup_configs).unwrap())
+        .bind(serde_json::to_value(backup_configs)?)
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn all_with_pagination(
@@ -252,7 +250,7 @@ impl BackupConfiguration {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -272,17 +270,22 @@ impl BackupConfiguration {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM backup_configurations
@@ -300,7 +303,7 @@ impl BackupConfiguration {
     pub async fn into_admin_api_object(
         mut self,
         database: &crate::database::Database,
-    ) -> Result<AdminApiBackupConfiguration, anyhow::Error> {
+    ) -> Result<AdminApiBackupConfiguration, crate::database::DatabaseError> {
         self.backup_configs.decrypt(database).await?;
 
         Ok(AdminApiBackupConfiguration {
@@ -319,7 +322,7 @@ impl ByUuid for BackupConfiguration {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -332,7 +335,7 @@ impl ByUuid for BackupConfiguration {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

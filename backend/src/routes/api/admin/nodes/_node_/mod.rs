@@ -162,6 +162,7 @@ mod patch {
             backup_configurations::BackupConfiguration, location::Location, node::GetNode,
             user::GetPermissionManager,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -338,7 +339,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("node with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

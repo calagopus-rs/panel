@@ -1,6 +1,4 @@
-use crate::models::ByUuid;
-
-use super::BaseModel;
+use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
@@ -92,31 +90,31 @@ impl BaseModel for OAuthProvider {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            client_id: row.get(format!("{prefix}client_id").as_str()),
-            client_secret: row.get(format!("{prefix}client_secret").as_str()),
-            auth_url: row.get(format!("{prefix}auth_url").as_str()),
-            token_url: row.get(format!("{prefix}token_url").as_str()),
-            info_url: row.get(format!("{prefix}info_url").as_str()),
-            scopes: row.get(format!("{prefix}scopes").as_str()),
-            identifier_path: row.get(format!("{prefix}identifier_path").as_str()),
-            email_path: row.get(format!("{prefix}email_path").as_str()),
-            username_path: row.get(format!("{prefix}username_path").as_str()),
-            name_first_path: row.get(format!("{prefix}name_first_path").as_str()),
-            name_last_path: row.get(format!("{prefix}name_last_path").as_str()),
-            enabled: row.get(format!("{prefix}enabled").as_str()),
-            login_only: row.get(format!("{prefix}login_only").as_str()),
-            link_viewable: row.get(format!("{prefix}link_viewable").as_str()),
-            user_manageable: row.get(format!("{prefix}user_manageable").as_str()),
-            basic_auth: row.get(format!("{prefix}basic_auth").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            client_id: row.try_get(format!("{prefix}client_id").as_str())?,
+            client_secret: row.try_get(format!("{prefix}client_secret").as_str())?,
+            auth_url: row.try_get(format!("{prefix}auth_url").as_str())?,
+            token_url: row.try_get(format!("{prefix}token_url").as_str())?,
+            info_url: row.try_get(format!("{prefix}info_url").as_str())?,
+            scopes: row.try_get(format!("{prefix}scopes").as_str())?,
+            identifier_path: row.try_get(format!("{prefix}identifier_path").as_str())?,
+            email_path: row.try_get(format!("{prefix}email_path").as_str())?,
+            username_path: row.try_get(format!("{prefix}username_path").as_str())?,
+            name_first_path: row.try_get(format!("{prefix}name_first_path").as_str())?,
+            name_last_path: row.try_get(format!("{prefix}name_last_path").as_str())?,
+            enabled: row.try_get(format!("{prefix}enabled").as_str())?,
+            login_only: row.try_get(format!("{prefix}login_only").as_str())?,
+            link_viewable: row.try_get(format!("{prefix}link_viewable").as_str())?,
+            user_manageable: row.try_get(format!("{prefix}user_manageable").as_str())?,
+            basic_auth: row.try_get(format!("{prefix}basic_auth").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -142,7 +140,7 @@ impl OAuthProvider {
         link_viewable: bool,
         user_manageable: bool,
         basic_auth: bool,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO oauth_providers (
@@ -182,7 +180,7 @@ impl OAuthProvider {
         .fetch_one(database.write())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 
     pub async fn all_with_pagination(
@@ -190,7 +188,7 @@ impl OAuthProvider {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -210,16 +208,21 @@ impl OAuthProvider {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn all_by_usable(
         database: &crate::database::Database,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -232,13 +235,15 @@ impl OAuthProvider {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM oauth_providers
@@ -384,7 +389,7 @@ impl ByUuid for OAuthProvider {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -397,7 +402,7 @@ impl ByUuid for OAuthProvider {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

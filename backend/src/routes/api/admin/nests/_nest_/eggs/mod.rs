@@ -192,7 +192,7 @@ mod post {
         .await
         {
             Ok(egg) => egg,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("egg with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

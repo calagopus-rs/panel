@@ -1,9 +1,6 @@
-use super::BaseModel;
 use crate::{
-    models::{
-        ByUuid, Fetchable,
-        database_host::{DatabaseTransaction, DatabaseType},
-    },
+    models::database_host::{DatabaseTransaction, DatabaseType},
+    prelude::*,
     storage::StorageUrlRetriever,
 };
 use rand::distr::SampleString;
@@ -60,21 +57,21 @@ impl BaseModel for ServerDatabase {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
             server: super::server::Server::get_fetchable(
-                row.get(format!("{prefix}server_uuid").as_str()),
+                row.try_get(format!("{prefix}server_uuid").as_str())?,
             ),
-            database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row),
-            name: row.get(format!("{prefix}name").as_str()),
-            locked: row.get(format!("{prefix}locked").as_str()),
-            username: row.get(format!("{prefix}username").as_str()),
-            password: row.get(format!("{prefix}password").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row)?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            locked: row.try_get(format!("{prefix}locked").as_str())?,
+            username: row.try_get(format!("{prefix}username").as_str())?,
+            password: row.try_get(format!("{prefix}password").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -84,7 +81,7 @@ impl ServerDatabase {
         server: &super::server::Server,
         database_host: &super::database_host::DatabaseHost,
         name: &str,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let server_id = format!("{:08x}", server.uuid_short);
         let name = format!("s{server_id}_{name}");
         let username = format!(
@@ -143,7 +140,7 @@ impl ServerDatabase {
         .bind(database_host.uuid)
         .bind(&name)
         .bind(&username)
-        .bind(database.encrypt(password.clone()).await.unwrap())
+        .bind(database.encrypt(password.clone()).await?)
         .fetch_one(database.write())
         .await
         {
@@ -166,7 +163,7 @@ impl ServerDatabase {
                     }
                 }
 
-                return Err(err);
+                return Err(err.into());
             }
         };
 
@@ -187,17 +184,17 @@ impl ServerDatabase {
                 .await
                 .ok();
 
-                return Err(err);
+                return Err(err.into());
             }
         }
 
-        Ok(row.get("uuid"))
+        Ok(row.try_get("uuid")?)
     }
 
     pub async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -211,14 +208,14 @@ impl ServerDatabase {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_server_uuid_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -233,7 +230,7 @@ impl ServerDatabase {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_database_host_uuid_with_pagination(
@@ -242,7 +239,7 @@ impl ServerDatabase {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -264,10 +261,15 @@ impl ServerDatabase {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -277,7 +279,7 @@ impl ServerDatabase {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -299,17 +301,22 @@ impl ServerDatabase {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn all_by_server_uuid(
         database: &crate::database::Database,
         server_uuid: uuid::Uuid,
-    ) -> Result<Vec<Self>, sqlx::Error> {
+    ) -> Result<Vec<Self>, crate::database::DatabaseError> {
         let rows = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -323,7 +330,9 @@ impl ServerDatabase {
         .fetch_all(database.read())
         .await?;
 
-        Ok(rows.into_iter().map(|row| Self::map(None, &row)).collect())
+        rows.into_iter()
+            .map(|row| Self::map(None, &row))
+            .try_collect_vec()
     }
 
     pub async fn count_by_server_uuid(
@@ -400,7 +409,10 @@ impl ServerDatabase {
         Ok(new_password)
     }
 
-    pub async fn get_size(&self, database: &crate::database::Database) -> Result<i64, sqlx::Error> {
+    pub async fn get_size(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<i64, crate::database::DatabaseError> {
         match self.database_host.get_connection(database).await? {
             crate::models::database_host::DatabasePool::Mysql(pool) => {
                 let row = sqlx::query(&format!(
@@ -422,7 +434,10 @@ impl ServerDatabase {
         }
     }
 
-    pub async fn delete(&self, database: &crate::database::Database) -> Result<(), sqlx::Error> {
+    pub async fn delete(
+        &self,
+        database: &crate::database::Database,
+    ) -> Result<(), crate::database::DatabaseError> {
         match self.database_host.get_connection(database).await? {
             crate::models::database_host::DatabasePool::Mysql(pool) => {
                 sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", self.name))

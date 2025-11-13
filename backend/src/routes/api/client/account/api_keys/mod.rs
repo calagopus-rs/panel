@@ -167,7 +167,7 @@ mod post {
         .await
         {
             Ok(api_key) => api_key,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("api key with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

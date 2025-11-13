@@ -159,6 +159,7 @@ mod patch {
             ByUuid, admin_activity::GetAdminActivityLogger,
             backup_configurations::BackupConfiguration, user::GetPermissionManager,
         },
+        prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -256,7 +257,7 @@ mod patch {
         .await
         {
             Ok(_) => {}
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("location with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

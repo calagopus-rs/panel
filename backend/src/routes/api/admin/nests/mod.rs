@@ -131,7 +131,7 @@ mod post {
         .await
         {
             Ok(nest) => nest,
-            Err(err) if err.to_string().contains("unique constraint") => {
+            Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("nest with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();

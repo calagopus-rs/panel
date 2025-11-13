@@ -1,5 +1,4 @@
-use super::BaseModel;
-use crate::{models::ByUuid, response::ApiResponse, storage::StorageUrlRetriever};
+use crate::{prelude::*, response::ApiResponse, storage::StorageUrlRetriever};
 use axum::http::StatusCode;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
@@ -207,30 +206,30 @@ impl BaseModel for User {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
             role: if row
                 .try_get::<uuid::Uuid, _>(format!("{prefix}role_uuid").as_str())
                 .is_ok()
             {
-                Some(super::role::Role::map(Some("role_"), row))
+                Some(super::role::Role::map(Some("role_"), row)?)
             } else {
                 None
             },
-            external_id: row.get(format!("{prefix}external_id").as_str()),
-            avatar: row.get(format!("{prefix}avatar").as_str()),
-            username: row.get(format!("{prefix}username").as_str()),
-            email: row.get(format!("{prefix}email").as_str()),
-            name_first: row.get(format!("{prefix}name_first").as_str()),
-            name_last: row.get(format!("{prefix}name_last").as_str()),
-            admin: row.get(format!("{prefix}admin").as_str()),
-            totp_enabled: row.get(format!("{prefix}totp_enabled").as_str()),
-            totp_secret: row.get(format!("{prefix}totp_secret").as_str()),
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            external_id: row.try_get(format!("{prefix}external_id").as_str())?,
+            avatar: row.try_get(format!("{prefix}avatar").as_str())?,
+            username: row.try_get(format!("{prefix}username").as_str())?,
+            email: row.try_get(format!("{prefix}email").as_str())?,
+            name_first: row.try_get(format!("{prefix}name_first").as_str())?,
+            name_last: row.try_get(format!("{prefix}name_last").as_str())?,
+            admin: row.try_get(format!("{prefix}admin").as_str())?,
+            totp_enabled: row.try_get(format!("{prefix}totp_enabled").as_str())?,
+            totp_secret: row.try_get(format!("{prefix}totp_secret").as_str())?,
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -246,7 +245,7 @@ impl User {
         name_last: &str,
         password: &str,
         admin: bool,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
             INSERT INTO users (role_uuid, external_id, username, email, name_first, name_last, password, admin)
@@ -265,7 +264,7 @@ impl User {
         .fetch_one(database.write())
         .await?;
 
-        Ok(row.get("uuid"))
+        Ok(row.try_get("uuid")?)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -278,7 +277,7 @@ impl User {
         name_first: &str,
         name_last: &str,
         password: &str,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
             INSERT INTO users (role_uuid, external_id, username, email, name_first, name_last, password, admin)
@@ -296,13 +295,13 @@ impl User {
         .fetch_one(database.write())
         .await?;
 
-        Ok(row.get("uuid"))
+        Ok(row.try_get("uuid")?)
     }
 
     pub async fn by_external_id(
         database: &crate::database::Database,
         external_id: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -317,7 +316,7 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_session_cached(
@@ -348,12 +347,12 @@ impl User {
                 .fetch_optional(database.read())
                 .await?;
 
-                Ok::<_, anyhow::Error>(row.map(|row| {
-                    (
-                        Self::map(None, &row),
-                        super::user_session::UserSession::map(Some("session_"), &row),
-                    )
-                }))
+                row.try_map(|row| {
+                    Ok::<_, anyhow::Error>((
+                        Self::map(None, &row)?,
+                        super::user_session::UserSession::map(Some("session_"), &row)?,
+                    ))
+                })
             })
             .await
     }
@@ -381,12 +380,12 @@ impl User {
                 .fetch_optional(database.read())
                 .await?;
 
-                Ok::<_, anyhow::Error>(row.map(|row| {
-                    (
-                        Self::map(None, &row),
-                        super::user_api_key::UserApiKey::map(Some("api_key_"), &row),
-                    )
-                }))
+                row.try_map(|row| {
+                    Ok::<_, anyhow::Error>((
+                        Self::map(None, &row)?,
+                        super::user_api_key::UserApiKey::map(Some("api_key_"), &row)?,
+                    ))
+                })
             })
             .await
     }
@@ -394,7 +393,10 @@ impl User {
     pub async fn by_credential_id(
         database: &crate::database::Database,
         credential_id: &CredentialID,
-    ) -> Result<Option<(Self, super::user_security_key::UserSecurityKey)>, sqlx::Error> {
+    ) -> Result<
+        Option<(Self, super::user_security_key::UserSecurityKey)>,
+        crate::database::DatabaseError,
+    > {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}, {}
@@ -410,18 +412,18 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| {
-            (
-                Self::map(None, &row),
-                super::user_security_key::UserSecurityKey::map(Some("security_key_"), &row),
-            )
-        }))
+        row.try_map(|row| {
+            Ok((
+                Self::map(None, &row)?,
+                super::user_security_key::UserSecurityKey::map(Some("security_key_"), &row)?,
+            ))
+        })
     }
 
     pub async fn by_email(
         database: &crate::database::Database,
         email: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -435,14 +437,14 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_username_password(
         database: &crate::database::Database,
         username: &str,
         password: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -457,14 +459,14 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_username_public_key(
         database: &crate::database::Database,
         username: &str,
         public_key: russh::keys::PublicKey,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -484,14 +486,14 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_email_password(
         database: &crate::database::Database,
         email: &str,
         password: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -506,7 +508,7 @@ impl User {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_role_uuid_with_pagination(
@@ -515,7 +517,7 @@ impl User {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -537,10 +539,15 @@ impl User {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -549,7 +556,7 @@ impl User {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -570,17 +577,22 @@ impl User {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM users
@@ -598,7 +610,7 @@ impl User {
         &self,
         database: &crate::database::Database,
         password: &str,
-    ) -> Result<bool, sqlx::Error> {
+    ) -> Result<bool, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
             SELECT 1
@@ -618,7 +630,7 @@ impl User {
         &self,
         database: &crate::database::Database,
         password: &str,
-    ) -> Result<(), sqlx::Error> {
+    ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             UPDATE users
@@ -678,7 +690,7 @@ impl ByUuid for User {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -692,7 +704,7 @@ impl ByUuid for User {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 

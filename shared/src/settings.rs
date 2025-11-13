@@ -581,7 +581,7 @@ pub struct SettingsGuard<'a> {
 }
 
 impl<'a> SettingsGuard<'a> {
-    pub async fn save(self) -> Result<(), sqlx::Error> {
+    pub async fn save(self) -> Result<(), crate::database::DatabaseError> {
         let (keys, values) = self.settings.serialize(&self.database);
         drop(self.settings);
 

@@ -1,5 +1,4 @@
-use super::{BaseModel, ByUuid, Fetchable};
-use crate::{State, storage::StorageUrlRetriever};
+use crate::{State, prelude::*, storage::StorageUrlRetriever};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -159,13 +158,13 @@ impl BaseModel for Server {
     }
 
     #[inline]
-    fn map(prefix: Option<&str>, row: &PgRow) -> Self {
+    fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError> {
         let prefix = prefix.unwrap_or_default();
 
-        Self {
-            uuid: row.get(format!("{prefix}uuid").as_str()),
-            uuid_short: row.get(format!("{prefix}uuid_short").as_str()),
-            external_id: row.get(format!("{prefix}external_id").as_str()),
+        Ok(Self {
+            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid_short: row.try_get(format!("{prefix}uuid_short").as_str())?,
+            external_id: row.try_get(format!("{prefix}external_id").as_str())?,
             allocation: if row
                 .try_get::<uuid::Uuid, _>(format!("{prefix}allocation_uuid").as_str())
                 .is_ok()
@@ -173,55 +172,56 @@ impl BaseModel for Server {
                 Some(super::server_allocation::ServerAllocation::map(
                     Some("allocation_"),
                     row,
-                ))
+                )?)
             } else {
                 None
             },
             destination_allocation_uuid: row
                 .try_get::<uuid::Uuid, _>(format!("{prefix}destination_allocation_uuid").as_str())
                 .ok(),
-            node: super::node::Node::get_fetchable(row.get(format!("{prefix}node_uuid").as_str())),
+            node: super::node::Node::get_fetchable(
+                row.try_get(format!("{prefix}node_uuid").as_str())?,
+            ),
             destination_node: super::node::Node::get_fetchable_from_row(
                 row,
                 format!("{prefix}destination_node_uuid"),
             ),
-            owner: super::user::User::map(Some("owner_"), row),
-            egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)),
-            nest: Box::new(super::nest::Nest::map(Some("nest_"), row)),
+            owner: super::user::User::map(Some("owner_"), row)?,
+            egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)?),
+            nest: Box::new(super::nest::Nest::map(Some("nest_"), row)?),
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
                     format!("{prefix}backup_configuration_uuid"),
                 ),
-            status: row.get(format!("{prefix}status").as_str()),
-            suspended: row.get(format!("{prefix}suspended").as_str()),
-            name: row.get(format!("{prefix}name").as_str()),
-            description: row.get(format!("{prefix}description").as_str()),
-            memory: row.get(format!("{prefix}memory").as_str()),
-            swap: row.get(format!("{prefix}swap").as_str()),
-            disk: row.get(format!("{prefix}disk").as_str()),
-            io_weight: row.get(format!("{prefix}io_weight").as_str()),
-            cpu: row.get(format!("{prefix}cpu").as_str()),
-            pinned_cpus: row.get(format!("{prefix}pinned_cpus").as_str()),
-            startup: row.get(format!("{prefix}startup").as_str()),
-            image: row.get(format!("{prefix}image").as_str()),
+            status: row.try_get(format!("{prefix}status").as_str())?,
+            suspended: row.try_get(format!("{prefix}suspended").as_str())?,
+            name: row.try_get(format!("{prefix}name").as_str())?,
+            description: row.try_get(format!("{prefix}description").as_str())?,
+            memory: row.try_get(format!("{prefix}memory").as_str())?,
+            swap: row.try_get(format!("{prefix}swap").as_str())?,
+            disk: row.try_get(format!("{prefix}disk").as_str())?,
+            io_weight: row.try_get(format!("{prefix}io_weight").as_str())?,
+            cpu: row.try_get(format!("{prefix}cpu").as_str())?,
+            pinned_cpus: row.try_get(format!("{prefix}pinned_cpus").as_str())?,
+            startup: row.try_get(format!("{prefix}startup").as_str())?,
+            image: row.try_get(format!("{prefix}image").as_str())?,
             auto_kill: serde_json::from_value(
-                row.get::<serde_json::Value, _>(format!("{prefix}auto_kill").as_str()),
-            )
-            .unwrap(),
-            timezone: row.get(format!("{prefix}timezone").as_str()),
-            allocation_limit: row.get(format!("{prefix}allocation_limit").as_str()),
-            database_limit: row.get(format!("{prefix}database_limit").as_str()),
-            backup_limit: row.get(format!("{prefix}backup_limit").as_str()),
-            schedule_limit: row.get(format!("{prefix}schedule_limit").as_str()),
+                row.try_get::<serde_json::Value, _>(format!("{prefix}auto_kill").as_str())?,
+            )?,
+            timezone: row.try_get(format!("{prefix}timezone").as_str())?,
+            allocation_limit: row.try_get(format!("{prefix}allocation_limit").as_str())?,
+            database_limit: row.try_get(format!("{prefix}database_limit").as_str())?,
+            backup_limit: row.try_get(format!("{prefix}backup_limit").as_str())?,
+            schedule_limit: row.try_get(format!("{prefix}schedule_limit").as_str())?,
             subuser_permissions: row
                 .try_get::<Vec<String>, _>("permissions")
                 .map(Arc::new)
                 .ok(),
             subuser_ignored_files: row.try_get::<Vec<String>, _>("ignored_files").ok(),
             subuser_ignored_files_overrides: None,
-            created: row.get(format!("{prefix}created").as_str()),
-        }
+            created: row.try_get(format!("{prefix}created").as_str())?,
+        })
     }
 }
 
@@ -246,7 +246,7 @@ impl Server {
         image: &str,
         timezone: Option<&str>,
         feature_limits: &ApiServerFeatureLimits,
-    ) -> Result<uuid::Uuid, sqlx::Error> {
+    ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let mut transaction = database.write().begin().await?;
         let mut attempts = 0;
 
@@ -368,7 +368,7 @@ impl Server {
 
                     transaction.commit().await?;
 
-                    if let Err(err) = node
+                    if let Err((status, err)) = node
                         .api_client(database)
                         .post_servers(&wings_api::servers::post::RequestBody {
                             uuid,
@@ -383,7 +383,7 @@ impl Server {
                             .execute(database.write())
                             .await?;
 
-                        return Err(sqlx::Error::Io(std::io::Error::other(err.1.error)));
+                        return Err(anyhow::anyhow!("status code {status}: {}", err.error).into());
                     }
 
                     return Ok(uuid);
@@ -396,7 +396,7 @@ impl Server {
                         );
                         transaction.rollback().await?;
 
-                        return Err(err);
+                        return Err(err.into());
                     }
                     attempts += 1;
 
@@ -415,7 +415,7 @@ impl Server {
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
         uuid: uuid::Uuid,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -435,13 +435,13 @@ impl Server {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_external_id(
         database: &crate::database::Database,
         external_id: &str,
-    ) -> Result<Option<Self>, sqlx::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -460,13 +460,13 @@ impl Server {
         .fetch_optional(database.read())
         .await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_identifier(
         database: &crate::database::Database,
         identifier: &str,
-    ) -> Result<Option<Self>, anyhow::Error> {
+    ) -> Result<Option<Self>, crate::database::DatabaseError> {
         let query = format!(
             r#"
             SELECT {}
@@ -489,13 +489,13 @@ impl Server {
 
         let mut row = sqlx::query(&query);
         row = match identifier.len() {
-            8 => row.bind(u32::from_str_radix(identifier, 16)? as i32),
-            36 => row.bind(uuid::Uuid::parse_str(identifier)?),
+            8 => row.bind(u32::from_str_radix(identifier, 16).map_err(anyhow::Error::new)? as i32),
+            36 => row.bind(uuid::Uuid::parse_str(identifier).map_err(anyhow::Error::new)?),
             _ => return Ok(None),
         };
         let row = row.fetch_optional(database.read()).await?;
 
-        Ok(row.map(|row| Self::map(None, &row)))
+        row.try_map(|row| Self::map(None, &row))
     }
 
     pub async fn by_user_identifier_cached(
@@ -535,7 +535,7 @@ impl Server {
                 };
                 let row = row.fetch_optional(database.read()).await?;
 
-                Ok(row.map(|row| Self::map(None, &row)))
+                Ok(row.try_map(|row| Self::map(None, &row))?)
             })
             .await
     }
@@ -546,7 +546,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -573,10 +573,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -587,7 +592,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -618,10 +623,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -631,7 +641,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -661,10 +671,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -674,7 +689,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -704,10 +719,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -717,7 +737,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -744,10 +764,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -757,7 +782,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -784,10 +809,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -796,7 +826,7 @@ impl Server {
         page: i64,
         per_page: i64,
         search: Option<&str>,
-    ) -> Result<super::Pagination<Self>, sqlx::Error> {
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
         let offset = (page - 1) * per_page;
 
         let rows = sqlx::query(&format!(
@@ -822,10 +852,15 @@ impl Server {
         .await?;
 
         Ok(super::Pagination {
-            total: rows.first().map_or(0, |row| row.get("total_count")),
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
             per_page,
             page,
-            data: rows.into_iter().map(|row| Self::map(None, &row)).collect(),
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
         })
     }
 
@@ -1128,24 +1163,25 @@ impl Server {
                 backups: backups.into_iter().map(|b| b.uuid).collect(),
                 schedules: schedules
                     .into_iter()
-                    .map(|s| wings_api::Schedule {
-                        uuid: s.uuid,
-                        triggers: s.triggers,
-                        condition: s.condition,
-                        actions: schedule_steps
-                            .remove(&s.uuid)
-                            .unwrap_or_default()
-                            .into_iter()
-                            .map(|step| {
-                                serde_json::to_value(wings_api::ScheduleAction {
-                                    uuid: step.uuid,
-                                    inner: serde_json::from_value(step.action).unwrap(),
+                    .map(|s| {
+                        Ok::<_, serde_json::Error>(wings_api::Schedule {
+                            uuid: s.uuid,
+                            triggers: s.triggers,
+                            condition: s.condition,
+                            actions: schedule_steps
+                                .remove(&s.uuid)
+                                .unwrap_or_default()
+                                .into_iter()
+                                .map(|step| {
+                                    serde_json::to_value(wings_api::ScheduleAction {
+                                        uuid: step.uuid,
+                                        inner: serde_json::from_value(step.action)?,
+                                    })
                                 })
-                                .unwrap()
-                            })
-                            .collect(),
+                                .try_collect_vec()?,
+                        })
                     })
-                    .collect(),
+                    .try_collect_vec()?,
                 allocations: wings_api::ServerConfigurationAllocations {
                     force_outgoing_ip: self.egg.force_outgoing_ip,
                     default: self.allocation.map(|a| {
@@ -1351,7 +1387,7 @@ impl ByUuid for Server {
     async fn by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,
-    ) -> Result<Self, sqlx::Error> {
+    ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
             SELECT {}
@@ -1370,7 +1406,7 @@ impl ByUuid for Server {
         .fetch_one(database.read())
         .await?;
 
-        Ok(Self::map(None, &row))
+        Self::map(None, &row)
     }
 }
 
