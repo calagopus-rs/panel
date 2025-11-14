@@ -23,19 +23,31 @@ pub trait IteratorExtension<R, E>: Iterator<Item = Result<R, E>> {
 impl<R, E, T: Iterator<Item = Result<R, E>>> IteratorExtension<R, E> for T {}
 
 pub trait OptionExtension<T> {
-    fn try_map<R, E, F: FnMut(T) -> Result<R, E>>(self, f: F) -> Result<Option<R>, E>
-    where
-        Self: Sized;
+    fn try_map<R, E, F: FnMut(T) -> Result<R, E>>(self, f: F) -> Result<Option<R>, E>;
 }
 
 impl<T> OptionExtension<T> for Option<T> {
-    fn try_map<R, E, F: FnMut(T) -> Result<R, E>>(self, mut f: F) -> Result<Option<R>, E>
-    where
-        Self: Sized,
-    {
+    #[inline]
+    fn try_map<R, E, F: FnMut(T) -> Result<R, E>>(self, mut f: F) -> Result<Option<R>, E> {
         match self {
             Some(item) => Ok(Some(f(item)?)),
             None => Ok(None),
+        }
+    }
+}
+
+#[async_trait::async_trait]
+pub trait AsyncOptionExtension<T, Fut: Future<Output = T>> {
+    async fn awaited(self) -> Option<T>;
+}
+
+#[async_trait::async_trait]
+impl<T, Fut: Future<Output = T> + Send> AsyncOptionExtension<T, Fut> for Option<Fut> {
+    #[inline]
+    async fn awaited(self) -> Option<T> {
+        match self {
+            Some(item) => Some(item.await),
+            None => None,
         }
     }
 }

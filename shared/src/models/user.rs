@@ -589,6 +589,18 @@ impl User {
         })
     }
 
+    pub async fn count(database: &crate::database::Database) -> i64 {
+        sqlx::query_scalar(
+            r#"
+            SELECT COUNT(*)
+            FROM users
+            "#,
+        )
+        .fetch_one(database.read())
+        .await
+        .unwrap_or(0)
+    }
+
     pub async fn delete_by_uuid(
         database: &crate::database::Database,
         uuid: uuid::Uuid,

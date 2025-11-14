@@ -1,3 +1,5 @@
+use crate::{cap::CapFilesystem, prelude::AsyncOptionExtension};
+use futures_util::FutureExt;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -7,8 +9,6 @@ use std::{
 };
 use tokio::sync::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use utoipa::ToSchema;
-
-use crate::cap::CapFilesystem;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -232,6 +232,8 @@ impl AppSettingsServer {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettings {
+    pub oobe_step: Option<String>,
+
     pub storage_driver: StorageDriver,
     pub mail_mode: MailMode,
     pub captcha_provider: CaptchaProvider,
@@ -251,6 +253,9 @@ impl AppSettings {
     ) -> (Vec<&'static str>, Vec<String>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
+
+        keys.push("::oobe_step");
+        values.push(self.oobe_step.clone().unwrap_or_else(|| "".to_string()));
 
         match &self.storage_driver {
             StorageDriver::Filesystem { path } => {
@@ -417,11 +422,22 @@ impl AppSettings {
         (keys, values)
     }
 
-    pub fn deserialize(
+    pub async fn deserialize(
         map: &mut HashMap<String, String>,
         database: &crate::database::Database,
     ) -> Self {
         AppSettings {
+            oobe_step: match map.remove("::oobe_step") {
+                Some(step) if step.is_empty() => None,
+                Some(step) => Some(step),
+                None => {
+                    if crate::models::user::User::count(database).await > 0 {
+                        None
+                    } else {
+                        Some("register".into())
+                    }
+                }
+            },
             storage_driver: match map.remove("::storage_driver").as_deref() {
                 Some("filesystem") => StorageDriver::Filesystem {
                     path: map.remove("::storage_filesystem_path").unwrap_or_else(|| {
@@ -436,28 +452,24 @@ impl AppSettings {
                     public_url: map
                         .remove("::storage_s3_public_url")
                         .unwrap_or_else(|| "https://your-s3-bucket.s3.amazonaws.com".to_string()),
-                    access_key: map
-                        .remove("::storage_s3_access_key")
-                        .and_then(|s| {
-                            if s.is_empty() {
-                                None
-                            } else {
-                                base32::decode(base32::Alphabet::Z, &s)
-                                    .and_then(|b| database.decrypt_sync(&b))
-                            }
-                        })
-                        .unwrap_or("your-access-key".to_string()),
-                    secret_key: map
-                        .remove("::storage_s3_secret_key")
-                        .and_then(|s| {
-                            if s.is_empty() {
-                                None
-                            } else {
-                                base32::decode(base32::Alphabet::Z, &s)
-                                    .and_then(|b| database.decrypt_sync(&b))
-                            }
-                        })
-                        .unwrap_or("your-secret-key".to_string()),
+                    access_key: match map.remove("::storage_s3_access_key") {
+                        Some(access_key) => base32::decode(base32::Alphabet::Z, &access_key)
+                            .map(|b| database.decrypt(b).map(Result::ok))
+                            .awaited()
+                            .await
+                            .flatten(),
+                        None => None,
+                    }
+                    .unwrap_or_else(|| "your-access-key".into()),
+                    secret_key: match map.remove("::storage_s3_secret_key") {
+                        Some(secret_key) => base32::decode(base32::Alphabet::Z, &secret_key)
+                            .map(|b| database.decrypt(b).map(Result::ok))
+                            .awaited()
+                            .await
+                            .flatten(),
+                        None => None,
+                    }
+                    .unwrap_or_else(|| "your-secret-key".into()),
                     bucket: map
                         .remove("::storage_s3_bucket")
                         .unwrap_or_else(|| "your-s3-bucket".to_string()),
@@ -492,22 +504,34 @@ impl AppSettings {
                         .remove("::mail_smtp_port")
                         .and_then(|s| s.parse().ok())
                         .unwrap_or(587),
-                    username: map.remove("::mail_smtp_username").and_then(|s| {
-                        if s.is_empty() {
-                            None
-                        } else {
-                            base32::decode(base32::Alphabet::Z, &s)
-                                .and_then(|b| database.decrypt_sync(&b))
+                    username: match map.remove("::mail_smtp_username") {
+                        Some(username) => {
+                            if username.is_empty() {
+                                None
+                            } else {
+                                base32::decode(base32::Alphabet::Z, &username)
+                                    .map(|b| database.decrypt(b).map(Result::ok))
+                                    .awaited()
+                                    .await
+                                    .flatten()
+                            }
                         }
-                    }),
-                    password: map.remove("::mail_smtp_password").and_then(|s| {
-                        if s.is_empty() {
-                            None
-                        } else {
-                            base32::decode(base32::Alphabet::Z, &s)
-                                .and_then(|b| database.decrypt_sync(&b))
+                        None => None,
+                    },
+                    password: match map.remove("::mail_smtp_password") {
+                        Some(username) => {
+                            if username.is_empty() {
+                                None
+                            } else {
+                                base32::decode(base32::Alphabet::Z, &username)
+                                    .map(|b| database.decrypt(b).map(Result::ok))
+                                    .awaited()
+                                    .await
+                                    .flatten()
+                            }
                         }
-                    }),
+                        None => None,
+                    },
                     use_tls: map
                         .remove("::mail_smtp_use_tls")
                         .map(|s| s == "true")
@@ -656,7 +680,7 @@ impl Settings {
             map.insert(row.key, row.value);
         }
 
-        AppSettings::deserialize(&mut map, database)
+        AppSettings::deserialize(&mut map, database).await
     }
 
     pub async fn new(database: Arc<crate::database::Database>) -> Self {

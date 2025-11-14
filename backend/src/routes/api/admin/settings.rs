@@ -65,6 +65,8 @@ mod put {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
+        oobe_step: Option<String>,
+
         storage_driver: Option<shared::settings::StorageDriver>,
         mail_mode: Option<shared::settings::MailMode>,
         captcha_provider: Option<shared::settings::CaptchaProvider>,
@@ -93,6 +95,15 @@ mod put {
 
         let mut settings = state.settings.get_mut().await;
 
+        if let Some(oobe_step) = data.oobe_step {
+            if oobe_step.is_empty() {
+                if settings.oobe_step.is_some() {
+                    settings.oobe_step = None;
+                }
+            } else {
+                settings.oobe_step = Some(oobe_step);
+            }
+        }
         if let Some(storage_driver) = data.storage_driver {
             settings.storage_driver = storage_driver;
         }
