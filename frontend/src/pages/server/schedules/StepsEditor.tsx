@@ -29,7 +29,10 @@ export default function StepsEditor() {
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
 
-  const nextStepOrder = useMemo(() => Math.max(...steps.map((s) => s.order)) ?? 1, [steps]);
+  const nextStepOrder = useMemo(
+    () => (Number.isFinite(Math.max(...steps.map((s) => s.order))) ? Math.max(...steps.map((s) => s.order)) : 1),
+    [steps],
+  );
 
   useEffect(() => {
     if (params.id) {
