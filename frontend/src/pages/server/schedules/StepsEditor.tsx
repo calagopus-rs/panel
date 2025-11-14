@@ -45,7 +45,7 @@ export default function StepsEditor() {
 
   const sortedSteps = useMemo(() => [...steps].sort((a, b) => a.order - b.order), [steps]);
 
-  if (!schedule || !steps.length) {
+  if (!schedule || !steps) {
     return (
       <div className={'w-full'}>
         <Spinner.Centered />
