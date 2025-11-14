@@ -113,15 +113,15 @@ impl PermissionManager {
 
         if self.server_subuser_permissions.is_none() && self.role_server_permissions.is_none() {
             if let Some(api_key_permissions) = &self.api_key_server_permissions
-                && api_key_permissions.iter().any(|p| p == permission)
+                && api_key_permissions.iter().all(|p| p != permission)
             {
-                return Ok(());
+                return Err(ApiResponse::error(&format!(
+                    "you do not have permission to perform this action: {permission}"
+                ))
+                .with_status(StatusCode::FORBIDDEN));
             }
 
-            return Err(ApiResponse::error(&format!(
-                "you do not have permission to perform this action: {permission}"
-            ))
-            .with_status(StatusCode::FORBIDDEN));
+            return Ok(());
         }
 
         let has_role_permission = if let Some(permissions) = &self.role_server_permissions {
