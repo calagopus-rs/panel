@@ -1,7 +1,7 @@
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Divider, Group, ModalProps, Stack, Text } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createScheduleStep from '@/api/server/schedules/steps/createScheduleStep';
 import updateScheduleStep from '@/api/server/schedules/steps/updateScheduleStep';
@@ -57,17 +57,6 @@ export default function StepCreateOrUpdateModal({
       } as ScheduleStep),
   );
 
-  useEffect(() => {
-    if (propStep) {
-      setStep(propStep);
-    } else {
-      setStep({
-        action: scheduleStepDefaultMapping.sleep,
-        order: 1,
-      } as ScheduleStep);
-    }
-  }, [propStep, opened]);
-
   const doCreateOrUpdate = () => {
     setLoading(true);
 
@@ -97,7 +86,7 @@ export default function StepCreateOrUpdateModal({
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} title={step ? 'Edit Schedule Step' : 'Create Schedule Step'} size={'lg'}>
+    <Modal opened={opened} onClose={onClose} title={propStep ? 'Edit Schedule Step' : 'Create Schedule Step'} size={'lg'}>
       <Stack gap={'md'}>
         <Select
           label={'Action Type'}
