@@ -179,7 +179,12 @@ export default function ServerItem({
           <div className={'flex flex-row items-center gap-2'}>
             {showGroupAddButton && (
               <Tooltip label={serverGroups.length === 0 ? 'No groups available to add to' : 'Add to Group'}>
-                <ActionIcon size={'lg'} disabled={serverGroups.length === 0} onClick={() => setOpenModal('add-group')}>
+                <ActionIcon
+                  size={'input-sm'}
+                  variant={'light'}
+                  disabled={serverGroups.length === 0}
+                  onClick={() => setOpenModal('add-group')}
+                >
                   <FontAwesomeIcon icon={faAdd} />
                 </ActionIcon>
               </Tooltip>

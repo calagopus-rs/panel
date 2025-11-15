@@ -1,7 +1,7 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, ModalProps, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
+import { ActionIcon, Group, ModalProps, Popover, Stack, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import createSchedule from '@/api/server/schedules/createSchedule';
 import Button from '@/elements/Button';
@@ -12,8 +12,62 @@ import Modal from '@/elements/modals/Modal';
 import { serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import updateSchedule from '@/api/server/schedules/updateSchedule';
 
-export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
+interface CrontabEditorProps {
+  value: string;
+  setValue: (value: string) => void;
+}
+
+const CRON_SEGMENTS = ['Second', 'Minute', 'Hour', 'Day', 'Month', 'Weekday'] as const;
+
+function CrontabEditor({ value, setValue }: CrontabEditorProps) {
+  const [segments, setSegments] = useState(['0', '0', '0', '0', '0', '0']);
+
+  useEffect(() => {
+    const newSegments = value.split(' ');
+    if (segments.every((s, i) => newSegments[i] === s)) {
+      return;
+    }
+
+    for (let i = 0; i < CRON_SEGMENTS.length; i++) {
+      if (!newSegments[i]) {
+        newSegments[i] = '0';
+      }
+    }
+
+    setSegments(newSegments);
+  }, [segments, value]);
+
+  const setSegment = (index: number, value: string) => {
+    const newSegments = [...segments.slice(0, index), value, ...segments.slice(index + 1)];
+    setSegments(newSegments);
+
+    setValue(newSegments.join(' '));
+  };
+
+  return (
+    <div className={'grid grid-cols-3 gap-2 w-64'}>
+      {CRON_SEGMENTS.map((label, i) => (
+        <TextInput
+          key={label}
+          label={label}
+          placeholder={label}
+          value={segments[i]}
+          className={'flex-1'}
+          onChange={(e) => setSegment(i, e.target.value)}
+        />
+      ))}
+    </div>
+  );
+}
+
+type Props = ModalProps & {
+  propSchedule?: ServerSchedule;
+  onScheduleUpdate?: (schedule: Partial<ServerSchedule>) => void;
+};
+
+export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUpdate, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, addSchedule } = useServerStore();
 
@@ -23,31 +77,48 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
   const [condition, setCondition] = useState<ScheduleCondition>({ type: 'none' });
   const [loading, setLoading] = useState(false);
 
-  const doClose = () => {
-    setName('');
-    setEnabled(true);
-    setTriggers([]);
-    setCondition({ type: 'none' });
-    onClose();
-  };
+  useEffect(() => {
+    if (propSchedule) {
+      setName(propSchedule.name);
+      setEnabled(propSchedule.enabled);
+      setTriggers(propSchedule.triggers);
+    }
+  }, [propSchedule]);
 
-  const doCreate = () => {
+  const doCreateOrUpdate = () => {
     setLoading(true);
 
-    createSchedule(server.uuid, { name, enabled, triggers, condition })
-      .then((schedule) => {
-        addToast('Schedule created.', 'success');
-        onClose();
-        addSchedule(schedule);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      })
-      .finally(() => setLoading(false));
+    if (propSchedule?.uuid) {
+      updateSchedule(server.uuid, propSchedule.uuid, { name, enabled, triggers })
+        .then(() => {
+          addToast('Schedule updated.', 'success');
+          onClose();
+          onScheduleUpdate({ name, enabled, triggers });
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => setLoading(false));
+    } else {
+      createSchedule(server.uuid, { name, enabled, triggers, condition })
+        .then((schedule) => {
+          addToast('Schedule created.', 'success');
+          setName('');
+          setEnabled(true);
+          setTriggers([]);
+          setCondition({ type: 'none' });
+          onClose();
+          addSchedule(schedule);
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => setLoading(false));
+    }
   };
 
   return (
-    <Modal title={'Create Schedule'} onClose={doClose} opened={opened} size={'xl'}>
+    <Modal title={`${propSchedule?.uuid ? 'Update' : 'Create'} Schedule`} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           label={'Schedule Name'}
@@ -59,13 +130,16 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
         <Switch label={'Enabled'} name={'enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
 
         <div>
-          <Text mb={'sm'}>Triggers</Text>
+          <Title order={4} mb={'sm'}>
+            Triggers
+          </Title>
           {triggers.map((trigger, index) => (
-            <Group key={index} grow mb={'sm'}>
+            <div key={`trigger-${index}`} className={'flex flex-row items-end space-x-2 mb-2'}>
               <Select
                 label={`Trigger ${index + 1}`}
                 placeholder={`Trigger ${index + 1}`}
                 value={trigger.type}
+                className={'flex-1'}
                 onChange={(value) => {
                   switch (value) {
                     case 'cron':
@@ -109,23 +183,41 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
               />
 
               {trigger.type === 'cron' ? (
-                <TextInput
-                  label={'Cron Schedule'}
-                  placeholder={'Cron Schedule'}
-                  value={trigger.schedule}
-                  onChange={(e) => {
-                    setTriggers((triggers) => [
-                      ...triggers.slice(0, index),
-                      { type: 'cron', schedule: e.target.value } as ScheduleTriggerCron,
-                      ...triggers.slice(index + 1),
-                    ]);
-                  }}
-                />
+                <Popover>
+                  <Popover.Target>
+                    <TextInput
+                      label={'Cron Schedule'}
+                      placeholder={'Cron Schedule'}
+                      value={trigger.schedule}
+                      className={'flex-1'}
+                      onChange={(e) => {
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'cron', schedule: e.target.value } as ScheduleTriggerCron,
+                          ...triggers.slice(index + 1),
+                        ]);
+                      }}
+                    />
+                  </Popover.Target>
+                  <Popover.Dropdown>
+                    <CrontabEditor
+                      value={trigger.schedule}
+                      setValue={(value) =>
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'cron', schedule: value } as ScheduleTriggerCron,
+                          ...triggers.slice(index + 1),
+                        ])
+                      }
+                    />
+                  </Popover.Dropdown>
+                </Popover>
               ) : trigger.type === 'power_action' ? (
                 <Select
                   label={'Power Action'}
                   placeholder={'Power Action'}
                   value={trigger.action}
+                  className={'flex-1'}
                   onChange={(value) => {
                     setTriggers((triggers) => [
                       ...triggers.slice(0, index),
@@ -145,6 +237,7 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
                   label={'Server State'}
                   placeholder={'Server State'}
                   value={trigger.state}
+                  className={'flex-1'}
                   onChange={(value) => {
                     setTriggers((triggers) => [
                       ...triggers.slice(0, index),
@@ -158,8 +251,18 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
                   }))}
                 />
               ) : null}
-            </Group>
+
+              <ActionIcon
+                size={'input-sm'}
+                color={'red'}
+                variant={'light'}
+                onClick={() => setTriggers((triggers) => [...triggers.filter((t) => t !== trigger)])}
+              >
+                <FontAwesomeIcon icon={faMinus} />
+              </ActionIcon>
+            </div>
           ))}
+
           <Button
             onClick={() =>
               setTriggers((triggers) => [...triggers, { type: 'cron', schedule: '' } as ScheduleTriggerCron])
@@ -169,22 +272,13 @@ export default function ScheduleCreateModal({ opened, onClose }: ModalProps) {
           >
             Add Trigger
           </Button>
-          <Button
-            className={'ml-2'}
-            onClick={() => setTriggers((triggers) => [...triggers.slice(0, -1)])}
-            color={'red'}
-            variant={'light'}
-            leftSection={<FontAwesomeIcon icon={faMinus} />}
-          >
-            Remove Trigger
-          </Button>
         </div>
 
         <Group>
-          <Button onClick={doCreate} loading={loading} disabled={!name}>
-            Create
+          <Button onClick={doCreateOrUpdate} loading={loading} disabled={!name}>
+            {propSchedule?.uuid ? 'Update' : 'Create'}
           </Button>
-          <Button variant={'default'} onClick={doClose}>
+          <Button variant={'default'} onClick={onClose}>
             Close
           </Button>
         </Group>

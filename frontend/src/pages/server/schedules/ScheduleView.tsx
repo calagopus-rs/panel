@@ -4,10 +4,6 @@ import {
   faClock,
   faClockRotateLeft,
   faExclamationTriangle,
-  faHdd,
-  faInfoCircle,
-  faMemory,
-  faMicrochip,
   faPencil,
   faPlay,
   faPlayCircle,
@@ -15,7 +11,7 @@ import {
   faSkull,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Alert, Grid, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
+import { Alert, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
@@ -29,45 +25,34 @@ import Code from '@/elements/Code';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import Spinner from '@/elements/Spinner';
 import Tooltip from '@/elements/Tooltip';
-import {
-  scheduleComparatorLabelMapping,
-  scheduleComparatorOperatorMapping,
-  scheduleStepIconMapping,
-} from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
-import { formatDateTime, formatMiliseconds, formatTimestamp } from '@/lib/time';
+import { scheduleStepIconMapping } from '@/lib/enums';
+import { formatDateTime } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import ScheduleConditionBuilder from './ScheduleConditionBuilder';
+import updateSchedule from '@/api/server/schedules/updateSchedule';
+import ScheduleCreateOrUpdateModal from './modals/ScheduleCreateOrUpdateModal';
 
 interface DetailCardProps {
   icon: React.ReactNode;
   label: string;
   value: string;
-  subtext?: string;
   color?: string;
+  className?: string;
 }
 
-function DetailCard({ icon, label, value, subtext, color = 'blue' }: DetailCardProps) {
+function DetailCard({ icon, label, value, color = 'blue' }: DetailCardProps) {
   return (
-    <Card shadow={'sm'} padding={'lg'} radius={'md'}>
-      <Group align={'flex-start'} gap={'md'}>
-        <ThemeIcon size={'xl'} radius={'md'} color={color}>
-          {icon}
-        </ThemeIcon>
-        <Stack gap={2}>
-          <Text size={'sm'} c={'dimmed'} fw={500}>
-            {label}
-          </Text>
-          <Text size={'lg'} fw={700}>
-            {value}
-            {subtext && (
-              <Text component={'span'} size={'sm'} c={'dimmed'} ml={'xs'}>
-                ({subtext})
-              </Text>
-            )}
-          </Text>
-        </Stack>
-      </Group>
+    <Card className={'flex flex-row! items-center flex-1'}>
+      <ThemeIcon size={'xl'} radius={'md'} color={color}>
+        {icon}
+      </ThemeIcon>
+      <div className={'flex flex-col ml-4 w-full'}>
+        <div className={'w-full flex justify-between'}>
+          <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
+        </div>
+        <span className={'text-lg font-bold'}>{value}</span>
+      </div>
     </Card>
   );
 }
@@ -128,117 +113,6 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
       </Group>
     </Card>
   );
-}
-
-function ConditionRenderer({ condition }: { condition: ScheduleCondition }) {
-  const renderCondition = (cond: ScheduleCondition, depth = 0): React.ReactNode => {
-    switch (cond.type) {
-      case 'and':
-        return (
-          <Stack gap={'xs'} pl={depth * 16}>
-            <Badge color={'blue'} variant={'light'}>
-              AND
-            </Badge>
-            {cond.conditions.map((c, i) => (
-              <div key={i}>{renderCondition(c, depth + 1)}</div>
-            ))}
-          </Stack>
-        );
-      case 'or':
-        return (
-          <Stack gap={'xs'} pl={depth * 16}>
-            <Badge color={'orange'} variant={'light'}>
-              OR
-            </Badge>
-            {cond.conditions.map((c, i) => (
-              <div key={i}>{renderCondition(c, depth + 1)}</div>
-            ))}
-          </Stack>
-        );
-      case 'server_state':
-        return (
-          <Card ml={depth * 16}>
-            <Group>
-              <FontAwesomeIcon icon={faServer} />
-              <Text>Server State: {cond.state}</Text>
-            </Group>
-          </Card>
-        );
-      case 'uptime':
-        return (
-          <Card ml={depth * 16}>
-            <Group>
-              <FontAwesomeIcon icon={faClock} />
-              <Text>
-                Uptime&nbsp;
-                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
-                  <Text component={'span'} c={'dimmed'}>
-                    {scheduleComparatorLabelMapping[cond.comparator]}
-                  </Text>
-                </Tooltip>
-                &nbsp;
-                {formatMiliseconds(cond.value)}
-              </Text>
-            </Group>
-          </Card>
-        );
-      case 'cpu_usage':
-        return (
-          <Card ml={depth * 16}>
-            <Group>
-              <FontAwesomeIcon icon={faMicrochip} />
-              <Text>
-                CPU Usage&nbsp;
-                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
-                  <Text component={'span'} c={'dimmed'}>
-                    {scheduleComparatorLabelMapping[cond.comparator]}
-                  </Text>
-                </Tooltip>
-                &nbsp;{cond.value}%
-              </Text>
-            </Group>
-          </Card>
-        );
-      case 'memory_usage':
-        return (
-          <Card ml={depth * 16}>
-            <Group>
-              <FontAwesomeIcon icon={faMemory} />
-              <Text>
-                Memory Usage&nbsp;
-                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
-                  <Text component={'span'} c={'dimmed'}>
-                    {scheduleComparatorLabelMapping[cond.comparator]}
-                  </Text>
-                </Tooltip>
-                &nbsp;{bytesToString(cond.value)}
-              </Text>
-            </Group>
-          </Card>
-        );
-      case 'disk_usage':
-        return (
-          <Card ml={depth * 16}>
-            <Group>
-              <FontAwesomeIcon icon={faHdd} />
-              <Text>
-                Disk Usage&nbsp;
-                <Tooltip label={scheduleComparatorOperatorMapping[cond.comparator]}>
-                  <Text component={'span'} c={'dimmed'}>
-                    {scheduleComparatorLabelMapping[cond.comparator]}
-                  </Text>
-                </Tooltip>
-                &nbsp;{bytesToString(cond.value)}
-              </Text>
-            </Group>
-          </Card>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return <>{renderCondition(condition)}</>;
 }
 
 function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStatus: ScheduleStatus }) {
@@ -390,6 +264,7 @@ export default function ScheduleView() {
   const { addToast } = useToast();
   const { server, scheduleStatus } = useServerStore();
 
+  const [openModal, setOpenModal] = useState<'update'>(null);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
   const [loading, setLoading] = useState(false);
@@ -413,6 +288,18 @@ export default function ScheduleView() {
     }
   };
 
+  const doUpdate = () => {
+    if (params.id) {
+      setLoading(true);
+
+      updateSchedule(server.uuid, params.id, { condition: schedule.condition })
+        .then(() => {
+          addToast('Schedule updated.', 'success');
+        })
+        .finally(() => setLoading(false));
+    }
+  };
+
   if (!schedule || !steps) {
     return (
       <div className={'w-full'}>
@@ -422,54 +309,48 @@ export default function ScheduleView() {
   }
 
   return (
-    <Stack gap={'lg'}>
-      <Group justify={'space-between'}>
-        <Group gap={'md'}>
-          <Title order={1} c={'white'}>
-            {schedule.name}
-          </Title>
-          <Badge color={schedule.enabled ? 'green' : 'red'} size={'lg'}>
-            {schedule.enabled ? 'Active' : 'Inactive'}
-          </Badge>
-        </Group>
+    <>
+      <ScheduleCreateOrUpdateModal
+        propSchedule={schedule}
+        onScheduleUpdate={(schedule) => setSchedule((s) => ({ ...s, ...schedule }))}
+        opened={openModal === 'update'}
+        onClose={() => setOpenModal(null)}
+      />
 
-        <Group>
-          {steps.length > 0 && (
-            <ContextMenuProvider>
-              <ContextMenu
-                items={[
-                  {
-                    icon: faPlayCircle,
-                    label: 'Trigger (do not skip condition)',
-                    onClick: () => doTriggerSchedule(false),
-                    color: 'gray',
-                  },
-                  {
-                    icon: faPlay,
-                    label: 'Trigger (skip condition)',
-                    onClick: () => doTriggerSchedule(true),
-                    color: 'gray',
-                  },
-                ]}
-              >
-                {({ openMenu }) =>
-                  schedule.enabled ? (
-                    <Button
-                      loading={loading}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        openMenu(rect.left, rect.bottom);
-                      }}
-                      color={'green'}
-                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                    >
-                      Trigger
-                    </Button>
-                  ) : (
-                    <Tooltip label={'Cannot Trigger disabled schedule'}>
+      <Stack gap={'lg'}>
+        <Group justify={'space-between'}>
+          <Group gap={'md'}>
+            <Title order={1} c={'white'}>
+              {schedule.name}
+            </Title>
+            <Badge color={schedule.enabled ? 'green' : 'red'} size={'lg'}>
+              {schedule.enabled ? 'Active' : 'Inactive'}
+            </Badge>
+          </Group>
+
+          <Group>
+            {steps.length > 0 && (
+              <ContextMenuProvider>
+                <ContextMenu
+                  items={[
+                    {
+                      icon: faPlayCircle,
+                      label: 'Trigger (do not skip condition)',
+                      onClick: () => doTriggerSchedule(false),
+                      color: 'gray',
+                    },
+                    {
+                      icon: faPlay,
+                      label: 'Trigger (skip condition)',
+                      onClick: () => doTriggerSchedule(true),
+                      color: 'gray',
+                    },
+                  ]}
+                >
+                  {({ openMenu }) =>
+                    schedule.enabled ? (
                       <Button
-                        disabled
+                        loading={loading}
                         onClick={(e) => {
                           e.stopPropagation();
                           const rect = e.currentTarget.getBoundingClientRect();
@@ -480,122 +361,139 @@ export default function ScheduleView() {
                       >
                         Trigger
                       </Button>
-                    </Tooltip>
-                  )
-                }
-              </ContextMenu>
-            </ContextMenuProvider>
-          )}
-          <Button
-            onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit`)}
-            color={'blue'}
-            leftSection={<FontAwesomeIcon icon={faPencil} />}
-          >
-            Edit
-          </Button>
+                    ) : (
+                      <Tooltip label={'Cannot Trigger disabled schedule'}>
+                        <Button
+                          disabled
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            openMenu(rect.left, rect.bottom);
+                          }}
+                          color={'green'}
+                          rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                        >
+                          Trigger
+                        </Button>
+                      </Tooltip>
+                    )
+                  }
+                </ContextMenu>
+              </ContextMenuProvider>
+            )}
+            <Button
+              onClick={() => setOpenModal('update')}
+              color={'blue'}
+              leftSection={<FontAwesomeIcon icon={faPencil} />}
+            >
+              Edit
+            </Button>
+          </Group>
         </Group>
-      </Group>
 
-      <Grid>
-        <Grid.Col span={{ base: 12, md: 6 }}>
+        <div className={'flex flex-row space-x-2'}>
           <DetailCard
             icon={<FontAwesomeIcon icon={faClockRotateLeft} />}
             label={'Last Run'}
             value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'Never'}
-            subtext={schedule.lastRun ? formatTimestamp(schedule.lastRun).trim() : undefined}
             color={'blue'}
           />
-        </Grid.Col>
-        <Grid.Col span={{ base: 12, md: 6 }}>
           <DetailCard
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
             label={'Last Failure'}
             value={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'None'}
-            subtext={schedule.lastFailure ? formatTimestamp(schedule.lastFailure).trim() : undefined}
             color={schedule.lastFailure ? 'red' : 'green'}
           />
-        </Grid.Col>
-      </Grid>
+        </div>
 
-      <Tabs defaultValue={'actions'}>
-        <Tabs.List>
-          <Tabs.Tab value={'actions'}>Actions</Tabs.Tab>
-          <Tabs.Tab value={'conditions'}>Conditions</Tabs.Tab>
-          <Tabs.Tab value={'triggers'}>Triggers</Tabs.Tab>
-        </Tabs.List>
+        <Tabs defaultValue={'actions'}>
+          <Tabs.List>
+            <Tabs.Tab value={'actions'}>Actions</Tabs.Tab>
+            <Tabs.Tab value={'conditions'}>Conditions</Tabs.Tab>
+            <Tabs.Tab value={'triggers'}>Triggers</Tabs.Tab>
+          </Tabs.List>
 
-        <Tabs.Panel value={'actions'} pt={'md'}>
-          <Card p={'lg'}>
-            <Group justify={'space-between'}>
-              <Title order={3} mb={'md'}>
-                Schedule Actions
-              </Title>
-              <Group>
-                <Button
-                  onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
-                  variant={'outline'}
-                >
-                  Edit
-                </Button>
+          <Tabs.Panel value={'actions'} pt={'md'}>
+            <Card p={'lg'}>
+              <Group justify={'space-between'}>
+                <Title order={3} mb={'md'}>
+                  Schedule Actions
+                </Title>
+                <Group>
+                  <Button
+                    onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
+                    variant={'outline'}
+                  >
+                    Edit
+                  </Button>
+                </Group>
               </Group>
-            </Group>
-            {steps.length === 0 ? (
-              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
-                No actions configured for this schedule
-              </Alert>
-            ) : (
-              <Timeline
-                active={steps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1}
-                color={'blue'}
-                bulletSize={40}
-                lineWidth={2}
-              >
-                {steps.map((step) => (
-                  <ActionStep
-                    key={step.uuid}
-                    step={step}
-                    scheduleStatus={scheduleStatus.get(schedule.uuid) ?? { running: false, step: null }}
-                  />
-                ))}
-              </Timeline>
-            )}
-          </Card>
-        </Tabs.Panel>
+              {steps.length === 0 ? (
+                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                  No actions configured for this schedule
+                </Alert>
+              ) : (
+                <Timeline
+                  active={steps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1}
+                  color={'blue'}
+                  bulletSize={40}
+                  lineWidth={2}
+                >
+                  {steps.map((step) => (
+                    <ActionStep
+                      key={step.uuid}
+                      step={step}
+                      scheduleStatus={
+                        scheduleStatus.get(schedule.uuid) ?? {
+                          running: false,
+                          step: null,
+                        }
+                      }
+                    />
+                  ))}
+                </Timeline>
+              )}
+            </Card>
+          </Tabs.Panel>
 
-        <Tabs.Panel value={'conditions'} pt={'md'}>
-          <Card p={'lg'}>
-            <Title order={3} mb={'md'}>
-              Execution Conditions
-            </Title>
-            {schedule.condition.type === 'none' ? (
-              <Alert icon={<FontAwesomeIcon icon={faInfoCircle} />} color={'blue'}>
-                This schedule does not have any conditions
-              </Alert>
-            ) : (
-              <ConditionRenderer condition={schedule.condition} />
-            )}
-          </Card>
-        </Tabs.Panel>
+          <Tabs.Panel value={'conditions'} pt={'md'}>
+            <Card p={'lg'}>
+              <Title order={3} mb={'md'}>
+                Execution Conditions
+              </Title>
+              <ScheduleConditionBuilder
+                condition={schedule.condition}
+                onChange={(condition) => setSchedule((schedule) => ({ ...schedule, condition }))}
+              />
 
-        <Tabs.Panel value={'triggers'} pt={'md'}>
-          <Card p={'lg'}>
-            <Title order={3} mb={'md'}>
-              Schedule Triggers
-            </Title>
-            {schedule.triggers.length === 0 ? (
-              <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
-                No triggers configured for this schedule
-              </Alert>
-            ) : (
-              <Stack gap={'md'}>
-                {schedule.triggers.map((trigger, index) => (
-                  <TriggerCard key={index} trigger={trigger} />
-                ))}
-              </Stack>
-            )}
-          </Card>
-        </Tabs.Panel>
-      </Tabs>
-    </Stack>
+              <div className={'flex flex-row mt-6'}>
+                <Button loading={loading} onClick={doUpdate}>
+                  Update
+                </Button>
+              </div>
+            </Card>
+          </Tabs.Panel>
+
+          <Tabs.Panel value={'triggers'} pt={'md'}>
+            <Card p={'lg'}>
+              <Title order={3} mb={'md'}>
+                Schedule Triggers
+              </Title>
+              {schedule.triggers.length === 0 ? (
+                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                  No triggers configured for this schedule
+                </Alert>
+              ) : (
+                <Stack gap={'md'}>
+                  {schedule.triggers.map((trigger, index) => (
+                    <TriggerCard key={index} trigger={trigger} />
+                  ))}
+                </Stack>
+              )}
+            </Card>
+          </Tabs.Panel>
+        </Tabs>
+      </Stack>
+    </>
   );
 }

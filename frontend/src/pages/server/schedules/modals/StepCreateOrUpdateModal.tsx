@@ -86,7 +86,7 @@ export default function StepCreateOrUpdateModal({
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} title={propStep ? 'Edit Schedule Step' : 'Create Schedule Step'} size={'lg'}>
+    <Modal opened={opened} onClose={onClose} title={propStep ? 'Edit Schedule Step' : 'Create Schedule Step'}>
       <Stack gap={'md'}>
         <Select
           label={'Action Type'}

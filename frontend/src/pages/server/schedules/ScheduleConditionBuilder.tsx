@@ -1,6 +1,6 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon, Group, Paper, Select, Stack, Text } from '@mantine/core';
+import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
 import { useState } from 'react';
 import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
@@ -82,7 +82,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
   };
 
   return (
-    <Paper p={'sm'} style={{ marginLeft: depth * 20 }}>
+    <div style={{ marginLeft: depth * 20 }}>
       <Stack>
         <Select
           label={'Condition Type'}
@@ -192,6 +192,6 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
           </>
         )}
       </Stack>
-    </Paper>
+    </div>
   );
 }

@@ -255,7 +255,7 @@ impl AppSettings {
         let mut values = Vec::new();
 
         keys.push("::oobe_step");
-        values.push(self.oobe_step.clone().unwrap_or_else(|| "".to_string()));
+        values.push(self.oobe_step.clone().unwrap_or_default());
 
         match &self.storage_driver {
             StorageDriver::Filesystem { path } => {

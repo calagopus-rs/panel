@@ -2,10 +2,10 @@ import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/api/transformers';
 
 interface Data {
-  name: string;
-  enabled: boolean;
-  triggers: ScheduleTrigger[];
-  condition: ScheduleCondition;
+  name?: string;
+  enabled?: boolean;
+  triggers?: ScheduleTrigger[];
+  condition?: ScheduleCondition;
 }
 
 export default async (serverUuid: string, scheduleUuid: string, data: Data): Promise<void> => {

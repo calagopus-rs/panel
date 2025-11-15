@@ -10,12 +10,11 @@ import Button from '@/elements/Button';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import ScheduleCreateModal from './modals/ScheduleCreateModal';
+import ScheduleCreateOrUpdateModal from './modals/ScheduleCreateOrUpdateModal';
 import ScheduleRow from './ScheduleRow';
 
 export default function ServerSchedules() {
@@ -66,7 +65,7 @@ export default function ServerSchedules() {
 
   return (
     <>
-      <ScheduleCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
+      <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={1} c={'white'}>

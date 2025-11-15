@@ -5,7 +5,6 @@ import { join } from 'pathe';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import deleteScheduleStep from '@/api/server/schedules/steps/deleteScheduleStep';
-import Badge from '@/elements/Badge';
 import Card from '@/elements/Card';
 import Code from '@/elements/Code';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
@@ -68,7 +67,7 @@ export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }:
             <Text fw={600}>{scheduleStepLabelMapping[step.action.type] || step.action.type}</Text>
             <Text size={'sm'} c={'dimmed'}>
               {step.action.type === 'sleep' ? (
-                <span>Sleep for {formatMiliseconds(step.action.duration)}</span>
+                <span>Sleep for {step.action.duration}ms</span>
               ) : step.action.type === 'wait_for_console_line' ? (
                 <span>
                   Wait {formatMiliseconds(step.action.timeout)} for console line containing "{step.action.contains}"

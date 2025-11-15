@@ -63,7 +63,7 @@ interface TerminalLine {
 }
 
 export default function Terminal() {
-  const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@pterodactyl~ \u001b[0m';
+  const TERMINAL_PRELUDE = '\u001b[1m\u001b[33mcontainer@calagopus~ \u001b[0m';
   const { server, imagePulls, socketConnected, socketInstance, state } = useServerStore();
 
   const [lines, setLines] = useState<TerminalLine[]>([]);
@@ -126,6 +126,10 @@ export default function Terminal() {
 
   const addLine = useCallback(
     (text: string, prelude = false) => {
+      if (text.includes('container@pterodactyl~')) {
+        text = text.replace('container@pterodactyl~', 'container@calagopus~');
+      }
+
       const processed = text.replace(/(?:\r\n|\r|\n)$/im, '');
       const ansiHtml = ansiUp.ansi_to_html(processed);
       const html = linkifyText(ansiHtml);
