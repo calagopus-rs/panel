@@ -103,7 +103,9 @@ mod delete {
     }
 
     #[derive(ToSchema, Serialize)]
-    struct Response {}
+    struct Response {
+        deleted: u64,
+    }
 
     #[utoipa::path(delete, path = "/", responses(
         (status = OK, body = inline(Response)),
@@ -124,7 +126,8 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("nodes.allocations")?;
 
-        NodeAllocation::delete_by_uuids(&state.database, &data.uuids).await?;
+        let deleted =
+            NodeAllocation::delete_by_uuids(&state.database, node.uuid, &data.uuids).await?;
 
         activity_logger
             .log(
@@ -137,11 +140,11 @@ mod delete {
             )
             .await;
 
-        ApiResponse::json(Response {}).ok()
+        ApiResponse::json(Response { deleted }).ok()
     }
 }
 
-mod put {
+mod post {
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -159,6 +162,8 @@ mod put {
     pub struct Payload {
         #[schema(value_type = String)]
         ip: std::net::IpAddr,
+        #[validate(length(min = 1, max = 255))]
+        #[schema(min_length = 1, max_length = 255)]
         ip_alias: Option<String>,
         ports: Vec<u16>,
     }
@@ -168,7 +173,7 @@ mod put {
         created: usize,
     }
 
-    #[utoipa::path(put, path = "/", responses(
+    #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
     ), params(
@@ -231,11 +236,111 @@ mod put {
     }
 }
 
+mod patch {
+    use axum::http::StatusCode;
+    use serde::{Deserialize, Serialize};
+    use shared::{
+        ApiError, GetState,
+        models::{
+            admin_activity::GetAdminActivityLogger, node::GetNode, user::GetPermissionManager,
+        },
+        response::{ApiResponse, ApiResponseResult},
+    };
+    use utoipa::ToSchema;
+    use validator::Validate;
+
+    #[derive(ToSchema, Validate, Deserialize)]
+    pub struct Payload {
+        uuids: Vec<uuid::Uuid>,
+
+        #[schema(value_type = String)]
+        ip: std::net::IpAddr,
+        #[validate(length(min = 1, max = 255))]
+        #[schema(min_length = 1, max_length = 255)]
+        ip_alias: Option<Option<String>>,
+    }
+
+    #[derive(ToSchema, Serialize)]
+    struct Response {
+        updated: u64,
+    }
+
+    #[utoipa::path(patch, path = "/", responses(
+        (status = OK, body = inline(Response)),
+        (status = NOT_FOUND, body = ApiError),
+    ), params(
+        (
+            "node" = uuid::Uuid,
+            description = "The node ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+    ), request_body = inline(Payload))]
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        node: GetNode,
+        activity_logger: GetAdminActivityLogger,
+        axum::Json(data): axum::Json<Payload>,
+    ) -> ApiResponseResult {
+        if let Err(errors) = shared::utils::validate_data(&data) {
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
+        permissions.has_admin_permission("nodes.allocations")?;
+
+        let allocation_ip: sqlx::types::ipnetwork::IpNetwork = data.ip.into();
+        let updated = if let Some(ip_alias) = &data.ip_alias {
+            sqlx::query!(
+                "UPDATE node_allocations
+                SET ip = $3, ip_alias = $4
+                WHERE node_allocations.node_uuid = $1 AND node_allocations.uuid = ANY($2)",
+                node.uuid,
+                &data.uuids,
+                allocation_ip,
+                ip_alias.as_deref()
+            )
+            .execute(state.database.write())
+            .await?
+            .rows_affected()
+        } else {
+            sqlx::query!(
+                "UPDATE node_allocations
+                SET ip = $3
+                WHERE node_allocations.node_uuid = $1 AND node_allocations.uuid = ANY($2)",
+                node.uuid,
+                &data.uuids,
+                allocation_ip
+            )
+            .execute(state.database.write())
+            .await?
+            .rows_affected()
+        };
+
+        activity_logger
+            .log(
+                "node:allocation.update",
+                serde_json::json!({
+                    "node_uuid": node.uuid,
+
+                    "ip": allocation_ip,
+                    "ip_alias": data.ip_alias,
+                    "uuids": data.uuids
+                }),
+            )
+            .await;
+
+        ApiResponse::json(Response { updated }).ok()
+    }
+}
+
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
-        .routes(routes!(put::route))
+        .routes(routes!(post::route))
+        .routes(routes!(patch::route))
         .nest("/available", available::router(state))
         .with_state(state.clone())
 }

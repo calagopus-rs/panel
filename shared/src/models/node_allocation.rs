@@ -173,19 +173,22 @@ impl NodeAllocation {
 
     pub async fn delete_by_uuids(
         database: &crate::database::Database,
+        node_uuid: uuid::Uuid,
         uuids: &[uuid::Uuid],
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
+    ) -> Result<u64, crate::database::DatabaseError> {
+        let deleted = sqlx::query(
             r#"
             DELETE FROM node_allocations
-            WHERE node_allocations.uuid = ANY($1)
+            WHERE node_allocations.node_uuid = $1, node_allocations.uuid = ANY($2)
             "#,
         )
+        .bind(node_uuid)
         .bind(uuids)
         .execute(database.write())
-        .await?;
+        .await?
+        .rows_affected();
 
-        Ok(())
+        Ok(deleted)
     }
 
     #[inline]

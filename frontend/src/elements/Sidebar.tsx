@@ -1,4 +1,4 @@
-import { faArrowRightFromBracket, faBars, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
@@ -11,6 +11,7 @@ import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
+import Tooltip from './Tooltip';
 
 type SidebarProps = {
   children: ReactNode;
@@ -98,10 +99,11 @@ function Divider() {
 
 function Footer() {
   const { user, doLogout } = useAuth();
+  const { settings } = useGlobalStore();
 
   return (
-    <Card className={'mt-auto flex-row! justify-between items-center min-h-fit'} p={'sm'}>
-      <NavLink to={'/account'}>
+    <>
+      <Card className={'mt-auto flex-row! justify-between items-center min-h-fit'} p={'sm'}>
         <div className={'flex items-center'}>
           <img
             src={user.avatar ?? '/icon.svg'}
@@ -109,23 +111,43 @@ function Footer() {
             className={'h-10 w-10 rounded-full select-none'}
           />
           <div className={'flex flex-col ml-3'}>
-            <span
-              className={'font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight select-none'}
-            >
+            <span className={'font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'}>
               {user.nameFirst}
             </span>
-            {user.admin && (
-              <Badge size={'xs'} className={'select-none cursor-pointer!'}>
-                Admin
-              </Badge>
-            )}
+            {user.admin && <Badge size={'xs'}>Admin</Badge>}
           </div>
         </div>
-      </NavLink>
-      <ActionIcon color={'red'} variant={'subtle'} onClick={doLogout}>
-        <FontAwesomeIcon icon={faArrowRightFromBracket} />
-      </ActionIcon>
-    </Card>
+
+        <div className={'flex flex-row items-center space-x-2'}>
+          <NavLink to={'/account'} end>
+            {({ isActive }) => (
+              <ActionIcon variant={'subtle'} disabled={isActive}>
+                <FontAwesomeIcon icon={faUserCog} />
+              </ActionIcon>
+            )}
+          </NavLink>
+          <ActionIcon color={'red'} variant={'subtle'} onClick={doLogout}>
+            <FontAwesomeIcon icon={faArrowRightFromBracket} />
+          </ActionIcon>
+        </div>
+      </Card>
+
+      <div className={'mt-2 text-xs transition-all text-gray-400'}>
+        <span className={'flex flex-row justify-between'}>
+          <Tooltip label={settings.version}>
+            <a
+              href={'https://github.com/calagopus-rs/panel'}
+              target={'_blank'}
+              rel={'noopener noreferrer'}
+              className={'underline'}
+            >
+              Calagopus
+            </a>
+          </Tooltip>
+          © 2025 - {new Date().getFullYear()}
+        </span>
+      </div>
+    </>
   );
 }
 

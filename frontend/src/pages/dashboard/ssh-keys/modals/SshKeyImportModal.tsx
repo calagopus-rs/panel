@@ -39,24 +39,27 @@ export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
   return (
     <Modal title={'Import SSH Keys'} onClose={onClose} opened={opened}>
       <Stack>
-        <Select
-          withAsterisk
-          label={'Provider'}
-          data={Object.entries(sshKeyProviderLabelMapping).map(([value, label]) => ({
-            label,
-            value,
-          }))}
-          value={provider}
-          onChange={(value) => setProvider(value as SshKeyProvider)}
-        />
+        <div className={'grid grid-cols-3 gap-2'}>
+          <Select
+            withAsterisk
+            label={'Provider'}
+            data={Object.entries(sshKeyProviderLabelMapping).map(([value, label]) => ({
+              label,
+              value,
+            }))}
+            value={provider}
+            onChange={(value) => setProvider(value as SshKeyProvider)}
+          />
 
-        <TextInput
-          withAsterisk
-          label={'Username'}
-          placeholder={'Username'}
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+          <TextInput
+            withAsterisk
+            label={'Username'}
+            placeholder={'Username'}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className={'col-span-2'}
+          />
+        </div>
 
         <Group mt={'md'}>
           <Button onClick={doImport} loading={loading} disabled={!username}>

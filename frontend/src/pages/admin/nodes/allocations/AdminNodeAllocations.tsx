@@ -1,33 +1,22 @@
-import { faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
-import { MouseEvent as ReactMouseEvent, Ref, useState } from 'react';
-import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
+import { MouseEvent as ReactMouseEvent, Ref, useEffect, useState } from 'react';
 import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations';
-import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import SelectionArea from '@/elements/SelectionArea';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
 import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
+import AllocationActionBar from './AllocationActionBar';
 
 export default function AdminNodeAllocations({ node }: { node: Node }) {
-  const { addToast } = useToast();
-  const {
-    nodeAllocations,
-    setNodeAllocations,
-    removeNodeAllocations,
-    selectedNodeAllocations,
-    setSelectedNodeAllocations,
-  } = useAdminStore();
+  const { nodeAllocations, setNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'create'>(null);
   const [selectedNodeAllocationsPrevious, setSelectedNodeAllocationsPrevious] = useState(selectedNodeAllocations);
 
   const { loading, search, setSearch, setPage, refetch } = useSearchablePaginatedTable({
@@ -43,22 +32,28 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
     setSelectedNodeAllocations([...selectedNodeAllocationsPrevious, ...selected]);
   };
 
-  const doDelete = async () => {
-    await deleteNodeAllocations(
-      node.uuid,
-      Array.from(selectedNodeAllocations).map((a) => a.uuid),
-    )
-      .then(() => {
-        removeNodeAllocations(Array.from(selectedNodeAllocations));
+  useEffect(() => {
+    setSelectedNodeAllocations([]);
+  }, []);
 
-        addToast('Node Mount deleted.', 'success');
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
+        event.preventDefault();
         setSelectedNodeAllocations([]);
-        setOpenModal(null);
-      })
-      .catch((msg) => {
-        addToast(httpErrorToHuman(msg), 'error');
-      });
-  };
+      }
+
+      if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+        event.preventDefault();
+        setSelectedNodeAllocations(nodeAllocations.data);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [nodeAllocations.data]);
 
   return (
     <>
@@ -69,30 +64,12 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
         onClose={() => setOpenModal(null)}
       />
 
-      <ConfirmationModal
-        opened={openModal === 'delete'}
-        onClose={() => setOpenModal(null)}
-        title={'Confirm Node Allocations Deletion'}
-        confirm={'Delete'}
-        onConfirmed={doDelete}
-      >
-        Are you sure you want to delete
-        <Code>{selectedNodeAllocations.size}</Code>
-        allocations from <Code>{node.name}</Code>?
-      </ConfirmationModal>
+      <AllocationActionBar node={node} loadAllocations={refetch} />
 
       <Group justify={'space-between'} align={'start'} mb={'md'}>
         <Title order={2}>Node Allocations</Title>
         <Group>
           <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => setOpenModal('delete')}
-            color={'red'}
-            leftSection={<FontAwesomeIcon icon={faTrash} />}
-            disabled={selectedNodeAllocations.size < 1}
-          >
-            Delete {selectedNodeAllocations.size}
-          </Button>
           <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>
