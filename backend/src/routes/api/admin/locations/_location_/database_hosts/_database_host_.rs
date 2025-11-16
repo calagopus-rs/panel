@@ -8,8 +8,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, location_database_host::LocationDatabaseHost,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger,
+            location_database_host::LocationDatabaseHost, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -58,8 +58,7 @@ mod delete {
             }
         };
 
-        LocationDatabaseHost::delete_by_uuids(&state.database, location.uuid, database_host.uuid)
-            .await?;
+        database_host.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

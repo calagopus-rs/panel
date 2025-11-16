@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
@@ -163,25 +166,6 @@ impl NodeMount {
         })
     }
 
-    pub async fn delete_by_uuids(
-        database: &crate::database::Database,
-        node_uuid: uuid::Uuid,
-        mount_uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM node_mounts
-            WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
-            "#,
-        )
-        .bind(node_uuid)
-        .bind(mount_uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub async fn into_admin_node_api_object(
         self,
@@ -211,6 +195,44 @@ impl NodeMount {
                 .into_admin_api_object(),
             created: self.created.and_utc(),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for NodeMount {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<NodeMount>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM node_mounts
+            WHERE node_mounts.node_uuid = $1 AND node_mounts.mount_uuid = $2
+            "#,
+        )
+        .bind(self.node.uuid)
+        .bind(self.mount.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

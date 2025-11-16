@@ -107,8 +107,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, backup_configurations::BackupConfiguration,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -135,7 +134,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("backup-configurations.delete")?;
 
-        BackupConfiguration::delete_by_uuid(&state.database, backup_configuration.uuid).await?;
+        backup_configuration.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

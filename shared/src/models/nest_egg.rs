@@ -2,7 +2,10 @@ use crate::prelude::*;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 use validator::Validate;
 
@@ -411,23 +414,6 @@ impl NestEgg {
         .unwrap_or(0)
     }
 
-    pub async fn delete_by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM nest_eggs
-            WHERE nest_eggs.uuid = $1
-            "#,
-        )
-        .bind(uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub async fn into_exported(
         self,
@@ -534,6 +520,43 @@ impl ByUuid for NestEgg {
         .await?;
 
         Self::map(None, &row)
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for NestEgg {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<NestEgg>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM nest_eggs
+            WHERE nest_eggs.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

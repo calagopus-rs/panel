@@ -192,6 +192,7 @@ mod delete {
     use shared::{
         GetState,
         models::{
+            DeletableModel,
             user::{GetPermissionManager, GetUser},
             user_activity::GetUserActivityLogger,
             user_server_group::UserServerGroup,
@@ -233,7 +234,7 @@ mod delete {
                 }
             };
 
-        UserServerGroup::delete_by_uuid(&state.database, server_group.uuid).await?;
+        server_group.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

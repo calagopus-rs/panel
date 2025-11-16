@@ -1,11 +1,16 @@
+use crate::database::DatabaseError;
 use futures_util::{StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use sqlx::{Row, postgres::PgRow};
-use std::{collections::BTreeMap, marker::PhantomData};
+use std::{
+    collections::BTreeMap,
+    marker::PhantomData,
+    pin::Pin,
+    sync::{Arc, LazyLock},
+};
+use tokio::sync::RwLock;
 use utoipa::ToSchema;
 use validator::Validate;
-
-use crate::database::DatabaseError;
 
 pub mod admin_activity;
 pub mod backup_configurations;
@@ -156,6 +161,94 @@ pub trait BaseModel: Serialize + DeserializeOwned {
     fn map(prefix: Option<&str>, row: &PgRow) -> Result<Self, crate::database::DatabaseError>;
 }
 
+type DeleteListenerResult<'a> =
+    Pin<Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'a>>;
+type DeleteListener<M> = dyn for<'a> Fn(
+        &'a M,
+        &'a <M as DeletableModel>::DeleteOptions,
+        &'a Arc<crate::database::Database>,
+        &'a mut sqlx::Transaction<'a, sqlx::Postgres>,
+    ) -> DeleteListenerResult<'a>
+    + Send
+    + Sync;
+pub type DeleteListenerList<M> = Arc<ListenerList<Box<DeleteListener<M>>>>;
+
+#[async_trait::async_trait]
+pub trait DeletableModel: BaseModel + Send + Sync + 'static {
+    type DeleteOptions: Send + Sync + Default;
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>>;
+
+    async fn add_delete_listener<
+        F: for<'a> Fn(
+                &'a Self,
+                &'a Self::DeleteOptions,
+                &'a Arc<crate::database::Database>,
+                &'a mut sqlx::Transaction<'a, sqlx::Postgres>,
+            )
+                -> Pin<Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'a>>
+            + Send
+            + Sync
+            + 'static,
+    >(
+        priority: ListenerPriority,
+        callback: F,
+    ) {
+        let erased = Box::new(callback) as Box<DeleteListener<Self>>;
+
+        Self::get_delete_listeners()
+            .add_listener(priority, erased)
+            .await;
+    }
+
+    /// # Warning
+    /// This method will block the current thread if the lock is not available
+    fn add_delete_listener_sync<
+        F: for<'a> Fn(
+                &'a Self,
+                &'a Self::DeleteOptions,
+                &'a Arc<crate::database::Database>,
+                &'a mut sqlx::Transaction<'a, sqlx::Postgres>,
+            )
+                -> Pin<Box<dyn Future<Output = Result<(), anyhow::Error>> + Send + 'a>>
+            + Send
+            + Sync
+            + 'static,
+    >(
+        priority: ListenerPriority,
+        callback: F,
+    ) {
+        let erased = Box::new(callback) as Box<DeleteListener<Self>>;
+
+        Self::get_delete_listeners().add_listener_sync(priority, erased);
+    }
+
+    async fn run_delete_listeners(
+        &self,
+        options: &Self::DeleteOptions,
+        database: &Arc<crate::database::Database>,
+        transaction: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    ) -> Result<(), anyhow::Error> {
+        let listeners = Self::get_delete_listeners().listeners.read().await;
+
+        for listener in listeners.iter() {
+            let transaction_ref: &mut sqlx::Transaction<'_, sqlx::Postgres> = unsafe {
+                std::mem::transmute(transaction as &mut sqlx::Transaction<'_, sqlx::Postgres>)
+            };
+
+            (*listener.callback)(self, options, database, transaction_ref).await?;
+        }
+
+        Ok(())
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error>;
+}
+
 #[async_trait::async_trait]
 pub trait ByUuid: BaseModel {
     async fn by_uuid(
@@ -215,6 +308,140 @@ pub trait ByUuid: BaseModel {
             }),
             Err(_) => None,
         }
+    }
+}
+
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ListenerPriority {
+    Highest,
+    High,
+    #[default]
+    Normal,
+    Low,
+    Lowest,
+}
+
+impl ListenerPriority {
+    #[inline]
+    fn rank(self) -> u8 {
+        match self {
+            Self::Highest => 5,
+            Self::High => 4,
+            Self::Normal => 3,
+            Self::Low => 2,
+            Self::Lowest => 1,
+        }
+    }
+}
+
+impl PartialOrd for ListenerPriority {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for ListenerPriority {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        let self_rank = self.rank();
+        let other_rank = other.rank();
+
+        other_rank.cmp(&self_rank)
+    }
+}
+
+pub struct ListenerList<F> {
+    listeners: RwLock<Vec<Listener<F>>>,
+}
+
+impl<F> Default for ListenerList<F> {
+    fn default() -> Self {
+        Self {
+            listeners: RwLock::new(Vec::new()),
+        }
+    }
+}
+
+impl<F> ListenerList<F> {
+    pub async fn add_listener(
+        self: &Arc<Self>,
+        priority: ListenerPriority,
+        callback: F,
+    ) -> ListenerAborter<F> {
+        let listener = Listener::new(callback, priority, self.clone());
+        let aborter = listener.aborter();
+
+        let mut self_listeners = self.listeners.write().await;
+        self_listeners.push(listener);
+        self_listeners.sort_by(|a, b| a.priority.cmp(&b.priority));
+
+        aborter
+    }
+
+    /// # Warning
+    /// This method will block the current thread if the lock is not available
+    pub fn add_listener_sync(
+        self: &Arc<Self>,
+        priority: ListenerPriority,
+        callback: F,
+    ) -> ListenerAborter<F> {
+        let listener = Listener::new(callback, priority, self.clone());
+        let aborter = listener.aborter();
+
+        let mut self_listeners = self.listeners.blocking_write();
+        self_listeners.push(listener);
+        self_listeners.sort_by(|a, b| a.priority.cmp(&b.priority));
+
+        aborter
+    }
+}
+
+pub struct Listener<F> {
+    uuid: uuid::Uuid,
+    priority: ListenerPriority,
+    list: Arc<ListenerList<F>>,
+
+    pub callback: F,
+}
+
+impl<F> Listener<F> {
+    pub fn new(callback: F, priority: ListenerPriority, list: Arc<ListenerList<F>>) -> Self {
+        Self {
+            uuid: uuid::Uuid::new_v4(),
+            priority,
+            list,
+            callback,
+        }
+    }
+
+    pub fn aborter(&self) -> ListenerAborter<F> {
+        ListenerAborter {
+            uuid: self.uuid,
+            list: self.list.clone(),
+        }
+    }
+}
+
+pub struct ListenerAborter<F> {
+    uuid: uuid::Uuid,
+    list: Arc<ListenerList<F>>,
+}
+
+impl<F> ListenerAborter<F> {
+    pub async fn abort(&self) {
+        self.list
+            .listeners
+            .write()
+            .await
+            .retain(|l| l.uuid != self.uuid);
+    }
+
+    /// # Warning
+    /// This method will block the current thread if the lists' lock is not available
+    pub fn abort_sync(&self) {
+        self.list
+            .listeners
+            .blocking_write()
+            .retain(|l| l.uuid != self.uuid);
     }
 }
 

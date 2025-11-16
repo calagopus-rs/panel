@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -197,23 +200,6 @@ impl ServerAllocation {
         .unwrap_or(0)
     }
 
-    pub async fn delete_by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM server_allocations
-            WHERE server_allocations.uuid = $1
-            "#,
-        )
-        .bind(uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub fn into_api_object(self, primary: Option<uuid::Uuid>) -> ApiServerAllocation {
         ApiServerAllocation {
@@ -225,6 +211,43 @@ impl ServerAllocation {
             is_primary: primary.is_some_and(|p| p == self.uuid),
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for ServerAllocation {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<ServerAllocation>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM server_allocations
+            WHERE server_allocations.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

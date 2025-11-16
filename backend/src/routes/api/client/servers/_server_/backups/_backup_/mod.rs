@@ -106,6 +106,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             server::{GetServer, GetServerActivityLogger},
             user::GetPermissionManager,
         },
@@ -154,11 +155,8 @@ mod delete {
                 .ok();
         }
 
-        let backup_uuid = backup.uuid;
-        let backup_name = backup.name.clone();
-
-        if let Err(err) = backup.0.delete(&state.database, &server).await {
-            tracing::error!(server = %server.uuid, backup = %backup_uuid, "failed to delete backup: {:#?}", err);
+        if let Err(err) = backup.delete(&state.database, ()).await {
+            tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
 
             return ApiResponse::error("failed to delete backup")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -169,8 +167,8 @@ mod delete {
             .log(
                 "server:backup.delete",
                 serde_json::json!({
-                    "uuid": backup_uuid,
-                    "name": backup_name,
+                    "uuid": backup.uuid,
+                    "name": backup.name,
                 }),
             )
             .await;

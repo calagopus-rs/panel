@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
@@ -164,25 +167,6 @@ impl NestEggMount {
         })
     }
 
-    pub async fn delete_by_uuids(
-        database: &crate::database::Database,
-        egg_uuid: uuid::Uuid,
-        mount_uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM nest_egg_mounts
-            WHERE nest_egg_mounts.egg_uuid = $1 AND nest_egg_mounts.mount_uuid = $2
-            "#,
-        )
-        .bind(egg_uuid)
-        .bind(mount_uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub async fn into_admin_nest_egg_api_object(
         self,
@@ -214,6 +198,44 @@ impl NestEggMount {
                 .into_admin_api_object(),
             created: self.created.and_utc(),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for NestEggMount {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<NestEggMount>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM nest_egg_mounts
+            WHERE nest_egg_mounts.egg_uuid = $1 AND nest_egg_mounts.mount_uuid = $2
+            "#,
+        )
+        .bind(self.nest_egg.uuid)
+        .bind(self.mount.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

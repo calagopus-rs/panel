@@ -8,8 +8,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, nest_egg_variable::NestEggVariable,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger,
+            nest_egg_variable::NestEggVariable, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -58,7 +58,7 @@ mod delete {
                 }
             };
 
-        NestEggVariable::delete_by_uuid(&state.database, egg_variable.uuid).await?;
+        egg_variable.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

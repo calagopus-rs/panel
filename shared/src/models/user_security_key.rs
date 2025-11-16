@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
@@ -151,23 +154,6 @@ impl UserSecurityKey {
         })
     }
 
-    pub async fn delete_by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM user_security_keys
-            WHERE user_security_keys.uuid = $1
-            "#,
-        )
-        .bind(uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub fn into_api_object(self) -> ApiUserSecurityKey {
         ApiUserSecurityKey {
@@ -176,6 +162,43 @@ impl UserSecurityKey {
             last_used: self.last_used.map(|dt| dt.and_utc()),
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for UserSecurityKey {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<UserSecurityKey>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM user_security_keys
+            WHERE user_security_keys.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

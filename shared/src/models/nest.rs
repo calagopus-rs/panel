@@ -1,7 +1,10 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -106,23 +109,6 @@ impl Nest {
         })
     }
 
-    pub async fn delete_by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM nests
-            WHERE nests.uuid = $1
-            "#,
-        )
-        .bind(uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiNest {
         AdminApiNest {
@@ -154,6 +140,43 @@ impl ByUuid for Nest {
         .await?;
 
         Self::map(None, &row)
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for Nest {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<Nest>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM nests
+            WHERE nests.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

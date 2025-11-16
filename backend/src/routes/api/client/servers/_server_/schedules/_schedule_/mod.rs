@@ -109,8 +109,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             server::{GetServer, GetServerActivityLogger},
-            server_schedule::ServerSchedule,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -146,7 +146,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_server_permission("schedules.delete")?;
 
-        ServerSchedule::delete_by_uuid(&state.database, schedule.uuid).await?;
+        schedule.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

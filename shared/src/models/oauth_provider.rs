@@ -2,7 +2,10 @@ use crate::prelude::*;
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -240,23 +243,6 @@ impl OAuthProvider {
             .try_collect_vec()
     }
 
-    pub async fn delete_by_uuid(
-        database: &crate::database::Database,
-        uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM oauth_providers
-            WHERE oauth_providers.uuid = $1
-            "#,
-        )
-        .bind(uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub fn extract_identifier(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
         Ok(
             match serde_json_path::JsonPath::parse(&self.identifier_path)?
@@ -403,6 +389,43 @@ impl ByUuid for OAuthProvider {
         .await?;
 
         Self::map(None, &row)
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for OAuthProvider {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<OAuthProvider>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM oauth_providers
+            WHERE oauth_providers.uuid = $1
+            "#,
+        )
+        .bind(self.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

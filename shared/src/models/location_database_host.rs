@@ -1,12 +1,15 @@
 use crate::prelude::*;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct LocationDatabaseHost {
-    pub location_uuid: uuid::Uuid,
+    pub location: Fetchable<super::location::Location>,
     pub database_host: super::database_host::DatabaseHost,
 
     pub created: chrono::NaiveDateTime,
@@ -42,7 +45,9 @@ impl BaseModel for LocationDatabaseHost {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            location_uuid: row.try_get(format!("{prefix}location_uuid").as_str())?,
+            location: super::location::Location::get_fetchable(
+                row.try_get(format!("{prefix}location_uuid").as_str())?,
+            ),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row)?,
             created: row.try_get(format!("{prefix}created").as_str())?,
         })
@@ -154,31 +159,50 @@ impl LocationDatabaseHost {
             .try_collect_vec()
     }
 
-    pub async fn delete_by_uuids(
-        database: &crate::database::Database,
-        location_uuid: uuid::Uuid,
-        database_host_uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM location_database_hosts
-            WHERE location_database_hosts.location_uuid = $1 AND location_database_hosts.database_host_uuid = $2
-            "#,
-        )
-        .bind(location_uuid)
-        .bind(database_host_uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub fn into_admin_api_object(self) -> AdminApiLocationDatabaseHost {
         AdminApiLocationDatabaseHost {
             database_host: self.database_host.into_admin_api_object(),
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for LocationDatabaseHost {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<LocationDatabaseHost>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM location_database_hosts
+            WHERE location_database_hosts.location_uuid = $1 AND location_database_hosts.database_host_uuid = $2
+            "#,
+        )
+        .bind(self.location.uuid)
+        .bind(self.database_host.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

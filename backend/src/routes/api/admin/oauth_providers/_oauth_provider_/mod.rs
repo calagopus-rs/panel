@@ -91,8 +91,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, oauth_provider::OAuthProvider,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -120,7 +119,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("oauth-providers.delete")?;
 
-        OAuthProvider::delete_by_uuid(&state.database, oauth_provider.uuid).await?;
+        oauth_provider.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

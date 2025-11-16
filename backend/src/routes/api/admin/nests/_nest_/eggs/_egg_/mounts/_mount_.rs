@@ -8,7 +8,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, nest_egg_mount::NestEggMount,
+            DeletableModel, admin_activity::GetAdminActivityLogger, nest_egg_mount::NestEggMount,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -58,7 +58,7 @@ mod delete {
                 }
             };
 
-        NestEggMount::delete_by_uuids(&state.database, egg.uuid, egg_mount.mount.uuid).await?;
+        egg_mount.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

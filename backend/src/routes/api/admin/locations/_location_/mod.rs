@@ -99,7 +99,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, location::Location, node::Node,
+            DeletableModel, admin_activity::GetAdminActivityLogger, node::Node,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -133,7 +133,7 @@ mod delete {
                 .ok();
         }
 
-        Location::delete_by_uuid(&state.database, location.uuid).await?;
+        location.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

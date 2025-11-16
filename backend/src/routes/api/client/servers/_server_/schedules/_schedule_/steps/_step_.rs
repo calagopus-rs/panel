@@ -131,6 +131,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             server::{GetServer, GetServerActivityLogger},
             server_schedule_step::ServerScheduleStep,
             user::GetPermissionManager,
@@ -189,7 +190,7 @@ mod delete {
 
         permissions.has_server_permission("schedules.update")?;
 
-        ServerScheduleStep::delete_by_uuid(&state.database, schedule_step.uuid).await?;
+        schedule_step.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

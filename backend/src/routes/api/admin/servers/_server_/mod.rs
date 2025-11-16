@@ -92,8 +92,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, server::GetServer, server_backup::ServerBackup,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger, server::GetServer,
+            server_backup::ServerBackup, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -134,7 +134,13 @@ mod delete {
             Vec::new()
         };
 
-        if let Err(err) = server.delete(&state.database, data.force).await {
+        if let Err(err) = server
+            .delete(
+                &state.database,
+                shared::models::server::DeleteServerOptions { force: data.force },
+            )
+            .await
+        {
             tracing::error!("failed to delete server: {:#?}", err);
 
             return ApiResponse::error(&format!("failed to delete server: {err}"))
@@ -146,7 +152,7 @@ mod delete {
             for backup in backups {
                 let backup_uuid = backup.uuid;
 
-                if let Err(err) = backup.delete(&state.database, &server).await {
+                if let Err(err) = backup.delete(&state.database, ()).await {
                     tracing::error!(server = %server.uuid, backup = %backup_uuid, "failed to delete backup: {:#?}", err);
 
                     if !data.force {

@@ -7,6 +7,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             server::{GetServer, GetServerActivityLogger},
             server_allocation::ServerAllocation,
             user::GetPermissionManager,
@@ -70,7 +71,7 @@ mod delete {
                 .ok();
         }
 
-        ServerAllocation::delete_by_uuid(&state.database, allocation.uuid).await?;
+        allocation.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

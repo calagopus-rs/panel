@@ -86,7 +86,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, mount::Mount, user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -114,7 +114,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("mounts.delete")?;
 
-        Mount::delete_by_uuid(&state.database, mount.uuid).await?;
+        mount.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

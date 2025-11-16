@@ -2,12 +2,16 @@ use crate::{prelude::*, storage::StorageUrlRetriever};
 use rand::distr::SampleString;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
 pub struct ServerSubuser {
     pub user: super::user::User,
+    pub server: Fetchable<super::server::Server>,
 
     pub permissions: Vec<String>,
     pub ignored_files: Vec<String>,
@@ -23,6 +27,10 @@ impl BaseModel for ServerSubuser {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
+            (
+                "server_subusers.server_uuid",
+                format!("{prefix}server_uuid"),
+            ),
             (
                 "server_subusers.permissions",
                 format!("{prefix}permissions"),
@@ -45,6 +53,9 @@ impl BaseModel for ServerSubuser {
 
         Ok(Self {
             user: super::user::User::map(Some("user_"), row)?,
+            server: super::server::Server::get_fetchable(
+                row.try_get(format!("{prefix}server_uuid").as_str())?,
+            ),
             permissions: row.try_get(format!("{prefix}permissions").as_str())?,
             ignored_files: row.try_get(format!("{prefix}ignored_files").as_str())?,
             created: row.try_get(format!("{prefix}created").as_str())?,
@@ -259,6 +270,44 @@ impl ServerSubuser {
             ignored_files: self.ignored_files,
             created: self.created.and_utc(),
         }
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for ServerSubuser {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<ServerSubuser>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM server_subusers
+            WHERE server_subusers.server_uuid = $1 AND server_subusers.user_uuid = $2
+            "#,
+        )
+        .bind(self.server.uuid)
+        .bind(self.user.uuid)
+        .execute(&mut *transaction)
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

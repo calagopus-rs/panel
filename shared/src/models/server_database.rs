@@ -7,7 +7,10 @@ use rand::distr::SampleString;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::{collections::BTreeMap, sync::LazyLock};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 pub static DB_NAME_REGEX: LazyLock<Regex> = LazyLock::new(|| {
@@ -434,42 +437,6 @@ impl ServerDatabase {
         }
     }
 
-    pub async fn delete(
-        &self,
-        database: &crate::database::Database,
-    ) -> Result<(), crate::database::DatabaseError> {
-        match self.database_host.get_connection(database).await? {
-            crate::models::database_host::DatabasePool::Mysql(pool) => {
-                sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", self.name))
-                    .execute(pool.as_ref())
-                    .await?;
-                sqlx::query(&format!("DROP USER IF EXISTS '{}'@'%'", self.username))
-                    .execute(pool.as_ref())
-                    .await?;
-            }
-            crate::models::database_host::DatabasePool::Postgres(pool) => {
-                sqlx::query(&format!("DROP DATABASE IF EXISTS \"{}\"", self.name))
-                    .execute(pool.as_ref())
-                    .await?;
-                sqlx::query(&format!("DROP USER IF EXISTS \"{}\"", self.username))
-                    .execute(pool.as_ref())
-                    .await?;
-            }
-        }
-
-        sqlx::query(
-            r#"
-            DELETE FROM server_databases
-            WHERE server_databases.uuid = $1
-            "#,
-        )
-        .bind(self.uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub async fn into_admin_api_object(
         self,
@@ -528,6 +495,85 @@ impl ServerDatabase {
             },
             created: self.created.and_utc(),
         })
+    }
+}
+
+#[derive(Default)]
+pub struct DeleteServerDatabaseOptions {
+    pub force: bool,
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for ServerDatabase {
+    type DeleteOptions = DeleteServerDatabaseOptions;
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<ServerDatabase>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        let connection = self.database_host.get_connection(database).await?;
+        let database_name = self.name.clone();
+        let database_username = self.username.clone();
+        let database_uuid = self.uuid;
+
+        tokio::spawn(async move {
+            let run_delete = async || {
+                match connection {
+                    crate::models::database_host::DatabasePool::Mysql(pool) => {
+                        sqlx::query(&format!("DROP DATABASE IF EXISTS `{}`", database_name))
+                            .execute(pool.as_ref())
+                            .await?;
+                        sqlx::query(&format!("DROP USER IF EXISTS '{}'@'%'", database_username))
+                            .execute(pool.as_ref())
+                            .await?;
+                    }
+                    crate::models::database_host::DatabasePool::Postgres(pool) => {
+                        sqlx::query(&format!("DROP DATABASE IF EXISTS \"{}\"", database_name))
+                            .execute(pool.as_ref())
+                            .await?;
+                        sqlx::query(&format!("DROP USER IF EXISTS \"{}\"", database_username))
+                            .execute(pool.as_ref())
+                            .await?;
+                    }
+                }
+
+                Ok::<_, anyhow::Error>(())
+            };
+
+            if let Err(err) = run_delete().await
+                && !options.force
+            {
+                return Err(err);
+            }
+
+            sqlx::query(
+                r#"
+                DELETE FROM server_databases
+                WHERE server_databases.uuid = $1
+                "#,
+            )
+            .bind(database_uuid)
+            .execute(&mut *transaction)
+            .await?;
+
+            transaction.commit().await?;
+
+            Ok(())
+        })
+        .await?
     }
 }
 

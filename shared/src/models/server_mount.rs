@@ -1,7 +1,10 @@
 use crate::{prelude::*, storage::StorageUrlRetriever};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
-use std::collections::BTreeMap;
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize)]
@@ -255,25 +258,6 @@ impl ServerMount {
         })
     }
 
-    pub async fn delete_by_uuids(
-        database: &crate::database::Database,
-        server_uuid: uuid::Uuid,
-        mount_uuid: uuid::Uuid,
-    ) -> Result<(), crate::database::DatabaseError> {
-        sqlx::query(
-            r#"
-            DELETE FROM server_mounts
-            WHERE server_mounts.server_uuid = $1 AND server_mounts.mount_uuid = $2
-            "#,
-        )
-        .bind(server_uuid)
-        .bind(mount_uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     #[inline]
     pub async fn into_api_object(
         self,
@@ -333,6 +317,53 @@ impl ServerMount {
             mount: mount.into_admin_api_object(),
             created: self.created.map(|dt| dt.and_utc()),
         })
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for ServerMount {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<ServerMount>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let server_uuid = match &self.server {
+            Some(server) => server.uuid,
+            None => {
+                return Err(anyhow::anyhow!(
+                    "This server mount does not have a server attached, cannot delete"
+                ));
+            }
+        };
+
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        sqlx::query(
+            r#"
+            DELETE FROM server_mounts
+            WHERE server_mounts.server_uuid = $1 AND server_mounts.mount_uuid = $2
+            "#,
+        )
+        .bind(server_uuid)
+        .bind(self.mount.uuid)
+        .execute(database.write())
+        .await?;
+
+        transaction.commit().await?;
+
+        Ok(())
     }
 }
 

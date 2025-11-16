@@ -124,6 +124,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             server::{GetServer, GetServerActivityLogger},
             user::GetPermissionManager,
         },
@@ -166,7 +167,7 @@ mod delete {
                 .ok();
         }
 
-        if let Err(err) = database.delete(&state.database).await {
+        if let Err(err) = database.delete(&state.database, Default::default()).await {
             tracing::error!(server = %server.uuid, "failed to delete database: {:#?}", err);
 
             return ApiResponse::error("failed to delete database")

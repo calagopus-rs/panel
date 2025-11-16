@@ -7,8 +7,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, node::GetNode, node_mount::NodeMount,
-            user::GetPermissionManager,
+            DeletableModel, admin_activity::GetAdminActivityLogger, node::GetNode,
+            node_mount::NodeMount, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -51,7 +51,7 @@ mod delete {
                 }
             };
 
-        NodeMount::delete_by_uuids(&state.database, node.uuid, node_mount.mount.uuid).await?;
+        node_mount.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

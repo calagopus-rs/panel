@@ -124,9 +124,8 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger,
-            server::Server,
-            user::{GetPermissionManager, User},
+            DeletableModel, admin_activity::GetAdminActivityLogger, server::Server,
+            user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -161,7 +160,7 @@ mod delete {
         }
 
         state.storage.remove(user.avatar.as_deref()).await?;
-        User::delete_by_uuid(&state.database, user.uuid).await?;
+        user.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

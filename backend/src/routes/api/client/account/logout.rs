@@ -7,8 +7,8 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             user::{AuthMethod, GetAuthMethod},
-            user_session::UserSession,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -38,7 +38,7 @@ mod post {
             }
         };
 
-        UserSession::delete_by_uuid(&state.database, session.uuid).await?;
+        session.delete(&state.database, ()).await?;
 
         let settings = state.settings.get().await;
 

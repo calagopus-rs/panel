@@ -2,7 +2,10 @@ use crate::prelude::*;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
-use std::{collections::BTreeMap, sync::Arc};
+use std::{
+    collections::BTreeMap,
+    sync::{Arc, LazyLock},
+};
 use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
@@ -488,144 +491,8 @@ impl ServerBackup {
         Ok(())
     }
 
-    pub async fn delete(
-        self,
-        database: &crate::database::Database,
-        server: &super::server::Server,
-    ) -> Result<(), anyhow::Error> {
-        let node = self.node.fetch_cached(database).await?;
-
-        let backup_configuration = self
-            .backup_configuration
-            .ok_or_else(|| {
-                crate::response::DisplayError::new(
-                    "no backup configuration available, unable to delete backup",
-                )
-                .with_status(StatusCode::EXPECTATION_FAILED)
-            })?
-            .fetch_cached(database)
-            .await?;
-
-        match self.disk {
-            BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
-                    s3_configuration.decrypt(database).await?;
-
-                    let client = s3_configuration
-                        .into_client()
-                        .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
-                    let file_path = match &self.upload_path {
-                        Some(path) => path,
-                        None => &Self::s3_path(server.uuid, self.uuid),
-                    };
-
-                    if let Err(err) = client.delete_object(file_path).await {
-                        tracing::error!(server = %server.uuid, backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
-                    }
-                } else {
-                    tracing::warn!(server = %server.uuid, backup = %self.uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");
-                }
-            }
-            _ => {
-                if let Err((status, error)) = node
-                    .api_client(database)
-                    .delete_backups_backup(
-                        self.uuid,
-                        &wings_api::backups_backup::delete::RequestBody {
-                            adapter: self.disk.to_wings_adapter(),
-                        },
-                    )
-                    .await
-                    && status != StatusCode::NOT_FOUND
-                {
-                    return Err(anyhow::anyhow!(error.error));
-                }
-            }
-        }
-
-        sqlx::query(
-            r#"
-            UPDATE server_backups
-            SET deleted = NOW()
-            WHERE server_backups.uuid = $1
-            "#,
-        )
-        .bind(self.uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn delete_detached(
-        self,
-        database: &crate::database::Database,
-        node: super::node::Node,
-    ) -> Result<(), anyhow::Error> {
-        let backup_configuration = self
-            .backup_configuration
-            .ok_or_else(|| {
-                crate::response::DisplayError::new(
-                    "no backup configuration available, unable to delete backup",
-                )
-                .with_status(StatusCode::EXPECTATION_FAILED)
-            })?
-            .fetch_cached(database)
-            .await?;
-
-        match self.disk {
-            BackupDisk::S3 => {
-                if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
-                    s3_configuration.decrypt(database).await?;
-
-                    let client = s3_configuration
-                        .into_client()
-                        .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
-                    let file_path = match self.upload_path.as_ref() {
-                        Some(path) => path,
-                        None => return Err(anyhow::anyhow!("upload path not found")),
-                    };
-
-                    if let Err(err) = client.delete_object(file_path).await {
-                        tracing::error!(backup = %self.uuid, "failed to delete S3 backup: {:#?}", err);
-                    }
-                } else {
-                    return Err(anyhow::anyhow!("S3 configuration not found"));
-                }
-            }
-            _ => {
-                if let Err((status, error)) = node
-                    .api_client(database)
-                    .delete_backups_backup(
-                        self.uuid,
-                        &wings_api::backups_backup::delete::RequestBody {
-                            adapter: self.disk.to_wings_adapter(),
-                        },
-                    )
-                    .await
-                    && status != StatusCode::NOT_FOUND
-                {
-                    return Err(anyhow::anyhow!(error.error));
-                }
-            }
-        }
-
-        sqlx::query(
-            r#"
-            UPDATE server_backups
-            SET deleted = NOW()
-            WHERE server_backups.uuid = $1
-            "#,
-        )
-        .bind(self.uuid)
-        .execute(database.write())
-        .await?;
-
-        Ok(())
-    }
-
     pub async fn delete_oldest_by_server_uuid(
-        database: &crate::database::Database,
+        database: &Arc<crate::database::Database>,
         server: &super::server::Server,
     ) -> Result<(), anyhow::Error> {
         let row = sqlx::query(&format!(
@@ -648,7 +515,7 @@ impl ServerBackup {
         if let Some(row) = row {
             let backup = Self::map(None, &row)?;
 
-            backup.delete(database, server).await
+            backup.delete(database, ()).await
         } else {
             Err(sqlx::Error::RowNotFound.into())
         }
@@ -706,6 +573,107 @@ impl ByUuid for ServerBackup {
         .await?;
 
         Self::map(None, &row)
+    }
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for ServerBackup {
+    type DeleteOptions = ();
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<ServerBackup>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        let node = self.node.fetch_cached(database).await?;
+
+        let backup_configuration = self
+            .backup_configuration
+            .as_ref()
+            .ok_or_else(|| {
+                crate::response::DisplayError::new(
+                    "no backup configuration available, unable to delete backup",
+                )
+                .with_status(StatusCode::EXPECTATION_FAILED)
+            })?
+            .fetch_cached(database)
+            .await?;
+
+        let database = Arc::clone(database);
+        let server_uuid = self.server.as_ref().map(|s| s.uuid);
+        let backup_uuid = self.uuid;
+        let backup_disk = self.disk;
+        let backup_upload_path = self.upload_path.clone();
+
+        tokio::spawn(async move {
+            match backup_disk {
+                BackupDisk::S3 => {
+                    if let Some(mut s3_configuration) = backup_configuration.backup_configs.s3 {
+                        s3_configuration.decrypt(&database).await?;
+
+                        let client = s3_configuration
+                            .into_client()
+                            .map_err(|err| sqlx::Error::Io(std::io::Error::other(err)))?;
+                        let file_path = match backup_upload_path {
+                            Some(path) => path,
+                            None => if let Some(server_uuid) = server_uuid {
+                                Self::s3_path(server_uuid, backup_uuid)
+                            } else {
+                                return Err(anyhow::anyhow!("upload path not found"))
+                            }
+                        };
+
+                        if let Err(err) = client.delete_object(file_path).await {
+                            tracing::error!(server = ?server_uuid, backup = %backup_uuid, "failed to delete S3 backup: {:#?}", err);
+                        }
+                    } else {
+                        tracing::warn!(server = ?server_uuid, backup = %backup_uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");
+                    }
+                }
+                _ => {
+                    if let Err((status, error)) = node
+                        .api_client(&database)
+                        .delete_backups_backup(
+                            backup_uuid,
+                            &wings_api::backups_backup::delete::RequestBody {
+                                adapter: backup_disk.to_wings_adapter(),
+                            },
+                        )
+                        .await
+                        && status != StatusCode::NOT_FOUND
+                    {
+                        return Err(anyhow::anyhow!(error.error));
+                    }
+                }
+            }
+
+            sqlx::query(
+                r#"
+                UPDATE server_backups
+                SET deleted = NOW()
+                WHERE server_backups.uuid = $1
+                "#,
+            )
+            .bind(backup_uuid)
+            .execute(&mut *transaction)
+            .await?;
+
+            transaction.commit().await?;
+
+            Ok(())
+        }).await?
     }
 }
 

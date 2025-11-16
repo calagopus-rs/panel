@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::{
     collections::{BTreeMap, HashMap},
-    sync::Arc,
+    sync::{Arc, LazyLock},
 };
 use utoipa::ToSchema;
 use validator::Validate;
@@ -936,57 +936,6 @@ impl Server {
         Ok(())
     }
 
-    pub async fn delete(
-        &self,
-        database: &crate::database::Database,
-        force: bool,
-    ) -> Result<(), anyhow::Error> {
-        let node = self.node.fetch_cached(database).await?;
-        let databases =
-            super::server_database::ServerDatabase::all_by_server_uuid(database, self.uuid).await?;
-
-        for db in databases {
-            match db.delete(database).await {
-                Ok(_) => {}
-                Err(err) => {
-                    tracing::error!(server = %self.uuid, "failed to delete database: {:#?}", err);
-
-                    if !force {
-                        return Err(err.into());
-                    }
-                }
-            }
-        }
-
-        let mut transaction = database.write().begin().await?;
-
-        sqlx::query!("DELETE FROM servers WHERE servers.uuid = $1", self.uuid)
-            .execute(&mut *transaction)
-            .await?;
-
-        match node
-            .api_client(database)
-            .delete_servers_server(self.uuid)
-            .await
-        {
-            Ok(_) => {
-                transaction.commit().await?;
-                Ok(())
-            }
-            Err((status, err)) => {
-                tracing::error!(server = %self.uuid, node = %self.node.uuid, "failed to delete server: {:#?}", err);
-
-                if force {
-                    transaction.commit().await?;
-                    Ok(())
-                } else {
-                    transaction.rollback().await?;
-                    Err(anyhow::anyhow!("status code {status}: {}", err.error))
-                }
-            }
-        }
-    }
-
     pub fn wings_permissions(&self, user: &super::user::User) -> Vec<&str> {
         let mut permissions = Vec::new();
         if user.admin {
@@ -1407,6 +1356,82 @@ impl ByUuid for Server {
         .await?;
 
         Self::map(None, &row)
+    }
+}
+
+#[derive(Default)]
+pub struct DeleteServerOptions {
+    pub force: bool,
+}
+
+#[async_trait::async_trait]
+impl DeletableModel for Server {
+    type DeleteOptions = DeleteServerOptions;
+
+    fn get_delete_listeners() -> &'static LazyLock<DeleteListenerList<Self>> {
+        static DELETE_LISTENERS: LazyLock<DeleteListenerList<Server>> =
+            LazyLock::new(|| Arc::new(ListenerList::default()));
+
+        &DELETE_LISTENERS
+    }
+
+    async fn delete(
+        &self,
+        database: &Arc<crate::database::Database>,
+        options: Self::DeleteOptions,
+    ) -> Result<(), anyhow::Error> {
+        let node = self.node.fetch_cached(database).await?;
+        let databases =
+            super::server_database::ServerDatabase::all_by_server_uuid(database, self.uuid).await?;
+
+        let mut transaction = database.write().begin().await?;
+
+        self.run_delete_listeners(&options, database, &mut transaction)
+            .await?;
+
+        let database = Arc::clone(database);
+        let server_uuid = self.uuid;
+
+        tokio::spawn(async move {
+            for db in databases {
+                match db.delete(&database, super::server_database::DeleteServerDatabaseOptions { force: options.force }).await {
+                    Ok(_) => {}
+                    Err(err) => {
+                        tracing::error!(server = %server_uuid, "failed to delete database: {:#?}", err);
+
+                        if !options.force {
+                            return Err(err);
+                        }
+                    }
+                }
+            }
+
+            sqlx::query!("DELETE FROM servers WHERE servers.uuid = $1", server_uuid)
+                .execute(&mut *transaction)
+                .await?;
+
+            match node
+                .api_client(&database)
+                .delete_servers_server(server_uuid)
+                .await
+            {
+                Ok(_) => {
+                    transaction.commit().await?;
+                    Ok(())
+                }
+                Err((status, err)) => {
+                    tracing::error!(server = %server_uuid, node = %node.uuid, "failed to delete server: {:#?}", err);
+
+                    if options.force {
+                        transaction.commit().await?;
+                        Ok(())
+                    } else {
+                        transaction.rollback().await?;
+                        Err(anyhow::anyhow!("status code {status}: {}", err.error))
+                    }
+                }
+            }
+        }).await?
     }
 }
 

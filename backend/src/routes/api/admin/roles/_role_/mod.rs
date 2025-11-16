@@ -82,7 +82,9 @@ mod delete {
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{admin_activity::GetAdminActivityLogger, role::Role, user::GetPermissionManager},
+        models::{
+            DeletableModel, admin_activity::GetAdminActivityLogger, user::GetPermissionManager,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -110,7 +112,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("roles.delete")?;
 
-        Role::delete_by_uuid(&state.database, role.uuid).await?;
+        role.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

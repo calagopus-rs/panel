@@ -7,6 +7,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             user::{GetPermissionManager, GetUser},
             user_activity::GetUserActivityLogger,
             user_session::UserSession,
@@ -47,7 +48,7 @@ mod delete {
                 }
             };
 
-        UserSession::delete_by_uuid(&state.database, session.uuid).await?;
+        session.delete(&state.database, ()).await?;
 
         activity_logger
             .log(

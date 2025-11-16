@@ -60,6 +60,7 @@ mod delete {
     use shared::{
         ApiError, GetState,
         models::{
+            DeletableModel,
             user::{GetPermissionManager, GetUser},
             user_activity::GetUserActivityLogger,
             user_oauth_link::UserOAuthLink,
@@ -100,7 +101,7 @@ mod delete {
                 }
             };
 
-        UserOAuthLink::delete_by_uuid(&state.database, oauth_link.uuid).await?;
+        oauth_link.delete(&state.database, ()).await?;
 
         activity_logger
             .log(
