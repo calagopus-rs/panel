@@ -6,11 +6,15 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const userTableColumns = ['ID', 'Username', 'Role', 'Created'];
+export const userTableColumns = ['', 'ID', 'Username', 'Role', 'Created'];
 
 export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>
+      <TableData>
+        <img src={user.avatar ?? '/icon.svg'} alt={user.username} className={'h-5 w-5 rounded-full select-none'} />
+      </TableData>
+
       <TableData>
         <NavLink to={`/admin/users/${user.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
           <Code>{user.uuid}</Code>

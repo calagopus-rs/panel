@@ -105,11 +105,7 @@ function Footer() {
     <>
       <Card className={'mt-auto flex-row! justify-between items-center min-h-fit'} p={'sm'}>
         <div className={'flex items-center'}>
-          <img
-            src={user.avatar ?? '/icon.svg'}
-            alt={'Profile Picture'}
-            className={'h-10 w-10 rounded-full select-none'}
-          />
+          <img src={user.avatar ?? '/icon.svg'} alt={user.username} className={'h-10 w-10 rounded-full select-none'} />
           <div className={'flex flex-col ml-3'}>
             <span className={'font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'}>
               {user.nameFirst}

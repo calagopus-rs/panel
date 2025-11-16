@@ -528,12 +528,20 @@ impl DeletableModel for ServerDatabase {
     ) -> Result<(), anyhow::Error> {
         let mut transaction = database.write().begin().await?;
 
+        if self.name.contains(|c| ['"', '\'', '`'].contains(&c))
+            || self.username.contains(|c| ['"', '\'', '`'].contains(&c))
+        {
+            return Err(anyhow::anyhow!(
+                "unable to delete database with escape characters"
+            ));
+        }
+
         self.run_delete_listeners(&options, database, &mut transaction)
             .await?;
 
         let connection = self.database_host.get_connection(database).await?;
         let database_name = self.name.clone();
-        let database_username = self.username.clone();
+        let database_username = self.username.trim_end().to_string();
         let database_uuid = self.uuid;
 
         tokio::spawn(async move {

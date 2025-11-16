@@ -70,7 +70,7 @@ export default function ServerSubusers() {
 
       <ContextMenuProvider>
         <Table
-          columns={['Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
+          columns={['', 'Username', '2FA Enabled', 'Permissions', 'Ignored Files', '']}
           loading={loading}
           pagination={subusers}
           onPageSelect={setPage}

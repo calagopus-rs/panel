@@ -74,6 +74,14 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
               openMenu(e.pageX, e.pageY);
             }}
           >
+            <TableData>
+              <img
+                src={subuser.user.avatar ?? '/icon.svg'}
+                alt={subuser.user.username}
+                className={'h-5 w-5 rounded-full select-none'}
+              />
+            </TableData>
+
             <TableData>{subuser.user.username}</TableData>
 
             <TableData>
