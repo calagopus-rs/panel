@@ -297,6 +297,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                 .map(|r| (r.get("key"), r.get("value")))
                 .collect();
 
+            settings.oobe_step = None;
             settings.app.url = source_app_url.clone();
             if let Some(app_name) = source_settings.remove("settings::app:name") {
                 settings.app.name = app_name;

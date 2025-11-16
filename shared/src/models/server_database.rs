@@ -474,6 +474,13 @@ impl ServerDatabase {
         database: &crate::database::Database,
         show_password: bool,
     ) -> Result<ApiServerDatabase, anyhow::Error> {
+        let mut username = self.username;
+        let space_idx = username.find(' ');
+
+        if let Some(space_idx) = space_idx {
+            username.truncate(space_idx);
+        }
+
         Ok(ApiServerDatabase {
             uuid: self.uuid,
             r#type: self.database_host.r#type,
@@ -487,7 +494,7 @@ impl ServerDatabase {
                 .unwrap_or(self.database_host.port),
             name: self.name,
             is_locked: self.locked,
-            username: self.username,
+            username,
             password: if show_password {
                 Some(database.decrypt(self.password).await?)
             } else {
