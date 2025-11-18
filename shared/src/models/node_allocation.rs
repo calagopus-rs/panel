@@ -179,7 +179,7 @@ impl NodeAllocation {
         let deleted = sqlx::query(
             r#"
             DELETE FROM node_allocations
-            WHERE node_allocations.node_uuid = $1, node_allocations.uuid = ANY($2)
+            WHERE node_allocations.node_uuid = $1 AND node_allocations.uuid = ANY($2)
             "#,
         )
         .bind(node_uuid)
