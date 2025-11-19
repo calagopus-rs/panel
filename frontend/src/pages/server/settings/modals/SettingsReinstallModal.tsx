@@ -2,7 +2,7 @@ import { Group, ModalProps } from '@mantine/core';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
-import reinstallServer from '@/api/server/settings/reinstallServer';
+import installServer from '@/api/server/settings/installServer';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import Modal from '@/elements/modals/Modal';
@@ -20,7 +20,7 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
   const doReinstall = () => {
     setLoading(true);
 
-    reinstallServer(server.uuid, { truncateDirectory: truncate })
+    installServer(server.uuid, { truncateDirectory: truncate })
       .then(() => {
         addToast('Reinstalling server...', 'success');
 

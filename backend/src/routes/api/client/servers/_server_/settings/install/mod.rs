@@ -1,6 +1,8 @@
 use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod cancel;
+
 mod post {
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
@@ -23,7 +25,7 @@ mod post {
     struct Response {}
 
     #[utoipa::path(post, path = "/", responses(
-        (status = OK, body = inline(Response)),
+        (status = ACCEPTED, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = EXPECTATION_FAILED, body = ApiError),
     ), params(
@@ -40,7 +42,7 @@ mod post {
         activity_logger: GetServerActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        permissions.has_server_permission("settings.reinstall")?;
+        permissions.has_server_permission("settings.install")?;
 
         let mut transaction = state.database.write().begin().await?;
 
@@ -90,19 +92,22 @@ mod post {
 
         activity_logger
             .log(
-                "server:settings.reinstall",
+                "server:settings.install",
                 serde_json::json!({
                     "truncate_directory": data.truncate_directory
                 }),
             )
             .await;
 
-        ApiResponse::json(Response {}).ok()
+        ApiResponse::json(Response {})
+            .with_status(StatusCode::ACCEPTED)
+            .ok()
     }
 }
 
 pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(post::route))
+        .nest("/cancel", cancel::router(state))
         .with_state(state.clone())
 }

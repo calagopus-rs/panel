@@ -6,12 +6,11 @@ use std::sync::LazyLock;
 
 static CLIENT: LazyLock<Client> = LazyLock::new(|| {
     Client::builder()
-        .user_agent("pterodactyl-rs panel")
+        .user_agent("Calagopus Panel")
         .build()
         .expect("Failed to create reqwest client")
 });
 
-#[inline]
 async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,
@@ -519,6 +518,21 @@ impl WingsClient {
         .await
     }
 
+    pub async fn post_servers_server_install_abort(
+        &self,
+        server: uuid::Uuid,
+    ) -> Result<super::servers_server_install_abort::post::Response, (StatusCode, super::ApiError)>
+    {
+        request_impl(
+            self,
+            Method::POST,
+            format!("/api/servers/{server}/install/abort"),
+            None::<&()>,
+            None,
+        )
+        .await
+    }
+
     pub async fn get_servers_server_logs(
         &self,
         server: uuid::Uuid,
@@ -725,12 +739,6 @@ impl WingsClient {
         .await
     }
 
-    pub async fn get_stats(
-        &self,
-    ) -> Result<super::stats::get::Response, (StatusCode, super::ApiError)> {
-        request_impl(self, Method::GET, "/api/stats", None::<&()>, None).await
-    }
-
     pub async fn get_system(
         &self,
     ) -> Result<super::system::get::Response, (StatusCode, super::ApiError)> {
@@ -761,6 +769,12 @@ impl WingsClient {
             None,
         )
         .await
+    }
+
+    pub async fn get_system_stats(
+        &self,
+    ) -> Result<super::system_stats::get::Response, (StatusCode, super::ApiError)> {
+        request_impl(self, Method::GET, "/api/system/stats", None::<&()>, None).await
     }
 
     pub async fn post_system_upgrade(

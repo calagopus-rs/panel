@@ -30,7 +30,6 @@ export const databaseTypeEnum = pgEnum('database_type', [
 export const serverStatusEnum = pgEnum('server_status', [
 	'INSTALLING',
 	'INSTALL_FAILED',
-	'REINSTALL_FAILED',
 	'RESTORING_BACKUP'
 ])
 

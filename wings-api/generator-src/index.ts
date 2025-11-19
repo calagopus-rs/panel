@@ -29,12 +29,11 @@ use std::sync::LazyLock;
 
 static CLIENT: LazyLock<Client> = LazyLock::new(|| {
     Client::builder()
-        .user_agent("pterodactyl-rs panel")
+        .user_agent("Calagopus Panel")
         .build()
         .expect("Failed to create reqwest client")
 });
 
-#[inline]
 async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,

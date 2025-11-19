@@ -47,7 +47,6 @@ mod post {
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
         successful: bool,
-        reinstall: bool,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -68,11 +67,7 @@ mod post {
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
         let status = if !data.successful {
-            if data.reinstall {
-                Some(ServerStatus::ReinstallFailed)
-            } else {
-                Some(ServerStatus::InstallFailed)
-            }
+            Some(ServerStatus::InstallFailed)
         } else {
             None
         };

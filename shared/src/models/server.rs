@@ -50,7 +50,6 @@ impl ServerActivityLogger {
 pub enum ServerStatus {
     Installing,
     InstallFailed,
-    ReinstallFailed,
     RestoringBackup,
 }
 

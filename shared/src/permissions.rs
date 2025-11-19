@@ -604,7 +604,11 @@ pub static SERVER_PERMISSIONS: LazyLock<PermissionMap> = LazyLock::new(|| {
                         "auto-kill",
                         "Allows to change the auto-kill settings for this server.",
                     ),
-                    ("reinstall", "Allows to trigger a reinstall of this server."),
+                    ("install", "Allows triggering a reinstall of this server."),
+                    (
+                        "cancel-install",
+                        "Allows cancelling the install process of this server.",
+                    ),
                 ]),
             },
         ),

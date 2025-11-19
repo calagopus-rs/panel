@@ -55,8 +55,9 @@ pub async fn auth(
     };
 
     const IGNORED_STATUS_PATHS: &[&str] = &[
-        "/api/client/servers/{server}/websocket",
         "/api/client/servers/{server}",
+        "/api/client/servers/{server}/websocket",
+        "/api/client/servers/{server}/settings/install/cancel",
     ];
 
     if !IGNORED_STATUS_PATHS.contains(&matched_path.as_str()) {
@@ -73,8 +74,7 @@ pub async fn auth(
         } else if let Some(status) = server.status {
             let message = match status {
                 ServerStatus::Installing => "server is currently installing",
-                ServerStatus::InstallFailed => "server install has failed",
-                ServerStatus::ReinstallFailed => "server reinstall has failed",
+                ServerStatus::InstallFailed => "your server has failed its installation process",
                 ServerStatus::RestoringBackup => "server is restoring from a backup",
             };
 

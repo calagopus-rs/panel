@@ -1,4 +1,4 @@
-import { faArrowUpRightFromSquare, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpRightFromSquare, faCancel, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router';
 import getServer from '@/api/server/getServer';
@@ -16,10 +16,17 @@ import { useAuth } from '@/providers/AuthProvider';
 import serverRoutes from '@/routers/routes/serverRoutes';
 import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
+import Button from '@/elements/Button';
+import cancelServerInstall from '@/api/server/settings/cancelServerInstall';
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default function ServerRouter() {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
+  const [abortLoading, setAbortLoading] = useState(false);
+  const { addToast } = useToast();
   const { user } = useAuth();
 
   const { settings } = useGlobalStore();
@@ -34,10 +41,23 @@ export default function ServerRouter() {
   }, []);
 
   useEffect(() => {
+    if (!server?.status && abortLoading) {
+      addToast('Server reinstall aborted.', 'success');
+      setAbortLoading(false);
+    }
+  }, [abortLoading, server?.status]);
+
+  useEffect(() => {
     getServer(params.id)
       .then((data) => setServer(data))
       .finally(() => setLoading(false));
   }, [params.id]);
+
+  const doAbortInstall = () => {
+    setAbortLoading(true);
+
+    cancelServerInstall(server.uuid).catch((err) => addToast(httpErrorToHuman(err), 'error'));
+  };
 
   return (
     <div className={'lg:flex'}>
@@ -100,6 +120,15 @@ export default function ServerRouter() {
               ) : server.status === 'installing' ? (
                 <Notification className={'mb-4'} loading>
                   Your Server is currently being installed. Please wait...
+                  <Button
+                    className={'ml-2'}
+                    leftSection={<FontAwesomeIcon icon={faCancel} />}
+                    variant={'subtle'}
+                    loading={abortLoading}
+                    onClick={doAbortInstall}
+                  >
+                    Cancel
+                  </Button>
                 </Notification>
               ) : null}
 

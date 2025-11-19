@@ -281,6 +281,13 @@
       "when": 1762725599370,
       "tag": "0039_normal_firedrake",
       "breakpoints": false
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1763546116511,
+      "tag": "0040_first_tusk",
+      "breakpoints": false
     }
   ]
 }

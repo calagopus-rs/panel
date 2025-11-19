@@ -12,7 +12,6 @@
               "Enum": [
                 "INSTALLING",
                 "INSTALL_FAILED",
-                "REINSTALL_FAILED",
                 "RESTORING_BACKUP"
               ]
             }

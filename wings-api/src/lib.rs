@@ -317,6 +317,57 @@ pub enum SystemDiskLimiterMode {
     XfsQuota,
 }
 
+nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct SystemStats {
+        #[schema(inline)]
+        pub cpu: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct SystemStatsCpu {
+            #[schema(inline)]
+            pub used: f64,
+            #[schema(inline)]
+            pub threads: u64,
+            #[schema(inline)]
+            pub model: String,
+        },
+
+        #[schema(inline)]
+        pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct SystemStatsNetwork {
+            #[schema(inline)]
+            pub received: u64,
+            #[schema(inline)]
+            pub receiving_rate: f64,
+            #[schema(inline)]
+            pub sent: u64,
+            #[schema(inline)]
+            pub sending_rate: f64,
+        },
+
+        #[schema(inline)]
+        pub memory: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct SystemStatsMemory {
+            #[schema(inline)]
+            pub used: u64,
+            #[schema(inline)]
+            pub total: u64,
+        },
+
+        #[schema(inline)]
+        pub disk: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct SystemStatsDisk {
+            #[schema(inline)]
+            pub used: u64,
+            #[schema(inline)]
+            pub total: u64,
+            #[schema(inline)]
+            pub read: u64,
+            #[schema(inline)]
+            pub reading_rate: f64,
+            #[schema(inline)]
+            pub written: u64,
+            #[schema(inline)]
+            pub writing_rate: f64,
+        },
+
+    }
+}
+
 #[derive(Debug, ToSchema, Deserialize, Serialize, Clone, Copy)]
 pub enum TransferArchiveFormat {
     #[serde(rename = "tar")]
@@ -946,6 +997,22 @@ pub mod servers_server_files_write {
         pub type Response = Response200;
     }
 }
+pub mod servers_server_install_abort {
+    use super::*;
+
+    pub mod post {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response202 {
+            }
+        }
+
+        pub type Response409 = ApiError;
+
+        pub type Response = Response202;
+    }
+}
 pub mod servers_server_logs {
     use super::*;
 
@@ -1224,66 +1291,6 @@ pub mod servers_server_ws_permissions {
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
-            }
-        }
-
-        pub type Response = Response200;
-    }
-}
-pub mod stats {
-    use super::*;
-
-    pub mod get {
-        use super::*;
-
-        nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
-                #[schema(inline)]
-                pub cpu: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Cpu {
-                    #[schema(inline)]
-                    pub used: f64,
-                    #[schema(inline)]
-                    pub threads: u64,
-                    #[schema(inline)]
-                    pub model: String,
-                },
-
-                #[schema(inline)]
-                pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Network {
-                    #[schema(inline)]
-                    pub received: u64,
-                    #[schema(inline)]
-                    pub receiving_rate: f64,
-                    #[schema(inline)]
-                    pub sent: u64,
-                    #[schema(inline)]
-                    pub sending_rate: f64,
-                },
-
-                #[schema(inline)]
-                pub memory: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Memory {
-                    #[schema(inline)]
-                    pub used: u64,
-                    #[schema(inline)]
-                    pub total: u64,
-                },
-
-                #[schema(inline)]
-                pub disk: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Disk {
-                    #[schema(inline)]
-                    pub used: u64,
-                    #[schema(inline)]
-                    pub total: u64,
-                    #[schema(inline)]
-                    pub read: u64,
-                    #[schema(inline)]
-                    pub reading_rate: f64,
-                    #[schema(inline)]
-                    pub written: u64,
-                    #[schema(inline)]
-                    pub writing_rate: f64,
-                },
-
             }
         }
 
@@ -1637,6 +1644,8 @@ pub mod system_config {
                 #[schema(inline)]
                 pub remote: String,
                 #[schema(inline)]
+                pub remote_headers: IndexMap<String, String>,
+                #[schema(inline)]
                 pub remote_query: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200RemoteQuery {
                     #[schema(inline)]
                     pub timeout: u64,
@@ -1692,6 +1701,22 @@ pub mod system_logs_file {
         pub type Response200 = String;
 
         pub type Response404 = ApiError;
+
+        pub type Response = Response200;
+    }
+}
+pub mod system_stats {
+    use super::*;
+
+    pub mod get {
+        use super::*;
+
+        nestify::nest! {
+            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
+                #[schema(inline)]
+                pub stats: SystemStats,
+            }
+        }
 
         pub type Response = Response200;
     }

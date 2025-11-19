@@ -1028,7 +1028,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                     let (status, suspended) = match status {
                         Some("installing") => (Some(shared::models::server::ServerStatus::Installing), false),
                         Some("install_failed") => (Some(shared::models::server::ServerStatus::InstallFailed), false),
-                        Some("reinstall_failed") => (Some(shared::models::server::ServerStatus::ReinstallFailed), false),
+                        Some("reinstall_failed") => (Some(shared::models::server::ServerStatus::InstallFailed), false),
                         Some("restoring_backup") => {
                             (Some(shared::models::server::ServerStatus::RestoringBackup), false)
                         }
@@ -1357,7 +1357,7 @@ pub async fn import(matches: &ArgMatches, env: Option<&shared::env::Env>) -> i32
                             "schedule.update" => "schedules.update",
                             "schedule.delete" => "schedules.delete",
                             "settings.rename" => "settings.rename",
-                            "settings.reinstall" => "settings.reinstall",
+                            "settings.reinstall" => "settings.install",
                             "activity.read" => "activity.read",
                             _ => continue,
                         });
