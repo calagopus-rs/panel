@@ -30,7 +30,7 @@ export default function ServerRouter() {
   const { user } = useAuth();
 
   const { settings } = useGlobalStore();
-  const { server, backupRestoreProgress } = useServerStore();
+  const { server, updateServer, backupRestoreProgress } = useServerStore();
   const resetState = useServerStore((state) => state.reset);
   const setServer = useServerStore((state) => state.setServer);
 
@@ -56,7 +56,13 @@ export default function ServerRouter() {
   const doAbortInstall = () => {
     setAbortLoading(true);
 
-    cancelServerInstall(server.uuid).catch((err) => addToast(httpErrorToHuman(err), 'error'));
+    cancelServerInstall(server.uuid)
+      .then((insantCancel) => {
+        if (insantCancel) {
+          updateServer({ status: null });
+        }
+      })
+      .catch((err) => addToast(httpErrorToHuman(err), 'error'));
   };
 
   return (

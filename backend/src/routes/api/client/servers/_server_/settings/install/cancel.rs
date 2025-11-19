@@ -18,6 +18,7 @@ mod post {
     struct Response {}
 
     #[utoipa::path(post, path = "/", responses(
+        (status = OK, body = inline(Response)),
         (status = ACCEPTED, body = inline(Response)),
         (status = UNAUTHORIZED, body = ApiError),
         (status = EXPECTATION_FAILED, body = ApiError),
@@ -61,9 +62,7 @@ mod post {
                 .execute(state.database.write())
                 .await?;
 
-                return ApiResponse::json(Response {})
-                    .with_status(StatusCode::ACCEPTED)
-                    .ok();
+                return ApiResponse::json(Response {}).ok();
             }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to abort server install: {:#?}", err);

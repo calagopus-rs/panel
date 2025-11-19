@@ -1,10 +1,10 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (uuid: string): Promise<void> => {
+export default async (uuid: string): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/settings/install/cancel`)
-      .then(() => resolve())
+      .then(({ status }) => resolve(status === 202))
       .catch(reject);
   });
 };
