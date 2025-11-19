@@ -1049,7 +1049,7 @@ declare global {
 
   type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
 
-  type ServerStatus = 'installing' | 'install_failed' | 'reinstall_failed' | 'restoring_backup';
+  type ServerStatus = 'installing' | 'install_failed' | 'restoring_backup';
 
   interface PermissionMap {
     [category: string]: {

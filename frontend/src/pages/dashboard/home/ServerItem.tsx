@@ -135,11 +135,6 @@ export default function ServerItem({
               <FontAwesomeIcon size={'2x'} icon={faTriangleExclamation} color={'yellow'} />
               <p className={'ml-2'}>Install Failed</p>
             </div>
-          ) : server.status === 'reinstall_failed' ? (
-            <div className={'col-span-3 flex flex-row items-center justify-center'}>
-              <FontAwesomeIcon size={'2x'} icon={faTriangleExclamation} color={'yellow'} />
-              <p className={'ml-2'}>Reinstall Failed</p>
-            </div>
           ) : stats === null ? (
             <div className={'col-span-3 flex flex-row items-center justify-center'}>
               <Spinner />
