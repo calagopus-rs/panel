@@ -57,8 +57,8 @@ export default function ServerRouter() {
     setAbortLoading(true);
 
     cancelServerInstall(server.uuid)
-      .then((insantCancel) => {
-        if (insantCancel) {
+      .then((instantCancel) => {
+        if (instantCancel) {
           updateServer({ status: null });
         }
       })
