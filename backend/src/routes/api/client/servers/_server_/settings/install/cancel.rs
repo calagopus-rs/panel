@@ -51,6 +51,20 @@ mod post {
             .await
         {
             Ok(_) => {}
+            Err((StatusCode::CONFLICT, _)) => {
+                sqlx::query!(
+                    "UPDATE servers
+                    SET status = NULL
+                    WHERE servers.uuid = $1",
+                    server.uuid
+                )
+                .execute(state.database.write())
+                .await?;
+
+                return ApiResponse::json(Response {})
+                    .with_status(StatusCode::ACCEPTED)
+                    .ok();
+            }
             Err((_, err)) => {
                 tracing::error!(server = %server.uuid, "failed to abort server install: {:#?}", err);
 

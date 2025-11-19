@@ -2,6 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod cancel;
+mod unlock;
 
 mod post {
     use axum::http::StatusCode;
@@ -109,5 +110,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
     OpenApiRouter::new()
         .routes(routes!(post::route))
         .nest("/cancel", cancel::router(state))
+        .nest("/unlock", unlock::router(state))
         .with_state(state.clone())
 }
