@@ -1,12 +1,11 @@
-use chrono::Datelike;
 use clap::Args;
 
 #[derive(Args)]
-pub struct VersionArgs;
+pub struct ListArgs;
 
-pub struct VersionCommand;
+pub struct ListCommand;
 
-impl shared::extensions::commands::CliCommand<VersionArgs> for VersionCommand {
+impl shared::extensions::commands::CliCommand<ListArgs> for ListCommand {
     fn get_command(&self, command: clap::Command) -> clap::Command {
         command
     }
@@ -19,10 +18,6 @@ impl shared::extensions::commands::CliCommand<VersionArgs> for VersionCommand {
                     shared::VERSION,
                     shared::GIT_COMMIT,
                     shared::TARGET
-                );
-                println!(
-                    "copyright © 2025 - {} 0x7d8 & Contributors",
-                    chrono::Local::now().year()
                 );
 
                 Ok(())

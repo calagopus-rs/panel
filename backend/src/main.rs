@@ -7,12 +7,13 @@ use axum::{
     response::Response,
     routing::get,
 };
-use clap::{Arg, Command};
 use colored::Colorize;
 use include_dir::{Dir, include_dir};
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
-use shared::{ApiError, GetState, response::ApiResponse};
+use shared::{
+    ApiError, GetState, extensions::commands::CliCommandGroupBuilder, response::ApiResponse,
+};
 use std::{net::SocketAddr, path::PathBuf, sync::Arc, time::Instant};
 use tower::Layer;
 use tower_cookies::CookieManagerLayer;
@@ -25,62 +26,6 @@ use utoipa_axum::router::OpenApiRouter;
 static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 
 const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
-
-fn cli() -> Command {
-    Command::new("panel-rs")
-        .about(
-            "The API server allowing programmatic control of game servers for Pterodactyl Panel.",
-        )
-        .allow_external_subcommands(true)
-        .subcommand(
-            Command::new("version")
-                .about("Prints the current executable version and exits.")
-                .arg_required_else_help(false),
-        )
-        .subcommand(
-            Command::new("service-install")
-                .about("Installs the Wings service on the system.")
-                .arg(
-                    Arg::new("override")
-                        .help("set to true to override an existing service file")
-                        .num_args(0)
-                        .long("override")
-                        .default_value("false")
-                        .value_parser(clap::value_parser!(bool))
-                        .required(false),
-                )
-                .arg_required_else_help(false),
-        )
-        .subcommand(
-            Command::new("import")
-                .about("Imports the database from pterodactyl.")
-                .arg(
-                    Arg::new("environment")
-                        .help("path to the pterodactyl environment variables file")
-                        .num_args(1)
-                        .short('e')
-                        .long("environment")
-                        .default_value("/var/www/pterodactyl/.env")
-                        .required(false),
-                )
-                .arg_required_else_help(false),
-        )
-        .subcommand(
-            Command::new("diagnostics")
-                .about("Collect and report information about this Panel to assist in debugging.")
-                .arg(
-                    Arg::new("log_lines")
-                        .help("the number of log lines to include in the report")
-                        .num_args(1)
-                        .short('l')
-                        .long("log-lines")
-                        .default_value("500")
-                        .value_parser(clap::value_parser!(usize))
-                        .required(false),
-                )
-                .arg_required_else_help(false),
-        )
-}
 
 async fn handle_request(
     connect_info: ConnectInfo<SocketAddr>,
@@ -177,32 +122,42 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
 
 #[tokio::main]
 async fn main() {
-    let matches = cli().get_matches();
-
     let env = shared::env::Env::parse();
+    let extensions = Arc::new(shared::extensions::manager::ExtensionManager::new(
+        extension_internal_list::list(),
+    ));
 
-    match matches.subcommand() {
-        Some(("version", sub_matches)) => std::process::exit(
-            panel_rs::commands::version::version(sub_matches, env.as_ref().ok().map(|c| &c.0))
-                .await,
-        ),
-        Some(("service-install", sub_matches)) => std::process::exit(
-            panel_rs::commands::service_install::service_install(
-                sub_matches,
-                env.as_ref().ok().map(|c| &c.0),
-            )
-            .await,
-        ),
-        Some(("import", sub_matches)) => std::process::exit(
-            panel_rs::commands::import::import(sub_matches, env.as_ref().ok().map(|c| &c.0)).await,
-        ),
-        Some(("diagnostics", sub_matches)) => std::process::exit(
-            panel_rs::commands::diagnostics::diagnostics(
-                sub_matches,
-                env.as_ref().ok().map(|c| &c.0),
-            )
-            .await,
-        ),
+    let cli = CliCommandGroupBuilder::new(
+        "panel-rs",
+        "The panel server allowing control of game servers.",
+    );
+
+    let mut cli = panel_rs::commands::commands(cli);
+    cli = extensions
+        .init_cli(env.as_ref().ok().map(|e| &e.0), cli)
+        .await;
+
+    match cli.get_matches().remove_subcommand() {
+        Some((command, arg_matches)) => {
+            if let Some((func, arg_matches)) = cli.match_command(command, arg_matches) {
+                match func(env.as_ref().ok().map(|e| e.0.clone()), arg_matches).await {
+                    Ok(()) => {
+                        std::process::exit(0);
+                    }
+                    Err(err) => {
+                        eprintln!(
+                            "{}: {:#?}",
+                            "an error occurred while running cli command".red(),
+                            err
+                        );
+                        std::process::exit(1);
+                    }
+                }
+            } else {
+                cli.print_help();
+                std::process::exit(0);
+            }
+        }
         None => {
             tracing::info!("                         _");
             tracing::info!("  _ __   __ _ _ __   ___| |");
@@ -216,10 +171,6 @@ async fn main() {
                 format!("{} (git-{})", shared::VERSION, shared::GIT_COMMIT)
             );
             tracing::info!("github.com/calagopus-rs/panel\n");
-        }
-        _ => {
-            cli().print_help().unwrap();
-            std::process::exit(0);
         }
     }
 
@@ -241,7 +192,6 @@ async fn main() {
         },
     ));
 
-    let env = Arc::new(env);
     let jwt = Arc::new(shared::jwt::Jwt::new(&env));
     let cache = Arc::new(shared::cache::Cache::new(&env).await);
     let database = Arc::new(shared::database::Database::new(&env, cache.clone()).await);
@@ -257,9 +207,6 @@ async fn main() {
         }
     }
 
-    let extensions = Arc::new(shared::extensions::manager::ExtensionManager::new(
-        extension_internal_list::list(),
-    ));
     let settings = Arc::new(shared::settings::Settings::new(database.clone()).await);
     let storage = Arc::new(shared::storage::Storage::new(settings.clone()));
     let captcha = Arc::new(shared::captcha::Captcha::new(settings.clone()));

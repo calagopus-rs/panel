@@ -6,8 +6,9 @@
     "target": "esnext",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["../src/*"]
+    },
+    "types": ["../src/vite-env.d.ts"]
   },
-  "include": ["src"]
+  "include": ["*/src"]
 }

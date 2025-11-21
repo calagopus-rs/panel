@@ -131,6 +131,9 @@ importers:
       react-spinners:
         specifier: ^0.17.0
         version: 0.17.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      shared:
+        specifier: workspace:*
+        version: link:modules/shared
       sockette:
         specifier: ^2.0.6
         version: 2.0.6
@@ -201,6 +204,17 @@ importers:
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2))
+
+  modules/shared: {}
+
+  modules/test:
+    dependencies:
+      '@rjweb/utils':
+        specifier: ^1.12.29
+        version: 1.12.29
+      shared:
+        specifier: workspace:*
+        version: link:../shared
 
 packages:
 
@@ -742,6 +756,10 @@ packages:
     resolution: {integrity: sha512-famxyD5emrGGpFuUlgOP6fVW2h/ZaF405G5KDi3zPHzyjAWys/8W6NAVJtNbkCkhedmvL0xOhvt8feGXyXaw5w==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@rjweb/utils@1.12.29':
+    resolution: {integrity: sha512-iBE0VN4FKYKpMtgrT0KgfscRfIyC6xPnxLF2v/05rSet+bukfqEbfceLfFh5V6U9sH3ncTlZ56kzUsCOvoJsSA==}
+    engines: {node: '>=18.0.0'}
 
   '@robloche/chartjs-plugin-streaming@3.1.0':
     resolution: {integrity: sha512-6tTRo0eyw7klsk2ayjrZmJga+NqawDxwXlMOsQGAqJ8kZj9szNwlfD9EmTP2MDA8Sh8qFezxE6LYU6UUoothkg==}
@@ -2323,6 +2341,9 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
+  ts-arithmetic@0.1.1:
+    resolution: {integrity: sha512-3VqgsRgzaYfj+zKWn+7O66ifHwbOOnT2BoOrHwdEUBz7az0DetoZOS20+juNJh1klgzvWEi2Qxden41pomOUAQ==}
+
   tsconfck@3.1.6:
     resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
     engines: {node: ^18 || >=20}
@@ -3049,6 +3070,10 @@ snapshots:
   '@react-types/shared@3.32.1(react@19.2.0)':
     dependencies:
       react: 19.2.0
+
+  '@rjweb/utils@1.12.29':
+    dependencies:
+      ts-arithmetic: 0.1.1
 
   '@robloche/chartjs-plugin-streaming@3.1.0(chart.js@4.5.1)':
     dependencies:
@@ -4746,6 +4771,8 @@ snapshots:
   ts-api-utils@2.1.0(typescript@5.9.3):
     dependencies:
       typescript: 5.9.3
+
+  ts-arithmetic@0.1.1: {}
 
   tsconfck@3.1.6(typescript@5.9.3):
     optionalDependencies:

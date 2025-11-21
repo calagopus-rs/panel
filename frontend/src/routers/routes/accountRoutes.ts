@@ -7,6 +7,7 @@ import {
   faUser,
   faUserSecret,
 } from '@fortawesome/free-solid-svg-icons';
+import type { RouteDefinition } from 'shared';
 import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
 import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
 import DashboardActivity from '@/pages/dashboard/DashboardActivity';

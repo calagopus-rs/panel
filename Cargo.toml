@@ -1,8 +1,8 @@
 [workspace]
 resolver = "3"
-members = ["backend", "rule-validator", "wings-api", "shared", "extensions/*"]
+members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
-package.version = "0.13.5"
+package.version = "0.14.0"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -39,6 +39,7 @@ sha2 = "0.10.8"
 colored = "3.0.0"
 russh = "0.54.0"
 futures-util = "0.3.31"
+clap = { version = "4.5.37", features = ["derive"] }
 rust-s3 = { version = "0.37.0", default-features = false, features = ["tokio-rustls-tls"] }
 rand = "0.9.0"
 rustis = "0.16.1"

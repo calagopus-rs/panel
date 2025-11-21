@@ -127,10 +127,6 @@ jobs:
         with:
           prefix-key: ${{ runner.os }}-${{ matrix.rust }}-${{ matrix.target }}
 
-      - name: Initialize Repo
-        run: make init
-        shell: bash
-
       - name: Build release binary
         uses: actions-rs/cargo@v1
         with:

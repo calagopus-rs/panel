@@ -2,10 +2,15 @@
 
 use crate::State;
 use serde::Serialize;
-use std::ops::{Deref, DerefMut};
+use std::{
+    ops::{Deref, DerefMut},
+    sync::Arc,
+};
 use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 
+pub mod commands;
+pub mod distr;
 pub mod manager;
 
 pub struct ExtensionRouteBuilder {
@@ -150,6 +155,15 @@ pub trait Extension: Send + Sync {
         builder
     }
 
+    /// Your extension cli entrypoint, this runs after the env has been parsed
+    async fn initialize_cli(
+        &mut self,
+        env: Option<&Arc<crate::env::Env>>,
+        builder: commands::CliCommandGroupBuilder,
+    ) -> commands::CliCommandGroupBuilder {
+        builder
+    }
+
     /// Your extension call processor, this can be called by other extensions to interact with yours,
     /// if the call does not apply to your extension, simply return `None` to continue the matching process.
     ///
@@ -179,6 +193,7 @@ pub trait Extension: Send + Sync {
 
 #[derive(ToSchema, Serialize)]
 pub struct ConstructedExtension {
+    pub identifier: &'static str,
     pub name: &'static str,
     pub description: &'static str,
     pub authors: &'static [&'static str],
@@ -190,6 +205,12 @@ pub struct ConstructedExtension {
 }
 
 impl ConstructedExtension {
+    /// Gets the identifier of the extension defined by the author
+    #[inline]
+    pub const fn identifier(&self) -> &'static str {
+        self.identifier
+    }
+
     /// Gets the display name of the extension defined by the author
     #[inline]
     pub const fn name(&self) -> &'static str {

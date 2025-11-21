@@ -197,6 +197,9 @@ name = "arbitrary"
 version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3d036a3c4ab069c7b410a2ce876bd74808d2d0888a82667669f8e783a898bf1"
+dependencies = [
+ "derive_arbitrary",
+]
 
 [[package]]
 name = "arg_enum_proc_macro"
@@ -1068,6 +1071,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aa8120877db0e5c011242f96806ce3c94e0737ab8108532a76a3300a01db2ab8"
 dependencies = [
  "clap_builder",
+ "clap_derive",
 ]
 
 [[package]]
@@ -1080,6 +1084,18 @@ dependencies = [
  "anstyle",
  "clap_lex",
  "strsim",
+]
+
+[[package]]
+name = "clap_derive"
+version = "4.5.49"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2a0b5487afeab2deb2ff4e03a807ad1a03ac532ff5a2cee5d86884440c7f7671"
+dependencies = [
+ "heck",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.110",
 ]
 
 [[package]]
@@ -1472,6 +1488,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derive_arbitrary"
+version = "1.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e567bd82dcff979e4b03460c307b3cdc9e96fde3d73bed1496d2bc75d9dd62a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.110",
+]
+
+[[package]]
 name = "dialoguer"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1737,9 +1764,10 @@ dependencies = [
 
 [[package]]
 name = "extension-internal-list"
-version = "0.13.5"
+version = "0.14.0"
 dependencies = [
  "shared",
+ "test",
 ]
 
 [[package]]
@@ -1836,6 +1864,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfe33edd8e85a12a67454e37f8c75e730830d83e313556ab9ebf9ee7fbeb3bfb"
 dependencies = [
  "crc32fast",
+ "libz-rs-sys",
  "miniz_oxide",
 ]
 
@@ -2313,6 +2342,12 @@ name = "httpdate"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9"
+
+[[package]]
+name = "human_bytes"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91f255a4535024abf7640cb288260811fc14794f62b063652ed349f9a6c2348e"
 
 [[package]]
 name = "hyper"
@@ -2927,6 +2962,15 @@ checksum = "2e99fb7a497b1e3339bc746195567ed8d3e24945ecd636e3619d20b9de9e9149"
 dependencies = [
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "libz-rs-sys"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "840db8cf39d9ec4dd794376f38acc40d0fc65eec2a8f484f7fd375b84602becd"
+dependencies = [
+ "zlib-rs",
 ]
 
 [[package]]
@@ -3613,7 +3657,7 @@ dependencies = [
 
 [[package]]
 name = "panel-rs"
-version = "0.13.5"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -3628,6 +3672,7 @@ dependencies = [
  "dotenvy",
  "extension-internal-list",
  "futures-util",
+ "human_bytes",
  "image",
  "include_dir",
  "indexmap",
@@ -4396,7 +4441,7 @@ dependencies = [
 
 [[package]]
 name = "rule-validator"
-version = "0.13.5"
+version = "0.14.0"
 dependencies = [
  "chrono",
  "regex",
@@ -5049,7 +5094,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.13.5"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -5058,6 +5103,7 @@ dependencies = [
  "bincode 2.0.1",
  "cap-std",
  "chrono",
+ "clap",
  "colored",
  "constant_time_eq 0.4.2",
  "dotenvy",
@@ -5081,6 +5127,7 @@ dependencies = [
  "simple_crypt",
  "sqlx",
  "tokio",
+ "toml",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
@@ -5091,6 +5138,7 @@ dependencies = [
  "validator",
  "webauthn-rs",
  "wings-api",
+ "zip",
 ]
 
 [[package]]
@@ -5553,6 +5601,14 @@ dependencies = [
  "once_cell",
  "rustix",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "test"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "shared",
 ]
 
 [[package]]
@@ -6910,7 +6966,7 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 
 [[package]]
 name = "wings-api"
-version = "0.13.5"
+version = "0.14.0"
 dependencies = [
  "chrono",
  "cron",
@@ -7095,6 +7151,39 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.110",
+]
+
+[[package]]
+name = "zip"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb2a05c7c36fde6c09b08576c9f7fb4cda705990f73b58fe011abf7dfb24168b"
+dependencies = [
+ "arbitrary",
+ "crc32fast",
+ "flate2",
+ "indexmap",
+ "memchr",
+ "sha1",
+ "zopfli",
+]
+
+[[package]]
+name = "zlib-rs"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f06ae92f42f5e5c42443fd094f245eb656abf56dd7cce9b8b263236565e00f2"
+
+[[package]]
+name = "zopfli"
+version = "0.8.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f05cd8797d63865425ff89b5c4a48804f35ba0ce8d125800027ad6017d2b5249"
+dependencies = [
+ "bumpalo",
+ "crc32fast",
+ "log",
+ "simd-adler32",
 ]
 
 [[package]]

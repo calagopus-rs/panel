@@ -77,7 +77,8 @@ impl Storage {
 
         match &settings.storage_driver {
             super::settings::StorageDriver::Filesystem { path: base_path } => {
-                let base_filesystem = crate::cap::CapFilesystem::new(base_path.into()).await?;
+                let base_filesystem =
+                    crate::cap::CapFilesystem::async_new(base_path.into()).await?;
 
                 if let Err(err) = base_filesystem.async_remove_file(&path).await
                     && err
@@ -143,7 +144,8 @@ impl Storage {
 
         match &settings.storage_driver {
             super::settings::StorageDriver::Filesystem { path: base_path } => {
-                let base_filesystem = crate::cap::CapFilesystem::new(base_path.into()).await?;
+                let base_filesystem =
+                    crate::cap::CapFilesystem::async_new(base_path.into()).await?;
 
                 if let Some(parent) = Path::new(path).parent() {
                     base_filesystem.async_create_dir_all(parent).await?;

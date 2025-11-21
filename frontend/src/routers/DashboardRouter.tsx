@@ -34,7 +34,18 @@ export default function DashboardRouter() {
         <Sidebar.Divider />
 
         {accountRoutes
-          .filter((route) => !!route.name)
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
+          .map((route) => (
+            <Sidebar.Link
+              key={route.path}
+              to={to(route.path, '/account')}
+              end={route.exact}
+              icon={route.icon}
+              name={route.name}
+            />
+          ))}
+        {window.extensionContext.routes.accountRoutes
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
           .map((route) => (
             <Sidebar.Link
               key={route.path}
@@ -53,9 +64,16 @@ export default function DashboardRouter() {
             <Routes>
               <Route path={''} element={<DashboardHome />} />
               <Route path={'/all'} element={<DashboardHomeAll />} />
-              {accountRoutes.map(({ path, element: Element }) => (
-                <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
-              ))}
+              {accountRoutes
+                .filter((route) => !route.filter || route.filter())
+                .map(({ path, element: Element }) => (
+                  <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
+                ))}
+              {window.extensionContext.routes.accountRoutes
+                .filter((route) => !route.filter || route.filter())
+                .map(({ path, element: Element }) => (
+                  <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
+                ))}
               <Route path={'*'} element={<NotFound />} />
             </Routes>
           </Suspense>

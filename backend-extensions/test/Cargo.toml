@@ -1,0 +1,10 @@
+[package]
+name = "test"
+description = "sigma"
+authors = ["0x7d8", "Arnaud Ligma"]
+version = "1.0.0"
+edition = { workspace = true }
+
+[dependencies]
+shared = { workspace = true }
+async-trait = { workspace = true }

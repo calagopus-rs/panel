@@ -2,11 +2,11 @@ use serde::Deserialize;
 use std::path::Path;
 
 fn main() {
-    let internal_list_extension = Path::new("../extensions/internal-list");
-    let extensions_path = Path::new("../extensions");
+    let internal_list_extension = Path::new("../backend-extensions/internal-list");
+    let extensions_path = Path::new("../backend-extensions");
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=../extensions");
+    println!("cargo:rerun-if-changed=../backend-extensions");
 
     let mut packages = Vec::new();
 
@@ -71,6 +71,9 @@ shared = {{ workspace = true }}
         let identifier = package.name.replace("-", "_");
 
         exts.push_str("\n        ConstructedExtension {\n");
+        exts.push_str("            identifier: ");
+        exts.push_str(&toml::Value::String(identifier.clone()).to_string());
+        exts.push_str(",\n");
         exts.push_str("            name: ");
         exts.push_str(&toml::Value::String(package.name).to_string());
         exts.push_str(",\n");

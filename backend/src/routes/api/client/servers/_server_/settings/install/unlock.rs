@@ -55,8 +55,7 @@ mod post {
             .log("server:settings.unlock-install", serde_json::json!({}))
             .await;
 
-        ApiResponse::json(Response {})
-            .ok()
+        ApiResponse::json(Response {}).ok()
     }
 }
 

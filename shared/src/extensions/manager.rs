@@ -1,8 +1,10 @@
+use std::sync::Arc;
+
 use tokio::sync::{RwLock, RwLockReadGuard};
 
 use crate::{
     State,
-    extensions::{ConstructedExtension, ExtensionRouteBuilder},
+    extensions::{ConstructedExtension, ExtensionRouteBuilder, commands::CliCommandGroupBuilder},
 };
 
 pub struct ExtensionManager {
@@ -23,6 +25,18 @@ impl ExtensionManager {
             ext.initialize(state.clone()).await;
 
             builder = ext.initialize_router(state.clone(), builder).await;
+        }
+
+        builder
+    }
+
+    pub async fn init_cli(
+        &self,
+        env: Option<&Arc<crate::env::Env>>,
+        mut builder: CliCommandGroupBuilder,
+    ) -> CliCommandGroupBuilder {
+        for ext in self.vec.write().await.iter_mut() {
+            builder = ext.initialize_cli(env, builder).await;
         }
 
         builder

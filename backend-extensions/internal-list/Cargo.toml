@@ -5,3 +5,4 @@ edition = { workspace = true }
 
 [dependencies]
 shared = { workspace = true }
+test = { path = "../test" }

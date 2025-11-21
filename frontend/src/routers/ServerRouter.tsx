@@ -85,7 +85,29 @@ export default function ServerRouter() {
         <Sidebar.Divider />
 
         {serverRoutes
-          .filter((route) => !!route.name)
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
+          .map((route) =>
+            route.permission ? (
+              <Can key={route.path} action={route.permission} matchAny>
+                <Sidebar.Link
+                  to={to(route.path, `/server/${params.id}`)}
+                  end={route.exact}
+                  icon={route.icon}
+                  name={route.name}
+                />
+              </Can>
+            ) : (
+              <Sidebar.Link
+                key={route.path}
+                to={to(route.path, `/server/${params.id}`)}
+                end={route.exact}
+                icon={route.icon}
+                name={route.name}
+              />
+            ),
+          )}
+        {window.extensionContext.routes.serverRoutes
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
           .map((route) =>
             route.permission ? (
               <Can key={route.path} action={route.permission} matchAny>
@@ -140,9 +162,16 @@ export default function ServerRouter() {
 
               <Suspense fallback={<Spinner.Centered />}>
                 <Routes>
-                  {serverRoutes.map(({ path, element: Element }) => (
-                    <Route key={path} path={path} element={<Element />} />
-                  ))}
+                  {serverRoutes
+                    .filter((route) => !route.filter || route.filter())
+                    .map(({ path, element: Element }) => (
+                      <Route key={path} path={path} element={<Element />} />
+                    ))}
+                  {window.extensionContext.routes.serverRoutes
+                    .filter((route) => !route.filter || route.filter())
+                    .map(({ path, element: Element }) => (
+                      <Route key={path} path={path} element={<Element />} />
+                    ))}
                   <Route path={'*'} element={<NotFound />} />
                 </Routes>
               </Suspense>

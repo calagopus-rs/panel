@@ -57,7 +57,8 @@
     "tailwindcss": "^4.1.16",
     "tzdata": "^1.0.46",
     "uuid": "^13.0.0",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "shared": "workspace:*"
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.4",

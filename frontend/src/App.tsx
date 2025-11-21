@@ -12,6 +12,8 @@ import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { lazy } from 'react';
 import ErrorBoundary from './elements/ErrorBoundary';
+import globalRoutes from './routers/routes/globalRoutes';
+import NotFound from './pages/NotFound';
 
 const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter'));
 const DashboardRouter = lazy(() => import('./routers/DashboardRouter'));
@@ -33,6 +35,17 @@ export default function App() {
             <AuthProvider>
               <Suspense fallback={<Spinner.Centered />}>
                 <Routes>
+                  {globalRoutes
+                    .filter((route) => !route.filter || route.filter())
+                    .map(({ path, element: Element }) => (
+                      <Route key={path} path={path} element={<Element />} />
+                    ))}
+                  {window.extensionContext.routes.globalRoutes
+                    .filter((route) => !route.filter || route.filter())
+                    .map(({ path, element: Element }) => (
+                      <Route key={path} path={path} element={<Element />} />
+                    ))}
+
                   <Route element={<UnauthenticatedRoute />}>
                     <Route path={'/auth/*'} element={<AuthenticationRouter />} />
                   </Route>
@@ -44,6 +57,8 @@ export default function App() {
                     <Route element={<AdminRoute />}>
                       <Route path={'/admin/*'} element={<AdminRouter />} />
                     </Route>
+
+                    <Route path={'*'} element={<NotFound />} />
                   </Route>
                 </Routes>
               </Suspense>

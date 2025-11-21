@@ -8,6 +8,7 @@ import { to } from '@/lib/routes';
 import NotFound from '@/pages/NotFound';
 import adminRoutes from '@/routers/routes/adminRoutes';
 import { useGlobalStore } from '@/stores/global';
+import Can from '@/elements/Can';
 
 export default function AdminRouter() {
   const { settings } = useGlobalStore();
@@ -29,16 +30,51 @@ export default function AdminRouter() {
         <Sidebar.Divider />
 
         {adminRoutes
-          .filter((route) => !!route.name)
-          .map((route) => (
-            <Sidebar.Link
-              key={route.path}
-              to={to(route.path, '/admin')}
-              end={route.exact}
-              icon={route.icon}
-              name={route.name}
-            />
-          ))}
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
+          .map((route) =>
+            route.permission ? (
+              <Can key={route.path} action={route.permission} matchAny>
+                <Sidebar.Link
+                  key={route.path}
+                  to={to(route.path, '/admin')}
+                  end={route.exact}
+                  icon={route.icon}
+                  name={route.name}
+                />
+              </Can>
+            ) : (
+              <Sidebar.Link
+                key={route.path}
+                to={to(route.path, '/admin')}
+                end={route.exact}
+                icon={route.icon}
+                name={route.name}
+              />
+            ),
+          )}
+        {window.extensionContext.routes.adminRoutes
+          .filter((route) => !!route.name && (!route.filter || route.filter()))
+          .map((route) =>
+            route.permission ? (
+              <Can key={route.path} action={route.permission} matchAny>
+                <Sidebar.Link
+                  key={route.path}
+                  to={to(route.path, '/admin')}
+                  end={route.exact}
+                  icon={route.icon}
+                  name={route.name}
+                />
+              </Can>
+            ) : (
+              <Sidebar.Link
+                key={route.path}
+                to={to(route.path, '/admin')}
+                end={route.exact}
+                icon={route.icon}
+                name={route.name}
+              />
+            ),
+          )}
 
         <Sidebar.Footer />
       </Sidebar>
@@ -46,9 +82,16 @@ export default function AdminRouter() {
         <Container>
           <Suspense fallback={<Spinner.Centered />}>
             <Routes>
-              {adminRoutes.map(({ path, element: Element }) => (
-                <Route key={path} path={path} element={<Element />} />
-              ))}
+              {adminRoutes
+                .filter((route) => !route.filter || route.filter())
+                .map(({ path, element: Element }) => (
+                  <Route key={path} path={path} element={<Element />} />
+                ))}
+              {window.extensionContext.routes.adminRoutes
+                .filter((route) => !route.filter || route.filter())
+                .map(({ path, element: Element }) => (
+                  <Route key={path} path={path} element={<Element />} />
+                ))}
               <Route path={'*'} element={<NotFound />} />
             </Routes>
           </Suspense>

@@ -7,7 +7,7 @@ edition = { workspace = true }
 wings-api = { workspace = true }
 rule-validator = { workspace = true }
 shared = { workspace = true }
-extension-internal-list = { path = "../extensions/internal-list" }
+extension-internal-list = { path = "../backend-extensions/internal-list" }
 tracing = { workspace = true }
 sentry = { workspace = true }
 sentry-tower = { workspace = true }
@@ -40,7 +40,7 @@ chrono-tz = { version = "0.10.4", features = ["serde"] }
 infer = "0.19.0"
 axum-extra = { workspace = true }
 anyhow = { workspace = true }
-clap = "4.5.37"
+clap = { workspace = true }
 dialoguer = "0.12.0"
 cron = { workspace = true }
 webauthn-rs = { workspace = true }
@@ -50,6 +50,7 @@ rust-s3 = { workspace = true }
 rustis = { workspace = true }
 dotenvy = { workspace = true }
 oauth2 = { workspace = true }
+human_bytes = "0.4.3"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"

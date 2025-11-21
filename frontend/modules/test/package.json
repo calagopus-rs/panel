@@ -1,0 +1,13 @@
+{
+  "name": "test",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "dependencies": {
+    "@rjweb/utils": "^1.12.29",
+    "shared": "workspace:*"
+  }
+}

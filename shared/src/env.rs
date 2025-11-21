@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Context;
 use colored::Colorize;
 use dotenvy::dotenv;
@@ -44,7 +46,8 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn parse() -> Result<(Env, tracing_appender::non_blocking::WorkerGuard), anyhow::Error> {
+    pub fn parse() -> Result<(Arc<Self>, tracing_appender::non_blocking::WorkerGuard), anyhow::Error>
+    {
         dotenv().ok();
 
         let env = Self {
@@ -177,6 +180,6 @@ impl Env {
                 .finish(),
         )?;
 
-        Ok((env, _guard))
+        Ok((Arc::new(env), _guard))
     }
 }

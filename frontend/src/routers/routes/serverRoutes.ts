@@ -11,6 +11,7 @@ import {
   faUsers,
 } from '@fortawesome/free-solid-svg-icons';
 import { lazy } from 'react';
+import type { ServerRouteDefinition } from 'shared';
 import ServerActivity from '@/pages/server/activity/ServerActivity';
 import ServerBackups from '@/pages/server/backups/ServerBackups';
 import ServerDatabases from '@/pages/server/databases/ServerDatabases';
@@ -25,10 +26,6 @@ import ServerSubusers from '@/pages/server/subusers/ServerSubusers';
 
 const ServerConsole = lazy(() => import('@/pages/server/console/ServerConsole'));
 const FileEditor = lazy(() => import('@/pages/server/files/FileEditor'));
-
-interface ServerRouteDefinition extends RouteDefinition {
-  permission: string | string[] | null;
-}
 
 const routes: ServerRouteDefinition[] = [
   {

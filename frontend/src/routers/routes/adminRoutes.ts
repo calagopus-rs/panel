@@ -12,6 +12,7 @@ import {
   faUsers,
   faWrench,
 } from '@fortawesome/free-solid-svg-icons';
+import type { AdminRouteDefinition } from 'shared';
 import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
 import AdminHome from '@/pages/admin/AdminHome';
 import AdminActivity from '@/pages/admin/activity/AdminActivity';
@@ -27,7 +28,7 @@ import AdminServers from '@/pages/admin/servers/AdminServers';
 import AdminSettings from '@/pages/admin/settings/AdminSettings';
 import AdminUsers from '@/pages/admin/users/AdminUsers';
 
-const routes: RouteDefinition[] = [
+const routes: AdminRouteDefinition[] = [
   {
     name: 'Overview',
     icon: faBuilding,
