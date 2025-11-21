@@ -47,6 +47,7 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
+        "noUnusedImports": "warn",
         "noUnusedVariables": "error",
         "useIsNan": "error",
         "useValidForDirection": "error",
@@ -57,7 +58,8 @@
         "noCommonJs": "error",
         "noNamespace": "error",
         "useArrayLiterals": "error",
-        "useAsConstAssertion": "error"
+        "useAsConstAssertion": "error",
+        "useConsistentCurlyBraces": "warn"
       },
       "suspicious": {
         "noAsyncPromiseExecutor": "error",

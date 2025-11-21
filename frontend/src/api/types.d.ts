@@ -989,6 +989,7 @@ declare global {
 
   interface PublicSettings {
     version: string;
+    oobeStep: string;
     captchaProvider: PublicCaptchaProvider;
     app: {
       url: string;
@@ -1074,4 +1075,6 @@ declare global {
     element: FC;
     exact?: boolean;
   }
+
+  type OobeStepKey = 'register' | 'configuration' | 'location' | 'node' | 'node_verify' | 'finished' | '';
 }

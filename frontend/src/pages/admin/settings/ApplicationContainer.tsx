@@ -54,7 +54,7 @@ export default function ApplicationContainer() {
         <Group grow>
           <Switch
             label={'Enable Telemetry'}
-            name={'telemetryEnabled'}
+            description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
             defaultChecked={appSettings.telemetryEnabled}
             onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
           />

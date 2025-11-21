@@ -10,7 +10,7 @@ interface AuthContextType {
   user: User | null;
 
   setUser: (user: User | null) => void;
-  doLogin: (user: User) => void;
+  doLogin: (user: User, doNavigate?: boolean) => void;
   doLogout: () => void;
 }
 
@@ -32,9 +32,11 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  const doLogin = (user: User) => {
+  const doLogin = (user: User, doNavigate: boolean = true) => {
     setUser(user);
-    navigate('/');
+    if (doNavigate) {
+      navigate('/');
+    }
   };
 
   const doLogout = () => {

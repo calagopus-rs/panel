@@ -203,15 +203,17 @@ export default function Login() {
                   Register
                 </Button>
               )}
-              <Button
-                variant={'light'}
-                disabled={!oAuthProviders.length}
-                onClick={() => setStep('oauth')}
-                size={'md'}
-                fullWidth
-              >
-                OAuth Login
-              </Button>
+              {oAuthProviders.length > 0 && (
+                <Button
+                  variant={'light'}
+                  disabled={!oAuthProviders.length}
+                  onClick={() => setStep('oauth')}
+                  size={'md'}
+                  fullWidth
+                >
+                  OAuth Login
+                </Button>
+              )}
               <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
                 Forgot Password
               </Button>

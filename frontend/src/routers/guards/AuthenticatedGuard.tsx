@@ -1,11 +1,10 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '@/providers/AuthProvider';
-import AdminRoutes from '@/routers/routes/adminRoutes';
 
-export default function AdminRoute() {
+export default function AuthenticatedGuard() {
   const { user } = useAuth();
 
-  if (!user.admin) return <Navigate to={'/'} />;
+  if (!user) return <Navigate to={'/auth/login'} />;
 
   return <Outlet />;
 }
