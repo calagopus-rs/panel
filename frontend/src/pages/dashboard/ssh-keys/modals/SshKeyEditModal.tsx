@@ -36,12 +36,12 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Edit SSH Key'} onClose={onClose} opened={opened}>
+    <Modal title='Edit SSH Key' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Name'}
-          placeholder={'Name'}
+          label='Name'
+          placeholder='Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -50,7 +50,7 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
           <Button onClick={doUpdate} loading={loading} disabled={!name}>
             Edit
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

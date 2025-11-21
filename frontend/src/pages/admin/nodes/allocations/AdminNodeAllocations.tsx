@@ -66,11 +66,11 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
 
       <AllocationActionBar node={node} loadAllocations={refetch} />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Node Allocations</Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>
         </Group>
@@ -79,7 +79,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
       <SelectionArea
         onSelectedStart={onSelectedStart}
         onSelected={onSelected}
-        className={'h-full'}
+        className='h-full'
         disabled={!!openModal}
       >
         <Table

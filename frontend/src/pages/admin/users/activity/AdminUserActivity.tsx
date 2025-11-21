@@ -19,7 +19,7 @@ export default function AdminUserActivity({ user }: { user: User }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         User Activity
       </Title>
 
@@ -46,7 +46,7 @@ export default function AdminUserActivity({ user }: { user: User }) {
             </TableData>
 
             <TableData>
-              <Group gap={4} justify={'right'} wrap={'nowrap'}>
+              <Group gap={4} justify='right' wrap='nowrap'>
                 {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
               </Group>
             </TableData>

@@ -13,13 +13,13 @@ export default function StepSendCommand({
     <Stack>
       <TextArea
         withAsterisk
-        label={'Command'}
-        placeholder={'say Hello World'}
+        label='Command'
+        placeholder='say Hello World'
         value={action.command}
         onChange={(e) => setAction({ ...action, command: e.target.value })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />

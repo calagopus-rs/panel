@@ -132,6 +132,12 @@
       "formatter": { "indentStyle": "space", "indentWidth": 2 }
     },
     {
+      "includes": ["**/*.css"],
+      "css": {
+        "parser": { "tailwindDirectives": true }
+      }
+    },
+    {
       "includes": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
       "linter": {
         "rules": {

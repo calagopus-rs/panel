@@ -35,29 +35,29 @@ export default function AccountContainer() {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Account
         </Title>
-        <Stack className={'mt-4'}>
+        <Stack className='mt-4'>
           <TextInput
             withAsterisk
-            label={'Username'}
-            placeholder={'Username'}
+            label='Username'
+            placeholder='Username'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
           <Group grow>
             <TextInput
               withAsterisk
-              label={'First Name'}
-              placeholder={'First Name'}
+              label='First Name'
+              placeholder='First Name'
               value={nameFirst}
               onChange={(e) => setNameFirst(e.target.value)}
             />
             <TextInput
               withAsterisk
-              label={'Last Name'}
-              placeholder={'Last Name'}
+              label='Last Name'
+              placeholder='Last Name'
               value={nameLast}
               onChange={(e) => setNameLast(e.target.value)}
             />

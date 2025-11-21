@@ -4,7 +4,7 @@ import { useAuth } from '@/providers/AuthProvider';
 export default function AuthenticatedGuard() {
   const { user } = useAuth();
 
-  if (!user) return <Navigate to={'/auth/login'} />;
+  if (!user) return <Navigate to='/auth/login' />;
 
   return <Outlet />;
 }

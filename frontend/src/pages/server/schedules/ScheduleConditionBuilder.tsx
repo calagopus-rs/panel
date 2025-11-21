@@ -85,7 +85,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
     <div style={{ marginLeft: depth * 20 }}>
       <Stack>
         <Select
-          label={'Condition Type'}
+          label='Condition Type'
           value={condition.type}
           onChange={(value) => value && handleTypeChange(value)}
           data={Object.entries(scheduleConditionLabelMapping)
@@ -98,7 +98,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
 
         {condition.type === 'server_state' && (
           <Select
-            label={'Server State'}
+            label='Server State'
             value={condition.state}
             onChange={(value) => value && onChange({ ...condition, state: value as ServerPowerState })}
             data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
@@ -114,7 +114,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
           condition.type === 'disk_usage') && (
           <Group grow>
             <Select
-              label={'Comparator'}
+              label='Comparator'
               value={condition.comparator}
               onChange={(value) => value && onChange({ ...condition, comparator: value as ScheduleComparator })}
               data={Object.entries(scheduleComparatorLabelMapping).map(([value, label]) => ({
@@ -124,7 +124,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
             />
             {condition.type === 'uptime' && (
               <NumberInput
-                label={'Value (seconds)'}
+                label='Value (seconds)'
                 value={Number(condition.value) / 1000}
                 onChange={(value) => onChange({ ...condition, value: Number(value) * 1000 || 0 })}
                 min={0}
@@ -132,7 +132,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
             )}
             {condition.type === 'cpu_usage' && (
               <NumberInput
-                label={'Value (%)'}
+                label='Value (%)'
                 value={condition.value}
                 onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
                 min={0}
@@ -140,7 +140,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
             )}
             {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
               <SizeInput
-                label={'Value + Unit (e.g. 2GB)'}
+                label='Value + Unit (e.g. 2GB)'
                 value={sizeInput}
                 setState={setSizeInput}
                 onChange={(value) => onChange({ ...condition, value })}
@@ -151,7 +151,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
 
         {condition.type === 'file_exists' && (
           <TextInput
-            label={'File Path'}
+            label='File Path'
             value={condition.file}
             onChange={(e) => onChange({ ...condition, file: e.target.value })}
           />
@@ -161,12 +161,12 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
           <>
             {depth < maxConditionDepth && (
               <Group>
-                <Text size={'sm'}>
+                <Text size='sm'>
                   {condition.type === 'and' ? 'All conditions must be true:' : 'Any condition must be true:'}
                 </Text>
                 <Button
-                  size={'xs'}
-                  variant={'light'}
+                  size='xs'
+                  variant='light'
                   leftSection={<FontAwesomeIcon icon={faPlus} />}
                   onClick={addNestedCondition}
                 >
@@ -176,7 +176,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
             )}
 
             {condition.conditions.map((nestedCondition, index) => (
-              <Group key={index} align={'flex-start'}>
+              <Group key={index} align='flex-start'>
                 <div style={{ flex: 1 }}>
                   <ScheduleConditionBuilder
                     condition={nestedCondition}
@@ -184,7 +184,7 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
                     depth={depth + 1}
                   />
                 </div>
-                <ActionIcon color={'red'} variant={'light'} onClick={() => removeNestedCondition(index)}>
+                <ActionIcon color='red' variant='light' onClick={() => removeNestedCondition(index)}>
                   <FontAwesomeIcon icon={faMinus} />
                 </ActionIcon>
               </Group>

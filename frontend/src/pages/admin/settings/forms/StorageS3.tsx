@@ -23,20 +23,20 @@ export default function StorageS3({
   }, []);
 
   return (
-    <Stack mt={'md'}>
+    <Stack mt='md'>
       <Group grow>
         <TextInput
           withAsterisk
-          label={'Access Key'}
-          placeholder={'Access Key'}
+          label='Access Key'
+          placeholder='Access Key'
           value={settings.accessKey || ''}
           onChange={(e) => setSettings({ ...settings, accessKey: e.target.value })}
         />
         <TextInput
           withAsterisk
-          label={'Secret Key'}
-          placeholder={'Secret Key'}
-          type={'password'}
+          label='Secret Key'
+          placeholder='Secret Key'
+          type='password'
           value={settings.secretKey || ''}
           onChange={(e) => setSettings({ ...settings, secretKey: e.target.value })}
         />
@@ -45,15 +45,15 @@ export default function StorageS3({
       <Group grow>
         <TextInput
           withAsterisk
-          label={'Bucket'}
-          placeholder={'Bucket'}
+          label='Bucket'
+          placeholder='Bucket'
           value={settings.bucket || ''}
           onChange={(e) => setSettings({ ...settings, bucket: e.target.value })}
         />
         <TextInput
           withAsterisk
-          label={'Region'}
-          placeholder={'Region'}
+          label='Region'
+          placeholder='Region'
           value={settings.region || ''}
           onChange={(e) => setSettings({ ...settings, region: e.target.value })}
         />
@@ -61,8 +61,8 @@ export default function StorageS3({
 
       <TextInput
         withAsterisk
-        label={'Endpoint'}
-        placeholder={'Endpoint'}
+        label='Endpoint'
+        placeholder='Endpoint'
         value={settings.endpoint || ''}
         onChange={(e) => setSettings({ ...settings, endpoint: e.target.value })}
       />

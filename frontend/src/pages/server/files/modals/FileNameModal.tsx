@@ -12,20 +12,20 @@ export default function FileNameModal({ onFileName, opened, onClose }: Props) {
   const [fileName, setFileName] = useState('');
 
   return (
-    <Modal title={'Create File'} onClose={onClose} opened={opened}>
+    <Modal title='Create File' onClose={onClose} opened={opened}>
       <TextInput
         withAsterisk
-        label={'File Name'}
-        placeholder={'File Name'}
+        label='File Name'
+        placeholder='File Name'
         value={fileName}
         onChange={(e) => setFileName(e.target.value)}
       />
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={() => onFileName(fileName)} disabled={!fileName}>
           Create
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

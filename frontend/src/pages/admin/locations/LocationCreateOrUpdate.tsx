@@ -54,8 +54,8 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Location Deletion'}
-        confirm={'Delete'}
+        title='Confirm Location Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -65,10 +65,10 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
 
         <Group grow>
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
           <Select
             allowDeselect
-            label={'Backup Configuration'}
+            label='Backup Configuration'
             data={[
               {
                 label: 'None',
@@ -86,8 +86,8 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
           />
         </Group>
 
-        <Group grow align={'start'}>
-          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
+        <Group grow align='start'>
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
         </Group>
 
         <Group>
@@ -100,7 +100,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
             </Button>
           )}
           {contextLocation && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>
           )}

@@ -60,8 +60,8 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Role Deletion'}
-        confirm={'Delete'}
+        title='Confirm Role Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -71,14 +71,14 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
         <Title order={2}>{contextRole ? 'Update' : 'Create'} Role</Title>
 
         <Group grow>
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
         </Group>
 
-        <Group grow align={'start'}>
-          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
+        <Group grow align='start'>
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
         </Group>
 
-        <Group grow align={'normal'}>
+        <Group grow align='normal'>
           <Stack>
             <Title order={3}>Server Permissions</Title>
             {availablePermissions?.serverPermissions && (
@@ -111,7 +111,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
             </Button>
           )}
           {contextRole && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>
           )}

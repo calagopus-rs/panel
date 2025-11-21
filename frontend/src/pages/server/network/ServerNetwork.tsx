@@ -8,7 +8,6 @@ import Button from '@/elements/Button';
 import ConditionalTooltip from '@/elements/ConditionalTooltip';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
@@ -37,15 +36,15 @@ export default function ServerNetwork() {
 
   return (
     <>
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           Network
-          <p className={'text-xs text-gray-300!'}>
+          <p className='text-xs text-gray-300!'>
             {allocations.total} of {server.featureLimits.allocations} maximum allocations assigned.
           </p>
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <ConditionalTooltip
             enabled={allocations.total >= server.featureLimits.allocations}
             label={`This server is limited to ${server.featureLimits.allocations} allocations.`}
@@ -53,7 +52,7 @@ export default function ServerNetwork() {
             <Button
               disabled={allocations.total >= server.featureLimits.allocations}
               onClick={doAdd}
-              color={'blue'}
+              color='blue'
               leftSection={<FontAwesomeIcon icon={faPlus} />}
             >
               Add

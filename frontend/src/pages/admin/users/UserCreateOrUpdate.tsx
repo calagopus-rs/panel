@@ -75,8 +75,8 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm User Deletion'}
-        confirm={'Delete'}
+        title='Confirm User Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.username}</Code>?
@@ -84,8 +84,8 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       <ConfirmationModal
         opened={openModal === 'disable_two_factor'}
         onClose={() => setOpenModal(null)}
-        title={'Disable User Two Factor'}
-        confirm={'Disable'}
+        title='Disable User Two Factor'
+        confirm='Disable'
         onConfirmed={doDisableTwoFactor}
       >
         Are you sure you want to remove the two factor of <Code>{form.values.username}</Code>?
@@ -95,12 +95,12 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
 
         <Group grow>
-          <TextInput withAsterisk label={'Username'} placeholder={'Username'} {...form.getInputProps('username')} />
+          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
           <TextInput
             withAsterisk
-            label={'Email'}
-            placeholder={'Email'}
-            type={'email'}
+            label='Email'
+            placeholder='Email'
+            type='email'
             {...form.getInputProps('email')}
           />
         </Group>
@@ -108,25 +108,25 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         <Group grow>
           <TextInput
             withAsterisk
-            label={'First Name'}
-            placeholder={'First Name'}
+            label='First Name'
+            placeholder='First Name'
             {...form.getInputProps('nameFirst')}
           />
-          <TextInput withAsterisk label={'Last Name'} placeholder={'Last Name'} {...form.getInputProps('nameLast')} />
+          <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
         </Group>
 
         <Group grow>
           <TextInput
             withAsterisk={!contextUser}
-            label={'Password'}
-            placeholder={'Password'}
-            type={'password'}
+            label='Password'
+            placeholder='Password'
+            type='password'
             {...form.getInputProps('password')}
           />
 
           <Select
-            label={'Role'}
-            placeholder={'Role'}
+            label='Role'
+            placeholder='Role'
             data={roles.items.map((nest) => ({
               label: nest.name,
               value: nest.uuid,
@@ -140,13 +140,13 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         </Group>
 
         <Switch
-          label={'Admin'}
+          label='Admin'
           checked={form.values.admin}
           onChange={(e) => form.setFieldValue('admin', e.target.checked)}
         />
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
@@ -158,15 +158,15 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         {contextUser && (
           <>
             <Button
-              color={'red'}
-              variant={'outline'}
+              color='red'
+              variant='outline'
               onClick={() => setOpenModal('disable_two_factor')}
               loading={loading}
               disabled={!form.values.totpEnabled}
             >
               Disable Two Factor
             </Button>
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>
           </>

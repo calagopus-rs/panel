@@ -81,8 +81,8 @@ export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) 
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Schedule Deletion'}
-        confirm={'Delete'}
+        title='Confirm Schedule Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{schedule.name}</Code> from this server?
@@ -143,7 +143,7 @@ export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) 
       >
         {({ openMenu }) => (
           <TableRow
-            className={'cursor-pointer'}
+            className='cursor-pointer'
             onContextMenu={(e) => {
               e.preventDefault();
               openMenu(e.clientX, e.clientY);

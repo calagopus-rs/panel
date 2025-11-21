@@ -46,7 +46,7 @@ function hasSelectionChanged<T>(oldSelection: T[], newSelection: T[]): boolean {
 class SelectionBox extends PureComponent<{ style: CSSProperties; isVisible: boolean }> {
   render() {
     if (!this.props.isVisible) return null;
-    return <div className={'selection-box'} style={this.props.style} />;
+    return <div className='selection-box' style={this.props.style} />;
   }
 }
 

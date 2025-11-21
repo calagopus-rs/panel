@@ -59,16 +59,16 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
 
   return (
     <>
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Server Variables</Title>
         <Group>
-          <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color={'blue'}>
+          <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color='blue'>
             Save
           </Button>
         </Group>
       </Group>
 
-      <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
+      <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'>
         {serverVariables.map((variable) => (
           <VariableContainer
             key={variable.envVariable}

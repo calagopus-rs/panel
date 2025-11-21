@@ -47,8 +47,8 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
     <>
       <Title order={2}>Node Configuration</Title>
 
-      <div className={'grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'}>
-        <div className={'flex flex-col md:col-span-3'}>
+      <div className='grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'>
+        <div className='flex flex-col md:col-span-3'>
           <Code
             block
             dangerouslySetInnerHTML={{
@@ -56,7 +56,7 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
             }}
           />
 
-          <p className={'mt-2'}>
+          <p className='mt-2'>
             Place this into the configuration file at <Code>/etc/pterodactyl/config.yml</Code> or run{' '}
             <Code block>
               wings configure --join-data{' '}
@@ -65,21 +65,21 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
           </p>
         </div>
         <Card>
-          <Title className={'text-right'}>Configuration</Title>
+          <Title className='text-right'>Configuration</Title>
 
           <Stack>
-            <TextInput name={'remote'} label={'Panel URL'} value={remote} onChange={(e) => setRemote(e.target.value)} />
+            <TextInput name='remote' label='Panel URL' value={remote} onChange={(e) => setRemote(e.target.value)} />
             <NumberInput
-              name={'api_port'}
-              label={'API Port'}
+              name='api_port'
+              label='API Port'
               value={apiPort}
               min={1}
               max={65535}
               onChange={(value) => setApiPort(Number(value))}
             />
             <NumberInput
-              name={'sftp_port'}
-              label={'SFTP Port'}
+              name='sftp_port'
+              label='SFTP Port'
               value={sftpPort}
               min={1}
               max={65535}

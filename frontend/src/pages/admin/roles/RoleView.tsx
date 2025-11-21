@@ -49,8 +49,8 @@ export default function RoleView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<RoleCreateOrUpdate contextRole={role} />} />
-        <Route path={'/users'} element={<AdminRoleUsers role={role} />} />
+        <Route path='/' element={<RoleCreateOrUpdate contextRole={role} />} />
+        <Route path='/users' element={<AdminRoleUsers role={role} />} />
       </Routes>
     </>
   );

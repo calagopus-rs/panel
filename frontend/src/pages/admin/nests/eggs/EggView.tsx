@@ -55,9 +55,9 @@ export default function EggView({ contextNest }: { contextNest: AdminNest }) {
       />
 
       <Routes>
-        <Route path={'/'} element={<EggCreateOrUpdate contextNest={contextNest} contextEgg={egg} />} />
-        <Route path={'/variables'} element={<AdminEggVariables contextNest={contextNest} contextEgg={egg} />} />
-        <Route path={'/mounts'} element={<AdminEggMounts contextNest={contextNest} contextEgg={egg} />} />
+        <Route path='/' element={<EggCreateOrUpdate contextNest={contextNest} contextEgg={egg} />} />
+        <Route path='/variables' element={<AdminEggVariables contextNest={contextNest} contextEgg={egg} />} />
+        <Route path='/mounts' element={<AdminEggMounts contextNest={contextNest} contextEgg={egg} />} />
       </Routes>
     </>
   );

@@ -6,8 +6,8 @@ export default function AlertError({ error, setError }: { error: string; setErro
   return (
     <Alert
       icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-      color={'red'}
-      title={'Error'}
+      color='red'
+      title='Error'
       onClose={() => setError('')}
       withCloseButton
     >

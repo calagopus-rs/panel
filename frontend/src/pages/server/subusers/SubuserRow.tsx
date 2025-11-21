@@ -54,8 +54,8 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Subuser Removal'}
-        confirm={'Remove'}
+        title='Confirm Subuser Removal'
+        confirm='Remove'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove <Code>{subuser.user.username}</Code> from this server?
@@ -78,7 +78,7 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
               <img
                 src={subuser.user.avatar ?? '/icon.svg'}
                 alt={subuser.user.username}
-                className={'h-5 w-5 rounded-full select-none'}
+                className='h-5 w-5 rounded-full select-none'
               />
             </TableData>
 
@@ -86,9 +86,9 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
 
             <TableData>
               {subuser.user.totpEnabled ? (
-                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
+                <FontAwesomeIcon className='text-green-500' icon={faLock} />
               ) : (
-                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
+                <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
               )}
             </TableData>
 

@@ -83,12 +83,12 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   };
 
   return (
-    <Modal title={`${contextApiKey ? 'Update' : 'Create'} API Key`} onClose={onClose} opened={opened} size={'xl'}>
+    <Modal title={`${contextApiKey ? 'Update' : 'Create'} API Key`} onClose={onClose} opened={opened} size='xl'>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Name'}
-          placeholder={'Name'}
+          label='Name'
+          placeholder='Name'
           value={apiKey.name}
           onChange={(e) => setApiKey({ ...apiKey, name: e.target.value })}
         />
@@ -124,11 +124,11 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           )}
         </Stack>
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doCreateOrUpdate} loading={loading} disabled={!apiKey.name}>
             Save
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

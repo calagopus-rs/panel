@@ -16,7 +16,7 @@ export default function AdminUserServers({ user }: { user: User }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         User Servers
       </Title>
 

@@ -24,15 +24,15 @@ function BackupConfigurationsContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Backup Configurations
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/backup-configurations/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -57,9 +57,9 @@ function BackupConfigurationsContainer() {
 export default function AdminBackupConfigurations() {
   return (
     <Routes>
-      <Route path={'/'} element={<BackupConfigurationsContainer />} />
-      <Route path={'/new'} element={<BackupConfigurationCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<BackupConfigurationView />} />
+      <Route path='/' element={<BackupConfigurationsContainer />} />
+      <Route path='/new' element={<BackupConfigurationCreateOrUpdate />} />
+      <Route path='/:id/*' element={<BackupConfigurationView />} />
     </Routes>
   );
 }

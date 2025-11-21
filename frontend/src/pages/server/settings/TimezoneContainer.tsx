@@ -52,14 +52,14 @@ export default function TimezoneContainer() {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
         <Stack h='100%'>
-          <Title order={2} c={'white'}>
+          <Title order={2} c='white'>
             Timezone
           </Title>
 
-          <Stack gap={'xs'}>
+          <Stack gap='xs'>
             <Select
               withAsterisk
-              label={'Timezone'}
+              label='Timezone'
               value={timezone}
               onChange={(value) => setTimezone(value)}
               data={[

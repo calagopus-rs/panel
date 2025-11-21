@@ -42,11 +42,11 @@ export default function DashboardHomeAll() {
     <>
       <DashboardHomeTitle />
 
-      <Group mb={'md'}>
-        <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+      <Group mb='md'>
+        <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
         {user.admin && (
           <Switch
-            label={"Show other users' servers"}
+            label="Show other users' servers"
             checked={serverListShowOthers}
             onChange={(e) => setServerListShowOthers(e.currentTarget.checked)}
           />
@@ -56,16 +56,16 @@ export default function DashboardHomeAll() {
       {loading ? (
         <Spinner.Centered />
       ) : servers.total === 0 ? (
-        <p className={'text-gray-400'}>No servers found</p>
+        <p className='text-gray-400'>No servers found</p>
       ) : (
-        <div className={'gap-4 grid md:grid-cols-2'}>
+        <div className='gap-4 grid md:grid-cols-2'>
           {servers.data.map((server) => (
             <ServerItem key={server.uuid} server={server} showGroupAddButton />
           ))}
         </div>
       )}
 
-      <Divider my={'md'} />
+      <Divider my='md' />
 
       <Pagination columns={[]} data={servers} onPageSelect={setPage} />
     </>

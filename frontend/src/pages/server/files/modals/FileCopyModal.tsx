@@ -78,29 +78,29 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Copy File'} onClose={onClose} opened={opened}>
+    <Modal title='Copy File' onClose={onClose} opened={opened}>
       <TextInput
-        label={'File Name'}
-        placeholder={'File Name'}
+        label='File Name'
+        placeholder='File Name'
         value={newFileName}
         onChange={(e) => setNewFileName(e.target.value)}
       />
 
-      <p className={'mt-2 text-sm md:text-base break-all'}>
-        <span className={'text-neutral-200'}>This file will be created as&nbsp;</span>
+      <p className='mt-2 text-sm md:text-base break-all'>
+        <span className='text-neutral-200'>This file will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className={'text-cyan-200'}>
+          <span className='text-cyan-200'>
             {join(browsingDirectory, newFileName || generateNewName()).replace(/^(\.\.\/|\/)+/, '')}
           </span>
         </Code>
       </p>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doCopy} loading={loading}>
           Copy
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

@@ -37,36 +37,36 @@ export default function ServerDeleteModal({ server, opened, onClose }: ModalProp
 
   return (
     <>
-      <Modal title={'Confirm Server Deletion'} onClose={onClose} opened={opened}>
+      <Modal title='Confirm Server Deletion' onClose={onClose} opened={opened}>
         <Stack>
           <Switch
-            label={'Do you want to forcefully delete this server?'}
-            name={'force'}
+            label='Do you want to forcefully delete this server?'
+            name='force'
             defaultChecked={deleteDoForce}
             onChange={(e) => setDeleteDoForce(e.target.checked)}
           />
 
           <Switch
-            label={'Do you want to delete backups of this server?'}
-            name={'deleteBackups'}
+            label='Do you want to delete backups of this server?'
+            name='deleteBackups'
             defaultChecked={deleteDoDeleteBackups}
             onChange={(e) => setDeleteDoDeleteBackups(e.target.checked)}
           />
 
           <TextInput
             withAsterisk
-            label={'Confirm Server Name'}
-            placeholder={'Server Name'}
+            label='Confirm Server Name'
+            placeholder='Server Name'
             value={deleteServerName}
             onChange={(e) => setDeleteServerName(e.target.value)}
           />
         </Stack>
 
-        <Group mt={'md'}>
-          <Button color={'red'} disabled={server.name != deleteServerName} loading={loading} onClick={doDelete}>
+        <Group mt='md'>
+          <Button color='red' disabled={server.name != deleteServerName} loading={loading} onClick={doDelete}>
             Okay
           </Button>
-          <Button variant={'default'} onClick={() => onClose()}>
+          <Button variant='default' onClick={() => onClose()}>
             Cancel
           </Button>
         </Group>

@@ -17,12 +17,12 @@ export default function DashboardSessions() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Sessions
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
         </Group>
       </Group>
 

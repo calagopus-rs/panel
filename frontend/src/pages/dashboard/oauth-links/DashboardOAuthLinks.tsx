@@ -28,8 +28,8 @@ export default function DashboardOAuthLinks() {
 
   return (
     <>
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           OAuth Links
         </Title>
         <Group>
@@ -57,7 +57,7 @@ export default function DashboardOAuthLinks() {
                   disabled={
                     !oAuthProviders.filter((p) => !oauthLinks.data.some((l) => l.oauthProvider.uuid === p.uuid)).length
                   }
-                  color={'blue'}
+                  color='blue'
                   rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                 >
                   Connect

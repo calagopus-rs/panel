@@ -13,13 +13,13 @@ export default function StepUpdateStartupCommand({
     <Stack>
       <TextArea
         withAsterisk
-        label={'Startup Command'}
-        placeholder={'java -jar server.jar'}
+        label='Startup Command'
+        placeholder='java -jar server.jar'
         value={action.command}
         onChange={(e) => setAction({ ...action, command: e.target.value })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) =>
           setAction({

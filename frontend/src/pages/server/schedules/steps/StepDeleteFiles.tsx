@@ -13,15 +13,15 @@ export default function StepDeleteFiles({
     <Stack>
       <TextInput
         withAsterisk
-        label={'Root Path'}
-        placeholder={'/'}
+        label='Root Path'
+        placeholder='/'
         value={action.root}
         onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
       <TagsInput
         withAsterisk
-        label={'Files to Delete'}
-        placeholder={'Add files to delete'}
+        label='Files to Delete'
+        placeholder='Add files to delete'
         value={action.files || []}
         onChange={(value) => setAction({ ...action, files: value })}
       />

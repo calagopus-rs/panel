@@ -73,7 +73,7 @@ export default function MultiKeyValueInput({
     .map(({ key, value }) => `${key}: ${transformValue ? transformValue(key, value) : value}`);
 
   return (
-    <Stack gap={'sm'}>
+    <Stack gap='sm'>
       <TagsInput
         value={displayedTags}
         onChange={(tags) => {
@@ -83,11 +83,11 @@ export default function MultiKeyValueInput({
           }
         }}
         readOnly
-        label={'Selected key-value pairs'}
-        placeholder={'No pairs added'}
+        label='Selected key-value pairs'
+        placeholder='No pairs added'
       />
 
-      <Group gap={'sm'} align={'flex-end'}>
+      <Group gap='sm' align='flex-end'>
         <TextInput
           ref={keyInputRef}
           value={newKey}
@@ -104,7 +104,7 @@ export default function MultiKeyValueInput({
           placeholder={placeholderValue}
           w={220}
         />
-        <Button onClick={handleAdd} color={'green'}>
+        <Button onClick={handleAdd} color='green'>
           Add
         </Button>
       </Group>

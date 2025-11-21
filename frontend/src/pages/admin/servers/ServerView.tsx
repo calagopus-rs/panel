@@ -79,11 +79,11 @@ export default function ServerView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<ServerCreateOrUpdate contextServer={server} />} />
-        <Route path={'/allocations'} element={<AdminServerAllocations server={server} />} />
-        <Route path={'/variables'} element={<AdminServerVariables server={server} />} />
-        <Route path={'/mounts'} element={<AdminServerMounts server={server} />} />
-        <Route path={'/management'} element={<AdminServerManagement server={server} />} />
+        <Route path='/' element={<ServerCreateOrUpdate contextServer={server} />} />
+        <Route path='/allocations' element={<AdminServerAllocations server={server} />} />
+        <Route path='/variables' element={<AdminServerVariables server={server} />} />
+        <Route path='/mounts' element={<AdminServerMounts server={server} />} />
+        <Route path='/management' element={<AdminServerManagement server={server} />} />
       </Routes>
     </>
   );

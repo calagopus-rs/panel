@@ -17,11 +17,11 @@ export default function StorageFilesystem({
   }, []);
 
   return (
-    <Stack mt={'md'}>
+    <Stack mt='md'>
       <TextInput
         withAsterisk
-        label={'Path'}
-        placeholder={'Path'}
+        label='Path'
+        placeholder='Path'
         value={settings.path || ''}
         onChange={(e) => setSettings((settings) => ({ ...settings, path: e.target.value }))}
       />

@@ -23,19 +23,19 @@ export default function EmailSmtp({
   }, []);
 
   return (
-    <Stack mt={'md'}>
+    <Stack mt='md'>
       <Group grow>
         <TextInput
           withAsterisk
-          label={'Host'}
-          placeholder={'Host'}
+          label='Host'
+          placeholder='Host'
           value={settings.host || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, host: e.target.value }))}
         />
         <NumberInput
           withAsterisk
-          label={'Port'}
-          placeholder={'Port'}
+          label='Port'
+          placeholder='Port'
           min={0}
           value={settings.port || 587}
           onChange={(e) => setSettings((settings) => ({ ...settings, port: Number(e) }))}
@@ -43,22 +43,22 @@ export default function EmailSmtp({
       </Group>
 
       <Switch
-        label={'Use TLS'}
+        label='Use TLS'
         checked={settings.useTls}
         onChange={(e) => setSettings((settings) => ({ ...settings, useTls: e.target.checked }))}
       />
 
       <Group grow>
         <TextInput
-          label={'Username'}
-          placeholder={'Username'}
+          label='Username'
+          placeholder='Username'
           value={settings.username || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, username: e.target.value }))}
         />
         <TextInput
-          label={'Password'}
-          placeholder={'Password'}
-          type={'password'}
+          label='Password'
+          placeholder='Password'
+          type='password'
           value={settings.password || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, password: e.target.value }))}
         />
@@ -67,14 +67,14 @@ export default function EmailSmtp({
       <Group grow>
         <TextInput
           withAsterisk
-          label={'From Address'}
-          placeholder={'From Address'}
+          label='From Address'
+          placeholder='From Address'
           value={settings.fromAddress || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromAddress: e.target.value }))}
         />
         <TextInput
-          label={'From Name'}
-          placeholder={'From Name'}
+          label='From Name'
+          placeholder='From Name'
           value={settings.fromName || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromName: e.target.value }))}
         />

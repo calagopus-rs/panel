@@ -13,21 +13,21 @@ export default function StepWaitForConsoleLine({
   return (
     <Stack>
       <TextInput
-        label={'Line contains'}
-        placeholder={'Text to make sure is in the console line'}
+        label='Line contains'
+        placeholder='Text to make sure is in the console line'
         value={action.contains || ''}
         onChange={(e) => setAction({ ...action, contains: e.target.value || null })}
       />
       <NumberInput
         withAsterisk
-        label={'Timeout (milliseconds)'}
-        placeholder={'1000'}
+        label='Timeout (milliseconds)'
+        placeholder='1000'
         min={1}
         value={action.timeout}
         onChange={(value) => setAction({ ...action, timeout: Number(value) })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />

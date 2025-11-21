@@ -76,18 +76,18 @@ export default function FileEditor() {
   }
 
   return loading ? (
-    <div className={'w-full h-screen flex items-center justify-center'}>
+    <div className='w-full h-screen flex items-center justify-center'>
       <Spinner size={75} />
     </div>
   ) : (
-    <div className={'flex flex-col'}>
+    <div className='flex flex-col'>
       <FileNameModal
         onFileName={(name: string) => saveFile(name)}
         opened={nameModalOpen}
         onClose={() => setNameModalOpen(false)}
       />
 
-      <div className={'flex justify-between w-full p-4'}>
+      <div className='flex justify-between w-full p-4'>
         <FileBreadcrumbs
           hideSelectAll
           path={join(decodeURIComponent(browsingDirectory), fileName)}
@@ -103,8 +103,8 @@ export default function FileEditor() {
       </div>
       <div className='mx-4 rounded-md overflow-hidden'>
         <Editor
-          height={'82vh'}
-          theme={'vs-dark'}
+          height='82vh'
+          theme='vs-dark'
           defaultLanguage={language}
           defaultValue={content}
           onChange={setContent}

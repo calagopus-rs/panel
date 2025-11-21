@@ -40,8 +40,8 @@ export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecur
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Security Key Deletion'}
-        confirm={'Delete'}
+        title='Confirm Security Key Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete

@@ -39,13 +39,13 @@ export default function AdminEggVariables({
 
   return (
     <>
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Egg Variables</Title>
-        <Button onClick={addVariable} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+        <Button onClick={addVariable} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
           Add
         </Button>
       </Group>
-      <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
+      <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'>
         {eggVariables.map((variable, index) => (
           <EggVariableContainer
             key={variable.uuid ?? index}

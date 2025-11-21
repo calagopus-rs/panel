@@ -18,7 +18,7 @@ export default function AdminMountNestEggs({ mount }: { mount?: Mount }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Mount Nest Eggs
       </Title>
 

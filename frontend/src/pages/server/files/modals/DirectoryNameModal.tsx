@@ -34,28 +34,28 @@ export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title={'Create Directory'} onClose={onClose} opened={opened}>
+    <Modal title='Create Directory' onClose={onClose} opened={opened}>
       <TextInput
         withAsterisk
-        label={'Directory Name'}
-        placeholder={'Directory Name'}
+        label='Directory Name'
+        placeholder='Directory Name'
         value={dirName}
         onChange={(e) => setDirName(e.target.value)}
       />
 
-      <p className={'mt-2 text-sm md:text-base break-all'}>
-        <span className={'text-neutral-200'}>This directory will be created as&nbsp;</span>
+      <p className='mt-2 text-sm md:text-base break-all'>
+        <span className='text-neutral-200'>This directory will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className={'text-cyan-200'}>{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className='text-cyan-200'>{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={makeDirectory} loading={loading} disabled={!dirName}>
           Create
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

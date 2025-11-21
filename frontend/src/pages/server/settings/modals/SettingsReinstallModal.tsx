@@ -34,19 +34,19 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
   };
 
   return (
-    <Modal title={'Reinstall Server'} onClose={onClose} opened={opened}>
+    <Modal title='Reinstall Server' onClose={onClose} opened={opened}>
       <Switch
-        label={'Do you want to empty the filesystem of this server before reinstallation?'}
-        name={'truncate'}
+        label='Do you want to empty the filesystem of this server before reinstallation?'
+        name='truncate'
         defaultChecked={truncate}
         onChange={(e) => setTruncate(e.target.checked)}
       />
 
-      <Group mt={'md'}>
-        <Button color={'red'} onClick={doReinstall} loading={loading}>
+      <Group mt='md'>
+        <Button color='red' onClick={doReinstall} loading={loading}>
           Reinstall
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

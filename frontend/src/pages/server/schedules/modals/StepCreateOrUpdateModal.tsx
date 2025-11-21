@@ -87,9 +87,9 @@ export default function StepCreateOrUpdateModal({
 
   return (
     <Modal opened={opened} onClose={onClose} title={propStep ? 'Edit Schedule Step' : 'Create Schedule Step'}>
-      <Stack gap={'md'}>
+      <Stack gap='md'>
         <Select
-          label={'Action Type'}
+          label='Action Type'
           data={Object.entries(scheduleStepLabelMapping).map(([value, label]) => ({
             value,
             label,
@@ -131,11 +131,11 @@ export default function StepCreateOrUpdateModal({
         ) : step.action.type === 'update_startup_docker_image' ? (
           <StepUpdateStartupDockerImage action={step.action} setAction={(action) => setStep({ ...step, action })} />
         ) : (
-          <Text c={'dimmed'}>Select an action type to configure</Text>
+          <Text c='dimmed'>Select an action type to configure</Text>
         )}
 
-        <Group justify={'flex-end'} mt={'md'}>
-          <Button variant={'outline'} onClick={onClose}>
+        <Group justify='flex-end' mt='md'>
+          <Button variant='outline' onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={doCreateOrUpdate} leftSection={<FontAwesomeIcon icon={faSave} />} loading={loading}>

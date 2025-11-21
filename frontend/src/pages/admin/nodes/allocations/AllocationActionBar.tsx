@@ -45,8 +45,8 @@ export default function AllocationActionBar({ node, loadAllocations }: { node: N
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Node Allocations Deletion'}
-        confirm={'Delete'}
+        title='Confirm Node Allocations Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete
@@ -56,10 +56,10 @@ export default function AllocationActionBar({ node, loadAllocations }: { node: N
 
       <ActionBar opened={selectedNodeAllocations.size > 0}>
         <Button onClick={() => setOpenModal('update')}>
-          <FontAwesomeIcon icon={faPen} className={'mr-2'} /> Update
+          <FontAwesomeIcon icon={faPen} className='mr-2' /> Update
         </Button>
-        <Button color={'red'} onClick={() => setOpenModal('delete')}>
-          <FontAwesomeIcon icon={faTrash} className={'mr-2'} /> Delete
+        <Button color='red' onClick={() => setOpenModal('delete')}>
+          <FontAwesomeIcon icon={faTrash} className='mr-2' /> Delete
         </Button>
       </ActionBar>
     </>

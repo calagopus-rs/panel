@@ -244,7 +244,7 @@ export default function Terminal() {
       lines.map((line, index) => (
         <div
           key={`line-${index}`}
-          className={'whitespace-pre-wrap break-all'}
+          className='whitespace-pre-wrap break-all'
           dangerouslySetInnerHTML={{
             __html:
               line.isPrelude && !line.content.includes('\u001b[1m\u001b[41m')
@@ -257,27 +257,27 @@ export default function Terminal() {
   );
 
   return (
-    <Card className={'h-full flex flex-col font-mono text-sm relative p-2!'}>
+    <Card className='h-full flex flex-col font-mono text-sm relative p-2!'>
       {!socketConnected && <Spinner.Centered />}
 
       <div
         ref={containerRef}
-        className={'flex-1 overflow-auto custom-scrollbar space-y-1 select-text'}
+        className='flex-1 overflow-auto custom-scrollbar space-y-1 select-text'
         onScroll={handleScroll}
       >
         {MemoizedLines}
       </div>
 
       {imagePulls.size > 0 && (
-        <span className={'flex flex-col justify-end mt-4'}>
+        <span className='flex flex-col justify-end mt-4'>
           Your Server is currently pulling it&apos;s docker image. Please wait...
           {Array.from(imagePulls).map(([id, progress]) => (
-            <span key={id} className={'flex flex-row w-full items-center whitespace-pre-wrap break-all'}>
+            <span key={id} className='flex flex-row w-full items-center whitespace-pre-wrap break-all'>
               {progress.status === 'pulling' ? 'Pulling' : 'Extracting'} Layer{' '}
               <Progress
                 hourglass={false}
                 value={(progress.progress / progress.total) * 100}
-                className={'flex-1 ml-2'}
+                className='flex-1 ml-2'
               />
             </span>
           ))}
@@ -285,23 +285,23 @@ export default function Terminal() {
       )}
 
       {!isAtBottom && (
-        <div className={'absolute bottom-2 right-2 z-90 w-fit'}>
-          <Button onClick={scrollToBottom} variant={'transparent'}>
+        <div className='absolute bottom-2 right-2 z-90 w-fit'>
+          <Button onClick={scrollToBottom} variant='transparent'>
             <FontAwesomeIcon icon={faArrowDown} />
           </Button>
         </div>
       )}
 
-      <div className={'w-full mt-4'}>
+      <div className='w-full mt-4'>
         <TextInput
           ref={inputRef}
-          placeholder={'Type a command...'}
-          aria-label={'Console command input.'}
+          placeholder='Type a command...'
+          aria-label='Console command input.'
           disabled={!socketConnected || state === 'offline'}
           onKeyDown={handleKeyDown}
-          autoCorrect={'off'}
-          autoCapitalize={'none'}
-          className={'w-full'}
+          autoCorrect='off'
+          autoCapitalize='none'
+          className='w-full'
         />
       </div>
     </Card>

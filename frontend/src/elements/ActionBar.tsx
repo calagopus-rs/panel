@@ -7,13 +7,13 @@ export default function ActionBar({ opened = false, children }: { opened?: boole
     <AnimatePresence>
       {opened && (
         <motion.div
-          className={'pointer-events-none fixed bottom-0 mb-2 flex justify-center w-screen z-90'}
+          className='pointer-events-none fixed bottom-0 mb-2 flex justify-center w-screen z-90'
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
         >
-          <Card p={'sm'} className={'grid! grid-cols-2 md:grid-flow-col md:auto-cols-fr gap-2 pointer-events-auto'}>
+          <Card p='sm' className='grid! grid-cols-2 md:grid-flow-col md:auto-cols-fr gap-2 pointer-events-auto'>
             {children}
           </Card>
         </motion.div>

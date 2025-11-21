@@ -147,7 +147,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
         </Alert>
       )}
 
-      <Group grow align={'normal'}>
+      <Group grow align='normal'>
         <Paper withBorder p='md'>
           <Stack>
             <Title order={3}>Basic Information</Title>
@@ -155,13 +155,13 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <TextInput
                 withAsterisk
-                label={'Server Name'}
-                placeholder={'My Game Server'}
+                label='Server Name'
+                placeholder='My Game Server'
                 {...form.getInputProps('name')}
               />
               <TextInput
-                label={'External ID'}
-                placeholder={'Optional external identifier'}
+                label='External ID'
+                placeholder='Optional external identifier'
                 {...form.getInputProps('externalId')}
               />
             </Group>
@@ -182,8 +182,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <Select
                 withAsterisk
-                label={'Node'}
-                placeholder={'Node'}
+                label='Node'
+                placeholder='Node'
                 data={nodes.items.map((node) => ({
                   label: node.name,
                   value: node.uuid,
@@ -195,8 +195,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               />
               <Select
                 withAsterisk
-                label={'Owner'}
-                placeholder={'Owner'}
+                label='Owner'
+                placeholder='Owner'
                 data={users.items.map((user) => ({
                   label: user.username,
                   value: user.uuid,
@@ -211,8 +211,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <Select
                 withAsterisk
-                label={'Nest'}
-                placeholder={'Nest'}
+                label='Nest'
+                placeholder='Nest'
                 value={selectedNestUuid}
                 onChange={(value) => setSelectedNestUuid(value)}
                 data={nests.items.map((nest) => ({
@@ -225,8 +225,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               />
               <Select
                 withAsterisk
-                label={'Egg'}
-                placeholder={'Egg'}
+                label='Egg'
+                placeholder='Egg'
                 disabled={!selectedNestUuid}
                 data={eggs.items.map((egg) => ({
                   label: egg.name,
@@ -242,7 +242,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <Select
                 allowDeselect
-                label={'Backup Configuration'}
+                label='Backup Configuration'
                 data={[
                   {
                     label: 'Inherit from Node/Location',
@@ -263,7 +263,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
         </Paper>
       </Group>
 
-      <Group grow align={'normal'}>
+      <Group grow align='normal'>
         <Paper withBorder p='md'>
           <Stack>
             <Title order={3}>Resource Limits</Title>
@@ -271,14 +271,14 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <NumberInput
                 withAsterisk
-                label={'CPU Limit (%)'}
-                placeholder={'100'}
+                label='CPU Limit (%)'
+                placeholder='100'
                 min={0}
                 {...form.getInputProps('limits.cpu')}
               />
               <SizeInput
                 withAsterisk
-                label={'Memory + Unit (e.g. 1 GiB)'}
+                label='Memory + Unit (e.g. 1 GiB)'
                 value={memoryInput}
                 setState={setMemoryInput}
                 onChange={(value) => form.setFieldValue('limits.memory', value / 1024 / 1024)}
@@ -288,19 +288,19 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <SizeInput
                 withAsterisk
-                label={'Disk Space + Unit (e.g. 10 GiB)'}
+                label='Disk Space + Unit (e.g. 10 GiB)'
                 value={diskInput}
                 setState={setDiskInput}
                 onChange={(value) => form.setFieldValue('limits.disk', value / 1024 / 1024)}
               />
               <SizeInput
                 withAsterisk
-                label={'Swap + Unit (e.g. 500 MiB)'}
+                label='Swap + Unit (e.g. 500 MiB)'
                 value={swapInput}
                 setState={setSwapInput}
                 onChange={(value) => form.setFieldValue('limits.swap', value / 1024 / 1024)}
               />
-              <NumberInput label={'IO Weight'} {...form.getInputProps('limits.ioWeight')} />
+              <NumberInput label='IO Weight' {...form.getInputProps('limits.ioWeight')} />
             </Group>
           </Stack>
         </Paper>
@@ -312,8 +312,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <Select
                 withAsterisk
-                label={'Docker Image'}
-                placeholder={'ghcr.io/...'}
+                label='Docker Image'
+                placeholder='ghcr.io/...'
                 data={Object.entries(
                   eggs.items.find((egg) => egg.uuid === form.values.eggUuid)?.dockerImages || {},
                 ).map(([label, value]) => ({
@@ -325,8 +325,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               />
               <Select
                 withAsterisk
-                label={'Timezone'}
-                placeholder={'Europe/Amsterdam'}
+                label='Timezone'
+                placeholder='Europe/Amsterdam'
                 data={[
                   {
                     label: 'System',
@@ -340,8 +340,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             </Group>
 
             <TextArea
-              label={'Startup Command'}
-              placeholder={'npm start'}
+              label='Startup Command'
+              placeholder='npm start'
               required
               rows={2}
               {...form.getInputProps('startup')}
@@ -350,14 +350,14 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             {!contextServer && (
               <Group grow>
                 <Switch
-                  label={'Start on Completion'}
-                  description={'Start server after installation completes'}
+                  label='Start on Completion'
+                  description='Start server after installation completes'
                   checked={form.values.startOnCompletion}
                   onChange={(e) => form.setFieldValue('startOnCompletion', e.target.checked)}
                 />
                 <Switch
-                  label={'Skip Installer'}
-                  description={'Skip running the install script'}
+                  label='Skip Installer'
+                  description='Skip running the install script'
                   checked={form.values.skipInstaller}
                   onChange={(e) => form.setFieldValue('skipInstaller', e.target.checked)}
                 />
@@ -367,7 +367,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
         </Paper>
       </Group>
 
-      <Group grow align={'normal'}>
+      <Group grow align='normal'>
         <Paper withBorder p='md'>
           <Stack>
             <Title order={3}>Feature Limits</Title>
@@ -375,29 +375,29 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
             <Group grow>
               <NumberInput
                 withAsterisk
-                label={'Allocations'}
-                placeholder={'0'}
+                label='Allocations'
+                placeholder='0'
                 min={0}
                 {...form.getInputProps('featureLimits.allocations')}
               />
               <NumberInput
                 withAsterisk
-                label={'Databases'}
-                placeholder={'0'}
+                label='Databases'
+                placeholder='0'
                 min={0}
                 {...form.getInputProps('featureLimits.databases')}
               />
               <NumberInput
                 withAsterisk
-                label={'Backups'}
-                placeholder={'0'}
+                label='Backups'
+                placeholder='0'
                 min={0}
                 {...form.getInputProps('featureLimits.backups')}
               />
               <NumberInput
                 withAsterisk
-                label={'Schedules'}
-                placeholder={'0'}
+                label='Schedules'
+                placeholder='0'
                 min={0}
                 {...form.getInputProps('featureLimits.schedules')}
               />
@@ -412,8 +412,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
 
               <Group grow>
                 <Select
-                  label={'Primary Allocation'}
-                  placeholder={'Primary Allocation'}
+                  label='Primary Allocation'
+                  placeholder='Primary Allocation'
                   disabled={!form.values.nodeUuid}
                   data={availablePrimaryAllocations.items
                     .filter((alloc) => !form.values.allocationUuids.includes(alloc.uuid))
@@ -428,8 +428,8 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
                   {...form.getInputProps('allocationUuid')}
                 />
                 <MultiSelect
-                  label={'Additional Allocations'}
-                  placeholder={'Additional Allocations'}
+                  label='Additional Allocations'
+                  placeholder='Additional Allocations'
                   disabled={!form.values.nodeUuid}
                   data={availableAllocations.items
                     .filter((alloc) => alloc.uuid !== form.values.allocationUuid)

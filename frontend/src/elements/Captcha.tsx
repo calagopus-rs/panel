@@ -64,7 +64,7 @@ const Captcha = forwardRef((_, ref) => {
       return null; // reCAPTCHA v3 is loaded dynamically
     }
 
-    return <ReCAPTCHA sitekey={captchaProvider.siteKey} ref={recaptchaRef} size={'normal'} />;
+    return <ReCAPTCHA sitekey={captchaProvider.siteKey} ref={recaptchaRef} size='normal' />;
   }
 
   return null;

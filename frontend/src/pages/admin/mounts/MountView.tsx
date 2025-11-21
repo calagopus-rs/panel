@@ -61,10 +61,10 @@ export default function MountView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<MountCreateOrUpdate contextMount={mount} />} />
-        <Route path={'/nest-eggs'} element={<AdminMountNestEggs mount={mount} />} />
-        <Route path={'/nodes'} element={<AdminMountNodes mount={mount} />} />
-        <Route path={'/servers'} element={<AdminMountServers mount={mount} />} />
+        <Route path='/' element={<MountCreateOrUpdate contextMount={mount} />} />
+        <Route path='/nest-eggs' element={<AdminMountNestEggs mount={mount} />} />
+        <Route path='/nodes' element={<AdminMountNodes mount={mount} />} />
+        <Route path='/servers' element={<AdminMountServers mount={mount} />} />
       </Routes>
     </>
   );

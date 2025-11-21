@@ -2,7 +2,6 @@ import { Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes';
 import { getEmptyPaginationSet } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
@@ -17,7 +16,7 @@ export default function AdminMountNodes({ mount }: { mount?: Mount }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Mount Nodes
       </Title>
 

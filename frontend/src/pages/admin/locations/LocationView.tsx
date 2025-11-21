@@ -55,9 +55,9 @@ export default () => {
       />
 
       <Routes>
-        <Route path={'/'} element={<LocationCreateOrUpdate contextLocation={location} />} />
-        <Route path={'/database-hosts'} element={<AdminLocationDatabaseHosts location={location} />} />
-        <Route path={'/nodes'} element={<AdminLocationNodes location={location} />} />
+        <Route path='/' element={<LocationCreateOrUpdate contextLocation={location} />} />
+        <Route path='/database-hosts' element={<AdminLocationDatabaseHosts location={location} />} />
+        <Route path='/nodes' element={<AdminLocationNodes location={location} />} />
       </Routes>
     </>
   );

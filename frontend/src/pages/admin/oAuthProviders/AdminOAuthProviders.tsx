@@ -68,29 +68,29 @@ function OAuthProvidersContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           OAuth Providers
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
-            <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => fileInputRef.current?.click()} color='blue'>
+            <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
           </Button>
           <Button
             onClick={() => navigate('/admin/oauth-providers/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
           </Button>
 
           <input
-            type={'file'}
-            accept={'.json,.yml,.yaml'}
+            type='file'
+            accept='.json,.yml,.yaml'
             ref={fileInputRef}
-            className={'hidden'}
+            className='hidden'
             onChange={handleFileUpload}
           />
         </Group>
@@ -108,9 +108,9 @@ function OAuthProvidersContainer() {
 export default function AdminOAuthProviders() {
   return (
     <Routes>
-      <Route path={'/'} element={<OAuthProvidersContainer />} />
-      <Route path={'/new'} element={<DatabaseHostCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<DatabaseHostView />} />
+      <Route path='/' element={<OAuthProvidersContainer />} />
+      <Route path='/new' element={<DatabaseHostCreateOrUpdate />} />
+      <Route path='/:id/*' element={<DatabaseHostView />} />
     </Routes>
   );
 }

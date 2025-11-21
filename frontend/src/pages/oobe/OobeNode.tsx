@@ -149,8 +149,8 @@ export default function OobeNode({ onNext }: OobeNodeProps) {
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Name'}
-            placeholder={'My Server'}
+            label='Name'
+            placeholder='My Server'
             leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
             {...form.getInputProps('name')}
           />
@@ -159,32 +159,32 @@ export default function OobeNode({ onNext }: OobeNodeProps) {
         <Group grow>
           <TextInput
             withAsterisk
-            label={'URL'}
-            description={'used for internal communication with the node'}
+            label='URL'
+            description='used for internal communication with the node'
             leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
-            placeholder={'URL'}
+            placeholder='URL'
             {...form.getInputProps('url')}
           />
           <TextInput
-            label={'Public URL'}
-            description={'used for websocket/downloads'}
+            label='Public URL'
+            description='used for websocket/downloads'
             leftSection={<FontAwesomeIcon icon={faGlobeAmericas} size='sm' />}
-            placeholder={'URL'}
+            placeholder='URL'
             {...form.getInputProps('publicUrl')}
           />
         </Group>
 
         <Group grow>
           <TextInput
-            label={'SFTP Host'}
-            placeholder={'SFTP Host'}
+            label='SFTP Host'
+            placeholder='SFTP Host'
             leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
             {...form.getInputProps('sftpHost')}
           />
           <NumberInput
             withAsterisk
-            label={'SFTP Port'}
-            placeholder={'SFTP Port'}
+            label='SFTP Port'
+            placeholder='SFTP Port'
             leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
             min={1}
             max={65535}
@@ -195,8 +195,8 @@ export default function OobeNode({ onNext }: OobeNodeProps) {
         <Group grow>
           <SizeInput
             withAsterisk
-            label={'Memory + Unit (e.g. 1 GiB)'}
-            placeholder={'1 GiB'}
+            label='Memory + Unit (e.g. 1 GiB)'
+            placeholder='1 GiB'
             leftSection={<FontAwesomeIcon icon={faMemory} size='sm' />}
             {...form.getInputProps('memory')}
             value={memoryInput}
@@ -205,7 +205,7 @@ export default function OobeNode({ onNext }: OobeNodeProps) {
           />
           <SizeInput
             withAsterisk
-            label={'Disk + Unit (e.g. 50 GiB)'}
+            label='Disk + Unit (e.g. 50 GiB)'
             placeholder='50 GiB'
             leftSection={<FontAwesomeIcon icon={faHardDrive} size='sm' />}
             {...form.getInputProps('disk')}

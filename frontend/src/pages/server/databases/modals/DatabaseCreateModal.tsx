@@ -40,22 +40,22 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title={'Create Database'} onClose={onClose} opened={opened}>
+    <Modal title='Create Database' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Database Name'}
-          placeholder={'Database Name'}
+          label='Database Name'
+          placeholder='Database Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <Select
           withAsterisk
-          label={'Database Host'}
-          placeholder={'Database Host'}
+          label='Database Host'
+          placeholder='Database Host'
           searchable
-          nothingFoundMessage={'No hosts found'}
+          nothingFoundMessage='No hosts found'
           data={Object.values(
             databaseHosts.reduce(
               (acc, { uuid, name, type }) => (
@@ -76,7 +76,7 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
           <Button onClick={doCreate} loading={loading} disabled={!name || !host}>
             Create
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

@@ -12,7 +12,7 @@ export default function EggRow({ nest, egg }: { nest: AdminNest; egg: AdminNestE
       <TableData>
         <NavLink
           to={`/admin/nests/${nest.uuid}/eggs/${egg.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{egg.uuid}</Code>
         </NavLink>

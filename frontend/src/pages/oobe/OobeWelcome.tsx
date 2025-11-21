@@ -11,7 +11,7 @@ export default function OobeWelcome({ onNext }: OobeWelcomeProps) {
   return (
     <Stack gap='xl' py='md'>
       <Group justify='center' mb='md'>
-        <img src={'/icon.svg'} className={'h-64 py-4'} alt={'Calagopus Icon'} />
+        <img src='/icon.svg' className='h-64 py-4' alt='Calagopus Icon' />
       </Group>
 
       <div>

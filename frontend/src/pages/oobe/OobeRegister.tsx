@@ -130,16 +130,16 @@ export default function OobeRegister({ onNext }: OobeRegisterProps) {
         />
 
         <TextInput
-          label={'First Name'}
-          placeholder={'Alan'}
+          label='First Name'
+          placeholder='Alan'
           leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
           required
           {...form.getInputProps('nameFirst')}
         />
 
         <TextInput
-          label={'Last Name'}
-          placeholder={'Turing'}
+          label='Last Name'
+          placeholder='Turing'
           leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
           required
           {...form.getInputProps('nameLast')}

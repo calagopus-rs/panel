@@ -18,7 +18,7 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         OAuth Provider Users
       </Title>
 

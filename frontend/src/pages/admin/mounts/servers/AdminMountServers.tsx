@@ -18,7 +18,7 @@ export default function AdminMountServers({ mount }: { mount?: Mount }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Mount Servers
       </Title>
 

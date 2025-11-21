@@ -86,43 +86,43 @@ export default function PermissionSelector({
   );
 
   return (
-    <div className={'grid grid-cols-1 gap-6'}>
-      <div className={'space-y-4'}>
+    <div className='grid grid-cols-1 gap-6'>
+      <div className='space-y-4'>
         {Object.entries(permissions).map(([category, { description, permissions: perms }]) => {
           const isExpanded = expandedCategories.includes(category);
           const selectionState = getCategorySelectionState(category);
 
           return (
             <Card key={category}>
-              <div className={'flex items-center justify-between gap-1'}>
-                <div className={'flex items-center gap-3'}>
-                  <FontAwesomeIcon icon={permissionCategoryIconMapping[category]} className={'w-5 h-5 text-gray-50'} />
+              <div className='flex items-center justify-between gap-1'>
+                <div className='flex items-center gap-3'>
+                  <FontAwesomeIcon icon={permissionCategoryIconMapping[category]} className='w-5 h-5 text-gray-50' />
                   <div>
-                    <Title order={5} c={'white'} className={'uppercase'}>
+                    <Title order={5} c='white' className='uppercase'>
                       {category}
                     </Title>
-                    <p className={'text-sm text-gray-200 mt-1'}>{description}</p>
+                    <p className='text-sm text-gray-200 mt-1'>{description}</p>
                   </div>
                 </div>
-                <div className={'flex items-center gap-2'}>
+                <div className='flex items-center gap-2'>
                   <Checkbox
                     onChange={() => toggleAllInCategory(category)}
                     indeterminate={selectionState === 'partial'}
                     checked={selectionState === 'all'}
                   />
-                  <ActionIcon variant={'subtle'} onClick={() => toggleCategory(category)}>
+                  <ActionIcon variant='subtle' onClick={() => toggleCategory(category)}>
                     {isExpanded ? (
-                      <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
+                      <FontAwesomeIcon icon={faChevronUp} className='w-4 h-4 text-gray-200' />
                     ) : (
-                      <FontAwesomeIcon icon={faChevronDown} className={'w-4 h-4 text-gray-200'} />
+                      <FontAwesomeIcon icon={faChevronDown} className='w-4 h-4 text-gray-200' />
                     )}
                   </ActionIcon>
                 </div>
               </div>
 
               {isExpanded && (
-                <div className={'p-4'}>
-                  <div className={'space-y-3'}>
+                <div className='p-4'>
+                  <div className='space-y-3'>
                     {Object.entries(perms).map(([permission, permDescription]) => {
                       const permissionKey = `${category}.${permission}`;
                       const isSelected = selectedPermissions.includes(permissionKey);
@@ -133,15 +133,15 @@ export default function PermissionSelector({
                           checked={isSelected}
                           onChange={() => togglePermission(permissionKey)}
                           color={isSelected ? 'green' : ''}
-                          bd={'0'}
+                          bd='0'
                         >
-                          <Group wrap={'nowrap'} align={'flex-start'}>
+                          <Group wrap='nowrap' align='flex-start'>
                             <Checkbox.Indicator />
                             <div>
-                              <div className={'text-gray-50 font-bold'}>
+                              <div className='text-gray-50 font-bold'>
                                 {permission.charAt(0).toUpperCase() + permission.slice(1)}
                               </div>
-                              <div className={'text-sm text-gray-200 mt-1'}>{permDescription}</div>
+                              <div className='text-sm text-gray-200 mt-1'>{permDescription}</div>
                             </div>
                           </Group>
                         </Checkbox.Card>
@@ -156,20 +156,20 @@ export default function PermissionSelector({
       </div>
 
       <Card>
-        <Title order={3} c={'white'}>
+        <Title order={3} c='white'>
           Selected Permissions ({selectedPermissions.length})
         </Title>
-        <div className={'max-h-96 overflow-y-auto'}>
+        <div className='max-h-96 overflow-y-auto'>
           {selectedPermissions.length === 0 ? (
-            <p className={'text-gray-200 text-sm'}>No permissions selected</p>
+            <p className='text-gray-200 text-sm'>No permissions selected</p>
           ) : (
-            <div className={'space-y-1'}>
+            <div className='space-y-1'>
               {sortedSelectedPermissions.map((permission) => (
-                <Card key={permission} className={'border border-neutral-600'} padding={'xs'}>
-                  <Group justify={'space-between'}>
-                    <span className={'text-sm font-mono text-white'}>{permission}</span>
+                <Card key={permission} className='border border-neutral-600' padding='xs'>
+                  <Group justify='space-between'>
+                    <span className='text-sm font-mono text-white'>{permission}</span>
 
-                    <ActionIcon color={'red'} onClick={() => togglePermission(permission)}>
+                    <ActionIcon color='red' onClick={() => togglePermission(permission)}>
                       <FontAwesomeIcon icon={faX} />
                     </ActionIcon>
                   </Group>
@@ -179,16 +179,16 @@ export default function PermissionSelector({
           )}
         </div>
 
-        <div className={'mt-4 flex flex-row'}>
+        <div className='mt-4 flex flex-row'>
           <Button disabled={selectedPermissions.length === allPermissionKeys.length} onClick={selectAllPermissions}>
             Select All
           </Button>
           <Button
             disabled={selectedPermissions.length === 0}
-            color={'red'}
-            variant={'outline'}
+            color='red'
+            variant='outline'
             onClick={clearAllPermissions}
-            className={'ml-2'}
+            className='ml-2'
           >
             Clear All
           </Button>

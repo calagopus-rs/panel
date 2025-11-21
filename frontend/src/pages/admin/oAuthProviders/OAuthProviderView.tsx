@@ -49,8 +49,8 @@ export default function OAuthProviderView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<OAuthProviderCreateOrUpdate contextOAuthProvider={oauthProvider} />} />
-        <Route path={'/users'} element={<AdminOAuthProviderUsers oauthProvider={oauthProvider} />} />
+        <Route path='/' element={<OAuthProviderCreateOrUpdate contextOAuthProvider={oauthProvider} />} />
+        <Route path='/users' element={<AdminOAuthProviderUsers oauthProvider={oauthProvider} />} />
       </Routes>
     </>
   );

@@ -49,8 +49,8 @@ export default function NestView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<NestCreateOrUpdate contextNest={nest} />} />
-        <Route path={'/eggs/*'} element={<AdminEggs contextNest={nest} />} />
+        <Route path='/' element={<NestCreateOrUpdate contextNest={nest} />} />
+        <Route path='/eggs/*' element={<AdminEggs contextNest={nest} />} />
       </Routes>
     </>
   );

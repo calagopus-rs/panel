@@ -12,7 +12,7 @@ export default function BackupS3({
   setBackupConfigs: Dispatch<BackupDiskConfigurationS3>;
 }) {
   return (
-    <Stack gap={'xs'}>
+    <Stack gap='xs'>
       <Stack gap={0}>
         <Title order={2}>S3 Settings</Title>
         <Divider />
@@ -22,16 +22,16 @@ export default function BackupS3({
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Access Key'}
-            placeholder={'Access Key'}
+            label='Access Key'
+            placeholder='Access Key'
             value={backupConfig?.accessKey || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, accessKey: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={'Secret Key'}
-            placeholder={'Secret Key'}
-            type={'password'}
+            label='Secret Key'
+            placeholder='Secret Key'
+            type='password'
             value={backupConfig?.secretKey || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, secretKey: e.target.value })}
           />
@@ -40,15 +40,15 @@ export default function BackupS3({
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Bucket'}
-            placeholder={'Bucket'}
+            label='Bucket'
+            placeholder='Bucket'
             value={backupConfig?.bucket || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, bucket: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={'Region'}
-            placeholder={'Region'}
+            label='Region'
+            placeholder='Region'
             value={backupConfig?.region || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, region: e.target.value })}
           />
@@ -57,15 +57,15 @@ export default function BackupS3({
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Endpoint'}
-            placeholder={'Endpoint'}
+            label='Endpoint'
+            placeholder='Endpoint'
             value={backupConfig?.endpoint || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, endpoint: e.target.value })}
           />
           <NumberInput
             withAsterisk
-            label={'Part Size'}
-            placeholder={'Part Size'}
+            label='Part Size'
+            placeholder='Part Size'
             value={backupConfig?.partSize || 0}
             onChange={(value) => setBackupConfigs({ ...backupConfig, partSize: Number(value) })}
           />

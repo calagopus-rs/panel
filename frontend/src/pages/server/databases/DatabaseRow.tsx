@@ -69,9 +69,9 @@ export default function DatabaseRow({ database }: { database: ServerDatabase }) 
 
             <TableData>
               {database.isLocked ? (
-                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
+                <FontAwesomeIcon className='text-green-500' icon={faLock} />
               ) : (
-                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
+                <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
               )}
             </TableData>
 

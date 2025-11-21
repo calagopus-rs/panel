@@ -35,22 +35,22 @@ export default function EmailContainer() {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Email
         </Title>
-        <Stack className={'mt-4'}>
+        <Stack className='mt-4'>
           <TextInput
             withAsterisk
-            label={'New Email'}
-            placeholder={'New Email'}
+            label='New Email'
+            placeholder='New Email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <TextInput
             withAsterisk
-            label={'Current Password'}
-            placeholder={'Current Password'}
-            type={'password'}
+            label='Current Password'
+            placeholder='Current Password'
+            type='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

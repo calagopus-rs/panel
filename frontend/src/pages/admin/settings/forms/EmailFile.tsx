@@ -19,11 +19,11 @@ export default function EmailFile({
   }, []);
 
   return (
-    <Stack mt={'md'}>
+    <Stack mt='md'>
       <TextInput
         withAsterisk
-        label={'Path'}
-        placeholder={'Path'}
+        label='Path'
+        placeholder='Path'
         value={settings.path || ''}
         onChange={(e) => setSettings((settings) => ({ ...settings, path: e.target.value }))}
       />
@@ -31,14 +31,14 @@ export default function EmailFile({
       <Group grow>
         <TextInput
           withAsterisk
-          label={'From Address'}
-          placeholder={'From Address'}
+          label='From Address'
+          placeholder='From Address'
           value={settings.fromAddress || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromAddress: e.target.value }))}
         />
         <TextInput
-          label={'From Name'}
-          placeholder={'From Name'}
+          label='From Name'
+          placeholder='From Name'
           value={settings.fromName || ''}
           onChange={(e) => setSettings((settings) => ({ ...settings, fromName: e.target.value }))}
         />

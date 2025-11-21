@@ -81,8 +81,8 @@ export default function ServerGroupItem({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Server Group Deletion'}
-        confirm={'Delete'}
+        title='Confirm Server Group Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete
@@ -91,33 +91,33 @@ export default function ServerGroupItem({
       </ConfirmationModal>
 
       <Card key={serverGroup.uuid} p={8}>
-        <Group justify={'space-between'} mb={isExpanded ? 'md' : undefined}>
+        <Group justify='space-between' mb={isExpanded ? 'md' : undefined}>
           <Card
             p={6}
-            className={'flex-1'}
+            className='flex-1'
             {...dragHandleProps}
             style={{
               ...dragHandleProps.style,
               touchAction: 'none',
             }}
           >
-            <span className={'text-sm font-mono text-white'}>{serverGroup.name}</span>
+            <span className='text-sm font-mono text-white'>{serverGroup.name}</span>
           </Card>
 
-          <div className={'flex flex-row items-center gap-2'}>
-            <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <div className='flex flex-row items-center gap-2'>
+            <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
 
-            <ActionIcon variant={'subtle'} onClick={() => setOpenModal('edit')}>
+            <ActionIcon variant='subtle' onClick={() => setOpenModal('edit')}>
               <FontAwesomeIcon icon={faPen} />
             </ActionIcon>
-            <ActionIcon color={'red'} variant={'subtle'} onClick={() => setOpenModal('delete')}>
+            <ActionIcon color='red' variant='subtle' onClick={() => setOpenModal('delete')}>
               <FontAwesomeIcon icon={faTrash} />
             </ActionIcon>
-            <ActionIcon variant={'subtle'} onClick={() => setIsExpanded(!isExpanded)}>
+            <ActionIcon variant='subtle' onClick={() => setIsExpanded(!isExpanded)}>
               {isExpanded ? (
-                <FontAwesomeIcon icon={faChevronUp} className={'w-4 h-4 text-gray-200'} />
+                <FontAwesomeIcon icon={faChevronUp} className='w-4 h-4 text-gray-200' />
               ) : (
-                <FontAwesomeIcon icon={faChevronDown} className={'w-4 h-4 text-gray-200'} />
+                <FontAwesomeIcon icon={faChevronDown} className='w-4 h-4 text-gray-200' />
               )}
             </ActionIcon>
           </div>
@@ -128,7 +128,7 @@ export default function ServerGroupItem({
             {loading ? (
               <Spinner.Centered />
             ) : servers.total === 0 ? (
-              <p className={'text-gray-400'}>No servers found</p>
+              <p className='text-gray-400'>No servers found</p>
             ) : (
               <DndContainer
                 items={dndServers}
@@ -169,7 +169,7 @@ export default function ServerGroupItem({
                 }
               >
                 {(items) => (
-                  <div className={'gap-4 grid md:grid-cols-2'}>
+                  <div className='gap-4 grid md:grid-cols-2'>
                     {items.map((server) => (
                       <SortableItem key={server.id} id={server.id}>
                         <ServerItem server={server} />
@@ -180,7 +180,7 @@ export default function ServerGroupItem({
               </DndContainer>
             )}
 
-            <Divider my={'md'} />
+            <Divider my='md' />
 
             <Pagination columns={[]} data={servers} onPageSelect={setPage} />
           </>

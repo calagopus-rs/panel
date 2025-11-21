@@ -36,8 +36,8 @@ export default function ServerMountRow({ server, mount }: { server: AdminServer;
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Server Mount Removal'}
-        confirm={'Delete'}
+        title='Confirm Server Mount Removal'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to remove the mount
@@ -65,7 +65,7 @@ export default function ServerMountRow({ server, mount }: { server: AdminServer;
             <TableData>
               <NavLink
                 to={`/admin/mounts/${mount.mount.uuid}`}
-                className={'text-blue-400 hover:text-blue-200 hover:underline'}
+                className='text-blue-400 hover:text-blue-200 hover:underline'
               >
                 <Code>{mount.mount.uuid}</Code>
               </NavLink>

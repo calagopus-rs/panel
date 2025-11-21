@@ -30,9 +30,9 @@ export default function ServerUnsuspendModal({ server, opened, onClose }: ModalP
       <ConfirmationModal
         opened={opened}
         onClose={() => onClose()}
-        title={'Confirm Server Unsuspension'}
-        confirm={'Unsuspend'}
-        confirmColor={'green'}
+        title='Confirm Server Unsuspension'
+        confirm='Unsuspend'
+        confirmColor='green'
         onConfirmed={doSuspend}
       >
         Are you sure you want to unsuspend <Code>{server.name}</Code>? This will allow the server to start again. The

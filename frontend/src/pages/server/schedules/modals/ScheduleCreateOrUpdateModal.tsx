@@ -47,14 +47,14 @@ function CrontabEditor({ value, setValue }: CrontabEditorProps) {
   };
 
   return (
-    <div className={'grid grid-cols-3 gap-2 w-64'}>
+    <div className='grid grid-cols-3 gap-2 w-64'>
       {CRON_SEGMENTS.map((label, i) => (
         <TextInput
           key={label}
           label={label}
           placeholder={label}
           value={segments[i]}
-          className={'flex-1'}
+          className='flex-1'
           onChange={(e) => setSegment(i, e.target.value)}
         />
       ))}
@@ -121,25 +121,25 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
     <Modal title={`${propSchedule?.uuid ? 'Update' : 'Create'} Schedule`} onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
-          label={'Schedule Name'}
-          placeholder={'Schedule Name'}
+          label='Schedule Name'
+          placeholder='Schedule Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
-        <Switch label={'Enabled'} name={'enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <Switch label='Enabled' name='enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
 
         <div>
-          <Title order={4} mb={'sm'}>
+          <Title order={4} mb='sm'>
             Triggers
           </Title>
           {triggers.map((trigger, index) => (
-            <div key={`trigger-${index}`} className={'flex flex-row items-end space-x-2 mb-2'}>
+            <div key={`trigger-${index}`} className='flex flex-row items-end space-x-2 mb-2'>
               <Select
                 label={`Trigger ${index + 1}`}
                 placeholder={`Trigger ${index + 1}`}
                 value={trigger.type}
-                className={'flex-1'}
+                className='flex-1'
                 onChange={(value) => {
                   switch (value) {
                     case 'cron':
@@ -186,10 +186,10 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
                 <Popover>
                   <Popover.Target>
                     <TextInput
-                      label={'Cron Schedule'}
-                      placeholder={'Cron Schedule'}
+                      label='Cron Schedule'
+                      placeholder='Cron Schedule'
                       value={trigger.schedule}
-                      className={'flex-1'}
+                      className='flex-1'
                       onChange={(e) => {
                         setTriggers((triggers) => [
                           ...triggers.slice(0, index),
@@ -214,10 +214,10 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
                 </Popover>
               ) : trigger.type === 'power_action' ? (
                 <Select
-                  label={'Power Action'}
-                  placeholder={'Power Action'}
+                  label='Power Action'
+                  placeholder='Power Action'
                   value={trigger.action}
-                  className={'flex-1'}
+                  className='flex-1'
                   onChange={(value) => {
                     setTriggers((triggers) => [
                       ...triggers.slice(0, index),
@@ -234,10 +234,10 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
                 />
               ) : trigger.type === 'server_state' ? (
                 <Select
-                  label={'Server State'}
-                  placeholder={'Server State'}
+                  label='Server State'
+                  placeholder='Server State'
                   value={trigger.state}
-                  className={'flex-1'}
+                  className='flex-1'
                   onChange={(value) => {
                     setTriggers((triggers) => [
                       ...triggers.slice(0, index),
@@ -253,9 +253,9 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
               ) : null}
 
               <ActionIcon
-                size={'input-sm'}
-                color={'red'}
-                variant={'light'}
+                size='input-sm'
+                color='red'
+                variant='light'
                 onClick={() => setTriggers((triggers) => [...triggers.filter((t) => t !== trigger)])}
               >
                 <FontAwesomeIcon icon={faMinus} />
@@ -267,7 +267,7 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
             onClick={() =>
               setTriggers((triggers) => [...triggers, { type: 'cron', schedule: '' } as ScheduleTriggerCron])
             }
-            variant={'light'}
+            variant='light'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Add Trigger
@@ -278,7 +278,7 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
           <Button onClick={doCreateOrUpdate} loading={loading} disabled={!name}>
             {propSchedule?.uuid ? 'Update' : 'Create'}
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

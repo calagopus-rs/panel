@@ -10,7 +10,7 @@ export default function MountRow({ mount }: { mount: Mount }) {
   return (
     <TableRow>
       <TableData>
-        <NavLink to={`/admin/mounts/${mount.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/mounts/${mount.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{mount.uuid}</Code>
         </NavLink>
       </TableData>

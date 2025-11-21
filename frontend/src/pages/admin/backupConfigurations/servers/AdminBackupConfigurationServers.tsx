@@ -22,7 +22,7 @@ export default function AdminBackupConfigurationServers({
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Backup Configuration Servers
       </Title>
 

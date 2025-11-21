@@ -29,25 +29,25 @@ export default function App() {
 
   return settings ? (
     <ErrorBoundary>
-      <MantineProvider forceColorScheme={'dark'}>
+      <MantineProvider forceColorScheme='dark'>
         <ToastProvider>
           <BrowserRouter>
             <AuthProvider>
               <Suspense fallback={<Spinner.Centered />}>
                 <Routes>
                   <Route element={<OobeGuard />}>
-                    <Route path={'/oobe/*'} element={<OobeRouter />} />
+                    <Route path='/oobe/*' element={<OobeRouter />} />
 
                     <Route element={<UnauthenticatedGuard />}>
-                      <Route path={'/auth/*'} element={<AuthenticationRouter />} />
+                      <Route path='/auth/*' element={<AuthenticationRouter />} />
                     </Route>
 
                     <Route element={<AuthenticatedGuard />}>
-                      <Route path={'/server/:id/*'} element={<ServerRouter />} />
-                      <Route path={'/*'} element={<DashboardRouter />} />
+                      <Route path='/server/:id/*' element={<ServerRouter />} />
+                      <Route path='/*' element={<DashboardRouter />} />
 
                       <Route element={<AdminGuard />}>
-                        <Route path={'/admin/*'} element={<AdminRouter />} />
+                        <Route path='/admin/*' element={<AdminRouter />} />
                       </Route>
                     </Route>
                   </Route>

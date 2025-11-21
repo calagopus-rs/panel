@@ -14,7 +14,7 @@ export default function StepSendPower({
     <Stack>
       <Select
         withAsterisk
-        label={'Power Action'}
+        label='Power Action'
         data={Object.entries(serverPowerActionLabelMapping).map(([value, label]) => ({
           value,
           label,
@@ -25,7 +25,7 @@ export default function StepSendPower({
         }}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />

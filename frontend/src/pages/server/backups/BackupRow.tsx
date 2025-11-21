@@ -64,8 +64,8 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Backup Deletion'}
-        confirm={'Delete'}
+        title='Confirm Backup Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{backup.name}</Code> from this server?
@@ -140,9 +140,9 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
 
             <TableData>
               {backup.isLocked ? (
-                <FontAwesomeIcon className={'text-green-500'} icon={faLock} />
+                <FontAwesomeIcon className='text-green-500' icon={faLock} />
               ) : (
-                <FontAwesomeIcon className={'text-red-500'} icon={faLockOpen} />
+                <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
               )}
             </TableData>
 

@@ -137,9 +137,9 @@ export default function OobeRouter() {
   };
 
   return (
-    <BackgroundImage src={minecraftBackground} h={'100vh'}>
-      <Center h={'100%'}>
-        <Container w={'100%'}>
+    <BackgroundImage src={minecraftBackground} h='100vh'>
+      <Center h='100%'>
+        <Container w='100%'>
           <Card>
             <Stepper active={steps.filter((s) => s.label).findIndex((s) => s.path === activeStep?.path)}>
               {steps

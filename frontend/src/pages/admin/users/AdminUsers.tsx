@@ -23,15 +23,15 @@ function UsersContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Users
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/users/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -51,9 +51,9 @@ function UsersContainer() {
 export default function AdminUsers() {
   return (
     <Routes>
-      <Route path={'/'} element={<UsersContainer />} />
-      <Route path={'/new'} element={<UserCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<UserView />} />
+      <Route path='/' element={<UsersContainer />} />
+      <Route path='/new' element={<UserCreateOrUpdate />} />
+      <Route path='/:id/*' element={<UserView />} />
     </Routes>
   );
 }

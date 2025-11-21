@@ -12,12 +12,12 @@ export default function ReinstallContainer() {
       <Card h='100%'>
         <SettingsReinstallModal opened={modalOpen} onClose={() => setModalOpen(false)} />
 
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Reinstall Server
         </Title>
 
-        <Group pt={'md'} mt={'auto'}>
-          <Button color={'red'} onClick={() => setModalOpen(true)}>
+        <Group pt='md' mt='auto'>
+          <Button color='red' onClick={() => setModalOpen(true)}>
             Reinstall Server
           </Button>
         </Group>

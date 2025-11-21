@@ -56,10 +56,10 @@ export default function AvatarContainer() {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Avatar
         </Title>
-        <Group className={'mt-4'}>
+        <Group className='mt-4'>
           <AvatarEditor
             ref={editor}
             image={file ?? user.avatar}
@@ -69,13 +69,13 @@ export default function AvatarContainer() {
             style={{ width: 256, height: 256, borderRadius: '0.25rem' }}
           />
 
-          <Stack className={'h-full grow'}>
+          <Stack className='h-full grow'>
             <FileInput
-              label={'Avatar'}
-              placeholder={'Avatar'}
+              label='Avatar'
+              placeholder='Avatar'
               value={file}
               onChange={(file) => setFile(file)}
-              accept={'image/*'}
+              accept='image/*'
               clearable
             />
 
@@ -83,7 +83,7 @@ export default function AvatarContainer() {
               <Button loading={loading} disabled={!file} onClick={doUpdate}>
                 Update Avatar
               </Button>
-              <Button color={'red'} loading={loading} disabled={!user.avatar} onClick={doRemove}>
+              <Button color='red' loading={loading} disabled={!user.avatar} onClick={doRemove}>
                 Remove Avatar
               </Button>
             </Group>

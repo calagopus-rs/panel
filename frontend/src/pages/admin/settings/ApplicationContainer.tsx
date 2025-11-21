@@ -29,7 +29,7 @@ export default function ApplicationContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Application Settings
       </Title>
 
@@ -37,15 +37,15 @@ export default function ApplicationContainer() {
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Name'}
-            placeholder={'Name'}
+            label='Name'
+            placeholder='Name'
             value={appSettings.name || ''}
             onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={'URL'}
-            placeholder={'URL'}
+            label='URL'
+            placeholder='URL'
             value={appSettings.url || ''}
             onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
           />
@@ -53,21 +53,21 @@ export default function ApplicationContainer() {
 
         <Group grow>
           <Switch
-            label={'Enable Telemetry'}
+            label='Enable Telemetry'
             description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
             defaultChecked={appSettings.telemetryEnabled}
             onChange={(e) => setAppSettings((settings) => ({ ...settings, telemetryEnabled: e.target.checked }))}
           />
           <Switch
-            label={'Enable Registration'}
-            name={'registrationEnabled'}
+            label='Enable Registration'
+            name='registrationEnabled'
             defaultChecked={appSettings.registrationEnabled}
             onChange={(e) => setAppSettings((settings) => ({ ...settings, registrationEnabled: e.target.checked }))}
           />
         </Group>
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>

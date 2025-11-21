@@ -55,7 +55,7 @@ function FileTableRow({
 
   return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
     <TableRow
-      className={'cursor-pointer select-none'}
+      className='cursor-pointer select-none'
       bg={
         selectedFiles.has(file) ||
         (movingFilesDirectory === browsingDirectory && [...movingFiles].some((f) => f.name === file.name))
@@ -234,7 +234,7 @@ export default function FileRow({
             }}
             ref={ref}
           >
-            <td className={'pl-4 relative cursor-pointer w-10 text-center py-2'}>
+            <td className='pl-4 relative cursor-pointer w-10 text-center py-2'>
               <Checkbox
                 id={file.name}
                 disabled={movingFiles.size > 0}
@@ -252,7 +252,7 @@ export default function FileRow({
 
             <TableData>
               <span className='flex items-center gap-4 leading-[100%]'>
-                <FontAwesomeIcon className={'text-gray-400'} icon={file.file ? faFile : faFolder} />
+                <FontAwesomeIcon className='text-gray-400' icon={file.file ? faFile : faFolder} />
                 {file.name}
               </span>
             </TableData>

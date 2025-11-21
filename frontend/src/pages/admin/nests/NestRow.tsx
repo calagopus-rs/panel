@@ -10,7 +10,7 @@ export default function NestRow({ nest }: { nest: AdminNest }) {
   return (
     <TableRow>
       <TableData>
-        <NavLink to={`/admin/nests/${nest.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/nests/${nest.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{nest.uuid}</Code>
         </NavLink>
       </TableData>

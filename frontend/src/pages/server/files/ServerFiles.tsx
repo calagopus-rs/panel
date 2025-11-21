@@ -568,13 +568,13 @@ export default function ServerFiles() {
   const hasOperations = fileOperations.size > 0 || uploadingFiles.size > 0;
 
   return (
-    <div {...getRootProps()} className={'h-fit relative'}>
+    <div {...getRootProps()} className='h-fit relative'>
       <input {...getInputProps()} />
 
-      <input ref={fileInputRef} type={'file'} multiple style={{ display: 'none' }} onChange={handleFileSelect} />
+      <input ref={fileInputRef} type='file' multiple style={{ display: 'none' }} onChange={handleFileSelect} />
       <input
         ref={folderInputRef}
-        type={'file'}
+        type='file'
         multiple
         style={{ display: 'none' }}
         onChange={handleFolderSelect}
@@ -583,13 +583,12 @@ export default function ServerFiles() {
 
       {isDragActive && (
         <div
-          className={
+          className=
             'fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none'
-          }
         >
-          <div className={'bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl'}>
-            <FontAwesomeIcon icon={faUpload} className={'text-4xl text-blue-500 mb-4'} />
-            <p className={'text-lg font-semibold'}>Drop files here to upload</p>
+          <div className='bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl'>
+            <FontAwesomeIcon icon={faUpload} className='text-4xl text-blue-500 mb-4' />
+            <p className='text-lg font-semibold'>Drop files here to upload</p>
           </div>
         </div>
       )}
@@ -600,14 +599,14 @@ export default function ServerFiles() {
 
       <FileActionBar />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           Files
         </Title>
         {!browsingBackup && (
           <Group>
             {hasOperations && (
-              <Popover position={'bottom-start'} shadow={'md'}>
+              <Popover position='bottom-start' shadow='md'>
                 <Popover.Target>
                   <UnstyledButton>
                     <RingProgress
@@ -621,14 +620,14 @@ export default function ServerFiles() {
                       roundCaps
                       thickness={4}
                       label={
-                        <Text c={uploadingFiles.size > 0 ? 'green' : 'blue'} fw={700} ta={'center'} size={'xs'}>
+                        <Text c={uploadingFiles.size > 0 ? 'green' : 'blue'} fw={700} ta='center' size='xs'>
                           {averageOperationProgress.toFixed(0)}%
                         </Text>
                       }
                     />
                   </UnstyledButton>
                 </Popover.Target>
-                <Popover.Dropdown className={'md:min-w-xl max-w-screen max-h-96 overflow-y-auto'}>
+                <Popover.Dropdown className='md:min-w-xl max-w-screen max-h-96 overflow-y-auto'>
                   {Array.from(folderProgress).map(([folderName, info]) => {
                     const progress = info.totalSize > 0 ? (info.uploadedSize / info.totalSize) * 100 : 0;
                     const statusText =
@@ -639,12 +638,12 @@ export default function ServerFiles() {
                         : `Uploading folder: ${folderName} (${info.fileCount} files)`;
 
                     return (
-                      <div key={folderName} className={'flex flex-row items-center mb-3'}>
-                        <div className={'flex flex-col grow'}>
-                          <p className={'break-all mb-1'}>{statusText}</p>
+                      <div key={folderName} className='flex flex-row items-center mb-3'>
+                        <div className='flex flex-col grow'>
+                          <p className='break-all mb-1'>{statusText}</p>
                           <Progress value={progress} />
                         </div>
-                        <CloseButton className={'ml-3'} onClick={() => cancelFolderUpload(folderName)} />
+                        <CloseButton className='ml-3' onClick={() => cancelFolderUpload(folderName)} />
                       </div>
                     );
                   })}
@@ -655,15 +654,15 @@ export default function ServerFiles() {
                     }
 
                     return (
-                      <div key={key} className={'flex flex-row items-center mb-2'}>
-                        <div className={'flex flex-col grow'}>
-                          <p className={'break-all mb-1 text-sm'}>
+                      <div key={key} className='flex flex-row items-center mb-2'>
+                        <div className='flex flex-col grow'>
+                          <p className='break-all mb-1 text-sm'>
                             {file.status === 'pending' ? 'Waiting: ' : 'Uploading: '}
                             {file.fileName}
                           </p>
                           <Progress value={file.progress} />
                         </div>
-                        <CloseButton className={'ml-3'} onClick={() => cancelFileUpload(key)} />
+                        <CloseButton className='ml-3' onClick={() => cancelFileUpload(key)} />
                       </div>
                     );
                   })}
@@ -672,9 +671,9 @@ export default function ServerFiles() {
                     const progress = (operation.progress / operation.total) * 100;
 
                     return (
-                      <div key={uuid} className={'flex flex-row items-center mb-2'}>
-                        <div className={'flex flex-col grow'}>
-                          <p className={'break-all mb-1'}>
+                      <div key={uuid} className='flex flex-row items-center mb-2'>
+                        <div className='flex flex-col grow'>
+                          <p className='break-all mb-1'>
                             {operation.type === 'compress'
                               ? `Compressing ${operation.path}`
                               : operation.type === 'decompress'
@@ -685,7 +684,7 @@ export default function ServerFiles() {
                           </p>
                           <Progress value={progress} />
                         </div>
-                        <CloseButton className={'ml-3'} onClick={() => doCancelOperation(uuid)} />
+                        <CloseButton className='ml-3' onClick={() => doCancelOperation(uuid)} />
                       </div>
                     );
                   })}
@@ -693,7 +692,7 @@ export default function ServerFiles() {
               </Popover>
             )}
             <Button
-              variant={'outline'}
+              variant='outline'
               leftSection={<FontAwesomeIcon icon={faServer} />}
               onClick={() => setOpenModal('sftpDetails')}
             >
@@ -744,7 +743,7 @@ export default function ServerFiles() {
                       const rect = e.currentTarget.getBoundingClientRect();
                       openMenu(rect.left, rect.bottom);
                     }}
-                    color={'blue'}
+                    color='blue'
                     rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                   >
                     New
@@ -760,13 +759,13 @@ export default function ServerFiles() {
         <Spinner.Centered />
       ) : (
         <>
-          <Card className={'border border-b-0 border-[#424242] rounded-b-none!'}>
+          <Card className='border border-b-0 border-[#424242] rounded-b-none!'>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
           <SelectionArea
             onSelectedStart={onSelectedStart}
             onSelected={onSelected}
-            className={'h-full'}
+            className='h-full'
             disabled={movingFiles.size > 0 || !!openModal || childOpenModal}
           >
             <ContextMenuProvider>

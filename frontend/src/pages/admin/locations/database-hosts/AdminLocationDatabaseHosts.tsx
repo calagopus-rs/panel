@@ -6,7 +6,6 @@ import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLo
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
-import Spinner from '@/elements/Spinner';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
@@ -31,11 +30,11 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
         onClose={() => setOpenModal(null)}
       />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Location Database Hosts</Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>
         </Group>

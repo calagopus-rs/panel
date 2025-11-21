@@ -23,15 +23,15 @@ function NestsContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Nests
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/nests/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -51,9 +51,9 @@ function NestsContainer() {
 export default function AdminNests() {
   return (
     <Routes>
-      <Route path={'/'} element={<NestsContainer />} />
-      <Route path={'/new'} element={<NestCreateOrUpdate />} />
-      <Route path={'/:nestId/*'} element={<NestView />} />
+      <Route path='/' element={<NestsContainer />} />
+      <Route path='/new' element={<NestCreateOrUpdate />} />
+      <Route path='/:nestId/*' element={<NestView />} />
     </Routes>
   );
 }

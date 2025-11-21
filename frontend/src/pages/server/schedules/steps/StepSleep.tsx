@@ -10,8 +10,8 @@ export default function StepSleep({
   return (
     <NumberInput
       withAsterisk
-      label={'Duration (milliseconds)'}
-      placeholder={'1000'}
+      label='Duration (milliseconds)'
+      placeholder='1000'
       min={1}
       value={action.duration}
       onChange={(value) => setAction({ ...action, duration: Number(value) })}

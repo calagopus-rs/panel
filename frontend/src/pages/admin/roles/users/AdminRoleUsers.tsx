@@ -16,7 +16,7 @@ export default function AdminRoleUsers({ role }: { role: Role }) {
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Role Users
       </Title>
 

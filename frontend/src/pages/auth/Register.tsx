@@ -47,8 +47,8 @@ export default function Register() {
         {error && (
           <Alert
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-            color={'red'}
-            title={'Error'}
+            color='red'
+            title='Error'
             onClose={() => setError('')}
             withCloseButton
           >
@@ -57,27 +57,27 @@ export default function Register() {
         )}
         <Card>
           <Stack>
-            <Title order={2} ta={'center'}>
+            <Title order={2} ta='center'>
               Register
             </Title>
-            <Text c={'dimmed'} ta={'center'}>
+            <Text c='dimmed' ta='center'>
               Please enter your details to register
             </Text>
 
-            <TextInput placeholder={'Username'} value={username} onChange={(e) => setUsername(e.target.value)} />
-            <TextInput placeholder={'Email'} value={email} onChange={(e) => setEmail(e.target.value)} />
-            <TextInput placeholder={'First Name'} value={nameFirst} onChange={(e) => setNameFirst(e.target.value)} />
-            <TextInput placeholder={'Last Name'} value={nameLast} onChange={(e) => setNameLast(e.target.value)} />
-            <PasswordInput placeholder={'Password'} value={password} onChange={(e) => setPassword(e.target.value)} />
+            <TextInput placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} />
+            <TextInput placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
+            <TextInput placeholder='First Name' value={nameFirst} onChange={(e) => setNameFirst(e.target.value)} />
+            <TextInput placeholder='Last Name' value={nameLast} onChange={(e) => setNameLast(e.target.value)} />
+            <PasswordInput placeholder='Password' value={password} onChange={(e) => setPassword(e.target.value)} />
             <Captcha ref={captchaRef} />
 
-            <Button onClick={submit} loading={loading} size={'md'} fullWidth>
+            <Button onClick={submit} loading={loading} size='md' fullWidth>
               Register
             </Button>
 
-            <Divider label={'OR'} labelPosition={'center'} />
+            <Divider label='OR' labelPosition='center' />
 
-            <Button variant={'light'} onClick={() => navigate('/auth/login')} size={'md'} fullWidth>
+            <Button variant='light' onClick={() => navigate('/auth/login')} size='md' fullWidth>
               Login
             </Button>
           </Stack>

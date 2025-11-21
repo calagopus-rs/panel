@@ -9,11 +9,11 @@ export default function AuthenticationRouter() {
   return (
     <>
       <Routes>
-        <Route path={'/login'} element={<Login />} />
-        <Route path={'/register'} element={<Register />} />
-        <Route path={'/forgot-password'} element={<ForgotPassword />} />
-        <Route path={'/reset-password'} element={<ResetPassword />} />
-        <Route path={'*'} element={<NotFound />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/reset-password' element={<ResetPassword />} />
+        <Route path='*' element={<NotFound />} />
       </Routes>
     </>
   );

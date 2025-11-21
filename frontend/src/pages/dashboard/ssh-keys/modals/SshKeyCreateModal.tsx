@@ -34,31 +34,31 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title={'Create SSH Key'} onClose={onClose} opened={opened}>
+    <Modal title='Create SSH Key' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Name'}
-          placeholder={'Name'}
+          label='Name'
+          placeholder='Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <TextArea
           withAsterisk
-          label={'Public Key'}
-          placeholder={'Public Key'}
+          label='Public Key'
+          placeholder='Public Key'
           value={pubKey}
           onChange={(e) => setPubKey(e.target.value)}
           rows={3}
-          resize={'none'}
+          resize='none'
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doCreate} loading={loading} disabled={!name || !pubKey}>
             Create
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

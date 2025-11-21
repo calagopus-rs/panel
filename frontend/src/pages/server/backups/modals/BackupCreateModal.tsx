@@ -34,19 +34,19 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title={'Create Backup'} onClose={onClose} opened={opened}>
+    <Modal title='Create Backup' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Name'}
-          placeholder={'Name'}
+          label='Name'
+          placeholder='Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
         <TagsInput
-          label={'Ignored Files'}
-          placeholder={'Ignored Files'}
+          label='Ignored Files'
+          placeholder='Ignored Files'
           value={ignoredFiles}
           onChange={setIgnoredFiles}
         />
@@ -55,7 +55,7 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
           <Button onClick={doCreate} loading={loading} disabled={!name}>
             Create
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

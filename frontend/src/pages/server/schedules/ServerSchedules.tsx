@@ -67,17 +67,17 @@ export default function ServerSchedules() {
     <>
       <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           Schedules
-          <p className={'text-xs text-gray-300!'}>
+          <p className='text-xs text-gray-300!'>
             {schedules.total} of {server.featureLimits.schedules} maximum schedules created.
           </p>
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
-            <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => fileInputRef.current?.click()} color='blue'>
+            <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
           </Button>
           <ConditionalTooltip
@@ -87,7 +87,7 @@ export default function ServerSchedules() {
             <Button
               disabled={schedules.total >= server.featureLimits.schedules}
               onClick={() => setOpenModal('create')}
-              color={'blue'}
+              color='blue'
               leftSection={<FontAwesomeIcon icon={faPlus} />}
             >
               Create
@@ -95,10 +95,10 @@ export default function ServerSchedules() {
           </ConditionalTooltip>
 
           <input
-            type={'file'}
-            accept={'.json,.yml,.yaml'}
+            type='file'
+            accept='.json,.yml,.yaml'
             ref={fileInputRef}
-            className={'hidden'}
+            className='hidden'
             onChange={handleFileUpload}
           />
         </Group>

@@ -64,27 +64,27 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
 
   return (
     <>
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Eggs</Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => fileInputRef.current?.click()} color={'blue'}>
-            <FontAwesomeIcon icon={faUpload} className={'mr-2'} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => fileInputRef.current?.click()} color='blue'>
+            <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
           </Button>
           <Button
             onClick={() => navigate(`/admin/nests/${contextNest.uuid}/eggs/new`)}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
           </Button>
 
           <input
-            type={'file'}
-            accept={'.json,.yml,.yaml'}
+            type='file'
+            accept='.json,.yml,.yaml'
             ref={fileInputRef}
-            className={'hidden'}
+            className='hidden'
             onChange={handleFileUpload}
           />
         </Group>
@@ -102,9 +102,9 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
 export default function AdminEggs({ contextNest }: { contextNest?: AdminNest }) {
   return (
     <Routes>
-      <Route path={'/'} element={<EggsContainer contextNest={contextNest} />} />
-      <Route path={'/new'} element={<EggCreateOrUpdate contextNest={contextNest} />} />
-      <Route path={'/:eggId/*'} element={<EggView contextNest={contextNest} />} />
+      <Route path='/' element={<EggsContainer contextNest={contextNest} />} />
+      <Route path='/new' element={<EggCreateOrUpdate contextNest={contextNest} />} />
+      <Route path='/:eggId/*' element={<EggView contextNest={contextNest} />} />
     </Routes>
   );
 }

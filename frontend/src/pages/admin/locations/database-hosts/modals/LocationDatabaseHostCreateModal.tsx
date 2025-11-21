@@ -43,12 +43,12 @@ export default function LocationDatabaseHostCreateModal({
   };
 
   return (
-    <Modal title={'Create Location Database Host'} onClose={onClose} opened={opened}>
+    <Modal title='Create Location Database Host' onClose={onClose} opened={opened}>
       <Stack>
         <Select
           withAsterisk
-          label={'Database Host'}
-          placeholder={'Database Host'}
+          label='Database Host'
+          placeholder='Database Host'
           value={databaseHost?.uuid}
           onChange={(value) => setDatabaseHost(databaseHosts.items.find((dh) => dh.uuid === value))}
           data={Object.values(
@@ -68,11 +68,11 @@ export default function LocationDatabaseHostCreateModal({
           onSearchChange={databaseHosts.setSearch}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doCreate} loading={loading} disabled={!databaseHost}>
             Create
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

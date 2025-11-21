@@ -66,20 +66,20 @@ export default function ServerRouter() {
   };
 
   return (
-    <div className={'lg:flex'}>
+    <div className='lg:flex'>
       <Sidebar>
-        <NavLink to={'/'} className={'w-full'}>
-          <div className={'h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'}>
-            <img src={'/icon.svg'} className={'h-full py-4'} alt={'Calagopus Icon'} />
-            <h1 className={'grow font-logo text-xl'}>{settings.app.name}</h1>
+        <NavLink to='/' className='w-full'>
+          <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
+            <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
+            <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
           </div>
         </NavLink>
 
         <Sidebar.Divider />
 
-        <Sidebar.Link to={'/'} end icon={faServer} name={'Servers'} />
+        <Sidebar.Link to='/' end icon={faServer} name='Servers' />
         {user.admin && (
-          <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name={'View admin'} />
+          <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name='View admin' />
         )}
 
         <Sidebar.Divider />
@@ -110,7 +110,7 @@ export default function ServerRouter() {
         <Sidebar.Footer />
       </Sidebar>
 
-      <div id={'server-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
+      <div id='server-root' className='max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'>
         <Container>
           {loading ? (
             <Spinner.Centered />
@@ -119,17 +119,17 @@ export default function ServerRouter() {
               <WebsocketHandler />
               <WebsocketListener />
               {server.status === 'restoring_backup' ? (
-                <Notification className={'mb-4'} loading>
+                <Notification className='mb-4' loading>
                   Your Server is currently restoring from a backup. Please wait...
                   <Progress value={backupRestoreProgress} />
                 </Notification>
               ) : server.status === 'installing' ? (
-                <Notification className={'mb-4'} loading>
+                <Notification className='mb-4' loading>
                   Your Server is currently being installed. Please wait...
                   <Button
-                    className={'ml-2'}
+                    className='ml-2'
                     leftSection={<FontAwesomeIcon icon={faCancel} />}
-                    variant={'subtle'}
+                    variant='subtle'
                     loading={abortLoading}
                     onClick={doAbortInstall}
                   >
@@ -143,7 +143,7 @@ export default function ServerRouter() {
                   {serverRoutes.map(({ path, element: Element }) => (
                     <Route key={path} path={path} element={<Element />} />
                   ))}
-                  <Route path={'*'} element={<NotFound />} />
+                  <Route path='*' element={<NotFound />} />
                 </Routes>
               </Suspense>
             </>

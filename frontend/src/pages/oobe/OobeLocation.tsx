@@ -111,8 +111,8 @@ export default function OobeLocation({ onNext }: OobeLocationProps) {
 
         <Select
           withAsterisk
-          label={'Backup Disk'}
-          placeholder={'Backup Disk'}
+          label='Backup Disk'
+          placeholder='Backup Disk'
           leftSection={<FontAwesomeIcon icon={faFloppyDisk} size='sm' />}
           data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
             value,

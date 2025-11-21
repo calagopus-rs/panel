@@ -55,7 +55,7 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <ToastContext.Provider value={{ addToast, dismissToast }}>
       {children}
-      <div className={'fixed top-4 right-4 z-999 space-y-2'}>
+      <div className='fixed top-4 right-4 z-999 space-y-2'>
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
@@ -64,7 +64,7 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
-              className={'w-72'}
+              className='w-72'
             >
               <Notification color={getToastColor(toast.type)} withCloseButton onClose={() => dismissToast(toast.id)}>
                 {toast.message}

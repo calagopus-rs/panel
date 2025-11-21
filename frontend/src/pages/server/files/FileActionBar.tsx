@@ -115,13 +115,13 @@ export default function FileActionBar() {
   return (
     <>
       <ArchiveCreateModal
-        key={'ArchiveCreateModal'}
+        key='ArchiveCreateModal'
         files={[...selectedFiles]}
         opened={openModal === 'archive'}
         onClose={() => setOpenModal(null)}
       />
       <FileDeleteModal
-        key={'FileDeleteModal'}
+        key='FileDeleteModal'
         files={[...selectedFiles]}
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -130,22 +130,22 @@ export default function FileActionBar() {
         {movingFiles.size > 0 ? (
           <>
             <Button onClick={doMove} loading={loading}>
-              <FontAwesomeIcon icon={faAnglesDown} className={'mr-2'} /> Move {movingFiles.size} File
+              <FontAwesomeIcon icon={faAnglesDown} className='mr-2' /> Move {movingFiles.size} File
               {movingFiles.size === 1 ? '' : 's'} Here
             </Button>
-            <Button variant={'default'} onClick={() => setMovingFiles([])}>
+            <Button variant='default' onClick={() => setMovingFiles([])}>
               Cancel
             </Button>
           </>
         ) : (
           <>
             <Button onClick={doDownload} loading={loading}>
-              <FontAwesomeIcon icon={faFileDownload} className={'mr-2'} /> Download
+              <FontAwesomeIcon icon={faFileDownload} className='mr-2' /> Download
             </Button>
             {!browsingBackup && (
               <>
                 <Button onClick={() => setOpenModal('archive')}>
-                  <FontAwesomeIcon icon={faArchive} className={'mr-2'} /> Archive
+                  <FontAwesomeIcon icon={faArchive} className='mr-2' /> Archive
                 </Button>
                 <Button
                   onClick={() => {
@@ -153,10 +153,10 @@ export default function FileActionBar() {
                     setSelectedFiles([]);
                   }}
                 >
-                  <FontAwesomeIcon icon={faAnglesUp} className={'mr-2'} /> Move
+                  <FontAwesomeIcon icon={faAnglesUp} className='mr-2' /> Move
                 </Button>
-                <Button color={'red'} onClick={() => setOpenModal('delete')}>
-                  <FontAwesomeIcon icon={faTrash} className={'mr-2'} />
+                <Button color='red' onClick={() => setOpenModal('delete')}>
+                  <FontAwesomeIcon icon={faTrash} className='mr-2' />
                   Delete
                 </Button>
               </>

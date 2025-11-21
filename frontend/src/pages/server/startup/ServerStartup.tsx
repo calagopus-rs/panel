@@ -103,26 +103,26 @@ export default function ServerStartup() {
 
   return (
     <>
-      <Title order={1} c={'white'} mb={'md'}>
+      <Title order={1} c='white' mb='md'>
         Startup
       </Title>
 
-      <div className={'grid grid-cols-3 gap-4'}>
-        <Card className={'flex flex-col justify-between rounded-md p-4 h-full col-span-2'}>
+      <div className='grid grid-cols-3 gap-4'>
+        <Card className='flex flex-col justify-between rounded-md p-4 h-full col-span-2'>
           <TextArea
             withAsterisk
-            label={'Startup Command'}
-            placeholder={'Startup Command'}
+            label='Startup Command'
+            placeholder='Startup Command'
             value={command}
             onChange={(e) => setCommand(e.target.value)}
             disabled={!settings.server.allowEditingStartupCommand}
             autosize
           />
         </Card>
-        <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
+        <Card className='flex flex-col justify-between rounded-md p-4 h-full'>
           <Select
             withAsterisk
-            label={'Docker Image'}
+            label='Docker Image'
             value={dockerImage}
             onChange={(value) => setDockerImage(value)}
             data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
@@ -131,7 +131,7 @@ export default function ServerStartup() {
             }))}
             disabled={!settings.server.allowOverwritingCustomDockerImage}
           />
-          <p className={'text-gray-400 mt-2'}>
+          <p className='text-gray-400 mt-2'>
             The Docker image used to run this server.{' '}
             {Object.values(server.egg.dockerImages).includes(server.image) ||
             settings.server.allowOverwritingCustomDockerImage
@@ -141,16 +141,16 @@ export default function ServerStartup() {
         </Card>
       </div>
 
-      <Group justify={'space-between'} my={'md'}>
+      <Group justify='space-between' my='md'>
         <Title order={2}>Variables</Title>
         <Group>
-          <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color={'blue'}>
+          <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color='blue'>
             Save
           </Button>
         </Group>
       </Group>
 
-      <div className={'grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'}>
+      <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'>
         {variables.map((variable) => (
           <VariableContainer
             key={variable.envVariable}

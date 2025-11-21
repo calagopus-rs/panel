@@ -22,11 +22,11 @@ export default function ServerActivity() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Activity
         </Title>
-        <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
       </Group>
 
       <Table
@@ -52,7 +52,7 @@ export default function ServerActivity() {
             </TableData>
 
             <TableData>
-              <Group gap={4} justify={'right'} wrap={'nowrap'}>
+              <Group gap={4} justify='right' wrap='nowrap'>
                 {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
               </Group>
             </TableData>

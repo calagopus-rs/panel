@@ -43,8 +43,8 @@ export default function LocationDatabaseHostRow({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Location Database Host Deletion'}
-        confirm={'Delete'}
+        title='Confirm Location Database Host Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete the database host
@@ -72,7 +72,7 @@ export default function LocationDatabaseHostRow({
             <TableData>
               <NavLink
                 to={`/admin/database-hosts/${databaseHost.databaseHost.uuid}`}
-                className={'text-blue-400 hover:text-blue-200 hover:underline'}
+                className='text-blue-400 hover:text-blue-200 hover:underline'
               >
                 <Code>{databaseHost.databaseHost.uuid}</Code>
               </NavLink>
