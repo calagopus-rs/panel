@@ -10,10 +10,7 @@ import AlertError from '@/elements/alerts/AlertError';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-
-interface OobeConfigurationProps {
-  onNext?: () => void;
-}
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
 interface ConfigurationFormValues {
   applicationName: string;
@@ -22,7 +19,7 @@ interface ConfigurationFormValues {
   applicationRegistration: boolean;
 }
 
-export default function OobeConfiguration({ onNext }: OobeConfigurationProps) {
+export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 

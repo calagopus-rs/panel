@@ -12,19 +12,15 @@ import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { to } from '@/lib/routes';
 import { useAuth } from '@/providers/AuthProvider';
-import { steps } from '@/routers/OobeRouter';
+import { OobeComponentProps, steps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global';
-
-interface OobeLoginProps {
-  onNext?: () => void;
-}
 
 interface LoginFormValues {
   username: string;
   password: string;
 }
 
-export default function OobeLogin({ onNext }: OobeLoginProps) {
+export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
   const navigate = useNavigate();
   const { settings } = useGlobalStore();

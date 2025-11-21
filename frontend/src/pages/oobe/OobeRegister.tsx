@@ -10,10 +10,7 @@ import Button from '@/elements/Button';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
-
-interface OobeRegisterProps {
-  onNext?: () => void;
-}
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
 interface RegisterFormValues {
   username: string;
@@ -24,7 +21,7 @@ interface RegisterFormValues {
   confirmPassword: string;
 }
 
-export default function OobeRegister({ onNext }: OobeRegisterProps) {
+export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -91,6 +88,7 @@ export default function OobeRegister({ onNext }: OobeRegisterProps) {
     })
       .then((response) => {
         doLogin(response.user!, false);
+        console.log('next');
         onNext();
       })
       .catch((msg) => {

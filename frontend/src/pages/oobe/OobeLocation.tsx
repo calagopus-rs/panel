@@ -13,10 +13,7 @@ import TextInput from '@/elements/input/TextInput';
 import { backupDiskLabelMapping } from '@/lib/enums';
 import BackupRestic from '@/pages/admin/locations/forms/BackupRestic';
 import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
-
-interface OobeLocationProps {
-  onNext?: () => void;
-}
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
 interface LocationFormValues {
   locationName: string;
@@ -25,7 +22,7 @@ interface LocationFormValues {
   backupConfigs: BackupDiskConfigurations;
 }
 
-export default function OobeLocation({ onNext }: OobeLocationProps) {
+export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -151,6 +148,9 @@ export default function OobeLocation({ onNext }: OobeLocationProps) {
         ) : null}
 
         <Group justify='flex-end' mt='xl'>
+          <Button variant='outline' onClick={() => skipFrom('location')}>
+            Skip
+          </Button>
           <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
             Create & Continue
           </Button>

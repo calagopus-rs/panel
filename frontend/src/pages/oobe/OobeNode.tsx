@@ -18,10 +18,7 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import TextInput from '@/elements/input/TextInput';
-
-interface OobeNodeProps {
-  onNext?: () => void;
-}
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
 interface NodeFormValues {
   name: string;
@@ -33,7 +30,7 @@ interface NodeFormValues {
   disk: number;
 }
 
-export default function OobeNode({ onNext }: OobeNodeProps) {
+export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -216,6 +213,9 @@ export default function OobeNode({ onNext }: OobeNodeProps) {
         </Group>
 
         <Group justify='flex-end' mt='xl'>
+          <Button variant='outline' onClick={() => skipFrom('node')}>
+            Skip
+          </Button>
           <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
             Create & Continue
           </Button>

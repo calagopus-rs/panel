@@ -25,8 +25,9 @@ import OobeWelcome from '@/pages/oobe/OobeWelcome';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 
-interface OobeComponentProps {
+export interface OobeComponentProps {
   onNext: () => void;
+  skipFrom?: (step: OobeStepKey) => void;
 }
 
 interface OobeStep {
@@ -36,6 +37,7 @@ interface OobeStep {
   icon: IconDefinition;
   component: ComponentType<OobeComponentProps>;
   preAuth?: boolean;
+  skipTo?: OobeStepKey;
 }
 
 export const steps: OobeStep[] = [
@@ -76,6 +78,7 @@ export const steps: OobeStep[] = [
     label: 'Location',
     icon: faEarthAmerica,
     component: OobeLocation,
+    skipTo: 'finished',
   },
   {
     path: '/node',
@@ -83,6 +86,7 @@ export const steps: OobeStep[] = [
     label: 'Node',
     icon: faServer,
     component: OobeNode,
+    skipTo: 'finished',
   },
   {
     path: '/finish',
@@ -121,9 +125,11 @@ export default function OobeRouter() {
     }
   }, [user, activeStep, currentAllowedStep, location.pathname]);
 
-  const onNext = async () => {
-    const idx = steps.findIndex((s) => s.path === activeStep?.path);
-    const nextStep = steps[idx + 1];
+  const filteredSteps = () => steps.filter((s) => s.label);
+
+  const onNext = () => {
+    const idx = filteredSteps().findIndex((s) => s.path === activeStep?.path);
+    const nextStep = filteredSteps()[idx + 1];
 
     if (!nextStep) return;
 
@@ -133,7 +139,22 @@ export default function OobeRouter() {
       });
     }
 
+    console.log('navigating', to(nextStep.path, '/oobe'));
+
     navigate(to(nextStep.path, '/oobe'));
+  };
+
+  const skipFrom = (stepKey: OobeStepKey) => {
+    const step = steps.find((s) => s.stepKey === stepKey);
+    if (!step || !step.skipTo) return;
+
+    const skipToStep = steps.find((s) => s.stepKey === step.skipTo);
+    if (!skipToStep) return;
+
+    updateOobeSettings(skipToStep.stepKey).then(() => {
+      setSettings({ ...settings, oobeStep: skipToStep.stepKey });
+    });
+    navigate(to(skipToStep.path, '/oobe'));
   };
 
   return (
@@ -141,18 +162,16 @@ export default function OobeRouter() {
       <Center h='100%'>
         <Container w='100%'>
           <Card>
-            <Stepper active={steps.filter((s) => s.label).findIndex((s) => s.path === activeStep?.path)}>
-              {steps
-                .filter((s) => s.label)
-                .map((step, index) => (
-                  <Stepper.Step key={index} label={step.label} icon={<FontAwesomeIcon icon={step.icon} />} />
-                ))}
+            <Stepper active={filteredSteps().findIndex((s) => s.path === activeStep?.path)}>
+              {filteredSteps().map((step, index) => (
+                <Stepper.Step key={index} label={step.label} icon={<FontAwesomeIcon icon={step.icon} />} />
+              ))}
             </Stepper>
 
             <Box>
               <Routes>
                 {steps.map(({ component: Component, ...step }, index) => (
-                  <Route key={index} path={step.path} element={<Component onNext={onNext} />} />
+                  <Route key={index} path={step.path} element={<Component onNext={onNext} skipFrom={skipFrom} />} />
                 ))}
               </Routes>
             </Box>

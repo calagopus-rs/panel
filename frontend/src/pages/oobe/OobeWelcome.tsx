@@ -2,12 +2,9 @@ import { faCheckCircle, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, List, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import Button from '@/elements/Button';
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
-interface OobeWelcomeProps {
-  onNext?: () => void;
-}
-
-export default function OobeWelcome({ onNext }: OobeWelcomeProps) {
+export default function OobeWelcome({ onNext }: OobeComponentProps) {
   return (
     <Stack gap='xl' py='md'>
       <Group justify='center' mb='md'>
