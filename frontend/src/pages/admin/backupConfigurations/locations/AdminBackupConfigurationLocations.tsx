@@ -22,7 +22,7 @@ export default function AdminBackupConfigurationLocations({
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Backup Configuration Locations
       </Title>
 

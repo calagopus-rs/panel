@@ -97,13 +97,13 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
       {!logs.length ? (
         <Spinner.Centered />
       ) : (
-        <div className={'flex flex-col'}>
-          <div className={'grid md:grid-cols-3 grid-cols-2 grid-rows-1 gap-2'}>
+        <div className='flex flex-col'>
+          <div className='grid md:grid-cols-3 grid-cols-2 grid-rows-1 gap-2'>
             <Select
-              label={'Log File'}
-              placeholder={'Log File'}
+              label='Log File'
+              placeholder='Log File'
               value={selectedLog?.name || ''}
-              className={'w-full'}
+              className='w-full'
               onChange={(value) => setSelectedLog(logs.find((log) => log.name === value))}
               data={logs.map((log) => ({
                 label: `${log.name} (${bytesToString(log.size)})`,
@@ -111,11 +111,11 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
               }))}
             />
 
-            <div className={'flex flex-row items-end'}>
+            <div className='flex flex-row items-end'>
               <Button onClick={doDownload} disabled={!selectedLog} loading={loading}>
                 Download
               </Button>
-              <Button className={'ml-2'} onClick={doView} variant={'outline'} disabled={!selectedLog} loading={loading}>
+              <Button className='ml-2' onClick={doView} variant='outline' disabled={!selectedLog} loading={loading}>
                 View
               </Button>
             </div>
@@ -123,10 +123,10 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
 
           <div className='mt-4 rounded-md overflow-hidden'>
             <Editor
-              height={'66vh'}
-              theme={'vs-dark'}
+              height='66vh'
+              theme='vs-dark'
               value={content || ''}
-              defaultLanguage={'text'}
+              defaultLanguage='text'
               options={{
                 readOnly: true,
               }}

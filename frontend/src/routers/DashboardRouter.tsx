@@ -17,19 +17,19 @@ export default function DashboardRouter() {
   const { settings } = useGlobalStore();
 
   return (
-    <div className={'lg:flex'}>
+    <div className='lg:flex'>
       <Sidebar>
-        <NavLink to={'/'} className={'w-full'}>
-          <div className={'h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'}>
-            <img src={'/icon.svg'} className={'h-full py-4'} alt={'Calagopus Icon'} />
-            <h1 className={'grow font-logo text-xl'}>{settings.app.name}</h1>
+        <NavLink to='/' className='w-full'>
+          <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
+            <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
+            <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
           </div>
         </NavLink>
 
         <Sidebar.Divider />
 
-        <Sidebar.Link to={'/'} end icon={faServer} name={'Servers'} />
-        {user.admin && <Sidebar.Link to={'/admin'} end icon={faGraduationCap} name={'Admin'} />}
+        <Sidebar.Link to='/' end icon={faServer} name='Servers' />
+        {user.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
 
         <Sidebar.Divider />
 
@@ -58,7 +58,7 @@ export default function DashboardRouter() {
 
         <Sidebar.Footer />
       </Sidebar>
-      <div id={'dashboard-root'} className={'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'}>
+      <div id='dashboard-root' className='max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'>
         <Container>
           <Suspense fallback={<Spinner.Centered />}>
             <Routes>

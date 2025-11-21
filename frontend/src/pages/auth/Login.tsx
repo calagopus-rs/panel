@@ -164,8 +164,8 @@ export default function Login() {
         {error && (
           <Alert
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-            color={'red'}
-            title={'Error'}
+            color='red'
+            title='Error'
             onClose={() => setError('')}
             withCloseButton
           >
@@ -175,76 +175,78 @@ export default function Login() {
         <Card>
           {step === 'username' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Login
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 Enter your username to continue
               </Text>
 
               <TextInput
-                label={'Username'}
-                placeholder={'Enter your username'}
+                label='Username'
+                placeholder='Enter your username'
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitUsername()}
                 leftSection={<FontAwesomeIcon icon={faUser} />}
-                size={'md'}
+                size='md'
               />
 
-              <Button onClick={doSubmitUsername} loading={loading} size={'md'} fullWidth>
+              <Button onClick={doSubmitUsername} loading={loading} size='md' fullWidth>
                 Continue
               </Button>
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
               {settings.app.registrationEnabled && (
-                <Button variant={'light'} onClick={() => navigate('/auth/register')} size={'md'} fullWidth>
+                <Button variant='light' onClick={() => navigate('/auth/register')} size='md' fullWidth>
                   Register
                 </Button>
               )}
-              <Button
-                variant={'light'}
-                disabled={!oAuthProviders.length}
-                onClick={() => setStep('oauth')}
-                size={'md'}
-                fullWidth
-              >
-                OAuth Login
-              </Button>
-              <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
+              {oAuthProviders.length > 0 && (
+                <Button
+                  variant='light'
+                  disabled={!oAuthProviders.length}
+                  onClick={() => setStep('oauth')}
+                  size='md'
+                  fullWidth
+                >
+                  OAuth Login
+                </Button>
+              )}
+              <Button variant='light' onClick={() => navigate('/auth/forgot-password')} size='md' fullWidth>
                 Forgot Password
               </Button>
             </Stack>
           ) : step === 'oauth' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Authenticate with OAuth
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 Choose any of the providers below to login
               </Text>
 
               {oAuthProviders.map((oAuthProvider) => (
                 <a key={oAuthProvider.uuid} href={`/api/auth/oauth/redirect/${oAuthProvider.uuid}`}>
-                  <Button leftSection={<FontAwesomeIcon icon={faFingerprint} />} size={'md'} fullWidth>
+                  <Button leftSection={<FontAwesomeIcon icon={faFingerprint} />} size='md' fullWidth>
                     Login with {oAuthProvider.name}
                   </Button>
                 </a>
               ))}
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
-              <Button variant={'light'} onClick={() => setStep('username')} size={'md'} fullWidth>
+              <Button variant='light' onClick={() => setStep('username')} size='md' fullWidth>
                 Back
               </Button>
             </Stack>
           ) : step === 'passkey' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Authenticate with Passkey
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 We found a passkey associated with <strong>{username}</strong>
               </Text>
 
@@ -252,54 +254,54 @@ export default function Login() {
                 onClick={doPasskeyAuth}
                 loading={loading}
                 leftSection={<FontAwesomeIcon icon={faFingerprint} />}
-                size={'md'}
+                size='md'
                 fullWidth
               >
                 Use Passkey
               </Button>
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
-              <Button variant={'light'} onClick={() => setStep('password')} size={'md'} fullWidth>
+              <Button variant='light' onClick={() => setStep('password')} size='md' fullWidth>
                 Use Password
               </Button>
             </Stack>
           ) : step === 'password' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Enter Password
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 Please enter your password for <strong>{username}</strong>
               </Text>
 
               <PasswordInput
-                label={'Password'}
-                placeholder={'Enter your password'}
+                label='Password'
+                placeholder='Enter your password'
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitPassword()}
-                size={'md'}
+                size='md'
               />
 
               <Captcha ref={captchaRef} />
 
-              <Button onClick={doSubmitPassword} loading={loading} size={'md'} fullWidth>
+              <Button onClick={doSubmitPassword} loading={loading} size='md' fullWidth>
                 Sign In
               </Button>
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
-              <Button variant={'light'} onClick={() => navigate('/auth/forgot-password')} size={'md'} fullWidth>
+              <Button variant='light' onClick={() => navigate('/auth/forgot-password')} size='md' fullWidth>
                 Forgot Password
               </Button>
             </Stack>
           ) : step === 'totp' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Two-Factor Authentication
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 Enter the 6-digit code from your authenticator app
               </Text>
 
@@ -308,25 +310,25 @@ export default function Login() {
                   length={6}
                   value={totpCode}
                   onChange={setTotpCode}
-                  placeholder={'0'}
-                  size={'md'}
-                  type={'number'}
+                  placeholder='0'
+                  size='md'
+                  type='number'
                 />
               </Center>
 
-              <Button onClick={doSubmitTotp} loading={loading} disabled={totpCode.length !== 6} size={'md'} fullWidth>
+              <Button onClick={doSubmitTotp} loading={loading} disabled={totpCode.length !== 6} size='md' fullWidth>
                 Verify Code
               </Button>
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
               <Button
-                variant={'light'}
+                variant='light'
                 onClick={() => {
                   setTotpCode('');
                   setStep('totp-recovery');
                 }}
-                size={'md'}
+                size='md'
                 fullWidth
               >
                 Use Recovery Code
@@ -334,37 +336,37 @@ export default function Login() {
             </Stack>
           ) : step === 'totp-recovery' ? (
             <Stack>
-              <Title order={2} ta={'center'}>
+              <Title order={2} ta='center'>
                 Two-Factor Authentication
               </Title>
-              <Text c={'dimmed'} ta={'center'}>
+              <Text c='dimmed' ta='center'>
                 Enter a recovery code
               </Text>
 
               <Center>
                 <TextInput
-                  label={'Recovery Code'}
-                  placeholder={'Enter a recovery code'}
+                  label='Recovery Code'
+                  placeholder='Enter a recovery code'
                   value={totpCode}
                   onChange={(e) => setTotpCode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && doSubmitTotp()}
-                  size={'md'}
+                  size='md'
                 />
               </Center>
 
-              <Button onClick={doSubmitTotp} loading={loading} disabled={!totpCode} size={'md'} fullWidth>
+              <Button onClick={doSubmitTotp} loading={loading} disabled={!totpCode} size='md' fullWidth>
                 Verify Code
               </Button>
 
-              <Divider label={'OR'} labelPosition={'center'} />
+              <Divider label='OR' labelPosition='center' />
 
               <Button
-                variant={'light'}
+                variant='light'
                 onClick={() => {
                   setTotpCode('');
                   setStep('totp');
                 }}
-                size={'md'}
+                size='md'
                 fullWidth
               >
                 Use TOTP

@@ -13,20 +13,20 @@ export default function StepUpdateStartupVariable({
     <Stack>
       <TextInput
         withAsterisk
-        label={'Environment Variable'}
-        placeholder={'JAVA_OPTS'}
+        label='Environment Variable'
+        placeholder='JAVA_OPTS'
         value={action.envVariable}
         onChange={(e) => setAction({ ...action, envVariable: e.target.value })}
       />
       <TextInput
         withAsterisk
-        label={'Value'}
-        placeholder={'-Xmx2G -Xms1G'}
+        label='Value'
+        placeholder='-Xmx2G -Xms1G'
         value={action.value}
         onChange={(e) => setAction({ ...action, value: e.target.value })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) =>
           setAction({

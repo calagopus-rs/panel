@@ -36,30 +36,30 @@ export default function PasswordContainer() {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Password
         </Title>
-        <Stack className={'mt-4'}>
+        <Stack className='mt-4'>
           <TextInput
             withAsterisk
-            label={'Current Password'}
-            placeholder={'Current Password'}
-            type={'password'}
+            label='Current Password'
+            placeholder='Current Password'
+            type='password'
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
           />
           <PasswordInput
             withAsterisk
-            label={'New Password'}
-            placeholder={'New Password'}
+            label='New Password'
+            placeholder='New Password'
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />
           <TextInput
             withAsterisk
-            label={'Confirm New Password'}
-            placeholder={'Confirm New Password'}
-            type={'password'}
+            label='Confirm New Password'
+            placeholder='Confirm New Password'
+            type='password'
             value={confirmNewPassword}
             onChange={(e) => setConfirmNewPassword(e.target.value)}
           />

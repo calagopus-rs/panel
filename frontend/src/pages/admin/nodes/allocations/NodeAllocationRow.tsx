@@ -31,7 +31,7 @@ export default function NodeAllocationRow({
         }}
         ref={ref}
       >
-        <td className={'pl-4 relative cursor-pointer w-10 text-center'}>
+        <td className='pl-4 relative cursor-pointer w-10 text-center'>
           <Checkbox
             id={allocation.uuid}
             checked={selectedNodeAllocations.has(allocation)}

@@ -47,18 +47,18 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Create Archive'} onClose={onClose} opened={opened}>
+    <Modal title='Create Archive' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
-          label={'Archive Name'}
-          placeholder={'Archive Name'}
+          label='Archive Name'
+          placeholder='Archive Name'
           value={fileName}
           onChange={(e) => setFileName(e.target.value)}
         />
 
         <Select
           withAsterisk
-          label={'Format'}
+          label='Format'
           data={Object.entries(archiveFormatLabelMapping).map(([format, extension]) => ({
             label: extension,
             value: format,
@@ -67,11 +67,11 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
           onChange={(value) => setFormat(value as ArchiveFormat)}
         />
 
-        <p className={'text-sm md:text-base break-all'}>
-          <span className={'text-neutral-200'}>This archive will be created as&nbsp;</span>
+        <p className='text-sm md:text-base break-all'>
+          <span className='text-neutral-200'>This archive will be created as&nbsp;</span>
           <Code>
             /home/container/
-            <span className={'text-cyan-200'}>
+            <span className='text-cyan-200'>
               {join(
                 browsingDirectory,
                 fileName
@@ -86,7 +86,7 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
           <Button onClick={doArchive} loading={loading}>
             Create
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

@@ -54,20 +54,20 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Rename File'} onClose={onClose} opened={opened}>
+    <Modal title='Rename File' onClose={onClose} opened={opened}>
       <TextInput
         withAsterisk
-        label={'File Name'}
-        placeholder={'File Name'}
+        label='File Name'
+        placeholder='File Name'
         value={newFileName}
         onChange={(e) => setNewFileName(e.target.value)}
       />
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doRename} loading={loading}>
           Rename
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

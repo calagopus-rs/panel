@@ -113,8 +113,8 @@ export default function EggVariableContainer({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Egg Variable Removal'}
-        confirm={'Remove'}
+        title='Confirm Egg Variable Removal'
+        confirm='Remove'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove&nbsp;
@@ -127,14 +127,14 @@ export default function EggVariableContainer({
         )}
         ?
       </ConfirmationModal>
-      <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
+      <Card className='flex flex-col justify-between rounded-md p-4 h-full'>
         <Stack>
           <Grid>
             <Grid.Col span={10}>
               <TextInput
                 withAsterisk
-                label={'Name'}
-                placeholder={'Name'}
+                label='Name'
+                placeholder='Name'
                 value={variable.name || ''}
                 onChange={(e) => setVariable({ ...variable, name: e.target.value })}
               />
@@ -142,7 +142,7 @@ export default function EggVariableContainer({
             <Grid.Col span={2}>
               <NumberInput
                 withAsterisk
-                label={'Order'}
+                label='Order'
                 value={variable.order || 0}
                 onChange={(value) => setVariable({ ...variable, order: Number(value) })}
               />
@@ -150,8 +150,8 @@ export default function EggVariableContainer({
           </Grid>
 
           <TextArea
-            label={'Description'}
-            placeholder={'Description'}
+            label='Description'
+            placeholder='Description'
             value={variable.description || ''}
             onChange={(e) => setVariable({ ...variable, description: e.target.value })}
           />
@@ -159,16 +159,16 @@ export default function EggVariableContainer({
           <Group grow>
             <TextInput
               withAsterisk
-              label={'Environment Variable'}
-              placeholder={'Environment Variable'}
+              label='Environment Variable'
+              placeholder='Environment Variable'
               value={variable.envVariable || ''}
               onChange={(e) => setVariable({ ...variable, envVariable: e.target.value.toUpperCase() })}
             />
 
             <TextInput
               withAsterisk
-              label={'Default Value'}
-              placeholder={'server.jar'}
+              label='Default Value'
+              placeholder='server.jar'
               value={variable.defaultValue || ''}
               onChange={(e) => setVariable({ ...variable, defaultValue: e.target.value })}
             />
@@ -176,32 +176,32 @@ export default function EggVariableContainer({
 
           <Group grow>
             <Switch
-              label={'User Viewable'}
-              name={'user_viewable'}
+              label='User Viewable'
+              name='user_viewable'
               checked={variable.userViewable}
               onChange={(e) => setVariable({ ...variable, userViewable: e.target.checked })}
             />
 
             <Switch
-              label={'User Editable'}
-              name={'user_editable'}
+              label='User Editable'
+              name='user_editable'
               checked={variable.userEditable}
               onChange={(e) => setVariable({ ...variable, userEditable: e.target.checked })}
             />
           </Group>
 
           <TagsInput
-            label={'Rules'}
+            label='Rules'
             value={variable.rules}
             onChange={(value) => setVariable({ ...variable, rules: value })}
           />
         </Stack>
 
-        <Group pt={'md'} mt={'auto'}>
+        <Group pt='md' mt='auto'>
           <Button onClick={doCreateOrUpdate} loading={loading}>
             Save
           </Button>
-          <Button color={'red'} variant={'outline'} onClick={() => setOpenModal('delete')}>
+          <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
             Remove
           </Button>
         </Group>

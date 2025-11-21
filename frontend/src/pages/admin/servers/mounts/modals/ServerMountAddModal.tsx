@@ -45,12 +45,12 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
   };
 
   return (
-    <Modal title={'Add Node Mount'} onClose={onClose} opened={opened}>
+    <Modal title='Add Node Mount' onClose={onClose} opened={opened}>
       <Stack>
         <Select
           withAsterisk
-          label={'Mount'}
-          placeholder={'Mount'}
+          label='Mount'
+          placeholder='Mount'
           value={selectedMount?.mount.uuid}
           onChange={(value) => setSelectedMount(mounts.items.find((m) => m.mount.uuid === value))}
           data={mounts.items.map((mount) => ({
@@ -62,11 +62,11 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
           onSearchChange={mounts.setSearch}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doAdd} loading={loading} disabled={!selectedMount}>
             Add
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

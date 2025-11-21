@@ -40,8 +40,8 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm API Key Deletion'}
-        confirm={'Delete'}
+        title='Confirm API Key Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete

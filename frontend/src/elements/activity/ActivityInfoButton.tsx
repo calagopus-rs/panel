@@ -16,7 +16,7 @@ export default function ActivityInfoButton({ activity }: { activity: ServerActiv
 
   return (
     <>
-      <Modal title={'Activity Details'} onClose={() => setOpenModal(null)} opened={openModal === 'view'}>
+      <Modal title='Activity Details' onClose={() => setOpenModal(null)} opened={openModal === 'view'}>
         <Stack>
           <Code
             block
@@ -26,7 +26,7 @@ export default function ActivityInfoButton({ activity }: { activity: ServerActiv
           />
 
           <Group>
-            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+            <Button variant='default' onClick={() => setOpenModal(null)}>
               Close
             </Button>
           </Group>

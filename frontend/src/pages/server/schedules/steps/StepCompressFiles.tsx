@@ -16,21 +16,21 @@ export default function StepCompressFiles({
     <Stack>
       <TextInput
         withAsterisk
-        label={'Root Path'}
-        placeholder={'/'}
+        label='Root Path'
+        placeholder='/'
         value={action.root}
         onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
       <TagsInput
         withAsterisk
-        label={'Files to Compress'}
-        placeholder={'Add files to compress'}
+        label='Files to Compress'
+        placeholder='Add files to compress'
         value={action.files || []}
         onChange={(e) => setAction({ ...action, files: e })}
       />
       <Select
         withAsterisk
-        label={'Archive Format'}
+        label='Archive Format'
         data={Object.entries(archiveFormatLabelMapping).map(([value, label]) => ({
           value,
           label,
@@ -40,18 +40,18 @@ export default function StepCompressFiles({
       />
       <TextInput
         withAsterisk
-        label={'Archive Name'}
-        placeholder={'backup.tar.gz'}
+        label='Archive Name'
+        placeholder='backup.tar.gz'
         value={action.name}
         onChange={(e) => setAction({ ...action, name: e.target.value })}
       />
       <Switch
-        label={'Run in Foreground'}
+        label='Run in Foreground'
         checked={action.foreground}
         onChange={(e) => setAction({ ...action, foreground: e.target.checked })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />

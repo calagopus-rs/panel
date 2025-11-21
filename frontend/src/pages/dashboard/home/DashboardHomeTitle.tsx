@@ -5,7 +5,7 @@ import SubNavigation from '@/elements/SubNavigation';
 export default function DashboardHomeTitle() {
   return (
     <>
-      <Title order={1} c={'white'} mb={'md'}>
+      <Title order={1} c='white' mb='md'>
         Servers
       </Title>
 

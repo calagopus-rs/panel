@@ -33,13 +33,13 @@ export default function AutokillContainer() {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
         <Stack h='100%'>
-          <Title order={2} c={'white'}>
+          <Title order={2} c='white'>
             Auto-Kill
           </Title>
 
-          <Switch label={'Enabled'} checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+          <Switch label='Enabled' checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
           <NumberInput
-            label={'Seconds until auto-kill'}
+            label='Seconds until auto-kill'
             value={seconds}
             min={0}
             max={3600}

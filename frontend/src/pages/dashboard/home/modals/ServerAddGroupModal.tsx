@@ -38,10 +38,10 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
   return (
     <Modal title={`Add ${server.name} to Server Group`} onClose={onClose} opened={opened}>
       <Select
-        label={'Server Group'}
-        placeholder={'Server Group'}
+        label='Server Group'
+        placeholder='Server Group'
         value={selectedServerGroup?.uuid || ''}
-        className={'w-full'}
+        className='w-full'
         searchable
         onChange={(value) => setSelectedServerGroup(serverGroups.find((g) => g.uuid === value))}
         data={serverGroups
@@ -52,11 +52,11 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
           }))}
       />
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doAdd} loading={loading} disabled={!selectedServerGroup}>
           Add
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

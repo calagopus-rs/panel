@@ -32,12 +32,12 @@ export default function StorageContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Storage Settings
       </Title>
 
       <Select
-        label={'Driver'}
+        label='Driver'
         value={settings.type}
         onChange={(value: StorageDriverType) => setSettings((settings) => ({ ...settings, type: value }))}
         data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
@@ -52,7 +52,7 @@ export default function StorageContainer() {
         <StorageS3 settings={settings as StorageDriverS3} setSettings={setSettings} />
       ) : null}
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>

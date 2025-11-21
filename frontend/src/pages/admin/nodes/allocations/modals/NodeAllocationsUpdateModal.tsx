@@ -102,22 +102,22 @@ export default function NodeAllocationsUpdateModal({
   };
 
   return (
-    <Modal title={'Update Node Allocations'} onClose={onClose} opened={opened}>
+    <Modal title='Update Node Allocations' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput withAsterisk label={'IP'} placeholder={'IP'} value={ip} onChange={(e) => setIp(e.target.value)} />
+        <TextInput withAsterisk label='IP' placeholder='IP' value={ip} onChange={(e) => setIp(e.target.value)} />
 
         <TextInput
-          label={'IP Alias'}
-          placeholder={'IP Alias'}
+          label='IP Alias'
+          placeholder='IP Alias'
           value={ipAlias}
           onChange={(e) => setIpAlias(e.target.value)}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doUpdate} loading={loading} disabled={!ip}>
             Update
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

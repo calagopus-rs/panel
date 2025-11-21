@@ -7,8 +7,8 @@ import TimezoneContainer from './TimezoneContainer';
 export default function ServerSettings() {
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Settings
         </Title>
       </Group>

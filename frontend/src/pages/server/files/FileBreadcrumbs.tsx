@@ -24,12 +24,12 @@ export default function FileBreadcrumbs({
   });
 
   return (
-    <div className={'flex items-center text-gray-500'}>
+    <div className='flex items-center text-gray-500'>
       <Checkbox
         disabled={movingFiles.size > 0}
         checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
         indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
-        className={'mr-4'}
+        className='mr-4'
         hidden={hideSelectAll}
         onChange={() => {
           if (selectedFiles.size >= browsingEntries.data.length) {
@@ -39,7 +39,7 @@ export default function FileBreadcrumbs({
           }
         }}
       />
-      /<span className={'px-1 text-gray-300'}>{browsingBackup ? 'backups' : 'home'}</span>/
+      /<span className='px-1 text-gray-300'>{browsingBackup ? 'backups' : 'home'}</span>/
       <NavLink
         to={
           browsingBackup
@@ -48,7 +48,7 @@ export default function FileBreadcrumbs({
               })}`
             : `/server/${server?.uuidShort}/files`
         }
-        className={'px-1 text-gray-200 hover:text-gray-400'}
+        className='px-1 text-gray-200 hover:text-gray-400'
       >
         {browsingBackup ? browsingBackup.name : 'container'}
       </NavLink>

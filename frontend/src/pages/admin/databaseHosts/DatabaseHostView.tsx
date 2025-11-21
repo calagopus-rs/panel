@@ -49,8 +49,8 @@ export default function DatabaseHostView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<DatabaseHostCreateOrUpdate contextDatabaseHost={databaseHost} />} />
-        <Route path={'/databases'} element={<AdminDatabaseHostDatabases databaseHost={databaseHost} />} />
+        <Route path='/' element={<DatabaseHostCreateOrUpdate contextDatabaseHost={databaseHost} />} />
+        <Route path='/databases' element={<AdminDatabaseHostDatabases databaseHost={databaseHost} />} />
       </Routes>
     </>
   );

@@ -79,8 +79,8 @@ export default function DatabaseHostCreateOrUpdate({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Database Host Deletion'}
-        confirm={'Delete'}
+        title='Confirm Database Host Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -90,10 +90,10 @@ export default function DatabaseHostCreateOrUpdate({
         <Title order={2}>{contextDatabaseHost ? 'Update' : 'Create'} Database Host</Title>
 
         <Group grow>
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
           <Select
             withAsterisk
-            label={'Type'}
+            label='Type'
             data={Object.entries(databaseTypeLabelMapping).map(([value, label]) => ({
               value,
               label,
@@ -104,33 +104,33 @@ export default function DatabaseHostCreateOrUpdate({
         </Group>
 
         <Group grow>
-          <TextInput withAsterisk label={'Username'} placeholder={'Username'} {...form.getInputProps('username')} />
+          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
           <TextInput
             withAsterisk={!contextDatabaseHost}
-            label={'Password'}
-            placeholder={'Password'}
-            type={'password'}
+            label='Password'
+            placeholder='Password'
+            type='password'
             {...form.getInputProps('password')}
           />
         </Group>
 
         <Group grow>
-          <TextInput withAsterisk label={'Host'} placeholder={'Host'} {...form.getInputProps('host')} />
-          <NumberInput withAsterisk label={'Port'} placeholder={'Port'} min={0} {...form.getInputProps('port')} />
+          <TextInput withAsterisk label='Host' placeholder='Host' {...form.getInputProps('host')} />
+          <NumberInput withAsterisk label='Port' placeholder='Port' min={0} {...form.getInputProps('port')} />
         </Group>
 
         <Group grow>
-          <TextInput label={'Public Host'} placeholder={'Public Host'} {...form.getInputProps('publicHost')} />
+          <TextInput label='Public Host' placeholder='Public Host' {...form.getInputProps('publicHost')} />
           <NumberInput
-            label={'Public Port'}
-            placeholder={'Public Port'}
+            label='Public Port'
+            placeholder='Public Port'
             min={0}
             {...form.getInputProps('publicPort')}
           />
         </Group>
 
         <Switch
-          label={'Public'}
+          label='Public'
           checked={form.values.public}
           onChange={(e) => form.setFieldValue('public', e.target.checked)}
         />
@@ -146,10 +146,10 @@ export default function DatabaseHostCreateOrUpdate({
           )}
           {contextDatabaseHost && (
             <>
-              <Button variant={'outline'} onClick={doTest} loading={loading}>
+              <Button variant='outline' onClick={doTest} loading={loading}>
                 Test
               </Button>
-              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
                 Delete
               </Button>
             </>

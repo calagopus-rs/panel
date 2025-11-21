@@ -18,7 +18,7 @@ export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseH
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Database Host Databases
       </Title>
 

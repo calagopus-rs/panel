@@ -50,9 +50,9 @@ export default function DashboardHome() {
 
       <Button
         onClick={() => setOpenModal('create')}
-        color={'blue'}
+        color='blue'
         leftSection={<FontAwesomeIcon icon={faPlus} />}
-        mb={'md'}
+        mb='md'
       >
         Create Group
       </Button>
@@ -60,7 +60,7 @@ export default function DashboardHome() {
       {loading ? (
         <Spinner.Centered />
       ) : serverGroups.length === 0 ? (
-        <p className={'text-gray-400'}>No server groups found</p>
+        <p className='text-gray-400'>No server groups found</p>
       ) : (
         <DndContainer
           items={dndServerGroups}
@@ -91,7 +91,7 @@ export default function DashboardHome() {
           }
         >
           {(items) => (
-            <div className={'flex flex-col gap-4'}>
+            <div className='flex flex-col gap-4'>
               {items.map((serverGroup) => (
                 <SortableItem
                   key={serverGroup.id}

@@ -16,7 +16,7 @@ export default function UserOAuthLinkRow({ userOAuthLink }: { userOAuthLink: Adm
       <TableData>
         <NavLink
           to={`/admin/users/${userOAuthLink.user.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{userOAuthLink.user.username}</Code>
         </NavLink>

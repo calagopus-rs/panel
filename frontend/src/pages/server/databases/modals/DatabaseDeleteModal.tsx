@@ -38,7 +38,7 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
   };
 
   return (
-    <Modal title={'Confirm Database Deletion'} onClose={onClose} opened={opened}>
+    <Modal title='Confirm Database Deletion' onClose={onClose} opened={opened}>
       <Stack>
         <Text>
           Deleting a database is a permanent action, it cannot be undone. This will permanently delete the
@@ -47,17 +47,17 @@ export default function DatabaseDeleteModal({ database, opened, onClose }: Props
 
         <TextInput
           withAsterisk
-          label={'Database Name'}
-          placeholder={'Database Name'}
+          label='Database Name'
+          placeholder='Database Name'
           value={enteredName}
           onChange={(e) => setEnteredName(e.target.value)}
         />
 
         <Group>
-          <Button color={'red'} onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
+          <Button color='red' onClick={doDelete} loading={loading} disabled={database.name !== enteredName}>
             Delete
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

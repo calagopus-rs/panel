@@ -35,15 +35,15 @@ export default function DatabaseEditModal({ database, opened, onClose }: Props) 
   };
 
   return (
-    <Modal title={'Edit Database'} onClose={onClose} opened={opened}>
+    <Modal title='Edit Database' onClose={onClose} opened={opened}>
       <Stack>
-        <Switch label={'Locked'} name={'locked'} checked={locked} onChange={(e) => setLocked(e.target.checked)} />
+        <Switch label='Locked' name='locked' checked={locked} onChange={(e) => setLocked(e.target.checked)} />
 
         <Group>
           <Button onClick={doUpdate} loading={loading}>
             Save
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

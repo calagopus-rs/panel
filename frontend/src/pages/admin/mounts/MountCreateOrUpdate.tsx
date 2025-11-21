@@ -49,8 +49,8 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Mount Deletion'}
-        confirm={'Delete'}
+        title='Confirm Mount Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -59,24 +59,24 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
       <Stack>
         <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
 
-        <Group grow align={'start'}>
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
-          <TextArea label={'Description'} placeholder={'Description'} {...form.getInputProps('description')} rows={3} />
+        <Group grow align='start'>
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />
         </Group>
 
         <Group grow>
-          <TextInput withAsterisk label={'Source'} placeholder={'Source'} {...form.getInputProps('source')} />
-          <TextInput withAsterisk label={'Target'} placeholder={'Target'} {...form.getInputProps('target')} />
+          <TextInput withAsterisk label='Source' placeholder='Source' {...form.getInputProps('source')} />
+          <TextInput withAsterisk label='Target' placeholder='Target' {...form.getInputProps('target')} />
         </Group>
 
         <Group grow>
           <Switch
-            label={'Read Only'}
+            label='Read Only'
             checked={form.values.readOnly}
             onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
           />
           <Switch
-            label={'User Mountable'}
+            label='User Mountable'
             checked={form.values.userMountable}
             onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
           />
@@ -92,7 +92,7 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
             </Button>
           )}
           {contextMount && (
-            <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>
           )}

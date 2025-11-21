@@ -23,15 +23,15 @@ function LocationsContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Locations
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/locations/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -51,9 +51,9 @@ function LocationsContainer() {
 export default function AdminLocations() {
   return (
     <Routes>
-      <Route path={'/'} element={<LocationsContainer />} />
-      <Route path={'/new'} element={<LocationCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<LocationView />} />
+      <Route path='/' element={<LocationsContainer />} />
+      <Route path='/new' element={<LocationCreateOrUpdate />} />
+      <Route path='/:id/*' element={<LocationView />} />
     </Routes>
   );
 }

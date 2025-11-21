@@ -40,24 +40,24 @@ export default function DatabaseDetailsModal({ database, opened, onClose }: Prop
   };
 
   return (
-    <Modal title={'Database connection details'} onClose={onClose} opened={opened}>
+    <Modal title='Database connection details' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput label={'Database Name'} placeholder={'Database Name'} value={database.name} disabled />
-        <TextInput label={'Host'} placeholder={'Host'} value={host} disabled />
-        <TextInput label={'Username'} placeholder={'Username'} value={database.username} disabled />
-        <TextInput label={'Password'} placeholder={'Password'} value={database.password} disabled />
+        <TextInput label='Database Name' placeholder='Database Name' value={database.name} disabled />
+        <TextInput label='Host' placeholder='Host' value={host} disabled />
+        <TextInput label='Username' placeholder='Username' value={database.username} disabled />
+        <TextInput label='Password' placeholder='Password' value={database.password} disabled />
         <TextInput
-          label={'JDBC Connection String'}
-          placeholder={'JDBC Connection String'}
+          label='JDBC Connection String'
+          placeholder='JDBC Connection String'
           value={jdbcConnectionString}
           disabled
         />
 
         <Group>
-          <Button color={'red'} onClick={onRotatePassword} loading={loading} disabled={database.isLocked}>
+          <Button color='red' onClick={onRotatePassword} loading={loading} disabled={database.isLocked}>
             Rotate Password
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

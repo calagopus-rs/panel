@@ -35,23 +35,23 @@ export default function ServerContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Server Settings
       </Title>
 
       <Stack>
         <Group grow>
           <SizeInput
-            label={'Max File Manager View Size + Unit (e.g. 2GB)'}
-            placeholder={'Max File Manager View Size'}
+            label='Max File Manager View Size + Unit (e.g. 2GB)'
+            placeholder='Max File Manager View Size'
             value={maxFileManagerViewSizeInput}
             setState={setMaxFileManagerViewSizeInput}
             onChange={(value) => setServerSettings({ ...serverSettings, maxFileManagerViewSize: value })}
           />
 
           <NumberInput
-            label={'Max Server Schedule Steps'}
-            placeholder={'Max Server Schedule Steps'}
+            label='Max Server Schedule Steps'
+            placeholder='Max Server Schedule Steps'
             value={serverSettings.maxSchedulesStepCount}
             onChange={(value) => {
               setServerSettings({ ...serverSettings, maxSchedulesStepCount: Number(value) });
@@ -61,7 +61,7 @@ export default function ServerContainer() {
 
         <Group grow>
           <Switch
-            label={'Allow Overwriting Custom Docker Image'}
+            label='Allow Overwriting Custom Docker Image'
             checked={serverSettings.allowOverwritingCustomDockerImage}
             onChange={(e) =>
               setServerSettings({ ...serverSettings, allowOverwritingCustomDockerImage: e.currentTarget.checked })
@@ -69,7 +69,7 @@ export default function ServerContainer() {
           />
 
           <Switch
-            label={'Allow Editing Startup Command'}
+            label='Allow Editing Startup Command'
             checked={serverSettings.allowEditingStartupCommand}
             onChange={(e) =>
               setServerSettings({ ...serverSettings, allowEditingStartupCommand: e.currentTarget.checked })
@@ -78,7 +78,7 @@ export default function ServerContainer() {
         </Group>
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>

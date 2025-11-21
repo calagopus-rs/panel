@@ -34,21 +34,21 @@ export default function RenameContainer() {
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
         <Stack h='100%'>
-          <Title order={2} c={'white'}>
+          <Title order={2} c='white'>
             Rename Server
           </Title>
 
           <TextInput
             withAsterisk
-            label={'Server Name'}
-            placeholder={'Server Name'}
+            label='Server Name'
+            placeholder='Server Name'
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
 
           <TextArea
-            label={'Description'}
-            placeholder={'Description'}
+            label='Description'
+            placeholder='Description'
             value={description}
             rows={3}
             onChange={(e) => setDescription(e.target.value)}

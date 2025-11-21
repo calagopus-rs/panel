@@ -67,7 +67,7 @@ export default function TwoFactorSetupButton() {
   return (
     <>
       <MantineModal.Stack>
-        <Modal {...stageStack.register('setup')} title={'Enable Two-Step Verification'}>
+        <Modal {...stageStack.register('setup')} title='Enable Two-Step Verification'>
           <Stack>
             <Text>
               Help protect your account from unauthorized access. You&apos;ll be prompted for a verification code each
@@ -76,11 +76,11 @@ export default function TwoFactorSetupButton() {
             {!token ? (
               <Spinner.Centered />
             ) : (
-              <div className={'flex flex-col items-center justify-center my-4'}>
-                <div className={'flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'}>
-                  <QRCode title={'QR Code'} value={token.otpUrl} />
+              <div className='flex flex-col items-center justify-center my-4'>
+                <div className='flex items-center justify-center w-56 h-56 p-2 bg-gray-50 shadow'>
+                  <QRCode title='QR Code' value={token.otpUrl} />
                 </div>
-                <div className={'mt-2'}>
+                <div className='mt-2'>
                   <CopyOnClick content={token.secret}>
                     <Code>{token.secret.match(/.{1,4}/g)!.join(' ') || 'Loading...'}</Code>
                   </CopyOnClick>
@@ -94,17 +94,17 @@ export default function TwoFactorSetupButton() {
 
             <NumberInput
               withAsterisk
-              label={'Code'}
-              placeholder={'000000'}
+              label='Code'
+              placeholder='000000'
               value={code}
               onChange={(value) => setCode(String(value))}
             />
 
             <TextInput
               withAsterisk
-              label={'Password'}
-              placeholder={'Password'}
-              type={'password'}
+              label='Password'
+              placeholder='Password'
+              type='password'
               onChange={(e) => setPassword(e.target.value)}
             />
 
@@ -112,7 +112,7 @@ export default function TwoFactorSetupButton() {
               <Button onClick={doEnable} loading={loading} disabled={!code || !password}>
                 Enable
               </Button>
-              <Button variant={'default'} onClick={() => stageStack.closeAll()}>
+              <Button variant='default' onClick={() => stageStack.closeAll()}>
                 Close
               </Button>
             </Group>
@@ -124,11 +124,11 @@ export default function TwoFactorSetupButton() {
             setUser({ ...user!, totpEnabled: true });
             stageStack.close('recovery');
           }}
-          title={'Recovery Codes'}
+          title='Recovery Codes'
         >
           <Stack>
             <CopyOnClick content={recoveryCodes.join('\n')}>
-              <Code block className={'grid grid-cols-2 w-full gap-x-2'}>
+              <Code block className='grid grid-cols-2 w-full gap-x-2'>
                 {recoveryCodes.map((code, i) => (
                   <span key={code} className={i % 2 === 0 ? 'text-right' : 'text-left'}>
                     {code}
@@ -138,7 +138,7 @@ export default function TwoFactorSetupButton() {
             </CopyOnClick>
             <Group>
               <Button
-                variant={'default'}
+                variant='default'
                 onClick={() => {
                   setUser({ ...user!, totpEnabled: true });
                   stageStack.closeAll();

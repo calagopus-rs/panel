@@ -26,13 +26,13 @@ export default function DashboardApiKeys() {
     <>
       <ApiKeyCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           API Keys
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color={'blue'} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Create
           </Button>
         </Group>

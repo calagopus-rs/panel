@@ -33,14 +33,14 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
   };
 
   return (
-    <Modal title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} opened={opened} size={'xl'}>
+    <Modal title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} opened={opened} size='xl'>
       <Stack>
         {subuser ? (
-          <TextInput label={'Username'} placeholder={'Username'} value={subuser.user.username} disabled />
+          <TextInput label='Username' placeholder='Username' value={subuser.user.username} disabled />
         ) : (
           <TextInput
-            label={'Email'}
-            placeholder={'Enter the email that this subuser should be saved as.'}
+            label='Email'
+            placeholder='Enter the email that this subuser should be saved as.'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -56,8 +56,8 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
         </div>
 
         <TagsInput
-          label={'Ignored Files'}
-          placeholder={'Ignored Files'}
+          label='Ignored Files'
+          placeholder='Ignored Files'
           value={ignoredFiles || []}
           onChange={(e) => setIgnoredFiles(e)}
         />
@@ -66,7 +66,7 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
 
         <Group>
           <Button onClick={doCreateOrUpdate}>{subuser ? 'Update' : 'Create'}</Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

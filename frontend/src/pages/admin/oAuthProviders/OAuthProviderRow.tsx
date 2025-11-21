@@ -20,7 +20,7 @@ export default function OAuthProviderRow({ oauthProvider }: { oauthProvider: Adm
       <TableData>
         <NavLink
           to={`/admin/oauth-providers/${oauthProvider.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{oauthProvider.uuid}</Code>
         </NavLink>

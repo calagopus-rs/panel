@@ -34,12 +34,12 @@ export default function NodeRow({ node }: { node: Node }) {
       <TableData>
         {version ? (
           version === 'Unavailable' ? (
-            <Tooltip label={'Error while fetching version'}>
-              <FontAwesomeIcon icon={faHeartBroken} className={'text-red-500'} />
+            <Tooltip label='Error while fetching version'>
+              <FontAwesomeIcon icon={faHeartBroken} className='text-red-500' />
             </Tooltip>
           ) : (
             <Tooltip label={version}>
-              <FontAwesomeIcon icon={faHeart} className={'text-green-500 animate-pulse'} />
+              <FontAwesomeIcon icon={faHeart} className='text-green-500 animate-pulse' />
             </Tooltip>
           )
         ) : (
@@ -48,21 +48,21 @@ export default function NodeRow({ node }: { node: Node }) {
       </TableData>
 
       <TableData>
-        <NavLink to={`/admin/nodes/${node.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/nodes/${node.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{node.uuid}</Code>
         </NavLink>
       </TableData>
 
       <TableData>
-        <span className={'flex gap-2 items-center'}>
+        <span className='flex gap-2 items-center'>
           {node.name}&nbsp;
           {node.public ? (
-            <Tooltip label={'Public Node'}>
-              <FontAwesomeIcon icon={faGlobe} className={'text-green-500'} />
+            <Tooltip label='Public Node'>
+              <FontAwesomeIcon icon={faGlobe} className='text-green-500' />
             </Tooltip>
           ) : (
-            <Tooltip label={'Private Node'}>
-              <FontAwesomeIcon icon={faGlobe} className={'text-red-500'} />
+            <Tooltip label='Private Node'>
+              <FontAwesomeIcon icon={faGlobe} className='text-red-500' />
             </Tooltip>
           )}
         </span>
@@ -71,7 +71,7 @@ export default function NodeRow({ node }: { node: Node }) {
       <TableData>
         <NavLink
           to={`/admin/locations/${node.location.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{node.location.name}</Code>
         </NavLink>

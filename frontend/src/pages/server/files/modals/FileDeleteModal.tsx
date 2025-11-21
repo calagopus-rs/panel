@@ -41,7 +41,7 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
       .finally(() => setLoading(false));
   };
   return (
-    <Modal title={'Delete File'} onClose={onClose} opened={opened}>
+    <Modal title='Delete File' onClose={onClose} opened={opened}>
       {files.length === 1 ? (
         <p>
           You will not be able to recover the contents of <Code>{files[0].name}</Code> once deleted.
@@ -49,7 +49,7 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
       ) : (
         <>
           <p>You will not be able to recover the contents of the following files once deleted.</p>
-          <Code block className={'mt-1'}>
+          <Code block className='mt-1'>
             <ul>
               {files.map((file) => (
                 <li key={file.name}>
@@ -61,11 +61,11 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
         </>
       )}
 
-      <Group mt={'md'}>
-        <Button color={'red'} onClick={doDelete} loading={loading}>
+      <Group mt='md'>
+        <Button color='red' onClick={doDelete} loading={loading}>
           Delete
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

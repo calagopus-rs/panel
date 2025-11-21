@@ -34,8 +34,8 @@ export default function SessionRow({ session }: { session: UserSession }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Session Deletion'}
-        confirm={'Delete'}
+        title='Confirm Session Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete the session

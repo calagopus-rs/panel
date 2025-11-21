@@ -44,7 +44,7 @@ export default function TwoFactorDisableButton() {
   return (
     <>
       <Modal
-        title={'Disable Two-Step Verification'}
+        title='Disable Two-Step Verification'
         onClose={() => setOpenModal(null)}
         opened={openModal === 'disable'}
       >
@@ -53,32 +53,32 @@ export default function TwoFactorDisableButton() {
 
           <TextInput
             withAsterisk
-            label={'Code'}
-            placeholder={'000000'}
+            label='Code'
+            placeholder='000000'
             value={code}
             onChange={(e) => setCode(e.target.value)}
           />
 
           <TextInput
             withAsterisk
-            label={'Password'}
-            placeholder={'Password'}
-            type={'password'}
+            label='Password'
+            placeholder='Password'
+            type='password'
             onChange={(e) => setPassword(e.target.value)}
           />
 
           <Group>
-            <Button color={'red'} onClick={doDisable} loading={loading} disabled={!password}>
+            <Button color='red' onClick={doDisable} loading={loading} disabled={!password}>
               Disable
             </Button>
-            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+            <Button variant='default' onClick={() => setOpenModal(null)}>
               Close
             </Button>
           </Group>
         </Stack>
       </Modal>
 
-      <Button color={'red'} onClick={() => setOpenModal('disable')}>
+      <Button color='red' onClick={() => setOpenModal('disable')}>
         Disable Two-Step
       </Button>
     </>

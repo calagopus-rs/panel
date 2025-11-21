@@ -1,5 +1,5 @@
 export const to = (value: string, base: string = '') => {
-  if (value === '/') {
+  if (value === '/' || value === '') {
     return base;
   }
 

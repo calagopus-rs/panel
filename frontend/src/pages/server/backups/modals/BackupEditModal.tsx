@@ -38,23 +38,23 @@ export default function BackupEditModal({ backup, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Edit Backup'} onClose={onClose} opened={opened}>
+    <Modal title='Edit Backup' onClose={onClose} opened={opened}>
       <Stack>
         <TextInput
           withAsterisk
-          label={'Name'}
-          placeholder={'Name'}
+          label='Name'
+          placeholder='Name'
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
 
-        <Switch label={'Locked'} name={'locked'} checked={locked} onChange={(e) => setLocked(e.target.checked)} />
+        <Switch label='Locked' name='locked' checked={locked} onChange={(e) => setLocked(e.target.checked)} />
 
         <Group>
           <Button onClick={doUpdate} loading={loading} disabled={!name}>
             Save
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

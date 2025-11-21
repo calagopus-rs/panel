@@ -10,7 +10,7 @@ export default function RoleRow({ role }: { role: Role }) {
   return (
     <TableRow>
       <TableData>
-        <NavLink to={`/admin/roles/${role.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/roles/${role.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{role.uuid}</Code>
         </NavLink>
       </TableData>

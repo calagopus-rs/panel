@@ -21,13 +21,13 @@ export default function VariableContainer({
   setValue: (value: string) => void;
 }) {
   return (
-    <Card className={'flex flex-col justify-between rounded-md p-4 h-full'}>
-      <Title order={2} c={'white'}>
+    <Card className='flex flex-col justify-between rounded-md p-4 h-full'>
+      <Title order={2} c='white'>
         <Group justify='space-between' align='center'>
           {variable.name}
           {!variable.isEditable && overrideReadonly ? (
-            <Tooltip label={'This field is not editable by a user, but you can override it.'}>
-              <Badge color={'orange'}>Override Read Only</Badge>
+            <Tooltip label='This field is not editable by a user, but you can override it.'>
+              <Badge color='orange'>Override Read Only</Badge>
             </Tooltip>
           ) : !variable.isEditable ? (
             <Badge>Read Only</Badge>
@@ -35,7 +35,7 @@ export default function VariableContainer({
         </Group>
       </Title>
 
-      <div className={'mt-4'}>
+      <div className='mt-4'>
         {variable.rules.includes('boolean') ||
         (variable.rules.includes('string') &&
           (variable.rules.includes('in:1,0') ||
@@ -84,7 +84,7 @@ export default function VariableContainer({
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
           />
         )}
-        <p className={'text-gray-400 text-sm mt-4'}>{variable.description}</p>
+        <p className='text-gray-400 text-sm mt-4'>{variable.description}</p>
       </div>
     </Card>
   );

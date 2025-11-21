@@ -91,10 +91,10 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
 
   const PermissionGroup = ({ title, category, perms }) => (
     <Card>
-      <Title order={3} c={'white'}>
+      <Title order={3} c='white'>
         {title}
       </Title>
-      <Stack mt={'sm'}>
+      <Stack mt='sm'>
         {Object.entries(perms).map(([type, value]: [string, boolean]) => (
           <Checkbox
             key={type}
@@ -128,54 +128,54 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'File Permissions'} onClose={onClose} opened={opened}>
+    <Modal title='File Permissions' onClose={onClose} opened={opened}>
       <Card>
-        <div className={'flex flex-row justify-between'}>
-          <Title order={3} c={'white'}>
+        <div className='flex flex-row justify-between'>
+          <Title order={3} c='white'>
             Symbolic:
           </Title>
-          <Badge variant={'light'} color={'blue'} size={'xl'} className={'lowercase!'}>
+          <Badge variant='light' color='blue' size='xl' className='lowercase!'>
             {getPermissionString()}
           </Badge>
         </div>
-        <div className={'mt-2 flex flex-row justify-between'}>
-          <Title order={3} c={'white'}>
+        <div className='mt-2 flex flex-row justify-between'>
+          <Title order={3} c='white'>
             Octal:
           </Title>
-          <Badge variant={'light'} color={'green'} size={'xl'}>
+          <Badge variant='light' color='green' size='xl'>
             {getOctalValue()}
           </Badge>
         </div>
       </Card>
 
-      <Group mt={'md'} grow>
-        <PermissionGroup title={'Owner'} category={'owner'} perms={permissions.owner} />
-        <PermissionGroup title={'Group'} category={'group'} perms={permissions.group} />
-        <PermissionGroup title={'Other'} category={'other'} perms={permissions.other} />
+      <Group mt='md' grow>
+        <PermissionGroup title='Owner' category='owner' perms={permissions.owner} />
+        <PermissionGroup title='Group' category='group' perms={permissions.group} />
+        <PermissionGroup title='Other' category='other' perms={permissions.other} />
       </Group>
 
-      <Card mt={'md'}>
-        <Title order={3} c={'white'}>
+      <Card mt='md'>
+        <Title order={3} c='white'>
           Permission Breakdown
         </Title>
-        <div className={'text-sm space-y-1'}>
+        <div className='text-sm space-y-1'>
           <div>
-            <Code className={'font-bold'}>r</Code> - Read permission (4)
+            <Code className='font-bold'>r</Code> - Read permission (4)
           </div>
           <div>
-            <Code className={'font-bold'}>w</Code> - Write permission (2)
+            <Code className='font-bold'>w</Code> - Write permission (2)
           </div>
           <div>
-            <Code className={'font-bold'}>x</Code> - Execute permission (1)
+            <Code className='font-bold'>x</Code> - Execute permission (1)
           </div>
         </div>
       </Card>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doChmod} loading={loading}>
           Save
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

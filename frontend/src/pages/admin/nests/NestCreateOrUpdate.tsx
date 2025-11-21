@@ -45,8 +45,8 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Nest Deletion'}
-        confirm={'Delete'}
+        title='Confirm Nest Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -56,14 +56,14 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
         <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
 
         <Group grow>
-          <TextInput withAsterisk label={'Author'} placeholder={'Author'} {...form.getInputProps('author')} />
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
         </Group>
 
-        <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
+        <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
@@ -73,7 +73,7 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
           </Button>
         )}
         {contextNest && (
-          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+          <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
           </Button>
         )}

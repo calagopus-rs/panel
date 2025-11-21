@@ -51,10 +51,10 @@ export default function AnimatedHourglass() {
 
   return (
     <div
-      className={'transition-transform duration-700 ease-in-out cursor-wait'}
+      className='transition-transform duration-700 ease-in-out cursor-wait'
       style={{ transform: `rotate(${rotation}deg)` }}
     >
-      <FontAwesomeIcon icon={getIcon()} size={'xl'} className={'animate-pulse'} />
+      <FontAwesomeIcon icon={getIcon()} size='xl' className='animate-pulse' />
     </div>
   );
 }

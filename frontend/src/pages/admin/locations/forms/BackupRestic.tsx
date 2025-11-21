@@ -12,7 +12,7 @@ export default function BackupRestic({
   setBackupConfigs: Dispatch<BackupDiskConfigurationRestic>;
 }) {
   return (
-    <Stack gap={'xs'}>
+    <Stack gap='xs'>
       <Stack gap={0}>
         <Title order={2}>Restic Settings</Title>
         <Divider />
@@ -22,15 +22,15 @@ export default function BackupRestic({
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Repository'}
-            placeholder={'Repository'}
+            label='Repository'
+            placeholder='Repository'
             value={backupConfig?.repository || ''}
             onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
           />
           <NumberInput
             withAsterisk
-            label={'Retry Lock Seconds'}
-            placeholder={'Retry Lock Seconds'}
+            label='Retry Lock Seconds'
+            placeholder='Retry Lock Seconds'
             value={backupConfig?.retryLockSeconds || 0}
             onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
           />
@@ -38,9 +38,9 @@ export default function BackupRestic({
 
         <TextInput
           withAsterisk
-          label={'Password'}
-          placeholder={'Password'}
-          type={'password'}
+          label='Password'
+          placeholder='Password'
+          type='password'
           value={backupConfig?.environment?.RESTIC_PASSWORD || ''}
           onChange={(e) =>
             setBackupConfigs({

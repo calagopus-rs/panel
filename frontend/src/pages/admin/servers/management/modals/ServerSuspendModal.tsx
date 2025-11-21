@@ -30,8 +30,8 @@ export default function ServerSuspendModal({ server, opened, onClose }: ModalPro
       <ConfirmationModal
         opened={opened}
         onClose={() => onClose()}
-        title={'Confirm Server Suspension'}
-        confirm={'Suspend'}
+        title='Confirm Server Suspension'
+        confirm='Suspend'
         onConfirmed={doSuspend}
       >
         Are you sure you want to suspend <Code>{server.name}</Code>? This will stop the server and prevent it from

@@ -47,12 +47,12 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
   };
 
   return (
-    <Modal title={'Add OAuth Link'} onClose={onClose} opened={opened}>
+    <Modal title='Add OAuth Link' onClose={onClose} opened={opened}>
       <Stack>
         <Select
           withAsterisk
-          label={'OAuth Provider'}
-          placeholder={'OAuth Provider'}
+          label='OAuth Provider'
+          placeholder='OAuth Provider'
           value={selectedOAuthProvider?.uuid}
           onChange={(value) => setSelectedOAuthProvider(oauthProviders.items.find((p) => p.uuid === value))}
           data={oauthProviders.items.map((oauthProvider) => ({
@@ -66,17 +66,17 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
 
         <TextInput
           withAsterisk
-          label={'Identifier'}
-          placeholder={'Identifier'}
+          label='Identifier'
+          placeholder='Identifier'
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doAdd} loading={loading} disabled={!selectedOAuthProvider || !identifier}>
             Add
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

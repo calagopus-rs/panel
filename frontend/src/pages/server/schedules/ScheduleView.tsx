@@ -43,15 +43,15 @@ interface DetailCardProps {
 
 function DetailCard({ icon, label, value, color = 'blue' }: DetailCardProps) {
   return (
-    <Card className={'flex flex-row! items-center flex-1'}>
-      <ThemeIcon size={'xl'} radius={'md'} color={color}>
+    <Card className='flex flex-row! items-center flex-1'>
+      <ThemeIcon size='xl' radius='md' color={color}>
         {icon}
       </ThemeIcon>
-      <div className={'flex flex-col ml-4 w-full'}>
-        <div className={'w-full flex justify-between'}>
-          <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
+      <div className='flex flex-col ml-4 w-full'>
+        <div className='w-full flex justify-between'>
+          <span className='text-sm text-gray-400 font-bold'>{label}</span>
         </div>
-        <span className={'text-lg font-bold'}>{value}</span>
+        <span className='text-lg font-bold'>{value}</span>
       </div>
     </Card>
   );
@@ -122,52 +122,52 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
     const action = step.action;
     switch (action.type) {
       case 'sleep':
-        return <Text size={'sm'}>Sleep for {action.duration}ms</Text>;
+        return <Text size='sm'>Sleep for {action.duration}ms</Text>;
       case 'wait_for_console_line':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               Line must contain: <Code>{action.contains}</Code>
             </Text>
-            <Text size={'sm'}>
+            <Text size='sm'>
               Timeout: <Code>{action.timeout}ms</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>
         );
       case 'send_power':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               Power Action: <Code>{action.action}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>
         );
       case 'send_command':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               Command: <Code>{action.command}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>
         );
       case 'create_backup':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>Backup Name: {action.name || 'Auto-generated'}</Text>
-            <Text size={'xs'} c={'dimmed'}>
+          <Stack gap='xs'>
+            <Text size='sm'>Backup Name: {action.name || 'Auto-generated'}</Text>
+            <Text size='xs' c='dimmed'>
               Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
             {action.ignoredFiles.length > 0 && (
-              <Text size={'xs'} c={'dimmed'}>
+              <Text size='xs' c='dimmed'>
                 Ignored Files: {action.ignoredFiles.join(', ')}
               </Text>
             )}
@@ -175,49 +175,49 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         );
       case 'write_file':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               File: <Code>{action.file}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Content: {action.content.substring(0, 50)}...
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Append: <Code>{action.append ? 'Yes' : 'No'}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>
         );
       case 'copy_file':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               From: <Code>{action.file}</Code>
             </Text>
-            <Text size={'sm'}>
+            <Text size='sm'>
               To: <Code>{action.destination}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
           </Stack>
         );
       case 'delete_files':
         return (
-          <Stack gap={'xs'}>
-            <Text size={'sm'}>
+          <Stack gap='xs'>
+            <Text size='sm'>
               Root: <Code>{action.root}</Code>
             </Text>
-            <Text size={'xs'} c={'dimmed'}>
+            <Text size='xs' c='dimmed'>
               Files: {action.files.join(', ')}
             </Text>
           </Stack>
         );
       default:
         return (
-          <Text size={'sm'} c={'dimmed'}>
+          <Text size='sm' c='dimmed'>
             Action details not available
           </Text>
         );
@@ -232,26 +232,26 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         scheduleStatus.step === step.uuid ? (
           <AnimatedHourglass />
         ) : (
-          <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size={'sm'} />
+          <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size='sm' />
         )
       }
       title={
-        <Group gap={'sm'}>
+        <Group gap='sm'>
           <Text fw={600}>
             Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}{' '}
           </Text>
-          {scheduleStatus.step === step.uuid && <Badge ml={'md'}>Running</Badge>}
+          {scheduleStatus.step === step.uuid && <Badge ml='md'>Running</Badge>}
           {stepError && (
             <Tooltip label={stepError}>
-              <ThemeIcon size={'sm'} color={'red'}>
-                <FontAwesomeIcon icon={faExclamationTriangle} size={'xs'} />
+              <ThemeIcon size='sm' color='red'>
+                <FontAwesomeIcon icon={faExclamationTriangle} size='xs' />
               </ThemeIcon>
             </Tooltip>
           )}
         </Group>
       }
     >
-      <Card p={'sm'} mt={'xs'}>
+      <Card p='sm' mt='xs'>
         {renderActionDetails()}
       </Card>
     </Timeline.Item>
@@ -302,7 +302,7 @@ export default function ScheduleView() {
 
   if (!schedule || !steps) {
     return (
-      <div className={'w-full'}>
+      <div className='w-full'>
         <Spinner.Centered />
       </div>
     );
@@ -317,13 +317,13 @@ export default function ScheduleView() {
         onClose={() => setOpenModal(null)}
       />
 
-      <Stack gap={'lg'}>
-        <Group justify={'space-between'}>
-          <Group gap={'md'}>
-            <Title order={1} c={'white'}>
+      <Stack gap='lg'>
+        <Group justify='space-between'>
+          <Group gap='md'>
+            <Title order={1} c='white'>
               {schedule.name}
             </Title>
-            <Badge color={schedule.enabled ? 'green' : 'red'} size={'lg'}>
+            <Badge color={schedule.enabled ? 'green' : 'red'} size='lg'>
               {schedule.enabled ? 'Active' : 'Inactive'}
             </Badge>
           </Group>
@@ -356,13 +356,13 @@ export default function ScheduleView() {
                           const rect = e.currentTarget.getBoundingClientRect();
                           openMenu(rect.left, rect.bottom);
                         }}
-                        color={'green'}
+                        color='green'
                         rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                       >
                         Trigger
                       </Button>
                     ) : (
-                      <Tooltip label={'Cannot Trigger disabled schedule'}>
+                      <Tooltip label='Cannot Trigger disabled schedule'>
                         <Button
                           disabled
                           onClick={(e) => {
@@ -370,7 +370,7 @@ export default function ScheduleView() {
                             const rect = e.currentTarget.getBoundingClientRect();
                             openMenu(rect.left, rect.bottom);
                           }}
-                          color={'green'}
+                          color='green'
                           rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                         >
                           Trigger
@@ -383,7 +383,7 @@ export default function ScheduleView() {
             )}
             <Button
               onClick={() => setOpenModal('update')}
-              color={'blue'}
+              color='blue'
               leftSection={<FontAwesomeIcon icon={faPencil} />}
             >
               Edit
@@ -391,51 +391,51 @@ export default function ScheduleView() {
           </Group>
         </Group>
 
-        <div className={'flex flex-row space-x-2'}>
+        <div className='flex flex-row space-x-2'>
           <DetailCard
             icon={<FontAwesomeIcon icon={faClockRotateLeft} />}
-            label={'Last Run'}
+            label='Last Run'
             value={schedule.lastRun ? formatDateTime(schedule.lastRun) : 'Never'}
-            color={'blue'}
+            color='blue'
           />
           <DetailCard
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-            label={'Last Failure'}
+            label='Last Failure'
             value={schedule.lastFailure ? formatDateTime(schedule.lastFailure) : 'None'}
             color={schedule.lastFailure ? 'red' : 'green'}
           />
         </div>
 
-        <Tabs defaultValue={'actions'}>
+        <Tabs defaultValue='actions'>
           <Tabs.List>
-            <Tabs.Tab value={'actions'}>Actions</Tabs.Tab>
-            <Tabs.Tab value={'conditions'}>Conditions</Tabs.Tab>
-            <Tabs.Tab value={'triggers'}>Triggers</Tabs.Tab>
+            <Tabs.Tab value='actions'>Actions</Tabs.Tab>
+            <Tabs.Tab value='conditions'>Conditions</Tabs.Tab>
+            <Tabs.Tab value='triggers'>Triggers</Tabs.Tab>
           </Tabs.List>
 
-          <Tabs.Panel value={'actions'} pt={'md'}>
-            <Card p={'lg'}>
-              <Group justify={'space-between'}>
-                <Title order={3} mb={'md'}>
+          <Tabs.Panel value='actions' pt='md'>
+            <Card p='lg'>
+              <Group justify='space-between'>
+                <Title order={3} mb='md'>
                   Schedule Actions
                 </Title>
                 <Group>
                   <Button
                     onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
-                    variant={'outline'}
+                    variant='outline'
                   >
                     Edit
                   </Button>
                 </Group>
               </Group>
               {steps.length === 0 ? (
-                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow'>
                   No actions configured for this schedule
                 </Alert>
               ) : (
                 <Timeline
                   active={steps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1}
-                  color={'blue'}
+                  color='blue'
                   bulletSize={40}
                   lineWidth={2}
                 >
@@ -456,9 +456,9 @@ export default function ScheduleView() {
             </Card>
           </Tabs.Panel>
 
-          <Tabs.Panel value={'conditions'} pt={'md'}>
-            <Card p={'lg'}>
-              <Title order={3} mb={'md'}>
+          <Tabs.Panel value='conditions' pt='md'>
+            <Card p='lg'>
+              <Title order={3} mb='md'>
                 Execution Conditions
               </Title>
               <ScheduleConditionBuilder
@@ -466,7 +466,7 @@ export default function ScheduleView() {
                 onChange={(condition) => setSchedule((schedule) => ({ ...schedule, condition }))}
               />
 
-              <div className={'flex flex-row mt-6'}>
+              <div className='flex flex-row mt-6'>
                 <Button loading={loading} onClick={doUpdate}>
                   Update
                 </Button>
@@ -474,17 +474,17 @@ export default function ScheduleView() {
             </Card>
           </Tabs.Panel>
 
-          <Tabs.Panel value={'triggers'} pt={'md'}>
-            <Card p={'lg'}>
-              <Title order={3} mb={'md'}>
+          <Tabs.Panel value='triggers' pt='md'>
+            <Card p='lg'>
+              <Title order={3} mb='md'>
                 Schedule Triggers
               </Title>
               {schedule.triggers.length === 0 ? (
-                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color={'yellow'}>
+                <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow'>
                   No triggers configured for this schedule
                 </Alert>
               ) : (
-                <Stack gap={'md'}>
+                <Stack gap='md'>
                   {schedule.triggers.map((trigger, index) => (
                     <TriggerCard key={index} trigger={trigger} />
                   ))}

@@ -73,12 +73,12 @@ export default function AdminSettings() {
         <Spinner.Centered />
       ) : (
         <Routes>
-          <Route path={'/'} element={<ApplicationContainer />} />
-          <Route path={'/storage'} element={<StorageContainer />} />
-          <Route path={'/mail'} element={<EmailContainer />} />
-          <Route path={'/captcha'} element={<CaptchaContainer />} />
-          <Route path={'/webauthn'} element={<WebauthnContainer />} />
-          <Route path={'/server'} element={<ServerContainer />} />
+          <Route path='/' element={<ApplicationContainer />} />
+          <Route path='/storage' element={<StorageContainer />} />
+          <Route path='/mail' element={<EmailContainer />} />
+          <Route path='/captcha' element={<CaptchaContainer />} />
+          <Route path='/webauthn' element={<WebauthnContainer />} />
+          <Route path='/server' element={<ServerContainer />} />
         </Routes>
       )}
     </>

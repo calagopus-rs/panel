@@ -33,8 +33,8 @@ export default function ServerConsole() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           {server.name}
         </Title>
         <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
@@ -42,12 +42,12 @@ export default function ServerConsole() {
         </Can>
       </Group>
 
-      <div className={'grid xl:grid-cols-4 gap-4 mb-4'}>
-        <div className={'xl:col-span-3'} style={{ height: maxConsoleHeight }}>
+      <div className='grid xl:grid-cols-4 gap-4 mb-4'>
+        <div className='xl:col-span-3' style={{ height: maxConsoleHeight }}>
           <Console />
         </div>
 
-        <div className={'h-fit'} ref={statsRef}>
+        <div className='h-fit' ref={statsRef}>
           <ServerDetails />
         </div>
       </div>

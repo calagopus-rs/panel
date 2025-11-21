@@ -80,12 +80,12 @@ export default function NodeView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<NodeCreateOrUpdate contextNode={node} />} />
-        <Route path={'/configuration'} element={<AdminNodeConfiguration node={node} />} />
-        <Route path={'/statistics'} element={<AdminNodeStatistics node={node} />} />
-        <Route path={'/logs'} element={<AdminNodeLogs node={node} />} />
-        <Route path={'/allocations'} element={<AdminNodeAllocations node={node} />} />
-        <Route path={'/mounts'} element={<AdminNodeMounts node={node} />} />
+        <Route path='/' element={<NodeCreateOrUpdate contextNode={node} />} />
+        <Route path='/configuration' element={<AdminNodeConfiguration node={node} />} />
+        <Route path='/statistics' element={<AdminNodeStatistics node={node} />} />
+        <Route path='/logs' element={<AdminNodeLogs node={node} />} />
+        <Route path='/allocations' element={<AdminNodeAllocations node={node} />} />
+        <Route path='/mounts' element={<AdminNodeMounts node={node} />} />
       </Routes>
     </>
   );

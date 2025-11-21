@@ -51,21 +51,21 @@ export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }:
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Schedule Step Deletion'}
-        confirm={'Delete'}
+        title='Confirm Schedule Step Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete this schedule step?
       </ConfirmationModal>
 
-      <Group justify={'space-between'} align={'flex-start'}>
-        <Group gap={'md'} align={'flex-start'}>
-          <ThemeIcon size={'lg'} color={'gray'}>
+      <Group justify='space-between' align='flex-start'>
+        <Group gap='md' align='flex-start'>
+          <ThemeIcon size='lg' color='gray'>
             <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type] || faGear} />
           </ThemeIcon>
           <Stack gap={4}>
             <Text fw={600}>{scheduleStepLabelMapping[step.action.type] || step.action.type}</Text>
-            <Text size={'sm'} c={'dimmed'}>
+            <Text size='sm' c='dimmed'>
               {step.action.type === 'sleep' ? (
                 <span>Sleep for {step.action.duration}ms</span>
               ) : step.action.type === 'wait_for_console_line' ? (
@@ -125,11 +125,11 @@ export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }:
           </Stack>
         </Group>
 
-        <Group gap={'xs'}>
-          <ActionIcon color={'blue'} onClick={() => setOpenModal('update')}>
+        <Group gap='xs'>
+          <ActionIcon color='blue' onClick={() => setOpenModal('update')}>
             <FontAwesomeIcon icon={faPencil} />
           </ActionIcon>
-          <ActionIcon color={'red'} onClick={() => setOpenModal('delete')}>
+          <ActionIcon color='red' onClick={() => setOpenModal('delete')}>
             <FontAwesomeIcon icon={faTrash} />
           </ActionIcon>
         </Group>

@@ -33,12 +33,12 @@ export default function EmailContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Email Settings
       </Title>
 
       <Select
-        label={'Provider'}
+        label='Provider'
         value={settings.type}
         onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
         data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
@@ -55,7 +55,7 @@ export default function EmailContainer() {
         <EmailFile settings={settings as MailModeFilesystem} setSettings={setSettings} />
       ) : null}
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>

@@ -10,7 +10,7 @@ export default function ServerRow({ server }: { server: AdminServer }) {
   return (
     <TableRow>
       <TableData>
-        <NavLink to={`/admin/servers/${server.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/servers/${server.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{server.uuid}</Code>
         </NavLink>
       </TableData>
@@ -20,7 +20,7 @@ export default function ServerRow({ server }: { server: AdminServer }) {
       <TableData>
         <NavLink
           to={`/admin/nodes/${server.node.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{server.node.name}</Code>
         </NavLink>
@@ -29,7 +29,7 @@ export default function ServerRow({ server }: { server: AdminServer }) {
       <TableData>
         <NavLink
           to={`/admin/users/${server.owner.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{server.owner.username}</Code>
         </NavLink>

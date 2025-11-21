@@ -41,12 +41,12 @@ export default function EggMountAddModal({
   };
 
   return (
-    <Modal title={'Add Egg Mount'} onClose={onClose} opened={opened}>
+    <Modal title='Add Egg Mount' onClose={onClose} opened={opened}>
       <Stack>
         <Select
           withAsterisk
-          label={'Mount'}
-          placeholder={'Mount'}
+          label='Mount'
+          placeholder='Mount'
           value={mount?.uuid}
           onChange={(value) => setMount(mounts.items.find((m) => m.uuid === value))}
           data={mounts.items.map((mount) => ({
@@ -58,11 +58,11 @@ export default function EggMountAddModal({
           onSearchChange={mounts.setSearch}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doAdd} loading={loading} disabled={!mount}>
             Add
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

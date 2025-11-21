@@ -75,29 +75,29 @@ export default function NodeAllocationsCreateModal({
   };
 
   return (
-    <Modal title={'Create Node Allocations'} onClose={onClose} opened={opened}>
+    <Modal title='Create Node Allocations' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput withAsterisk label={'IP'} placeholder={'IP'} value={ip} onChange={(e) => setIp(e.target.value)} />
+        <TextInput withAsterisk label='IP' placeholder='IP' value={ip} onChange={(e) => setIp(e.target.value)} />
 
         <TextInput
-          label={'IP Alias'}
-          placeholder={'IP Alias'}
+          label='IP Alias'
+          placeholder='IP Alias'
           value={ipAlias}
           onChange={(e) => setIpAlias(e.target.value)}
         />
 
         <TagsInput
-          label={'Port Ranges'}
-          placeholder={'Port Ranges'}
+          label='Port Ranges'
+          placeholder='Port Ranges'
           value={ports}
           onChange={(values) => setPorts(values)}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doCreate} loading={loading} disabled={!ip || !resolvedPorts.length}>
             Create {resolvedPorts.length}
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

@@ -36,8 +36,8 @@ export default function NodeMountRow({ node, mount }: { node: Node; mount: NodeM
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Node Mount Removal'}
-        confirm={'Remove'}
+        title='Confirm Node Mount Removal'
+        confirm='Remove'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove the mount
@@ -65,7 +65,7 @@ export default function NodeMountRow({ node, mount }: { node: Node; mount: NodeM
             <TableData>
               <NavLink
                 to={`/admin/mounts/${mount.mount.uuid}`}
-                className={'text-blue-400 hover:text-blue-200 hover:underline'}
+                className='text-blue-400 hover:text-blue-200 hover:underline'
               >
                 <Code>{mount.mount.uuid}</Code>
               </NavLink>

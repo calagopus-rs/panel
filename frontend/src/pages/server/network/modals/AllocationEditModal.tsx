@@ -46,22 +46,22 @@ export default function AllocationEditModal({ allocation, opened, onClose }: Pro
   };
 
   return (
-    <Modal title={'Edit Allocation'} onClose={onClose} opened={opened}>
+    <Modal title='Edit Allocation' onClose={onClose} opened={opened}>
       <Stack>
         <TextArea
-          label={'Notes'}
-          placeholder={'Notes'}
+          label='Notes'
+          placeholder='Notes'
           value={notes}
           rows={3}
           onChange={(e) => setNotes(e.target.value)}
         />
-        <Switch label={'Primary'} checked={primary} onChange={(e) => setPrimary(e.target.checked)} />
+        <Switch label='Primary' checked={primary} onChange={(e) => setPrimary(e.target.checked)} />
 
         <Group>
           <Button onClick={doUpdate} loading={loading}>
             Edit
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

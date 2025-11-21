@@ -50,7 +50,7 @@ export default function StepsEditor() {
 
   if (!schedule || !steps) {
     return (
-      <div className={'w-full'}>
+      <div className='w-full'>
         <Spinner.Centered />
       </div>
     );
@@ -72,18 +72,18 @@ export default function StepsEditor() {
       />
 
       <Stack>
-        <Group justify={'space-between'}>
+        <Group justify='space-between'>
           <Stack gap={4}>
-            <Title order={1} c={'white'}>
+            <Title order={1} c='white'>
               Manage Steps: {schedule.name}
             </Title>
-            <Text c={'dimmed'}>Configure the actions that will be executed when this schedule runs</Text>
+            <Text c='dimmed'>Configure the actions that will be executed when this schedule runs</Text>
           </Stack>
 
           <Group>
             <Button
               onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}`)}
-              variant={'outline'}
+              variant='outline'
             >
               Back to Schedule
             </Button>
@@ -94,14 +94,14 @@ export default function StepsEditor() {
         </Group>
 
         {sortedSteps.length === 0 ? (
-          <Paper withBorder p={'xl'} radius={'md'} style={{ textAlign: 'center' }}>
-            <ThemeIcon size={'xl'} mb={'md'} color={'gray'}>
+          <Paper withBorder p='xl' radius='md' style={{ textAlign: 'center' }}>
+            <ThemeIcon size='xl' mb='md' color='gray'>
               <FontAwesomeIcon icon={faGear} />
             </ThemeIcon>
-            <Title order={3} c={'dimmed'} mb={'sm'}>
+            <Title order={3} c='dimmed' mb='sm'>
               No Steps Configured
             </Title>
-            <Text c={'dimmed'} mb={'md'}>
+            <Text c='dimmed' mb='md'>
               This schedule doesn&apos;t have any steps yet. Add some actions to get started.
             </Text>
             <Button onClick={() => setOpenModal('create')} leftSection={<FontAwesomeIcon icon={faPlus} />}>
@@ -145,7 +145,7 @@ export default function StepsEditor() {
             }
           >
             {(items) => (
-              <Stack gap={'md'}>
+              <Stack gap='md'>
                 {items.map((step) => (
                   <SortableItem
                     key={step.id}

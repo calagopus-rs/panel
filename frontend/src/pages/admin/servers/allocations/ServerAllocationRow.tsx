@@ -82,21 +82,21 @@ export default function ServerAllocationRow({
 
   return (
     <>
-      <Modal title={'Edit Server Allocation'} onClose={() => setOpenModal(null)} opened={openModal === 'edit'}>
+      <Modal title='Edit Server Allocation' onClose={() => setOpenModal(null)} opened={openModal === 'edit'}>
         <Stack>
           <TextInput
             withAsterisk
-            label={'Note'}
-            placeholder={'Note'}
+            label='Note'
+            placeholder='Note'
             value={allocationNote}
             onChange={(e) => setAllocationNote(e.target.value)}
           />
 
-          <Group mt={'md'}>
+          <Group mt='md'>
             <Button onClick={doEdit} loading={loading}>
               Edit
             </Button>
-            <Button variant={'default'} onClick={() => setOpenModal(null)}>
+            <Button variant='default' onClick={() => setOpenModal(null)}>
               Close
             </Button>
           </Group>
@@ -106,8 +106,8 @@ export default function ServerAllocationRow({
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Allocation Removal'}
-        confirm={'Remove'}
+        title='Confirm Allocation Removal'
+        confirm='Remove'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove
@@ -123,10 +123,10 @@ export default function ServerAllocationRow({
       >
         {({ openMenu }) => (
           <TableRow>
-            <td className={'relative cursor-pointer w-10 text-center'}>
+            <td className='relative cursor-pointer w-10 text-center'>
               {allocation.isPrimary && (
-                <Tooltip label={'Primary'}>
-                  <FontAwesomeIcon icon={faStar} className={'text-yellow-500'} />
+                <Tooltip label='Primary'>
+                  <FontAwesomeIcon icon={faStar} className='text-yellow-500' />
                 </Tooltip>
               )}
             </td>

@@ -36,36 +36,36 @@ export default function PullFileModal({ opened, onClose }: ModalProps) {
   };
 
   return (
-    <Modal title={'Pull File'} onClose={onClose} opened={opened}>
+    <Modal title='Pull File' onClose={onClose} opened={opened}>
       <TextInput
         withAsterisk
-        label={'File URL'}
-        placeholder={'File URL'}
+        label='File URL'
+        placeholder='File URL'
         value={url}
         onChange={(e) => setUrl(e.target.value)}
       />
       <TextInput
         withAsterisk
-        label={'File Name'}
-        placeholder={'File Name'}
-        className={'mt-2'}
+        label='File Name'
+        placeholder='File Name'
+        className='mt-2'
         value={fileName}
         onChange={(e) => setFileName(e.target.value)}
       />
 
-      <p className={'mt-2 text-sm md:text-base break-all'}>
-        <span className={'text-neutral-200'}>This file will be created as&nbsp;</span>
+      <p className='mt-2 text-sm md:text-base break-all'>
+        <span className='text-neutral-200'>This file will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className={'text-cyan-200'}>{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className='text-cyan-200'>{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={makeDirectory} loading={loading} disabled={!url || !fileName}>
           Pull
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

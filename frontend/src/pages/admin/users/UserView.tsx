@@ -61,10 +61,10 @@ export default function UserView() {
       />
 
       <Routes>
-        <Route path={'/'} element={<UserCreateOrUpdate contextUser={user} />} />
-        <Route path={'/servers'} element={<AdminUserServers user={user} />} />
-        <Route path={'/oauth-links'} element={<AdminUserOAuthLinks user={user} />} />
-        <Route path={'/activity'} element={<AdminUserActivity user={user} />} />
+        <Route path='/' element={<UserCreateOrUpdate contextUser={user} />} />
+        <Route path='/servers' element={<AdminUserServers user={user} />} />
+        <Route path='/oauth-links' element={<AdminUserOAuthLinks user={user} />} />
+        <Route path='/activity' element={<AdminUserActivity user={user} />} />
       </Routes>
     </>
   );

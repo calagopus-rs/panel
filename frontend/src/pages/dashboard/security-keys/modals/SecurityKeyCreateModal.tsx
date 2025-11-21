@@ -53,20 +53,20 @@ export default function SecurityKeyCreateModal({ opened, onClose }: ModalProps) 
   };
 
   return (
-    <Modal title={'Create Security Key'} onClose={onClose} opened={opened}>
+    <Modal title='Create Security Key' onClose={onClose} opened={opened}>
       <TextInput
         withAsterisk
-        label={'Name'}
-        placeholder={'Name'}
+        label='Name'
+        placeholder='Name'
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doCreate} loading={loading} disabled={!name}>
           Create
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

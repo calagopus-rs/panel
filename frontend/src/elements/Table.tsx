@@ -4,7 +4,7 @@ import Spinner from '@/elements/Spinner';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
-    return <Table.Th className={'py-2'} />;
+    return <Table.Th className='py-2' />;
   }
 
   return <Table.Th>{name}</Table.Th>;
@@ -59,13 +59,13 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
   const isLastPage = data.page >= totalPages;
 
   const inner = (
-    <Group justify={'space-between'}>
-      <p className={'text-sm leading-5 text-gray-400'}>
+    <Group justify='space-between'>
+      <p className='text-sm leading-5 text-gray-400'>
         Showing&nbsp;
-        <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
+        <span className='text-gray-300'>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
         &nbsp;to&nbsp;
-        <span className={'text-gray-300'}>{(data.page - 1) * data.perPage + data.data.length}</span>
-        &nbsp;of&nbsp;<span className={'text-gray-300'}>{data.total}</span> results
+        <span className='text-gray-300'>{(data.page - 1) * data.perPage + data.data.length}</span>
+        &nbsp;of&nbsp;<span className='text-gray-300'>{data.total}</span> results
       </p>
       {isFirstPage && isLastPage ? null : (
         <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
@@ -84,8 +84,8 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
 
 export const NoItems = () => {
   return (
-    <Center py={'lg'}>
-      <Text c={'dimmed'}>No items could be found, it&apos;s almost like they are hiding.</Text>
+    <Center py='lg'>
+      <Text c='dimmed'>No items could be found, it&apos;s almost like they are hiding.</Text>
     </Center>
   );
 };

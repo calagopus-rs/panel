@@ -2,7 +2,7 @@ import { Notification as MantineNotification, NotificationProps } from '@mantine
 import { forwardRef } from 'react';
 
 const Notification = forwardRef<HTMLDivElement, NotificationProps>(({ className, ...rest }, ref) => {
-  return <MantineNotification ref={ref} className={className} radius={'md'} withCloseButton={false} {...rest} />;
+  return <MantineNotification ref={ref} className={className} radius='md' withCloseButton={false} {...rest} />;
 });
 
 export default Notification;

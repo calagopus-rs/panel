@@ -23,15 +23,15 @@ function NodesContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Nodes
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/nodes/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -51,9 +51,9 @@ function NodesContainer() {
 export default function AdminNodes() {
   return (
     <Routes>
-      <Route path={'/'} element={<NodesContainer />} />
-      <Route path={'/new'} element={<NodeCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<NodeView />} />
+      <Route path='/' element={<NodesContainer />} />
+      <Route path='/new' element={<NodeCreateOrUpdate />} />
+      <Route path='/:id/*' element={<NodeView />} />
     </Routes>
   );
 }

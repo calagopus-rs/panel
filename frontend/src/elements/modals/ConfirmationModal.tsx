@@ -32,11 +32,11 @@ export default function ConfirmationModal({
   return (
     <Modal {...props}>
       {children}
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button color={confirmColor} loading={loading} onClick={onConfirmedAlt}>
           {confirm}
         </Button>
-        <Button variant={'default'} onClick={props.onClose}>
+        <Button variant='default' onClick={props.onClose}>
           Cancel
         </Button>
       </Group>

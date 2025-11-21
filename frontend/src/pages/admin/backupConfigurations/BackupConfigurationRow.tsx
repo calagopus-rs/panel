@@ -13,7 +13,7 @@ export default function BackupConfigurationRow({ backupConfiguration }: { backup
       <TableData>
         <NavLink
           to={`/admin/backup-configurations/${backupConfiguration.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{backupConfiguration.uuid}</Code>
         </NavLink>

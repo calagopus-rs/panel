@@ -170,7 +170,7 @@ const ContextMenu = ({
 ContextMenu.Toggle = ({ openMenu }: { openMenu: (x: number, y: number) => void }) => {
   return (
     <td
-      className={'relative cursor-pointer w-10 text-center'}
+      className='relative cursor-pointer w-10 text-center'
       onClick={(e) => {
         e.stopPropagation();
 

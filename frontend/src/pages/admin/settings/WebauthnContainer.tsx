@@ -41,7 +41,7 @@ export default function WebauthnContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Webauthn Settings
       </Title>
 
@@ -49,26 +49,26 @@ export default function WebauthnContainer() {
         <Group grow>
           <TextInput
             withAsterisk
-            label={'RP Id'}
-            placeholder={'RP Id'}
+            label='RP Id'
+            placeholder='RP Id'
             value={webauthnSettings.rpId || ''}
             onChange={(e) => setWebauthnSettings({ ...webauthnSettings, rpId: e.target.value })}
           />
           <TextInput
             withAsterisk
-            label={'RP Origin'}
-            placeholder={'RP Origin'}
+            label='RP Origin'
+            placeholder='RP Origin'
             value={webauthnSettings.rpOrigin || ''}
             onChange={(e) => setWebauthnSettings({ ...webauthnSettings, rpOrigin: e.target.value })}
           />
         </Group>
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>
-        <Button variant={'outline'} onClick={doAutofill} disabled={loading}>
+        <Button variant='outline' onClick={doAutofill} disabled={loading}>
           Autofill
         </Button>
       </Group>

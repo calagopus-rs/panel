@@ -37,8 +37,8 @@ export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm SSH Key Deletion'}
-        confirm={'Delete'}
+        title='Confirm SSH Key Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete

@@ -19,7 +19,7 @@ export default function SubNavigation({ items }: Props) {
     items[0];
 
   return (
-    <Tabs my={'xs'} defaultValue={activeItem?.name ?? items[0].name}>
+    <Tabs my='xs' defaultValue={activeItem?.name ?? items[0].name}>
       <Tabs.List>
         {items.map((item) => (
           <NavLink key={item.name} to={item.link} end={item.end ?? true}>

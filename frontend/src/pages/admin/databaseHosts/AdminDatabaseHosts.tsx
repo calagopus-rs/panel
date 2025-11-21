@@ -22,15 +22,15 @@ function DatabaseHostsContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Database Hosts
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/database-hosts/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -50,9 +50,9 @@ function DatabaseHostsContainer() {
 export default function AdminDatabaseHosts() {
   return (
     <Routes>
-      <Route path={'/'} element={<DatabaseHostsContainer />} />
-      <Route path={'/new'} element={<DatabaseHostCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<DatabaseHostView />} />
+      <Route path='/' element={<DatabaseHostsContainer />} />
+      <Route path='/new' element={<DatabaseHostCreateOrUpdate />} />
+      <Route path='/:id/*' element={<DatabaseHostView />} />
     </Routes>
   );
 }

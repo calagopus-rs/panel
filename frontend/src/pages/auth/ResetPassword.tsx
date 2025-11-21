@@ -48,8 +48,8 @@ export default function ResetPassword() {
         {error && (
           <Alert
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-            color={'red'}
-            title={'Error'}
+            color='red'
+            title='Error'
             onClose={() => setError('')}
             withCloseButton
           >
@@ -59,27 +59,27 @@ export default function ResetPassword() {
 
         <Card>
           <Stack>
-            <Title order={2} ta={'center'}>
+            <Title order={2} ta='center'>
               Reset Password
             </Title>
-            <Text c={'dimmed'} ta={'center'}>
+            <Text c='dimmed' ta='center'>
               Please enter your new password
             </Text>
 
             <TextInput
-              placeholder={'Password'}
-              type={'password'}
+              placeholder='Password'
+              type='password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
             <TextInput
-              placeholder={'Confirm Password'}
-              type={'password'}
+              placeholder='Confirm Password'
+              type='password'
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
 
-            <Button onClick={submit} loading={loading} disabled={password !== confirmPassword} size={'md'} fullWidth>
+            <Button onClick={submit} loading={loading} disabled={password !== confirmPassword} size='md' fullWidth>
               Reset Password
             </Button>
           </Stack>

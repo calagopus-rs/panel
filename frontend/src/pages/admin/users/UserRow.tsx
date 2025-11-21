@@ -12,30 +12,30 @@ export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>
       <TableData>
-        <img src={user.avatar ?? '/icon.svg'} alt={user.username} className={'h-5 w-5 rounded-full select-none'} />
+        <img src={user.avatar ?? '/icon.svg'} alt={user.username} className='h-5 w-5 rounded-full select-none' />
       </TableData>
 
       <TableData>
-        <NavLink to={`/admin/users/${user.uuid}`} className={'text-blue-400 hover:text-blue-200 hover:underline'}>
+        <NavLink to={`/admin/users/${user.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{user.uuid}</Code>
         </NavLink>
       </TableData>
 
       <TableData>
-        <span className={'flex gap-2 items-center'}>
+        <span className='flex gap-2 items-center'>
           {user.username}&nbsp;
           {user.admin && (
-            <Tooltip label={'Admin'}>
-              <FontAwesomeIcon icon={faCrown} className={'text-yellow-400'} />
+            <Tooltip label='Admin'>
+              <FontAwesomeIcon icon={faCrown} className='text-yellow-400' />
             </Tooltip>
           )}
           {user.totpEnabled ? (
-            <Tooltip label={'2FA Enabled'}>
-              <FontAwesomeIcon icon={faLock} className={'text-green-500'} />
+            <Tooltip label='2FA Enabled'>
+              <FontAwesomeIcon icon={faLock} className='text-green-500' />
             </Tooltip>
           ) : (
-            <Tooltip label={'2FA Disabled'}>
-              <FontAwesomeIcon icon={faLockOpen} className={'text-red-500'} />
+            <Tooltip label='2FA Disabled'>
+              <FontAwesomeIcon icon={faLockOpen} className='text-red-500' />
             </Tooltip>
           )}
         </span>

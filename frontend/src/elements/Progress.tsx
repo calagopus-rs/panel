@@ -8,13 +8,13 @@ const Progress = forwardRef<HTMLDivElement, ProgressProps & { hourglass?: boolea
     return (
       <div className={classNames('flex flex-row items-center', className)}>
         {hourglass && (
-          <span className={'mr-2'}>
+          <span className='mr-2'>
             <AnimatedHourglass />
           </span>
         )}
 
-        <MantineProgress.Root size={'xl'} className={'flex-grow'} ref={ref} {...rest}>
-          <MantineProgress.Section value={value} color={'blue'}>
+        <MantineProgress.Root size='xl' className='flex-grow' ref={ref} {...rest}>
+          <MantineProgress.Section value={value} color='blue'>
             <MantineProgress.Label>{value.toFixed(1)}%</MantineProgress.Label>
           </MantineProgress.Section>
         </MantineProgress.Root>

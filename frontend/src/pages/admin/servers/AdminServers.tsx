@@ -23,15 +23,15 @@ function ServersContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Servers
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/servers/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -51,9 +51,9 @@ function ServersContainer() {
 export default function AdminServers() {
   return (
     <Routes>
-      <Route path={'/'} element={<ServersContainer />} />
-      <Route path={'/new'} element={<ServerCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<ServerView />} />
+      <Route path='/' element={<ServersContainer />} />
+      <Route path='/new' element={<ServerCreateOrUpdate />} />
+      <Route path='/:id/*' element={<ServerView />} />
     </Routes>
   );
 }

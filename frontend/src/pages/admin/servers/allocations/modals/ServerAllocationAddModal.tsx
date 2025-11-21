@@ -54,12 +54,12 @@ export default function ServerAllocationAddModal({ server, opened, onClose }: Mo
   };
 
   return (
-    <Modal title={'Add Server Allocations'} onClose={onClose} opened={opened}>
+    <Modal title='Add Server Allocations' onClose={onClose} opened={opened}>
       <Stack>
         <MultiSelect
           withAsterisk
-          label={'Allocations'}
-          placeholder={'Allocations'}
+          label='Allocations'
+          placeholder='Allocations'
           value={selectedAllocationUuids}
           onChange={(value) => setSelectedAllocationUuids(value)}
           data={availableAllocations.items.map((alloc) => ({
@@ -71,11 +71,11 @@ export default function ServerAllocationAddModal({ server, opened, onClose }: Mo
           onSearchChange={availableAllocations.setSearch}
         />
 
-        <Group mt={'md'}>
+        <Group mt='md'>
           <Button onClick={doAdd} loading={loading} disabled={!selectedAllocationUuids.length}>
             Add {selectedAllocationUuids.length}
           </Button>
-          <Button variant={'default'} onClick={onClose}>
+          <Button variant='default' onClick={onClose}>
             Close
           </Button>
         </Group>

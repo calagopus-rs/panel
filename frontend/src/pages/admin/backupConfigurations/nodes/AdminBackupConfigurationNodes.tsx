@@ -20,7 +20,7 @@ export default function AdminBackupConfigurationNodes({
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Backup Configuration Nodes
       </Title>
 

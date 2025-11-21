@@ -117,8 +117,8 @@ export default function OAuthProviderCreateOrUpdate({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm OAuth Provider Deletion'}
-        confirm={'Delete'}
+        title='Confirm OAuth Provider Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -127,13 +127,13 @@ export default function OAuthProviderCreateOrUpdate({
       <Stack>
         <Title order={2}>{contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider</Title>
 
-        <Group grow align={'start'}>
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
-          <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
+        <Group grow align='start'>
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
         </Group>
 
         {contextOAuthProvider && (
-          <Card className={'flex flex-row! items-center justify-between'}>
+          <Card className='flex flex-row! items-center justify-between'>
             <Title order={4}>Redirect URL</Title>
             <Code>
               {settings.app.url}/api/auth/oauth/{contextOAuthProvider.uuid}
@@ -142,26 +142,26 @@ export default function OAuthProviderCreateOrUpdate({
         )}
 
         <Group grow>
-          <TextInput withAsterisk label={'Client Id'} placeholder={'Client Id'} {...form.getInputProps('clientId')} />
+          <TextInput withAsterisk label='Client Id' placeholder='Client Id' {...form.getInputProps('clientId')} />
           <TextInput
             withAsterisk={!contextOAuthProvider}
-            label={'Client Secret'}
-            placeholder={'Client Secret'}
-            type={'password'}
+            label='Client Secret'
+            placeholder='Client Secret'
+            type='password'
             {...form.getInputProps('clientSecret')}
           />
         </Group>
 
         <Group grow>
-          <TextInput withAsterisk label={'Auth URL'} placeholder={'Auth URL'} {...form.getInputProps('authUrl')} />
-          <TextInput withAsterisk label={'Token URL'} placeholder={'Token URL'} {...form.getInputProps('tokenUrl')} />
+          <TextInput withAsterisk label='Auth URL' placeholder='Auth URL' {...form.getInputProps('authUrl')} />
+          <TextInput withAsterisk label='Token URL' placeholder='Token URL' {...form.getInputProps('tokenUrl')} />
         </Group>
 
         <Group grow>
-          <TextInput withAsterisk label={'Info URL'} placeholder={'Info URL'} {...form.getInputProps('infoUrl')} />
+          <TextInput withAsterisk label='Info URL' placeholder='Info URL' {...form.getInputProps('infoUrl')} />
           <Switch
-            label={'Basic Auth'}
-            description={'Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'}
+            label='Basic Auth'
+            description='Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'
             checked={form.values.basicAuth}
             onChange={(e) => form.setFieldValue('basicAuth', e.target.checked)}
           />
@@ -169,66 +169,62 @@ export default function OAuthProviderCreateOrUpdate({
 
         <Group grow>
           <TagsInput
-            label={'Scopes'}
-            description={'The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'}
+            label='Scopes'
+            description='The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'
             {...form.getInputProps('scopes')}
           />
           <TextInput
             withAsterisk
-            label={'Identifier Path'}
-            placeholder={'Identifier Path'}
-            description={
+            label='Identifier Path'
+            placeholder='Identifier Path'
+            description=
               'The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
-            }
             {...form.getInputProps('identifierPath')}
           />
         </Group>
 
         <Group grow>
           <TextInput
-            label={'Email Path'}
-            placeholder={'Email Path'}
-            description={'The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'}
+            label='Email Path'
+            placeholder='Email Path'
+            description='The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'
             {...form.getInputProps('emailPath')}
           />
           <TextInput
             withAsterisk
-            label={'Username Path'}
-            placeholder={'Username Path'}
-            description={
+            label='Username Path'
+            placeholder='Username Path'
+            description=
               'The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
-            }
             {...form.getInputProps('usernamePath')}
           />
         </Group>
 
         <Group grow>
           <TextInput
-            label={'First Name Path'}
-            placeholder={'First Name URL'}
-            description={
+            label='First Name Path'
+            placeholder='First Name URL'
+            description=
               'The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
-            }
             {...form.getInputProps('nameFirstPath')}
           />
           <TextInput
-            label={'Last Name Path'}
-            placeholder={'Last Name Path'}
-            description={
+            label='Last Name Path'
+            placeholder='Last Name Path'
+            description=
               'The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
-            }
             {...form.getInputProps('nameLastPath')}
           />
         </Group>
 
         <Group grow>
           <Switch
-            label={'Enabled'}
+            label='Enabled'
             checked={form.values.enabled}
             onChange={(e) => form.setFieldValue('enabled', e.target.checked)}
           />
           <Switch
-            label={'Only allow Login'}
+            label='Only allow Login'
             checked={form.values.loginOnly}
             onChange={(e) => form.setFieldValue('loginOnly', e.target.checked)}
           />
@@ -236,14 +232,14 @@ export default function OAuthProviderCreateOrUpdate({
 
         <Group grow>
           <Switch
-            label={'Link Viewable to User'}
-            description={'Allows the User to see the Connection and its identifier in the Client UI'}
+            label='Link Viewable to User'
+            description='Allows the User to see the Connection and its identifier in the Client UI'
             checked={form.values.linkViewable}
             onChange={(e) => form.setFieldValue('linkViewable', e.target.checked)}
           />
           <Switch
-            label={'Link Manageable by User'}
-            description={'Allows the User to connect and disconnect with this provider'}
+            label='Link Manageable by User'
+            description='Allows the User to connect and disconnect with this provider'
             checked={form.values.userManageable}
             onChange={(e) => form.setFieldValue('userManageable', e.target.checked)}
           />
@@ -285,7 +281,7 @@ export default function OAuthProviderCreateOrUpdate({
                         openMenu(rect.left, rect.bottom);
                       }}
                       loading={loading}
-                      variant={'outline'}
+                      variant='outline'
                       rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                     >
                       Export
@@ -293,7 +289,7 @@ export default function OAuthProviderCreateOrUpdate({
                   )}
                 </ContextMenu>
               </ContextMenuProvider>
-              <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
                 Delete
               </Button>
             </>

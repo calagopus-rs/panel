@@ -33,8 +33,8 @@ export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm OAuth Link Deletion'}
-        confirm={'Delete'}
+        title='Confirm OAuth Link Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete the

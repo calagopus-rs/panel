@@ -16,7 +16,7 @@ export default function AdminLocationNodes({ location }: { location: Location })
 
   return (
     <>
-      <Title order={2} mb={'md'}>
+      <Title order={2} mb='md'>
         Location Nodes
       </Title>
 

@@ -10,10 +10,10 @@ export default function TwoFactorContainer() {
   return (
     <Grid.Col span={{ base: 12, md: 6, lg: 4 }}>
       <Card h='100%'>
-        <Title order={2} c={'white'}>
+        <Title order={2} c='white'>
           Two-Step Verification
         </Title>
-        <div className={'mt-4'}>
+        <div className='mt-4'>
           {user.totpEnabled ? (
             <p>Two-Step Verification is currently enabled.</p>
           ) : (
@@ -23,7 +23,7 @@ export default function TwoFactorContainer() {
             </p>
           )}
         </div>
-        <div className={'pt-4 flex mt-auto'}>
+        <div className='pt-4 flex mt-auto'>
           {user.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}
         </div>
       </Card>

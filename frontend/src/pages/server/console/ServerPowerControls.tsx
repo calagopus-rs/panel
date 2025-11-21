@@ -32,20 +32,20 @@ export default function ServerPowerControls() {
   }, [state]);
 
   return (
-    <div className={'flex gap-2'}>
+    <div className='flex gap-2'>
       <ConfirmationModal
         opened={open}
         onClose={() => setOpen(false)}
-        title={'Forcibly Stop Process'}
-        confirm={'Continue'}
+        title='Forcibly Stop Process'
+        confirm='Continue'
         onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
       >
         Forcibly stopping a server can lead to data corruption.
       </ConfirmationModal>
 
-      <Can action={'control.start'}>
+      <Can action='control.start'>
         <Button
-          color={'green'}
+          color='green'
           disabled={state !== 'offline'}
           loading={state === 'starting'}
           onClick={onButtonClick.bind(this, 'start')}
@@ -53,14 +53,14 @@ export default function ServerPowerControls() {
           Start
         </Button>
       </Can>
-      <Can action={'control.restart'}>
-        <Button color={'gray'} disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
+      <Can action='control.restart'>
+        <Button color='gray' disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
           Restart
         </Button>
       </Can>
-      <Can action={'control.stop'}>
+      <Can action='control.stop'>
         <Button
-          color={'red'}
+          color='red'
           disabled={state === 'offline'}
           onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
         >

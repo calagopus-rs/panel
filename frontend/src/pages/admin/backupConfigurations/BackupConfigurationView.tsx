@@ -68,17 +68,17 @@ export default function BackupConfigurationView() {
 
       <Routes>
         <Route
-          path={'/'}
+          path='/'
           element={<BackupConfigurationCreateOrUpdate contextBackupConfiguration={backupConfiguration} />}
         />
-        <Route path={'/stats'} element={<AdminBackupConfigurationStats backupConfiguration={backupConfiguration} />} />
+        <Route path='/stats' element={<AdminBackupConfigurationStats backupConfiguration={backupConfiguration} />} />
         <Route
-          path={'/locations'}
+          path='/locations'
           element={<AdminBackupConfigurationLocations backupConfiguration={backupConfiguration} />}
         />
-        <Route path={'/nodes'} element={<AdminBackupConfigurationNodes backupConfiguration={backupConfiguration} />} />
+        <Route path='/nodes' element={<AdminBackupConfigurationNodes backupConfiguration={backupConfiguration} />} />
         <Route
-          path={'/servers'}
+          path='/servers'
           element={<AdminBackupConfigurationServers backupConfiguration={backupConfiguration} />}
         />
       </Routes>

@@ -14,27 +14,27 @@ export default function StepWriteFile({
     <Stack>
       <TextInput
         withAsterisk
-        label={'File Path'}
-        placeholder={'/file.txt'}
+        label='File Path'
+        placeholder='/file.txt'
         value={action.file}
         onChange={(e) => setAction({ ...action, file: e.target.value })}
       />
       <TextArea
         withAsterisk
-        label={'Content'}
-        placeholder={'File content here...'}
+        label='Content'
+        placeholder='File content here...'
         autosize
         minRows={3}
         value={action.content}
         onChange={(e) => setAction({ ...action, content: e.target.value })}
       />
       <Switch
-        label={'Append to File'}
+        label='Append to File'
         checked={action.append}
         onChange={(e) => setAction({ ...action, append: e.target.checked })}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
       />

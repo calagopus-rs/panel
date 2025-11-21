@@ -42,8 +42,8 @@ export default function ForgotPassword() {
         {error && (
           <Alert
             icon={<FontAwesomeIcon icon={faExclamationTriangle} />}
-            color={'red'}
-            title={'Error'}
+            color='red'
+            title='Error'
             onClose={() => setError('')}
             withCloseButton
           >
@@ -53,8 +53,8 @@ export default function ForgotPassword() {
         {success && (
           <Alert
             icon={<FontAwesomeIcon icon={faInfoCircle} />}
-            color={'green'}
-            title={'Success'}
+            color='green'
+            title='Success'
             onClose={() => setSuccess('')}
             withCloseButton
           >
@@ -64,23 +64,23 @@ export default function ForgotPassword() {
 
         <Card>
           <Stack>
-            <Title order={2} ta={'center'}>
+            <Title order={2} ta='center'>
               Forgot Password
             </Title>
-            <Text c={'dimmed'} ta={'center'}>
+            <Text c='dimmed' ta='center'>
               Enter your email to receive instructions on how to reset your password
             </Text>
 
-            <TextInput placeholder={'Email'} value={email} onChange={(e) => setEmail(e.target.value)} />
+            <TextInput placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
             <Captcha ref={captchaRef} />
 
-            <Button onClick={submit} loading={loading} disabled={requested} size={'md'} fullWidth>
+            <Button onClick={submit} loading={loading} disabled={requested} size='md' fullWidth>
               Request Password Reset
             </Button>
 
-            <Divider label={'OR'} labelPosition={'center'} />
+            <Divider label='OR' labelPosition='center' />
 
-            <Button variant={'light'} onClick={() => navigate('/auth/login')} size={'md'} fullWidth>
+            <Button variant='light' onClick={() => navigate('/auth/login')} size='md' fullWidth>
               Login
             </Button>
           </Stack>

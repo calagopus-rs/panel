@@ -39,34 +39,34 @@ function StatCard({
   details?: string;
 }) {
   return (
-    <Card className={'flex flex-row! items-center'}>
-      <ThemeIcon size={'xl'} radius={'md'}>
-        <FontAwesomeIcon size={'xl'} icon={icon} />
+    <Card className='flex flex-row! items-center'>
+      <ThemeIcon size='xl' radius='md'>
+        <FontAwesomeIcon size='xl' icon={icon} />
       </ThemeIcon>
-      <div className={'flex flex-col ml-4 w-full'}>
-        <div className={'w-full flex justify-between'}>
-          <span className={'text-sm text-gray-400 font-bold'}>{label}</span>
+      <div className='flex flex-col ml-4 w-full'>
+        <div className='w-full flex justify-between'>
+          <span className='text-sm text-gray-400 font-bold'>{label}</span>
           {popover && (
-            <Popover position={'bottom'} withArrow shadow={'md'}>
+            <Popover position='bottom' withArrow shadow='md'>
               <Popover.Target>
-                <Button variant={'transparent'} size={'compact-xs'}>
-                  <FontAwesomeIcon size={'lg'} icon={faCog} />
+                <Button variant='transparent' size='compact-xs'>
+                  <FontAwesomeIcon size='lg' icon={faCog} />
                 </Button>
               </Popover.Target>
               <Popover.Dropdown>{popover}</Popover.Dropdown>
             </Popover>
           )}
         </div>
-        <span className={'text-lg font-bold'}>
+        <span className='text-lg font-bold'>
           {copyOnClick ? (
             <CopyOnClick content={value}>
-              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}{' '}
-              {details && <span className={'text-sm text-gray-400'}>({details})</span>}
+              {value} {limit && <span className='text-sm text-gray-400'>/ {limit}</span>}{' '}
+              {details && <span className='text-sm text-gray-400'>({details})</span>}
             </CopyOnClick>
           ) : (
             <>
-              {value} {limit && <span className={'text-sm text-gray-400'}>/ {limit}</span>}{' '}
-              {details && <span className={'text-sm text-gray-400'}>({details})</span>}
+              {value} {limit && <span className='text-sm text-gray-400'>/ {limit}</span>}{' '}
+              {details && <span className='text-sm text-gray-400'>({details})</span>}
             </>
           )}
         </span>
@@ -115,29 +115,29 @@ export default function ServerDetails() {
   }, [stats]);
 
   return (
-    <div className={'flex flex-col space-y-4'}>
+    <div className='flex flex-col space-y-4'>
       <StatCard
         icon={faEthernet}
-        label={'Address'}
+        label='Address'
         copyOnClick={!!server.allocation}
         value={server.allocation ? formatAllocation(server.allocation, server.egg.separatePort) : 'N/A'}
       />
       {server.egg.separatePort && server.allocation && (
         <StatCard
           icon={faEthernet}
-          label={'Port'}
+          label='Port'
           copyOnClick={!!server.allocation}
           value={server.allocation.port.toString()}
         />
       )}
       <StatCard
         icon={faClock}
-        label={'Uptime'}
+        label='Uptime'
         value={state === 'offline' ? 'Offline' : formatMiliseconds(stats?.uptime || 0)}
       />
       <StatCard
         icon={faMicrochip}
-        label={'CPU Load'}
+        label='CPU Load'
         value={
           state === 'offline'
             ? 'Offline'
@@ -148,7 +148,7 @@ export default function ServerDetails() {
         limit={doNormalizeCpuLoad ? null : server.limits.cpu !== 0 ? server.limits.cpu + '%' : 'Unlimited'}
         popover={
           <Checkbox
-            label={'Normalize CPU Load (shifted to max 100%)'}
+            label='Normalize CPU Load (shifted to max 100%)'
             checked={doNormalizeCpuLoad}
             onChange={(e) => setDoNormalizeCpuLoad(e.target.checked)}
           />
@@ -156,25 +156,25 @@ export default function ServerDetails() {
       />
       <StatCard
         icon={faMemory}
-        label={'Memory Load'}
+        label='Memory Load'
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.memoryBytes)}
         limit={server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited'}
       />
       <StatCard
         icon={faHardDrive}
-        label={'Disk Usage'}
+        label='Disk Usage'
         value={bytesToString(stats?.diskBytes)}
         limit={server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited'}
       />
       <StatCard
         icon={faCloudDownload}
-        label={'Network (In)'}
+        label='Network (In)'
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.rxBytes)}
         details={state === 'offline' ? null : `${bytesToString(networkRef.current.rxSpeed, undefined, true)}/s`}
       />
       <StatCard
         icon={faCloudUpload}
-        label={'Network (Out)'}
+        label='Network (Out)'
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.txBytes)}
         details={state === 'offline' ? null : `${bytesToString(networkRef.current.txSpeed, undefined, true)}/s`}
       />

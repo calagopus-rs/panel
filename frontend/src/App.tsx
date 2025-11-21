@@ -4,17 +4,19 @@ import getSettings from './api/getSettings';
 import Spinner from './elements/Spinner';
 import AuthProvider from './providers/AuthProvider';
 import { ToastProvider } from './providers/ToastProvider';
-import AdminRoute from './routers/guards/AdminRoute';
-import AuthenticatedRoute from './routers/guards/AuthenticatedRoute';
-import UnauthenticatedRoute from './routers/guards/UnauthenticatedRoute';
+import AdminGuard from './routers/guards/AdminGuard';
+import AuthenticatedGuard from './routers/guards/AuthenticatedGuard';
+import UnauthenticatedGuard from './routers/guards/UnauthenticatedGuard';
 import { useGlobalStore } from './stores/global';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { lazy } from 'react';
+import OobeGuard from '@/routers/guards/OobeGuard';
 import ErrorBoundary from './elements/ErrorBoundary';
 import globalRoutes from './routers/routes/globalRoutes';
 import NotFound from './pages/NotFound';
 
+const OobeRouter = lazy(() => import('./routers/OobeRouter'));
 const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter'));
 const DashboardRouter = lazy(() => import('./routers/DashboardRouter'));
 const AdminRouter = lazy(() => import('./routers/AdminRouter'));
@@ -29,7 +31,7 @@ export default function App() {
 
   return settings ? (
     <ErrorBoundary>
-      <MantineProvider forceColorScheme={'dark'}>
+      <MantineProvider forceColorScheme='dark'>
         <ToastProvider>
           <BrowserRouter>
             <AuthProvider>
@@ -46,16 +48,20 @@ export default function App() {
                       <Route key={path} path={path} element={<Element />} />
                     ))}
 
-                  <Route element={<UnauthenticatedRoute />}>
-                    <Route path={'/auth/*'} element={<AuthenticationRouter />} />
-                  </Route>
+                  <Route element={<OobeGuard />}>
+                    <Route path='/oobe/*' element={<OobeRouter />} />
 
-                  <Route element={<AuthenticatedRoute />}>
-                    <Route path={'/server/:id/*'} element={<ServerRouter />} />
-                    <Route path={'/*'} element={<DashboardRouter />} />
+                    <Route element={<UnauthenticatedGuard />}>
+                      <Route path={'/auth/*'} element={<AuthenticationRouter />} />
+                    </Route>
 
-                    <Route element={<AdminRoute />}>
-                      <Route path={'/admin/*'} element={<AdminRouter />} />
+                    <Route element={<AuthenticatedGuard />}>
+                      <Route path='/server/:id/*' element={<ServerRouter />} />
+                      <Route path='/*' element={<DashboardRouter />} />
+
+                      <Route element={<AdminGuard />}>
+                        <Route path='/admin/*' element={<AdminRouter />} />
+                      </Route>
                     </Route>
 
                     <Route path={'*'} element={<NotFound />} />

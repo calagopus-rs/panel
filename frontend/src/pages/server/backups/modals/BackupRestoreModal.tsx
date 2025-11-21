@@ -38,19 +38,19 @@ export default function BackupRestoreModal({ backup, opened, onClose }: Props) {
   };
 
   return (
-    <Modal title={'Restore Backup'} onClose={onClose} opened={opened}>
+    <Modal title='Restore Backup' onClose={onClose} opened={opened}>
       <Switch
-        label={'Do you want to empty the filesystem of this server before restoring the backup?'}
-        name={'truncate'}
+        label='Do you want to empty the filesystem of this server before restoring the backup?'
+        name='truncate'
         checked={truncate}
         onChange={(e) => setTruncate(e.target.checked)}
       />
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button color={truncate ? 'red' : undefined} onClick={doRestore} loading={loading}>
           Restore
         </Button>
-        <Button variant={'default'} onClick={onClose}>
+        <Button variant='default' onClick={onClose}>
           Close
         </Button>
       </Group>

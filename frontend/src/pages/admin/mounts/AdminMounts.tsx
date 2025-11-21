@@ -22,15 +22,15 @@ function MountsContainer() {
 
   return (
     <>
-      <Group justify={'space-between'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' mb='md'>
+        <Title order={1} c='white'>
           Mounts
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button
             onClick={() => navigate('/admin/mounts/new')}
-            color={'blue'}
+            color='blue'
             leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
             Create
@@ -50,9 +50,9 @@ function MountsContainer() {
 export default function AdminMounts() {
   return (
     <Routes>
-      <Route path={'/'} element={<MountsContainer />} />
-      <Route path={'/new'} element={<MountCreateOrUpdate />} />
-      <Route path={'/:id/*'} element={<MountView />} />
+      <Route path='/' element={<MountsContainer />} />
+      <Route path='/new' element={<MountCreateOrUpdate />} />
+      <Route path='/:id/*' element={<MountView />} />
     </Routes>
   );
 }

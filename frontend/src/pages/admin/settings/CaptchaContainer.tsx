@@ -33,12 +33,12 @@ export default function CaptchaContainer() {
 
   return (
     <>
-      <Title mt={'md'} order={2}>
+      <Title mt='md' order={2}>
         Captcha Settings
       </Title>
 
       <Select
-        label={'Provider'}
+        label='Provider'
         value={settings.type}
         onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
         data={Object.entries(captchaProviderTypeLabelMapping).map(([value, label]) => ({
@@ -53,7 +53,7 @@ export default function CaptchaContainer() {
         <CaptchaRecaptcha settings={settings as CaptchaProviderRecaptcha} setSettings={setSettings} />
       ) : null}
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={doUpdate} loading={loading}>
           Save
         </Button>

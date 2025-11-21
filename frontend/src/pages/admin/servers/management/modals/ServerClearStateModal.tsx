@@ -28,8 +28,8 @@ export default function ServerClearStateModal({ server, opened, onClose }: Modal
       <ConfirmationModal
         opened={opened}
         onClose={() => onClose()}
-        title={'Confirm Server State Clear'}
-        confirm={'Clear State'}
+        title='Confirm Server State Clear'
+        confirm='Clear State'
         onConfirmed={doClearState}
       >
         Are you sure you want to clear the state of <Code>{server.name}</Code>? This will clear any known pending

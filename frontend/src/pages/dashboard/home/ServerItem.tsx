@@ -1,6 +1,5 @@
 import {
   faAdd,
-  faCartPlus,
   faExternalLink,
   faHardDrive,
   faInfoCircle,
@@ -75,40 +74,40 @@ export default function ServerItem({
     <>
       <ServerAddGroupModal server={server} opened={openModal === 'add-group'} onClose={() => setOpenModal(null)} />
 
-      <Card className={'hover:border-gray-300! duration-200'}>
-        <div className={'flex items-center gap-2 justify-between'}>
-          <span className={'text-xl font-medium truncate flex flex-row'} title={server.name}>
+      <Card className='hover:border-gray-300! duration-200'>
+        <div className='flex items-center gap-2 justify-between'>
+          <span className='text-xl font-medium truncate flex flex-row' title={server.name}>
             {server.name}
             {serverGroups.every((g) => !g.serverOrder.includes(server.uuid)) && (
-              <Tooltip className={'ml-2'} label={'This server is not in any group'}>
-                <FontAwesomeIcon size={'sm'} icon={faInfoCircle} />
+              <Tooltip className='ml-2' label='This server is not in any group'>
+                <FontAwesomeIcon size='sm' icon={faInfoCircle} />
               </Tooltip>
             )}
           </span>
-          <div className={'flex flex-row gap-2 items-center'}>
+          <div className='flex flex-row gap-2 items-center'>
             {server.allocation ? (
               server.egg.separatePort ? (
-                <div className={'flex flex-row gap-2'}>
-                  <CopyOnClick content={server.allocation.ipAlias ?? server.allocation.ip} className={'w-fit'}>
-                    <Card p={'xs'}>
-                      <p className={'text-sm text-gray-400'}>{server.allocation.ipAlias ?? server.allocation.ip}</p>
+                <div className='flex flex-row gap-2'>
+                  <CopyOnClick content={server.allocation.ipAlias ?? server.allocation.ip} className='w-fit'>
+                    <Card p='xs'>
+                      <p className='text-sm text-gray-400'>{server.allocation.ipAlias ?? server.allocation.ip}</p>
                     </Card>
                   </CopyOnClick>
-                  <CopyOnClick content={server.allocation.port.toString()} className={'w-fit'}>
-                    <Card p={'xs'}>
-                      <p className={'text-sm text-gray-400'}>{server.allocation.port.toString()}</p>
+                  <CopyOnClick content={server.allocation.port.toString()} className='w-fit'>
+                    <Card p='xs'>
+                      <p className='text-sm text-gray-400'>{server.allocation.port.toString()}</p>
                     </Card>
                   </CopyOnClick>
                 </div>
               ) : (
-                <CopyOnClick content={formatAllocation(server.allocation)} className={'w-fit'}>
-                  <Card p={'xs'}>
-                    <p className={'text-sm text-gray-400'}>{formatAllocation(server.allocation)}</p>
+                <CopyOnClick content={formatAllocation(server.allocation)} className='w-fit'>
+                  <Card p='xs'>
+                    <p className='text-sm text-gray-400'>{formatAllocation(server.allocation)}</p>
                   </Card>
                 </CopyOnClick>
               )
             ) : (
-              <Card p={'xs'} className={'opacity-0'}>
+              <Card p='xs' className='opacity-0'>
                 No Allocation
               </Card>
             )}
@@ -117,66 +116,66 @@ export default function ServerItem({
           </div>
         </div>
 
-        <Divider my={'md'} />
+        <Divider my='md' />
 
-        <div className={'flex flex-row justify-between'}>
+        <div className='flex flex-row justify-between'>
           {server.status === 'installing' ? (
-            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+            <div className='col-span-3 flex flex-row items-center justify-center'>
               <Spinner />
-              <p className={'ml-2'}>Installing</p>
+              <p className='ml-2'>Installing</p>
             </div>
           ) : server.status === 'restoring_backup' ? (
-            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+            <div className='col-span-3 flex flex-row items-center justify-center'>
               <Spinner />
-              <p className={'ml-2'}>Restoring Backup</p>
+              <p className='ml-2'>Restoring Backup</p>
             </div>
           ) : server.status === 'install_failed' ? (
-            <div className={'col-span-3 flex flex-row items-center justify-center'}>
-              <FontAwesomeIcon size={'2x'} icon={faTriangleExclamation} color={'yellow'} />
-              <p className={'ml-2'}>Install Failed</p>
+            <div className='col-span-3 flex flex-row items-center justify-center'>
+              <FontAwesomeIcon size='2x' icon={faTriangleExclamation} color='yellow' />
+              <p className='ml-2'>Install Failed</p>
             </div>
           ) : stats === null ? (
-            <div className={'col-span-3 flex flex-row items-center justify-center'}>
+            <div className='col-span-3 flex flex-row items-center justify-center'>
               <Spinner />
             </div>
           ) : (
-            <div className={'flex flex-row'}>
-              <div className={'flex gap-2 text-sm justify-center items-center'}>
-                <FontAwesomeIcon icon={faMicrochip} className={'size-5 flex-none'} />
+            <div className='flex flex-row'>
+              <div className='flex gap-2 text-sm justify-center items-center'>
+                <FontAwesomeIcon icon={faMicrochip} className='size-5 flex-none' />
                 <div>
-                  <span className={'mr-1'}>{stats.cpuAbsolute.toFixed(2)}%</span>
-                  <span className={'inline-block text-xs text-gray-400'}>/ {cpuLimit}</span>
+                  <span className='mr-1'>{stats.cpuAbsolute.toFixed(2)}%</span>
+                  <span className='inline-block text-xs text-gray-400'>/ {cpuLimit}</span>
                 </div>
               </div>
 
-              <Divider mx={'sm'} orientation={'vertical'} />
+              <Divider mx='sm' orientation='vertical' />
 
-              <div className={'flex gap-2 text-sm justify-center items-center'}>
-                <FontAwesomeIcon icon={faMemory} className={'size-5 flex-none'} />
+              <div className='flex gap-2 text-sm justify-center items-center'>
+                <FontAwesomeIcon icon={faMemory} className='size-5 flex-none' />
                 <div>
-                  <span className={'mr-1'}>{bytesToString(stats.memoryBytes)}</span>
-                  <span className={'inline-block text-xs text-gray-400'}>/ {memoryLimit}</span>
+                  <span className='mr-1'>{bytesToString(stats.memoryBytes)}</span>
+                  <span className='inline-block text-xs text-gray-400'>/ {memoryLimit}</span>
                 </div>
               </div>
 
-              <Divider mx={'sm'} orientation={'vertical'} />
+              <Divider mx='sm' orientation='vertical' />
 
-              <div className={'flex gap-2 text-sm justify-center items-center'}>
-                <FontAwesomeIcon icon={faHardDrive} className={'size-5 flex-none'} />
+              <div className='flex gap-2 text-sm justify-center items-center'>
+                <FontAwesomeIcon icon={faHardDrive} className='size-5 flex-none' />
                 <div>
-                  <span className={'mr-1'}>{bytesToString(stats.diskBytes)}</span>
-                  <span className={'inline-block text-xs text-gray-400'}>/ {diskLimit}</span>
+                  <span className='mr-1'>{bytesToString(stats.diskBytes)}</span>
+                  <span className='inline-block text-xs text-gray-400'>/ {diskLimit}</span>
                 </div>
               </div>
             </div>
           )}
 
-          <div className={'flex flex-row items-center gap-2'}>
+          <div className='flex flex-row items-center gap-2'>
             {showGroupAddButton && (
               <Tooltip label={serverGroups.length === 0 ? 'No groups available to add to' : 'Add to Group'}>
                 <ActionIcon
-                  size={'input-sm'}
-                  variant={'light'}
+                  size='input-sm'
+                  variant='light'
                   disabled={serverGroups.length === 0}
                   onClick={() => setOpenModal('add-group')}
                 >
@@ -185,10 +184,10 @@ export default function ServerItem({
               </Tooltip>
             )}
             <NavLink to={`/server/${server.uuidShort}`}>
-              <Button className={'hidden! md:block!'} leftSection={<FontAwesomeIcon icon={faExternalLink} />}>
+              <Button className='hidden! md:block!' leftSection={<FontAwesomeIcon icon={faExternalLink} />}>
                 View Server
               </Button>
-              <ActionIcon size={'lg'} className={'md:hidden!'}>
+              <ActionIcon size='lg' className='md:hidden!'>
                 <FontAwesomeIcon icon={faExternalLink} />
               </ActionIcon>
             </NavLink>

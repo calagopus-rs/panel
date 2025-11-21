@@ -27,15 +27,15 @@ export default function ServerBackups() {
     <>
       <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify={'space-between'} align={'start'} mb={'md'}>
-        <Title order={1} c={'white'}>
+      <Group justify='space-between' align='start' mb='md'>
+        <Title order={1} c='white'>
           Backups
-          <p className={'text-xs text-gray-300!'}>
+          <p className='text-xs text-gray-300!'>
             {backups.total} of {server.featureLimits.backups} maximum backups created.
           </p>
         </Title>
         <Group>
-          <TextInput placeholder={'Search...'} value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <ConditionalTooltip
             enabled={backups.total >= server.featureLimits.backups}
             label={`This server is limited to ${server.featureLimits.backups} backups.`}
@@ -43,7 +43,7 @@ export default function ServerBackups() {
             <Button
               disabled={backups.total >= server.featureLimits.backups}
               onClick={() => setOpenModal('create')}
-              color={'blue'}
+              color='blue'
               leftSection={<FontAwesomeIcon icon={faPlus} />}
             >
               Create

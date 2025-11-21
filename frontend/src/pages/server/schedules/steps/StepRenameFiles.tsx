@@ -13,20 +13,20 @@ export default function StepRenameFiles({
     <Stack>
       <TextInput
         withAsterisk
-        label={'Root Path'}
-        placeholder={'/'}
+        label='Root Path'
+        placeholder='/'
         value={action.root}
         onChange={(e) => setAction({ ...action, root: e.target.value })}
       />
 
-      <Stack gap={'xs'}>
+      <Stack gap='xs'>
         <Text>Files</Text>
         {action.files.map((file, index) => (
           <Group key={index}>
             <TextInput
               withAsterisk
-              label={'from'}
-              placeholder={'source.txt'}
+              label='from'
+              placeholder='source.txt'
               value={file.from}
               onChange={(e) => {
                 const newFiles = [...action.files];
@@ -36,8 +36,8 @@ export default function StepRenameFiles({
             />
             <TextInput
               withAsterisk
-              label={'to'}
-              placeholder={'target.txt'}
+              label='to'
+              placeholder='target.txt'
               value={file.to}
               onChange={(e) => {
                 const newFiles = [...action.files];

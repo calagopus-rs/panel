@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router';
 import debounce from 'debounce';
 import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import { load } from '@/lib/debounce';
 
 interface UseSearchablePaginatedTableOptions<T> {
   fetcher: (page: number, search: string) => Promise<ResponseMeta<T>>;

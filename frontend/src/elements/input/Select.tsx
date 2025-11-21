@@ -7,7 +7,7 @@ const Select = forwardRef<HTMLInputElement, SelectProps>(({ className, allowDese
       ref={ref}
       className={className}
       allowDeselect={allowDeselect}
-      nothingFoundMessage={'No results found'}
+      nothingFoundMessage='No results found'
       {...rest}
     />
   );

@@ -31,7 +31,7 @@ export default function DatabaseRow({ database }: { database: AdminServerDatabas
         <TableData>
           <NavLink
             to={`/admin/servers/${database.server.uuid}`}
-            className={'text-blue-400 hover:text-blue-200 hover:underline'}
+            className='text-blue-400 hover:text-blue-200 hover:underline'
           >
             <Code>{database.server.name}</Code>
           </NavLink>

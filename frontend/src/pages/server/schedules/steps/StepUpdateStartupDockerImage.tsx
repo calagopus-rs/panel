@@ -16,7 +16,7 @@ export default function StepUpdateStartupDockerImage({
     <Stack>
       <Select
         withAsterisk
-        label={'Docker Image'}
+        label='Docker Image'
         value={action.image}
         onChange={(value) => setAction({ ...action, image: value })}
         data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
@@ -25,7 +25,7 @@ export default function StepUpdateStartupDockerImage({
         }))}
       />
       <Switch
-        label={'Ignore Failure'}
+        label='Ignore Failure'
         checked={action.ignoreFailure}
         onChange={(e) =>
           setAction({

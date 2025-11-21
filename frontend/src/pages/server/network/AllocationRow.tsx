@@ -34,8 +34,8 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Allocation Removal'}
-        confirm={'Remove'}
+        title='Confirm Allocation Removal'
+        confirm='Remove'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove
@@ -68,7 +68,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
 
             <TableData>{allocation.notes ?? 'No notes'}</TableData>
 
-            <TableData>{allocation.isPrimary ? <Badge>Primary</Badge> : <Badge color={'gray'}>Other</Badge>}</TableData>
+            <TableData>{allocation.isPrimary ? <Badge>Primary</Badge> : <Badge color='gray'>Other</Badge>}</TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

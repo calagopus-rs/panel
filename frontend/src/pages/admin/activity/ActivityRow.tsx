@@ -25,7 +25,7 @@ export default function ActivityRow({ activity }: { activity: AdminActivity }) {
       </TableData>
 
       <TableData>
-        <Group gap={4} justify={'right'} wrap={'nowrap'}>
+        <Group gap={4} justify='right' wrap='nowrap'>
           {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
         </Group>
       </TableData>

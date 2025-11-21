@@ -129,8 +129,8 @@ export default function EggCreateOrUpdate({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Egg Deletion'}
-        confirm={'Delete'}
+        title='Confirm Egg Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
@@ -138,23 +138,23 @@ export default function EggCreateOrUpdate({
 
       <Stack>
         <Group grow>
-          <TextInput withAsterisk label={'Author'} placeholder={'Author'} {...form.getInputProps('author')} />
-          <TextInput withAsterisk label={'Name'} placeholder={'Name'} {...form.getInputProps('name')} />
+          <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
         </Group>
 
-        <TextArea label={'Description'} placeholder={'Description'} rows={3} {...form.getInputProps('description')} />
+        <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
 
         {/* TODO: configFiles */}
 
         <TagsInput
           withAsterisk
-          label={'Startup Done'}
-          placeholder={'Startup Done'}
+          label='Startup Done'
+          placeholder='Startup Done'
           {...form.getInputProps('configStartup.done')}
         />
 
         <Switch
-          label={'Strip ANSI from startup messages'}
+          label='Strip ANSI from startup messages'
           checked={form.values.configStartup.stripAnsi}
           onChange={(e) => form.setFieldValue('configStartup.stripAnsi', e.target.checked)}
         />
@@ -164,34 +164,34 @@ export default function EggCreateOrUpdate({
         <Group grow>
           <TextInput
             withAsterisk
-            label={'Install Script Container'}
-            placeholder={'Install Script Container'}
+            label='Install Script Container'
+            placeholder='Install Script Container'
             {...form.getInputProps('configScript.container')}
           />
           <TextInput
             withAsterisk
-            label={'Install Script Entrypoint'}
-            placeholder={'Install Script Entrypoint'}
+            label='Install Script Entrypoint'
+            placeholder='Install Script Entrypoint'
             {...form.getInputProps('configScript.entrypoint')}
           />
         </Group>
 
         <TextArea
           withAsterisk
-          label={'Install Script Content'}
-          placeholder={'Install Script Content'}
+          label='Install Script Content'
+          placeholder='Install Script Content'
           rows={6}
           {...form.getInputProps('configScript.content')}
         />
 
         <Switch
-          label={'Allocation Self Assign'}
+          label='Allocation Self Assign'
           checked={form.values.configAllocations.userSelfAssign.enabled}
           onChange={(e) => form.setFieldValue('configAllocations.userSelfAssign.enabled', e.target.checked)}
         />
 
         <Switch
-          label={'Require Primary Allocation'}
+          label='Require Primary Allocation'
           checked={form.values.configAllocations.userSelfAssign.requirePrimaryAllocation}
           onChange={(e) =>
             form.setFieldValue('configAllocations.userSelfAssign.requirePrimaryAllocation', e.target.checked)
@@ -200,42 +200,42 @@ export default function EggCreateOrUpdate({
 
         <Group grow>
           <NumberInput
-            label={'Automatic Allocation Start'}
-            placeholder={'Automatic Allocation Start'}
+            label='Automatic Allocation Start'
+            placeholder='Automatic Allocation Start'
             {...form.getInputProps('configAllocations.userSelfAssign.startPort')}
           />
           <NumberInput
-            label={'Automatic Allocation End'}
-            placeholder={'Automatic Allocation End'}
+            label='Automatic Allocation End'
+            placeholder='Automatic Allocation End'
             {...form.getInputProps('configAllocations.userSelfAssign.endPort')}
           />
         </Group>
 
-        <TextInput withAsterisk label={'Startup'} placeholder={'Startup'} {...form.getInputProps('startup')} />
+        <TextInput withAsterisk label='Startup' placeholder='Startup' {...form.getInputProps('startup')} />
 
         <Switch
-          label={'Force Outgoing IP'}
+          label='Force Outgoing IP'
           checked={form.values.forceOutgoingIp}
           onChange={(e) => form.setFieldValue('forceOutgoingIp', e.target.checked)}
         />
         <Switch
-          label={'Separate IP and Port'}
-          description={'Separates the primary IP and Port in the Console page instead of joining them with ":"'}
+          label='Separate IP and Port'
+          description='Separates the primary IP and Port in the Console page instead of joining them with ":"'
           checked={form.values.separatePort}
           onChange={(e) => form.setFieldValue('separatePort', e.target.checked)}
         />
 
-        <TagsInput label={'Features'} placeholder={'Feature'} {...form.getInputProps('features')} />
+        <TagsInput label='Features' placeholder='Feature' {...form.getInputProps('features')} />
 
         <MultiKeyValueInput
           options={form.values.dockerImages}
           onChange={(e) => form.setFieldValue('dockerImages', e)}
         />
 
-        <TagsInput label={'File Deny List'} placeholder={'File Deny List'} {...form.getInputProps('fileDenylist')} />
+        <TagsInput label='File Deny List' placeholder='File Deny List' {...form.getInputProps('fileDenylist')} />
       </Stack>
 
-      <Group mt={'md'}>
+      <Group mt='md'>
         <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
           Save
         </Button>
@@ -265,7 +265,7 @@ export default function EggCreateOrUpdate({
                     openMenu(rect.left, rect.bottom);
                   }}
                   loading={loading}
-                  variant={'outline'}
+                  variant='outline'
                   rightSection={<FontAwesomeIcon icon={faChevronDown} />}
                 >
                   Export
@@ -275,7 +275,7 @@ export default function EggCreateOrUpdate({
           </ContextMenuProvider>
         )}
         {contextEgg && (
-          <Button color={'red'} onClick={() => setOpenModal('delete')} loading={loading}>
+          <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
             Delete
           </Button>
         )}

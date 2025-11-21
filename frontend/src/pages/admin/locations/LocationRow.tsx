@@ -12,7 +12,7 @@ export default ({ location }: { location: Location }) => {
       <TableData>
         <NavLink
           to={`/admin/locations/${location.uuid}`}
-          className={'text-blue-400 hover:text-blue-200 hover:underline'}
+          className='text-blue-400 hover:text-blue-200 hover:underline'
         >
           <Code>{location.uuid}</Code>
         </NavLink>
@@ -24,7 +24,7 @@ export default ({ location }: { location: Location }) => {
         {location.backupConfiguration ? (
           <NavLink
             to={`/admin/backup-configurations/${location.backupConfiguration.uuid}`}
-            className={'text-blue-400 hover:text-blue-200 hover:underline'}
+            className='text-blue-400 hover:text-blue-200 hover:underline'
           >
             <Code>{location.backupConfiguration.name}</Code>
           </NavLink>

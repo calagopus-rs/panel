@@ -34,8 +34,8 @@ export default function EggMountRow({ nest, egg, mount }: { nest: AdminNest; egg
       <ConfirmationModal
         opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
-        title={'Confirm Egg Mount Removal'}
-        confirm={'Delete'}
+        title='Confirm Egg Mount Removal'
+        confirm='Delete'
         onConfirmed={doRemove}
       >
         Are you sure you want to remove the mount
@@ -63,7 +63,7 @@ export default function EggMountRow({ nest, egg, mount }: { nest: AdminNest; egg
             <TableData>
               <NavLink
                 to={`/admin/mounts/${mount.mount.uuid}`}
-                className={'text-blue-400 hover:text-blue-200 hover:underline'}
+                className='text-blue-400 hover:text-blue-200 hover:underline'
               >
                 <Code>{mount.mount.uuid}</Code>
               </NavLink>
