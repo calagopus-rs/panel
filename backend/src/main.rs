@@ -244,11 +244,11 @@ async fn main() {
             api_admin
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::client::auth,
+                    panel_rs::routes::api::admin::auth,
                 ))
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::admin::auth,
+                    panel_rs::routes::api::client::auth,
                 )),
         );
     }
@@ -270,11 +270,11 @@ async fn main() {
             api_client_servers_server
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::client::auth,
+                    panel_rs::routes::api::client::servers::_server_::auth,
                 ))
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::client::servers::_server_::auth,
+                    panel_rs::routes::api::client::auth,
                 )),
         );
     }
@@ -293,11 +293,11 @@ async fn main() {
             api_remote_servers_server
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::remote::auth,
+                    panel_rs::routes::api::remote::servers::_server_::auth,
                 ))
                 .route_layer(axum::middleware::from_fn_with_state(
                     state.clone(),
-                    panel_rs::routes::api::remote::servers::_server_::auth,
+                    panel_rs::routes::api::remote::auth,
                 )),
         );
     }
