@@ -2,7 +2,6 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
@@ -46,7 +45,7 @@ mod post {
             wings_api::ServerPowerAction::Restart => "control.restart",
         })?;
 
-        match server
+        server
             .node
             .fetch_cached(&state.database)
             .await?
@@ -58,17 +57,7 @@ mod post {
                     wait_seconds: None,
                 },
             )
-            .await
-        {
-            Ok(data) => data,
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to post server power: {:#?}", err);
-
-                return ApiResponse::error("failed to send power signal to server")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        };
+            .await?;
 
         activity_logger
             .log(

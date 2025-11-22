@@ -4,7 +4,10 @@ use tokio::sync::{RwLock, RwLockReadGuard};
 
 use crate::{
     State,
-    extensions::{ConstructedExtension, ExtensionRouteBuilder, commands::CliCommandGroupBuilder},
+    extensions::{
+        ConstructedExtension, ExtensionPermissionsBuilder, ExtensionRouteBuilder,
+        commands::CliCommandGroupBuilder,
+    },
 };
 
 pub struct ExtensionManager {
@@ -19,15 +22,36 @@ impl ExtensionManager {
     }
 
     pub async fn init(&self, state: State) -> ExtensionRouteBuilder {
-        let mut builder = ExtensionRouteBuilder::new(state.clone());
+        let mut route_builder = ExtensionRouteBuilder::new(state.clone());
+        let mut permissions_builder = ExtensionPermissionsBuilder::new(
+            crate::permissions::BASE_USER_PERMISSIONS.clone(),
+            crate::permissions::BASE_ADMIN_PERMISSIONS.clone(),
+            crate::permissions::BASE_SERVER_PERMISSIONS.clone(),
+        );
 
         for ext in self.vec.write().await.iter_mut() {
             ext.initialize(state.clone()).await;
 
-            builder = ext.initialize_router(state.clone(), builder).await;
+            route_builder = ext.initialize_router(state.clone(), route_builder).await;
+            permissions_builder = ext
+                .initialize_permissions(state.clone(), permissions_builder)
+                .await;
         }
 
-        builder
+        crate::permissions::USER_PERMISSIONS
+            .write()
+            .unwrap()
+            .replace(permissions_builder.user_permissions);
+        crate::permissions::ADMIN_PERMISSIONS
+            .write()
+            .unwrap()
+            .replace(permissions_builder.admin_permissions);
+        crate::permissions::SERVER_PERMISSIONS
+            .write()
+            .unwrap()
+            .replace(permissions_builder.server_permissions);
+
+        route_builder
     }
 
     pub async fn init_cli(

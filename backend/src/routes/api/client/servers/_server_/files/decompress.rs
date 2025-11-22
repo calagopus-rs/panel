@@ -80,23 +80,17 @@ mod post {
                 Ok(wings_api::servers_server_files_decompress::post::Response::Accepted(data)) => {
                     Some(data.identifier)
                 }
-                Err((StatusCode::NOT_FOUND, err)) => {
+                Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                     return ApiResponse::json(ApiError::new_wings_value(err))
                         .with_status(StatusCode::NOT_FOUND)
                         .ok();
                 }
-                Err((StatusCode::EXPECTATION_FAILED, err)) => {
+                Err(wings_api::client::ApiHttpError::Http(StatusCode::EXPECTATION_FAILED, err)) => {
                     return ApiResponse::json(ApiError::new_wings_value(err))
                         .with_status(StatusCode::EXPECTATION_FAILED)
                         .ok();
                 }
-                Err((_, err)) => {
-                    tracing::error!(server = %server.uuid, "failed to decompress server file: {:#?}", err);
-
-                    return ApiResponse::error("failed to decompress server file")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
+                Err(err) => return Err(err.into()),
             };
 
             activity_logger
@@ -116,7 +110,8 @@ mod post {
             } else {
                 ApiResponse::json(Response {}).ok()
             }
-        }).await?
+        })
+        .await?
     }
 }
 

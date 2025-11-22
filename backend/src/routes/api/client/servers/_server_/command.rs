@@ -54,23 +54,13 @@ mod post {
             commands: vec![data.command],
         };
 
-        match server
+        server
             .node
             .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .post_servers_server_commands(server.uuid, &request_body)
-            .await
-        {
-            Ok(data) => data,
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to post server command: {:#?}", err);
-
-                return ApiResponse::error("failed to send command to server")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        };
+            .await?;
 
         activity_logger
             .log(

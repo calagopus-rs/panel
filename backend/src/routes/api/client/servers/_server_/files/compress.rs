@@ -85,27 +85,23 @@ mod post {
                     ApiResponse::json(Response { entry: data }).ok()
                 }
                 Ok(wings_api::servers_server_files_compress::post::Response::Accepted(data)) => {
-                    ApiResponse::json(ResponseAccepted { identifier: data.identifier })
-                        .with_status(StatusCode::ACCEPTED)
-                        .ok()
+                    ApiResponse::json(ResponseAccepted {
+                        identifier: data.identifier,
+                    })
+                    .with_status(StatusCode::ACCEPTED)
+                    .ok()
                 }
-                Err((StatusCode::NOT_FOUND, err)) => {
+                Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                     return ApiResponse::json(ApiError::new_wings_value(err))
                         .with_status(StatusCode::NOT_FOUND)
                         .ok();
                 }
-                Err((StatusCode::EXPECTATION_FAILED, err)) => {
+                Err(wings_api::client::ApiHttpError::Http(StatusCode::EXPECTATION_FAILED, err)) => {
                     return ApiResponse::json(ApiError::new_wings_value(err))
                         .with_status(StatusCode::EXPECTATION_FAILED)
                         .ok();
                 }
-                Err((_, err)) => {
-                    tracing::error!(server = %server.uuid, "failed to compress server files: {:#?}", err);
-
-                    return ApiResponse::error("failed to compress server files")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
+                Err(err) => return Err(err.into()),
             };
 
             activity_logger

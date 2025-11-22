@@ -52,7 +52,7 @@ mod post {
             .await
         {
             Ok(_) => {}
-            Err((StatusCode::CONFLICT, _)) => {
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::CONFLICT, _)) => {
                 sqlx::query!(
                     "UPDATE servers
                     SET status = NULL
@@ -64,13 +64,7 @@ mod post {
 
                 return ApiResponse::json(Response {}).ok();
             }
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to abort server install: {:#?}", err);
-
-                return ApiResponse::error("failed to abort server install")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
+            Err(err) => return Err(err.into()),
         };
 
         activity_logger

@@ -74,23 +74,17 @@ mod post {
             .await
         {
             Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, err)) => {
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
                     .ok();
             }
-            Err((StatusCode::EXPECTATION_FAILED, err)) => {
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::EXPECTATION_FAILED, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::EXPECTATION_FAILED)
                     .ok();
             }
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to copy server file: {:#?}", err);
-
-                return ApiResponse::error("failed to copy server file")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
+            Err(err) => return Err(err.into()),
         };
 
         activity_logger

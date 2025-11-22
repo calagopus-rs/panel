@@ -3,7 +3,6 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
     use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
-    use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
@@ -54,23 +53,13 @@ mod post {
             )
             .await?;
 
-        match server
+        server
             .node
             .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .post_servers_server_schedules_schedule_abort(server.uuid, schedule.uuid)
-            .await
-        {
-            Ok(_) => {}
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to post server schedule abort: {:#?}", err);
-
-                return ApiResponse::error("failed to send schedule abort signal to server")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        }
+            .await?;
 
         activity_logger
             .log(

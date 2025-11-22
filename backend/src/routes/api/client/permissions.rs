@@ -4,7 +4,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 mod get {
     use serde::Serialize;
     use shared::{
-        permissions::{ADMIN_PERMISSIONS, PermissionMap, SERVER_PERMISSIONS, USER_PERMISSIONS},
+        permissions::{
+            PermissionMap, get_admin_permissions, get_server_permissions, get_user_permissions,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -21,9 +23,9 @@ mod get {
     ))]
     pub async fn route() -> ApiResponseResult {
         ApiResponse::json(Response {
-            user_permissions: &USER_PERMISSIONS,
-            admin_permissions: &ADMIN_PERMISSIONS,
-            server_permissions: &SERVER_PERMISSIONS,
+            user_permissions: &get_user_permissions(),
+            admin_permissions: &get_admin_permissions(),
+            server_permissions: &get_server_permissions(),
         })
         .ok()
     }

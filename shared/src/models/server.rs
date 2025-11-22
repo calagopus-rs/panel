@@ -367,7 +367,7 @@ impl Server {
 
                     transaction.commit().await?;
 
-                    if let Err((status, err)) = node
+                    if let Err(err) = node
                         .api_client(database)
                         .post_servers(&wings_api::servers::post::RequestBody {
                             uuid,
@@ -382,7 +382,7 @@ impl Server {
                             .execute(database.write())
                             .await?;
 
-                        return Err(anyhow::anyhow!("status code {status}: {}", err.error).into());
+                        return Err(err.into());
                     }
 
                     return Ok(uuid);
@@ -915,8 +915,7 @@ impl Server {
     }
 
     pub async fn sync(self, database: &crate::database::Database) -> Result<(), anyhow::Error> {
-        match self
-            .node
+        self.node
             .fetch_cached(database)
             .await?
             .api_client(database)
@@ -926,11 +925,7 @@ impl Server {
                     server: serde_json::to_value(self.into_remote_api_object(database).await?)?,
                 },
             )
-            .await
-        {
-            Ok(_) => {}
-            Err((_, err)) => return Err(anyhow::anyhow!(err.error)),
-        }
+            .await?;
 
         Ok(())
     }
@@ -1418,7 +1413,7 @@ impl DeletableModel for Server {
                     transaction.commit().await?;
                     Ok(())
                 }
-                Err((status, err)) => {
+                Err(err) => {
                     tracing::error!(server = %server_uuid, node = %node.uuid, "failed to delete server: {:#?}", err);
 
                     if options.force {
@@ -1426,7 +1421,7 @@ impl DeletableModel for Server {
                         Ok(())
                     } else {
                         transaction.rollback().await?;
-                        Err(anyhow::anyhow!("status code {status}: {}", err.error))
+                        Err(err.into())
                     }
                 }
             }

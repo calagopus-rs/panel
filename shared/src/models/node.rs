@@ -337,14 +337,7 @@ impl Node {
             .cached(
                 &format!("node::{}::configuration", self.uuid),
                 120,
-                || async {
-                    match self.api_client(database).get_system_config().await {
-                        Ok(config) => Ok(config),
-                        Err((status, err)) => {
-                            Err(anyhow::anyhow!("status code {status}: {}", err.error))
-                        }
-                    }
-                },
+                || async { self.api_client(database).get_system_config().await },
             )
             .await
     }

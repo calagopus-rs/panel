@@ -34,13 +34,30 @@ static CLIENT: LazyLock<Client> = LazyLock::new(|| {
         .expect("Failed to create reqwest client")
 });
 
+#[derive(Debug)]
+pub enum ApiHttpError {
+    Http(StatusCode, super::ApiError),
+    Reqwest(reqwest::Error),
+}
+
+impl From<ApiHttpError> for anyhow::Error {
+    fn from(value: ApiHttpError) -> Self {
+        match value {
+            ApiHttpError::Http(status, err) => {
+                anyhow::anyhow!("wings api status code {status}: {}", err.error)
+            }
+            ApiHttpError::Reqwest(err) => anyhow::anyhow!(err),
+        }
+    }
+}
+
 async fn request_impl<T: DeserializeOwned + 'static>(
     client: &WingsClient,
     method: Method,
     endpoint: impl AsRef<str>,
     body: Option<&impl Serialize>,
     body_raw: Option<String>,
-) -> Result<T, (StatusCode, super::ApiError)> {
+) -> Result<T, ApiHttpError> {
     let url = format!(
         "{}{}",
         client.base_url.trim_end_matches('/'),
@@ -66,7 +83,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                         Ok(text) => Ok(*(Box::new(text) as Box<dyn std::any::Any>)
                             .downcast::<T>()
                             .unwrap()),
-                        Err(err) => Err((
+                        Err(err) => Err(ApiHttpError::Http(
                             StatusCode::PRECONDITION_FAILED,
                             super::ApiError {
                                 error: err.to_string(),
@@ -77,15 +94,10 @@ async fn request_impl<T: DeserializeOwned + 'static>(
 
                 match response.json().await {
                     Ok(data) => Ok(data),
-                    Err(err) => Err((
-                        StatusCode::PRECONDITION_FAILED,
-                        super::ApiError {
-                            error: err.to_string(),
-                        },
-                    )),
+                    Err(err) => Err(ApiHttpError::Reqwest(err)),
                 }
             } else {
-                Err((
+                Err(ApiHttpError::Http(
                     response.status(),
                     response.json().await.unwrap_or_else(|err| super::ApiError {
                         error: err.to_string(),
@@ -93,12 +105,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                 ))
             }
         }
-        Err(err) => Err((
-            StatusCode::PRECONDITION_FAILED,
-            super::ApiError {
-                error: err.to_string(),
-            },
-        )),
+        Err(err) => Err(ApiHttpError::Reqwest(err)),
     }
 }
 
@@ -222,7 +229,7 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             }
 
             clientOutput.write(`    pub async fn ${method}_${snakeCase(path).slice(4)}(&self${params.length ? `, ${params.join(', ')}` : ''})`)
-            clientOutput.write(` -> Result<super::${snakeCase(path).slice(4)}::${method}::Response, (StatusCode, super::ApiError)> {\n`)
+            clientOutput.write(` -> Result<super::${snakeCase(path).slice(4)}::${method}::Response, ApiHttpError> {\n`)
 
             let query = ""
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {

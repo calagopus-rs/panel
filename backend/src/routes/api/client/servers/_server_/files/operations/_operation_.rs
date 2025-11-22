@@ -52,18 +52,12 @@ mod delete {
             .await
         {
             Ok(_) => {}
-            Err((StatusCode::NOT_FOUND, err)) => {
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
                     .ok();
             }
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to cancel server file operation: {:#?}", err);
-
-                return ApiResponse::error("failed to cancel server file operation")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
+            Err(err) => return Err(err.into()),
         };
 
         activity_logger

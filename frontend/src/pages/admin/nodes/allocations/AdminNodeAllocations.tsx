@@ -79,7 +79,6 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
       <SelectionArea
         onSelectedStart={onSelectedStart}
         onSelected={onSelected}
-        className='h-full'
         disabled={!!openModal}
       >
         <Table

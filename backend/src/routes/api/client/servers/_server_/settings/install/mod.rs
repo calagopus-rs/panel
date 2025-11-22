@@ -79,13 +79,10 @@ mod post {
             .await
         {
             Ok(_) => {}
-            Err((_, err)) => {
+            Err(err) => {
                 transaction.rollback().await?;
-                tracing::error!(server = %server.uuid, "failed to reinstall server: {:#?}", err);
 
-                return ApiResponse::error("failed to reinstall server")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
+                return Err(err.into());
             }
         };
 

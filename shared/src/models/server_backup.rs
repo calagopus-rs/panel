@@ -450,7 +450,7 @@ impl ServerBackup {
             .fetch_cached(database)
             .await?;
 
-        if let Err((status, error)) = server
+        server
             .node
             .fetch_cached(database)
             .await?
@@ -483,10 +483,7 @@ impl ServerBackup {
                     truncate_directory,
                 },
             )
-            .await
-        {
-            return Err(s3::error::S3Error::HttpFailWithBody(status.as_u16(), error.error).into());
-        }
+            .await?;
 
         Ok(())
     }
@@ -643,7 +640,7 @@ impl DeletableModel for ServerBackup {
                     }
                 }
                 _ => {
-                    if let Err((status, error)) = node
+                    if let Err(err) = node
                         .api_client(&database)
                         .delete_backups_backup(
                             backup_uuid,
@@ -652,9 +649,9 @@ impl DeletableModel for ServerBackup {
                             },
                         )
                         .await
-                        && status != StatusCode::NOT_FOUND
+                        && !matches!(err, wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, _))
                     {
-                        return Err(anyhow::anyhow!(error.error));
+                        return Err(err.into());
                     }
                 }
             }

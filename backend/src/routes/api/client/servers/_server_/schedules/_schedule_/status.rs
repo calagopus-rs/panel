@@ -3,7 +3,6 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::routes::api::client::servers::_server_::schedules::_schedule_::GetServerSchedule;
-    use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
@@ -41,23 +40,13 @@ mod get {
     ) -> ApiResponseResult {
         permissions.has_server_permission("schedules.read")?;
 
-        let schedule_status = match server
+        let schedule_status = server
             .node
             .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
             .get_servers_server_schedules_schedule(server.uuid, schedule.uuid)
-            .await
-        {
-            Ok(data) => data,
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to get server schedule status: {:#?}", err);
-
-                return ApiResponse::error("failed to get server schedule status")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        };
+            .await?;
 
         ApiResponse::json(Response {
             status: schedule_status.status,

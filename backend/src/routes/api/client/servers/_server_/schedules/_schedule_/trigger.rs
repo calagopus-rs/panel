@@ -72,7 +72,7 @@ mod post {
             }
         }
 
-        match server
+        server
             .node
             .fetch_cached(&state.database)
             .await?
@@ -84,17 +84,7 @@ mod post {
                     skip_condition: data.skip_condition,
                 },
             )
-            .await
-        {
-            Ok(_) => {}
-            Err((_, err)) => {
-                tracing::error!(server = %server.uuid, "failed to post server schedule trigger: {:#?}", err);
-
-                return ApiResponse::error("failed to send schedule trigger signal to server")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
-        }
+            .await?;
 
         activity_logger
             .log(

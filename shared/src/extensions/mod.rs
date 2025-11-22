@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 
-use crate::State;
+use crate::{State, permissions::PermissionGroup};
+use indexmap::IndexMap;
 use serde::Serialize;
 use std::{
     ops::{Deref, DerefMut},
@@ -139,6 +140,60 @@ impl ExtensionRouteBuilder {
     }
 }
 
+type RawPermissionMap = IndexMap<&'static str, PermissionGroup>;
+pub struct ExtensionPermissionsBuilder {
+    pub user_permissions: RawPermissionMap,
+    pub admin_permissions: RawPermissionMap,
+    pub server_permissions: RawPermissionMap,
+}
+
+impl ExtensionPermissionsBuilder {
+    pub fn new(
+        user_permissions: RawPermissionMap,
+        admin_permissions: RawPermissionMap,
+        server_permissions: RawPermissionMap,
+    ) -> Self {
+        Self {
+            user_permissions,
+            admin_permissions,
+            server_permissions,
+        }
+    }
+
+    /// Adds a permission group to the user permissions.
+    pub fn add_user_permission_group(
+        mut self,
+        group_name: &'static str,
+        group: PermissionGroup,
+    ) -> Self {
+        self.user_permissions.insert(group_name, group);
+
+        self
+    }
+
+    /// Adds a permission group to the admin permissions.
+    pub fn add_admin_permission_group(
+        mut self,
+        group_name: &'static str,
+        group: PermissionGroup,
+    ) -> Self {
+        self.admin_permissions.insert(group_name, group);
+
+        self
+    }
+
+    /// Adds a permission group to the server permissions.
+    pub fn add_server_permission_group(
+        mut self,
+        group_name: &'static str,
+        group: PermissionGroup,
+    ) -> Self {
+        self.server_permissions.insert(group_name, group);
+
+        self
+    }
+}
+
 pub type ExtensionCallValue = Box<dyn std::any::Any + Send + Sync>;
 
 #[async_trait::async_trait]
@@ -161,6 +216,15 @@ pub trait Extension: Send + Sync {
         env: Option<&Arc<crate::env::Env>>,
         builder: commands::CliCommandGroupBuilder,
     ) -> commands::CliCommandGroupBuilder {
+        builder
+    }
+
+    /// Your extension permissions entrypoint, this runs as soon as the database is migrated and before the webserver starts
+    async fn initialize_permissions(
+        &mut self,
+        state: State,
+        builder: ExtensionPermissionsBuilder,
+    ) -> ExtensionPermissionsBuilder {
         builder
     }
 

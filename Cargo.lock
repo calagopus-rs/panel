@@ -6908,6 +6908,7 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 name = "wings-api"
 version = "0.14.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "cron",
  "indexmap",

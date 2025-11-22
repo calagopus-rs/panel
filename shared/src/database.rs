@@ -220,6 +220,13 @@ impl Display for DatabaseError {
     }
 }
 
+impl From<wings_api::client::ApiHttpError> for DatabaseError {
+    #[inline]
+    fn from(value: wings_api::client::ApiHttpError) -> Self {
+        Self::Any(value.into())
+    }
+}
+
 impl From<anyhow::Error> for DatabaseError {
     #[inline]
     fn from(value: anyhow::Error) -> Self {

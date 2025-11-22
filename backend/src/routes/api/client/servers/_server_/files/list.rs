@@ -93,18 +93,12 @@ mod get {
             .await
         {
             Ok(data) => data,
-            Err((StatusCode::NOT_FOUND, err)) => {
+            Err(wings_api::client::ApiHttpError::Http(StatusCode::NOT_FOUND, err)) => {
                 return ApiResponse::json(ApiError::new_wings_value(err))
                     .with_status(StatusCode::NOT_FOUND)
                     .ok();
             }
-            Err((_, err)) => {
-                tracing::error!(server = %server.0.uuid, "failed to list server files: {:#?}", err);
-
-                return ApiResponse::error("failed to list server files")
-                    .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                    .ok();
-            }
+            Err(err) => return Err(err.into()),
         };
 
         ApiResponse::json(Response {

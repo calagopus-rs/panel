@@ -31,20 +31,16 @@ mod get {
                 &format!("server::{}::resources", server.uuid),
                 10,
                 || async {
-                    match server
-                        .node
-                        .fetch_cached(&state.database)
-                        .await?
-                        .api_client(&state.database)
-                        .get_servers_server(server.uuid)
-                        .await {
-                            Ok(data) => Ok(data.utilization),
-                            Err((status, err)) => {
-                                tracing::error!(server = %server.uuid, "failed to get server details: {:#?}", err);
-
-                                Err(anyhow::anyhow!("status code {status}: {}", err.error))
-                            }
-                        }
+                    Ok::<_, anyhow::Error>(
+                        server
+                            .node
+                            .fetch_cached(&state.database)
+                            .await?
+                            .api_client(&state.database)
+                            .get_servers_server(server.uuid)
+                            .await?
+                            .utilization,
+                    )
                 },
             )
             .await?;
