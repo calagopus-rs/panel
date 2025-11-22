@@ -170,10 +170,6 @@ jobs:
           path: artifacts
           pattern: ${{ env.PROJECT_NAME }}*
 
-      - name: Initialize Repo
-        run: make init
-        shell: bash
-
       - name: Get cli version from Cargo.toml
         id: version
         run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' -r)" >> $GITHUB_OUTPUT
@@ -225,10 +221,6 @@ jobs:
           cp dist/${{ env.PROJECT_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux .docker/arm64/panel-rs
           chmod +x .docker/amd64/panel-rs
           chmod +x .docker/arm64/panel-rs
-
-      - name: Initialize Repo
-        run: make init
-        shell: bash
 
       - name: Get cli version from Cargo.toml
         id: version
