@@ -52,7 +52,7 @@ export default function App() {
                     <Route path='/oobe/*' element={<OobeRouter />} />
 
                     <Route element={<UnauthenticatedGuard />}>
-                      <Route path={'/auth/*'} element={<AuthenticationRouter />} />
+                      <Route path='/auth/*' element={<AuthenticationRouter />} />
                     </Route>
 
                     <Route element={<AuthenticatedGuard />}>
@@ -64,7 +64,7 @@ export default function App() {
                       </Route>
                     </Route>
 
-                    <Route path={'*'} element={<NotFound />} />
+                    <Route path='*' element={<NotFound />} />
                   </Route>
                 </Routes>
               </Suspense>

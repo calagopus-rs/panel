@@ -163,8 +163,15 @@ impl ExtensionDistrFile {
             }
         }
 
+        if self.identifier.len() < 5 {
+            return Err(anyhow::anyhow!(
+                "invalid identifier `{}` in calagopus extension archive identifier. must be atleast 5 characters.",
+                self.identifier
+            ));
+        }
+
         for c in self.identifier.chars() {
-            if !c.is_ascii_lowercase() && c != '_' {
+            if !c.is_ascii_lowercase() && !c.is_ascii_digit() && c != '_' {
                 return Err(anyhow::anyhow!(
                     "invalid character `{c}` in calagopus extension archive identifier."
                 ));

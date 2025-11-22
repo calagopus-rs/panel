@@ -62,8 +62,8 @@ export default function DashboardRouter() {
         <Container>
           <Suspense fallback={<Spinner.Centered />}>
             <Routes>
-              <Route path={''} element={<DashboardHome />} />
-              <Route path={'/all'} element={<DashboardHomeAll />} />
+              <Route path='' element={<DashboardHome />} />
+              <Route path='/all' element={<DashboardHomeAll />} />
               {accountRoutes
                 .filter((route) => !route.filter || route.filter())
                 .map(({ path, element: Element }) => (
@@ -74,7 +74,7 @@ export default function DashboardRouter() {
                 .map(({ path, element: Element }) => (
                   <Route key={path} path={`/account/${path}`.replace('//', '/')} element={<Element />} />
                 ))}
-              <Route path={'*'} element={<NotFound />} />
+              <Route path='*' element={<NotFound />} />
             </Routes>
           </Suspense>
         </Container>

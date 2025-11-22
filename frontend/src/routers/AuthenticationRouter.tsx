@@ -15,7 +15,7 @@ export default function AuthenticationRouter() {
         .map(({ path, element: Element }) => (
           <Route key={path} path={path} element={<Element />} />
         ))}
-      <Route path={'*'} element={<NotFound />} />
+      <Route path='*' element={<NotFound />} />
     </Routes>
   );
 }
