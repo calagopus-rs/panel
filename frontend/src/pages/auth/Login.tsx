@@ -306,14 +306,7 @@ export default function Login() {
               </Text>
 
               <Center>
-                <PinInput
-                  length={6}
-                  value={totpCode}
-                  onChange={setTotpCode}
-                  placeholder='0'
-                  size='md'
-                  type='number'
-                />
+                <PinInput length={6} value={totpCode} onChange={setTotpCode} placeholder='0' size='md' type='number' />
               </Center>
 
               <Button onClick={doSubmitTotp} loading={loading} disabled={totpCode.length !== 6} size='md' fullWidth>

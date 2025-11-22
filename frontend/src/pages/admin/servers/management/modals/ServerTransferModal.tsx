@@ -187,8 +187,7 @@ export default function ServerTransferModal({ server, opened, onClose }: ModalPr
             withAsterisk
             label='Multiplex Channels'
             placeholder='Multiplex Channels'
-            description=
-              'Add additional HTTP connections (and therefore also threads) for transfering split archives, total streams is 1 + multiplex channels'
+            description='Add additional HTTP connections (and therefore also threads) for transfering split archives, total streams is 1 + multiplex channels'
             min={0}
             value={multiplexChannels}
             onChange={(value) => setMultiplexChannels(Number(value) || 0)}

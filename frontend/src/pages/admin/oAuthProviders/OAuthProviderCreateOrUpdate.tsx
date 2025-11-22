@@ -177,8 +177,7 @@ export default function OAuthProviderCreateOrUpdate({
             withAsterisk
             label='Identifier Path'
             placeholder='Identifier Path'
-            description=
-              'The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
+            description='The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
             {...form.getInputProps('identifierPath')}
           />
         </Group>
@@ -194,8 +193,7 @@ export default function OAuthProviderCreateOrUpdate({
             withAsterisk
             label='Username Path'
             placeholder='Username Path'
-            description=
-              'The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
+            description='The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
             {...form.getInputProps('usernamePath')}
           />
         </Group>
@@ -204,15 +202,13 @@ export default function OAuthProviderCreateOrUpdate({
           <TextInput
             label='First Name Path'
             placeholder='First Name URL'
-            description=
-              'The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
+            description='The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
             {...form.getInputProps('nameFirstPath')}
           />
           <TextInput
             label='Last Name Path'
             placeholder='Last Name Path'
-            description=
-              'The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
+            description='The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
             {...form.getInputProps('nameLastPath')}
           />
         </Group>

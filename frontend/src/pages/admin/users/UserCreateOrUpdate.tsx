@@ -96,22 +96,11 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
 
         <Group grow>
           <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
-          <TextInput
-            withAsterisk
-            label='Email'
-            placeholder='Email'
-            type='email'
-            {...form.getInputProps('email')}
-          />
+          <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='First Name'
-            placeholder='First Name'
-            {...form.getInputProps('nameFirst')}
-          />
+          <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
           <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
         </Group>
 

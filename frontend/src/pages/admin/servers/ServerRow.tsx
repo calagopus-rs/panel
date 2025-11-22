@@ -18,19 +18,13 @@ export default function ServerRow({ server }: { server: AdminServer }) {
       <TableData>{server.name}</TableData>
 
       <TableData>
-        <NavLink
-          to={`/admin/nodes/${server.node.uuid}`}
-          className='text-blue-400 hover:text-blue-200 hover:underline'
-        >
+        <NavLink to={`/admin/nodes/${server.node.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{server.node.name}</Code>
         </NavLink>
       </TableData>
 
       <TableData>
-        <NavLink
-          to={`/admin/users/${server.owner.uuid}`}
-          className='text-blue-400 hover:text-blue-200 hover:underline'
-        >
+        <NavLink to={`/admin/users/${server.owner.uuid}`} className='text-blue-400 hover:text-blue-200 hover:underline'>
           <Code>{server.owner.username}</Code>
         </NavLink>
       </TableData>

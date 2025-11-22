@@ -152,13 +152,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
             min={1024}
             {...form.getInputProps('memory')}
           />
-          <NumberInput
-            withAsterisk
-            label='Disk MB'
-            placeholder='Disk MB'
-            min={1024}
-            {...form.getInputProps('disk')}
-          />
+          <NumberInput withAsterisk label='Disk MB' placeholder='Disk MB' min={1024} {...form.getInputProps('disk')} />
         </Group>
 
         <Group grow align='start'>

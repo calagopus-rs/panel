@@ -1,0 +1,3 @@
+shamefully-hoist=true
+engine-strict=true
+package-manager-strict-version=true

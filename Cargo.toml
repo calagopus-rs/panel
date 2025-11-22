@@ -2,6 +2,7 @@
 resolver = "3"
 members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
+package.license = "MIT"
 package.version = "0.14.0"
 package.edition = "2024"
 
@@ -45,13 +46,17 @@ rand = "0.9.0"
 rustis = "0.16.1"
 dotenvy = "0.15.7"
 oauth2 = "5.0.0"
+semver = { version = "1.0.27", features = ["serde"] }
 
+# dev (for development)
 [profile.dev.package."*"]
 opt-level = 3
 
 [profile.dev]
+codegen-units = 512
 debug = false
 
+# release (for github actions)
 [profile.release.package."*"]
 opt-level = "s"
 codegen-units = 1
@@ -61,4 +66,17 @@ strip = "symbols"
 opt-level = "s"
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
+
+# heavy-release (mainly for extension builds)
+[profile.heavy-release.package."*"]
+opt-level = "s"
+codegen-units = 32
+strip = "symbols"
+
+[profile.heavy-release]
+inherits = "release"
+opt-level = "s"
+lto = false
+codegen-units = 32
 strip = "symbols"

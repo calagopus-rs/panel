@@ -1,5 +1,7 @@
+use anyhow::Context;
 use clap::{Args, FromArgMatches};
 use colored::Colorize;
+use shared::extensions::distr::ExtensionDistrFile;
 
 #[derive(Args)]
 pub struct InspectArgs {
@@ -19,22 +21,22 @@ impl shared::extensions::commands::CliCommand<InspectArgs> for InspectCommand {
             Box::pin(async move {
                 let args = InspectArgs::from_arg_matches(&arg_matches)?;
 
-                let file = std::fs::File::open(args.file)?;
-                let metadata = file.metadata()?;
-                let extension_distr =
-                    shared::extensions::distr::ExtensionDistrFile::parse_from_file(file)?;
+                let file = tokio::fs::File::open(&args.file).await?.into_std().await;
+                let metadata = tokio::fs::metadata(args.file).await?;
+                let extension_distr = tokio::task::spawn_blocking(move || {
+                    ExtensionDistrFile::parse_from_file(file)
+                        .context("failed to parse calagopus extension archive")
+                })
+                .await??;
 
-                println!(
-                    "{}",
-                    extension_distr.backend_package.name.cyan().underline()
-                );
+                println!("{}", extension_distr.identifier.cyan().underline());
                 println!(
                     "  status:        {}",
                     if let Some(ext) = extension_internal_list::list()
                         .into_iter()
                         .find(|e| e.identifier == extension_distr.identifier)
                     {
-                        if ext.version() == extension_distr.backend_package.version {
+                        if ext.version == extension_distr.cargo_toml.package.version {
                             "installed".green()
                         } else {
                             "installed - different version".yellow()
@@ -43,27 +45,38 @@ impl shared::extensions::commands::CliCommand<InspectArgs> for InspectCommand {
                         "not installed".red()
                     }
                 );
-                if let Some(description) = &extension_distr.backend_package.description {
-                    println!("  description:   {}", description.cyan());
-                }
-                if let Some(authors) = &extension_distr.backend_package.authors
-                    && let Some(first) = authors.first()
-                {
-                    let spaces = (authors.len() as f64).log10().floor() as usize + 1;
+                println!(
+                    "  name:          {}",
+                    extension_distr.cargo_toml.package.name.cyan()
+                );
+                println!(
+                    "  description:   {}",
+                    extension_distr.cargo_toml.package.description.cyan()
+                );
+                if let Some(first) = extension_distr.cargo_toml.package.authors.first() {
+                    let spaces = (extension_distr.cargo_toml.package.authors.len() as f64)
+                        .log10()
+                        .floor() as usize
+                        + 1;
 
                     println!(
                         "  authors ({}): {}{}",
-                        authors.len(),
+                        extension_distr.cargo_toml.package.authors.len(),
                         " ".repeat(3 - spaces),
                         first.cyan()
                     );
-                    for author in authors.iter().skip(1) {
+                    for author in extension_distr.cargo_toml.package.authors.iter().skip(1) {
                         println!("                 {}", author.cyan());
                     }
                 }
                 println!(
                     "  version:       {}",
-                    extension_distr.backend_package.version.cyan()
+                    extension_distr
+                        .cargo_toml
+                        .package
+                        .version
+                        .to_string()
+                        .cyan()
                 );
                 println!(
                     "  packed size:   {}",
@@ -76,30 +89,53 @@ impl shared::extensions::commands::CliCommand<InspectArgs> for InspectCommand {
                 );
 
                 println!("  frontend:");
-                if let Some((dep, version)) = extension_distr
-                    .frontend_package
-                    .dependencies
-                    .first_key_value()
+                if let Some((dep, version)) =
+                    extension_distr.package_json.dependencies.first_key_value()
                 {
-                    let spaces = (extension_distr.frontend_package.dependencies.len() as f64)
+                    let spaces = (extension_distr.package_json.dependencies.len() as f64)
                         .log10()
                         .floor() as usize
                         + 1;
 
                     println!(
-                        "    dependencies ({}): {}@{}",
-                        extension_distr.frontend_package.dependencies.len(),
+                        "    dependencies ({}): {} = {}",
+                        extension_distr.package_json.dependencies.len(),
                         dep.cyan(),
-                        version.cyan()
+                        version.bright_black()
                     );
-                    for (dep, version) in
-                        extension_distr.frontend_package.dependencies.iter().skip(1)
-                    {
+                    for (dep, version) in extension_distr.package_json.dependencies.iter().skip(1) {
                         println!(
-                            "{}                     {}@{}",
+                            "{}                     {} = {}",
                             " ".repeat(spaces),
                             dep.cyan(),
-                            version.cyan()
+                            version.bright_black()
+                        );
+                    }
+                } else {
+                    println!("    dependencies (0)");
+                }
+
+                println!("  backend:");
+                if let Some((dep, version)) =
+                    extension_distr.cargo_toml.dependencies.first_key_value()
+                {
+                    let spaces = (extension_distr.cargo_toml.dependencies.len() as f64)
+                        .log10()
+                        .floor() as usize
+                        + 1;
+
+                    println!(
+                        "    dependencies ({}): {} = {}",
+                        extension_distr.cargo_toml.dependencies.len(),
+                        dep.cyan(),
+                        version.to_string().bright_black()
+                    );
+                    for (dep, version) in extension_distr.cargo_toml.dependencies.iter().skip(1) {
+                        println!(
+                            "{}                     {} = {}",
+                            " ".repeat(spaces),
+                            dep.cyan(),
+                            version.to_string().bright_black()
                         );
                     }
                 } else {

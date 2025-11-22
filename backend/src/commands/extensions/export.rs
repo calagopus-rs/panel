@@ -1,7 +1,7 @@
-use std::{io::Write, path::Path};
-
 use clap::{Args, FromArgMatches};
 use colored::Colorize;
+use shared::extensions::distr::{ExtensionDistrFile, ExtensionDistrFileBuilder};
+use std::{io::Write, path::Path};
 
 #[derive(Args)]
 pub struct ExportArgs {
@@ -35,7 +35,7 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     std::process::exit(1);
                 }
 
-                let frontend_path = Path::new("frontend/modules").join(&args.identifier);
+                let frontend_path = Path::new("frontend/extensions").join(&args.identifier);
                 if tokio::fs::metadata(&frontend_path)
                     .await
                     .ok()
@@ -44,7 +44,7 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     eprintln!(
                         "{} {} {}",
                         "failed to find".red(),
-                        format!("frontend/modules/{}", args.identifier).bright_red(),
+                        format!("frontend/extensions/{}", args.identifier).bright_red(),
                         "directory, make sure you are in the panel root.".red()
                     );
                     std::process::exit(1);
@@ -77,30 +77,26 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     .open(&output_path)?;
                 let mut file =
                     tokio::task::spawn_blocking(move || -> Result<std::fs::File, anyhow::Error> {
-                        Ok(shared::extensions::distr::ExtensionDistrFileBuilder::new(
-                            file,
-                            &args.identifier,
-                        )?
-                        .add_frontend(frontend_path)?
-                        .add_backend(backend_path)?
-                        .write()?)
+                        Ok(ExtensionDistrFileBuilder::new(file, &args.identifier)?
+                            .add_frontend(frontend_path)?
+                            .add_backend(backend_path)?
+                            .write()?)
                     })
                     .await??;
                 file.flush()?;
                 file.sync_all()?;
 
-                let extension_distr =
-                    match shared::extensions::distr::ExtensionDistrFile::parse_from_file(file) {
-                        Ok(extension_distr) => extension_distr,
-                        Err(err) => {
-                            std::fs::remove_file(output_path)?;
-                            return Err(err);
-                        }
-                    };
+                let extension_distr = match ExtensionDistrFile::parse_from_file(file) {
+                    Ok(extension_distr) => extension_distr,
+                    Err(err) => {
+                        std::fs::remove_file(output_path)?;
+                        return Err(err);
+                    }
+                };
 
                 println!(
                     "sucessfully exported {} to {}",
-                    extension_distr.backend_package.name.cyan(),
+                    extension_distr.cargo_toml.package.name.cyan(),
                     output_path.to_string_lossy().cyan()
                 );
 

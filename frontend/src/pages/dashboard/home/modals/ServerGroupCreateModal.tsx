@@ -31,13 +31,7 @@ export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) 
 
   return (
     <Modal title='Create Server Group' onClose={onClose} opened={opened}>
-      <TextInput
-        withAsterisk
-        label='Name'
-        placeholder='Name'
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+      <TextInput withAsterisk label='Name' placeholder='Name' value={name} onChange={(e) => setName(e.target.value)} />
 
       <Group mt='md'>
         <Button onClick={doCreate} loading={loading} disabled={!name}>

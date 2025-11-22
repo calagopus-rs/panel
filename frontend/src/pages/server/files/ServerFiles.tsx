@@ -582,10 +582,7 @@ export default function ServerFiles() {
       />
 
       {isDragActive && (
-        <div
-          className=
-            'fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none'
-        >
+        <div className='fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none'>
           <div className='bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl'>
             <FontAwesomeIcon icon={faUpload} className='text-4xl text-blue-500 mb-4' />
             <p className='text-lg font-semibold'>Drop files here to upload</p>

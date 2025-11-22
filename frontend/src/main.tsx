@@ -3,10 +3,10 @@ import App from '@/App';
 import { Extension, ExtensionContext } from 'shared';
 import '@/app.css';
 
-const modules = import.meta.glob('../modules/*/src/index.ts', { eager: true });
+const extensionModules = import.meta.glob('../extensions/*/src/index.ts', { eager: true });
 const extensions: Extension[] = [];
 
-for (const [path, module] of Object.entries(modules)) {
+for (const [path, module] of Object.entries(extensionModules)) {
   const identifier = path.split('/')[2];
   if (identifier === 'shared') continue;
 

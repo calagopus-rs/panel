@@ -44,12 +44,7 @@ export default function BackupCreateModal({ opened, onClose }: ModalProps) {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <TagsInput
-          label='Ignored Files'
-          placeholder='Ignored Files'
-          value={ignoredFiles}
-          onChange={setIgnoredFiles}
-        />
+        <TagsInput label='Ignored Files' placeholder='Ignored Files' value={ignoredFiles} onChange={setIgnoredFiles} />
 
         <Group>
           <Button onClick={doCreate} loading={loading} disabled={!name}>

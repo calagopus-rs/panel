@@ -994,6 +994,7 @@ declare global {
 
   interface PublicSettings {
     version: string;
+    oobeStep: OobeStepKey | null;
     captchaProvider: PublicCaptchaProvider;
     app: {
       url: string;
@@ -1009,6 +1010,7 @@ declare global {
   }
 
   interface AdminSettings {
+    oobeStep: OobeStepKey | null;
     storageDriver: StorageDriver;
     mailMode: MailMode;
     captchaProvider: CaptchaProvider;
@@ -1071,4 +1073,5 @@ declare global {
 
   type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip' | 'seven_zip';
   type StreamingArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip';
+  type OobeStepKey = 'register' | 'configuration' | 'location' | 'node' | 'node_verify' | 'finished' | '';
 }

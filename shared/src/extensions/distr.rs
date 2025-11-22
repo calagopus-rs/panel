@@ -8,20 +8,21 @@ use std::{
 use zip::write::FileOptions;
 
 #[derive(Deserialize)]
-struct CargoToml {
-    package: CargoPackage,
-}
-
-#[derive(Deserialize)]
 pub struct CargoPackage {
     pub name: String,
-    pub description: Option<String>,
-    pub authors: Option<Vec<String>>,
-    pub version: String,
+    pub description: String,
+    pub authors: Vec<String>,
+    pub version: semver::Version,
 }
 
 #[derive(Deserialize)]
-pub struct NodePackage {
+pub struct CargoToml {
+    pub package: CargoPackage,
+    pub dependencies: BTreeMap<String, toml::Value>,
+}
+
+#[derive(Deserialize)]
+pub struct PackageJson {
     pub dependencies: BTreeMap<String, String>,
 }
 
@@ -29,8 +30,8 @@ pub struct ExtensionDistrFile {
     zip: zip::ZipArchive<std::fs::File>,
 
     pub identifier: String,
-    pub backend_package: CargoPackage,
-    pub frontend_package: NodePackage,
+    pub cargo_toml: CargoToml,
+    pub package_json: PackageJson,
 }
 
 impl ExtensionDistrFile {
@@ -43,32 +44,107 @@ impl ExtensionDistrFile {
         drop(identifier);
         let identifier = String::from_utf8(identifier_bytes)?;
 
-        let mut toml = zip.by_name("backend/Cargo.toml")?;
-        let mut toml_bytes = vec![0; toml.size() as usize];
-        toml.read_exact(&mut toml_bytes)?;
-        drop(toml);
+        let mut cargo_toml = zip.by_name("backend/Cargo.toml")?;
+        let mut cargo_toml_bytes = vec![0; cargo_toml.size() as usize];
+        cargo_toml.read_exact(&mut cargo_toml_bytes)?;
+        drop(cargo_toml);
 
-        let toml: CargoToml = toml::from_slice(&toml_bytes)?;
+        let cargo_toml: CargoToml = toml::from_slice(&cargo_toml_bytes)?;
 
-        let mut json = zip.by_name("frontend/package.json")?;
-        let mut json_bytes = vec![0; json.size() as usize];
-        json.read_exact(&mut json_bytes)?;
-        drop(json);
+        let mut package_json = zip.by_name("frontend/package.json")?;
+        let mut package_json_bytes = vec![0; package_json.size() as usize];
+        package_json.read_exact(&mut package_json_bytes)?;
+        drop(package_json);
 
-        let frontend_package: NodePackage = serde_json::from_slice(&json_bytes)?;
+        let package_json: PackageJson = serde_json::from_slice(&package_json_bytes)?;
 
         let mut this = Self {
             zip,
             identifier,
-            backend_package: toml.package,
-            frontend_package,
+            cargo_toml,
+            package_json,
         };
         this.validate()?;
 
         Ok(this)
     }
 
+    pub fn extract_backend(&mut self, path: impl AsRef<Path>) -> Result<(), anyhow::Error> {
+        let filesystem = crate::cap::CapFilesystem::new(path.as_ref().to_path_buf())?;
+
+        let mut i = 0;
+        while let Ok(mut entry) = self.zip.by_index(i) {
+            i += 1;
+
+            if !entry.name().starts_with("backend/") {
+                continue;
+            }
+
+            let clean_path = match entry.enclosed_name() {
+                Some(clean_path) => clean_path,
+                None => continue,
+            };
+            let clean_path = match clean_path.strip_prefix("backend/") {
+                Ok(clean_path) => clean_path,
+                Err(_) => continue,
+            };
+
+            if entry.is_dir() {
+                filesystem.create_dir_all(clean_path)?;
+            } else if entry.is_file() {
+                let mut file = filesystem.create(clean_path)?;
+
+                std::io::copy(&mut entry, &mut file)?;
+                file.flush()?;
+                file.sync_all()?;
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn extract_frontend(&mut self, path: impl AsRef<Path>) -> Result<(), anyhow::Error> {
+        let filesystem = crate::cap::CapFilesystem::new(path.as_ref().to_path_buf())?;
+
+        let mut i = 0;
+        while let Ok(mut entry) = self.zip.by_index(i) {
+            i += 1;
+
+            if !entry.name().starts_with("frontend/") {
+                continue;
+            }
+
+            let clean_path = match entry.enclosed_name() {
+                Some(clean_path) => clean_path,
+                None => continue,
+            };
+            let clean_path = match clean_path.strip_prefix("frontend/") {
+                Ok(clean_path) => clean_path,
+                Err(_) => continue,
+            };
+
+            if entry.is_dir() {
+                filesystem.create_dir_all(clean_path)?;
+            } else if entry.is_file() {
+                let mut file = filesystem.create(clean_path)?;
+
+                std::io::copy(&mut entry, &mut file)?;
+                file.flush()?;
+                file.sync_all()?;
+            }
+        }
+
+        Ok(())
+    }
+
     pub fn validate(&mut self) -> Result<(), anyhow::Error> {
+        const BANNED_EXTENSION_IDENTIFIERS: &[&str] = &[
+            "shared",
+            "internal-list",
+            "internal_list",
+            "panel-rs",
+            "panel_rs",
+        ];
         const MUST_EXIST_DIRECTORIES: &[&str] =
             &["backend/", "backend/src/", "frontend/", "frontend/src/"];
         const MUST_EXIST_FILES: &[&str] = &[
@@ -78,14 +154,21 @@ impl ExtensionDistrFile {
             "frontend/src/index.ts",
         ];
 
-        for c in self.identifier.chars() {
-            if ('a'..'z').contains(&c) || c == '_' {
-                break;
+        for banned in BANNED_EXTENSION_IDENTIFIERS {
+            if self.identifier == *banned {
+                return Err(anyhow::anyhow!(
+                    "invalid identifier `{}` in calagopus extension archive identifier.",
+                    self.identifier
+                ));
             }
+        }
 
-            return Err(anyhow::anyhow!(
-                "invalid character `{c}` in calagopus extension archive identifier."
-            ));
+        for c in self.identifier.chars() {
+            if !c.is_ascii_lowercase() && c != '_' {
+                return Err(anyhow::anyhow!(
+                    "invalid character `{c}` in calagopus extension archive identifier."
+                ));
+            }
         }
 
         for dir in MUST_EXIST_DIRECTORIES {
@@ -138,6 +221,48 @@ impl ExtensionDistrFile {
     #[inline]
     pub fn total_size(&self) -> u128 {
         self.zip.decompressed_size().unwrap_or_default()
+    }
+}
+
+pub struct SlimExtensionDistrFile {
+    pub identifier: String,
+    pub cargo_toml: CargoToml,
+    pub package_json: PackageJson,
+}
+
+impl SlimExtensionDistrFile {
+    pub fn parse_from_directory(path: impl AsRef<Path>) -> Result<Vec<Self>, anyhow::Error> {
+        let filesystem = crate::cap::CapFilesystem::new(path.as_ref().to_path_buf())?;
+        let mut results = Vec::new();
+
+        let mut dir = filesystem.read_dir("backend-extensions")?;
+        while let Some(Ok((is_dir, name))) = dir.next_entry() {
+            if !is_dir || name == "internal-list" {
+                continue;
+            }
+
+            let cargo_toml = filesystem.read_to_string(
+                Path::new("backend-extensions")
+                    .join(&name)
+                    .join("Cargo.toml"),
+            )?;
+            let cargo_toml: CargoToml = toml::from_str(&cargo_toml)?;
+
+            let package_json = filesystem.read_to_string(
+                Path::new("frontend/extensions")
+                    .join(&name)
+                    .join("package.json"),
+            )?;
+            let package_json: PackageJson = serde_json::from_str(&package_json)?;
+
+            results.push(Self {
+                identifier: name,
+                cargo_toml,
+                package_json,
+            });
+        }
+
+        Ok(results)
     }
 }
 

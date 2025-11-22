@@ -1,5 +1,6 @@
 [package]
 name = "wings-api"
+license = { workspace = true }
 version = { workspace = true }
 edition = { workspace = true }
 

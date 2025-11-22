@@ -1,7 +1,7 @@
 import { sql } from "drizzle-orm"
 import { index, integer, pgTable, varchar, uniqueIndex, pgEnum, char, boolean, timestamp, text, uuid, smallint, jsonb, inet, bigint, primaryKey, PgColumn, customType, json } from "drizzle-orm/pg-core"
 
-const UTF8_MAX_SCALAR_SIZE = 4
+export const UTF8_MAX_SCALAR_SIZE = 4
 
 export const bytea = customType<{ data: string; notNull: false; default: false }>({
   dataType() {

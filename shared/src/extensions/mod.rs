@@ -197,43 +197,12 @@ pub struct ConstructedExtension {
     pub name: &'static str,
     pub description: &'static str,
     pub authors: &'static [&'static str],
-    pub version: &'static str,
+    #[schema(value_type = String)]
+    pub version: semver::Version,
 
     #[serde(skip)]
     #[schema(ignore)]
     pub extension: Box<dyn Extension>,
-}
-
-impl ConstructedExtension {
-    /// Gets the identifier of the extension defined by the author
-    #[inline]
-    pub const fn identifier(&self) -> &'static str {
-        self.identifier
-    }
-
-    /// Gets the display name of the extension defined by the author
-    #[inline]
-    pub const fn name(&self) -> &'static str {
-        self.name
-    }
-
-    /// Gets the description of the extension defined by the author
-    #[inline]
-    pub const fn description(&self) -> &'static str {
-        self.description
-    }
-
-    /// Gets the author name of the extension defined by the author
-    #[inline]
-    pub const fn author(&self) -> &'static [&'static str] {
-        self.authors
-    }
-
-    /// Gets the version name of the extension defined by the author
-    #[inline]
-    pub const fn version(&self) -> &'static str {
-        self.version
-    }
 }
 
 impl Deref for ConstructedExtension {

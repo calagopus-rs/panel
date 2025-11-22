@@ -30,7 +30,7 @@ fn main() {
             name: String,
             description: Option<String>,
             authors: Option<Vec<String>>,
-            version: String,
+            version: semver::Version,
         }
 
         let cargo_toml: CargoToml = toml::from_str(&cargo_toml).unwrap();
@@ -49,30 +49,25 @@ fn main() {
         deps.push_str("\" }\n");
     }
 
+    const CARGO_TEMPLATE_TOML: &str =
+        include_str!("../backend-extensions/internal-list/Cargo.template.toml");
+
     std::fs::write(
         internal_list_extension.join("Cargo.toml"),
-        format!(
-            r#"[package]
-name = "extension-internal-list"
-version = {{ workspace = true }}
-edition = {{ workspace = true }}
-
-[dependencies]
-shared = {{ workspace = true }}
-{}"#,
-            deps
-        ),
+        format!("{CARGO_TEMPLATE_TOML}{}", deps),
     )
     .unwrap();
 
     let mut exts = String::new();
 
-    for (_, package) in packages {
+    for (file_identifier, package) in packages {
         let identifier = package.name.replace("-", "_");
 
         exts.push_str("\n        ConstructedExtension {\n");
         exts.push_str("            identifier: ");
-        exts.push_str(&toml::Value::String(identifier.clone()).to_string());
+        exts.push_str(
+            &toml::Value::String(file_identifier.to_string_lossy().to_string()).to_string(),
+        );
         exts.push_str(",\n");
         exts.push_str("            name: ");
         exts.push_str(&toml::Value::String(package.name).to_string());
@@ -93,9 +88,9 @@ shared = {{ workspace = true }}
             .to_string(),
         );
         exts.push_str(",\n");
-        exts.push_str("            version: ");
-        exts.push_str(&toml::Value::String(package.version).to_string());
-        exts.push_str(",\n");
+        exts.push_str("            version: semver::Version::parse(");
+        exts.push_str(&toml::Value::String(package.version.to_string()).to_string());
+        exts.push_str(").unwrap(),\n");
         exts.push_str("            extension: Box::new(");
         exts.push_str(&identifier);
         exts.push_str("::ExtensionStruct::default()),\n");
@@ -105,7 +100,9 @@ shared = {{ workspace = true }}
     std::fs::write(
         internal_list_extension.join("src/lib.rs"),
         format!(
-            r#"use shared::extensions::ConstructedExtension;
+            r#"#![allow(clippy::default_constructed_unit_structs)]
+
+use shared::extensions::ConstructedExtension;
 
 pub fn list() -> Vec<ConstructedExtension> {{
     vec![{}

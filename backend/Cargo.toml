@@ -1,5 +1,6 @@
 [package]
 name = "panel-rs"
+license = { workspace = true }
 version = { workspace = true }
 edition = { workspace = true }
 
@@ -51,6 +52,8 @@ rustis = { workspace = true }
 dotenvy = { workspace = true }
 oauth2 = { workspace = true }
 human_bytes = "0.4.3"
+which = "8.0.0"
+semver = { workspace = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 tikv-jemallocator = "0.6.0"
@@ -58,3 +61,4 @@ tikv-jemallocator = "0.6.0"
 [build-dependencies]
 serde = { workspace = true }
 toml = "0.9.7"
+semver = { workspace = true }
