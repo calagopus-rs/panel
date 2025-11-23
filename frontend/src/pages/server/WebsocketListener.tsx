@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
-import { transformKeysToCamelCase } from '@/api/transformers';
+import { transformKeysToCamelCase } from '@/lib/transformers';
 import useWebsocketEvent, { SocketEvent, SocketRequest } from '@/plugins/useWebsocketEvent';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';

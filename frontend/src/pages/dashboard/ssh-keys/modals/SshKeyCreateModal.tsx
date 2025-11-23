@@ -1,5 +1,8 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod/v4';
 import { httpErrorToHuman } from '@/api/axios';
 import createSshKey from '@/api/me/ssh-keys/createSshKey';
 import Button from '@/elements/Button';
@@ -9,18 +12,30 @@ import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 
+const schema = z.object({
+  name: z.string().min(3).max(31),
+  publicKey: z.string(),
+});
+
 export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { addSshKey } = useUserStore();
 
-  const [name, setName] = useState('');
-  const [pubKey, setPubKey] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      name: '',
+      publicKey: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
 
   const doCreate = () => {
     setLoading(true);
 
-    createSshKey(name, pubKey)
+    createSshKey(form.values)
       .then((key) => {
         addToast('SSH key created.', 'success');
 
@@ -36,26 +51,19 @@ export default function SshKeyCreateModal({ opened, onClose }: ModalProps) {
   return (
     <Modal title='Create SSH Key' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput
-          withAsterisk
-          label='Name'
-          placeholder='Name'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
         <TextArea
           withAsterisk
           label='Public Key'
           placeholder='Public Key'
-          value={pubKey}
-          onChange={(e) => setPubKey(e.target.value)}
           rows={3}
           resize='none'
+          {...form.getInputProps('publicKey')}
         />
 
         <Group mt='md'>
-          <Button onClick={doCreate} loading={loading} disabled={!name || !pubKey}>
+          <Button onClick={doCreate} loading={loading} disabled={!form.isValid()}>
             Create
           </Button>
           <Button variant='default' onClick={onClose}>

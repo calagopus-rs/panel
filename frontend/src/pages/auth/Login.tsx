@@ -26,9 +26,7 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState<'username' | 'oauth' | 'passkey' | 'password' | 'totp' | 'totp-recovery'>(
-    'username',
-  );
+  const [step, setStep] = useState<'username' | 'passkey' | 'password' | 'totp' | 'totp-recovery'>('username');
   const [oAuthProviders, setOAuthProviders] = useState<OAuthProvider[]>([]);
   const [username, setUsername] = useState('');
   const [passkeyUuid, setPasskeyUuid] = useState('');
@@ -207,7 +205,7 @@ export default function Login() {
                 <Button
                   variant='light'
                   disabled={!oAuthProviders.length}
-                  onClick={() => setStep('oauth')}
+                  onClick={() => navigate('/auth/login/oauth')}
                   size='md'
                   fullWidth
                 >
@@ -216,29 +214,6 @@ export default function Login() {
               )}
               <Button variant='light' onClick={() => navigate('/auth/forgot-password')} size='md' fullWidth>
                 Forgot Password
-              </Button>
-            </Stack>
-          ) : step === 'oauth' ? (
-            <Stack>
-              <Title order={2} ta='center'>
-                Authenticate with OAuth
-              </Title>
-              <Text c='dimmed' ta='center'>
-                Choose any of the providers below to login
-              </Text>
-
-              {oAuthProviders.map((oAuthProvider) => (
-                <a key={oAuthProvider.uuid} href={`/api/auth/oauth/redirect/${oAuthProvider.uuid}`}>
-                  <Button leftSection={<FontAwesomeIcon icon={faFingerprint} />} size='md' fullWidth>
-                    Login with {oAuthProvider.name}
-                  </Button>
-                </a>
-              ))}
-
-              <Divider label='OR' labelPosition='center' />
-
-              <Button variant='light' onClick={() => setStep('username')} size='md' fullWidth>
-                Back
               </Button>
             </Stack>
           ) : step === 'passkey' ? (

@@ -1,6 +1,9 @@
 import { Group, Modal as MantineModal, Stack, Text, useModalsStack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
+import { z } from 'zod/v4';
 import { httpErrorToHuman } from '@/api/axios';
 import enableTwoFactor from '@/api/me/account/enableTwoFactor';
 import getTwoFactor from '@/api/me/account/getTwoFactor';
@@ -8,11 +11,16 @@ import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
 import NumberInput from '@/elements/input/NumberInput';
-import TextInput from '@/elements/input/TextInput';
+import PasswordInput from '@/elements/input/PasswordInput';
 import Modal from '@/elements/modals/Modal';
 import Spinner from '@/elements/Spinner';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
+
+const schema = z.object({
+  code: z.string().min(6).max(6),
+  password: z.string().max(512),
+});
 
 export interface TwoFactorSetupResponse {
   otpUrl: string;
@@ -26,17 +34,23 @@ export default function TwoFactorSetupButton() {
   const stageStack = useModalsStack(['setup', 'recovery']);
 
   const [token, setToken] = useState<TwoFactorSetupResponse | null>(null);
-  const [code, setCode] = useState('');
-  const [password, setPassword] = useState('');
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      code: '',
+      password: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
 
   useEffect(() => {
     if (!open) {
       stageStack.open('setup');
-      setCode('');
-      setPassword('');
       setRecoveryCodes([]);
+      form.reset();
       return;
     }
 
@@ -52,7 +66,7 @@ export default function TwoFactorSetupButton() {
   const doEnable = () => {
     setLoading(true);
 
-    enableTwoFactor(code, password)
+    enableTwoFactor(form.values)
       .then(({ recoveryCodes }) => {
         setRecoveryCodes(recoveryCodes);
         addToast('Two-factor authentication enabled. Please copy your recovery codes.', 'warning');
@@ -92,24 +106,12 @@ export default function TwoFactorSetupButton() {
               generated into the field below.
             </Text>
 
-            <NumberInput
-              withAsterisk
-              label='Code'
-              placeholder='000000'
-              value={code}
-              onChange={(value) => setCode(String(value))}
-            />
+            <NumberInput withAsterisk label='Code' placeholder='000000' {...form.getInputProps('code')} />
 
-            <TextInput
-              withAsterisk
-              label='Password'
-              placeholder='Password'
-              type='password'
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <PasswordInput withAsterisk label='Password' placeholder='Password' {...form.getInputProps('password')} />
 
             <Group>
-              <Button onClick={doEnable} loading={loading} disabled={!code || !password}>
+              <Button onClick={doEnable} loading={loading} disabled={!form.isValid()}>
                 Enable
               </Button>
               <Button variant='default' onClick={() => stageStack.closeAll()}>

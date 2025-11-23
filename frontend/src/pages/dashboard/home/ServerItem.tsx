@@ -8,20 +8,20 @@ import {
   faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import getServerResourceUsage from '@/api/server/getServerResourceUsage';
-import CopyOnClick from '@/elements/CopyOnClick';
-import Spinner from '@/elements/Spinner';
-import { formatAllocation } from '@/lib/server';
-import { bytesToString, mbToBytes } from '@/lib/size';
-import Card from '@/elements/Card';
-import Divider from '@/elements/Divider';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
-import { useUserStore } from '@/stores/user';
+import Card from '@/elements/Card';
+import CopyOnClick from '@/elements/CopyOnClick';
+import Divider from '@/elements/Divider';
+import Spinner from '@/elements/Spinner';
 import Tooltip from '@/elements/Tooltip';
-import { ActionIcon } from '@mantine/core';
+import { formatAllocation } from '@/lib/server';
+import { bytesToString, mbToBytes } from '@/lib/size';
+import { useUserStore } from '@/stores/user';
 import ServerAddGroupModal from './modals/ServerAddGroupModal';
 
 const statusToColor = (status: ServerPowerState) => {

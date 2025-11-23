@@ -1,5 +1,8 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod/v4';
 import { httpErrorToHuman } from '@/api/axios';
 import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
 import Button from '@/elements/Button';
@@ -7,6 +10,10 @@ import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+
+const schema = z.object({
+  name: z.string().min(3).max(31),
+});
 
 type Props = ModalProps & {
   sshKey: UserSshKey;
@@ -16,15 +23,22 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { updateSshKey: updateStateSshKey } = useUserStore();
 
-  const [name, setName] = useState(sshKey.name);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      name: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
 
   const doUpdate = () => {
     setLoading(true);
 
-    updateSshKey(sshKey.uuid, name)
+    updateSshKey(sshKey.uuid, form.values)
       .then(() => {
-        updateStateSshKey(sshKey.uuid, { name });
+        updateStateSshKey(sshKey.uuid, form.values);
 
         onClose();
         addToast('SSH Key updated.', 'success');
@@ -38,16 +52,10 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
   return (
     <Modal title='Edit SSH Key' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput
-          withAsterisk
-          label='Name'
-          placeholder='Name'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
         <Group>
-          <Button onClick={doUpdate} loading={loading} disabled={!name}>
+          <Button onClick={doUpdate} loading={loading} disabled={!form.isValid()}>
             Edit
           </Button>
           <Button variant='default' onClick={onClose}>

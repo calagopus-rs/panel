@@ -1,12 +1,14 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (email: string, password: string): Promise<void> => {
+interface Data {
+  email: string;
+  password: string;
+}
+
+export default async (data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put('/api/client/account/email', {
-        email,
-        password,
-      })
+      .put('/api/client/account/email', data)
       .then(() => resolve())
       .catch(reject);
   });

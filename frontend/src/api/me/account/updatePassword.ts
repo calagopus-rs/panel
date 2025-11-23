@@ -1,12 +1,15 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-export default async (password: string, newPassword: string): Promise<void> => {
+interface Data {
+  password: string;
+  newPassword: string;
+}
+
+export default async (data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put('/api/client/account/password', {
-        password,
-        new_password: newPassword,
-      })
+      .put('/api/client/account/password', transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

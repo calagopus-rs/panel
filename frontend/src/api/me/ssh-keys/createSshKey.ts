@@ -1,9 +1,15 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-export default async (name: string, publicKey: string): Promise<UserSshKey> => {
+interface Data {
+  name: string;
+  publicKey: string;
+}
+
+export default async (data: Data): Promise<UserSshKey> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post('/api/client/account/ssh-keys', { name, public_key: publicKey })
+      .post('/api/client/account/ssh-keys', transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.sshKey))
       .catch(reject);
   });

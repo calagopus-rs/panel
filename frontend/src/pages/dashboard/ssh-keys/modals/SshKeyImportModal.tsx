@@ -1,5 +1,8 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod/v4';
 import { httpErrorToHuman } from '@/api/axios';
 import importSshKeys from '@/api/me/ssh-keys/importSshKeys';
 import Button from '@/elements/Button';
@@ -10,18 +13,30 @@ import { sshKeyProviderLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
 
+const schema = z.object({
+  provider: z.enum(['github', 'gitlab', 'launchpad']),
+  username: z.string(),
+});
+
 export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { addSshKey } = useUserStore();
 
-  const [provider, setProvider] = useState<SshKeyProvider>('github');
-  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      provider: 'github',
+      username: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
 
   const doImport = () => {
     setLoading(true);
 
-    importSshKeys(provider, username)
+    importSshKeys(form.values)
       .then((keys) => {
         addToast(`${keys.length} SSH key${keys.length === 1 ? '' : 's'} created.`, 'success');
 
@@ -47,22 +62,20 @@ export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
               label,
               value,
             }))}
-            value={provider}
-            onChange={(value) => setProvider(value as SshKeyProvider)}
+            {...form.getInputProps('provider')}
           />
 
           <TextInput
             withAsterisk
             label='Username'
             placeholder='Username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
             className='col-span-2'
+            {...form.getInputProps('username')}
           />
         </div>
 
         <Group mt='md'>
-          <Button onClick={doImport} loading={loading} disabled={!username}>
+          <Button onClick={doImport} loading={loading} disabled={!form.isValid()}>
             Import
           </Button>
           <Button variant='default' onClick={onClose}>

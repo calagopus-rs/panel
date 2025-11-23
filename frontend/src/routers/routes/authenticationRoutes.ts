@@ -1,13 +1,18 @@
 import type { GlobalRouteDefinition } from 'shared';
-import Login from '@/pages/auth/Login';
-import Register from '@/pages/auth/Register';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
+import Login from '@/pages/auth/Login';
+import LoginOAuth from '@/pages/auth/LoginSteps/LoginOAuth';
+import Register from '@/pages/auth/Register';
 import ResetPassword from '@/pages/auth/ResetPassword';
 
 const routes: GlobalRouteDefinition[] = [
   {
     path: '/login',
     element: Login,
+  },
+  {
+    path: '/login/oauth',
+    element: LoginOAuth,
   },
   {
     path: '/register',
