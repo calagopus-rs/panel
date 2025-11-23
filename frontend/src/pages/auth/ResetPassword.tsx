@@ -5,7 +5,7 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import resetPassword from '@/api/auth/resetPassword';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';

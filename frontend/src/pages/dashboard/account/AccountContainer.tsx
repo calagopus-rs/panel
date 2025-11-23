@@ -2,7 +2,7 @@ import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';

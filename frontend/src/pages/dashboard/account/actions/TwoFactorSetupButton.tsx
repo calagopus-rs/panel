@@ -3,7 +3,7 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import enableTwoFactor from '@/api/me/account/enableTwoFactor';
 import getTwoFactor from '@/api/me/account/getTwoFactor';

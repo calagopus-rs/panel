@@ -11,7 +11,7 @@ import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import getLocations from '@/api/admin/locations/getLocations';
 import createNode from '@/api/admin/nodes/createNode';
 import { httpErrorToHuman } from '@/api/axios';

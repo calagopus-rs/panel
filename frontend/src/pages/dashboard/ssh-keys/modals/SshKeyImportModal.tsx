@@ -2,7 +2,7 @@ import { Group, ModalProps, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import importSshKeys from '@/api/me/ssh-keys/importSshKeys';
 import Button from '@/elements/Button';

@@ -5,7 +5,7 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import login from '@/api/auth/login';
 import { httpErrorToHuman } from '@/api/axios';
 import AlertError from '@/elements/alerts/AlertError';

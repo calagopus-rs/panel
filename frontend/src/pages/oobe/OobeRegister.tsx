@@ -4,7 +4,7 @@ import { Alert, Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import register from '@/api/auth/register';
 import { httpErrorToHuman } from '@/api/axios';
 import AlertError from '@/elements/alerts/AlertError';

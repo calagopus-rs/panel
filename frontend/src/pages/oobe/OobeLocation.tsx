@@ -4,7 +4,7 @@ import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
 import createLocation from '@/api/admin/locations/createLocation';
 import { httpErrorToHuman } from '@/api/axios';
