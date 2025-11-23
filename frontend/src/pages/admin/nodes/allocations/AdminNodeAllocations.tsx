@@ -76,11 +76,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
         </Group>
       </Group>
 
-      <SelectionArea
-        onSelectedStart={onSelectedStart}
-        onSelected={onSelected}
-        disabled={!!openModal}
-      >
+      <SelectionArea onSelectedStart={onSelectedStart} onSelected={onSelected} disabled={!!openModal}>
         <Table
           columns={nodeAllocationTableColumns}
           loading={loading}
