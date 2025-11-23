@@ -72,6 +72,10 @@ impl<'a> Validator<'a> {
 
         Ok(())
     }
+
+    pub fn into_data(self) -> HashMap<&'a str, &'a str> {
+        self.data
+    }
 }
 
 pub trait ValidateRule: Send + Sync {

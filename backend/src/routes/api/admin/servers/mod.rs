@@ -75,6 +75,8 @@ mod get {
 }
 
 mod post {
+    use std::collections::HashMap;
+
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -84,6 +86,7 @@ mod post {
             admin_activity::GetAdminActivityLogger,
             backup_configurations::BackupConfiguration,
             nest_egg::NestEgg,
+            nest_egg_variable::NestEggVariable,
             node::Node,
             server::Server,
             user::{GetPermissionManager, User},
@@ -92,6 +95,16 @@ mod post {
     };
     use utoipa::ToSchema;
     use validator::Validate;
+
+    #[derive(ToSchema, Validate, Serialize, Deserialize)]
+    pub struct PayloadVariable {
+        #[validate(length(min = 1, max = 255))]
+        #[schema(min_length = 1, max_length = 255)]
+        env_variable: String,
+        #[validate(length(max = 4096))]
+        #[schema(max_length = 4096)]
+        value: String,
+    }
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
@@ -129,6 +142,8 @@ mod post {
         timezone: Option<chrono_tz::Tz>,
 
         feature_limits: shared::models::server::ApiServerFeatureLimits,
+        #[schema(inline)]
+        variables: Vec<PayloadVariable>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -201,6 +216,59 @@ mod post {
             None
         };
 
+        let variables = NestEggVariable::all_by_egg_uuid(&state.database, egg.uuid).await?;
+
+        let mut validator_variables = HashMap::new();
+        validator_variables.reserve(variables.len());
+
+        for variable in variables.iter() {
+            validator_variables.insert(
+                variable.env_variable.as_str(),
+                (
+                    variable.rules.as_slice(),
+                    if let Some(value) = data
+                        .variables
+                        .iter()
+                        .find(|v| v.env_variable == variable.env_variable)
+                    {
+                        value.value.as_str()
+                    } else {
+                        variable.default_value.as_ref().map_or("", |v| v.as_str())
+                    },
+                ),
+            );
+        }
+
+        let validator = match rule_validator::Validator::new(validator_variables) {
+            Ok(validator) => validator,
+            Err(error) => {
+                return ApiResponse::error(&error)
+                    .with_status(StatusCode::BAD_REQUEST)
+                    .ok();
+            }
+        };
+
+        if let Err(error) = validator.validate() {
+            return ApiResponse::error(&error)
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
+        let mut server_variables = HashMap::new();
+        server_variables.reserve(variables.len());
+
+        for data_variable in &data.variables {
+            let variable_uuid = match variables
+                .iter()
+                .find(|v| v.env_variable == data_variable.env_variable)
+            {
+                Some(variable) => variable.uuid,
+                None => continue,
+            };
+
+            server_variables.insert(variable_uuid, data_variable.value.as_str());
+        }
+
         let server = match Server::create(
             &state.database,
             &node,
@@ -220,6 +288,7 @@ mod post {
             &data.image,
             data.timezone.as_ref().map(|tz| tz.name()),
             &data.feature_limits,
+            &server_variables,
         )
         .await
         {
@@ -262,6 +331,7 @@ mod post {
                     "image": data.image,
                     "timezone": data.timezone,
                     "feature_limits": data.feature_limits,
+                    "variables": data.variables,
                 }),
             )
             .await;

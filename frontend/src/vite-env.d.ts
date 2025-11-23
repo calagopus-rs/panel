@@ -261,6 +261,7 @@ declare global {
     backupConfigurationUuid: string | null;
     allocationUuid: string | null;
     allocationUuids: string[];
+    variables: { envVariable: string; value: string }[];
   }
 
   interface AdminServer {

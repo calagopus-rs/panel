@@ -3,7 +3,7 @@ resolver = "3"
 members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
 package.license = "MIT"
-package.version = "0.14.0"
+package.version = "0.14.1"
 package.edition = "2024"
 
 [workspace.dependencies]

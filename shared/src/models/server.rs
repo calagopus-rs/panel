@@ -245,6 +245,7 @@ impl Server {
         image: &str,
         timezone: Option<&str>,
         feature_limits: &ApiServerFeatureLimits,
+        variables: &HashMap<uuid::Uuid, &'_ str>,
     ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let mut transaction = database.write().begin().await?;
         let mut attempts = 0;
@@ -364,6 +365,20 @@ impl Server {
                     .bind(uuid)
                     .execute(&mut *transaction)
                     .await?;
+
+                    for (variable_uuid, value) in variables {
+                        sqlx::query(
+                            r#"
+                            INSERT INTO server_variables (server_uuid, variable_uuid, value)
+                            VALUES ($1, $2, $3)
+                            "#,
+                        )
+                        .bind(uuid)
+                        .bind(variable_uuid)
+                        .bind(value)
+                        .execute(&mut *transaction)
+                        .await?;
+                    }
 
                     transaction.commit().await?;
 

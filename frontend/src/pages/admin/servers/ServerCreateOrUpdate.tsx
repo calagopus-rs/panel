@@ -1,6 +1,6 @@
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Alert, Group, Paper, Stack, Title } from '@mantine/core';
+import { Group, Paper, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
@@ -19,12 +19,18 @@ import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import SizeInput from '@/elements/input/SizeInput';
 import Switch from '@/elements/input/Switch';
+import Alert from '@/elements/Alert';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
+import VariableContainer from '@/elements/VariableContainer';
+import Spinner from '@/elements/Spinner';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -34,6 +40,8 @@ const timezones = Object.keys(zones)
   }));
 
 export default function ServerCreateOrUpdate({ contextServer }: { contextServer?: AdminServer }) {
+  const { addToast } = useToast();
+
   const form = useForm<Partial<UpdateAdminServer>>({
     initialValues: {
       externalId: null,
@@ -64,6 +72,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       backupConfigurationUuid: uuidNil,
       allocationUuid: null,
       allocationUuids: [],
+      variables: [],
     },
   });
 
@@ -89,10 +98,12 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
     }
   }, [contextServer]);
 
+  const [eggVariablesLoading, setEggVariablesLoading] = useState(false);
   const [memoryInput, setMemoryInput] = useState('');
   const [diskInput, setDiskInput] = useState('');
   const [swapInput, setSwapInput] = useState('');
   const [selectedNestUuid, setSelectedNestUuid] = useState<string>(contextServer?.nest.uuid ?? '');
+  const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
@@ -124,7 +135,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   }, [contextServer]);
 
   useEffect(() => {
-    if (!form.values.eggUuid) {
+    if (!form.values.eggUuid || contextServer) {
       return;
     }
 
@@ -133,11 +144,25 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       return;
     }
 
-    if (!contextServer) {
-      form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
-      form.setFieldValue('startup', egg.startup);
-    }
+    form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
+    form.setFieldValue('startup', egg.startup);
   }, [form.values.eggUuid, eggs.items, contextServer]);
+
+  useEffect(() => {
+    if (!selectedNestUuid || !form.values.eggUuid || contextServer) {
+      return;
+    }
+
+    setEggVariablesLoading(true);
+    getEggVariables(selectedNestUuid, form.values.eggUuid)
+      .then((variables) => {
+        setEggVariables(variables);
+      })
+      .catch((err) => {
+        addToast(httpErrorToHuman(err), 'error');
+      })
+      .finally(() => setEggVariablesLoading(false));
+  }, [selectedNestUuid, form.values.eggUuid, contextServer]);
 
   return (
     <Stack>
@@ -449,6 +474,42 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
           </Paper>
         )}
       </Group>
+
+      {!contextServer && (
+        <Paper withBorder p='md'>
+          <Stack>
+            <Title order={3}>Variables</Title>
+
+            {!selectedNestUuid || !form.values.eggUuid ? (
+              <Alert>Please select an egg before you can configure variables.</Alert>
+            ) : eggVariablesLoading ? (
+              <Spinner.Centered />
+            ) : (
+              <div className='grid grid-cols-1 xl:grid-cols-2 gap-4'>
+                {eggVariables.map((variable) => (
+                  <VariableContainer
+                    key={variable.envVariable}
+                    variable={{ ...variable, value: '', isEditable: variable.userEditable }}
+                    loading={loading}
+                    overrideReadonly
+                    value={
+                      form.values.variables.find((v) => v.envVariable === variable.envVariable)?.value ??
+                      variable.defaultValue ??
+                      ''
+                    }
+                    setValue={(value) =>
+                      form.setFieldValue('variables', (prev) => [
+                        ...prev.filter((v) => v.envVariable !== variable.envVariable),
+                        { envVariable: variable.envVariable, value },
+                      ])
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </Stack>
+        </Paper>
+      )}
 
       <Group>
         <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
