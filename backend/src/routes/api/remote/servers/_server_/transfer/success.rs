@@ -109,7 +109,7 @@ mod post {
             .delete_servers_server(server.uuid)
             .await
         {
-            tracing::error!("failed to delete server on source node: {:#?}", err);
+            tracing::error!("failed to delete server on source node: {:?}", err);
         }
 
         ApiResponse::json(Response {}).ok()

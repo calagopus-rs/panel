@@ -137,7 +137,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create nest: {:#?}", err);
+                tracing::error!("failed to create nest: {:?}", err);
 
                 return ApiResponse::error("failed to create nest")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

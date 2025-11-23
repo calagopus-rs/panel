@@ -228,7 +228,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create variable: {:#?}", err);
+                tracing::error!("failed to create variable: {:?}", err);
 
                 return ApiResponse::error("failed to create variable")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

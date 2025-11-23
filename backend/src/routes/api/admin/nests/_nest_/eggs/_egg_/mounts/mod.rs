@@ -156,7 +156,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create egg mount: {:#?}", err);
+                tracing::error!("failed to create egg mount: {:?}", err);
 
                 return ApiResponse::error("failed to create egg mount")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

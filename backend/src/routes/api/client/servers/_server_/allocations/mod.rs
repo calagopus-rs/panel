@@ -150,7 +150,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!(server = %server.uuid, "failed to create allocation: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to create allocation: {:?}", err);
 
                 return ApiResponse::error("failed to create allocation")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -201,7 +201,7 @@ async fn main() {
         match database.migrate().await {
             Ok(_) => tracing::info!("database migrations completed successfully"),
             Err(err) => {
-                tracing::error!("failed to run database migrations: {:#?}", err);
+                tracing::error!("failed to run database migrations: {:?}", err);
                 std::process::exit(1);
             }
         }

@@ -146,7 +146,7 @@ mod post {
         {
             Ok(schedule_step) => schedule_step,
             Err(err) => {
-                tracing::error!("failed to create schedule step: {:#?}", err);
+                tracing::error!("failed to create schedule step: {:?}", err);
 
                 return ApiResponse::error("failed to create schedule step")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -176,7 +176,7 @@ mod post {
                     match server.0.sync(&state.database).await {
                         Ok(_) => {}
                         Err(err) => {
-                            tracing::warn!(server = %uuid, "failed to post server sync: {:#?}", err);
+                            tracing::warn!(server = %uuid, "failed to post server sync: {:?}", err);
                         }
                     }
                 }

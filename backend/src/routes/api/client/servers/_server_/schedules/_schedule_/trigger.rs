@@ -64,7 +64,7 @@ mod post {
         match server.clone().sync(&state.database).await {
             Ok(_) => {}
             Err(err) => {
-                tracing::error!(server = %server.uuid, "failed to post server sync: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to post server sync: {:?}", err);
 
                 return ApiResponse::error("failed to send sync signal to server")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

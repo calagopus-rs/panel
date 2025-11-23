@@ -266,7 +266,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update database host: {:#?}", err);
+                tracing::error!("failed to update database host: {:?}", err);
 
                 return ApiResponse::error("failed to update database host")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -102,7 +102,7 @@ mod post {
                         .delete_servers_server(server.uuid)
                         .await
                     {
-                        tracing::error!("failed to delete server on destination node: {:#?}", err);
+                        tracing::error!("failed to delete server on destination node: {:?}", err);
                     }
 
                     transaction.commit().await?;

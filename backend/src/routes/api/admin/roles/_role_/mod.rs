@@ -225,7 +225,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update role: {:#?}", err);
+                tracing::error!("failed to update role: {:?}", err);
 
                 return ApiResponse::error("failed to update role")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

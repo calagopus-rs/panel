@@ -151,7 +151,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create mount: {:#?}", err);
+                tracing::error!("failed to create mount: {:?}", err);
 
                 return ApiResponse::error("failed to create mount")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

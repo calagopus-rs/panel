@@ -167,7 +167,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!(name = %data.name, "failed to create schedule: {:#?}", err);
+                tracing::error!(name = %data.name, "failed to create schedule: {:?}", err);
 
                 return ApiResponse::error("failed to create schedule")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

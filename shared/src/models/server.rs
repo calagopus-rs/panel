@@ -391,7 +391,7 @@ impl Server {
                         })
                         .await
                     {
-                        tracing::error!(server = %uuid, node = %node.uuid, "failed to create server: {:#?}", err);
+                        tracing::error!(server = %uuid, node = %node.uuid, "failed to create server: {:?}", err);
 
                         sqlx::query!("DELETE FROM servers WHERE servers.uuid = $1", uuid)
                             .execute(database.write())
@@ -1406,7 +1406,7 @@ impl DeletableModel for Server {
                 match db.delete(&database, super::server_database::DeleteServerDatabaseOptions { force: options.force }).await {
                     Ok(_) => {}
                     Err(err) => {
-                        tracing::error!(server = %server_uuid, "failed to delete database: {:#?}", err);
+                        tracing::error!(server = %server_uuid, "failed to delete database: {:?}", err);
 
                         if !options.force {
                             return Err(err);
@@ -1429,7 +1429,7 @@ impl DeletableModel for Server {
                     Ok(())
                 }
                 Err(err) => {
-                    tracing::error!(server = %server_uuid, node = %node.uuid, "failed to delete server: {:#?}", err);
+                    tracing::error!(server = %server_uuid, node = %node.uuid, "failed to delete server: {:?}", err);
 
                     if options.force {
                         transaction.commit().await?;

@@ -94,7 +94,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create user: {:#?}", err);
+                tracing::error!("failed to create user: {:?}", err);
 
                 return ApiResponse::error("failed to create user")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

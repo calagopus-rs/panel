@@ -113,7 +113,7 @@ mod post {
                         Ok(ssh_key) => ssh_key,
                         Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
-                            tracing::error!("failed to create ssh key: {:#?}", err);
+                            tracing::error!("failed to create ssh key: {:?}", err);
 
                             return ApiResponse::error("failed to create ssh key")
                                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -182,7 +182,7 @@ mod post {
                         Ok(ssh_key) => ssh_key,
                         Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
-                            tracing::error!("failed to create ssh key: {:#?}", err);
+                            tracing::error!("failed to create ssh key: {:?}", err);
 
                             return ApiResponse::error("failed to create ssh key")
                                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -243,7 +243,7 @@ mod post {
                         Ok(ssh_key) => ssh_key,
                         Err(err) if err.is_unique_violation() => continue,
                         Err(err) => {
-                            tracing::error!("failed to create ssh key: {:#?}", err);
+                            tracing::error!("failed to create ssh key: {:?}", err);
 
                             return ApiResponse::error("failed to create ssh key")
                                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)

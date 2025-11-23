@@ -76,7 +76,7 @@ mod put {
                         .ok();
                 }
                 Err(err) => {
-                    tracing::error!("failed to update user email: {:#?}", err);
+                    tracing::error!("failed to update user email: {:?}", err);
 
                     return ApiResponse::error("failed to update user email")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

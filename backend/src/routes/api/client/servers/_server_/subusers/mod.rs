@@ -189,7 +189,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!(email = %data.email, "failed to create subuser: {:#?}", err);
+                tracing::error!(email = %data.email, "failed to create subuser: {:?}", err);
 
                 return ApiResponse::error("failed to create subuser")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

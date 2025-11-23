@@ -191,7 +191,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create oauth provider: {:#?}", err);
+                tracing::error!("failed to create oauth provider: {:?}", err);
 
                 return ApiResponse::error("failed to create oauth provider")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

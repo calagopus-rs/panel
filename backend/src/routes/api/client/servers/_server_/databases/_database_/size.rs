@@ -44,7 +44,7 @@ mod get {
         let size = match database.get_size(&state.database).await {
             Ok(size) => size,
             Err(err) => {
-                tracing::error!(server = %server.uuid, "failed to get database size: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to get database size: {:?}", err);
 
                 return ApiResponse::error("failed to get database size")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

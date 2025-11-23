@@ -156,7 +156,7 @@ mod delete {
         }
 
         if let Err(err) = backup.delete(&state.database, ()).await {
-            tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:#?}", err);
+            tracing::error!(server = %server.uuid, backup = %backup.uuid, "failed to delete backup: {:?}", err);
 
             return ApiResponse::error("failed to delete backup")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)

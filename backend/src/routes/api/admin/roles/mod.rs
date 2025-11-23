@@ -140,7 +140,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create role: {:#?}", err);
+                tracing::error!("failed to create role: {:?}", err);
 
                 return ApiResponse::error("failed to create role")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

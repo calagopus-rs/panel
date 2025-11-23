@@ -97,7 +97,7 @@ impl ServerSubuser {
                 {
                     Ok(user_uuid) => super::user::User::by_uuid(database, user_uuid).await?,
                     Err(err) => {
-                        tracing::error!(username = %username, email = %email, "failed to create subuser user: {:#?}", err);
+                        tracing::error!(username = %username, email = %email, "failed to create subuser user: {:?}", err);
 
                         return Err(err);
                     }

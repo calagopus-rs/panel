@@ -141,7 +141,7 @@ mod delete {
             )
             .await
         {
-            tracing::error!("failed to delete server: {:#?}", err);
+            tracing::error!("failed to delete server: {:?}", err);
 
             return ApiResponse::error(&format!("failed to delete server: {err}"))
                 .with_status(StatusCode::EXPECTATION_FAILED)
@@ -153,7 +153,7 @@ mod delete {
                 let backup_uuid = backup.uuid;
 
                 if let Err(err) = backup.delete(&state.database, ()).await {
-                    tracing::error!(server = %server.uuid, backup = %backup_uuid, "failed to delete backup: {:#?}", err);
+                    tracing::error!(server = %server.uuid, backup = %backup_uuid, "failed to delete backup: {:?}", err);
 
                     if !data.force {
                         return ApiResponse::error(&format!("failed to delete backup: {err}"))
@@ -404,7 +404,7 @@ mod patch {
         {
             Ok(_) => {}
             Err(err) => {
-                tracing::error!("failed to update server: {:#?}", err);
+                tracing::error!("failed to update server: {:?}", err);
 
                 return ApiResponse::error(&format!("failed to update server: {err}"))
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -435,7 +435,7 @@ mod patch {
 
         tokio::spawn(async move {
             if let Err(err) = server.0.sync(&state.database).await {
-                tracing::error!("failed to sync server on node: {:#?}", err);
+                tracing::error!("failed to sync server on node: {:?}", err);
             }
         });
 

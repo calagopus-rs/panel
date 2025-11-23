@@ -191,7 +191,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create node: {:#?}", err);
+                tracing::error!("failed to create node: {:?}", err);
 
                 return ApiResponse::error("failed to create node")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

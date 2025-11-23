@@ -113,7 +113,7 @@ mod patch {
                     match server.0.sync(&state.database).await {
                         Ok(_) => {}
                         Err(err) => {
-                            tracing::warn!(server = %uuid, "failed to post server sync: {:#?}", err);
+                            tracing::warn!(server = %uuid, "failed to post server sync: {:?}", err);
                         }
                     }
                 }
@@ -214,7 +214,7 @@ mod delete {
                     match server.0.sync(&state.database).await {
                         Ok(_) => {}
                         Err(err) => {
-                            tracing::warn!(server = %uuid, "failed to post server sync: {:#?}", err);
+                            tracing::warn!(server = %uuid, "failed to post server sync: {:?}", err);
                         }
                     }
                 }

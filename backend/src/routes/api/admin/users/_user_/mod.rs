@@ -295,7 +295,7 @@ mod patch {
             match user.update_password(&state.database, &password).await {
                 Ok(_) => {}
                 Err(err) => {
-                    tracing::error!("failed to update user password: {:#?}", err);
+                    tracing::error!("failed to update user password: {:?}", err);
 
                     return ApiResponse::error("failed to update user password")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)
@@ -330,7 +330,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update user: {:#?}", err);
+                tracing::error!("failed to update user: {:?}", err);
 
                 return ApiResponse::error("failed to update user")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

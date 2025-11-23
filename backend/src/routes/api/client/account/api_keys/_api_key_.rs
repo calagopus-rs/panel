@@ -192,7 +192,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update api key: {:#?}", err);
+                tracing::error!("failed to update api key: {:?}", err);
 
                 return ApiResponse::error("failed to update api key")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

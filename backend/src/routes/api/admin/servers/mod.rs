@@ -298,7 +298,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create server: {:#?}", err);
+                tracing::error!("failed to create server: {:?}", err);
 
                 return ApiResponse::error(&format!("failed to create server: {err}"))
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -150,7 +150,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update ssh key: {:#?}", err);
+                tracing::error!("failed to update ssh key: {:?}", err);
 
                 return ApiResponse::error("failed to update ssh key")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

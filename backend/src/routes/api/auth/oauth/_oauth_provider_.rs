@@ -137,7 +137,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                             .execute(state.database.write())
                             .await
                             {
-                                tracing::warn!(user = %user.uuid, "failed to update user session: {:#?}", err);
+                                tracing::warn!(user = %user.uuid, "failed to update user session: {:?}", err);
                                 sentry::capture_error(&err);
                             }
                         }
@@ -200,7 +200,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                 )
                 .await
                 {
-                    tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
+                    tracing::warn!(user = %user.uuid, "failed to log user activity: {:?}", err);
                 }
 
                 let settings = state.settings.get().await;
@@ -278,7 +278,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                         )
                         .await
                         {
-                            tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
+                            tracing::warn!(user = %user.uuid, "failed to log user activity: {:?}", err);
                         }
 
                         sqlx::query!(
@@ -361,7 +361,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                                     .ok();
                             }
                             Err(err) => {
-                                tracing::error!("failed to create user: {:#?}", err);
+                                tracing::error!("failed to create user: {:?}", err);
 
                                 return ApiResponse::error("failed to create user")
                                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

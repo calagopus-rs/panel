@@ -168,7 +168,7 @@ mod delete {
         }
 
         if let Err(err) = database.delete(&state.database, Default::default()).await {
-            tracing::error!(server = %server.uuid, "failed to delete database: {:#?}", err);
+            tracing::error!(server = %server.uuid, "failed to delete database: {:?}", err);
 
             return ApiResponse::error("failed to delete database")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)

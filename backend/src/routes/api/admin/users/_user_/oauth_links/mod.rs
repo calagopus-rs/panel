@@ -159,7 +159,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create oauth link: {:#?}", err);
+                tracing::error!("failed to create oauth link: {:?}", err);
 
                 return ApiResponse::error("failed to create oauth link")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

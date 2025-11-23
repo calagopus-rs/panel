@@ -86,7 +86,7 @@ mod get {
             let client = match s3_configuration.into_client() {
                 Ok(client) => client,
                 Err(err) => {
-                    tracing::error!("Failed to create S3 client: {:#?}", err);
+                    tracing::error!("Failed to create S3 client: {:?}", err);
 
                     return ApiResponse::error("failed to download s3 backup")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

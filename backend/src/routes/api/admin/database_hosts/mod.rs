@@ -162,7 +162,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create database host: {:#?}", err);
+                tracing::error!("failed to create database host: {:?}", err);
 
                 return ApiResponse::error("failed to create database host")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -193,7 +193,7 @@ impl Mail {
 
             match run().await {
                 Ok(_) => tracing::debug!("email sent successfully"),
-                Err(err) => tracing::error!("failed to send email: {:#?}", err),
+                Err(err) => tracing::error!("failed to send email: {:?}", err),
             }
         });
     }

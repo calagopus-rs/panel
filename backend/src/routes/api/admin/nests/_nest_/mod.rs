@@ -237,7 +237,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update nest: {:#?}", err);
+                tracing::error!("failed to update nest: {:?}", err);
 
                 return ApiResponse::error("failed to update nest")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

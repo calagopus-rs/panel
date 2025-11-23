@@ -57,7 +57,7 @@ mod post {
             && let Err(err) =
                 ServerBackup::delete_oldest_by_server_uuid(&state.database, &server).await
         {
-            tracing::error!(server = %server.uuid, "failed to delete old backup: {:#?}", err);
+            tracing::error!(server = %server.uuid, "failed to delete old backup: {:?}", err);
 
             return ApiResponse::error("maximum number of backups reached")
                 .with_status(StatusCode::EXPECTATION_FAILED)
@@ -84,7 +84,7 @@ mod post {
             {
                 Ok(backup) => backup,
                 Err(err) => {
-                    tracing::error!(name = %name, "failed to create backup: {:#?}", err);
+                    tracing::error!(name = %name, "failed to create backup: {:?}", err);
 
                     return ApiResponse::error("failed to create backup")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

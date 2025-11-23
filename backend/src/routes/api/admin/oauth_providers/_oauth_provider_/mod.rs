@@ -339,7 +339,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update oauth provider: {:#?}", err);
+                tracing::error!("failed to update oauth provider: {:?}", err);
 
                 return ApiResponse::error("failed to update oauth provider")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

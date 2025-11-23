@@ -109,7 +109,7 @@ mod post {
             )
             .await
             {
-                tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
+                tracing::warn!(user = %user.uuid, "failed to log user activity: {:?}", err);
             }
 
             ApiResponse::json(Response::TwoFactorRequired { token }).ok()
@@ -152,7 +152,7 @@ mod post {
             )
             .await
             {
-                tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
+                tracing::warn!(user = %user.uuid, "failed to log user activity: {:?}", err);
             }
 
             ApiResponse::json(Response::Completed {

@@ -55,7 +55,7 @@ mod post {
         let password = match database.rotate_password(&state.database).await {
             Ok(password) => password,
             Err(err) => {
-                tracing::error!(server = %server.uuid, "failed to rotate database password: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to rotate database password: {:?}", err);
 
                 return ApiResponse::error("failed to rotate database password")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

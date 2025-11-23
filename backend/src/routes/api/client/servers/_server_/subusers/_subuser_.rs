@@ -77,7 +77,7 @@ mod delete {
                 let node = match server.node.fetch_cached(&state.database).await {
                     Ok(node) => node,
                     Err(err) => {
-                        tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+                        tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:?}", err);
 
                         return;
                     }
@@ -97,7 +97,7 @@ mod delete {
                     )
                     .await
                 {
-                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:?}", err);
                 }
 
                 if let Err(err) = node
@@ -110,7 +110,7 @@ mod delete {
                     )
                     .await
                 {
-                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:#?}", err);
+                    tracing::error!(server = %server.uuid, "failed to remove subuser permissions in wings: {:?}", err);
                 }
             }
         });
@@ -247,7 +247,7 @@ mod patch {
                 let node = match server.node.fetch_cached(&state.database).await {
                     Ok(node) => node,
                     Err(err) => {
-                        tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:#?}", err);
+                        tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:?}", err);
 
                         return;
                     }
@@ -267,7 +267,7 @@ mod patch {
                     )
                     .await
                 {
-                    tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:#?}", err);
+                    tracing::error!(server = %server.uuid, "failed to update subuser permissions in wings: {:?}", err);
                 }
             }
         });

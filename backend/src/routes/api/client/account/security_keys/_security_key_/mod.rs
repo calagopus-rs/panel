@@ -163,7 +163,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update security key: {:#?}", err);
+                tracing::error!("failed to update security key: {:?}", err);
 
                 return ApiResponse::error("failed to update security key")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

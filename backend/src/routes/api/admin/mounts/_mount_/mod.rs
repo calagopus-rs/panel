@@ -238,7 +238,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update mount: {:#?}", err);
+                tracing::error!("failed to update mount: {:?}", err);
 
                 return ApiResponse::error("failed to update mount")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

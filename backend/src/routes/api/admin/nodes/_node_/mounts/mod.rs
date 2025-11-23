@@ -142,7 +142,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create node mount: {:#?}", err);
+                tracing::error!("failed to create node mount: {:?}", err);
 
                 return ApiResponse::error("failed to create node mount")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

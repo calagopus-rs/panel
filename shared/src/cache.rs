@@ -164,7 +164,7 @@ impl Cache {
                 ) {
                     Ok((value, _)) => return Ok(value),
                     Err(err) => {
-                        tracing::warn!("failed to deserialize from memory cache: {:#?}", err);
+                        tracing::warn!("failed to deserialize from memory cache: {:?}", err);
                     }
                 }
             }
@@ -217,7 +217,7 @@ impl Cache {
             ) {
                 Ok((value, _)) => return Ok(value),
                 Err(err) => {
-                    tracing::warn!("failed to deserialize from memory cache: {:#?}", err)
+                    tracing::warn!("failed to deserialize from memory cache: {:?}", err)
                 }
             }
         }

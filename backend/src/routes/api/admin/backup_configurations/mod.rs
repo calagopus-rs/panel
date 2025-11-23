@@ -141,7 +141,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create backup configuration: {:#?}", err);
+                tracing::error!("failed to create backup configuration: {:?}", err);
 
                 return ApiResponse::error("failed to create backup configuration")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

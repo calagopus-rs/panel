@@ -138,7 +138,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create location database host: {:#?}", err);
+                tracing::error!("failed to create location database host: {:?}", err);
 
                 return ApiResponse::error("failed to create location database host")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

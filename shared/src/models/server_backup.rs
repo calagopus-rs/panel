@@ -179,7 +179,7 @@ impl ServerBackup {
                 let node = match server.node.fetch_cached(&database).await {
                     Ok(node) => node,
                     Err(err) => {
-                        tracing::error!(backup = %uuid, "failed to create server backup: {:#?}", err);
+                        tracing::error!(backup = %uuid, "failed to create server backup: {:?}", err);
 
                         if let Err(err) = sqlx::query!(
                             r#"
@@ -192,7 +192,7 @@ impl ServerBackup {
                         .execute(database.write())
                         .await
                         {
-                            tracing::error!(backup = %uuid, "failed to update server backup status: {:#?}", err);
+                            tracing::error!(backup = %uuid, "failed to update server backup status: {:?}", err);
                         }
 
                         return;
@@ -211,7 +211,7 @@ impl ServerBackup {
                     )
                     .await
                 {
-                    tracing::error!(backup = %uuid, "failed to create server backup: {:#?}", err);
+                    tracing::error!(backup = %uuid, "failed to create server backup: {:?}", err);
 
                     if let Err(err) = sqlx::query!(
                         r#"
@@ -224,7 +224,7 @@ impl ServerBackup {
                     .execute(database.write())
                     .await
                     {
-                        tracing::error!(backup = %uuid, "failed to update server backup status: {:#?}", err);
+                        tracing::error!(backup = %uuid, "failed to update server backup status: {:?}", err);
                     }
                 }
             }
@@ -633,7 +633,7 @@ impl DeletableModel for ServerBackup {
                         };
 
                         if let Err(err) = client.delete_object(file_path).await {
-                            tracing::error!(server = ?server_uuid, backup = %backup_uuid, "failed to delete S3 backup: {:#?}", err);
+                            tracing::error!(server = ?server_uuid, backup = %backup_uuid, "failed to delete S3 backup: {:?}", err);
                         }
                     } else {
                         tracing::warn!(server = ?server_uuid, backup = %backup_uuid, "S3 backup deletion attempted but no S3 configuration found, ignoring");

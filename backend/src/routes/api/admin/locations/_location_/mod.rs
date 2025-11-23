@@ -263,7 +263,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update location: {:#?}", err);
+                tracing::error!("failed to update location: {:?}", err);
 
                 return ApiResponse::error("failed to update location")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

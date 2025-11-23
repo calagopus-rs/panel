@@ -81,7 +81,7 @@ where
     fn from(err: T) -> Self {
         let err: anyhow::Error = err.into();
 
-        tracing::error!("a request error occurred: {:#?}", err);
+        tracing::error!("a request error occurred: {:?}", err);
         sentry_anyhow::capture_anyhow(&err);
 
         if let Ok(error) = err.downcast::<DisplayError>() {

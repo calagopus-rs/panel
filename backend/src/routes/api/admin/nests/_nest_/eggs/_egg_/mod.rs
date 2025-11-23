@@ -337,7 +337,7 @@ mod patch {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to update egg: {:#?}", err);
+                tracing::error!("failed to update egg: {:?}", err);
 
                 return ApiResponse::error("failed to update egg")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

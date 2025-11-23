@@ -148,7 +148,7 @@ mod post {
                         .ok();
                 }
                 Err(err) => {
-                    tracing::error!("failed to create ssh key: {:#?}", err);
+                    tracing::error!("failed to create ssh key: {:?}", err);
 
                     return ApiResponse::error("failed to create ssh key")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

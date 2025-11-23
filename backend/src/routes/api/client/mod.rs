@@ -78,7 +78,7 @@ pub async fn auth(
                     .execute(state.database.write())
                     .await
                     {
-                        tracing::warn!(user = %user.uuid, "failed to update user session: {:#?}", err);
+                        tracing::warn!(user = %user.uuid, "failed to update user session: {:?}", err);
                         sentry::capture_error(&err);
                     }
                 }
@@ -151,7 +151,7 @@ pub async fn auth(
                     .execute(state.database.write())
                     .await
                     {
-                        tracing::warn!(user = %user.uuid, "failed to update api key: {:#?}", err);
+                        tracing::warn!(user = %user.uuid, "failed to update api key: {:?}", err);
                     }
                 }
             })

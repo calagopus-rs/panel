@@ -103,7 +103,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create egg: {:#?}", err);
+                tracing::error!("failed to create egg: {:?}", err);
 
                 return ApiResponse::error("failed to create egg")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

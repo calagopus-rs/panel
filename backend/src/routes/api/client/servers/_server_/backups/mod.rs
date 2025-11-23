@@ -163,7 +163,7 @@ mod post {
             {
                 Ok(backup) => backup,
                 Err(err) => {
-                    tracing::error!(name = %data.name, "failed to create backup: {:#?}", err);
+                    tracing::error!(name = %data.name, "failed to create backup: {:?}", err);
 
                     return ApiResponse::error("failed to create backup")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -159,7 +159,7 @@ mod post {
             )
             .await
         {
-            tracing::error!("failed to transfer server to node: {:#?}", err);
+            tracing::error!("failed to transfer server to node: {:?}", err);
 
             return ApiResponse::error("failed to transfer server to node")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)

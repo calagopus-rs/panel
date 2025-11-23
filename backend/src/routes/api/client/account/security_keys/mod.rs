@@ -162,7 +162,7 @@ mod post {
                         .ok();
                 }
                 Err(err) => {
-                    tracing::error!("failed to create security key: {:#?}", err);
+                    tracing::error!("failed to create security key: {:?}", err);
 
                     return ApiResponse::error("failed to create security key")
                         .with_status(StatusCode::INTERNAL_SERVER_ERROR)

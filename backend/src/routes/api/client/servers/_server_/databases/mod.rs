@@ -224,7 +224,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!(server = %server.uuid, "failed to create database: {:#?}", err);
+                tracing::error!(server = %server.uuid, "failed to create database: {:?}", err);
 
                 return ApiResponse::error("failed to create database")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

@@ -68,7 +68,7 @@ mod post {
         {
             Ok(passkey) => passkey,
             Err(err) => {
-                tracing::error!("failed to finish security key registration: {:#?}", err);
+                tracing::error!("failed to finish security key registration: {:?}", err);
 
                 return ApiResponse::error(&format!(
                     "failed to finish security key registration: {}",

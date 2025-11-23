@@ -153,7 +153,7 @@ mod post {
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create location: {:#?}", err);
+                tracing::error!("failed to create location: {:?}", err);
 
                 return ApiResponse::error("failed to create location")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)

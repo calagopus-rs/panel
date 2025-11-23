@@ -86,7 +86,7 @@ mod post {
             .await
         {
             transaction.rollback().await?;
-            tracing::error!(server = %uuid, backup = %backup_uuid, "failed to restore backup: {:#?}", err);
+            tracing::error!(server = %uuid, backup = %backup_uuid, "failed to restore backup: {:?}", err);
 
             return ApiResponse::error("failed to restore backup")
                 .with_status(StatusCode::INTERNAL_SERVER_ERROR)

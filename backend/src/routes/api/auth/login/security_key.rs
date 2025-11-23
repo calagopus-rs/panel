@@ -142,7 +142,7 @@ mod post {
         {
             Ok(passkey) => passkey,
             Err(err) => {
-                tracing::error!("failed to finish security key authentication: {:#?}", err);
+                tracing::error!("failed to finish security key authentication: {:?}", err);
 
                 return ApiResponse::error(&format!(
                     "failed to finish security key authentication: {}",
@@ -216,7 +216,7 @@ mod post {
         )
         .await
         {
-            tracing::warn!(user = %user.uuid, "failed to log user activity: {:#?}", err);
+            tracing::warn!(user = %user.uuid, "failed to log user activity: {:?}", err);
         }
 
         ApiResponse::json(Response {
