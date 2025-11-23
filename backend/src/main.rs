@@ -214,6 +214,7 @@ async fn main() {
 
     let state = Arc::new(shared::AppState {
         start_time: Instant::now(),
+        is_container: std::env::var("OCI_CONTAINER").is_ok_and(|v| v == "official"),
         version: format!("{}:{}", shared::VERSION, shared::GIT_COMMIT),
 
         client: reqwest::ClientBuilder::new()

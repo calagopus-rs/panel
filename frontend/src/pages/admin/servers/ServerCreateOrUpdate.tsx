@@ -133,9 +133,11 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       return;
     }
 
-    form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
-    form.setFieldValue('startup', egg.startup);
-  }, [form.values.eggUuid, eggs.items]);
+    if (!contextServer) {
+      form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
+      form.setFieldValue('startup', egg.startup);
+    }
+  }, [form.values.eggUuid, eggs.items, contextServer]);
 
   return (
     <Stack>

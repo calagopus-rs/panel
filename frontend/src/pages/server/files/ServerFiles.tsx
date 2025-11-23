@@ -510,12 +510,15 @@ export default function ServerFiles() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
       if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
         event.preventDefault();
         setSelectedFiles([]);
       }
 
-      if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'a' && !isInputFocused) {
         event.preventDefault();
         setSelectedFiles(browsingEntries.data);
       }

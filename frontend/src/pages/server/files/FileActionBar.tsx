@@ -80,7 +80,10 @@ export default function FileActionBar() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'x' && !movingFiles.size) {
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if ((event.ctrlKey || event.metaKey) && event.key === 'x' && !movingFiles.size && !isInputFocused) {
         event.preventDefault();
         setSelectedFiles([]);
         setMovingFiles([...selectedFiles]);
@@ -100,7 +103,16 @@ export default function FileActionBar() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && movingFiles.size > 0 && !loading) {
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key === 'v' &&
+        movingFiles.size > 0 &&
+        !loading &&
+        !isInputFocused
+      ) {
         event.preventDefault();
         doMove();
       }

@@ -38,12 +38,15 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
       if ((event.ctrlKey || event.metaKey) && event.key === 'Escape') {
         event.preventDefault();
         setSelectedNodeAllocations([]);
       }
 
-      if ((event.ctrlKey || event.metaKey) && event.key === 'a') {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'a' && !isInputFocused) {
         event.preventDefault();
         setSelectedNodeAllocations(nodeAllocations.data);
       }

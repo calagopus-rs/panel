@@ -56,6 +56,7 @@ impl ApiError {
 
 pub struct AppState {
     pub start_time: Instant,
+    pub is_container: bool,
     pub version: String,
 
     pub client: reqwest::Client,
