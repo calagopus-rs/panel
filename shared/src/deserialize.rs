@@ -1,5 +1,29 @@
 use serde::{Deserialize, Deserializer, de::DeserializeOwned};
 
+#[inline]
+pub fn deserialize_defaultable<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: DeserializeOwned + Default,
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+
+    Ok(serde_json::from_value(value).unwrap_or_default())
+}
+
+pub fn deserialize_stringable_option<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer).unwrap_or_default();
+    Ok(match value {
+        serde_json::Value::Null => None,
+        serde_json::Value::String(string) if string.is_empty() => None,
+        serde_json::Value::String(string) => Some(string),
+        value => Some(value.to_string()),
+    })
+}
+
 pub fn deserialize_string_option<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
@@ -65,6 +89,19 @@ where
                 }),
             }
         }),
+        value => serde_json::from_value(value).map_err(serde::de::Error::custom)?,
+    };
+
+    Ok(value)
+}
+
+pub fn deserialize_nest_egg_variable_rules<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
+    let value: Vec<String> = match value {
+        serde_json::Value::String(value) => value.split('|').map(|v| v.to_string()).collect(),
         value => serde_json::from_value(value).map_err(serde::de::Error::custom)?,
     };
 

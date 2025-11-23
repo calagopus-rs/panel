@@ -16,7 +16,7 @@ pub struct ExportedNestEggVariable {
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
     pub description: Option<String>,
-    #[serde(default)]
+    #[serde(default, alias = "sort")]
     pub order: i16,
 
     #[validate(length(min = 1, max = 255))]
@@ -24,11 +24,19 @@ pub struct ExportedNestEggVariable {
     pub env_variable: String,
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_stringable_option"
+    )]
     pub default_value: Option<String>,
 
     pub user_viewable: bool,
     pub user_editable: bool,
-    pub rules: Option<String>,
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_nest_egg_variable_rules"
+    )]
+    pub rules: Vec<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -196,7 +204,7 @@ impl NestEggVariable {
             default_value: self.default_value,
             user_viewable: self.user_viewable,
             user_editable: self.user_editable,
-            rules: Some(self.rules.join("|")),
+            rules: self.rules,
         }
     }
 

@@ -146,6 +146,8 @@ pub struct ExportedNestEggScripts {
 
 #[derive(ToSchema, Validate, Serialize, Deserialize)]
 pub struct ExportedNestEgg {
+    #[serde(default = "uuid::Uuid::new_v4")]
+    pub uuid: uuid::Uuid,
     #[validate(length(min = 2, max = 255))]
     #[schema(min_length = 2, max_length = 255)]
     pub author: String,
@@ -169,10 +171,16 @@ pub struct ExportedNestEgg {
     #[serde(default)]
     pub separate_port: bool,
 
-    #[serde(default)]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_defaultable"
+    )]
     pub features: Vec<String>,
     pub docker_images: IndexMap<String, String>,
-    #[serde(default)]
+    #[serde(
+        default,
+        deserialize_with = "crate::deserialize::deserialize_defaultable"
+    )]
     pub file_denylist: Vec<String>,
 
     #[schema(inline)]
@@ -420,6 +428,7 @@ impl NestEgg {
         database: &crate::database::Database,
     ) -> Result<ExportedNestEgg, crate::database::DatabaseError> {
         Ok(ExportedNestEgg {
+            uuid: self.uuid,
             author: self.author,
             name: self.name,
             description: self.description,

@@ -2,8 +2,10 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod _variable_;
+mod order;
 
 mod get {
+    use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
     use serde::Serialize;
     use shared::{
         GetState,
@@ -11,8 +13,6 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
-
-    use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
 
     #[derive(ToSchema, Serialize)]
     struct Response {
@@ -190,5 +190,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(post::route))
         .nest("/{variable}", _variable_::router(state))
+        .nest("/order", order::router(state))
         .with_state(state.clone())
 }

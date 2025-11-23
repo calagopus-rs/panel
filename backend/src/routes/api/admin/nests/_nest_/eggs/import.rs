@@ -112,13 +112,7 @@ mod post {
         };
 
         for variable in data.variables {
-            let rules = variable
-                .rules
-                .as_ref()
-                .map(|v| v.split('|').map(String::from).collect::<Vec<String>>())
-                .unwrap_or_default();
-
-            if rule_validator::validate_rules(&rules).is_err() {
+            if rule_validator::validate_rules(&variable.rules).is_err() {
                 continue;
             }
 
@@ -132,7 +126,7 @@ mod post {
                 variable.default_value.as_deref(),
                 variable.user_viewable,
                 variable.user_editable,
-                &rules,
+                &variable.rules,
             )
             .await
             .ok();

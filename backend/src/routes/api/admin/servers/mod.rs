@@ -75,8 +75,6 @@ mod get {
 }
 
 mod post {
-    use std::collections::HashMap;
-
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -93,6 +91,7 @@ mod post {
         },
         response::{ApiResponse, ApiResponseResult},
     };
+    use std::collections::HashMap;
     use utoipa::ToSchema;
     use validator::Validate;
 

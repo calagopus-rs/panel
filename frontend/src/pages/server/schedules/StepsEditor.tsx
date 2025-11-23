@@ -115,7 +115,7 @@ export default function StepsEditor() {
               onDragEnd: async (reorderedSteps) => {
                 const stepsWithNewOrder = reorderedSteps.map((step, index) => ({
                   ...step,
-                  order: index,
+                  order: index + 1,
                 }));
                 setSteps(stepsWithNewOrder);
 

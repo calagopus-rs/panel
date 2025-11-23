@@ -27,7 +27,6 @@ export default function DashboardHome() {
   useEffect(() => {
     getServerGroups()
       .then((response) => {
-        setLoading(false);
         setServerGroups(response);
       })
       .catch((msg) => {

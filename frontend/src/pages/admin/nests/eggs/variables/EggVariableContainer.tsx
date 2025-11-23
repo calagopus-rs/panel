@@ -1,6 +1,5 @@
-import { Grid, Group, Stack } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import isEqual from 'react-fast-compare';
 import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
 import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
 import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
@@ -8,7 +7,6 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import Code from '@/elements/Code';
-import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
@@ -26,8 +24,8 @@ export default function EggVariableContainer({
   contextEgg: AdminNestEgg;
   contextVariable?: NestEggVariable;
 }) {
-  const { addToast } = useToast();
   const { eggVariables, setEggVariables, addEggVariable, removeEggVariable } = useAdminStore();
+  const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete'>();
   const [loading, setLoading] = useState(false);
@@ -98,11 +96,7 @@ export default function EggVariableContainer({
           addToast(httpErrorToHuman(msg), 'error');
         });
     } else {
-      const varIndex = eggVariables.findIndex((v) => isEqual(v, variable));
-      if (varIndex !== -1) {
-        eggVariables.splice(varIndex, 1);
-        setEggVariables([...eggVariables]);
-      }
+      setEggVariables(eggVariables.filter((v) => v.uuid || v.order !== contextVariable.order));
       addToast('Egg variable deleted.', 'success');
       setOpenModal(null);
     }
@@ -127,27 +121,16 @@ export default function EggVariableContainer({
         )}
         ?
       </ConfirmationModal>
-      <Card className='flex flex-col justify-between rounded-md p-4 h-full'>
+
+      <Card className='flex flex-col justify-between h-full'>
         <Stack>
-          <Grid>
-            <Grid.Col span={10}>
-              <TextInput
-                withAsterisk
-                label='Name'
-                placeholder='Name'
-                value={variable.name || ''}
-                onChange={(e) => setVariable({ ...variable, name: e.target.value })}
-              />
-            </Grid.Col>
-            <Grid.Col span={2}>
-              <NumberInput
-                withAsterisk
-                label='Order'
-                value={variable.order || 0}
-                onChange={(value) => setVariable({ ...variable, order: Number(value) })}
-              />
-            </Grid.Col>
-          </Grid>
+          <TextInput
+            withAsterisk
+            label='Name'
+            placeholder='Name'
+            value={variable.name || ''}
+            onChange={(e) => setVariable({ ...variable, name: e.target.value })}
+          />
 
           <TextArea
             label='Description'

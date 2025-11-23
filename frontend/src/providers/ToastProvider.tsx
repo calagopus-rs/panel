@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { createContext, FC, ReactNode, useCallback, useContext, useState } from 'react';
+import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import Notification from '@/elements/Notification';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -21,6 +21,19 @@ let toastId = 0;
 
 const toastTimeout = 7500;
 
+const getToastColor = (type: ToastType) => {
+  switch (type) {
+    case 'success':
+      return 'green';
+    case 'error':
+      return 'red';
+    case 'warning':
+      return 'yellow';
+    default:
+      return 'teal';
+  }
+};
+
 export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
@@ -33,27 +46,22 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
     setToasts((prev) => [...prev, { id, message, type }]);
 
     setTimeout(() => {
-      dismissToast(id);
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, toastTimeout);
 
     return id;
   }, []);
 
-  const getToastColor = (type: ToastType) => {
-    switch (type) {
-      case 'success':
-        return 'green';
-      case 'error':
-        return 'red';
-      case 'warning':
-        return 'yellow';
-      default:
-        return 'teal';
-    }
-  };
+  const contextValue = useMemo(
+    () => ({
+      addToast,
+      dismissToast,
+    }),
+    [addToast, dismissToast],
+  );
 
   return (
-    <ToastContext.Provider value={{ addToast, dismissToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className='fixed top-4 right-4 z-999 space-y-2'>
         <AnimatePresence>
