@@ -9,7 +9,9 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import getLocations from '@/api/admin/locations/getLocations';
 import createNode from '@/api/admin/nodes/createNode';
 import { httpErrorToHuman } from '@/api/axios';
@@ -20,15 +22,15 @@ import SizeInput from '@/elements/input/SizeInput';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 
-interface NodeFormValues {
-  name: string;
-  publicUrl: string;
-  url: string;
-  sftpHost: string;
-  sftpPort: number;
-  memory: number;
-  disk: number;
-}
+const schema = z.object({
+  name: z.string().min(3).max(255),
+  publicUrl: z.url().optional(),
+  url: z.url().min(3).max(255),
+  sftpHost: z.string().optional(),
+  sftpPort: z.number().min(1).max(65535),
+  memory: z.number(),
+  disk: z.number(),
+});
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [diskInput, setDiskInput] = useState('');
   const [locationUuid, setLocationUuid] = useState('');
 
-  const form = useForm<NodeFormValues>({
+  const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       name: '',
       url: '',
@@ -49,46 +51,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
       disk: null,
     },
     validateInputOnBlur: true,
-    validate: {
-      name: (value) => {
-        if (!value) return 'Name is required';
-        if (value.length < 3) return 'Name must be at least 3 characters';
-        if (value.length > 255) return 'Name must not exceed 255 characters';
-        return null;
-      },
-      url: (value) => {
-        if (!value) return 'URL is required';
-        if (value.length < 3) return 'URL must be at least 3 characters';
-        if (value.length > 255) return 'URL must not exceed 255 characters';
-        return null;
-      },
-      publicUrl: (value) => {
-        if (!value) return null;
-        if (value.length < 3) return 'Public URL must be at least 3 characters';
-        if (value.length > 255) return 'Public URL must not exceed 255 characters';
-        return null;
-      },
-      sftpHost: (value) => {
-        if (!value) return null;
-        if (value.length < 3) return 'SFTP Host must be at least 3 characters';
-        if (value.length > 255) return 'SFTP Host must not exceed 255 characters';
-        return null;
-      },
-      sftpPort: (value) => {
-        if (!value) return 'SFTP Port is required';
-        if (value < 1) return 'SFTP Port must be at least 1';
-        if (value > 65535) return 'SFTP Port must not exceed 65535';
-        return null;
-      },
-      memory: (value) => {
-        if (!value) return 'Memory is required';
-        return null;
-      },
-      disk: (value) => {
-        if (!value) return 'Disk is required';
-        return null;
-      },
-    },
+    validate: zod4Resolver(schema),
   });
 
   useEffect(() => {

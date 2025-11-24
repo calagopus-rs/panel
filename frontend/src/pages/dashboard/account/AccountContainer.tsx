@@ -1,5 +1,8 @@
 import { Grid, Group, Stack, Title } from '@mantine/core';
-import { useState } from 'react';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';
@@ -8,23 +11,53 @@ import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 
+const schema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(15)
+    .regex(/^[a-zA-Z0-9_]+$/),
+  nameFirst: z.string().min(2).max(255),
+  nameLast: z.string().min(2).max(255),
+});
+
 export default function AccountContainer() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
-  const [username, setUsername] = useState(user.username);
-  const [nameFirst, setNameFirst] = useState(user.nameFirst);
-  const [nameLast, setNameLast] = useState(user.nameLast);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      username: '',
+      nameFirst: '',
+      nameLast: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
+
+  useEffect(() => {
+    if (user) {
+      form.setValues({
+        username: user.username,
+        nameFirst: user.nameFirst,
+        nameLast: user.nameLast,
+      });
+    }
+  }, [user]);
 
   const doUpdate = () => {
     setLoading(true);
 
-    updateAccount({ username, nameFirst, nameLast })
+    updateAccount(form.values)
       .then(() => {
         addToast('Account updated.', 'success');
 
-        setUser({ ...user!, username, nameFirst, nameLast });
+        setUser({
+          ...user!,
+          ...form.values,
+        });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -39,31 +72,13 @@ export default function AccountContainer() {
           Account
         </Title>
         <Stack className='mt-4'>
-          <TextInput
-            withAsterisk
-            label='Username'
-            placeholder='Username'
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
           <Group grow>
-            <TextInput
-              withAsterisk
-              label='First Name'
-              placeholder='First Name'
-              value={nameFirst}
-              onChange={(e) => setNameFirst(e.target.value)}
-            />
-            <TextInput
-              withAsterisk
-              label='Last Name'
-              placeholder='Last Name'
-              value={nameLast}
-              onChange={(e) => setNameLast(e.target.value)}
-            />
+            <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
+            <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
           </Group>
           <Group>
-            <Button loading={loading} disabled={!username || !nameFirst || !nameLast} onClick={doUpdate}>
+            <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>
               Update Account
             </Button>
           </Group>

@@ -1,10 +1,15 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (code: string, password: string): Promise<void> => {
+interface Data {
+  code: string;
+  password: string;
+}
+
+export default async (data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .delete('/api/client/account/two-factor', {
-        data: { code, password },
+        data,
       })
       .then(() => resolve())
       .catch(reject);

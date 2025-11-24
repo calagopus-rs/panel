@@ -1,5 +1,8 @@
 import { Group, ModalProps, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import getPermissions from '@/api/getPermissions';
 import createApiKey from '@/api/me/api-keys/createApiKey';
@@ -13,6 +16,13 @@ import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
 import { useUserStore } from '@/stores/user';
 
+const schema = z.object({
+  name: z.string().min(3).max(31),
+  userPermissions: z.array(z.string()),
+  serverPermissions: z.array(z.string()),
+  adminPermissions: z.array(z.string()),
+});
+
 type Props = ModalProps & {
   contextApiKey?: UserApiKey;
 };
@@ -20,21 +30,24 @@ type Props = ModalProps & {
 export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { addApiKey, updateApiKey: updateStateApiKey } = useUserStore();
-
-  const { user } = useAuth();
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(false);
-  const [apiKey, setApiKey] = useState<UpdateUserApiKey>({
-    name: '',
-    userPermissions: [],
-    serverPermissions: [],
-    adminPermissions: [],
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      name: '',
+      userPermissions: [],
+      serverPermissions: [],
+      adminPermissions: [],
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
   });
 
   useEffect(() => {
     if (contextApiKey) {
-      setApiKey({
+      form.setValues({
         name: contextApiKey.name,
         userPermissions: contextApiKey.userPermissions,
         serverPermissions: contextApiKey.serverPermissions,
@@ -54,11 +67,11 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
     setLoading(true);
 
     if (contextApiKey) {
-      updateApiKey(contextApiKey.uuid, apiKey)
+      updateApiKey(contextApiKey.uuid, form.values)
         .then(() => {
           addToast('API key updated.', 'success');
           onClose();
-          updateStateApiKey(contextApiKey.uuid, apiKey);
+          updateStateApiKey(contextApiKey.uuid, form.values);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -67,7 +80,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           setLoading(false);
         });
     } else {
-      createApiKey(apiKey)
+      createApiKey(form.values)
         .then((key) => {
           addToast('API key created.', 'success');
           onClose();
@@ -85,21 +98,15 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
   return (
     <Modal title={`${contextApiKey ? 'Update' : 'Create'} API Key`} onClose={onClose} opened={opened} size='xl'>
       <Stack>
-        <TextInput
-          withAsterisk
-          label='Name'
-          placeholder='Name'
-          value={apiKey.name}
-          onChange={(e) => setApiKey({ ...apiKey, name: e.target.value })}
-        />
+        <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
         <Stack>
           <Title order={3}>User Permissions</Title>
           {availablePermissions?.userPermissions && (
             <PermissionSelector
               permissions={availablePermissions.userPermissions}
-              selectedPermissions={apiKey.userPermissions}
-              setSelectedPermissions={(permissions) => setApiKey({ ...apiKey, userPermissions: permissions })}
+              selectedPermissions={form.values.userPermissions}
+              setSelectedPermissions={(permissions) => form.setFieldValue('userPermissions', permissions)}
             />
           )}
         </Stack>
@@ -108,8 +115,8 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           {availablePermissions?.serverPermissions && (
             <PermissionSelector
               permissions={availablePermissions.serverPermissions}
-              selectedPermissions={apiKey.serverPermissions}
-              setSelectedPermissions={(permissions) => setApiKey({ ...apiKey, serverPermissions: permissions })}
+              selectedPermissions={form.values.serverPermissions}
+              setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
             />
           )}
         </Stack>
@@ -118,14 +125,14 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
           {user.admin && availablePermissions?.adminPermissions && (
             <PermissionSelector
               permissions={availablePermissions.adminPermissions}
-              selectedPermissions={apiKey.adminPermissions}
-              setSelectedPermissions={(permissions) => setApiKey({ ...apiKey, adminPermissions: permissions })}
+              selectedPermissions={form.values.adminPermissions}
+              setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
             />
           )}
         </Stack>
 
         <Group mt='md'>
-          <Button onClick={doCreateOrUpdate} loading={loading} disabled={!apiKey.name}>
+          <Button onClick={doCreateOrUpdate} loading={loading} disabled={!form.isValid()}>
             Save
           </Button>
           <Button variant='default' onClick={onClose}>

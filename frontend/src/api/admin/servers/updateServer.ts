@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/api/transformers';
+import { transformKeysToSnakeCase } from '@/lib/transformers';
 
 export default async (serverUuid: string, data: Partial<UpdateAdminServer>): Promise<void> => {
   return new Promise((resolve, reject) => {

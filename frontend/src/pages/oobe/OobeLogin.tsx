@@ -2,8 +2,10 @@ import { faInfoCircle, faLock, faUser } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { z } from 'zod';
 import login from '@/api/auth/login';
 import { httpErrorToHuman } from '@/api/axios';
 import AlertError from '@/elements/alerts/AlertError';
@@ -15,10 +17,10 @@ import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps, steps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global';
 
-interface LoginFormValues {
-  username: string;
-  password: string;
-}
+const schema = z.object({
+  username: z.string(),
+  password: z.string().max(512),
+});
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -28,22 +30,13 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<LoginFormValues>({
+  const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       username: '',
       password: '',
     },
     validateInputOnBlur: true,
-    validate: {
-      username: (value) => {
-        if (!value) return 'Username is required';
-        return null;
-      },
-      password: (value) => {
-        if (!value) return 'Password is required';
-        return null;
-      },
-    },
+    validate: zod4Resolver(schema),
   });
 
   const onSubmit = async () => {

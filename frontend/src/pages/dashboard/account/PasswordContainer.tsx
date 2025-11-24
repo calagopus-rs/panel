@@ -1,31 +1,51 @@
 import { Grid, Group, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
+
+const schema = z
+  .object({
+    currentPassword: z.string().max(512),
+    newPassword: z.string().min(8).max(512),
+    confirmNewPassword: z.string().min(8).max(512),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmNewPassword'],
+  });
 
 export default function PasswordContainer() {
   const { addToast } = useToast();
 
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(schema),
+  });
 
   const doUpdate = () => {
     setLoading(true);
 
-    updatePassword(currentPassword, newPassword)
+    updatePassword({
+      password: form.values.currentPassword,
+      newPassword: form.values.newPassword,
+    })
       .then(() => {
         addToast('Password updated.', 'success');
-
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmNewPassword('');
+        form.reset();
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -40,35 +60,26 @@ export default function PasswordContainer() {
           Password
         </Title>
         <Stack className='mt-4'>
-          <TextInput
+          <PasswordInput
             withAsterisk
             label='Current Password'
             placeholder='Current Password'
-            type='password'
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
+            {...form.getInputProps('currentPassword')}
           />
           <PasswordInput
             withAsterisk
             label='New Password'
             placeholder='New Password'
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            {...form.getInputProps('newPassword')}
           />
-          <TextInput
+          <PasswordInput
             withAsterisk
             label='Confirm New Password'
             placeholder='Confirm New Password'
-            type='password'
-            value={confirmNewPassword}
-            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            {...form.getInputProps('confirmNewPassword')}
           />
           <Group>
-            <Button
-              loading={loading}
-              disabled={!currentPassword || !newPassword || !confirmNewPassword || newPassword !== confirmNewPassword}
-              onClick={doUpdate}
-            >
+            <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>
               Update Password
             </Button>
           </Group>

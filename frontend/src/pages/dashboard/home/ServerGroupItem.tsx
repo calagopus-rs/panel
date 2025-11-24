@@ -1,25 +1,25 @@
+import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ComponentProps, useState } from 'react';
-import Card from '@/elements/Card';
 import { ActionIcon, Group } from '@mantine/core';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Code from '@/elements/Code';
-import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup';
-import { useUserStore } from '@/stores/user';
-import { useToast } from '@/providers/ToastProvider';
+import { ComponentProps, useState } from 'react';
 import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
-import ServerGroupEditModal from './modals/ServerGroupEditModal';
-import TextInput from '@/elements/input/TextInput';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup';
 import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers';
-import Spinner from '@/elements/Spinner';
-import ServerItem from './ServerItem';
-import Divider from '@/elements/Divider';
-import { Pagination } from '@/elements/Table';
-import { rectSortingStrategy } from '@dnd-kit/sortable';
 import updateServerGroup from '@/api/me/servers/groups/updateServerGroup';
-import { DndContainer, SortableItem, DndItem } from '@/elements/DragAndDrop';
+import Card from '@/elements/Card';
+import Code from '@/elements/Code';
+import Divider from '@/elements/Divider';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import Spinner from '@/elements/Spinner';
+import { Pagination } from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
+import ServerGroupEditModal from './modals/ServerGroupEditModal';
+import ServerItem from './ServerItem';
 
 function insertItems<T>(list: T[], items: T[], startIndex: number): T[] {
   if (startIndex > list.length) {

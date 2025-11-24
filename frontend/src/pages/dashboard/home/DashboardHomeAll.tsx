@@ -1,20 +1,20 @@
-import getServers from '@/api/server/getServers';
-import Spinner from '@/elements/Spinner';
-import { useGlobalStore } from '@/stores/global';
-import ServerItem from './ServerItem';
-import { useAuth } from '@/providers/AuthProvider';
 import { Group } from '@mantine/core';
-import Switch from '@/elements/input/Switch';
-import DashboardHomeTitle from './DashboardHomeTitle';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useUserStore } from '@/stores/user';
-import TextInput from '@/elements/input/TextInput';
-import { Pagination } from '@/elements/Table';
-import Divider from '@/elements/Divider';
 import { useEffect } from 'react';
-import getServerGroups from '@/api/me/servers/groups/getServerGroups';
-import { useToast } from '@/providers/ToastProvider';
 import { httpErrorToHuman } from '@/api/axios';
+import getServerGroups from '@/api/me/servers/groups/getServerGroups';
+import getServers from '@/api/server/getServers';
+import Divider from '@/elements/Divider';
+import Switch from '@/elements/input/Switch';
+import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import { Pagination } from '@/elements/Table';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
+import { useUserStore } from '@/stores/user';
+import DashboardHomeTitle from './DashboardHomeTitle';
+import ServerItem from './ServerItem';
 
 export default function DashboardHomeAll() {
   const { servers, setServers, setServerGroups } = useUserStore();

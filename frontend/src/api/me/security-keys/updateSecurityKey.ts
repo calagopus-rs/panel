@@ -1,9 +1,13 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (securityKeyUuid: string, name: string): Promise<void> => {
+interface Data {
+  name: string;
+}
+
+export default async (securityKeyUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .patch(`/api/client/account/security-keys/${securityKeyUuid}`, { name })
+      .patch(`/api/client/account/security-keys/${securityKeyUuid}`, data)
       .then(() => resolve())
       .catch(reject);
   });

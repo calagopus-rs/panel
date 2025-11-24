@@ -1,9 +1,15 @@
 import { axiosInstance } from '@/api/axios';
+import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-export default async (name: string, serverOrder: string[]): Promise<UserServerGroup> => {
+interface Data {
+  name: string;
+  serverOrder: string[];
+}
+
+export default async (data: Data): Promise<UserServerGroup> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post('/api/client/servers/groups', { name, server_order: serverOrder })
+      .post('/api/client/servers/groups', transformKeysToSnakeCase(data))
       .then(({ data }) => resolve(data.serverGroup))
       .catch(reject);
   });

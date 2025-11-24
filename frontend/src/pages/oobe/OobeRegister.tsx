@@ -2,7 +2,9 @@ import { faEnvelope, faLock, faShieldHalved, faUser } from '@fortawesome/free-so
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod';
 import register from '@/api/auth/register';
 import { httpErrorToHuman } from '@/api/axios';
 import AlertError from '@/elements/alerts/AlertError';
@@ -12,14 +14,23 @@ import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 
-interface RegisterFormValues {
-  username: string;
-  email: string;
-  nameFirst: string;
-  nameLast: string;
-  password: string;
-  confirmPassword: string;
-}
+const schema = z
+  .object({
+    username: z
+      .string()
+      .min(3)
+      .max(15)
+      .regex(/^[a-zA-Z0-9_]+$/),
+    email: z.email(),
+    nameFirst: z.string().min(2).max(255),
+    nameLast: z.string().min(2).max(255),
+    password: z.string().min(8).max(512),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -27,7 +38,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<RegisterFormValues>({
+  const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       username: '',
       email: '',
@@ -37,42 +48,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
       confirmPassword: '',
     },
     validateInputOnBlur: true,
-    validate: {
-      username: (value) => {
-        if (!value) return 'Username is required';
-        if (value.length < 3) return 'Username must be at least 3 characters';
-        if (value.length > 15) return 'Username must not exceed 15 characters';
-        if (!/^[a-zA-Z0-9_]+$/.test(value)) return 'Username can only contain letters, numbers and underscores';
-        return null;
-      },
-      email: (value) => {
-        if (!value) return 'Email is required';
-        return null;
-      },
-      nameFirst: (value) => {
-        if (!value) return 'First name is required';
-        if (value.length < 2) return 'First name must be at least 2 characters';
-        if (value.length > 255) return 'First name must not exceed 255 characters';
-        return null;
-      },
-      nameLast: (value) => {
-        if (!value) return 'Last name is required';
-        if (value.length < 2) return 'Last name must be at least 2 characters';
-        if (value.length > 255) return 'Last name must not exceed 255 characters';
-        return null;
-      },
-      password: (value) => {
-        if (!value) return 'Password is required';
-        if (value.length < 8) return 'Password must be at least 8 characters';
-        if (value.length > 512) return 'Password must not exceed 512 characters';
-        return null;
-      },
-      confirmPassword: (value, values) => {
-        if (!value) return 'Please confirm your password';
-        if (value !== values.password) return 'Passwords do not match';
-        return null;
-      },
-    },
+    validate: zod4Resolver(schema),
   });
 
   const onSubmit = async () => {

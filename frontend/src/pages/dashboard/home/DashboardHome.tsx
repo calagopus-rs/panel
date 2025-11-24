@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
-import DashboardHomeTitle from './DashboardHomeTitle';
-import { useUserStore } from '@/stores/user';
-import { useToast } from '@/providers/ToastProvider';
-import getServerGroups from '@/api/me/servers/groups/getServerGroups';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import ServerGroupItem from './ServerGroupItem';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
-import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useEffect, useMemo, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import getServerGroups from '@/api/me/servers/groups/getServerGroups';
 import updateServerGroupsOrder from '@/api/me/servers/groups/updateServerGroupsOrder';
-import { DndContainer, SortableItem, DndItem } from '@/elements/DragAndDrop';
+import Button from '@/elements/Button';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
+import Spinner from '@/elements/Spinner';
+import { useToast } from '@/providers/ToastProvider';
+import { useUserStore } from '@/stores/user';
+import DashboardHomeTitle from './DashboardHomeTitle';
+import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
+import ServerGroupItem from './ServerGroupItem';
 
 interface DndServerGroup extends UserServerGroup, DndItem {
   id: string;

@@ -2,7 +2,9 @@ import { faAddressCard, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import getSettings from '@/api/admin/settings/getSettings';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
 import { httpErrorToHuman } from '@/api/axios';
@@ -12,18 +14,18 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 
-interface ConfigurationFormValues {
-  applicationName: string;
-  applicationUrl: string;
-  applicationTelemetry: boolean;
-  applicationRegistration: boolean;
-}
+const schema = z.object({
+  applicationName: z.string().min(3).max(255),
+  applicationUrl: z.url(),
+  applicationTelemetry: z.boolean(),
+  applicationRegistration: z.boolean(),
+});
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<ConfigurationFormValues>({
+  const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       applicationName: '',
       applicationUrl: '',
@@ -31,16 +33,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       applicationRegistration: true,
     },
     validateInputOnBlur: true,
-    validate: {
-      applicationName: (value) => {
-        if (!value) return 'Application name is required';
-        return null;
-      },
-      applicationUrl: (value) => {
-        if (!value) return 'Application URL is required';
-        return null;
-      },
-    },
+    validate: zod4Resolver(schema),
   });
 
   useEffect(() => {

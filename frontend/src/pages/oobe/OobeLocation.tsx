@@ -2,7 +2,9 @@ import { faAddressCard, faFloppyDisk, faRainbow } from '@fortawesome/free-solid-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod';
 import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
 import createLocation from '@/api/admin/locations/createLocation';
 import { httpErrorToHuman } from '@/api/axios';
@@ -15,18 +17,33 @@ import BackupRestic from '@/pages/admin/locations/forms/BackupRestic';
 import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 
-interface LocationFormValues {
-  locationName: string;
-  backupName: string;
-  backupDisk: BackupDisk;
-  backupConfigs: BackupDiskConfigurations;
-}
+const schema = z.object({
+  locationName: z.string().min(3).max(255),
+  backupName: z.string().min(3).max(255),
+  backupDisk: z.enum(['local', 's3', 'restic']),
+  backupConfigs: z.object({
+    s3: z.object({
+      accessKey: z.string(),
+      secretKey: z.string(),
+      bucket: z.string(),
+      region: z.string(),
+      endpoint: z.string(),
+      pathStyle: z.boolean(),
+      partSize: z.number().min(0),
+    }),
+    restic: z.object({
+      repository: z.string(),
+      retryLockSeconds: z.number().min(0),
+      environment: z.record(z.string(), z.string()),
+    }),
+  }),
+});
 
 export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<LocationFormValues>({
+  const form = useForm<z.infer<typeof schema>>({
     initialValues: {
       locationName: '',
       backupName: '',
@@ -34,24 +51,7 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
       backupConfigs: { s3: null, restic: null },
     },
     validateInputOnBlur: true,
-    validate: {
-      locationName: (value) => {
-        if (!value) return 'Location name is required';
-        if (value.length < 3) return 'Location name must be at least 3 characters';
-        if (value.length > 255) return 'Location name must not exceed 255 characters';
-        return null;
-      },
-      backupName: (value) => {
-        if (!value) return 'Backup configuration name is required';
-        if (value.length < 3) return 'Backup configuration name must be at least 3 characters';
-        if (value.length > 255) return 'Backup configuration name must not exceed 255 characters';
-        return null;
-      },
-      backupDisk: (value) => {
-        if (!value) return 'Backup disk is required';
-        return null;
-      },
-    },
+    validate: zod4Resolver(schema),
   });
 
   const onSubmit = async () => {

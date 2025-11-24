@@ -1,5 +1,5 @@
 import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/api/transformers';
+import { transformKeysToSnakeCase } from '@/lib/transformers';
 
 export default async (data: UpdateAdminOAuthProvider): Promise<AdminOAuthProvider> => {
   return new Promise((resolve, reject) => {
