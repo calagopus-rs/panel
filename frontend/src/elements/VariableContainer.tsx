@@ -45,7 +45,17 @@ export default function VariableContainer({
           <Switch
             name={variable.envVariable}
             defaultChecked={value === '1' || value === 'true'}
-            onChange={(e) => setValue(e.target.checked ? '1' : '0')}
+            onChange={(e) =>
+              setValue(
+                variable.rules.includes('in:1,0') || variable.rules.includes('in:0,1')
+                  ? e.target.checked
+                    ? '1'
+                    : '0'
+                  : e.target.checked
+                    ? 'true'
+                    : 'false',
+              )
+            }
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
             label={variable.name}
           />
