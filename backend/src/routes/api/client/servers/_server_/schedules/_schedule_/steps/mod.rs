@@ -159,6 +159,8 @@ mod post {
                 "server:schedule.step.create",
                 serde_json::json!({
                     "uuid": schedule_step.uuid,
+                    "schedule_uuid": schedule.uuid,
+
                     "action": schedule_step.action,
                     "order": schedule_step.order,
                 }),

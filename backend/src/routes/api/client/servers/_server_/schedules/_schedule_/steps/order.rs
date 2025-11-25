@@ -55,6 +55,7 @@ mod put {
             .log(
                 "server:schedule.step.update-order",
                 serde_json::json!({
+                    "schedule_uuid": schedule.uuid,
                     "schedule_step_order": data.schedule_step_order,
                 }),
             )

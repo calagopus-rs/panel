@@ -2,7 +2,7 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod put {
-    use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -30,6 +30,7 @@ mod put {
         state: GetState,
         permissions: GetPermissionManager,
         egg: GetNestEgg,
+        nest: GetNest,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
@@ -55,6 +56,8 @@ mod put {
             .log(
                 "nest:egg.variable.update-order",
                 serde_json::json!({
+                    "nest_uuid": nest.uuid,
+                    "egg_uuid": egg.uuid,
                     "variable_order": data.variable_order,
                 }),
             )

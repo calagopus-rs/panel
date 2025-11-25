@@ -96,6 +96,8 @@ mod patch {
                 "server:schedule.step.update",
                 serde_json::json!({
                     "uuid": schedule_step.uuid,
+                    "schedule_uuid": schedule.uuid,
+
                     "action": schedule_step.action,
                     "order": schedule_step.order,
                 }),
@@ -197,6 +199,8 @@ mod delete {
                 "server:schedule.step.delete",
                 serde_json::json!({
                     "uuid": schedule_step.uuid,
+                    "schedule_uuid": schedule.uuid,
+
                     "action": schedule_step.action,
                     "order": schedule_step.order,
                 }),
