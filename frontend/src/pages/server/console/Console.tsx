@@ -91,11 +91,11 @@ export default function Terminal() {
         console.error('Failed to parse terminal history:', e);
       }
     }
-  }, []);
+  }, [HISTORY_STORAGE_KEY]);
 
   useEffect(() => {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
-  }, [history]);
+  }, [history, HISTORY_STORAGE_KEY]);
 
   const checkIfAtBottom = useCallback(() => {
     if (!containerRef.current) return true;

@@ -1,0 +1,1 @@
+DROP INDEX "settings_key_idx";

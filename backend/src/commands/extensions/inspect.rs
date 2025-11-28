@@ -29,12 +29,20 @@ impl shared::extensions::commands::CliCommand<InspectArgs> for InspectCommand {
                 })
                 .await??;
 
-                println!("{}", extension_distr.identifier.cyan().underline());
+                println!(
+                    "{}",
+                    extension_distr
+                        .metadata_toml
+                        .package_name
+                        .cyan()
+                        .underline()
+                );
                 println!(
                     "  status:        {}",
                     if let Some(ext) = extension_internal_list::list()
                         .into_iter()
-                        .find(|e| e.identifier == extension_distr.identifier)
+                        .find(|e| e.metadata_toml.package_name
+                            == extension_distr.metadata_toml.package_name)
                     {
                         if ext.version == extension_distr.cargo_toml.package.version {
                             "installed".green()
@@ -47,7 +55,7 @@ impl shared::extensions::commands::CliCommand<InspectArgs> for InspectCommand {
                 );
                 println!(
                     "  name:          {}",
-                    extension_distr.cargo_toml.package.name.cyan()
+                    extension_distr.metadata_toml.name.cyan()
                 );
                 println!(
                     "  description:   {}",

@@ -1,12 +1,12 @@
 use clap::{Args, FromArgMatches};
 use colored::Colorize;
-use shared::extensions::distr::{ExtensionDistrFile, ExtensionDistrFileBuilder};
+use shared::extensions::distr::{ExtensionDistrFile, ExtensionDistrFileBuilder, MetadataToml};
 use std::{io::Write, path::Path};
 
 #[derive(Args)]
 pub struct ExportArgs {
-    #[arg(help = "the extension identifier to export")]
-    identifier: String,
+    #[arg(help = "the extension package name to export")]
+    package_name: String,
 }
 
 pub struct ExportCommand;
@@ -35,7 +35,9 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     std::process::exit(1);
                 }
 
-                let frontend_path = Path::new("frontend/extensions").join(&args.identifier);
+                let frontend_path = Path::new("frontend/extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                );
                 if tokio::fs::metadata(&frontend_path)
                     .await
                     .ok()
@@ -44,13 +46,19 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     eprintln!(
                         "{} {} {}",
                         "failed to find".red(),
-                        format!("frontend/extensions/{}", args.identifier).bright_red(),
+                        format!(
+                            "frontend/extensions/{}",
+                            MetadataToml::convert_package_name_to_identifier(&args.package_name)
+                        )
+                        .bright_red(),
                         "directory, make sure you are in the panel root.".red()
                     );
                     std::process::exit(1);
                 }
 
-                let backend_path = Path::new("backend-extensions").join(&args.identifier);
+                let backend_path = Path::new("backend-extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                );
                 if tokio::fs::metadata(&backend_path)
                     .await
                     .ok()
@@ -59,16 +67,26 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     eprintln!(
                         "{} {} {}",
                         "failed to find".red(),
-                        format!("backend-extensions/{}", args.identifier).bright_red(),
+                        format!(
+                            "backend-extensions/{}",
+                            MetadataToml::convert_package_name_to_identifier(&args.package_name)
+                        )
+                        .bright_red(),
                         "directory, make sure you are in the panel root.".red()
                     );
                     std::process::exit(1);
                 }
 
+                let schema_path = Path::new("database/src/schema/extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name) + ".ts",
+                );
+
                 tokio::fs::create_dir_all("exported-extensions").await?;
 
-                let output_path =
-                    Path::new("exported-extensions").join(format!("{}.c7s.zip", args.identifier));
+                let output_path = Path::new("exported-extensions").join(format!(
+                    "{}.c7s.zip",
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name)
+                ));
                 let file = std::fs::OpenOptions::new()
                     .create(true)
                     .write(true)
@@ -77,10 +95,16 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
                     .open(&output_path)?;
                 let mut file =
                     tokio::task::spawn_blocking(move || -> Result<std::fs::File, anyhow::Error> {
-                        Ok(ExtensionDistrFileBuilder::new(file, &args.identifier)?
+                        let mut builder = ExtensionDistrFileBuilder::new(file)
                             .add_frontend(frontend_path)?
-                            .add_backend(backend_path)?
-                            .write()?)
+                            .add_backend(backend_path)?;
+
+                        if schema_path.exists() {
+                            let schema = std::fs::read_to_string(schema_path)?;
+                            builder = builder.add_schema(&schema)?;
+                        }
+
+                        Ok(builder.write()?)
                     })
                     .await??;
                 file.flush()?;
@@ -96,7 +120,7 @@ impl shared::extensions::commands::CliCommand<ExportArgs> for ExportCommand {
 
                 println!(
                     "sucessfully exported {} to {}",
-                    extension_distr.cargo_toml.package.name.cyan(),
+                    extension_distr.metadata_toml.name.cyan(),
                     output_path.to_string_lossy().cyan()
                 );
 

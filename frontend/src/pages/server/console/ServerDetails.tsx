@@ -170,13 +170,17 @@ export default function ServerDetails() {
         icon={faCloudDownload}
         label='Network (In)'
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.rxBytes)}
-        details={state === 'offline' ? null : `${bytesToString(networkRef.current.rxSpeed, undefined, true)}/s`}
+        details={
+          state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.rxSpeed), undefined, true)}/s`
+        }
       />
       <StatCard
         icon={faCloudUpload}
         label='Network (Out)'
         value={state === 'offline' ? 'Offline' : bytesToString(stats?.network.txBytes)}
-        details={state === 'offline' ? null : `${bytesToString(networkRef.current.txSpeed, undefined, true)}/s`}
+        details={
+          state === 'offline' ? null : `${bytesToString(Math.round(networkRef.current.txSpeed), undefined, true)}/s`
+        }
       />
     </div>
   );

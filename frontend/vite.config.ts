@@ -9,12 +9,25 @@ export default defineConfig({
   build: {
     outDir: './dist',
     emptyOutDir: true,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1024,
+    target: 'es2020',
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
+        experimentalMinChunkSize: 102400,
+        manualChunks(id) {
+          if (
+            id.includes('src/providers/') ||
+            id.includes('src/plugins/') ||
+            id.includes('src/stores/') ||
+            id.includes('src/lib/')
+          ) {
+            return 'shared';
+          }
+        },
       },
     },
   },

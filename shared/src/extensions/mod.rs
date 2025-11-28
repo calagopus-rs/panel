@@ -257,8 +257,7 @@ pub trait Extension: Send + Sync {
 
 #[derive(ToSchema, Serialize)]
 pub struct ConstructedExtension {
-    pub identifier: &'static str,
-    pub name: &'static str,
+    pub metadata_toml: distr::MetadataToml,
     pub description: &'static str,
     pub authors: &'static [&'static str],
     #[schema(value_type = String)]

@@ -21,7 +21,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-brands-svg-icons": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
-    "@fortawesome/react-fontawesome": "^3.1.0",
+    "@fortawesome/react-fontawesome": "^3.1.1",
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@mantine/core": "^8.3.9",
@@ -63,7 +63,7 @@
     "tailwindcss": "^4.1.17",
     "tzdata": "^1.0.46",
     "uuid": "^13.0.0",
-    "zod": "^4.1.12",
+    "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -72,7 +72,7 @@
     "@types/grecaptcha": "^3.0.9",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.6",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
     "eslint": "^9.39.1",
@@ -80,15 +80,12 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "globals": "^16.5.0",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.47.0",
+    "typescript-eslint": "^8.48.0",
     "vite": "^7.2.4",
     "vite-bundle-analyzer": "^1.2.3",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@tailwindcss/oxide",
-      "esbuild"
-    ]
+    "onlyBuiltDependencies": ["@tailwindcss/oxide", "esbuild"]
   }
 }

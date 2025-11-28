@@ -1,15 +1,41 @@
+use anyhow::Context;
 use ignore::gitignore::GitignoreBuilder;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
     io::{Read, Write},
     path::Path,
 };
+use utoipa::ToSchema;
 use zip::write::FileOptions;
+
+#[derive(ToSchema, Deserialize, Serialize)]
+pub struct MetadataToml {
+    pub package_name: String,
+    pub name: String,
+    #[schema(value_type = String)]
+    pub panel_version: semver::VersionReq,
+}
+
+impl MetadataToml {
+    #[inline]
+    pub fn get_package_identifier(&self) -> String {
+        Self::convert_package_name_to_identifier(&self.package_name)
+    }
+
+    #[inline]
+    pub fn convert_package_name_to_identifier(package_name: &str) -> String {
+        package_name.replace('.', "_")
+    }
+
+    #[inline]
+    pub fn convert_identifier_to_package_name(identifier: &str) -> String {
+        identifier.replace('_', ".")
+    }
+}
 
 #[derive(Deserialize)]
 pub struct CargoPackage {
-    pub name: String,
     pub description: String,
     pub authors: Vec<String>,
     pub version: semver::Version,
@@ -29,7 +55,7 @@ pub struct PackageJson {
 pub struct ExtensionDistrFile {
     zip: zip::ZipArchive<std::fs::File>,
 
-    pub identifier: String,
+    pub metadata_toml: MetadataToml,
     pub cargo_toml: CargoToml,
     pub package_json: PackageJson,
 }
@@ -38,11 +64,11 @@ impl ExtensionDistrFile {
     pub fn parse_from_file(file: std::fs::File) -> Result<Self, anyhow::Error> {
         let mut zip = zip::ZipArchive::new(file)?;
 
-        let mut identifier = zip.by_name("identifier.txt")?;
-        let mut identifier_bytes = vec![0; identifier.size() as usize];
-        identifier.read_exact(&mut identifier_bytes)?;
-        drop(identifier);
-        let identifier = String::from_utf8(identifier_bytes)?;
+        let mut metadata_toml = zip.by_name("Metadata.toml")?;
+        let mut metadata_toml_bytes = vec![0; metadata_toml.size() as usize];
+        metadata_toml.read_exact(&mut metadata_toml_bytes)?;
+        drop(metadata_toml);
+        let metadata_toml: MetadataToml = toml::from_slice(&metadata_toml_bytes)?;
 
         let mut cargo_toml = zip.by_name("backend/Cargo.toml")?;
         let mut cargo_toml_bytes = vec![0; cargo_toml.size() as usize];
@@ -60,7 +86,7 @@ impl ExtensionDistrFile {
 
         let mut this = Self {
             zip,
-            identifier,
+            metadata_toml,
             cargo_toml,
             package_json,
         };
@@ -100,6 +126,11 @@ impl ExtensionDistrFile {
             }
         }
 
+        filesystem.write(
+            "Metadata.toml",
+            toml::to_string_pretty(&self.metadata_toml)?.into_bytes(),
+        )?;
+
         Ok(())
     }
 
@@ -137,43 +168,88 @@ impl ExtensionDistrFile {
         Ok(())
     }
 
+    pub fn has_schema(&mut self) -> bool {
+        self.zip.by_name("schema.ts").is_ok()
+    }
+
+    pub fn get_schema(&mut self) -> Result<String, anyhow::Error> {
+        let mut schema_file = self.zip.by_name("schema.ts")?;
+        let mut schema_string = String::new();
+        schema_string.reserve_exact(schema_file.size() as usize);
+        schema_file.read_to_string(&mut schema_string)?;
+
+        Ok(schema_string)
+    }
+
     pub fn validate(&mut self) -> Result<(), anyhow::Error> {
-        const BANNED_EXTENSION_IDENTIFIERS: &[&str] = &[
-            "shared",
-            "internal-list",
-            "internal_list",
-            "panel-rs",
-            "panel_rs",
-        ];
         const MUST_EXIST_DIRECTORIES: &[&str] =
             &["backend/", "backend/src/", "frontend/", "frontend/src/"];
         const MUST_EXIST_FILES: &[&str] = &[
+            "Metadata.toml",
             "backend/Cargo.toml",
             "backend/src/lib.rs",
             "frontend/package.json",
             "frontend/src/index.ts",
         ];
 
-        for banned in BANNED_EXTENSION_IDENTIFIERS {
-            if self.identifier == *banned {
+        let mut package_segments = self.metadata_toml.package_name.split('.');
+        let tld_segment = package_segments.next().ok_or_else(|| {
+            anyhow::anyhow!("invalid package name in calagopus extension archive. (too few segments, expected 3)")
+        })?;
+        let author_segment = package_segments.next().ok_or_else(|| {
+            anyhow::anyhow!("invalid package name in calagopus extension archive. (too few segments, expected 3)")
+        })?;
+        let identifier_segment = package_segments.next().ok_or_else(|| {
+            anyhow::anyhow!("invalid package name in calagopus extension archive. (too few segments, expected 3)")
+        })?;
+
+        if package_segments.next().is_some() {
+            return Err(anyhow::anyhow!(
+                "invalid package name in calagopus extension archive. (too many segments, expected 3)"
+            ));
+        }
+
+        if tld_segment.len() < 2 || tld_segment.len() > 6 {
+            return Err(anyhow::anyhow!(
+                "invalid tld segment `{}` in calagopus extension archive package name.",
+                tld_segment
+            ));
+        }
+
+        if author_segment.len() < 3 || author_segment.len() > 30 {
+            return Err(anyhow::anyhow!(
+                "invalid author segment `{}` in calagopus extension archive package name.",
+                author_segment
+            ));
+        }
+
+        if identifier_segment.len() < 5 || identifier_segment.len() > 30 {
+            return Err(anyhow::anyhow!(
+                "invalid identifier segment `{}` in calagopus extension archive package name.",
+                identifier_segment
+            ));
+        }
+
+        for c in tld_segment.chars() {
+            if !c.is_ascii_lowercase() {
                 return Err(anyhow::anyhow!(
-                    "invalid identifier `{}` in calagopus extension archive identifier.",
-                    self.identifier
+                    "invalid character `{c}` in tld segment of calagopus extension archive package name."
                 ));
             }
         }
 
-        if self.identifier.len() < 5 {
-            return Err(anyhow::anyhow!(
-                "invalid identifier `{}` in calagopus extension archive identifier. must be atleast 5 characters.",
-                self.identifier
-            ));
+        for c in author_segment.chars() {
+            if !c.is_ascii_lowercase() && !c.is_ascii_digit() && c != '-' {
+                return Err(anyhow::anyhow!(
+                    "invalid character `{c}` in author segment of calagopus extension archive package name."
+                ));
+            }
         }
 
-        for c in self.identifier.chars() {
-            if !c.is_ascii_lowercase() && !c.is_ascii_digit() && c != '_' {
+        for c in identifier_segment.chars() {
+            if !c.is_ascii_lowercase() && !c.is_ascii_digit() && c != '-' {
                 return Err(anyhow::anyhow!(
-                    "invalid character `{c}` in calagopus extension archive identifier."
+                    "invalid character `{c}` in identifier segment of calagopus extension archive package name."
                 ));
             }
         }
@@ -222,6 +298,14 @@ impl ExtensionDistrFile {
             }
         }
 
+        if let Ok(schema_string) = self.get_schema()
+            && !schema_string.contains("export default (definitions: DatabaseDefinitions) =>")
+        {
+            return Err(anyhow::anyhow!(
+                "unable to find `export default (definitions: DatabaseDefinitions) =>` in calagopus extension archive schema.ts."
+            ));
+        }
+
         Ok(())
     }
 
@@ -232,7 +316,7 @@ impl ExtensionDistrFile {
 }
 
 pub struct SlimExtensionDistrFile {
-    pub identifier: String,
+    pub metadata_toml: MetadataToml,
     pub cargo_toml: CargoToml,
     pub package_json: PackageJson,
 }
@@ -247,6 +331,13 @@ impl SlimExtensionDistrFile {
             if !is_dir || name == "internal-list" {
                 continue;
             }
+
+            let metadata_toml = filesystem.read_to_string(
+                Path::new("backend-extensions")
+                    .join(&name)
+                    .join("Metadata.toml"),
+            )?;
+            let metadata_toml: MetadataToml = toml::from_str(&metadata_toml)?;
 
             let cargo_toml = filesystem.read_to_string(
                 Path::new("backend-extensions")
@@ -263,7 +354,7 @@ impl SlimExtensionDistrFile {
             let package_json: PackageJson = serde_json::from_str(&package_json)?;
 
             results.push(Self {
-                identifier: name,
+                metadata_toml,
                 cargo_toml,
                 package_json,
             });
@@ -280,17 +371,12 @@ pub struct ExtensionDistrFileBuilder {
 }
 
 impl ExtensionDistrFileBuilder {
-    pub fn new(file: std::fs::File, identifier: &str) -> Result<Self, anyhow::Error> {
-        let mut zip = zip::ZipWriter::new(file);
-
-        zip.start_file("identifier.txt", FileOptions::<()>::default())?;
-        zip.write_all(identifier.as_bytes())?;
-
-        Ok(Self {
-            zip,
+    pub fn new(file: std::fs::File) -> Self {
+        Self {
+            zip: zip::ZipWriter::new(file),
             wrote_backend: false,
             wrote_frontend: false,
-        })
+        }
     }
 
     pub fn add_backend(mut self, path: impl AsRef<Path>) -> Result<Self, anyhow::Error> {
@@ -302,12 +388,23 @@ impl ExtensionDistrFileBuilder {
 
         let filesystem = crate::cap::CapFilesystem::new(path.as_ref().to_path_buf())?;
 
+        let metadata_toml = filesystem
+            .read_to_string("Metadata.toml")
+            .context("Failed to read Metadata.toml from backend extension directory.")?;
+        self.zip
+            .start_file("Metadata.toml", FileOptions::<()>::default())?;
+        self.zip.write_all(metadata_toml.as_bytes())?;
+
         self.zip.add_directory(
             "backend",
             FileOptions::<()>::default().compression_level(Some(9)),
         )?;
 
-        let mut walker = filesystem.walk_dir(path)?;
+        let ignored = &[GitignoreBuilder::new("/")
+            .add_line(None, "Metadata.toml")?
+            .build()?];
+
+        let mut walker = filesystem.walk_dir(path)?.with_ignored(ignored);
         while let Some(Ok((_, name))) = walker.next_entry() {
             let metadata = filesystem.metadata(&name)?;
             let virtual_path = Path::new("backend").join(&name);
@@ -369,6 +466,14 @@ impl ExtensionDistrFileBuilder {
         }
 
         self.wrote_frontend = true;
+
+        Ok(self)
+    }
+
+    pub fn add_schema(mut self, schema: &str) -> Result<Self, anyhow::Error> {
+        self.zip
+            .start_file("schema.ts", FileOptions::<()>::default())?;
+        self.zip.write_all(schema.as_bytes())?;
 
         Ok(self)
     }

@@ -36,12 +36,16 @@ impl shared::extensions::commands::CliCommand<ListArgs> for ListCommand {
                 let applied_extensions = extension_internal_list::list();
 
                 for extension in &installed_extensions {
-                    println!("{}", extension.cargo_toml.package.name.cyan().underline());
+                    println!(
+                        "{}",
+                        extension.metadata_toml.package_name.cyan().underline()
+                    );
                     println!(
                         "  status:        {}",
                         if let Some(ext) = applied_extensions
                             .iter()
-                            .find(|e| e.identifier == extension.identifier)
+                            .find(|e| e.metadata_toml.package_name
+                                == extension.metadata_toml.package_name)
                         {
                             if ext.version == extension.cargo_toml.package.version {
                                 "applied".green()
@@ -52,6 +56,7 @@ impl shared::extensions::commands::CliCommand<ListArgs> for ListCommand {
                             "not applied".red()
                         }
                     );
+                    println!("  name:          {}", extension.metadata_toml.name.cyan());
                     println!(
                         "  description:   {}",
                         extension.cargo_toml.package.description.cyan()

@@ -15,10 +15,22 @@ fn main() {
             continue;
         }
 
+        let metadata_toml = match std::fs::read_to_string(dir.path().join("Metadata.toml")) {
+            Ok(file) => file,
+            Err(_) => continue,
+        };
+
         let cargo_toml = match std::fs::read_to_string(dir.path().join("Cargo.toml")) {
             Ok(file) => file,
             Err(_) => continue,
         };
+
+        #[derive(Deserialize)]
+        struct MetadataToml {
+            package_name: String,
+            name: String,
+            panel_version: semver::VersionReq,
+        }
 
         #[derive(Deserialize)]
         struct CargoToml {
@@ -27,14 +39,14 @@ fn main() {
 
         #[derive(Deserialize)]
         struct CargoPackage {
-            name: String,
             description: Option<String>,
             authors: Option<Vec<String>>,
             version: semver::Version,
         }
 
+        let metadata_toml: MetadataToml = toml::from_str(&metadata_toml).unwrap();
         let cargo_toml: CargoToml = toml::from_str(&cargo_toml).unwrap();
-        packages.push((dir.file_name(), cargo_toml.package));
+        packages.push((dir.file_name(), metadata_toml, cargo_toml.package));
     }
 
     std::fs::create_dir_all(internal_list_extension).unwrap();
@@ -42,8 +54,8 @@ fn main() {
 
     let mut deps = String::new();
 
-    for (path, package) in packages.iter() {
-        deps.push_str(&package.name);
+    for (path, metadata, _) in packages.iter() {
+        deps.push_str(&metadata.package_name.replace('.', "_"));
         deps.push_str(" = { path = \"../");
         deps.push_str(&path.to_string_lossy());
         deps.push_str("\" }\n");
@@ -60,49 +72,44 @@ fn main() {
 
     let mut exts = String::new();
 
-    for (file_identifier, package) in packages {
-        let identifier = package.name.replace("-", "_");
-
-        exts.push_str("\n        ConstructedExtension {\n");
-        exts.push_str("            identifier: ");
-        exts.push_str(
-            &toml::Value::String(file_identifier.to_string_lossy().to_string()).to_string(),
-        );
-        exts.push_str(",\n");
-        exts.push_str("            name: ");
-        exts.push_str(&toml::Value::String(package.name).to_string());
-        exts.push_str(",\n");
-        exts.push_str("            description: ");
-        exts.push_str(&toml::Value::String(package.description.unwrap_or_default()).to_string());
-        exts.push_str(",\n");
-        exts.push_str("            authors: &");
-        exts.push_str(
-            &toml::Value::Array(
+    for (_, metadata, package) in packages {
+        exts.push_str(&format!(
+            r#"
+        ConstructedExtension {{
+            metadata_toml: MetadataToml {{
+                package_name: {}.to_string(),
+                name: {}.to_string(),
+                panel_version: semver::VersionReq::parse({}).unwrap(),
+            }},
+            description: {},
+            authors: &{},
+            version: semver::Version::parse({}).unwrap(),
+            extension: Box::new({}::ExtensionStruct::default()),
+        }},"#,
+            toml::Value::String(metadata.package_name.clone()),
+            toml::Value::String(metadata.name),
+            toml::Value::String(metadata.panel_version.to_string()),
+            toml::Value::String(package.description.unwrap_or_default()),
+            toml::Value::Array(
                 package
                     .authors
                     .unwrap_or_default()
                     .into_iter()
                     .map(toml::Value::String)
                     .collect(),
-            )
-            .to_string(),
-        );
-        exts.push_str(",\n");
-        exts.push_str("            version: semver::Version::parse(");
-        exts.push_str(&toml::Value::String(package.version.to_string()).to_string());
-        exts.push_str(").unwrap(),\n");
-        exts.push_str("            extension: Box::new(");
-        exts.push_str(&identifier);
-        exts.push_str("::ExtensionStruct::default()),\n");
-        exts.push_str("        },");
+            ),
+            toml::Value::String(package.version.to_string()),
+            metadata.package_name.replace('.', "_"),
+        ));
     }
 
     std::fs::write(
         internal_list_extension.join("src/lib.rs"),
         format!(
             r#"#![allow(clippy::default_constructed_unit_structs)]
+#![allow(unused_imports)]
 
-use shared::extensions::ConstructedExtension;
+use shared::extensions::{{ConstructedExtension, distr::MetadataToml}};
 
 pub fn list() -> Vec<ConstructedExtension> {{
     vec![{}

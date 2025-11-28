@@ -133,6 +133,17 @@ impl shared::extensions::commands::CliCommand<ApplyArgs> for ApplyCommand {
                     std::process::exit(1);
                 }
 
+                println!("checking backend...");
+                let status = Command::new(&cargo_bin).arg("check").status().await?;
+                if !status.success() {
+                    eprintln!(
+                        "{} {}",
+                        "cargo check".bright_red(),
+                        "did not run successfully, aborting process".red()
+                    );
+                    std::process::exit(1);
+                }
+
                 println!();
                 println!("┏━━━━━━━━━━━━━━━━━━━┓");
                 println!("┃ building frontend ┃");

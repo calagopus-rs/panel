@@ -3,13 +3,14 @@ use anyhow::Context;
 use clap::{Args, FromArgMatches};
 use colored::Colorize;
 use serde::Deserialize;
+use shared::extensions::distr::MetadataToml;
 use std::{collections::HashMap, path::Path};
 use tokio::process::Command;
 
 #[derive(Args)]
 pub struct RemoveArgs {
-    #[arg(help = "the extension identifier to remove")]
-    identifier: String,
+    #[arg(help = "the extension package name to remove")]
+    package_name: String,
     #[arg(
         long = "remove-migrations",
         help = "whether to remove the database migrations of this extension (usually not recommended)",
@@ -44,7 +45,9 @@ impl shared::extensions::commands::CliCommand<RemoveArgs> for RemoveCommand {
                     std::process::exit(1);
                 }
 
-                let frontend_path = Path::new("frontend/extensions").join(&args.identifier);
+                let frontend_path = Path::new("frontend/extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                );
                 if tokio::fs::metadata(&frontend_path)
                     .await
                     .ok()
@@ -53,13 +56,19 @@ impl shared::extensions::commands::CliCommand<RemoveArgs> for RemoveCommand {
                     eprintln!(
                         "{} {} {}",
                         "failed to find".red(),
-                        format!("frontend/extensions/{}", args.identifier).bright_red(),
+                        format!(
+                            "frontend/extensions/{}",
+                            MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                        )
+                        .bright_red(),
                         "directory, make sure you are in the panel root.".red()
                     );
                     std::process::exit(1);
                 }
 
-                let backend_path = Path::new("backend-extensions").join(&args.identifier);
+                let backend_path = Path::new("backend-extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                );
                 if tokio::fs::metadata(&backend_path)
                     .await
                     .ok()
@@ -68,11 +77,19 @@ impl shared::extensions::commands::CliCommand<RemoveArgs> for RemoveCommand {
                     eprintln!(
                         "{} {} {}",
                         "failed to find".red(),
-                        format!("backend-extensions/{}", args.identifier).bright_red(),
+                        format!(
+                            "backend-extensions/{}",
+                            MetadataToml::convert_package_name_to_identifier(&args.package_name),
+                        )
+                        .bright_red(),
                         "directory, make sure you are in the panel root.".red()
                     );
                     std::process::exit(1);
                 }
+
+                let schema_path = Path::new("database/src/schema/extensions").join(
+                    MetadataToml::convert_package_name_to_identifier(&args.package_name) + ".ts",
+                );
 
                 let cargo_bin = which("cargo")
                     .await
@@ -176,7 +193,42 @@ impl shared::extensions::commands::CliCommand<RemoveArgs> for RemoveCommand {
                     );
                 }
 
-                println!("sucessfully removed {}", args.identifier.cyan(),);
+                if args.remove_migrations && tokio::fs::metadata(&schema_path).await.is_ok() {
+                    tokio::fs::remove_file(schema_path).await?;
+
+                    println!("generating database migrations...");
+
+                    println!("installing dependencies...");
+                    let status = Command::new(&pnpm_bin)
+                        .arg("install")
+                        .current_dir("database")
+                        .status()
+                        .await?;
+                    if !status.success() {
+                        eprintln!(
+                            "{} {}",
+                            "pnpm install".bright_red(),
+                            "did not run successfully, aborting process".red()
+                        );
+                        std::process::exit(1);
+                    }
+
+                    let status = Command::new(&pnpm_bin)
+                        .arg("kit:generate:extensions")
+                        .current_dir("database")
+                        .status()
+                        .await?;
+                    if !status.success() {
+                        eprintln!(
+                            "{} {}",
+                            "pnpm kit:generate:extensions".bright_red(),
+                            "did not run successfully, aborting process".red()
+                        );
+                        std::process::exit(1);
+                    }
+                }
+
+                println!("sucessfully removed {}", args.package_name.cyan(),);
 
                 Ok(())
             })

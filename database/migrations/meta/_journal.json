@@ -288,6 +288,13 @@
       "when": 1763546116511,
       "tag": "0040_first_tusk",
       "breakpoints": false
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1764357559387,
+      "tag": "0041_far_squadron_sinister",
+      "breakpoints": false
     }
   ]
 }
