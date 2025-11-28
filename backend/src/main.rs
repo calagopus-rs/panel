@@ -69,24 +69,27 @@ async fn handle_postprocessing(req: Request, next: Next) -> Result<Response, Sta
     {
         let (mut parts, body) = response.into_parts();
 
-        let text_body = String::from_utf8(
-            axum::body::to_bytes(body, usize::MAX)
-                .await
-                .unwrap()
-                .into_iter()
-                .by_ref()
-                .collect::<Vec<u8>>(),
-        )
-        .unwrap();
+        let bytes_body = axum::body::to_bytes(body, usize::MAX)
+            .await
+            .unwrap()
+            .into_iter()
+            .collect::<Vec<u8>>();
 
-        parts
-            .headers
-            .insert("Content-Type", "application/json".parse().unwrap());
+        match String::from_utf8(bytes_body) {
+            Ok(text_body) => {
+                parts
+                    .headers
+                    .insert("Content-Type", "application/json".parse().unwrap());
 
-        response = Response::from_parts(
-            parts,
-            Body::from(ApiError::new_value(&[&text_body]).to_string()),
-        );
+                response = Response::from_parts(
+                    parts,
+                    Body::from(ApiError::new_value(&[&text_body]).to_string()),
+                );
+            }
+            Err(err) => {
+                response = Response::from_parts(parts, Body::from(err.into_bytes()));
+            }
+        }
     }
 
     let (etag, response) = if let Some(etag) = response.headers().get("ETag") {

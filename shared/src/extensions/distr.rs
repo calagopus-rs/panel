@@ -34,20 +34,20 @@ impl MetadataToml {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct CargoPackage {
     pub description: String,
     pub authors: Vec<String>,
     pub version: semver::Version,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct CargoToml {
     pub package: CargoPackage,
     pub dependencies: BTreeMap<String, toml::Value>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct PackageJson {
     pub dependencies: BTreeMap<String, String>,
 }

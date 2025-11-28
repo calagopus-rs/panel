@@ -1,9 +1,17 @@
-use clap::Args;
+use clap::{Args, FromArgMatches};
 use colored::Colorize;
-use shared::extensions::distr::SlimExtensionDistrFile;
+use serde::Serialize;
+use shared::extensions::distr::{CargoToml, MetadataToml, PackageJson, SlimExtensionDistrFile};
 
 #[derive(Args)]
-pub struct ListArgs;
+pub struct ListArgs {
+    #[arg(
+        long = "json",
+        help = "whether to output the list in JSON format",
+        default_value = "false"
+    )]
+    json: bool,
+}
 
 pub struct ListCommand;
 
@@ -13,8 +21,10 @@ impl shared::extensions::commands::CliCommand<ListArgs> for ListCommand {
     }
 
     fn get_executor(self) -> Box<shared::extensions::commands::ExecutorFunc> {
-        Box::new(|_env, _arg_matches| {
+        Box::new(|_env, arg_matches| {
             Box::pin(async move {
+                let args = ListArgs::from_arg_matches(&arg_matches)?;
+
                 if tokio::fs::metadata(".sqlx")
                     .await
                     .ok()
@@ -35,52 +45,86 @@ impl shared::extensions::commands::CliCommand<ListArgs> for ListCommand {
                 .await??;
                 let applied_extensions = extension_internal_list::list();
 
-                for extension in &installed_extensions {
-                    println!(
-                        "{}",
-                        extension.metadata_toml.package_name.cyan().underline()
-                    );
-                    println!(
-                        "  status:        {}",
-                        if let Some(ext) = applied_extensions
-                            .iter()
-                            .find(|e| e.metadata_toml.package_name
-                                == extension.metadata_toml.package_name)
-                        {
-                            if ext.version == extension.cargo_toml.package.version {
-                                "applied".green()
-                            } else {
-                                "applied - different version".yellow()
-                            }
-                        } else {
-                            "not applied".red()
-                        }
-                    );
-                    println!("  name:          {}", extension.metadata_toml.name.cyan());
-                    println!(
-                        "  description:   {}",
-                        extension.cargo_toml.package.description.cyan()
-                    );
-                    if let Some(first) = extension.cargo_toml.package.authors.first() {
-                        let spaces = (extension.cargo_toml.package.authors.len() as f64)
-                            .log10()
-                            .floor() as usize
-                            + 1;
+                if args.json {
+                    let mut extensions_json = Vec::new();
+                    extensions_json.reserve_exact(installed_extensions.len());
 
-                        println!(
-                            "  authors ({}): {}{}",
-                            extension.cargo_toml.package.authors.len(),
-                            " ".repeat(3 - spaces),
-                            first.cyan()
-                        );
-                        for author in extension.cargo_toml.package.authors.iter().skip(1) {
-                            println!("                 {}", author.cyan());
-                        }
+                    #[derive(Serialize)]
+                    struct ExtensionJson {
+                        status: &'static str,
+                        metadata_toml: MetadataToml,
+                        cargo_toml: CargoToml,
+                        package_json: PackageJson,
                     }
-                    println!(
-                        "  version:       {}",
-                        extension.cargo_toml.package.version.to_string().cyan()
-                    );
+
+                    for extension in installed_extensions {
+                        extensions_json.push(ExtensionJson {
+                            status: if let Some(ext) = applied_extensions.iter().find(|e| {
+                                e.metadata_toml.package_name == extension.metadata_toml.package_name
+                            }) {
+                                if ext.version == extension.cargo_toml.package.version {
+                                    "applied"
+                                } else {
+                                    "applied - different version"
+                                }
+                            } else {
+                                "not applied"
+                            },
+                            metadata_toml: extension.metadata_toml,
+                            cargo_toml: extension.cargo_toml,
+                            package_json: extension.package_json,
+                        });
+                    }
+
+                    println!("{}", serde_json::to_string_pretty(&extensions_json)?);
+                } else {
+                    for extension in installed_extensions {
+                        println!(
+                            "{}",
+                            extension.metadata_toml.package_name.cyan().underline()
+                        );
+                        println!(
+                            "  status:        {}",
+                            if let Some(ext) = applied_extensions
+                                .iter()
+                                .find(|e| e.metadata_toml.package_name
+                                    == extension.metadata_toml.package_name)
+                            {
+                                if ext.version == extension.cargo_toml.package.version {
+                                    "applied".green()
+                                } else {
+                                    "applied - different version".yellow()
+                                }
+                            } else {
+                                "not applied".red()
+                            }
+                        );
+                        println!("  name:          {}", extension.metadata_toml.name.cyan());
+                        println!(
+                            "  description:   {}",
+                            extension.cargo_toml.package.description.cyan()
+                        );
+                        if let Some(first) = extension.cargo_toml.package.authors.first() {
+                            let spaces = (extension.cargo_toml.package.authors.len() as f64)
+                                .log10()
+                                .floor() as usize
+                                + 1;
+
+                            println!(
+                                "  authors ({}): {}{}",
+                                extension.cargo_toml.package.authors.len(),
+                                " ".repeat(3 - spaces),
+                                first.cyan()
+                            );
+                            for author in extension.cargo_toml.package.authors.iter().skip(1) {
+                                println!("                 {}", author.cyan());
+                            }
+                        }
+                        println!(
+                            "  version:       {}",
+                            extension.cargo_toml.package.version.to_string().cyan()
+                        );
+                    }
                 }
 
                 Ok(())
