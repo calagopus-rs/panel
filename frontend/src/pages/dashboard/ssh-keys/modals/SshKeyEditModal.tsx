@@ -1,7 +1,7 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import updateSshKey from '@/api/me/ssh-keys/updateSshKey';
@@ -32,6 +32,12 @@ export default function SshKeyEditModal({ sshKey, opened, onClose }: Props) {
     validateInputOnBlur: true,
     validate: zod4Resolver(schema),
   });
+
+  useEffect(() => {
+    form.setValues({
+      name: sshKey.name,
+    });
+  }, []);
 
   const doUpdate = () => {
     setLoading(true);
