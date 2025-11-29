@@ -1,7 +1,12 @@
 import { filesystem } from '@rjweb/utils';
 import { defineConfig } from 'drizzle-kit';
 
-const env = filesystem.env('../.env', { async: false });
+let env: Record<string, string>;
+try {
+  env = filesystem.env('../.env', { async: false });
+} catch {
+  env = process.env as Record<string, string>;
+}
 
 export default defineConfig({
   dialect: 'postgresql',
