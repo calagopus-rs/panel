@@ -1,6 +1,19 @@
-import { Center, Group, Pagination as MantinePagination, Table, TableTdProps, TableTrProps, Text } from '@mantine/core';
+import {
+  Center,
+  Group,
+  GroupProps,
+  Pagination as MantinePagination,
+  Paper,
+  Stack,
+  Table,
+  TableTdProps,
+  TableTrProps,
+  Text,
+} from '@mantine/core';
 import { forwardRef, ReactNode } from 'react';
 import Spinner from '@/elements/Spinner';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCubesStacked } from '@fortawesome/free-solid-svg-icons';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
@@ -39,12 +52,11 @@ export const TableData = forwardRef<HTMLTableCellElement, TableTdProps>(({ class
 });
 
 interface PaginationProps<T> {
-  columns: string[];
   data: ResponseMeta<T>;
   onPageSelect: (page: number) => void;
 }
 
-export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T>) {
+export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<T> & GroupProps) {
   const totalPages = data.total === 0 ? 0 : Math.ceil(data.total / data.perPage);
 
   const setPage = (page: number) => {
@@ -58,13 +70,16 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
   const isFirstPage = data.page === 1;
   const isLastPage = data.page >= totalPages;
 
-  const inner = (
-    <Group justify='space-between'>
+  const rangeStart = (data.page - 1) * data.perPage + 1;
+  const rangeEnd = Math.min(data.page * data.perPage, data.total);
+
+  return (
+    <Group justify='space-between' hidden={rangeEnd === 0} {...props}>
       <p className='text-sm leading-5 text-gray-400'>
         Showing&nbsp;
-        <span className='text-gray-300'>{(data.page - 1) * data.perPage + (data.total > 0 ? 1 : 0)}</span>
+        <span className='text-gray-300'>{rangeStart}</span>
         &nbsp;to&nbsp;
-        <span className='text-gray-300'>{(data.page - 1) * data.perPage + data.data.length}</span>
+        <span className='text-gray-300'>{rangeEnd}</span>
         &nbsp;of&nbsp;<span className='text-gray-300'>{data.total}</span> results
       </p>
       {isFirstPage && isLastPage ? null : (
@@ -72,20 +87,15 @@ export function Pagination<T>({ columns, data, onPageSelect }: PaginationProps<T
       )}
     </Group>
   );
-
-  return columns.length > 0 ? (
-    <Table.Tr>
-      <Table.Td colSpan={columns.length}>{inner}</Table.Td>
-    </Table.Tr>
-  ) : (
-    inner
-  );
 }
 
 export const NoItems = () => {
   return (
     <Center py='lg'>
-      <Text c='dimmed'>No items could be found, it&apos;s almost like they are hiding.</Text>
+      <Stack align='center' c='dimmed'>
+        <FontAwesomeIcon icon={faCubesStacked} size='3x' className='-mb-2' />
+        <Text>No items could be found, it&apos;s almost like they are hiding.</Text>
+      </Stack>
     </Center>
   );
 };
@@ -101,39 +111,39 @@ interface TableProps {
 
 export default ({ columns, loading, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {
   return (
-    <Table
-      stickyHeader
-      withTableBorder
-      highlightOnHover={pagination?.total > 0}
-      className={allowSelect ? undefined : 'select-none'}
-    >
-      <TableHead>
-        {columns.map((column, index) => (
-          <TableHeader name={column} key={`column-${index}`} />
-        ))}
-      </TableHead>
-      <Table.Tbody>
-        {loading ? (
-          <Table.Tr>
-            <Table.Td colSpan={columns.length}>
-              <Spinner.Centered />
-            </Table.Td>
-          </Table.Tr>
-        ) : pagination?.total === 0 ? (
-          <Table.Tr>
-            <Table.Td colSpan={columns.length}>
-              <NoItems />
-            </Table.Td>
-          </Table.Tr>
-        ) : (
-          children
-        )}
-      </Table.Tbody>
-      {pagination ? (
-        <Table.Tfoot>
-          <Pagination columns={columns} data={pagination} onPageSelect={onPageSelect} />
-        </Table.Tfoot>
-      ) : null}
-    </Table>
+    <Paper withBorder radius='md' className='overflow-x-auto'>
+      {pagination.total > pagination.perPage && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
+
+      <Table
+        stickyHeader
+        highlightOnHover={pagination?.total > 0 && !loading}
+        className={allowSelect ? undefined : 'select-none'}
+      >
+        <TableHead>
+          {columns.map((column, index) => (
+            <TableHeader name={column} key={`column-${index}`} />
+          ))}
+        </TableHead>
+        <Table.Tbody>
+          {loading ? (
+            <Table.Tr>
+              <Table.Td colSpan={columns.length}>
+                <Spinner.Centered />
+              </Table.Td>
+            </Table.Tr>
+          ) : pagination?.total === 0 ? (
+            <Table.Tr>
+              <Table.Td colSpan={columns.length}>
+                <NoItems />
+              </Table.Td>
+            </Table.Tr>
+          ) : (
+            children
+          )}
+        </Table.Tbody>
+      </Table>
+
+      {pagination && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
+    </Paper>
   );
 };

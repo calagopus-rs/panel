@@ -5,8 +5,9 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
+import { NavLink } from 'react-router';
 
-export const nodeAllocationTableColumns = ['', 'ID', 'IP', 'IP Alias', 'Port', 'Created'];
+export const nodeAllocationTableColumns = ['', 'ID', 'Server', 'IP', 'IP Alias', 'Port', 'Created'];
 
 export default function NodeAllocationRow({
   allocation,
@@ -49,15 +50,34 @@ export default function NodeAllocationRow({
         <TableData>
           <Code>{allocation.uuid}</Code>
         </TableData>
+
+        <TableData>
+          <Code>
+            {allocation.server ? (
+              <NavLink
+                to={`/admin/servers/${allocation.server.uuid}`}
+                className='text-blue-400 hover:text-blue-200 hover:underline'
+              >
+                {allocation.server.name}
+              </NavLink>
+            ) : (
+              '-'
+            )}
+          </Code>
+        </TableData>
+
         <TableData>
           <Code>{allocation.ip}</Code>
         </TableData>
+
         <TableData>
           <Code>{allocation.ipAlias ?? 'N/A'}</Code>
         </TableData>
+
         <TableData>
           <Code>{allocation.port}</Code>
         </TableData>
+
         <TableData>
           <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>
         </TableData>

@@ -4,7 +4,7 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const locationTableColumns = ['ID', 'Name', 'Backup Disk', 'Created'];
+export const locationTableColumns = ['ID', 'Name', 'Backup Configuration', 'Created'];
 
 export default ({ location }: { location: Location }) => {
   return (
@@ -18,16 +18,18 @@ export default ({ location }: { location: Location }) => {
       <TableData>{location.name}</TableData>
 
       <TableData>
-        {location.backupConfiguration ? (
-          <NavLink
-            to={`/admin/backup-configurations/${location.backupConfiguration.uuid}`}
-            className='text-blue-400 hover:text-blue-200 hover:underline'
-          >
-            <Code>{location.backupConfiguration.name}</Code>
-          </NavLink>
-        ) : (
-          '-'
-        )}
+        <Code>
+          {location.backupConfiguration ? (
+            <NavLink
+              to={`/admin/backup-configurations/${location.backupConfiguration.uuid}`}
+              className='text-blue-400 hover:text-blue-200 hover:underline'
+            >
+              {location.backupConfiguration.name}
+            </NavLink>
+          ) : (
+            '-'
+          )}
+        </Code>
       </TableData>
 
       <TableData>

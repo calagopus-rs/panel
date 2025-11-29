@@ -60,14 +60,14 @@ export default function DashboardHomeAll() {
       ) : (
         <div className='gap-4 grid md:grid-cols-2'>
           {servers.data.map((server) => (
-            <ServerItem key={server.uuid} server={server} showGroupAddButton />
+            <ServerItem key={server.uuid} server={server} showGroupAddButton={!serverListShowOthers} />
           ))}
         </div>
       )}
 
       <Divider my='md' />
 
-      <Pagination columns={[]} data={servers} onPageSelect={setPage} />
+      <Pagination data={servers} onPageSelect={setPage} />
     </>
   );
 }

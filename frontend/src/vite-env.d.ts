@@ -219,6 +219,7 @@ declare global {
 
   interface NodeAllocation {
     uuid: string;
+    server: AdminServer | null;
     ip: string;
     ipAlias: string | null;
     port: number;

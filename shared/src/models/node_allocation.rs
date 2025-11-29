@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, storage::StorageUrlRetriever};
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow};
 use std::collections::BTreeMap;
@@ -7,6 +7,7 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct NodeAllocation {
     pub uuid: uuid::Uuid,
+    pub server: Option<Fetchable<super::server::Server>>,
 
     pub ip: sqlx::types::ipnetwork::IpNetwork,
     pub ip_alias: Option<String>,
@@ -37,6 +38,11 @@ impl BaseModel for NodeAllocation {
 
         Ok(Self {
             uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            server: if let Ok(server_uuid) = row.try_get::<uuid::Uuid, _>("server_uuid") {
+                Some(super::server::Server::get_fetchable(server_uuid))
+            } else {
+                None
+            },
             ip: row.try_get(format!("{prefix}ip").as_str())?,
             ip_alias: row.try_get(format!("{prefix}ip_alias").as_str())?,
             port: row.try_get(format!("{prefix}port").as_str())?,
@@ -143,8 +149,9 @@ impl NodeAllocation {
 
         let rows = sqlx::query(&format!(
             r#"
-            SELECT {}, COUNT(*) OVER() AS total_count
+            SELECT {}, server_allocations.server_uuid, COUNT(*) OVER() AS total_count
             FROM node_allocations
+            LEFT JOIN server_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
             WHERE node_allocations.node_uuid = $1 AND ($2 IS NULL OR host(node_allocations.ip) || ':' || node_allocations.port ILIKE '%' || $2 || '%')
             ORDER BY node_allocations.ip, node_allocations.port
             LIMIT $3 OFFSET $4
@@ -192,14 +199,30 @@ impl NodeAllocation {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiNodeAllocation {
-        AdminApiNodeAllocation {
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> Result<AdminApiNodeAllocation, crate::database::DatabaseError> {
+        let server = match self.server {
+            Some(fetchable) => Some(
+                fetchable
+                    .fetch_cached(database)
+                    .await?
+                    .into_admin_api_object(database, storage_url_retriever)
+                    .await?,
+            ),
+            None => None,
+        };
+
+        Ok(AdminApiNodeAllocation {
             uuid: self.uuid,
+            server,
             ip: self.ip.ip().to_string(),
             ip_alias: self.ip_alias,
             port: self.port,
             created: self.created.and_utc(),
-        }
+        })
     }
 }
 
@@ -207,6 +230,7 @@ impl NodeAllocation {
 #[schema(title = "NodeAllocation")]
 pub struct AdminApiNodeAllocation {
     pub uuid: uuid::Uuid,
+    pub server: Option<super::server::AdminApiServer>,
 
     pub ip: String,
     pub ip_alias: Option<String>,
