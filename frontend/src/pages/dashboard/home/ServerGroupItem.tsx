@@ -94,6 +94,7 @@ export default function ServerGroupItem({
         <Group justify='space-between' mb={isExpanded ? 'md' : undefined}>
           <Card
             p={6}
+            radius='sm'
             className='flex-1'
             {...dragHandleProps}
             style={{
@@ -182,7 +183,7 @@ export default function ServerGroupItem({
 
             <Divider my='md' />
 
-            <Pagination columns={[]} data={servers} onPageSelect={setPage} />
+            <Pagination data={servers} onPageSelect={setPage} />
           </>
         )}
       </Card>

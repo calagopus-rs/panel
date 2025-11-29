@@ -396,11 +396,41 @@ export const nodeAllocationsTable = new DatabaseTable('node_allocations')
     uniqueIndex('allocations_node_uuid_ip_port_idx').on(cols.node_uuid, sql`host(${cols.ip})`, cols.port),
   ]);
 
-export const nestsTable = new DatabaseTable('nests')
+export const eggRepositoriesTable = new DatabaseTable('egg_repositories')
   .addColumn('uuid', uuid().default(sql`gen_random_uuid()`).primaryKey().notNull())
-  .addColumn('author', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('name', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('description', text())
+  .addColumn('git_repository', text().notNull())
+  .addColumn('last_synced', timestamp())
+  .addColumn('created', timestamp().defaultNow().notNull())
+  .addConfigBuilder((cols) => [
+    uniqueIndex('egg_repositories_name_idx').on(cols.name),
+    uniqueIndex('egg_repositories_git_repository_idx').on(cols.git_repository),
+  ]);
+
+export const eggRepositoriesEggsTable = new DatabaseTable('egg_repository_eggs')
+  .addColumn('uuid', uuid().default(sql`gen_random_uuid()`).primaryKey().notNull())
+  .addColumn(
+    'egg_repository_uuid',
+    uuid()
+      .references(() => eggRepositoriesTable.join().uuid, { onDelete: 'cascade' })
+      .notNull(),
+  )
+  .addColumn('path', text().notNull())
+  .addColumn('name', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
+  .addColumn('description', text())
+  .addColumn('author', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
+  .addColumn('exported_egg', jsonb().notNull())
+  .addConfigBuilder((cols) => [
+    index('egg_repository_eggs_egg_repository_uuid_idx').on(cols.egg_repository_uuid),
+    uniqueIndex('egg_repository_eggs_egg_repository_uuid_path_idx').on(cols.egg_repository_uuid, cols.path),
+  ]);
+
+export const nestsTable = new DatabaseTable('nests')
+  .addColumn('uuid', uuid().default(sql`gen_random_uuid()`).primaryKey().notNull())
+  .addColumn('name', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
+  .addColumn('description', text())
+  .addColumn('author', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [uniqueIndex('nests_name_idx').on(cols.name)]);
 
@@ -412,9 +442,13 @@ export const nestEggsTable = new DatabaseTable('nest_eggs')
       .references(() => nestsTable.join().uuid)
       .notNull(),
   )
-  .addColumn('author', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
+  .addColumn(
+    'egg_repository_egg_uuid',
+    uuid().references(() => eggRepositoriesEggsTable.join().uuid, { onDelete: 'set null' }),
+  )
   .addColumn('name', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('description', text())
+  .addColumn('author', varchar({ length: 255 * UTF8_MAX_SCALAR_SIZE }).notNull())
   .addColumn('config_files', jsonb().notNull())
   .addColumn('config_startup', jsonb().notNull())
   .addColumn('config_stop', jsonb().notNull())
@@ -429,6 +463,7 @@ export const nestEggsTable = new DatabaseTable('nest_eggs')
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     index('eggs_nest_uuid_idx').on(cols.nest_uuid),
+    index('eggs_egg_repository_egg_uuid_idx').on(cols.egg_repository_egg_uuid),
     uniqueIndex('eggs_nest_uuid_name_idx').on(cols.nest_uuid, cols.name),
   ]);
 

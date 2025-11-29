@@ -41,7 +41,20 @@ export default function UserRow({ user }: { user: User }) {
         </span>
       </TableData>
 
-      <TableData>{user.role?.name ?? '-'}</TableData>
+      <TableData>
+        <Code>
+          {user.role ? (
+            <NavLink
+              to={`/admin/roles/${user.role.uuid}`}
+              className='text-blue-400 hover:text-blue-200 hover:underline'
+            >
+              {user.role.name}
+            </NavLink>
+          ) : (
+            '-'
+          )}
+        </Code>
+      </TableData>
 
       <TableData>
         <Tooltip label={formatDateTime(user.created)}>{formatTimestamp(user.created)}</Tooltip>

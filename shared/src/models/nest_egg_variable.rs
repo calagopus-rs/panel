@@ -8,7 +8,7 @@ use std::{
 use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(ToSchema, Validate, Serialize, Deserialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
 pub struct ExportedNestEggVariable {
     #[validate(length(min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]

@@ -10,7 +10,7 @@ import {
   TableTrProps,
   Text,
 } from '@mantine/core';
-import { forwardRef, ReactNode } from 'react';
+import { forwardRef, ReactNode, useEffect } from 'react';
 import Spinner from '@/elements/Spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCubesStacked } from '@fortawesome/free-solid-svg-icons';
@@ -66,6 +66,32 @@ export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<
 
     onPageSelect(page);
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+      if (event.key === 'ArrowLeft' && !isInputFocused) {
+        event.preventDefault();
+
+        const page = event.shiftKey ? 1 : data.page - 1;
+        setPage(page);
+      }
+
+      if (event.key === 'ArrowRight' && !isInputFocused) {
+        event.preventDefault();
+
+        const page = event.shiftKey ? totalPages : data.page + 1;
+        setPage(page);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [data.page, totalPages]);
 
   const isFirstPage = data.page === 1;
   const isLastPage = data.page >= totalPages;

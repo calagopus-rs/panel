@@ -3,6 +3,7 @@ import {
   faBuilding,
   faCrow,
   faDatabase,
+  faDownload,
   faEarthAmerica,
   faFileZipper,
   faFingerprint,
@@ -21,6 +22,7 @@ import AdminDatabaseHosts from '@/pages/admin/databaseHosts/AdminDatabaseHosts';
 import AdminLocations from '@/pages/admin/locations/AdminLocations';
 import AdminMounts from '@/pages/admin/mounts/AdminMounts';
 import AdminNests from '@/pages/admin/nests/AdminNests';
+import AdminEggRepositories from '@/pages/admin/eggRepositories/AdminEggRepositories';
 import AdminNodes from '@/pages/admin/nodes/AdminNodes';
 import AdminOAuthProviders from '@/pages/admin/oAuthProviders/AdminOAuthProviders';
 import AdminRoles from '@/pages/admin/roles/AdminRoles';
@@ -71,6 +73,12 @@ const routes: AdminRouteDefinition[] = [
     icon: faCrow,
     path: '/nests/*',
     element: AdminNests,
+  },
+  {
+    name: 'Egg Repositories',
+    icon: faDownload,
+    path: '/egg-repositories/*',
+    element: AdminEggRepositories,
   },
   {
     name: 'Database Hosts',

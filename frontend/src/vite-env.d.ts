@@ -109,6 +109,26 @@ declare global {
     created: Date;
   }
 
+  interface AdminUpdateEggRepository {
+    name: string;
+    description: string | null;
+    gitRepository: string;
+  }
+
+  interface AdminEggRepository extends AdminUpdateEggRepository {
+    uuid: string;
+    created: Date;
+  }
+
+  interface AdminEggRepositoryEgg {
+    uuid: string;
+    path: string;
+    author: string;
+    name: string;
+    description: string | null;
+    exportedEgg: object;
+  }
+
   interface AdminUpdateNest {
     author: string;
     name: string;

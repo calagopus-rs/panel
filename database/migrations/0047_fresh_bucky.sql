@@ -1,0 +1,2 @@
+CREATE INDEX "egg_repository_eggs_egg_repository_uuid_idx" ON "egg_repository_eggs" USING btree ("egg_repository_uuid");
+CREATE INDEX "eggs_egg_repository_egg_uuid_idx" ON "nest_eggs" USING btree ("egg_repository_egg_uuid");

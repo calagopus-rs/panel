@@ -362,6 +362,28 @@ pub(crate) static BASE_ADMIN_PERMISSIONS: LazyLock<IndexMap<&'static str, Permis
                 },
             ),
             (
+                "egg-repositories",
+                PermissionGroup {
+                    description: "Permissions that control the ability to manage egg repositories for the panel.",
+                    permissions: IndexMap::from([
+                        (
+                            "create",
+                            "Allows to create new egg repositories for the panel.",
+                        ),
+                        ("read", "Allows to view egg repositories for the panel."),
+                        ("update", "Allows to modify egg repositories."),
+                        (
+                            "delete",
+                            "Allows to delete egg repositories from the panel.",
+                        ),
+                        (
+                            "sync",
+                            "Allows to sync egg repositories with their repositories.",
+                        ),
+                    ]),
+                },
+            ),
+            (
                 "database-hosts",
                 PermissionGroup {
                     description: "Permissions that control the ability to manage database hosts for the panel.",

@@ -1,0 +1,1 @@
+ALTER TABLE "egg_repositories" ADD COLUMN "last_synced" timestamp;

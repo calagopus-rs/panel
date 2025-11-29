@@ -3,7 +3,7 @@ resolver = "3"
 members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
 package.license = "MIT"
-package.version = "0.15.1"
+package.version = "0.15.2"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -28,6 +28,7 @@ utoipa-axum = "0.2.0"
 validator = { version = "0.20.0", features = ["derive"] }
 serde = { version = "1.0.218", features = ["derive", "rc"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
+serde_yml = "0.0.12"
 reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
 chrono = { version = "0.4.40", features = ["serde"] }
 uuid = { version = "1.17.0", features = ["v4", "serde"] }
@@ -47,6 +48,7 @@ rustis = "0.16.1"
 dotenvy = "0.15.7"
 oauth2 = "5.0.0"
 semver = { version = "1.0.27", features = ["serde"] }
+tempfile = "3.23.0"
 
 # dev (for development)
 [profile.dev.package."*"]

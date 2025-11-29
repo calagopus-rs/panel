@@ -22,8 +22,9 @@ zip = { version = "6.0.0", default-features = false, features = ["deflate", "sha
 toml = "0.9.7"
 serde = { workspace = true }
 serde_json_path = "0.7.2"
-utoipa-axum = { workspace = true }
 serde_json = { workspace = true }
+serde_yml = { workspace = true }
+utoipa-axum = { workspace = true }
 base32 = "0.5.1"
 sqlx = { workspace = true }
 webauthn-rs = { workspace = true }
@@ -49,3 +50,5 @@ futures-util = { workspace = true }
 bincode = { version = "2.0.1", features = ["serde"] }
 cap-std = "3.4.5"
 semver = { workspace = true }
+git2 = "0.20.2"
+tempfile = { workspace = true }

@@ -3,15 +3,15 @@ import { AdminStore } from '@/stores/admin';
 import { StateCreator } from 'zustand';
 
 export interface NestsSlice {
-  nests: ResponseMeta<Nest>;
+  nests: ResponseMeta<AdminNest>;
 
-  setNests: (nests: ResponseMeta<Nest>) => void;
-  addNest: (nest: Nest) => void;
-  removeNest: (nest: Nest) => void;
+  setNests: (nests: ResponseMeta<AdminNest>) => void;
+  addNest: (nest: AdminNest) => void;
+  removeNest: (nest: AdminNest) => void;
 }
 
 export const createNestsSlice: StateCreator<AdminStore, [], [], NestsSlice> = (set): NestsSlice => ({
-  nests: getEmptyPaginationSet<Nest>(),
+  nests: getEmptyPaginationSet<AdminNest>(),
 
   setNests: (value) => set((state) => ({ ...state, nests: value })),
   addNest: (nest) =>

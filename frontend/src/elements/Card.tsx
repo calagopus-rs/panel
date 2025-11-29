@@ -14,6 +14,7 @@ const Card = forwardRef<HTMLDivElement, CardProps & ComponentProps<'div'>>(
         ref={ref}
         className={classNames('relative', className, hoverable && 'hover:opacity-60 cursor-pointer')}
         pl={typeof pl === 'number' && leftStripeClassName ? pl + 4 : leftStripeClassName ? 20 : pl}
+        radius='md'
         withBorder
         {...rest}
       >

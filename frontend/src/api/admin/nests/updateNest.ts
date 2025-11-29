@@ -1,13 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-interface Data {
-  author: string;
-  name: string;
-  description: string | null;
-}
-
-export default async (nestUuid: string, data: Data): Promise<void> => {
+export default async (nestUuid: string, data: AdminUpdateNest): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/admin/nests/${nestUuid}`, transformKeysToSnakeCase(data))

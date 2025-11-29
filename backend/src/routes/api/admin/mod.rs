@@ -19,6 +19,7 @@ use utoipa_axum::router::OpenApiRouter;
 mod activity;
 mod backup_configurations;
 mod database_hosts;
+mod egg_repositories;
 mod extensions;
 mod locations;
 mod mounts;
@@ -73,6 +74,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .nest("/servers", servers::router(state))
         .nest("/nodes", nodes::router(state))
         .nest("/nests", nests::router(state))
+        .nest("/egg-repositories", egg_repositories::router(state))
         .nest("/database-hosts", database_hosts::router(state))
         .nest(
             "/backup-configurations",

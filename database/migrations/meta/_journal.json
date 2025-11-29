@@ -295,6 +295,55 @@
       "when": 1764357559387,
       "tag": "0041_far_squadron_sinister",
       "breakpoints": false
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1764422662948,
+      "tag": "0042_nosy_bullseye",
+      "breakpoints": false
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1764422857503,
+      "tag": "0043_same_purple_man",
+      "breakpoints": false
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1764424011132,
+      "tag": "0044_fluffy_blazing_skull",
+      "breakpoints": false
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1764424083850,
+      "tag": "0045_deep_nehzno",
+      "breakpoints": false
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1764424405568,
+      "tag": "0046_slimy_scarecrow",
+      "breakpoints": false
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1764424453857,
+      "tag": "0047_fresh_bucky",
+      "breakpoints": false
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1764425414045,
+      "tag": "0048_brief_mandroid",
+      "breakpoints": false
     }
   ]
 }

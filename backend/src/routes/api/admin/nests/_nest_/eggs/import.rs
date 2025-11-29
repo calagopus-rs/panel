@@ -55,17 +55,10 @@ mod post {
         let egg = match NestEgg::create(
             &state.database,
             nest.uuid,
+            None,
             &data.author,
             &data.name,
-            if let Some(description) = &data.description {
-                if description.is_empty() {
-                    None
-                } else {
-                    Some(description)
-                }
-            } else {
-                None
-            },
+            data.description.as_deref(),
             data.config
                 .files
                 .into_iter()

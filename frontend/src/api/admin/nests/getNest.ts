@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/api/axios';
 
-export default async (nestUuid: string): Promise<Nest> => {
+export default async (nestUuid: string): Promise<AdminNest> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/admin/nests/${nestUuid}`)

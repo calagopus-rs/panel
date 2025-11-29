@@ -11,9 +11,9 @@ use utoipa::ToSchema;
 pub struct Nest {
     pub uuid: uuid::Uuid,
 
-    pub author: String,
     pub name: String,
     pub description: Option<String>,
+    pub author: String,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -27,9 +27,9 @@ impl BaseModel for Nest {
 
         BTreeMap::from([
             ("nests.uuid", format!("{prefix}uuid")),
-            ("nests.author", format!("{prefix}author")),
             ("nests.name", format!("{prefix}name")),
             ("nests.description", format!("{prefix}description")),
+            ("nests.author", format!("{prefix}author")),
             ("nests.created", format!("{prefix}created")),
         ])
     }
@@ -40,9 +40,9 @@ impl BaseModel for Nest {
 
         Ok(Self {
             uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            author: row.try_get(format!("{prefix}author").as_str())?,
             name: row.try_get(format!("{prefix}name").as_str())?,
             description: row.try_get(format!("{prefix}description").as_str())?,
+            author: row.try_get(format!("{prefix}author").as_str())?,
             created: row.try_get(format!("{prefix}created").as_str())?,
         })
     }
@@ -113,9 +113,9 @@ impl Nest {
     pub fn into_admin_api_object(self) -> AdminApiNest {
         AdminApiNest {
             uuid: self.uuid,
-            author: self.author,
             name: self.name,
             description: self.description,
+            author: self.author,
             created: self.created.and_utc(),
         }
     }
@@ -185,9 +185,9 @@ impl DeletableModel for Nest {
 pub struct AdminApiNest {
     pub uuid: uuid::Uuid,
 
-    pub author: String,
     pub name: String,
     pub description: Option<String>,
+    pub author: String,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

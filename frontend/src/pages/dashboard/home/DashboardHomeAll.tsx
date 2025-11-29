@@ -53,6 +53,13 @@ export default function DashboardHomeAll() {
         )}
       </Group>
 
+      {servers.total > servers.perPage && (
+        <>
+          <Pagination data={servers} onPageSelect={setPage} />
+          <Divider my='md' />
+        </>
+      )}
+
       {loading ? (
         <Spinner.Centered />
       ) : servers.total === 0 ? (

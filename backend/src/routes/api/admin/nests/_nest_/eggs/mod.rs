@@ -174,6 +174,7 @@ mod post {
         let egg = match NestEgg::create(
             &state.database,
             nest.uuid,
+            None,
             &data.author,
             &data.name,
             data.description.as_deref(),

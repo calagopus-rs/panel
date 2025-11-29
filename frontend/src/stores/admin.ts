@@ -5,6 +5,7 @@ import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/ad
 import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders';
 import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations';
 import { createNestsSlice, NestsSlice } from '@/stores/slices/admin/nests';
+import { createEggRepositoriesSlice, EggRepositoriesSlice } from './slices/admin/eggRepositories';
 import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings';
 import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users';
 import { createNodesSlice, NodesSlice } from '@/stores/slices/admin/nodes';
@@ -19,6 +20,7 @@ export interface AdminStore
     EggsSlice,
     LocationsSlice,
     NestsSlice,
+    EggRepositoriesSlice,
     SettingsSlice,
     UsersSlice,
     NodesSlice,
@@ -33,6 +35,7 @@ export const useAdminStore = create<AdminStore>()((...a) => ({
   ...createEggsSlice(...a),
   ...createLocationsSlice(...a),
   ...createNestsSlice(...a),
+  ...createEggRepositoriesSlice(...a),
   ...createSettingsSlice(...a),
   ...createUsersSlice(...a),
   ...createNodesSlice(...a),

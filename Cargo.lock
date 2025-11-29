@@ -1729,7 +1729,7 @@ dependencies = [
 
 [[package]]
 name = "extension-internal-list"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "semver",
  "shared",
@@ -2073,6 +2073,21 @@ name = "gimli"
 version = "0.32.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
+
+[[package]]
+name = "git2"
+version = "0.20.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2deb07a133b1520dc1a5690e9bd08950108873d7ed5de38dcc74d3b5ebffa110"
+dependencies = [
+ "bitflags",
+ "libc",
+ "libgit2-sys",
+ "log",
+ "openssl-probe",
+ "openssl-sys",
+ "url",
+]
 
 [[package]]
 name = "globset"
@@ -2877,6 +2892,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "libgit2-sys"
+version = "0.18.2+1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1c42fe03df2bd3c53a3a9c7317ad91d80c81cd1fb0caec8d7cc4cd2bfa10c222"
+dependencies = [
+ "cc",
+ "libc",
+ "libssh2-sys",
+ "libz-sys",
+ "openssl-sys",
+ "pkg-config",
+]
+
+[[package]]
 name = "libm"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2904,12 +2933,48 @@ dependencies = [
 ]
 
 [[package]]
+name = "libssh2-sys"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "220e4f05ad4a218192533b300327f5150e809b54c4ec83b5a1d91833601811b9"
+dependencies = [
+ "cc",
+ "libc",
+ "libz-sys",
+ "openssl-sys",
+ "pkg-config",
+ "vcpkg",
+]
+
+[[package]]
+name = "libyml"
+version = "0.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3302702afa434ffa30847a83305f0a69d6abd74293b6554c18ec85c7ef30c980"
+dependencies = [
+ "anyhow",
+ "version_check",
+]
+
+[[package]]
 name = "libz-rs-sys"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "840db8cf39d9ec4dd794376f38acc40d0fc65eec2a8f484f7fd375b84602becd"
 dependencies = [
  "zlib-rs",
+]
+
+[[package]]
+name = "libz-sys"
+version = "1.1.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15d118bbf3771060e7311cc7bb0545b01d08a8b4a7de949198dec1fa0ca1c0f7"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
 ]
 
 [[package]]
@@ -3492,6 +3557,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "openssl-probe"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
+
+[[package]]
 name = "openssl-src"
 version = "300.5.4+3.5.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3596,7 +3667,7 @@ dependencies = [
 
 [[package]]
 name = "panel-rs"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "anyhow",
  "axum",
@@ -4372,7 +4443,7 @@ dependencies = [
 
 [[package]]
 name = "rule-validator"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "chrono",
  "regex",
@@ -4997,6 +5068,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_yml"
+version = "0.0.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "59e2dd588bf1597a252c3b920e0143eb99b0f76e4e082f4c92ce34fbc9e71ddd"
+dependencies = [
+ "indexmap",
+ "itoa",
+ "libyml",
+ "memchr",
+ "ryu",
+ "serde",
+ "version_check",
+]
+
+[[package]]
 name = "sha1"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5029,7 +5115,7 @@ dependencies = [
 
 [[package]]
 name = "shared"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -5043,6 +5129,7 @@ dependencies = [
  "constant_time_eq 0.4.2",
  "dotenvy",
  "futures-util",
+ "git2",
  "hmac",
  "ignore",
  "indexmap",
@@ -5059,9 +5146,11 @@ dependencies = [
  "serde",
  "serde_json",
  "serde_json_path",
+ "serde_yml",
  "sha2",
  "simple_crypt",
  "sqlx",
+ "tempfile",
  "tokio",
  "toml",
  "tracing",
@@ -6905,7 +6994,7 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 
 [[package]]
 name = "wings-api"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "anyhow",
  "chrono",

@@ -113,7 +113,7 @@ pub struct ExportedNestEggConfigsFilesFile {
     pub find: IndexMap<String, serde_json::Value>,
 }
 
-#[derive(ToSchema, Validate, Serialize, Deserialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
 pub struct ExportedNestEggConfigs {
     #[schema(inline)]
     #[serde(
@@ -138,25 +138,26 @@ pub struct ExportedNestEggConfigs {
     pub allocations: NestEggConfigAllocations,
 }
 
-#[derive(ToSchema, Validate, Serialize, Deserialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
 pub struct ExportedNestEggScripts {
     #[schema(inline)]
     pub installation: NestEggConfigScript,
 }
 
-#[derive(ToSchema, Validate, Serialize, Deserialize)]
+#[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
 pub struct ExportedNestEgg {
     #[serde(default = "uuid::Uuid::new_v4")]
     pub uuid: uuid::Uuid,
-    #[validate(length(min = 2, max = 255))]
-    #[schema(min_length = 2, max_length = 255)]
-    pub author: String,
     #[validate(length(min = 3, max = 255))]
     #[schema(min_length = 3, max_length = 255)]
     pub name: String,
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
+    #[serde(deserialize_with = "crate::deserialize::deserialize_string_option")]
     pub description: Option<String>,
+    #[validate(length(min = 2, max = 255))]
+    #[schema(min_length = 2, max_length = 255)]
+    pub author: String,
 
     #[schema(inline)]
     pub config: ExportedNestEggConfigs,
@@ -191,10 +192,11 @@ pub struct ExportedNestEgg {
 pub struct NestEgg {
     pub uuid: uuid::Uuid,
     pub nest: Fetchable<super::nest::Nest>,
+    pub egg_repository_egg: Option<Fetchable<super::egg_repository_egg::EggRepositoryEgg>>,
 
-    pub author: String,
     pub name: String,
     pub description: Option<String>,
+    pub author: String,
 
     pub config_files: Vec<ProcessConfigurationFile>,
     pub config_startup: NestEggConfigStartup,
@@ -223,9 +225,13 @@ impl BaseModel for NestEgg {
         BTreeMap::from([
             ("nest_eggs.uuid", format!("{prefix}uuid")),
             ("nest_eggs.nest_uuid", format!("{prefix}nest_uuid")),
-            ("nest_eggs.author", format!("{prefix}author")),
+            (
+                "nest_eggs.egg_repository_egg_uuid",
+                format!("{prefix}egg_repository_egg_uuid"),
+            ),
             ("nest_eggs.name", format!("{prefix}name")),
             ("nest_eggs.description", format!("{prefix}description")),
+            ("nest_eggs.author", format!("{prefix}author")),
             ("nest_eggs.config_files", format!("{prefix}config_files")),
             (
                 "nest_eggs.config_startup",
@@ -260,9 +266,14 @@ impl BaseModel for NestEgg {
             nest: super::nest::Nest::get_fetchable(
                 row.try_get(format!("{prefix}nest_uuid").as_str())?,
             ),
-            author: row.try_get(format!("{prefix}author").as_str())?,
+            egg_repository_egg: row
+                .try_get::<Option<uuid::Uuid>, _>(
+                    format!("{prefix}egg_repository_egg_uuid").as_str(),
+                )?
+                .map(super::egg_repository_egg::EggRepositoryEgg::get_fetchable),
             name: row.try_get(format!("{prefix}name").as_str())?,
             description: row.try_get(format!("{prefix}description").as_str())?,
+            author: row.try_get(format!("{prefix}author").as_str())?,
             config_files: serde_json::from_value(
                 row.try_get(format!("{prefix}config_files").as_str())?,
             )?,
@@ -297,6 +308,7 @@ impl NestEgg {
     pub async fn create(
         database: &crate::database::Database,
         nest_uuid: uuid::Uuid,
+        egg_repository_egg_uuid: Option<uuid::Uuid>,
         author: &str,
         name: &str,
         description: Option<&str>,
@@ -315,16 +327,17 @@ impl NestEgg {
         let row = sqlx::query(&format!(
             r#"
             INSERT INTO nest_eggs (
-                nest_uuid, author, name, description, config_files, config_startup,
+                nest_uuid, egg_repository_egg_uuid, author, name, description, config_files, config_startup,
                 config_stop, config_script, config_allocations, startup, force_outgoing_ip,
                 separate_port, features, docker_images, file_denylist
             )
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING {}
             "#,
             Self::columns_sql(None)
         ))
         .bind(nest_uuid)
+        .bind(egg_repository_egg_uuid)
         .bind(author)
         .bind(name)
         .bind(description)
@@ -477,9 +490,9 @@ impl NestEgg {
     pub fn into_admin_api_object(self) -> AdminApiNestEgg {
         AdminApiNestEgg {
             uuid: self.uuid,
-            author: self.author,
             name: self.name,
             description: self.description,
+            author: self.author,
             config_files: self.config_files,
             config_startup: self.config_startup,
             config_stop: self.config_stop,
@@ -574,9 +587,9 @@ impl DeletableModel for NestEgg {
 pub struct AdminApiNestEgg {
     pub uuid: uuid::Uuid,
 
-    pub author: String,
     pub name: String,
     pub description: Option<String>,
+    pub author: String,
 
     #[schema(inline)]
     pub config_files: Vec<ProcessConfigurationFile>,

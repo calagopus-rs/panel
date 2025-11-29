@@ -110,9 +110,9 @@ mod delete {
         (status = CONFLICT, body = ApiError),
     ), params(
         (
-            "nest" = i32,
+            "nest" = uuid::Uuid,
             description = "The nest ID",
-            example = "1",
+            example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
@@ -147,6 +147,7 @@ mod delete {
 }
 
 mod patch {
+    use crate::routes::api::admin::nests::_nest_::GetNest;
     use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
@@ -157,8 +158,6 @@ mod patch {
     };
     use utoipa::ToSchema;
     use validator::Validate;
-
-    use crate::routes::api::admin::nests::_nest_::GetNest;
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {

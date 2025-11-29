@@ -15,6 +15,8 @@ use validator::Validate;
 pub mod admin_activity;
 pub mod backup_configurations;
 pub mod database_host;
+pub mod egg_repository;
+pub mod egg_repository_egg;
 pub mod location;
 pub mod location_database_host;
 pub mod mount;
