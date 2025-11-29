@@ -173,6 +173,7 @@ impl EggRepository {
 
         super::egg_repository_egg::EggRepositoryEgg::delete_unused(
             database,
+            self.uuid,
             &exported_eggs
                 .iter()
                 .map(|(path, _)| path.to_string_lossy().to_string())

@@ -167,14 +167,16 @@ impl EggRepositoryEgg {
 
     pub async fn delete_unused(
         database: &crate::database::Database,
+        egg_repository_uuid: uuid::Uuid,
         paths: &[String],
     ) -> Result<(), crate::database::DatabaseError> {
         sqlx::query(
             r#"
             DELETE FROM egg_repository_eggs
-            WHERE egg_repository_eggs.path != ANY($1)
+            WHERE egg_repository_eggs.egg_repository_uuid = $1 AND egg_repository_eggs.path != ANY($2)
             "#,
         )
+        .bind(egg_repository_uuid)
         .bind(paths)
         .execute(database.write())
         .await?;
