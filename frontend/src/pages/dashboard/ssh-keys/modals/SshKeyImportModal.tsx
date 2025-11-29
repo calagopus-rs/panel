@@ -15,7 +15,7 @@ import { useUserStore } from '@/stores/user';
 
 const schema = z.object({
   provider: z.enum(['github', 'gitlab', 'launchpad']),
-  username: z.string(),
+  username: z.string().min(3).max(31),
 });
 
 export default function SshKeyImportModal({ opened, onClose }: ModalProps) {
