@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE egg_repositories\n            SET name = $1, description = $2, git_repository = $3\n            WHERE egg_repositories.uuid = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7a4a005103e20cb0e10645975cc3cd70cd5578d4442b275b844a72075decf993"
+}
