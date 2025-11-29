@@ -30,13 +30,21 @@ export default function ServerActivity() {
       </Group>
 
       <Table
-        columns={['Actor', 'Event', 'IP', 'When', '']}
+        columns={['', 'Actor', 'Event', 'IP', 'When', '']}
         loading={loading}
         pagination={activities}
         onPageSelect={setPage}
       >
         {activities.data.map((activity) => (
           <TableRow key={activity.created.toString()}>
+            <TableData>
+              <img
+                src={activity.user?.avatar ?? '/icon.svg'}
+                alt={activity.user?.username}
+                className='h-5 w-5 rounded-full select-none'
+              />
+            </TableData>
+
             <TableData>
               {activity.user ? `${activity.user.username} (${activity.isApi ? 'API' : 'Web'})` : 'System'}
             </TableData>

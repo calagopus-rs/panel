@@ -1,5 +1,4 @@
-use clap::Args;
-use clap::FromArgMatches;
+use clap::{Args, FromArgMatches};
 use colored::Colorize;
 use std::path::Path;
 use tokio::process::Command;
