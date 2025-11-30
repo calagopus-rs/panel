@@ -77,7 +77,7 @@ export const WindowProvider: FC<{ children: ReactNode }> = ({ children }) => {
           key={`window_${w.id}`}
           default={{
             x: window.innerWidth / 4,
-            y: window.innerHeight / 2,
+            y: window.innerHeight / 4,
             width: window.innerWidth / 2,
             height: window.innerHeight / 2,
           }}

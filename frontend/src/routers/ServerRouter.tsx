@@ -66,7 +66,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
   };
 
   return (
-    <div className='lg:flex'>
+    <div className='lg:flex h-full'>
       {isNormal && (
         <Sidebar>
           <NavLink to='/' className='w-full'>
@@ -136,7 +136,9 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
 
       <div
         id='server-root'
-        className={isNormal ? 'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0' : 'flex-1 lg:ml-0'}
+        className={
+          isNormal ? 'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0' : 'flex-1 lg:ml-0 overflow-auto'
+        }
       >
         <Container isNormal={isNormal}>
           {loading ? (
