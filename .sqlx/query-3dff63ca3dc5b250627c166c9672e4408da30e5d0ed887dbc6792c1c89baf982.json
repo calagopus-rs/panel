@@ -18,7 +18,7 @@
         "Bool",
         "Bool",
         "TextArray",
-        "Json",
+        "Text",
         "TextArray"
       ]
     },
