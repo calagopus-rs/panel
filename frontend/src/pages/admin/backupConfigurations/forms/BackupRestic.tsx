@@ -1,16 +1,13 @@
 import { Divider, Group, Stack, Title } from '@mantine/core';
-import { Dispatch } from 'react';
+import { UseFormReturnType } from '@mantine/form';
+import { z } from 'zod';
 import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput';
 import NumberInput from '@/elements/input/NumberInput';
+import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
+import { backupConfigurationSchema } from '@/schemas';
 
-export default function BackupRestic({
-  backupConfig,
-  setBackupConfigs,
-}: {
-  backupConfig: BackupDiskConfigurationRestic;
-  setBackupConfigs: Dispatch<BackupDiskConfigurationRestic>;
-}) {
+export default function BackupRestic({ form }: { form: UseFormReturnType<z.infer<typeof backupConfigurationSchema>> }) {
   return (
     <Stack gap='xs'>
       <Stack gap={0}>
@@ -24,37 +21,31 @@ export default function BackupRestic({
             withAsterisk
             label='Repository'
             placeholder='Repository'
-            value={backupConfig?.repository || ''}
-            onChange={(e) => setBackupConfigs({ ...backupConfig, repository: e.target.value })}
+            {...form.getInputProps('backupConfigs.restic.repository')}
           />
           <NumberInput
             withAsterisk
             label='Retry Lock Seconds'
             placeholder='Retry Lock Seconds'
-            value={backupConfig?.retryLockSeconds || 0}
-            onChange={(value) => setBackupConfigs({ ...backupConfig, retryLockSeconds: Number(value) })}
+            {...form.getInputProps('backupConfigs.restic.retryLockSeconds')}
           />
         </Group>
 
-        <TextInput
+        <PasswordInput
           withAsterisk
           label='Password'
           placeholder='Password'
-          type='password'
-          value={backupConfig?.environment?.RESTIC_PASSWORD || ''}
+          value={form.values.backupConfigs.restic?.environment?.RESTIC_PASSWORD || ''}
           onChange={(e) =>
-            setBackupConfigs({
-              ...backupConfig,
-              environment: { ...backupConfig.environment, RESTIC_PASSWORD: e.target.value },
-            })
+            form.setFieldValue('form.values.backupConfigs.restic.environment.RESTIC_PASSWORD', e.target.value)
           }
         />
 
         <MultiKeyValueInput
           label='Environment Variables'
           allowReordering={false}
-          options={backupConfig.environment || {}}
-          onChange={(e) => setBackupConfigs({ ...backupConfig, environment: e })}
+          options={form.values.backupConfigs.restic?.environment}
+          onChange={(e) => form.setFieldValue('form.values.backupConfigs.restic.environment', e)}
           transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
           hideKey={(key) => key === 'RESTIC_PASSWORD'}
         />
