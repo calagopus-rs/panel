@@ -2,16 +2,18 @@ import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@for
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
-import { NavLink, useNavigate } from 'react-router';
+import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import CloseButton from '@/elements/CloseButton';
 import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
-import { useAuth } from '@/providers/AuthProvider';
+import AuthProvider, { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import Tooltip from './Tooltip';
+import { useWindows } from '@/providers/WindowProvider';
+import RouterRoutes from '@/RouterRoutes';
 
 type SidebarProps = {
   children: ReactNode;
@@ -61,6 +63,7 @@ type LinkProps = {
 
 function Link({ to, end, icon, name, title = name }: LinkProps) {
   const navigate = useNavigate();
+  const { addWindow } = useWindows();
   const { settings } = useGlobalStore();
 
   const doNavigate = (e: ReactMouseEvent) => {
@@ -70,8 +73,21 @@ function Link({ to, end, icon, name, title = name }: LinkProps) {
     });
   };
 
+  const doOpenWindow = (e: ReactMouseEvent) => {
+    e.preventDefault();
+    addWindow(
+      icon,
+      title,
+      <MemoryRouter initialEntries={[to]}>
+        <AuthProvider>
+          <RouterRoutes isNormal={false} />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+  };
+
   return (
-    <NavLink to={to} end={end} onClick={doNavigate} className='w-full'>
+    <NavLink to={to} end={end} onClick={doNavigate} onContextMenu={doOpenWindow} className='w-full'>
       {({ isActive }) => {
         if (isActive) {
           document.title = `${title} | ${settings.app.name}`;

@@ -22,7 +22,7 @@ import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export default function ServerRouter() {
+export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
   const params = useParams<'id'>();
   const [loading, setLoading] = useState(true);
   const [abortLoading, setAbortLoading] = useState(false);
@@ -67,73 +67,78 @@ export default function ServerRouter() {
 
   return (
     <div className='lg:flex'>
-      <Sidebar>
-        <NavLink to='/' className='w-full'>
-          <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
-            <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
-            <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
-          </div>
-        </NavLink>
+      {isNormal && (
+        <Sidebar>
+          <NavLink to='/' className='w-full'>
+            <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
+              <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
+              <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
+            </div>
+          </NavLink>
 
-        <Sidebar.Divider />
+          <Sidebar.Divider />
 
-        <Sidebar.Link to='/' end icon={faServer} name='Servers' />
-        {user.admin && (
-          <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name='View admin' />
-        )}
+          <Sidebar.Link to='/' end icon={faServer} name='Servers' />
+          {user.admin && (
+            <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name='View admin' />
+          )}
 
-        <Sidebar.Divider />
+          <Sidebar.Divider />
 
-        {serverRoutes
-          .filter((route) => !!route.name && (!route.filter || route.filter()))
-          .map((route) =>
-            route.permission ? (
-              <Can key={route.path} action={route.permission} matchAny>
+          {serverRoutes
+            .filter((route) => !!route.name && (!route.filter || route.filter()))
+            .map((route) =>
+              route.permission ? (
+                <Can key={route.path} action={route.permission} matchAny>
+                  <Sidebar.Link
+                    to={to(route.path, `/server/${params.id}`)}
+                    end={route.exact}
+                    icon={route.icon}
+                    name={route.name}
+                  />
+                </Can>
+              ) : (
                 <Sidebar.Link
+                  key={route.path}
                   to={to(route.path, `/server/${params.id}`)}
                   end={route.exact}
                   icon={route.icon}
                   name={route.name}
                 />
-              </Can>
-            ) : (
-              <Sidebar.Link
-                key={route.path}
-                to={to(route.path, `/server/${params.id}`)}
-                end={route.exact}
-                icon={route.icon}
-                name={route.name}
-              />
-            ),
-          )}
-        {window.extensionContext.routes.serverRoutes
-          .filter((route) => !!route.name && (!route.filter || route.filter()))
-          .map((route) =>
-            route.permission ? (
-              <Can key={route.path} action={route.permission} matchAny>
+              ),
+            )}
+          {window.extensionContext.routes.serverRoutes
+            .filter((route) => !!route.name && (!route.filter || route.filter()))
+            .map((route) =>
+              route.permission ? (
+                <Can key={route.path} action={route.permission} matchAny>
+                  <Sidebar.Link
+                    to={to(route.path, `/server/${params.id}`)}
+                    end={route.exact}
+                    icon={route.icon}
+                    name={route.name}
+                  />
+                </Can>
+              ) : (
                 <Sidebar.Link
+                  key={route.path}
                   to={to(route.path, `/server/${params.id}`)}
                   end={route.exact}
                   icon={route.icon}
                   name={route.name}
                 />
-              </Can>
-            ) : (
-              <Sidebar.Link
-                key={route.path}
-                to={to(route.path, `/server/${params.id}`)}
-                end={route.exact}
-                icon={route.icon}
-                name={route.name}
-              />
-            ),
-          )}
+              ),
+            )}
 
-        <Sidebar.Footer />
-      </Sidebar>
+          <Sidebar.Footer />
+        </Sidebar>
+      )}
 
-      <div id='server-root' className='max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'>
-        <Container>
+      <div
+        id='server-root'
+        className={isNormal ? 'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0' : 'flex-1 lg:ml-0'}
+      >
+        <Container isNormal={isNormal}>
           {loading ? (
             <Spinner.Centered />
           ) : server ? (

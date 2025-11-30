@@ -12,54 +12,60 @@ import { useAuth } from '@/providers/AuthProvider';
 import accountRoutes from '@/routers/routes/accountRoutes';
 import { useGlobalStore } from '@/stores/global';
 
-export default function DashboardRouter() {
+export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
   const { user } = useAuth();
   const { settings } = useGlobalStore();
 
   return (
     <div className='lg:flex'>
-      <Sidebar>
-        <NavLink to='/' className='w-full'>
-          <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
-            <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
-            <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
-          </div>
-        </NavLink>
+      {isNormal && (
+        <Sidebar>
+          <NavLink to='/' className='w-full'>
+            <div className='h-28 w-full flex flex-row items-center justify-between mt-1 select-none cursor-pointer'>
+              <img src='/icon.svg' className='h-full py-4' alt='Calagopus Icon' />
+              <h1 className='grow font-logo text-xl'>{settings.app.name}</h1>
+            </div>
+          </NavLink>
 
-        <Sidebar.Divider />
+          <Sidebar.Divider />
 
-        <Sidebar.Link to='/' end icon={faServer} name='Servers' />
-        {user.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
+          <Sidebar.Link to='/' end icon={faServer} name='Servers' />
+          {user.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
 
-        <Sidebar.Divider />
+          <Sidebar.Divider />
 
-        {accountRoutes
-          .filter((route) => !!route.name && (!route.filter || route.filter()))
-          .map((route) => (
-            <Sidebar.Link
-              key={route.path}
-              to={to(route.path, '/account')}
-              end={route.exact}
-              icon={route.icon}
-              name={route.name}
-            />
-          ))}
-        {window.extensionContext.routes.accountRoutes
-          .filter((route) => !!route.name && (!route.filter || route.filter()))
-          .map((route) => (
-            <Sidebar.Link
-              key={route.path}
-              to={to(route.path, '/account')}
-              end={route.exact}
-              icon={route.icon}
-              name={route.name}
-            />
-          ))}
+          {accountRoutes
+            .filter((route) => !!route.name && (!route.filter || route.filter()))
+            .map((route) => (
+              <Sidebar.Link
+                key={route.path}
+                to={to(route.path, '/account')}
+                end={route.exact}
+                icon={route.icon}
+                name={route.name}
+              />
+            ))}
+          {window.extensionContext.routes.accountRoutes
+            .filter((route) => !!route.name && (!route.filter || route.filter()))
+            .map((route) => (
+              <Sidebar.Link
+                key={route.path}
+                to={to(route.path, '/account')}
+                end={route.exact}
+                icon={route.icon}
+                name={route.name}
+              />
+            ))}
 
-        <Sidebar.Footer />
-      </Sidebar>
-      <div id='dashboard-root' className='max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0'>
-        <Container>
+          <Sidebar.Footer />
+        </Sidebar>
+      )}
+
+      <div
+        id='dashboard-root'
+        className={isNormal ? 'max-w-[100vw] lg:max-w-[calc(100vw-17.5rem)] flex-1 lg:ml-0' : 'flex-1 lg:ml-0'}
+      >
+        <Container isNormal={isNormal}>
           <Suspense fallback={<Spinner.Centered />}>
             <Routes>
               <Route path='' element={<DashboardHome />} />
