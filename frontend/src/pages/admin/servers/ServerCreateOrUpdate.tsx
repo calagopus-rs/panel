@@ -1,6 +1,6 @@
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faReply } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Paper, Stack, Title } from '@mantine/core';
+import { ActionIcon, Group, Paper, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
@@ -371,6 +371,17 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               placeholder='npm start'
               required
               rows={2}
+              rightSection={
+                <ActionIcon
+                  variant='subtle'
+                  disabled={form.values.startup === eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup}
+                  onClick={() =>
+                    form.setFieldValue('startup', eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup)
+                  }
+                >
+                  <FontAwesomeIcon icon={faReply} />
+                </ActionIcon>
+              }
               {...form.getInputProps('startup')}
             />
 
