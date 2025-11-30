@@ -49,14 +49,16 @@ export default function BackupRestic({
             })
           }
         />
-      </Stack>
 
-      <MultiKeyValueInput
-        options={backupConfig.environment || {}}
-        onChange={(e) => setBackupConfigs({ ...backupConfig, environment: e })}
-        transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
-        hideKey={(key) => key === 'RESTIC_PASSWORD'}
-      />
+        <MultiKeyValueInput
+          label='Environment Variables'
+          allowReordering={false}
+          options={backupConfig.environment || {}}
+          onChange={(e) => setBackupConfigs({ ...backupConfig, environment: e })}
+          transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
+          hideKey={(key) => key === 'RESTIC_PASSWORD'}
+        />
+      </Stack>
     </Stack>
   );
 }

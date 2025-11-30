@@ -1,4 +1,4 @@
-import { Group, ModalProps, Stack, Title } from '@mantine/core';
+import { Group, ModalProps, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -100,36 +100,33 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
       <Stack>
         <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-        <Stack>
-          <Title order={3}>User Permissions</Title>
-          {availablePermissions?.userPermissions && (
-            <PermissionSelector
-              permissions={availablePermissions.userPermissions}
-              selectedPermissions={form.values.userPermissions}
-              setSelectedPermissions={(permissions) => form.setFieldValue('userPermissions', permissions)}
-            />
-          )}
-        </Stack>
-        <Stack>
-          <Title order={3}>Server Permissions</Title>
-          {availablePermissions?.serverPermissions && (
-            <PermissionSelector
-              permissions={availablePermissions.serverPermissions}
-              selectedPermissions={form.values.serverPermissions}
-              setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
-            />
-          )}
-        </Stack>
-        <Stack>
-          <Title order={3}>Admin Permissions</Title>
-          {user.admin && availablePermissions?.adminPermissions && (
-            <PermissionSelector
-              permissions={availablePermissions.adminPermissions}
-              selectedPermissions={form.values.adminPermissions}
-              setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
-            />
-          )}
-        </Stack>
+        {availablePermissions?.userPermissions && (
+          <PermissionSelector
+            label='User Permissions'
+            permissionsMapType='userPermissions'
+            permissions={availablePermissions.userPermissions}
+            selectedPermissions={form.values.userPermissions}
+            setSelectedPermissions={(permissions) => form.setFieldValue('userPermissions', permissions)}
+          />
+        )}
+        {availablePermissions?.serverPermissions && (
+          <PermissionSelector
+            label='Server Permissions'
+            permissionsMapType='serverPermissions'
+            permissions={availablePermissions.serverPermissions}
+            selectedPermissions={form.values.serverPermissions}
+            setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
+          />
+        )}
+        {user.admin && availablePermissions?.adminPermissions && (
+          <PermissionSelector
+            label='Admin Permissions'
+            permissionsMapType='adminPermissions'
+            permissions={availablePermissions.adminPermissions}
+            selectedPermissions={form.values.adminPermissions}
+            setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
+          />
+        )}
 
         <Group mt='md'>
           <Button onClick={doCreateOrUpdate} loading={loading} disabled={!form.isValid()}>

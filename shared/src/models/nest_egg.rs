@@ -293,8 +293,8 @@ impl BaseModel for NestEgg {
             force_outgoing_ip: row.try_get(format!("{prefix}force_outgoing_ip").as_str())?,
             separate_port: row.try_get(format!("{prefix}separate_port").as_str())?,
             features: row.try_get(format!("{prefix}features").as_str())?,
-            docker_images: serde_json::from_value(
-                row.try_get(format!("{prefix}docker_images").as_str())?,
+            docker_images: serde_json::from_str(
+                row.try_get::<&str, _>(format!("{prefix}docker_images").as_str())?,
             )
             .unwrap_or_default(),
             file_denylist: row.try_get(format!("{prefix}file_denylist").as_str())?,
@@ -350,7 +350,7 @@ impl NestEgg {
         .bind(force_outgoing_ip)
         .bind(separate_port)
         .bind(features)
-        .bind(serde_json::to_value(docker_images)?)
+        .bind(serde_json::to_string(&docker_images)?)
         .bind(file_denylist)
         .fetch_one(database.write())
         .await?;

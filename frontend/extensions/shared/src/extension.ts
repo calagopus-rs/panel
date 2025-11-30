@@ -1,5 +1,6 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: this is a dynamic system */
 
+import { ReactNode } from 'react';
 import type { AdminRouteDefinition, GlobalRouteDefinition, RouteDefinition, ServerRouteDefinition } from '.';
 
 class ExtensionSkip {
@@ -9,19 +10,22 @@ class ExtensionSkip {
 export class ExtensionContext {
   public readonly extensions: Extension[];
   public readonly routes: ExtensionRoutesBuilder;
+  public readonly permissionIcons: ExtensionPermissionIconsBuilder;
 
   constructor(extensions: Extension[]) {
     this.extensions = extensions;
     this.routes = new ExtensionRoutesBuilder();
+    this.permissionIcons = new ExtensionPermissionIconsBuilder();
 
     for (const extension of this.extensions) {
       try {
         extension.initialize(this);
       } catch (err) {
-        console.error('Error while running module initialize function', extension.identifier, err);
+        console.error('Error while running module initialize function', extension.packageName, err);
       }
 
       this.routes.mergeFrom(extension.routes);
+      this.permissionIcons.mergeFrom(extension.permissionIcons);
     }
   }
 
@@ -91,12 +95,53 @@ export class ExtensionRoutesBuilder {
   }
 }
 
-export abstract class Extension {
-  public abstract identifier: string;
-  public abstract routes: ExtensionRoutesBuilder;
+export class ExtensionPermissionIconsBuilder {
+  public userPermissionIcons: Record<string, ReactNode> = {};
+  public adminPermissionIcons: Record<string, ReactNode> = {};
+  public serverPermissionIcons: Record<string, ReactNode> = {};
+
+  public mergeFrom(other: this): this {
+    for (const [k, v] of Object.entries(other.userPermissionIcons)) {
+      this.userPermissionIcons[k] = v;
+    }
+    for (const [k, v] of Object.entries(other.adminPermissionIcons)) {
+      this.adminPermissionIcons[k] = v;
+    }
+    for (const [k, v] of Object.entries(other.serverPermissionIcons)) {
+      this.serverPermissionIcons[k] = v;
+    }
+
+    return this;
+  }
+
+  public addUserPermissionIcon(group: string, icon: ReactNode): this {
+    this.userPermissionIcons[group] = icon;
+
+    return this;
+  }
+
+  public addAdminPermissionIcon(group: string, icon: ReactNode): this {
+    this.adminPermissionIcons[group] = icon;
+
+    return this;
+  }
+
+  public addServerPermissionIcon(group: string, icon: ReactNode): this {
+    this.serverPermissionIcons[group] = icon;
+
+    return this;
+  }
+}
+
+export class Extension {
+  public packageName: string = '';
+  public routes: ExtensionRoutesBuilder = new ExtensionRoutesBuilder();
+  public permissionIcons: ExtensionPermissionIconsBuilder = new ExtensionPermissionIconsBuilder();
 
   // Your extension entrypoint, this runs when the page is loaded
-  public abstract initialize(ctx: ExtensionContext): void;
+  public initialize(ctx: ExtensionContext): void {
+    // to be implemented
+  }
 
   /**
    * Your extension call processor, this can be called by other extensions to interact with yours,
@@ -104,5 +149,7 @@ export abstract class Extension {
    *
    * Optimally (if applies) make sure your calls are globally unique, for example by prepending them with `yourauthorname_yourextensioname_`
    */
-  public abstract processCall(ctx: ExtensionContext, name: string, args: object): any;
+  public processCall(ctx: ExtensionContext, name: string, args: object): any {
+    return ctx.skip();
+  }
 }

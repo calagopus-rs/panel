@@ -1,0 +1,1 @@
+ALTER TABLE "nest_eggs" ALTER COLUMN "docker_images" SET DATA TYPE text;

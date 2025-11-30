@@ -46,14 +46,13 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
           />
         )}
 
-        <div>
-          <label>Permissions</label>
-          <PermissionSelector
-            permissions={availablePermissions.serverPermissions}
-            selectedPermissions={selectedPermissions}
-            setSelectedPermissions={setSelectedPermissions}
-          />
-        </div>
+        <PermissionSelector
+          label='Permissions'
+          permissionsMapType='serverPermissions'
+          permissions={availablePermissions.serverPermissions}
+          selectedPermissions={selectedPermissions}
+          setSelectedPermissions={setSelectedPermissions}
+        />
 
         <TagsInput
           label='Ignored Files'

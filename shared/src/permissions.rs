@@ -204,15 +204,19 @@ pub(crate) static BASE_ADMIN_PERMISSIONS: LazyLock<IndexMap<&'static str, Permis
     LazyLock::new(|| {
         IndexMap::from([
             (
+                "stats",
+                PermissionGroup {
+                    description: "Permissions that control the ability to view stats for the panel.",
+                    permissions: IndexMap::from([("read", "Allows to view stats for the panel.")]),
+                },
+            ),
+            (
                 "settings",
                 PermissionGroup {
                     description: "Permissions that control the ability to manage settings for the panel.",
                     permissions: IndexMap::from([
-                        (
-                            "read",
-                            "Allows to view settings and their passwords for the panel.",
-                        ),
-                        ("update", "Allows to modify settings and their passwords."),
+                        ("read", "Allows to view settings and secrets for the panel."),
+                        ("update", "Allows to modify settings and secrets."),
                     ]),
                 },
             ),
@@ -434,13 +438,6 @@ pub(crate) static BASE_ADMIN_PERMISSIONS: LazyLock<IndexMap<&'static str, Permis
                         "read",
                         "Allows to view extensions for the panel.",
                     )]),
-                },
-            ),
-            (
-                "stats",
-                PermissionGroup {
-                    description: "Permissions that control the ability to view stats for the panel.",
-                    permissions: IndexMap::from([("read", "Allows to view stats for the panel.")]),
                 },
             ),
             (

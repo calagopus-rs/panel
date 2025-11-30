@@ -3,6 +3,7 @@ import { faDocker } from '@fortawesome/free-brands-svg-icons';
 import {
   faBoxArchive,
   faBriefcase,
+  faChartPie,
   faCloud,
   faCode,
   faCog,
@@ -10,12 +11,14 @@ import {
   faComputer,
   faCopy,
   faDatabase,
+  faDownload,
   faEarthAmerica,
   faEdit,
   faEgg,
   faExpand,
   faFile,
   faFileZipper,
+  faFingerprint,
   faFolder,
   faFolderOpen,
   faGear,
@@ -274,6 +277,7 @@ export const sshKeyProviderLabelMapping: Record<SshKeyProvider, string> = {
 };
 
 export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
+  stats: faChartPie,
   account: faUser,
   activity: faBriefcase,
   allocations: faNetworkWired,
@@ -289,6 +293,8 @@ export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
   locations: faEarthAmerica,
   mounts: faFolder,
   nests: faKiwiBird,
+  'egg-repositories': faDownload,
+  'oauth-providers': faFingerprint,
   nodes: faServer,
   roles: faScroll,
   schedules: faStopwatch,
@@ -297,6 +303,7 @@ export const permissionCategoryIconMapping: Record<string, IconDefinition> = {
   sessions: faUserSecret,
   settings: faCog,
   'ssh-keys': faKey,
+  'oauth-links': faFingerprint,
   startup: faPlay,
   subusers: faUsers,
   users: faUsers,

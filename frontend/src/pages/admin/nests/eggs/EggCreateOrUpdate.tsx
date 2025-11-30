@@ -228,6 +228,8 @@ export default function EggCreateOrUpdate({
         <TagsInput label='Features' placeholder='Feature' {...form.getInputProps('features')} />
 
         <MultiKeyValueInput
+          label='Docker Images'
+          withAsterisk
           options={form.values.dockerImages}
           onChange={(e) => form.setFieldValue('dockerImages', e)}
         />

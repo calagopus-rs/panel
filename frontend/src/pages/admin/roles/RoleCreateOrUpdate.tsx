@@ -79,26 +79,24 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
         </Group>
 
         <Group grow align='normal'>
-          <Stack>
-            <Title order={3}>Server Permissions</Title>
-            {availablePermissions?.serverPermissions && (
-              <PermissionSelector
-                permissions={availablePermissions.serverPermissions}
-                selectedPermissions={form.values.serverPermissions}
-                setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
-              />
-            )}
-          </Stack>
-          <Stack>
-            <Title order={3}>Admin Permissions</Title>
-            {availablePermissions?.adminPermissions && (
-              <PermissionSelector
-                permissions={availablePermissions.adminPermissions}
-                selectedPermissions={form.values.adminPermissions}
-                setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
-              />
-            )}
-          </Stack>
+          {availablePermissions?.serverPermissions && (
+            <PermissionSelector
+              label='Server Permissions'
+              permissionsMapType='serverPermissions'
+              permissions={availablePermissions.serverPermissions}
+              selectedPermissions={form.values.serverPermissions}
+              setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
+            />
+          )}
+          {availablePermissions?.adminPermissions && (
+            <PermissionSelector
+              label='Admin Permissions'
+              permissionsMapType='adminPermissions'
+              permissions={availablePermissions.adminPermissions}
+              selectedPermissions={form.values.adminPermissions}
+              setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
+            />
+          )}
         </Group>
 
         <Group>

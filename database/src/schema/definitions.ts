@@ -8,7 +8,6 @@ import {
   index,
   inet,
   integer,
-  json,
   jsonb,
   primaryKey,
   smallint,
@@ -458,7 +457,7 @@ export const nestEggsTable = new DatabaseTable('nest_eggs')
   .addColumn('force_outgoing_ip', boolean().default(false).notNull())
   .addColumn('separate_port', boolean().default(false).notNull())
   .addColumn('features', text().array().notNull())
-  .addColumn('docker_images', json().$type<Record<string, string>>().notNull())
+  .addColumn('docker_images', text().notNull())
   .addColumn('file_denylist', text().array().notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [

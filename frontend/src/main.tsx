@@ -11,7 +11,7 @@ for (const [path, module] of Object.entries(extensionModules)) {
   if (identifier === 'shared') continue;
 
   if (typeof module === 'object' && 'default' in module && module.default instanceof Extension) {
-    module.default.identifier = identifier;
+    module.default.packageName = identifier.replaceAll('_', '.');
     extensions.push(module.default);
   } else {
     console.error('Invalid frontend module', identifier, module);

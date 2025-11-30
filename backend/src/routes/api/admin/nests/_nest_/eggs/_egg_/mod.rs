@@ -324,7 +324,7 @@ mod patch {
             egg.force_outgoing_ip,
             egg.separate_port,
             &egg.features,
-            serde_json::to_value(&egg.docker_images)?,
+            serde_json::to_string(&egg.docker_images)?,
             &egg.file_denylist,
         )
         .execute(state.database.write())
