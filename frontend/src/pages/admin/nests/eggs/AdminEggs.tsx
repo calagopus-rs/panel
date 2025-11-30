@@ -10,12 +10,13 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { eggTableColumns } from '@/lib/tableColumns';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import EggCreateOrUpdate from './EggCreateOrUpdate';
-import EggRow, { eggTableColumns } from './EggRow';
+import EggRow from './EggRow';
 
 function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    event.target.value = null;
+    event.target.value = '';
 
     try {
       const text = await file.text().then((t) => t.trim());
@@ -58,7 +59,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
           addToast(httpErrorToHuman(msg), 'error');
         });
     } catch (err) {
-      addToast(httpErrorToHuman(err), 'error');
+      addToast('Something went wrong while importing the egg.', 'error');
     }
   };
 
@@ -99,7 +100,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   );
 }
 
-export default function AdminEggs({ contextNest }: { contextNest?: AdminNest }) {
+export default function AdminEggs({ contextNest }: { contextNest: AdminNest }) {
   return (
     <Routes>
       <Route path='/' element={<EggsContainer contextNest={contextNest} />} />

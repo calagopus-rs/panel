@@ -1,10 +1,19 @@
 import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
+import { UseFormReturnType, useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import updateStorageSettings from '@/api/admin/settings/updateStorageSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { storageDriverTypeLabelMapping } from '@/lib/enums';
+import {
+  adminSettingsEmailSmtpSchema,
+  adminSettingsStorageFilesystemSchema,
+  adminSettingsStorageS3Schema,
+  adminSettingsStorageSchema,
+} from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
@@ -16,11 +25,25 @@ export default function StorageContainer() {
   const { storageDriver } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<AdminSettings['storageDriver']>(storageDriver);
+
+  const form = useForm<z.infer<typeof adminSettingsStorageSchema>>({
+    initialValues: {
+      type: 'filesystem',
+      path: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminSettingsStorageSchema),
+  });
+
+  useEffect(() => {
+    form.setValues({
+      ...storageDriver,
+    });
+  }, [storageDriver]);
 
   const doUpdate = () => {
     setLoading(true);
-    updateStorageSettings(transformKeysToSnakeCase({ ...settings } as StorageDriver))
+    updateStorageSettings(form.values)
       .then(() => {
         addToast('Storage settings updated.', 'success');
       })
@@ -38,18 +61,17 @@ export default function StorageContainer() {
 
       <Select
         label='Driver'
-        value={settings.type}
-        onChange={(value: StorageDriverType) => setSettings((settings) => ({ ...settings, type: value }))}
         data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
           value,
           label,
         }))}
+        {...form.getInputProps('type')}
       />
 
-      {settings.type === 'filesystem' ? (
-        <StorageFilesystem settings={settings as StorageDriverFilesystem} setSettings={setSettings} />
-      ) : settings.type === 's3' ? (
-        <StorageS3 settings={settings as StorageDriverS3} setSettings={setSettings} />
+      {form.values.type === 'filesystem' ? (
+        <StorageFilesystem form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageFilesystemSchema>>} />
+      ) : form.values.type === 's3' ? (
+        <StorageS3 form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageS3Schema>>} />
       ) : null}
 
       <Group mt='md'>

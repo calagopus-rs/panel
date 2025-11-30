@@ -30,7 +30,7 @@ export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
           <Sidebar.Divider />
 
           <Sidebar.Link to='/' end icon={faServer} name='Servers' />
-          {user.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
+          {user!.admin && <Sidebar.Link to='/admin' end icon={faGraduationCap} name='Admin' />}
 
           <Sidebar.Divider />
 

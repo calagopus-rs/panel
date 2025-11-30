@@ -1,7 +1,9 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { NIL as uuidNil } from 'uuid';
+import { z } from 'zod';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import createLocation from '@/api/admin/locations/createLocation';
 import deleteLocation from '@/api/admin/locations/deleteLocation';
@@ -12,25 +14,28 @@ import Select from '@/elements/input/Select';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminLocationSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateLocation>({
+  const form = useForm<z.infer<typeof adminLocationSchema>>({
     initialValues: {
       name: '',
       description: null,
       backupConfigurationUuid: uuidNil,
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminLocationSchema),
   });
 
-  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateLocation, Location>({
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminLocationSchema>, Location>({
     form,
     createFn: () => createLocation(form.values),
-    updateFn: () => updateLocation(contextLocation?.uuid, form.values),
-    deleteFn: () => deleteLocation(contextLocation?.uuid),
+    updateFn: () => updateLocation(contextLocation!.uuid, form.values),
+    deleteFn: () => deleteLocation(contextLocation!.uuid),
     doUpdate: !!contextLocation,
     basePath: '/admin/locations',
     resourceName: 'Location',

@@ -16,7 +16,7 @@ export default function EggMountRow({ nest, egg, mount }: { nest: AdminNest; egg
   const { addToast } = useToast();
   const { removeEggMount } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'remove'>(null);
+  const [openModal, setOpenModal] = useState<'remove' | null>(null);
 
   const doRemove = async () => {
     await deleteEggMount(nest.uuid, egg.uuid, mount.mount.uuid)

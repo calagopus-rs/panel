@@ -3,10 +3,11 @@ import { useState } from 'react';
 import getMountServers from '@/api/admin/mounts/servers/getMountServers';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
+import { serverTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import ServerRow, { serverTableColumns } from '../../servers/ServerRow';
+import ServerRow from '../../servers/ServerRow';
 
-export default function AdminMountServers({ mount }: { mount?: Mount }) {
+export default function AdminMountServers({ mount }: { mount: Mount }) {
   const [mountServers, setMountServers] = useState<ResponseMeta<AndCreated<{ server: AdminServer }>>>(
     getEmptyPaginationSet(),
   );

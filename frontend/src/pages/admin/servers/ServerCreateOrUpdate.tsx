@@ -2,35 +2,38 @@ import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Paper, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
 import { NIL as uuidNil } from 'uuid';
+import { z } from 'zod';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import getEggs from '@/api/admin/nests/eggs/getEggs';
+import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
 import getNests from '@/api/admin/nests/getNests';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
 import getNodes from '@/api/admin/nodes/getNodes';
 import createServer from '@/api/admin/servers/createServer';
 import updateServer from '@/api/admin/servers/updateServer';
 import getUsers from '@/api/admin/users/getUsers';
+import { httpErrorToHuman } from '@/api/axios';
+import Alert from '@/elements/Alert';
 import Button from '@/elements/Button';
 import MultiSelect from '@/elements/input/MultiSelect';
 import NumberInput from '@/elements/input/NumberInput';
 import Select from '@/elements/input/Select';
 import SizeInput from '@/elements/input/SizeInput';
 import Switch from '@/elements/input/Switch';
-import Alert from '@/elements/Alert';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
+import Spinner from '@/elements/Spinner';
+import VariableContainer from '@/elements/VariableContainer';
+import { adminServerSchema } from '@/lib/schemas';
 import { formatAllocation } from '@/lib/server';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
-import { httpErrorToHuman } from '@/api/axios';
 import { useToast } from '@/providers/ToastProvider';
-import VariableContainer from '@/elements/VariableContainer';
-import Spinner from '@/elements/Spinner';
 
 const timezones = Object.keys(zones)
   .sort()
@@ -42,7 +45,7 @@ const timezones = Object.keys(zones)
 export default function ServerCreateOrUpdate({ contextServer }: { contextServer?: AdminServer }) {
   const { addToast } = useToast();
 
-  const form = useForm<Partial<UpdateAdminServer>>({
+  const form = useForm<z.infer<typeof adminServerSchema>>({
     initialValues: {
       externalId: null,
       name: '',
@@ -74,12 +77,14 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       allocationUuids: [],
       variables: [],
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminServerSchema),
   });
 
-  const { loading, doCreateOrUpdate } = useResourceForm<Partial<UpdateAdminServer>, AdminServer>({
+  const { loading, doCreateOrUpdate } = useResourceForm<z.infer<typeof adminServerSchema>, AdminServer>({
     form,
     createFn: () => createServer(form.values),
-    updateFn: () => updateServer(contextServer?.uuid, form.values),
+    updateFn: () => updateServer(contextServer!.uuid, form.values),
     doUpdate: !!contextServer,
     basePath: '/admin/servers',
     resourceName: 'Server',
@@ -102,14 +107,14 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   const [memoryInput, setMemoryInput] = useState('');
   const [diskInput, setDiskInput] = useState('');
   const [swapInput, setSwapInput] = useState('');
-  const [selectedNestUuid, setSelectedNestUuid] = useState<string>(contextServer?.nest.uuid ?? '');
+  const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>(contextServer?.nest.uuid ?? '');
   const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
   const nests = useSearchableResource<AdminNest>({ fetcher: (search) => getNests(1, search) });
   const eggs = useSearchableResource<AdminNestEgg>({
-    fetcher: (search) => getEggs(selectedNestUuid, 1, search),
+    fetcher: (search) => getEggs(selectedNestUuid!, 1, search),
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({

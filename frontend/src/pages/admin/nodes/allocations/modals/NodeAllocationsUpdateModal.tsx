@@ -1,11 +1,11 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
+import updateNodeAllocations from '@/api/admin/nodes/allocations/updateNodeAllocations';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
-import updateNodeAllocations from '@/api/admin/nodes/allocations/updateNodeAllocations';
 import { useAdminStore } from '@/stores/admin';
 
 export default function NodeAllocationsUpdateModal({

@@ -1,6 +1,8 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
 import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost';
 import testDatabaseHost from '@/api/admin/database-hosts/testDatabaseHost';
@@ -14,6 +16,7 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { adminDatabaseHostSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -24,13 +27,13 @@ export default function DatabaseHostCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateAdminDatabaseHost>({
+  const form = useForm<z.infer<typeof adminDatabaseHostSchema>>({
     initialValues: {
       name: '',
       username: '',
-      password: null,
+      password: '',
       host: '',
       port: 3306,
       public: false,
@@ -38,16 +41,18 @@ export default function DatabaseHostCreateOrUpdate({
       publicPort: null,
       type: 'mysql',
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminDatabaseHostSchema),
   });
 
   const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
-    UpdateAdminDatabaseHost,
+    z.infer<typeof adminDatabaseHostSchema>,
     AdminDatabaseHost
   >({
     form,
     createFn: () => createDatabaseHost(form.values),
-    updateFn: () => updateDatabaseHost(contextDatabaseHost?.uuid, form.values),
-    deleteFn: () => deleteDatabaseHost(contextDatabaseHost?.uuid),
+    updateFn: () => updateDatabaseHost(contextDatabaseHost!.uuid, form.values),
+    deleteFn: () => deleteDatabaseHost(contextDatabaseHost!.uuid),
     doUpdate: !!contextDatabaseHost,
     basePath: '/admin/database-hosts',
     resourceName: 'Database host',
@@ -57,14 +62,14 @@ export default function DatabaseHostCreateOrUpdate({
     if (contextDatabaseHost) {
       form.setValues({
         ...contextDatabaseHost,
-        password: null,
+        password: '',
       });
     }
   }, [contextDatabaseHost]);
 
   const doTest = () => {
     setLoading(true);
-    testDatabaseHost(contextDatabaseHost.uuid)
+    testDatabaseHost(contextDatabaseHost!.uuid)
       .then(() => {
         addToast('Test successfully completed', 'success');
       })

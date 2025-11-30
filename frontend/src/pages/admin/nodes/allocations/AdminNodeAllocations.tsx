@@ -7,16 +7,17 @@ import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import SelectionArea from '@/elements/SelectionArea';
 import Table from '@/elements/Table';
+import { nodeAllocationTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
-import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
 import AllocationActionBar from './AllocationActionBar';
+import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
+import NodeAllocationRow from './NodeAllocationRow';
 
 export default function AdminNodeAllocations({ node }: { node: Node }) {
   const { nodeAllocations, setNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
   const [selectedNodeAllocationsPrevious, setSelectedNodeAllocationsPrevious] = useState(selectedNodeAllocations);
 
   const { loading, search, setSearch, setPage, refetch } = useSearchablePaginatedTable({

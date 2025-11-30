@@ -1,10 +1,14 @@
 import { Group, Stack, Title } from '@mantine/core';
-import { useState } from 'react';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { isIP } from '@/lib/ip';
+import { adminSettingsWebauthnSchema } from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
@@ -13,11 +17,25 @@ export default function WebauthnContainer() {
   const { webauthn } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [webauthnSettings, setWebauthnSettings] = useState<AdminSettings['webauthn']>(webauthn);
+
+  const form = useForm<z.infer<typeof adminSettingsWebauthnSchema>>({
+    initialValues: {
+      rpId: '',
+      rpOrigin: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminSettingsWebauthnSchema),
+  });
+
+  useEffect(() => {
+    form.setValues({
+      ...webauthn,
+    });
+  }, [webauthn]);
 
   const doUpdate = () => {
     setLoading(true);
-    updateWebauthnSettings(webauthnSettings)
+    updateWebauthnSettings(form.values)
       .then(() => {
         addToast('Webauthn settings updated.', 'success');
       })
@@ -33,7 +51,7 @@ export default function WebauthnContainer() {
       return;
     }
 
-    setWebauthnSettings({
+    form.setValues({
       rpId: window.location.hostname.split('.').slice(-2).join('.'),
       rpOrigin: window.location.origin,
     });
@@ -47,20 +65,8 @@ export default function WebauthnContainer() {
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='RP Id'
-            placeholder='RP Id'
-            value={webauthnSettings.rpId || ''}
-            onChange={(e) => setWebauthnSettings({ ...webauthnSettings, rpId: e.target.value })}
-          />
-          <TextInput
-            withAsterisk
-            label='RP Origin'
-            placeholder='RP Origin'
-            value={webauthnSettings.rpOrigin || ''}
-            onChange={(e) => setWebauthnSettings({ ...webauthnSettings, rpOrigin: e.target.value })}
-          />
+          <TextInput withAsterisk label='RP Id' placeholder='RP Id' {...form.getInputProps('rpId')} />
+          <TextInput withAsterisk label='RP Origin' placeholder='RP Origin' {...form.getInputProps('rpOrigin')} />
         </Group>
       </Stack>
 

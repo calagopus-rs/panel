@@ -29,12 +29,12 @@ export default function NodeMountAddModal({ node, opened, onClose }: ModalProps 
   const doAdd = () => {
     setLoading(true);
 
-    createNodeMount(node.uuid, selectedMount.uuid)
+    createNodeMount(node.uuid, selectedMount!.uuid)
       .then(() => {
         addToast('Node Mount added.', 'success');
 
         onClose();
-        addNodeMount({ mount: selectedMount, created: new Date() });
+        addNodeMount({ mount: selectedMount!, created: new Date() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -50,7 +50,7 @@ export default function NodeMountAddModal({ node, opened, onClose }: ModalProps 
           label='Mount'
           placeholder='Mount'
           value={selectedMount?.uuid}
-          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.uuid === value))}
+          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.uuid === value) ?? null)}
           data={mounts.items.map((mount) => ({
             label: mount.name,
             value: mount.uuid,

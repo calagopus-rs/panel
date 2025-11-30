@@ -13,8 +13,8 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import { backupDiskLabelMapping } from '@/lib/enums';
+import { adminBackupConfigurationSchema } from '@/lib/schemas';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-import { backupConfigurationSchema } from '@/schemas';
 import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic';
 import BackupS3 from '../admin/backupConfigurations/forms/BackupS3';
 
@@ -22,7 +22,7 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<z.infer<typeof backupConfigurationSchema>>({
+  const form = useForm<z.infer<typeof adminBackupConfigurationSchema>>({
     initialValues: {
       locationName: '',
       backupName: '',
@@ -45,7 +45,7 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
       },
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(backupConfigurationSchema),
+    validate: zod4Resolver(adminBackupConfigurationSchema),
   });
 
   const onSubmit = async () => {

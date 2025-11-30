@@ -12,8 +12,6 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const userOAuthLinkTableColumns = ['ID', 'OAuth Provider', 'Identifier', 'Last Used', 'Created', ''];
-
 export default function UserOAuthLinkRow({ user, userOAuthLink }: { user: User; userOAuthLink: UserOAuthLink }) {
   const { addToast } = useToast();
   const { removeUserOAuthLink } = useAdminStore();

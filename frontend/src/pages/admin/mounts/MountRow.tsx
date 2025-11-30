@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const mountTableColumns = ['ID', 'Name', 'Source', 'Target', 'Created'];
-
 export default function MountRow({ mount }: { mount: Mount }) {
   return (
     <TableRow>

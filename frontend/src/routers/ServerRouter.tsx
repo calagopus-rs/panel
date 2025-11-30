@@ -1,7 +1,11 @@
 import { faArrowUpRightFromSquare, faCancel, faServer } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Route, Routes, useParams } from 'react-router';
+import { httpErrorToHuman } from '@/api/axios';
 import getServer from '@/api/server/getServer';
+import cancelServerInstall from '@/api/server/settings/cancelServerInstall';
+import Button from '@/elements/Button';
 import Can from '@/elements/Can';
 import Container from '@/elements/Container';
 import Notification from '@/elements/Notification';
@@ -13,14 +17,10 @@ import NotFound from '@/pages/NotFound';
 import WebsocketHandler from '@/pages/server/WebsocketHandler';
 import WebsocketListener from '@/pages/server/WebsocketListener';
 import { useAuth } from '@/providers/AuthProvider';
+import { useToast } from '@/providers/ToastProvider';
 import serverRoutes from '@/routers/routes/serverRoutes';
 import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
-import Button from '@/elements/Button';
-import cancelServerInstall from '@/api/server/settings/cancelServerInstall';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
   const params = useParams<'id'>();
@@ -48,9 +48,11 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
   }, [abortLoading, server?.status]);
 
   useEffect(() => {
-    getServer(params.id)
-      .then((data) => setServer(data))
-      .finally(() => setLoading(false));
+    if (params.id) {
+      getServer(params.id)
+        .then((data) => setServer(data))
+        .finally(() => setLoading(false));
+    }
   }, [params.id]);
 
   const doAbortInstall = () => {
@@ -79,7 +81,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
           <Sidebar.Divider />
 
           <Sidebar.Link to='/' end icon={faServer} name='Servers' />
-          {user.admin && (
+          {user!.admin && (
             <Sidebar.Link to={`/admin/servers/${params.id}`} end icon={faArrowUpRightFromSquare} name='View admin' />
           )}
 

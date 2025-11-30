@@ -1,11 +1,15 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createNodeAllocations from '@/api/admin/nodes/allocations/createNodeAllocations';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { adminNodeAllocationsSchema } from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 
 export default function NodeAllocationsCreateModal({
@@ -16,16 +20,23 @@ export default function NodeAllocationsCreateModal({
 }: ModalProps & { node: Node; loadAllocations: () => void }) {
   const { addToast } = useToast();
 
-  const [ip, setIp] = useState('');
-  const [ipAlias, setIpAlias] = useState('');
-  const [ports, setPorts] = useState<string[]>([]);
   const [resolvedPorts, setResolvedPorts] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof adminNodeAllocationsSchema>>({
+    initialValues: {
+      ip: '',
+      ipAlias: null,
+      ports: [],
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminNodeAllocationsSchema),
+  });
 
   useEffect(() => {
     const resolved: number[] = [];
 
-    for (const range of ports) {
+    for (const range of form.values.ports) {
       const integer = Number(range);
 
       if (Number.isFinite(integer) && Number.isInteger(integer)) {
@@ -47,19 +58,19 @@ export default function NodeAllocationsCreateModal({
           }
         }
       } else {
-        setPorts((p) => p.filter((r) => r !== range));
+        form.setFieldValue('ports', (p) => p.filter((r) => r !== range));
       }
     }
 
     setResolvedPorts(resolved);
-  }, [ports]);
+  }, [form.values.ports]);
 
   const doCreate = () => {
     setLoading(true);
 
     createNodeAllocations(node.uuid, {
-      ip,
-      ipAlias: ipAlias || null,
+      ip: form.values.ip,
+      ipAlias: form.values.ipAlias || null,
       ports: resolvedPorts,
     })
       .then(({ created }) => {
@@ -77,24 +88,14 @@ export default function NodeAllocationsCreateModal({
   return (
     <Modal title='Create Node Allocations' onClose={onClose} opened={opened}>
       <Stack>
-        <TextInput withAsterisk label='IP' placeholder='IP' value={ip} onChange={(e) => setIp(e.target.value)} />
+        <TextInput withAsterisk label='IP' placeholder='IP' {...form.getInputProps('ip')} />
 
-        <TextInput
-          label='IP Alias'
-          placeholder='IP Alias'
-          value={ipAlias}
-          onChange={(e) => setIpAlias(e.target.value)}
-        />
+        <TextInput label='IP Alias' placeholder='IP Alias' {...form.getInputProps('ipAlias')} />
 
-        <TagsInput
-          label='Port Ranges'
-          placeholder='Port Ranges'
-          value={ports}
-          onChange={(values) => setPorts(values)}
-        />
+        <TagsInput label='Port Ranges' placeholder='Port Ranges' {...form.getInputProps('ports')} />
 
         <Group mt='md'>
-          <Button onClick={doCreate} loading={loading} disabled={!ip || !resolvedPorts.length}>
+          <Button onClick={doCreate} loading={loading} disabled={!form.isValid() || !resolvedPorts.length}>
             Create {resolvedPorts.length}
           </Button>
           <Button variant='default' onClick={onClose}>

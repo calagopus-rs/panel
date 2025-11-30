@@ -1,13 +1,11 @@
 import { Ref } from 'react';
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code';
 import Checkbox from '@/elements/input/Checkbox';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
-import { NavLink } from 'react-router';
-
-export const nodeAllocationTableColumns = ['', 'ID', 'Server', 'IP', 'IP Alias', 'Port', 'Created'];
 
 export default function NodeAllocationRow({
   allocation,

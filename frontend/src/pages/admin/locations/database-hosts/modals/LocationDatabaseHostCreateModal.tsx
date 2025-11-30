@@ -29,12 +29,12 @@ export default function LocationDatabaseHostCreateModal({
   const doCreate = () => {
     setLoading(true);
 
-    createLocationDatabaseHost(location.uuid, databaseHost.uuid)
+    createLocationDatabaseHost(location.uuid, databaseHost!.uuid)
       .then(() => {
         addToast('Location Database Host created.', 'success');
 
         onClose();
-        addLocationDatabaseHost({ databaseHost, created: new Date().toString() });
+        addLocationDatabaseHost({ databaseHost: databaseHost!, created: new Date().toString() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -50,7 +50,7 @@ export default function LocationDatabaseHostCreateModal({
           label='Database Host'
           placeholder='Database Host'
           value={databaseHost?.uuid}
-          onChange={(value) => setDatabaseHost(databaseHosts.items.find((dh) => dh.uuid === value))}
+          onChange={(value) => setDatabaseHost(databaseHosts.items.find((dh) => dh.uuid === value) ?? null)}
           data={Object.values(
             databaseHosts.items.reduce(
               (acc, { uuid, name, type }) => (
@@ -60,7 +60,7 @@ export default function LocationDatabaseHostCreateModal({
                 }),
                 acc
               ),
-              {},
+              {} as DatabaseHost,
             ),
           )}
           searchable

@@ -6,10 +6,11 @@ import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Table from '@/elements/Table';
+import { adminUserOAuthLinkTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal';
-import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
+import UserOAuthLinkRow from './UserOAuthLinkRow';
 
 export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();
@@ -35,7 +36,12 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
       </Group>
 
       <ContextMenuProvider>
-        <Table columns={userOAuthLinkTableColumns} loading={loading} pagination={userOAuthLinks} onPageSelect={setPage}>
+        <Table
+          columns={adminUserOAuthLinkTableColumns}
+          loading={loading}
+          pagination={userOAuthLinks}
+          onPageSelect={setPage}
+        >
           {userOAuthLinks.data.map((userOAuthLink) => (
             <UserOAuthLinkRow key={userOAuthLink.uuid} user={user} userOAuthLink={userOAuthLink} />
           ))}

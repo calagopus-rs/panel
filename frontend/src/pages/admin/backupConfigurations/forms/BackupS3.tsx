@@ -5,9 +5,9 @@ import NumberInput from '@/elements/input/NumberInput';
 import PasswordInput from '@/elements/input/PasswordInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { backupConfigurationSchema } from '@/schemas';
+import { adminBackupConfigurationSchema } from '@/lib/schemas';
 
-export default function BackupS3({ form }: { form: UseFormReturnType<z.infer<typeof backupConfigurationSchema>> }) {
+export default function BackupS3({ form }: { form: UseFormReturnType<z.infer<typeof adminBackupConfigurationSchema>> }) {
   return (
     <Stack gap='xs'>
       <Stack gap={0}>

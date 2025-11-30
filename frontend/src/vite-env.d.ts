@@ -29,7 +29,8 @@ declare global {
     created: Date;
   }
 
-  interface UpdateAdminDatabaseHost {
+  interface AdminDatabaseHost {
+    uuid: string;
     name: string;
     username: string;
     password: string;
@@ -39,14 +40,11 @@ declare global {
     publicHost: string | null;
     publicPort: number | null;
     type: DatabaseType;
-  }
-
-  interface AdminDatabaseHost extends UpdateAdminDatabaseHost {
-    uuid: string;
     created: Date;
   }
 
-  interface UpdateAdminOAuthProvider {
+  interface AdminOAuthProvider {
+    uuid: string;
     name: string;
     description: string | null;
     clientId: string;
@@ -65,10 +63,6 @@ declare global {
     linkViewable: boolean;
     userManageable: boolean;
     basicAuth: boolean;
-  }
-
-  interface AdminOAuthProvider extends UpdateAdminOAuthProvider {
-    uuid: string;
     created: Date;
   }
 
@@ -80,29 +74,22 @@ declare global {
     created: Date;
   }
 
-  interface UpdateLocation {
+  interface Location {
+    uuid: string;
     name: string;
     description: string | null;
-    backupConfigurationUuid: string | null;
-  }
-
-  interface Location extends UpdateLocation {
-    uuid: string;
     backupConfiguration: BackupConfiguration | null;
     created: Date;
   }
 
-  interface UpdateAdminMount {
+  interface Mount {
+    uuid: string;
     name: string;
     description: string | null;
     source: string;
     target: string;
     readOnly: boolean;
     userMountable: boolean;
-  }
-
-  interface Mount extends UpdateAdminMount {
-    uuid: string;
     created: Date;
   }
 
@@ -126,14 +113,11 @@ declare global {
     exportedEgg: object;
   }
 
-  interface AdminUpdateNest {
+  interface AdminNest {
+    uuid: string;
     author: string;
     name: string;
     description: string | null;
-  }
-
-  interface AdminNest extends AdminUpdateNest {
-    uuid: string;
     created: Date;
   }
 
@@ -200,21 +184,6 @@ declare global {
     created: Date;
   }
 
-  interface UpdateNode {
-    name: string;
-    public: boolean;
-    description: string | null;
-    publicUrl: string | null;
-    url: string;
-    sftpHost: string | null;
-    sftpPort: number;
-    maintenanceMessage: string | null;
-    memory: number;
-    disk: number;
-    locationUuid: string;
-    backupConfigurationUuid: string | null;
-  }
-
   interface Node {
     uuid: string;
     location: Location;
@@ -248,38 +217,13 @@ declare global {
     created: Date;
   }
 
-  interface UpdateRole {
+  interface Role {
+    uuid: string;
     name: string;
     description: string | null;
     serverPermissions: string[];
     adminPermissions: string[];
-  }
-
-  interface Role extends UpdateRole {
-    uuid: string;
     created: Date;
-  }
-
-  interface UpdateAdminServer {
-    externalId: string | null;
-    name: string;
-    description: string | null;
-    startOnCompletion: boolean;
-    skipInstaller: boolean;
-    suspended: boolean;
-    limits: ServerLimits;
-    pinnedCpus: number[];
-    startup: string;
-    image: string;
-    timezone: string;
-    featureLimits: ServerFeatureLimits;
-    nodeUuid: string;
-    ownerUuid: string;
-    eggUuid: string;
-    backupConfigurationUuid: string | null;
-    allocationUuid: string | null;
-    allocationUuids: string[];
-    variables: { envVariable: string; value: string }[];
   }
 
   interface AdminServer {
@@ -305,7 +249,7 @@ declare global {
       enabled: boolean;
       seconds: number;
     };
-    timezone: string | null;
+    timezone: string;
     created: Date;
   }
 

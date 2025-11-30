@@ -4,17 +4,20 @@ import { Group, TextInput, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
+import { z } from 'zod';
 import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
 import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
+import { adminOAuthProviderSchema } from '@/lib/schemas';
+import { oauthProviderTableColumns } from '@/lib/tableColumns';
 import { transformKeysToCamelCase } from '@/lib/transformers';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './OAuthProviderCreateOrUpdate';
-import DatabaseHostRow, { oauthProviderTableColumns } from './OAuthProviderRow';
+import DatabaseHostRow from './OAuthProviderRow';
 import DatabaseHostView from './OAuthProviderView';
 
 function OAuthProvidersContainer() {
@@ -33,7 +36,7 @@ function OAuthProvidersContainer() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    event.target.value = null;
+    event.target.value = '';
 
     try {
       const text = await file.text().then((t) => t.trim());
@@ -50,7 +53,7 @@ function OAuthProvidersContainer() {
       }
 
       createOAuthProvider({
-        ...(transformKeysToCamelCase(data) as UpdateAdminOAuthProvider),
+        ...(transformKeysToCamelCase(data) as z.infer<typeof adminOAuthProviderSchema>),
         clientId: 'example',
         clientSecret: 'example',
       })
@@ -62,7 +65,7 @@ function OAuthProvidersContainer() {
           addToast(httpErrorToHuman(msg), 'error');
         });
     } catch (err) {
-      addToast(httpErrorToHuman(err), 'error');
+      addToast('Something went wrong while importing the oauth provider.', 'error');
     }
   };
 

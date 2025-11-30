@@ -11,7 +11,7 @@ import { useToast } from '@/providers/ToastProvider';
 export default function AdminBackupConfigurationStats({
   backupConfiguration,
 }: {
-  backupConfiguration?: BackupConfiguration;
+  backupConfiguration: BackupConfiguration;
 }) {
   const { addToast } = useToast();
 

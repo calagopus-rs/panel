@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const userOAuthLinkTableColumns = ['ID', 'User', 'Identifier', 'Last Used', 'Created'];
-
 export default function UserOAuthLinkRow({ userOAuthLink }: { userOAuthLink: AdminUserOAuthLink }) {
   return (
     <TableRow>

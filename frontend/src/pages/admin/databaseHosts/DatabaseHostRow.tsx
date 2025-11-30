@@ -5,8 +5,6 @@ import Tooltip from '@/elements/Tooltip';
 import { databaseTypeLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const databaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Created'];
-
 export default function DatabaseHostRow({ databaseHost }: { databaseHost: AdminDatabaseHost }) {
   return (
     <TableRow>

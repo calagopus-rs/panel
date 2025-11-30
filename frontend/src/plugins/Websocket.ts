@@ -3,7 +3,7 @@ import Sockette from 'sockette';
 
 export class Websocket extends EventEmitter {
   // Timer instance for this socket.
-  private timer: NodeJS.Timeout | null = null;
+  private timer: NodeJS.Timeout | undefined;
 
   // The backoff for the timer, in milliseconds.
   private backoff = 5000;
@@ -15,7 +15,7 @@ export class Websocket extends EventEmitter {
   private url: string | null = null;
 
   // The authentication token passed along with every request to the Daemon.
-  // By default this token expires every 15 minutes and must therefore be
+  // By default, this token expires every 15 minutes and must therefore be
   // refreshed at a pretty continuous interval. The socket server will respond
   // with "token expiring" and "token expired" events when approaching 3 minutes
   // and 0 minutes to expiry.

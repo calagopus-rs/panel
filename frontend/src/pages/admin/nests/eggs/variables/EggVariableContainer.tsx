@@ -27,7 +27,7 @@ export default function EggVariableContainer({
   const { eggVariables, setEggVariables, addEggVariable, removeEggVariable } = useAdminStore();
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>();
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
   const [loading, setLoading] = useState(false);
   const [variable, setVariable] = useState<UpdateNestEggVariable>({
     name: '',
@@ -96,7 +96,7 @@ export default function EggVariableContainer({
           addToast(httpErrorToHuman(msg), 'error');
         });
     } else {
-      setEggVariables(eggVariables.filter((v) => v.uuid || v.order !== contextVariable.order));
+      setEggVariables(eggVariables.filter((v) => v.uuid || v.order !== contextVariable!.order));
       addToast('Egg variable deleted.', 'success');
       setOpenModal(null);
     }

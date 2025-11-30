@@ -6,7 +6,7 @@ import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import DatabaseRow, { databaseTableColumns } from './DatabaseRow';
 
-export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseHost?: AdminDatabaseHost }) {
+export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseHost: AdminDatabaseHost }) {
   const [databaseHostDatabases, setDatabaseHostDatabases] = useState<ResponseMeta<AdminServerDatabase>>(
     getEmptyPaginationSet(),
   );

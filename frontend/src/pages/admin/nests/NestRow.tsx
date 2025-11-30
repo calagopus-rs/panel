@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const nestTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
-
 export default function NestRow({ nest }: { nest: AdminNest }) {
   return (
     <TableRow>

@@ -13,10 +13,10 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { backupDiskLabelMapping } from '@/lib/enums';
+import { adminBackupConfigurationSchema } from '@/lib/schemas';
 import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
 import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
 import { useResourceForm } from '@/plugins/useResourceForm';
-import { backupConfigurationSchema } from '@/schemas';
 
 export default function BackupConfigurationCreateOrUpdate({
   contextBackupConfiguration,
@@ -25,7 +25,7 @@ export default function BackupConfigurationCreateOrUpdate({
 }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<z.infer<typeof backupConfigurationSchema>>({
+  const form = useForm<z.infer<typeof adminBackupConfigurationSchema>>({
     initialValues: {
       name: '',
       description: null,
@@ -48,11 +48,11 @@ export default function BackupConfigurationCreateOrUpdate({
       },
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(backupConfigurationSchema),
+    validate: zod4Resolver(adminBackupConfigurationSchema),
   });
 
   const { loading, doCreateOrUpdate, doDelete } = useResourceForm<
-    z.infer<typeof backupConfigurationSchema>,
+    z.infer<typeof adminBackupConfigurationSchema>,
     BackupConfiguration
   >({
     form,

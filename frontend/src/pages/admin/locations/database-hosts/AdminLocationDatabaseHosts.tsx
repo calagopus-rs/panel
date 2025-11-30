@@ -7,15 +7,16 @@ import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { locationDatabaseHostTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import LocationDatabaseHostRow, { locationDatabaseHostTableColumns } from './LocationDatabaseHostRow';
+import LocationDatabaseHostRow from './LocationDatabaseHostRow';
 import LocationDatabaseHostCreateModal from './modals/LocationDatabaseHostCreateModal';
 
 export default function AdminLocationDatabaseHosts({ location }: { location: Location }) {
   const { locationDatabaseHosts, setLocationDatabaseHosts } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getLocationDatabaseHosts(location.uuid, page, search),

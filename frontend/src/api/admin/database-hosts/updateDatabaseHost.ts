@@ -1,7 +1,9 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
+import { adminDatabaseHostSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-export default async (hostUuid: string, data: UpdateAdminDatabaseHost): Promise<void> => {
+export default async (hostUuid: string, data: z.infer<typeof adminDatabaseHostSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/admin/database-hosts/${hostUuid}`, transformKeysToSnakeCase(data))

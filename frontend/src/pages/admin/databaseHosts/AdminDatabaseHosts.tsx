@@ -5,10 +5,11 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
+import { databaseHostTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
-import DatabaseHostRow, { databaseHostTableColumns } from './DatabaseHostRow';
+import DatabaseHostRow from './DatabaseHostRow';
 import DatabaseHostView from './DatabaseHostView';
 
 function DatabaseHostsContainer() {

@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const eggTableColumns = ['ID', 'Name', 'Author', 'Description', 'Created'];
-
 export default function EggRow({ nest, egg }: { nest: AdminNest; egg: AdminNestEgg }) {
   return (
     <TableRow>

@@ -10,10 +10,10 @@ import CloseButton from '@/elements/CloseButton';
 import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
 import { useAuth } from '@/providers/AuthProvider';
-import { useGlobalStore } from '@/stores/global';
-import Tooltip from './Tooltip';
 import { useWindows } from '@/providers/WindowProvider';
 import RouterRoutes from '@/RouterRoutes';
+import { useGlobalStore } from '@/stores/global';
+import Tooltip from './Tooltip';
 
 type SidebarProps = {
   children: ReactNode;
@@ -56,8 +56,8 @@ function Sidebar({ children }: SidebarProps) {
 type LinkProps = {
   to: string;
   end?: boolean;
-  icon: IconDefinition;
-  name: string;
+  icon?: IconDefinition;
+  name?: string;
   title?: string;
 };
 
@@ -99,7 +99,7 @@ function Link({ to, end, icon, name, title = name }: LinkProps) {
             fullWidth
             styles={{ label: { width: '100%' } }}
           >
-            <FontAwesomeIcon icon={icon} className='mr-2' /> {name}
+            {icon && <FontAwesomeIcon icon={icon} className='mr-2' />} {name}
           </Button>
         );
       }}
@@ -119,12 +119,12 @@ function Footer() {
     <>
       <Card className='mt-auto flex-row! justify-between items-center min-h-fit' p='sm'>
         <div className='flex items-center'>
-          <img src={user.avatar ?? '/icon.svg'} alt={user.username} className='h-10 w-10 rounded-full select-none' />
+          <img src={user!.avatar ?? '/icon.svg'} alt={user!.username} className='h-10 w-10 rounded-full select-none' />
           <div className='flex flex-col ml-3'>
             <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'>
-              {user.nameFirst}
+              {user!.nameFirst}
             </span>
-            {user.admin && <Badge size='xs'>Admin</Badge>}
+            {user!.admin && <Badge size='xs'>Admin</Badge>}
           </div>
         </div>
 

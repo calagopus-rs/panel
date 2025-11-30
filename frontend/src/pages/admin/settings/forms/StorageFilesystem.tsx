@@ -1,30 +1,24 @@
 import { Stack } from '@mantine/core';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { UseFormReturnType } from '@mantine/form';
+import { useEffect } from 'react';
+import { z } from 'zod';
 import TextInput from '@/elements/input/TextInput';
+import { adminSettingsStorageFilesystemSchema } from '@/lib/schemas';
 
 export default function StorageFilesystem({
-  settings,
-  setSettings,
+  form,
 }: {
-  settings: StorageDriverFilesystem;
-  setSettings: Dispatch<SetStateAction<StorageDriver>>;
+  form: UseFormReturnType<z.infer<typeof adminSettingsStorageFilesystemSchema>>;
 }) {
   useEffect(() => {
-    setSettings((settings: StorageDriverFilesystem) => ({
-      ...settings,
-      path: settings.path || '',
-    }));
+    form.setValues({
+      path: form.values.path ?? '',
+    });
   }, []);
 
   return (
     <Stack mt='md'>
-      <TextInput
-        withAsterisk
-        label='Path'
-        placeholder='Path'
-        value={settings.path || ''}
-        onChange={(e) => setSettings((settings) => ({ ...settings, path: e.target.value }))}
-      />
+      <TextInput withAsterisk label='Path' placeholder='Path' {...form.getInputProps('path')} />
     </Stack>
   );
 }

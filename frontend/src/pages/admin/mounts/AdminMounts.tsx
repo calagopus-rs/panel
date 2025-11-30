@@ -5,11 +5,12 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getMounts from '@/api/admin/mounts/getMounts';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
+import { mountTableColumns } from '@/lib/tableColumns';
 import MountView from '@/pages/admin/mounts/MountView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import MountCreateOrUpdate from './MountCreateOrUpdate';
-import MountRow, { mountTableColumns } from './MountRow';
+import MountRow from './MountRow';
 
 function MountsContainer() {
   const navigate = useNavigate();

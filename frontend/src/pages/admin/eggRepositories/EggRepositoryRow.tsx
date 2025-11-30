@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const eggRepositoryTableColumns = ['ID', 'Name', 'Description', 'Git Repository', 'Created'];
-
 export default function EggRepositoryRow({ eggRepository }: { eggRepository: AdminEggRepository }) {
   return (
     <TableRow>

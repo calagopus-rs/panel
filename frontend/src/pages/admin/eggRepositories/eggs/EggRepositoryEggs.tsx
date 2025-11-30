@@ -1,11 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
+import getEggs from '@/api/admin/egg-repositories/eggs/getEggs';
 import { getEmptyPaginationSet } from '@/api/axios';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { eggRepositoryEggTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import EggRepositoryEggRow, { eggRepositoryEggTableColumns } from './EggRepositoryEggRow';
-import getEggs from '@/api/admin/egg-repositories/eggs/getEggs';
+import EggRepositoryEggRow from './EggRepositoryEggRow';
 
 export default function EggRepositoryEggs({ contextEggRepository }: { contextEggRepository: AdminEggRepository }) {
   const [eggRepositoryEggs, setEggRepositoryEggs] = useState(getEmptyPaginationSet<AdminEggRepositoryEgg>());

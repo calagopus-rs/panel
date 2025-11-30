@@ -1,6 +1,8 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createMount from '@/api/admin/mounts/createMount';
 import deleteMount from '@/api/admin/mounts/deleteMount';
 import updateMount from '@/api/admin/mounts/updateMount';
@@ -10,12 +12,13 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminMountSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateAdminMount>({
+  const form = useForm<z.infer<typeof adminMountSchema>>({
     initialValues: {
       name: '',
       description: null,
@@ -24,13 +27,15 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
       readOnly: false,
       userMountable: false,
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminMountSchema),
   });
 
-  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateAdminMount, Mount>({
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminMountSchema>, Mount>({
     form,
     createFn: () => createMount(form.values),
-    updateFn: () => updateMount(contextMount?.uuid, form.values),
-    deleteFn: () => deleteMount(contextMount?.uuid),
+    updateFn: () => updateMount(contextMount!.uuid, form.values),
+    deleteFn: () => deleteMount(contextMount!.uuid),
     doUpdate: !!contextMount,
     basePath: '/admin/locations',
     resourceName: 'Location',

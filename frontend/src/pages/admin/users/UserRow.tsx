@@ -6,8 +6,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const userTableColumns = ['', 'ID', 'Username', 'Role', 'Created'];
-
 export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>

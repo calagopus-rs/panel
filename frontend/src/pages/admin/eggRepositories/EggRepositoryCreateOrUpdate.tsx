@@ -1,18 +1,21 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import createEggRepository from '@/api/admin/egg-repositories/createEggRepository';
+import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository';
+import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository';
+import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository';
+import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminEggRepositorySchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
-import createEggRepository from '@/api/admin/egg-repositories/createEggRepository';
-import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository';
-import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository';
-import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository';
 import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 
 export default function EggRepositoryCreateOrUpdate({
   contextEggRepository,
@@ -21,14 +24,16 @@ export default function EggRepositoryCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<AdminUpdateEggRepository>({
+  const form = useForm<z.infer<typeof adminEggRepositorySchema>>({
     initialValues: {
       name: '',
       description: null,
       gitRepository: '',
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminEggRepositorySchema),
   });
 
   const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
@@ -37,8 +42,8 @@ export default function EggRepositoryCreateOrUpdate({
   >({
     form,
     createFn: () => createEggRepository(form.values),
-    updateFn: () => updateEggRepository(contextEggRepository?.uuid, form.values),
-    deleteFn: () => deleteEggRepository(contextEggRepository?.uuid),
+    updateFn: () => updateEggRepository(contextEggRepository!.uuid, form.values),
+    deleteFn: () => deleteEggRepository(contextEggRepository!.uuid),
     doUpdate: !!contextEggRepository,
     basePath: '/admin/egg-repositories',
     resourceName: 'Egg Repository',
@@ -54,7 +59,7 @@ export default function EggRepositoryCreateOrUpdate({
 
   const doSync = () => {
     setLoading(true);
-    syncEggRepository(contextEggRepository?.uuid)
+    syncEggRepository(contextEggRepository!.uuid)
       .then((found) => {
         addToast(`Egg Repository synchronised, found ${found} Egg${found === 1 ? '' : 's'}.`, 'success');
       })

@@ -3,10 +3,11 @@ import { useState } from 'react';
 import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
+import { nodeTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
+import NodeRow from '../../nodes/NodeRow';
 
-export default function AdminMountNodes({ mount }: { mount?: Mount }) {
+export default function AdminMountNodes({ mount }: { mount: Mount }) {
   const [mountNodes, setMountNodes] = useState<ResponseMeta<AndCreated<{ node: Node }>>>(getEmptyPaginationSet());
 
   const { loading, setPage } = useSearchablePaginatedTable({

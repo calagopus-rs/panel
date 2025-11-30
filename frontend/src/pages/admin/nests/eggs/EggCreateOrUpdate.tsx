@@ -3,7 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createEgg from '@/api/admin/nests/eggs/createEgg';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
 import exportEgg from '@/api/admin/nests/eggs/exportEgg';
@@ -19,6 +21,7 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminEggSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -31,9 +34,9 @@ export default function EggCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<AdminUpdateNestEgg>({
+  const form = useForm<z.infer<typeof adminEggSchema>>({
     initialValues: {
       author: '',
       name: '',
@@ -67,13 +70,15 @@ export default function EggCreateOrUpdate({
       dockerImages: {},
       fileDenylist: [],
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminEggSchema),
   });
 
-  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<AdminUpdateNestEgg, AdminNestEgg>({
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminEggSchema>, AdminNestEgg>({
     form,
     createFn: () => createEgg(contextNest.uuid, form.values),
-    updateFn: () => updateEgg(contextNest.uuid, contextEgg.uuid, form.values),
-    deleteFn: () => deleteEgg(contextNest.uuid, contextEgg.uuid),
+    updateFn: () => updateEgg(contextNest.uuid, contextEgg!.uuid, form.values),
+    deleteFn: () => deleteEgg(contextNest.uuid, contextEgg!.uuid),
     doUpdate: !!contextEgg,
     basePath: `/admin/nests/${contextNest.uuid}/eggs`,
     resourceName: 'Egg',
@@ -90,7 +95,7 @@ export default function EggCreateOrUpdate({
   const doExport = (format: 'json' | 'yaml') => {
     setLoading(true);
 
-    exportEgg(contextNest?.uuid, contextEgg.uuid)
+    exportEgg(contextNest?.uuid, contextEgg!.uuid)
       .then((data) => {
         addToast('Egg exported.', 'success');
 
@@ -99,7 +104,7 @@ export default function EggCreateOrUpdate({
           const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
           const downloadLink = document.createElement('a');
           downloadLink.href = fileURL;
-          downloadLink.download = `egg-${contextEgg.uuid}.json`;
+          downloadLink.download = `egg-${contextEgg!.uuid}.json`;
           document.body.appendChild(downloadLink);
           downloadLink.click();
 
@@ -110,7 +115,7 @@ export default function EggCreateOrUpdate({
           const fileURL = URL.createObjectURL(new Blob([yamlData], { type: 'text/plain' }));
           const downloadLink = document.createElement('a');
           downloadLink.href = fileURL;
-          downloadLink.download = `egg-${contextEgg.uuid}.yml`;
+          downloadLink.download = `egg-${contextEgg!.uuid}.yml`;
           document.body.appendChild(downloadLink);
           downloadLink.click();
 
