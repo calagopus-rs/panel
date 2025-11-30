@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create, StoreApi } from 'zustand';
+import { createContext } from 'zustand-utils';
 import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs';
 import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
 import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts';
@@ -28,18 +29,24 @@ export interface AdminStore
     ServersSlice,
     MountsSlice {}
 
-export const useAdminStore = create<AdminStore>()((...a) => ({
-  ...createBackupConfigurationsSlice(...a),
-  ...createDatabaseHostsSlice(...a),
-  ...createOAuthProvidersSlice(...a),
-  ...createEggsSlice(...a),
-  ...createLocationsSlice(...a),
-  ...createNestsSlice(...a),
-  ...createEggRepositoriesSlice(...a),
-  ...createSettingsSlice(...a),
-  ...createUsersSlice(...a),
-  ...createNodesSlice(...a),
-  ...createRolesSlice(...a),
-  ...createServersSlice(...a),
-  ...createMountsSlice(...a),
-}));
+const { Provider, useStore } = createContext<StoreApi<AdminStore>>();
+
+export const createAdminStore = () =>
+  create<AdminStore>()((...a) => ({
+    ...createBackupConfigurationsSlice(...a),
+    ...createDatabaseHostsSlice(...a),
+    ...createOAuthProvidersSlice(...a),
+    ...createEggsSlice(...a),
+    ...createLocationsSlice(...a),
+    ...createNestsSlice(...a),
+    ...createEggRepositoriesSlice(...a),
+    ...createSettingsSlice(...a),
+    ...createUsersSlice(...a),
+    ...createNodesSlice(...a),
+    ...createRolesSlice(...a),
+    ...createServersSlice(...a),
+    ...createMountsSlice(...a),
+  }));
+
+export const AdminStoreContextProvider = Provider;
+export const useAdminStore = useStore;

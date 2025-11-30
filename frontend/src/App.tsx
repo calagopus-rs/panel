@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router';
 import getSettings from './api/getSettings';
 import Spinner from './elements/Spinner';
-import AuthProvider from './providers/AuthProvider';
 import { ToastProvider } from './providers/ToastProvider';
 import { useGlobalStore } from './stores/global';
 import '@mantine/core/styles.css';
@@ -24,9 +23,7 @@ export default function App() {
         <ToastProvider>
           <WindowProvider>
             <BrowserRouter>
-              <AuthProvider>
-                <RouterRoutes isNormal />
-              </AuthProvider>
+              <RouterRoutes isNormal />
             </BrowserRouter>
           </WindowProvider>
         </ToastProvider>

@@ -1,4 +1,5 @@
-import { create } from 'zustand';
+import { create, StoreApi } from 'zustand';
+import { createContext } from 'zustand-utils';
 import { BackupsSlice, createBackupsSlice } from '@/stores/slices/server/backups';
 import { AllocationsSlice, createAllocationsSlice } from '@/stores/slices/server/allocations';
 import { createDatabasesSlice, DatabasesSlice } from '@/stores/slices/server/databases';
@@ -26,21 +27,27 @@ export interface ServerStore
   reset: () => void;
 }
 
-export const useServerStore = create<ServerStore>()((...a) => {
-  const initialState = {} as ServerStore;
-  Object.assign(initialState, {
-    ...createAllocationsSlice(...a),
-    ...createBackupsSlice(...a),
-    ...createDatabasesSlice(...a),
-    ...createFilesSlice(...a),
-    ...createSchedulesSlice(...a),
-    ...createServerSlice(...a),
-    ...createStateSlice(...a),
-    ...createStatsSlice(...a),
-    ...createSubusersSlice(...a),
-    ...createStartupSlice(...a),
-    ...createWebsocketSlice(...a),
+const { Provider, useStore } = createContext<StoreApi<ServerStore>>();
+
+export const createServerStore = () =>
+  create<ServerStore>()((...a) => {
+    const initialState = {} as ServerStore;
+    Object.assign(initialState, {
+      ...createAllocationsSlice(...a),
+      ...createBackupsSlice(...a),
+      ...createDatabasesSlice(...a),
+      ...createFilesSlice(...a),
+      ...createSchedulesSlice(...a),
+      ...createServerSlice(...a),
+      ...createStateSlice(...a),
+      ...createStatsSlice(...a),
+      ...createSubusersSlice(...a),
+      ...createStartupSlice(...a),
+      ...createWebsocketSlice(...a),
+    });
+    initialState.reset = () => a[0]((state) => ({ ...initialState, reset: state.reset }), true);
+    return initialState;
   });
-  initialState.reset = () => useServerStore.setState((state) => ({ ...initialState, reset: state.reset }), true);
-  return initialState;
-});
+
+export const ServerStoreContextprovider = Provider;
+export const useServerStore = useStore;

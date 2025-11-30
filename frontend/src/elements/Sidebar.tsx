@@ -9,7 +9,7 @@ import Card from '@/elements/Card';
 import CloseButton from '@/elements/CloseButton';
 import MantineDivider from '@/elements/Divider';
 import Drawer from '@/elements/Drawer';
-import AuthProvider, { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import Tooltip from './Tooltip';
 import { useWindows } from '@/providers/WindowProvider';
@@ -79,9 +79,7 @@ function Link({ to, end, icon, name, title = name }: LinkProps) {
       icon,
       title,
       <MemoryRouter initialEntries={[to]}>
-        <AuthProvider>
-          <RouterRoutes isNormal={false} />
-        </AuthProvider>
+        <RouterRoutes isNormal={false} />
       </MemoryRouter>,
     );
   };
