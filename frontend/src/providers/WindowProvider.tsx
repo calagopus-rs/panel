@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Title } from '@mantine/core';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
+import { CurrentWindowProvider } from './CurrentWindowProvider';
 
 interface WindowType {
   id: number;
@@ -98,7 +99,7 @@ export const WindowProvider: FC<{ children: ReactNode }> = ({ children }) => {
             topRight: true,
           }}
         >
-          <Card p='sm' shadow='xl' className='h-full'>
+          <Card p='sm' shadow='xl' className='h-full' id={`window_${w.id}_card`}>
             <div className={`window_${w.id}_drag flex flex-row justify-between items-center cursor-grab`}>
               <Title order={3}>
                 {w.icon && <FontAwesomeIcon icon={w.icon} />} {w.title}
@@ -115,7 +116,7 @@ export const WindowProvider: FC<{ children: ReactNode }> = ({ children }) => {
                 </ActionIcon>
               </div>
             </div>
-            {w.component}
+            <CurrentWindowProvider id={w.id}>{w.component}</CurrentWindowProvider>
           </Card>
         </Rnd>
       ))}

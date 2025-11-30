@@ -9,6 +9,7 @@ import { MantineProvider } from '@mantine/core';
 import ErrorBoundary from './elements/ErrorBoundary';
 import { WindowProvider } from './providers/WindowProvider';
 import RouterRoutes from './RouterRoutes';
+import { CurrentWindowProvider } from './providers/CurrentWindowProvider';
 
 export default function App() {
   const { settings, setSettings } = useGlobalStore();
@@ -22,9 +23,11 @@ export default function App() {
       <MantineProvider forceColorScheme='dark'>
         <ToastProvider>
           <WindowProvider>
-            <BrowserRouter>
-              <RouterRoutes isNormal />
-            </BrowserRouter>
+            <CurrentWindowProvider id={null}>
+              <BrowserRouter>
+                <RouterRoutes isNormal />
+              </BrowserRouter>
+            </CurrentWindowProvider>
           </WindowProvider>
         </ToastProvider>
       </MantineProvider>
