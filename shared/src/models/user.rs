@@ -429,7 +429,7 @@ impl User {
             SELECT {}
             FROM users
             LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE users.email = $1
+            WHERE lower(users.email) = lower($1)
             "#,
             Self::columns_sql(None)
         ))
@@ -499,7 +499,7 @@ impl User {
             SELECT {}
             FROM users
             LEFT JOIN roles ON roles.uuid = users.role_uuid
-            WHERE users.email = lower($1) AND users.password = crypt($2, users.password)
+            WHERE lower(users.email) = lower($1) AND users.password = crypt($2, users.password)
             "#,
             Self::columns_sql(None)
         ))

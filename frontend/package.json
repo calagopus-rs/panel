@@ -51,7 +51,6 @@
     "react-avatar-editor": "14.0.0-beta.6",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
-    "react-dropzone": "^14.3.8",
     "react-fast-compare": "^3.2.2",
     "react-google-recaptcha": "^3.1.0",
     "react-qr-code": "^2.0.18",
@@ -65,7 +64,7 @@
     "tzdata": "^1.0.46",
     "uuid": "^13.0.0",
     "zod": "^4.1.13",
-    "zustand": "^5.0.8",
+    "zustand": "^5.0.9",
     "zustand-utils": "^2.1.1"
   },
   "devDependencies": {
