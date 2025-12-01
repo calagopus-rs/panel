@@ -9,7 +9,9 @@ export interface BackupStats {
   deletedBytes: number;
 }
 
-export default async (backupConfigUuid: string): Promise<Record<'today' | 'week' | 'month', BackupStats>> => {
+export default async (
+  backupConfigUuid: string,
+): Promise<Record<'allTime' | 'today' | 'week' | 'month', BackupStats>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get(`/api/admin/backup-configurations/${backupConfigUuid}/stats`)

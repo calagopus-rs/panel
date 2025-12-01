@@ -16,7 +16,7 @@ export default function AdminBackupConfigurationStats({
 }) {
   const { addToast } = useToast();
 
-  const [stats, setStats] = useState<Record<'today' | 'week' | 'month', BackupStats> | null>(null);
+  const [stats, setStats] = useState<Record<'allTime' | 'today' | 'week' | 'month', BackupStats> | null>(null);
 
   useEffect(() => {
     getBackupConfigurationStats(backupConfiguration.uuid)
@@ -38,6 +38,35 @@ export default function AdminBackupConfigurationStats({
         <Spinner.Centered />
       ) : (
         <div className='grid grid-cols-2 xl:grid-cols-5 gap-4'>
+          <Title order={3} c='white' className='col-span-2 xl:col-span-1'>
+            All Time
+          </Title>
+
+          <Card className='flex'>
+            <Title order={3} c='white'>
+              {stats.allTime.total}
+            </Title>
+            Total backups all time
+          </Card>
+          <Card className='flex'>
+            <Title order={3} c='white'>
+              {stats.allTime.successful} ({bytesToString(stats.allTime.successfulBytes)})
+            </Title>
+            Successful backups all time
+          </Card>
+          <Card className='flex'>
+            <Title order={3} c='white'>
+              {stats.allTime.failed}
+            </Title>
+            Failed backups all time
+          </Card>
+          <Card className='flex'>
+            <Title order={3} c='white'>
+              {stats.allTime.deleted} ({bytesToString(stats.allTime.deletedBytes)})
+            </Title>
+            Deleted backups all time
+          </Card>
+
           <Title order={3} c='white' className='col-span-2 xl:col-span-1'>
             Today
           </Title>

@@ -9,7 +9,7 @@ export interface BackupStats {
   deletedBytes: number;
 }
 
-export default async (): Promise<Record<'today' | 'week' | 'month', BackupStats>> => {
+export default async (): Promise<Record<'allTime' | 'today' | 'week' | 'month', BackupStats>> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .get('/api/admin/stats/backups')
