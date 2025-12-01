@@ -65,9 +65,11 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
 
   const locations = useSearchableResource<Location>({
     fetcher: (search) => getLocations(1, search),
+    defaultSearchValue: contextNode?.location.name,
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
+    defaultSearchValue: contextNode?.backupConfiguration?.name,
   });
 
   const doResetToken = () => {

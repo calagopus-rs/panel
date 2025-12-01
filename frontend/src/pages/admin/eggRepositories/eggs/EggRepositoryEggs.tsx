@@ -5,13 +5,13 @@ import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import EggRepositoryEggRow, { eggRepositoryEggTableColumns } from './EggRepositoryEggRow';
-import getEggs from '@/api/admin/egg-repositories/eggs/getEggs';
+import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs';
 
 export default function EggRepositoryEggs({ contextEggRepository }: { contextEggRepository: AdminEggRepository }) {
   const [eggRepositoryEggs, setEggRepositoryEggs] = useState(getEmptyPaginationSet<AdminEggRepositoryEgg>());
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
-    fetcher: (page, search) => getEggs(contextEggRepository.uuid, page, search),
+    fetcher: (page, search) => getEggRepositoryEggs(contextEggRepository.uuid, page, search),
     setStoreData: setEggRepositoryEggs,
   });
 

@@ -105,11 +105,21 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   const [selectedNestUuid, setSelectedNestUuid] = useState<string>(contextServer?.nest.uuid ?? '');
   const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
-  const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
-  const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
-  const nests = useSearchableResource<AdminNest>({ fetcher: (search) => getNests(1, search) });
+  const nodes = useSearchableResource<Node>({
+    fetcher: (search) => getNodes(1, search),
+    defaultSearchValue: contextServer?.node.name,
+  });
+  const users = useSearchableResource<User>({
+    fetcher: (search) => getUsers(1, search),
+    defaultSearchValue: contextServer?.owner.username,
+  });
+  const nests = useSearchableResource<AdminNest>({
+    fetcher: (search) => getNests(1, search),
+    defaultSearchValue: contextServer?.nest.name,
+  });
   const eggs = useSearchableResource<AdminNestEgg>({
     fetcher: (search) => getEggs(selectedNestUuid, 1, search),
+    defaultSearchValue: contextServer?.egg.name,
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
@@ -122,6 +132,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
+    defaultSearchValue: contextServer?.backupConfiguration?.name,
   });
 
   useEffect(() => {

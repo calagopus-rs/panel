@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT nest_egg_variables.uuid\n            FROM nest_egg_variables\n            WHERE nest_egg_variables.egg_uuid = $1 AND nest_egg_variables.env_variable != ALL($2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "uuid",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "5d4a9e805ee953b82980571d06976c76a1a994c4e32feef974fd79927654ac9e"
+}

@@ -144,6 +144,7 @@ declare global {
     author: string;
     name: string;
     description: string | null;
+    eggRepositoryEggUuid: string | null;
     configFiles: {
       file: string;
       parser: ProcessConfigurationConfigParser;
@@ -182,8 +183,9 @@ declare global {
     fileDenylist: string[];
   }
 
-  interface AdminNestEgg extends AdminUpdateNestEgg {
+  interface AdminNestEgg extends Omit<AdminUpdateNestEgg, 'eggRepositoryEggUuid'> {
     uuid: string;
+    eggRepositoryEgg: (AdminEggRepositoryEgg & { eggRepository: AdminEggRepository }) | null;
     created: Date;
   }
 

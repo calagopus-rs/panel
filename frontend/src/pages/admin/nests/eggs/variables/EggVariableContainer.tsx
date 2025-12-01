@@ -24,7 +24,7 @@ export default function EggVariableContainer({
   contextEgg: AdminNestEgg;
   contextVariable?: NestEggVariable;
 }) {
-  const { eggVariables, setEggVariables, addEggVariable, removeEggVariable } = useAdminStore();
+  const { eggVariables, setEggVariables, removeEggVariable } = useAdminStore();
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete'>();
@@ -72,8 +72,8 @@ export default function EggVariableContainer({
     } else {
       createEggVariable(contextNest.uuid, contextEgg.uuid, variable)
         .then((variable) => {
+          setEggVariables([...eggVariables.filter((v) => v.uuid || v.order !== contextVariable.order), variable]);
           addToast('Egg variable created.', 'success');
-          addEggVariable(variable);
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');

@@ -171,16 +171,16 @@ impl NestEggMount {
     pub async fn into_admin_nest_egg_api_object(
         self,
         database: &crate::database::Database,
-    ) -> Result<AdminApiNestEggNestEggMount, anyhow::Error> {
+    ) -> Result<AdminApiNestEggNestEggMount, crate::database::DatabaseError> {
         let nest_egg = self.nest_egg.fetch_cached(database).await?;
+        let nest = nest_egg.nest.clone();
+        let (nest, nest_egg) = tokio::try_join!(nest.fetch_cached(database), async {
+            Ok(nest_egg.into_admin_api_object(database).await?)
+        })?;
 
         Ok(AdminApiNestEggNestEggMount {
-            nest: nest_egg
-                .nest
-                .fetch_cached(database)
-                .await?
-                .into_admin_api_object(),
-            nest_egg: nest_egg.into_admin_api_object(),
+            nest: nest.into_admin_api_object(),
+            nest_egg,
             created: self.created.and_utc(),
         })
     }
@@ -189,7 +189,7 @@ impl NestEggMount {
     pub async fn into_admin_api_object(
         self,
         database: &crate::database::Database,
-    ) -> Result<AdminApiNestEggMount, anyhow::Error> {
+    ) -> Result<AdminApiNestEggMount, crate::database::DatabaseError> {
         Ok(AdminApiNestEggMount {
             mount: self
                 .mount

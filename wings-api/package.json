@@ -14,9 +14,9 @@
     "openapi3-ts": "^4.5.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.32",
-    "esbuild": "^0.25.5",
-    "typescript": "^5.8.3"
+    "@types/node": "^22.19.1",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.9.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

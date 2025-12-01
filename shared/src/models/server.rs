@@ -1221,7 +1221,7 @@ impl Server {
     ) -> Result<AdminApiServer, anyhow::Error> {
         let allocation_uuid = self.allocation.as_ref().map(|a| a.uuid);
 
-        let (node, backup_configuration) = tokio::join!(
+        let (node, backup_configuration, egg) = tokio::join!(
             async {
                 match self.node.fetch_cached(database).await {
                     Ok(node) => Ok(node.into_admin_api_object(database).await?),
@@ -1243,7 +1243,8 @@ impl Server {
                 } else {
                     None
                 }
-            }
+            },
+            self.egg.into_admin_api_object(database)
         );
 
         Ok(AdminApiServer {
@@ -1253,7 +1254,7 @@ impl Server {
             allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             node: node?,
             owner: self.owner.into_api_full_object(storage_url_retriever),
-            egg: self.egg.into_admin_api_object(),
+            egg: egg?,
             nest: self.nest.into_admin_api_object(),
             backup_configuration,
             status: self.status,

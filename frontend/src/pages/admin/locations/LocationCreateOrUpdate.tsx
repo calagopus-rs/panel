@@ -47,6 +47,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
 
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
+    defaultSearchValue: contextLocation?.backupConfiguration?.name,
   });
 
   return (

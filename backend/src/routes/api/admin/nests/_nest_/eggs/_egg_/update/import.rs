@@ -2,14 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::api::admin::nests::_nest_::GetNest;
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
     use axum::http::StatusCode;
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger,
-            nest_egg::{ExportedNestEgg, NestEgg},
+            admin_activity::GetAdminActivityLogger, nest_egg::ExportedNestEgg,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -17,19 +16,20 @@ mod post {
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Serialize)]
-    struct Response {
-        egg: shared::models::nest_egg::AdminApiNestEgg,
-    }
+    struct Response {}
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
-        (status = BAD_REQUEST, body = ApiError),
-        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "nest" = uuid::Uuid,
             description = "The nest ID",
+            example = "123e4567-e89b-12d3-a456-426614174000",
+        ),
+        (
+            "egg" = uuid::Uuid,
+            description = "The egg ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ), request_body = ExportedNestEgg)]
@@ -37,6 +37,7 @@ mod post {
         state: GetState,
         permissions: GetPermissionManager,
         nest: GetNest,
+        egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<ExportedNestEgg>,
     ) -> ApiResponseResult {
@@ -46,30 +47,31 @@ mod post {
                 .ok();
         }
 
-        permissions.has_admin_permission("eggs.create")?;
+        permissions.has_admin_permission("eggs.update")?;
 
-        let egg = match NestEgg::import(&state.database, nest.uuid, None, data).await {
-            Ok(egg) => egg,
+        match egg.import_update(&state.database, data).await {
+            Ok(_) => {}
             Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("egg with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create egg: {:?}", err);
+                tracing::error!("failed to update egg: {:?}", err);
 
-                return ApiResponse::error("failed to create egg")
+                return ApiResponse::error("failed to update egg")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
-        };
+        }
 
         activity_logger
             .log(
-                "nest:egg.create",
+                "nest:egg.update",
                 serde_json::json!({
                     "uuid": egg.uuid,
                     "nest_uuid": nest.uuid,
+                    "egg_repository_egg_uuid": egg.egg_repository_egg.as_ref().map(|e| e.uuid),
 
                     "author": egg.author,
                     "name": egg.name,
@@ -92,10 +94,7 @@ mod post {
             )
             .await;
 
-        ApiResponse::json(Response {
-            egg: egg.into_admin_api_object(&state.database).await?,
-        })
-        .ok()
+        ApiResponse::json(Response {}).ok()
     }
 }
 

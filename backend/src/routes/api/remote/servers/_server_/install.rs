@@ -2,22 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
-    use serde::Serialize;
     use shared::{
         models::server::GetServer,
         response::{ApiResponse, ApiResponseResult},
     };
-    use utoipa::ToSchema;
-
-    #[derive(ToSchema, Serialize)]
-    struct Response {
-        container_image: String,
-        entrypoint: String,
-        script: String,
-    }
 
     #[utoipa::path(get, path = "/", responses(
-        (status = OK, body = inline(Response)),
+        (status = OK, body = inline(wings_api::InstallationScript)),
     ), params(
         (
             "server" = uuid::Uuid,
@@ -26,10 +17,11 @@ mod get {
         ),
     ))]
     pub async fn route(server: GetServer) -> ApiResponseResult {
-        ApiResponse::json(Response {
+        ApiResponse::json(wings_api::InstallationScript {
             container_image: server.0.egg.config_script.container,
             entrypoint: server.0.egg.config_script.entrypoint,
             script: server.0.egg.config_script.content,
+            environment: Default::default(),
         })
         .ok()
     }

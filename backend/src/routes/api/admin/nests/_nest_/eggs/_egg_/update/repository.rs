@@ -2,108 +2,79 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
-    use crate::routes::api::admin::egg_repositories::_egg_repository_::GetEggRepository;
-    use axum::{extract::Path, http::StatusCode};
-    use serde::{Deserialize, Serialize};
+    use crate::routes::api::admin::nests::_nest_::{GetNest, eggs::_egg_::GetNestEgg};
+    use axum::http::StatusCode;
+    use serde::Serialize;
     use shared::{
         ApiError, GetState,
-        models::{
-            ByUuid, admin_activity::GetAdminActivityLogger, egg_repository_egg::EggRepositoryEgg,
-            nest::Nest, nest_egg::NestEgg, user::GetPermissionManager,
-        },
+        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
 
-    #[derive(ToSchema, Deserialize)]
-    pub struct Payload {
-        nest_uuid: uuid::Uuid,
-    }
-
     #[derive(ToSchema, Serialize)]
-    struct Response {
-        egg: shared::models::nest_egg::AdminApiNestEgg,
-    }
+    struct Response {}
 
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "egg_repository" = uuid::Uuid,
-            description = "The egg repository ID",
+            "nest" = uuid::Uuid,
+            description = "The nest ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
             "egg" = uuid::Uuid,
-            description = "The egg repository egg ID",
+            description = "The egg ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
-        egg_repository: GetEggRepository,
+        nest: GetNest,
+        egg: GetNestEgg,
         activity_logger: GetAdminActivityLogger,
-        Path((_egg_repository_uuid, egg_uuid)): Path<(uuid::Uuid, uuid::Uuid)>,
-        axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        permissions.has_admin_permission("eggs.create")?;
+        permissions.has_admin_permission("eggs.update")?;
 
-        let egg_repository_egg = match EggRepositoryEgg::by_egg_repository_uuid_uuid(
-            &state.database,
-            egg_repository.uuid,
-            egg_uuid,
-        )
-        .await?
-        {
-            Some(egg) => egg,
+        let egg_repository_egg = match &egg.egg_repository_egg {
+            Some(egg_repository_egg) => egg_repository_egg.fetch(&state.database).await?,
             None => {
-                return ApiResponse::error("egg repository egg not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
+                return ApiResponse::error(
+                    "unable to update egg thats not linked to a repository egg",
+                )
+                .ok();
             }
         };
 
-        let nest = match Nest::by_uuid_optional(&state.database, data.nest_uuid).await? {
-            Some(nest) => nest,
-            None => {
-                return ApiResponse::error("nest not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
-            }
-        };
-
-        let egg = match NestEgg::import(
-            &state.database,
-            nest.uuid,
-            Some(egg_repository_egg.uuid),
-            egg_repository_egg.exported_egg,
-        )
-        .await
+        match egg
+            .import_update(&state.database, egg_repository_egg.exported_egg)
+            .await
         {
-            Ok(egg) => egg,
+            Ok(_) => {}
             Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("egg with name already exists")
                     .with_status(StatusCode::CONFLICT)
                     .ok();
             }
             Err(err) => {
-                tracing::error!("failed to create egg: {:?}", err);
+                tracing::error!("failed to update egg: {:?}", err);
 
-                return ApiResponse::error("failed to create egg")
+                return ApiResponse::error("failed to update egg")
                     .with_status(StatusCode::INTERNAL_SERVER_ERROR)
                     .ok();
             }
-        };
+        }
 
         activity_logger
             .log(
-                "nest:egg.create",
+                "nest:egg.update",
                 serde_json::json!({
                     "uuid": egg.uuid,
                     "nest_uuid": nest.uuid,
-                    "egg_repository_egg_uuid": egg_repository_egg.uuid,
+                    "egg_repository_egg_uuid": egg.egg_repository_egg.as_ref().map(|e| e.uuid),
 
                     "author": egg.author,
                     "name": egg.name,
@@ -126,10 +97,7 @@ mod post {
             )
             .await;
 
-        ApiResponse::json(Response {
-            egg: egg.into_admin_api_object(&state.database).await?,
-        })
-        .ok()
+        ApiResponse::json(Response {}).ok()
     }
 }
 
