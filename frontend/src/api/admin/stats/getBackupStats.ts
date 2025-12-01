@@ -3,8 +3,10 @@ import { axiosInstance } from '@/api/axios';
 export interface BackupStats {
   total: number;
   successful: number;
+  successfulBytes: number;
   failed: number;
   deleted: number;
+  deletedBytes: number;
 }
 
 export default async (): Promise<Record<'today' | 'week' | 'month', BackupStats>> => {

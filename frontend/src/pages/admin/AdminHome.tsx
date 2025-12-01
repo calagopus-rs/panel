@@ -1,11 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import getBackupStats, { BackupStats } from '@/api/admin/stats/getBackupStats';
-import getGeneralStats, { GeneralStats } from '@/api/admin/stats/getGeneralStats';
+import getBackupStats, { type BackupStats } from '@/api/admin/stats/getBackupStats';
+import getGeneralStats, { type GeneralStats } from '@/api/admin/stats/getGeneralStats';
 import { httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
+import { bytesToString } from '@/lib/size';
 
 export default function AdminHome() {
   const { addToast } = useToast();
@@ -101,7 +102,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.today.successful}
+                {backupStats.today.successful} ({bytesToString(backupStats.today.successfulBytes)})
               </Title>
               Successful backups today
             </Card>
@@ -113,7 +114,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.today.deleted}
+                {backupStats.today.deleted} ({bytesToString(backupStats.today.deletedBytes)})
               </Title>
               Deleted backups today
             </Card>
@@ -130,7 +131,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.week.successful}
+                {backupStats.week.successful} ({bytesToString(backupStats.week.successfulBytes)})
               </Title>
               Successful backups this week
             </Card>
@@ -142,7 +143,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.week.deleted}
+                {backupStats.week.deleted} ({bytesToString(backupStats.week.deletedBytes)})
               </Title>
               Deleted backups this week
             </Card>
@@ -159,7 +160,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.month.successful}
+                {backupStats.month.successful} ({bytesToString(backupStats.month.successfulBytes)})
               </Title>
               Successful backups this month
             </Card>
@@ -171,7 +172,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.month.deleted}
+                {backupStats.month.deleted} ({bytesToString(backupStats.month.deletedBytes)})
               </Title>
               Deleted backups this month
             </Card>

@@ -1,12 +1,13 @@
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import getBackupConfigurationStats, {
-  BackupStats,
+  type BackupStats,
 } from '@/api/admin/backup-configurations/getBackupConfigurationStats';
 import { httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
+import { bytesToString } from '@/lib/size';
 
 export default function AdminBackupConfigurationStats({
   backupConfiguration,
@@ -49,7 +50,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.today.successful}
+              {stats.today.successful} ({bytesToString(stats.today.successfulBytes)})
             </Title>
             Successful backups today
           </Card>
@@ -61,7 +62,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.today.deleted}
+              {stats.today.deleted} ({bytesToString(stats.today.deletedBytes)})
             </Title>
             Deleted backups today
           </Card>
@@ -78,7 +79,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.week.successful}
+              {stats.week.successful} ({bytesToString(stats.week.successfulBytes)})
             </Title>
             Successful backups this week
           </Card>
@@ -90,7 +91,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.week.deleted}
+              {stats.week.deleted} ({bytesToString(stats.week.deletedBytes)})
             </Title>
             Deleted backups this week
           </Card>
@@ -107,7 +108,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.month.successful}
+              {stats.month.successful} ({bytesToString(stats.month.successfulBytes)})
             </Title>
             Successful backups this month
           </Card>
@@ -119,7 +120,7 @@ export default function AdminBackupConfigurationStats({
           </Card>
           <Card className='flex'>
             <Title order={3} c='white'>
-              {stats.month.deleted}
+              {stats.month.deleted} ({bytesToString(stats.month.deletedBytes)})
             </Title>
             Deleted backups this month
           </Card>
