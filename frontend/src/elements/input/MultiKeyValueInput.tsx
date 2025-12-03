@@ -189,7 +189,7 @@ export default function MultiKeyValueInput({
             <ActionIcon size='sm' variant='subtle' color='gray' {...dragHandleProps} hidden={!allowReordering}>
               <FontAwesomeIcon icon={faGripVertical} size='xs' />
             </ActionIcon>
-            <Badge variant='light' size='sm' radius='sm'>
+            <Badge variant='light' size='sm' radius='sm' className='normal-case!'>
               {key}
             </Badge>
             <Text size='xs' className='flex-1' truncate c='dimmed'>

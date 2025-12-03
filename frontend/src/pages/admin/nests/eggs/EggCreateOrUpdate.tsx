@@ -29,6 +29,7 @@ import { NIL as uuidNil } from 'uuid';
 import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
 import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
 import getEgg from '@/api/admin/nests/eggs/getEgg';
+import EggMoveModal from './modals/EggMoveModal';
 
 export default function EggCreateOrUpdate({
   contextNest,
@@ -39,7 +40,7 @@ export default function EggCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'move' | 'delete'>(null);
   const [selectedEggRepositoryUuid, setSelectedEggRepositoryUuid] = useState<string>(
     contextEgg?.eggRepositoryEgg?.eggRepository.uuid ?? '',
   );
@@ -210,6 +211,12 @@ export default function EggCreateOrUpdate({
 
   return (
     <>
+      <EggMoveModal
+        opened={openModal === 'move'}
+        onClose={() => setOpenModal(null)}
+        nest={contextNest}
+        egg={contextEgg}
+      />
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -434,6 +441,11 @@ export default function EggCreateOrUpdate({
               onChange={handleFileUpload}
             />
           </>
+        )}
+        {contextEgg && (
+          <Button variant='outline' onClick={() => setOpenModal('move')} loading={loading}>
+            Move
+          </Button>
         )}
         {contextEgg && (
           <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>

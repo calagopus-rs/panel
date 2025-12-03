@@ -790,6 +790,51 @@ impl Server {
         })
     }
 
+    pub async fn by_egg_uuid_with_pagination(
+        database: &crate::database::Database,
+        egg_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM servers
+            LEFT JOIN server_allocations ON server_allocations.uuid = servers.allocation_uuid
+            LEFT JOIN node_allocations ON node_allocations.uuid = server_allocations.allocation_uuid
+            JOIN users ON users.uuid = servers.owner_uuid
+            LEFT JOIN roles ON roles.uuid = users.role_uuid
+            JOIN nest_eggs ON nest_eggs.uuid = servers.egg_uuid
+            JOIN nests ON nests.uuid = nest_eggs.nest_uuid
+            WHERE servers.egg_uuid = $1 AND ($2 IS NULL OR servers.name ILIKE '%' || $2 || '%')
+            ORDER BY servers.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(egg_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
+            per_page,
+            page,
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
+        })
+    }
+
     pub async fn by_backup_configuration_uuid_with_pagination(
         database: &crate::database::Database,
         backup_configuration_uuid: uuid::Uuid,
@@ -912,18 +957,18 @@ impl Server {
         .unwrap_or(0)
     }
 
-    pub async fn count_by_nest_egg_uuid(
+    pub async fn count_by_egg_uuid(
         database: &crate::database::Database,
-        nest_egg_uuid: uuid::Uuid,
+        egg_uuid: uuid::Uuid,
     ) -> i64 {
         sqlx::query_scalar(
             r#"
             SELECT COUNT(*)
             FROM servers
-            WHERE servers.nest_egg_uuid = $1
+            WHERE servers.egg_uuid = $1
             "#,
         )
-        .bind(nest_egg_uuid)
+        .bind(egg_uuid)
         .fetch_one(database.read())
         .await
         .unwrap_or(0)

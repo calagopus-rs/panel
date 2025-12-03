@@ -15,6 +15,8 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod export;
 mod mounts;
+mod r#move;
+mod servers;
 mod update;
 mod variables;
 
@@ -144,7 +146,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("eggs.delete")?;
 
-        if Server::count_by_nest_egg_uuid(&state.database, egg.uuid).await > 0 {
+        if Server::count_by_egg_uuid(&state.database, egg.uuid).await > 0 {
             return ApiResponse::error("egg has servers, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
@@ -416,8 +418,10 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/servers", servers::router(state))
         .nest("/update", update::router(state))
         .nest("/variables", variables::router(state))
+        .nest("/move", r#move::router(state))
         .nest("/mounts", mounts::router(state))
         .nest("/export", export::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))

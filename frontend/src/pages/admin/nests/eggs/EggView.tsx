@@ -1,4 +1,4 @@
-import { faCodeCommit, faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
+import { faCodeCommit, faCog, faComputer, faEgg } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
@@ -10,6 +10,7 @@ import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
 import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
 import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables';
 import { useToast } from '@/providers/ToastProvider';
+import AdminEggServers from './servers/AdminEggServers';
 
 export default function EggView({ contextNest }: { contextNest: AdminNest }) {
   const params = useParams<'eggId'>();
@@ -51,6 +52,11 @@ export default function EggView({ contextNest }: { contextNest: AdminNest }) {
             icon: faEgg,
             link: `/admin/nests/${contextNest.uuid}/eggs/${params.eggId}/mounts`,
           },
+          {
+            name: 'Servers',
+            icon: faComputer,
+            link: `/admin/nests/${contextNest.uuid}/eggs/${params.eggId}/servers`,
+          },
         ]}
       />
 
@@ -58,6 +64,7 @@ export default function EggView({ contextNest }: { contextNest: AdminNest }) {
         <Route path='/' element={<EggCreateOrUpdate contextNest={contextNest} contextEgg={egg} />} />
         <Route path='/variables' element={<AdminEggVariables contextNest={contextNest} contextEgg={egg} />} />
         <Route path='/mounts' element={<AdminEggMounts contextNest={contextNest} contextEgg={egg} />} />
+        <Route path='/servers' element={<AdminEggServers contextNest={contextNest} contextEgg={egg} />} />
       </Routes>
     </>
   );
