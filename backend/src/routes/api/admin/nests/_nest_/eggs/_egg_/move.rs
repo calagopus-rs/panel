@@ -26,6 +26,7 @@ mod post {
     #[utoipa::path(post, path = "/", responses(
         (status = OK, body = inline(Response)),
         (status = NOT_FOUND, body = ApiError),
+        (status = CONFLICT, body = ApiError),
     ), params(
         (
             "nest" = uuid::Uuid,
@@ -57,6 +58,12 @@ mod post {
                         .ok();
                 }
             };
+
+        if nest.uuid == destination_nest.uuid {
+            return ApiResponse::error("cannot move egg to the same nest")
+                .with_status(StatusCode::CONFLICT)
+                .ok();
+        }
 
         sqlx::query!(
             "UPDATE nest_eggs
