@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE nest_egg_variables\n            SET order_ = $1 + array_position($2, nest_egg_variables.uuid)\n            WHERE nest_egg_variables.uuid = ANY($2) AND nest_egg_variables.egg_uuid = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "UuidArray",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cb08dad099ee174afe957623741514800d1ecd6378784320f5d50b4466c4095d"
+}

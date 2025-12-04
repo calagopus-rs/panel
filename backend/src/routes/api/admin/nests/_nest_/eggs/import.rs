@@ -9,11 +9,7 @@ mod post {
         ApiError, GetState,
         models::{
             admin_activity::GetAdminActivityLogger,
-            nest_egg::{
-                ExportedNestEgg, NestEgg, ProcessConfigurationFile,
-                ProcessConfigurationFileReplacement,
-            },
-            nest_egg_variable::NestEggVariable,
+            nest_egg::{ExportedNestEgg, NestEgg},
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -52,43 +48,7 @@ mod post {
 
         permissions.has_admin_permission("eggs.create")?;
 
-        let egg = match NestEgg::create(
-            &state.database,
-            nest.uuid,
-            None,
-            &data.author,
-            &data.name,
-            data.description.as_deref(),
-            data.config
-                .files
-                .into_iter()
-                .map(|(file, config)| ProcessConfigurationFile {
-                    file,
-                    parser: config.parser,
-                    replace: config
-                        .find
-                        .into_iter()
-                        .map(|(r#match, value)| ProcessConfigurationFileReplacement {
-                            r#match,
-                            if_value: None,
-                            replace_with: value,
-                        })
-                        .collect(),
-                })
-                .collect(),
-            data.config.startup,
-            data.config.stop,
-            data.scripts.installation,
-            data.config.allocations,
-            &data.startup,
-            data.force_outgoing_ip,
-            data.separate_port,
-            &data.features,
-            data.docker_images,
-            &data.file_denylist,
-        )
-        .await
-        {
+        let egg = match NestEgg::import(&state.database, nest.uuid, None, data).await {
             Ok(egg) => egg,
             Err(err) if err.is_unique_violation() => {
                 return ApiResponse::error("egg with name already exists")
@@ -103,27 +63,6 @@ mod post {
                     .ok();
             }
         };
-
-        for variable in data.variables {
-            if rule_validator::validate_rules(&variable.rules).is_err() {
-                continue;
-            }
-
-            NestEggVariable::create(
-                &state.database,
-                egg.uuid,
-                &variable.name,
-                variable.description.as_deref(),
-                variable.order,
-                &variable.env_variable,
-                variable.default_value.as_deref(),
-                variable.user_viewable,
-                variable.user_editable,
-                &variable.rules,
-            )
-            .await
-            .ok();
-        }
 
         activity_logger
             .log(
@@ -154,7 +93,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            egg: egg.into_admin_api_object(),
+            egg: egg.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }

@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountServers from '@/api/admin/mounts/servers/getMountServers';
 import { getEmptyPaginationSet } from '@/api/axios';
@@ -6,22 +6,26 @@ import Table from '@/elements/Table';
 import { serverTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import ServerRow from '../../servers/ServerRow';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminMountServers({ mount }: { mount: Mount }) {
   const [mountServers, setMountServers] = useState<ResponseMeta<AndCreated<{ server: AdminServer }>>>(
     getEmptyPaginationSet(),
   );
 
-  const { loading, setPage } = useSearchablePaginatedTable({
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getMountServers(mount.uuid, page, search),
     setStoreData: setMountServers,
   });
 
   return (
     <>
-      <Title order={2} mb='md'>
-        Mount Servers
-      </Title>
+      <Group justify='space-between' mb='md'>
+        <Title order={2}>Mount Servers</Title>
+        <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        </Group>
+      </Group>
 
       <Table columns={serverTableColumns} loading={loading} pagination={mountServers} onPageSelect={setPage}>
         {mountServers.data.map((serverMount) => (

@@ -1,11 +1,11 @@
-import { faChevronDown, faFileDownload } from '@fortawesome/free-solid-svg-icons';
+import { faChevronDown, faFileDownload, faRefresh, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { useEffect, useState } from 'react';
 import { z } from 'zod';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import createEgg from '@/api/admin/nests/eggs/createEgg';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
 import exportEgg from '@/api/admin/nests/eggs/exportEgg';
@@ -24,6 +24,15 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { adminEggSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
+import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs';
+import Select from '@/elements/input/Select';
+import { NIL as uuidNil } from 'uuid';
+import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
+import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
+import getEgg from '@/api/admin/nests/eggs/getEgg';
+import EggMoveModal from './modals/EggMoveModal';
 
 export default function EggCreateOrUpdate({
   contextNest,
@@ -34,10 +43,16 @@ export default function EggCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete' | null>(null);
+  const [openModal, setOpenModal] = useState<'move' | 'delete' | null>(null);
+  const [selectedEggRepositoryUuid, setSelectedEggRepositoryUuid] = useState<string>(
+    contextEgg?.eggRepositoryEgg?.eggRepository.uuid ?? '',
+  );
+
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<z.infer<typeof adminEggSchema>>({
     initialValues: {
+      eggRepositoryEggUuid: null,
       author: '',
       name: '',
       description: null,
@@ -88,9 +103,20 @@ export default function EggCreateOrUpdate({
     if (contextEgg) {
       form.setValues({
         ...contextEgg,
+        eggRepositoryEggUuid: contextEgg.eggRepositoryEgg?.uuid || null,
       });
     }
   }, [contextEgg]);
+
+  const eggRepositories = useSearchableResource<AdminEggRepository>({
+    fetcher: (search) => getEggRepositories(1, search),
+    defaultSearchValue: contextEgg?.eggRepositoryEgg?.eggRepository.name,
+  });
+  const eggRepositoryEggs = useSearchableResource<AdminEggRepositoryEgg>({
+    fetcher: (search) => getEggRepositoryEggs(selectedEggRepositoryUuid, 1, search),
+    defaultSearchValue: contextEgg?.eggRepositoryEgg?.name,
+    deps: [selectedEggRepositoryUuid],
+  });
 
   const doExport = (format: 'json' | 'yaml') => {
     setLoading(true);
@@ -129,8 +155,75 @@ export default function EggCreateOrUpdate({
       .finally(() => setLoading(false));
   };
 
+  const doRepositoryUpdate = () => {
+    setLoading(true);
+
+    updateEggUsingRepository(contextNest.uuid, contextEgg!.uuid)
+      .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
+      .then((egg) => {
+        form.setValues({
+          ...egg,
+          eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
+        });
+        addToast('Egg updated.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    event.target.value = '';
+
+    try {
+      setLoading(true);
+
+      const text = await file.text().then((t) => t.trim());
+      let data: object;
+      try {
+        if (text.startsWith('{')) {
+          data = JSON.parse(text);
+        } else {
+          data = jsYaml.load(text) as object;
+        }
+      } catch (err) {
+        addToast(`Failed to parse egg: ${err}`, 'error');
+        return;
+      }
+
+      updateEggUsingImport(contextNest.uuid, contextEgg!.uuid, data)
+        .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
+        .then((egg) => {
+          form.setValues({
+            ...egg,
+            eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
+          });
+          addToast('Egg updated.', 'success');
+        })
+        .catch((msg) => {
+          addToast(httpErrorToHuman(msg), 'error');
+        })
+        .finally(() => setLoading(false));
+    } catch (err) {
+      addToast('Failed to upload egg.', 'error');
+      setLoading(false);
+    }
+  };
+
   return (
     <>
+      {contextEgg && (
+        <EggMoveModal
+          opened={openModal === 'move'}
+          onClose={() => setOpenModal(null)}
+          nest={contextNest}
+          egg={contextEgg}
+        />
+      )}
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -148,6 +241,37 @@ export default function EggCreateOrUpdate({
         </Group>
 
         <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+
+        <Group grow>
+          <Select
+            label='Egg Repository'
+            placeholder='Egg Repository'
+            value={selectedEggRepositoryUuid}
+            onChange={(value) => setSelectedEggRepositoryUuid(value ?? '')}
+            data={eggRepositories.items.map((eggRepository) => ({
+              label: eggRepository.name,
+              value: eggRepository.uuid,
+            }))}
+            searchable
+            searchValue={eggRepositories.search}
+            onSearchChange={eggRepositories.setSearch}
+          />
+          <Select
+            label='Egg Repository Egg'
+            placeholder='Egg Repository Egg'
+            disabled={!selectedEggRepositoryUuid}
+            data={eggRepositoryEggs.items.map((eggRepositoryEgg) => ({
+              label: eggRepositoryEgg.name,
+              value: eggRepositoryEgg.uuid,
+            }))}
+            searchable
+            clearable
+            searchValue={eggRepositoryEggs.search}
+            onSearchChange={eggRepositoryEggs.setSearch}
+            value={form.values.eggRepositoryEggUuid}
+            onChange={(value) => form.setFieldValue('eggRepositoryEggUuid', value || uuidNil)}
+          />
+        </Group>
 
         {/* TODO: configFiles */}
 
@@ -247,39 +371,88 @@ export default function EggCreateOrUpdate({
           Save
         </Button>
         {contextEgg && (
-          <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
-            <ContextMenu
-              items={[
-                {
-                  icon: faFileDownload,
-                  label: 'as JSON',
-                  onClick: () => doExport('json'),
-                  color: 'gray',
-                },
-                {
-                  icon: faFileDownload,
-                  label: 'as YAML',
-                  onClick: () => doExport('yaml'),
-                  color: 'gray',
-                },
-              ]}
-            >
-              {({ openMenu }) => (
-                <Button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    openMenu(rect.left, rect.bottom);
-                  }}
-                  loading={loading}
-                  variant='outline'
-                  rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                >
-                  Export
-                </Button>
-              )}
-            </ContextMenu>
-          </ContextMenuProvider>
+          <>
+            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+              <ContextMenu
+                items={[
+                  {
+                    icon: faUpload,
+                    label: 'from File',
+                    onClick: () => fileInputRef.current?.click(),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faRefresh,
+                    label: 'from Repository',
+                    disabled: !contextEgg.eggRepositoryEgg,
+                    onClick: doRepositoryUpdate,
+                    color: 'gray',
+                  },
+                ]}
+              >
+                {({ openMenu }) => (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      openMenu(rect.left, rect.bottom);
+                    }}
+                    loading={loading}
+                    variant='outline'
+                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                  >
+                    Update
+                  </Button>
+                )}
+              </ContextMenu>
+            </ContextMenuProvider>
+            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+              <ContextMenu
+                items={[
+                  {
+                    icon: faFileDownload,
+                    label: 'as JSON',
+                    onClick: () => doExport('json'),
+                    color: 'gray',
+                  },
+                  {
+                    icon: faFileDownload,
+                    label: 'as YAML',
+                    onClick: () => doExport('yaml'),
+                    color: 'gray',
+                  },
+                ]}
+              >
+                {({ openMenu }) => (
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      openMenu(rect.left, rect.bottom);
+                    }}
+                    loading={loading}
+                    variant='outline'
+                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                  >
+                    Export
+                  </Button>
+                )}
+              </ContextMenu>
+            </ContextMenuProvider>
+
+            <input
+              type='file'
+              accept='.json,.yml,.yaml'
+              ref={fileInputRef}
+              className='hidden'
+              onChange={handleFileUpload}
+            />
+          </>
+        )}
+        {contextEgg && (
+          <Button variant='outline' onClick={() => setOpenModal('move')} loading={loading}>
+            Move
+          </Button>
         )}
         {contextEgg && (
           <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>

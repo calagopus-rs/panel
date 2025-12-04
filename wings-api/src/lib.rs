@@ -101,6 +101,19 @@ nestify::nest! {
 }
 
 nestify::nest! {
+    #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct InstallationScript {
+        #[schema(inline)]
+        pub container_image: String,
+        #[schema(inline)]
+        pub entrypoint: String,
+        #[schema(inline)]
+        pub script: String,
+        #[schema(inline)]
+        pub environment: IndexMap<String, serde_json::Value>,
+    }
+}
+
+nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Mount {
         #[schema(inline)]
         pub target: String,
@@ -1062,6 +1075,8 @@ pub mod servers_server_reinstall {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
                 pub truncate_directory: bool,
+                #[schema(inline)]
+                pub installation_script: Option<InstallationScript>,
             }
         }
 
@@ -1138,16 +1153,7 @@ pub mod servers_server_script {
     pub mod post {
         use super::*;
 
-        nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
-                #[schema(inline)]
-                pub container_image: String,
-                #[schema(inline)]
-                pub entrypoint: String,
-                #[schema(inline)]
-                pub script: String,
-            }
-        }
+        pub type RequestBody = InstallationScript;
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {

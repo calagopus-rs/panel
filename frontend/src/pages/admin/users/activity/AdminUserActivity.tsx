@@ -8,20 +8,24 @@ import Table, { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminUserActivity({ user }: { user: User }) {
   const [userActivity, setUserActivity] = useState<ResponseMeta<UserActivity>>(getEmptyPaginationSet());
 
-  const { loading, setPage } = useSearchablePaginatedTable({
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getUserActivity(user.uuid, page, search),
     setStoreData: setUserActivity,
   });
 
   return (
     <>
-      <Title order={2} mb='md'>
-        User Activity
-      </Title>
+      <Group justify='space-between' mb='md'>
+        <Title order={2}>User Activity</Title>
+        <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        </Group>
+      </Group>
 
       <Table
         columns={['Actor', 'Event', 'IP', 'When', '']}

@@ -1,5 +1,6 @@
 import {
   faCog,
+  faComputer,
   faExternalLink,
   faFileLines,
   faInfoCircle,
@@ -20,6 +21,7 @@ import AdminNodeLogs from './logs/AdminNodeLogs';
 import AdminNodeMounts from './mounts/AdminNodeMounts';
 import NodeCreateOrUpdate from './NodeCreateOrUpdate';
 import AdminNodeStatistics from './statistics/AdminNodeStatistics';
+import AdminNodeServers from './servers/AdminNodeServers';
 
 export default function NodeView() {
   const params = useParams<'id'>();
@@ -76,6 +78,11 @@ export default function NodeView() {
             icon: faExternalLink,
             link: `/admin/nodes/${params.id}/mounts`,
           },
+          {
+            name: 'Servers',
+            icon: faComputer,
+            link: `/admin/nodes/${params.id}/servers`,
+          },
         ]}
       />
 
@@ -86,6 +93,7 @@ export default function NodeView() {
         <Route path='/logs' element={<AdminNodeLogs node={node} />} />
         <Route path='/allocations' element={<AdminNodeAllocations node={node} />} />
         <Route path='/mounts' element={<AdminNodeMounts node={node} />} />
+        <Route path='/servers' element={<AdminNodeServers node={node} />} />
       </Routes>
     </>
   );

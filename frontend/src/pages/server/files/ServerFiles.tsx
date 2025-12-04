@@ -10,13 +10,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Card, Group, Popover, Text, Title, UnstyledButton } from '@mantine/core';
-import { Ref, useCallback, useEffect, useRef, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { Ref, useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
+import { httpErrorToHuman } from '@/api/axios';
 import getBackup from '@/api/server/backups/getBackup';
 import cancelOperation from '@/api/server/files/cancelOperation';
-import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
 import loadDirectory from '@/api/server/files/loadDirectory';
 import Button from '@/elements/Button';
 import CloseButton from '@/elements/CloseButton';
@@ -34,21 +32,7 @@ import FileRow from './FileRow';
 import DirectoryNameModal from './modals/DirectoryNameModal';
 import PullFileModal from './modals/PullFileModal';
 import SftpDetailsModal from './modals/SftpDetailsModal';
-
-interface FileUploadProgress {
-  fileName: string;
-  progress: number;
-  size: number;
-  uploaded: number;
-  batchId: string;
-  status: 'pending' | 'uploading' | 'completed' | 'cancelled';
-}
-
-interface BatchInfo {
-  controller: AbortController;
-  fileIndices: number[];
-  status: 'pending' | 'uploading' | 'completed' | 'cancelled';
-}
+import { useFileUpload } from '@/plugins/useFileUpload';
 
 export default function ServerFiles() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -76,13 +60,20 @@ export default function ServerFiles() {
   const [page, setPage] = useState(1);
   const [selectedFilesPrevious, setSelectedFilesPrevious] = useState(selectedFiles);
   const [averageOperationProgress, setAverageOperationProgress] = useState(0);
-  const [uploadingFiles, setUploadingFiles] = useState<Map<string, FileUploadProgress>>(new Map());
-  const [uploadBatches, setUploadBatches] = useState<Map<string, BatchInfo>>(new Map());
-  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
-  const [activeBatchCount, setActiveBatchCount] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
-  const fileIndexCounter = useRef(0);
+
+  const {
+    uploadingFiles,
+    uploadFiles,
+    cancelFileUpload,
+    cancelFolderUpload,
+    aggregatedUploadProgress,
+    handleFileSelect,
+    handleFolderSelect,
+  } = useFileUpload(server.uuid, browsingDirectory, () => loadDirectoryData());
 
   useEffect(() => {
     setSelectedFiles([]);
@@ -127,333 +118,122 @@ export default function ServerFiles() {
     setSelectedFiles([...selectedFilesPrevious, ...selected]);
   };
 
-  const uploadFiles = useCallback(
-    async (files: File[]) => {
-      if (files.length === 0) return;
+  const traverseDirectory = async (
+    entry: FileSystemDirectoryEntry,
+    files: File[],
+    path: string = '',
+  ): Promise<void> => {
+    return new Promise((resolve) => {
+      const reader = entry.createReader();
 
-      setPendingFiles((prev) => [...prev, ...files]);
-
-      const startIndex = fileIndexCounter.current;
-      fileIndexCounter.current += files.length;
-      const initialProgress = new Map<string, FileUploadProgress>();
-
-      files.forEach((file, index) => {
-        const path = file.webkitRelativePath || file.name;
-        const fileKey = `file-${startIndex + index}`;
-        initialProgress.set(fileKey, {
-          fileName: path,
-          progress: 0,
-          size: file.size,
-          uploaded: 0,
-          batchId: '',
-          status: 'pending',
-        });
-      });
-      setUploadingFiles((prev) => new Map([...prev, ...initialProgress]));
-
-      try {
-        const batches: { files: File[]; indices: number[] }[] = [];
-        for (let i = 0; i < files.length; i += 2) {
-          batches.push({
-            files: files.slice(i, i + 2),
-            indices: Array.from({ length: Math.min(2, files.length - i) }, (_, j) => startIndex + i + j),
-          });
-        }
-
-        for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
-          while (activeBatchCount >= 4) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
+      const readEntries = () => {
+        reader.readEntries(async (entries) => {
+          if (entries.length === 0) {
+            resolve();
+            return;
           }
 
-          const batch = batches[batchIndex];
-          const batchId = `batch-${Date.now()}-${batchIndex}`;
-          const controller = new AbortController();
-
-          setUploadBatches(
-            (prev) =>
-              new Map([
-                ...prev,
-                [
-                  batchId,
-                  {
-                    controller,
-                    fileIndices: batch.indices,
-                    status: 'pending',
-                  },
-                ],
-              ]),
-          );
-
-          setUploadingFiles((prev) => {
-            const updated = new Map(prev);
-            batch.indices.forEach((idx) => {
-              const key = `file-${idx}`;
-              const file = updated.get(key);
-              if (file) {
-                updated.set(key, { ...file, batchId });
-              }
-            });
-            return updated;
-          });
-
-          const batchInfo = uploadBatches.get(batchId);
-          if (batchInfo?.status === 'cancelled') {
-            continue;
-          }
-
-          setActiveBatchCount((prev) => prev + 1);
-
-          setUploadBatches((prev) => {
-            const updated = new Map(prev);
-            const info = updated.get(batchId);
-            if (info) {
-              updated.set(batchId, { ...info, status: 'uploading' });
-            }
-            return updated;
-          });
-
-          setUploadingFiles((prev) => {
-            const updated = new Map(prev);
-            batch.indices.forEach((idx) => {
-              const key = `file-${idx}`;
-              const file = updated.get(key);
-              if (file) {
-                updated.set(key, { ...file, status: 'uploading' });
-              }
-            });
-            return updated;
-          });
-
-          try {
-            const { url } = await getFileUploadUrl(server.uuid, browsingDirectory);
-
-            const formData = new FormData();
-            batch.files.forEach((file) => {
-              const path = file.webkitRelativePath || file.name;
-              formData.append('files', file, path);
-            });
-
-            const batchTotalSize = batch.files.reduce((sum, file) => sum + file.size, 0);
-            let lastLoaded = 0;
-
-            await axiosInstance.post(url, formData, {
-              signal: controller.signal,
-              headers: {
-                'Content-Type': 'multipart/form-data',
-              },
-              onUploadProgress: (progressEvent) => {
-                if (progressEvent.total) {
-                  const currentLoaded = progressEvent.loaded;
-                  const deltaLoaded = currentLoaded - lastLoaded;
-                  lastLoaded = currentLoaded;
-
-                  setUploadingFiles((prev) => {
-                    const updated = new Map(prev);
-                    batch.indices.forEach((index) => {
-                      const fileKey = `file-${index}`;
-                      const file = batch.files[index - batch.indices[0]];
-                      if (updated.has(fileKey)) {
-                        const fileProgress = updated.get(fileKey)!;
-                        const fileRatio = file.size / batchTotalSize;
-
-                        const newUploaded = Math.min(fileProgress.uploaded + deltaLoaded * fileRatio, file.size);
-                        updated.set(fileKey, {
-                          ...fileProgress,
-                          progress: (newUploaded / file.size) * 100,
-                          uploaded: newUploaded,
-                        });
-                      }
-                    });
-                    return updated;
+          for (const entry of entries) {
+            if (entry.isFile) {
+              const fileEntry = entry as FileSystemFileEntry;
+              await new Promise<void>((resolveFile) => {
+                fileEntry.file((file) => {
+                  const newFile = new File([file], `${path}/${file.name}`, {
+                    type: file.type,
+                    lastModified: file.lastModified,
                   });
-                }
-              },
-            });
-
-            setUploadingFiles((prev) => {
-              const updated = new Map(prev);
-              batch.indices.forEach((index) => {
-                const fileKey = `file-${index}`;
-                if (updated.has(fileKey)) {
-                  const fileProgress = updated.get(fileKey)!;
-                  updated.set(fileKey, {
-                    ...fileProgress,
-                    progress: 100,
-                    uploaded: fileProgress.size,
-                    status: 'completed',
-                  });
-                }
+                  files.push(newFile);
+                  resolveFile();
+                });
               });
-              return updated;
-            });
-
-            setUploadBatches((prev) => {
-              const updated = new Map(prev);
-              const info = updated.get(batchId);
-              if (info) {
-                updated.set(batchId, { ...info, status: 'completed' });
-              }
-              return updated;
-            });
-          } catch (error) {
-            if (error.name !== 'CanceledError') {
-              throw error;
-            }
-          } finally {
-            setActiveBatchCount((prev) => prev - 1);
-          }
-        }
-
-        addToast(`Successfully uploaded ${files.length} file(s)`, 'success');
-        loadDirectoryData();
-      } catch (error) {
-        if (error.name !== 'CanceledError') {
-          addToast(`Failed to upload files: ${error.message || error}`, 'error');
-        }
-      } finally {
-        setTimeout(() => {
-          setUploadingFiles((prev) => {
-            const updated = new Map();
-            prev.forEach((file, key) => {
-              if (file.status !== 'completed' && file.status !== 'cancelled') {
-                updated.set(key, file);
-              }
-            });
-            return updated;
-          });
-        }, 1000);
-
-        setUploadBatches(new Map());
-
-        if (uploadingFiles.size === 0) {
-          setPendingFiles([]);
-        }
-      }
-    },
-    [server.uuid, browsingDirectory, activeBatchCount],
-  );
-
-  const cancelFileUpload = useCallback(
-    async (fileKey: string) => {
-      const file = uploadingFiles.get(fileKey);
-      if (!file) return;
-
-      const batch = uploadBatches.get(file.batchId);
-      if (!batch) return;
-
-      if (batch.status === 'pending') {
-        setUploadingFiles((prev) => {
-          const updated = new Map(prev);
-          updated.delete(fileKey);
-          return updated;
-        });
-
-        const fileIndex = parseInt(fileKey.split('-')[1]);
-        setPendingFiles((prev) => prev.filter((_, idx) => idx !== fileIndex));
-        return;
-      }
-
-      if (batch.status === 'uploading') {
-        batch.controller.abort();
-
-        setUploadBatches((prev) => {
-          const updated = new Map(prev);
-          updated.set(file.batchId, { ...batch, status: 'cancelled' });
-          return updated;
-        });
-
-        const filesToReupload: File[] = [];
-        batch.fileIndices.forEach((idx) => {
-          const key = `file-${idx}`;
-          if (key !== fileKey) {
-            const fileData = uploadingFiles.get(key);
-            if (fileData && fileData.status !== 'completed') {
-              setUploadingFiles((prev) => {
-                const updated = new Map(prev);
-                updated.delete(key);
-                return updated;
-              });
-              filesToReupload.push(pendingFiles[idx]);
+            } else if (entry.isDirectory) {
+              await traverseDirectory(entry as FileSystemDirectoryEntry, files, `${path}/${entry.name}`);
             }
           }
+
+          readEntries();
         });
+      };
 
-        setUploadingFiles((prev) => {
-          const updated = new Map(prev);
-          updated.delete(fileKey);
-          return updated;
-        });
-
-        if (filesToReupload.length > 0) {
-          await uploadFiles(filesToReupload);
-        }
-      }
-    },
-    [uploadingFiles, uploadBatches, pendingFiles, uploadFiles],
-  );
-
-  const cancelFolderUpload = useCallback(
-    (folderName: string) => {
-      const filesToCancel: string[] = [];
-      const batchesToCancel = new Set<string>();
-
-      uploadingFiles.forEach((file, key) => {
-        if (file.fileName.startsWith(folderName + '/')) {
-          filesToCancel.push(key);
-          if (file.batchId) {
-            batchesToCancel.add(file.batchId);
-          }
-        }
-      });
-
-      batchesToCancel.forEach((batchId) => {
-        const batch = uploadBatches.get(batchId);
-        if (batch && batch.status === 'uploading') {
-          batch.controller.abort();
-        }
-      });
-
-      setUploadingFiles((prev) => {
-        const updated = new Map(prev);
-        filesToCancel.forEach((key) => updated.delete(key));
-        return updated;
-      });
-
-      setUploadBatches((prev) => {
-        const updated = new Map(prev);
-        batchesToCancel.forEach((batchId) => updated.delete(batchId));
-        return updated;
-      });
-
-      addToast(`Cancelled upload of folder: ${folderName}`, 'info');
-    },
-    [uploadingFiles, uploadBatches],
-  );
-
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      uploadFiles(acceptedFiles);
-    },
-    [uploadFiles],
-  );
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    noClick: true,
-    noKeyboard: true,
-  });
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    uploadFiles(files);
-    event.target.value = '';
+      readEntries();
+    });
   };
 
-  const handleFolderSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    uploadFiles(files);
-    event.target.value = '';
+  const handleDrop = async (e: DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDragging(false);
+    dragCounterRef.current = 0;
+
+    if (browsingBackup) return;
+
+    const items = Array.from(e.dataTransfer?.items || []);
+    const files: File[] = [];
+
+    for (const item of items) {
+      if (item.kind === 'file') {
+        const entry = item.webkitGetAsEntry?.();
+
+        if (entry) {
+          if (entry.isDirectory) {
+            await traverseDirectory(entry as FileSystemDirectoryEntry, files, entry.name);
+          } else {
+            const file = item.getAsFile();
+            if (file) files.push(file);
+          }
+        } else {
+          const file = item.getAsFile();
+          if (file) files.push(file);
+        }
+      }
+    }
+
+    if (files.length > 0) {
+      await uploadFiles(files);
+    }
   };
+
+  useEffect(() => {
+    const handleDragEnter = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (browsingBackup) return;
+
+      dragCounterRef.current++;
+      if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+        setIsDragging(true);
+      }
+    };
+
+    const handleDragLeave = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      dragCounterRef.current--;
+      if (dragCounterRef.current === 0) {
+        setIsDragging(false);
+      }
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    document.addEventListener('dragenter', handleDragEnter);
+    document.addEventListener('dragleave', handleDragLeave);
+    document.addEventListener('dragover', handleDragOver);
+    document.addEventListener('drop', handleDrop);
+
+    return () => {
+      document.removeEventListener('dragenter', handleDragEnter);
+      document.removeEventListener('dragleave', handleDragLeave);
+      document.removeEventListener('dragover', handleDragOver);
+      document.removeEventListener('drop', handleDrop);
+    };
+  }, [browsingBackup, uploadFiles]);
 
   useEffect(() => {
     if (!browsingDirectory) return;
@@ -530,68 +310,25 @@ export default function ServerFiles() {
     };
   }, [browsingEntries.data]);
 
-  const getAggregatedUploadProgress = useCallback(() => {
-    const folderMap = new Map<
-      string,
-      {
-        totalSize: number;
-        uploadedSize: number;
-        fileCount: number;
-        completedCount: number;
-        pendingCount: number;
-      }
-    >();
-
-    uploadingFiles.forEach((file) => {
-      const pathParts = file.fileName.split('/');
-      if (pathParts.length > 1) {
-        const folderName = pathParts[0];
-        const existing = folderMap.get(folderName) || {
-          totalSize: 0,
-          uploadedSize: 0,
-          fileCount: 0,
-          completedCount: 0,
-          pendingCount: 0,
-        };
-
-        folderMap.set(folderName, {
-          totalSize: existing.totalSize + file.size,
-          uploadedSize: existing.uploadedSize + file.uploaded,
-          fileCount: existing.fileCount + 1,
-          completedCount: existing.completedCount + (file.status === 'completed' ? 1 : 0),
-          pendingCount: existing.pendingCount + (file.status === 'pending' ? 1 : 0),
-        });
-      }
-    });
-
-    return folderMap;
-  }, [uploadingFiles]);
-
-  const folderProgress = getAggregatedUploadProgress();
   const hasOperations = fileOperations.size > 0 || uploadingFiles.size > 0;
 
   return (
-    <div {...getRootProps()} className='h-fit relative'>
-      <input {...getInputProps()} />
-
-      <input ref={fileInputRef} type='file' multiple style={{ display: 'none' }} onChange={handleFileSelect} />
+    <div className='h-fit relative'>
+      <input
+        ref={fileInputRef}
+        type='file'
+        multiple
+        style={{ display: 'none' }}
+        onChange={(e) => handleFileSelect(e, fileInputRef)}
+      />
       <input
         ref={folderInputRef}
         type='file'
         multiple
         style={{ display: 'none' }}
-        onChange={handleFolderSelect}
+        onChange={(e) => handleFolderSelect(e, folderInputRef)}
         {...{ webkitdirectory: '', directory: '' }}
       />
-
-      {isDragActive && (
-        <div className='fixed inset-0 z-50 bg-blue-500 bg-opacity-20 flex items-center justify-center pointer-events-none'>
-          <div className='bg-white dark:bg-gray-800 rounded-lg p-8 shadow-xl'>
-            <FontAwesomeIcon icon={faUpload} className='text-4xl text-blue-500 mb-4' />
-            <p className='text-lg font-semibold'>Drop files here to upload</p>
-          </div>
-        </div>
-      )}
 
       <SftpDetailsModal opened={openModal === 'sftpDetails'} onClose={() => setOpenModal(null)} />
       <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
@@ -628,7 +365,7 @@ export default function ServerFiles() {
                   </UnstyledButton>
                 </Popover.Target>
                 <Popover.Dropdown className='md:min-w-xl max-w-screen max-h-96 overflow-y-auto'>
-                  {Array.from(folderProgress).map(([folderName, info]) => {
+                  {Array.from(aggregatedUploadProgress).map(([folderName, info]) => {
                     const progress = info.totalSize > 0 ? (info.uploadedSize / info.totalSize) * 100 : 0;
                     const statusText =
                       info.pendingCount > 0
@@ -649,7 +386,7 @@ export default function ServerFiles() {
                   })}
 
                   {Array.from(uploadingFiles).map(([key, file]) => {
-                    if (folderProgress.size > 0 && file.fileName.includes('/')) {
+                    if (aggregatedUploadProgress.size > 0 && file.fileName.includes('/')) {
                       return null;
                     }
 
@@ -759,6 +496,23 @@ export default function ServerFiles() {
         <Spinner.Centered />
       ) : (
         <>
+          {isDragging && !browsingBackup && (
+            <div className='fixed w-screen h-screen left-0 top-0 inset-0 z-100 flex items-center justify-center backdrop-blur-md bg-black/20 pointer-events-auto'>
+              <div className='pointer-events-none'>
+                <div className='bg-gray-800 rounded-lg p-8 shadow-2xl border-2 border-dashed border-blue-500 dark:border-blue-400'>
+                  <div className='flex flex-col items-center gap-4 z-100'>
+                    <FontAwesomeIcon
+                      icon={faUpload}
+                      className='text-6xl text-blue-500 dark:text-blue-400 animate-bounce'
+                    />
+                    <p className='text-xl font-semibold text-gray-800 dark:text-gray-200'>Drop files here to upload</p>
+                    <p className='text-sm text-gray-600 dark:text-gray-400'>Release to start uploading</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Card className='border border-b-0 border-[#424242] rounded-b-none!'>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_security_keys.passkey\n            FROM user_security_keys\n            JOIN users ON users.uuid = user_security_keys.user_uuid\n            WHERE user_security_keys.passkey IS NOT NULL AND (lower(users.email) = lower($1) OR lower(users.username) = lower($1))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "passkey",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "ed068a3ab6f73411043c8e1d5a95635888ebfcf83b580bbb9686654f0ac7e79f"
+}

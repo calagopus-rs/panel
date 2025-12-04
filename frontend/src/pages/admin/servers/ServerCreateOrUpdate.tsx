@@ -1,6 +1,6 @@
-import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faReply } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Paper, Stack, Title } from '@mantine/core';
+import { ActionIcon, Group, Paper, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -110,11 +110,21 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>(contextServer?.nest.uuid ?? '');
   const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
-  const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
-  const users = useSearchableResource<User>({ fetcher: (search) => getUsers(1, search) });
-  const nests = useSearchableResource<AdminNest>({ fetcher: (search) => getNests(1, search) });
+  const nodes = useSearchableResource<Node>({
+    fetcher: (search) => getNodes(1, search),
+    defaultSearchValue: contextServer?.node.name,
+  });
+  const users = useSearchableResource<User>({
+    fetcher: (search) => getUsers(1, search),
+    defaultSearchValue: contextServer?.owner.username,
+  });
+  const nests = useSearchableResource<AdminNest>({
+    fetcher: (search) => getNests(1, search),
+    defaultSearchValue: contextServer?.nest.name,
+  });
   const eggs = useSearchableResource<AdminNestEgg>({
     fetcher: (search) => getEggs(selectedNestUuid!, 1, search),
+    defaultSearchValue: contextServer?.egg.name,
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
@@ -127,6 +137,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
+    defaultSearchValue: contextServer?.backupConfiguration?.name,
   });
 
   useEffect(() => {
@@ -376,6 +387,17 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               placeholder='npm start'
               required
               rows={2}
+              rightSection={
+                <ActionIcon
+                  variant='subtle'
+                  disabled={form.values.startup === eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup}
+                  onClick={() =>
+                    form.setFieldValue('startup', eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup)
+                  }
+                >
+                  <FontAwesomeIcon icon={faReply} />
+                </ActionIcon>
+              }
               {...form.getInputProps('startup')}
             />
 

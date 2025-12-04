@@ -1,0 +1,72 @@
+import { Group, ModalProps, Stack } from '@mantine/core';
+import { useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios';
+import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
+import Modal from '@/elements/modals/Modal';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
+import moveEgg from '@/api/admin/nests/eggs/moveEgg';
+import getNests from '@/api/admin/nests/getNests';
+import { useNavigate } from 'react-router';
+
+export default function EggMoveModal({
+  nest,
+  egg,
+  opened,
+  onClose,
+}: ModalProps & { nest: AdminNest; egg: AdminNestEgg }) {
+  const { addToast } = useToast();
+  const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
+  const [selectedNest, setSelectedNest] = useState<AdminNest | null>(null);
+
+  const nests = useSearchableResource<AdminNest>({ fetcher: (search) => getNests(1, search) });
+
+  const doMove = () => {
+    setLoading(true);
+
+    moveEgg(nest.uuid, egg.uuid, selectedNest!.uuid)
+      .then(() => {
+        addToast('Egg moved.', 'success');
+        navigate(`/admin/nests/${selectedNest!.uuid}/eggs/${egg.uuid}`);
+
+        onClose();
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  return (
+    <Modal title='Move Egg' onClose={onClose} opened={opened}>
+      <Stack>
+        <Select
+          withAsterisk
+          label='Nest'
+          placeholder='Nest'
+          value={selectedNest?.uuid}
+          onChange={(value) => setSelectedNest(nests.items.find((m) => m.uuid === value) ?? null)}
+          data={nests.items.map((nest) => ({
+            label: nest.name,
+            value: nest.uuid,
+          }))}
+          searchable
+          searchValue={nests.search}
+          onSearchChange={nests.setSearch}
+        />
+
+        <Group mt='md'>
+          <Button onClick={doMove} loading={loading} disabled={!selectedNest}>
+            Move
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </Stack>
+    </Modal>
+  );
+}

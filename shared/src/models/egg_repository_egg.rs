@@ -173,7 +173,7 @@ impl EggRepositoryEgg {
         sqlx::query(
             r#"
             DELETE FROM egg_repository_eggs
-            WHERE egg_repository_eggs.egg_repository_uuid = $1 AND egg_repository_eggs.path != ANY($2)
+            WHERE egg_repository_eggs.egg_repository_uuid = $1 AND egg_repository_eggs.path != ALL($2)
             "#,
         )
         .bind(egg_repository_uuid)
@@ -194,6 +194,26 @@ impl EggRepositoryEgg {
             author: self.author,
             exported_egg: self.exported_egg,
         }
+    }
+
+    #[inline]
+    pub async fn into_admin_egg_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiEggEggRepositoryEgg, crate::database::DatabaseError> {
+        Ok(AdminApiEggEggRepositoryEgg {
+            uuid: self.uuid,
+            path: self.path,
+            egg_repository: self
+                .egg_repository
+                .fetch_cached(database)
+                .await?
+                .into_admin_api_object(),
+            name: self.name,
+            description: self.description,
+            author: self.author,
+            exported_egg: self.exported_egg,
+        })
     }
 }
 
@@ -261,6 +281,20 @@ impl DeletableModel for EggRepositoryEgg {
 pub struct AdminApiEggRepositoryEgg {
     pub uuid: uuid::Uuid,
     pub path: String,
+
+    pub name: String,
+    pub description: Option<String>,
+    pub author: String,
+
+    pub exported_egg: super::nest_egg::ExportedNestEgg,
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "EggEggRepositoryEgg")]
+pub struct AdminApiEggEggRepositoryEgg {
+    pub uuid: uuid::Uuid,
+    pub path: String,
+    pub egg_repository: super::egg_repository::AdminApiEggRepository,
 
     pub name: String,
     pub description: Option<String>,

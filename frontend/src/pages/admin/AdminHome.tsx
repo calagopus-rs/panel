@@ -1,17 +1,20 @@
 import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import getBackupStats, { BackupStats } from '@/api/admin/stats/getBackupStats';
-import getGeneralStats, { GeneralStats } from '@/api/admin/stats/getGeneralStats';
+import getBackupStats, { type BackupStats } from '@/api/admin/stats/getBackupStats';
+import getGeneralStats, { type GeneralStats } from '@/api/admin/stats/getGeneralStats';
 import { httpErrorToHuman } from '@/api/axios';
 import Card from '@/elements/Card';
 import Spinner from '@/elements/Spinner';
 import { useToast } from '@/providers/ToastProvider';
+import { bytesToString } from '@/lib/size';
 
 export default function AdminHome() {
   const { addToast } = useToast();
 
   const [generalStats, setGeneralStats] = useState<GeneralStats | null>(null);
-  const [backupStats, setBackupStats] = useState<Record<'today' | 'week' | 'month', BackupStats> | null>(null);
+  const [backupStats, setBackupStats] = useState<Record<'allTime' | 'today' | 'week' | 'month', BackupStats> | null>(
+    null,
+  );
 
   useEffect(() => {
     getGeneralStats()
@@ -90,6 +93,35 @@ export default function AdminHome() {
         ) : (
           <div className='grid grid-cols-2 xl:grid-cols-5 gap-4'>
             <Title order={3} c='white' className='col-span-2 xl:col-span-1'>
+              All Time
+            </Title>
+
+            <Card className='flex'>
+              <Title order={3} c='white'>
+                {backupStats.allTime.total}
+              </Title>
+              Total backups all time
+            </Card>
+            <Card className='flex'>
+              <Title order={3} c='white'>
+                {backupStats.allTime.successful} ({bytesToString(backupStats.allTime.successfulBytes)})
+              </Title>
+              Successful backups all time
+            </Card>
+            <Card className='flex'>
+              <Title order={3} c='white'>
+                {backupStats.allTime.failed}
+              </Title>
+              Failed backups all time
+            </Card>
+            <Card className='flex'>
+              <Title order={3} c='white'>
+                {backupStats.allTime.deleted} ({bytesToString(backupStats.allTime.deletedBytes)})
+              </Title>
+              Deleted backups all time
+            </Card>
+
+            <Title order={3} c='white' className='col-span-2 xl:col-span-1'>
               Today
             </Title>
 
@@ -101,7 +133,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.today.successful}
+                {backupStats.today.successful} ({bytesToString(backupStats.today.successfulBytes)})
               </Title>
               Successful backups today
             </Card>
@@ -113,7 +145,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.today.deleted}
+                {backupStats.today.deleted} ({bytesToString(backupStats.today.deletedBytes)})
               </Title>
               Deleted backups today
             </Card>
@@ -130,7 +162,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.week.successful}
+                {backupStats.week.successful} ({bytesToString(backupStats.week.successfulBytes)})
               </Title>
               Successful backups this week
             </Card>
@@ -142,7 +174,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.week.deleted}
+                {backupStats.week.deleted} ({bytesToString(backupStats.week.deletedBytes)})
               </Title>
               Deleted backups this week
             </Card>
@@ -159,7 +191,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.month.successful}
+                {backupStats.month.successful} ({bytesToString(backupStats.month.successfulBytes)})
               </Title>
               Successful backups this month
             </Card>
@@ -171,7 +203,7 @@ export default function AdminHome() {
             </Card>
             <Card className='flex'>
               <Title order={3} c='white'>
-                {backupStats.month.deleted}
+                {backupStats.month.deleted} ({bytesToString(backupStats.month.deletedBytes)})
               </Title>
               Deleted backups this month
             </Card>

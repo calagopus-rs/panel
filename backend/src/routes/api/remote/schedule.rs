@@ -75,7 +75,7 @@ mod post {
                     "UPDATE server_schedule_steps
                     SET error = NULL
                     WHERE server_schedule_steps.schedule_uuid = $1
-                        AND array_length($2::uuid[], 1) IS NULL OR server_schedule_steps.uuid != ANY($2)",
+                        AND array_length($2::uuid[], 1) IS NULL OR server_schedule_steps.uuid != ALL($2)",
                     schedule.uuid,
                     &schedule_status.errors.keys().copied().collect::<Vec<_>>()
                 )

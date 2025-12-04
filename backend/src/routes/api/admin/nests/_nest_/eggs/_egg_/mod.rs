@@ -15,6 +15,9 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod export;
 mod mounts;
+mod r#move;
+mod servers;
+mod update;
 mod variables;
 
 pub type GetNestEgg = shared::extract::ConsumingExtension<NestEgg>;
@@ -61,7 +64,7 @@ mod get {
     use crate::routes::api::admin::nests::_nest_::eggs::_egg_::GetNestEgg;
     use serde::Serialize;
     use shared::{
-        ApiError,
+        ApiError, GetState,
         models::user::GetPermissionManager,
         response::{ApiResponse, ApiResponseResult},
     };
@@ -87,11 +90,15 @@ mod get {
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
     ))]
-    pub async fn route(permissions: GetPermissionManager, egg: GetNestEgg) -> ApiResponseResult {
+    pub async fn route(
+        state: GetState,
+        permissions: GetPermissionManager,
+        egg: GetNestEgg,
+    ) -> ApiResponseResult {
         permissions.has_admin_permission("eggs.read")?;
 
         ApiResponse::json(Response {
-            egg: egg.0.into_admin_api_object(),
+            egg: egg.0.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }
@@ -139,7 +146,7 @@ mod delete {
     ) -> ApiResponseResult {
         permissions.has_admin_permission("eggs.delete")?;
 
-        if Server::count_by_nest_egg_uuid(&state.database, egg.uuid).await > 0 {
+        if Server::count_by_egg_uuid(&state.database, egg.uuid).await > 0 {
             return ApiResponse::error("egg has servers, cannot delete")
                 .with_status(StatusCode::CONFLICT)
                 .ok();
@@ -171,7 +178,10 @@ mod patch {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
+        models::{
+            ByUuid, admin_activity::GetAdminActivityLogger, egg_repository_egg::EggRepositoryEgg,
+            user::GetPermissionManager,
+        },
         prelude::SqlxErrorExtension,
         response::{ApiResponse, ApiResponseResult},
     };
@@ -180,6 +190,8 @@ mod patch {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
+        egg_repository_egg_uuid: Option<uuid::Uuid>,
+
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         author: Option<String>,
@@ -249,6 +261,28 @@ mod patch {
 
         permissions.has_admin_permission("eggs.update")?;
 
+        if let Some(egg_repository_egg_uuid) = data.egg_repository_egg_uuid {
+            if egg_repository_egg_uuid.is_nil() {
+                egg.egg_repository_egg = None;
+            } else {
+                let egg_repository_egg = match EggRepositoryEgg::by_uuid_optional(
+                    &state.database,
+                    egg_repository_egg_uuid,
+                )
+                .await?
+                {
+                    Some(egg_repository_egg) => egg_repository_egg,
+                    None => {
+                        return ApiResponse::error("backup configuration not found")
+                            .with_status(StatusCode::NOT_FOUND)
+                            .ok();
+                    }
+                };
+
+                egg.egg_repository_egg =
+                    Some(EggRepositoryEgg::get_fetchable(egg_repository_egg.uuid));
+            }
+        }
         if let Some(name) = data.name {
             egg.name = name;
         }
@@ -305,13 +339,14 @@ mod patch {
         match sqlx::query!(
             "UPDATE nest_eggs
             SET
-                author = $2, name = $3, description = $4,
-                config_files = $5, config_startup = $6, config_stop = $7,
-                config_script = $8, config_allocations = $9, startup = $10,
-                force_outgoing_ip = $11, separate_port = $12, features = $13,
-                docker_images = $14, file_denylist = $15
+                egg_repository_egg_uuid = $2, author = $3, name = $4, description = $5,
+                config_files = $6, config_startup = $7, config_stop = $8,
+                config_script = $9, config_allocations = $10, startup = $11,
+                force_outgoing_ip = $12, separate_port = $13, features = $14,
+                docker_images = $15, file_denylist = $16
             WHERE nest_eggs.uuid = $1",
             egg.uuid,
+            egg.egg_repository_egg.as_ref().map(|e| e.uuid),
             egg.author,
             egg.name,
             egg.description,
@@ -351,6 +386,7 @@ mod patch {
                 serde_json::json!({
                     "uuid": egg.uuid,
                     "nest_uuid": nest.uuid,
+                    "egg_repository_egg_uuid": egg.egg_repository_egg.as_ref().map(|e| e.uuid),
 
                     "author": egg.author,
                     "name": egg.name,
@@ -382,7 +418,10 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
+        .nest("/servers", servers::router(state))
+        .nest("/update", update::router(state))
         .nest("/variables", variables::router(state))
+        .nest("/move", r#move::router(state))
         .nest("/mounts", mounts::router(state))
         .nest("/export", export::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))

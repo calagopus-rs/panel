@@ -1,4 +1,4 @@
-import { Group, Title } from '@mantine/core';
+import { ActionIcon, Group, Title } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
@@ -14,6 +14,8 @@ import VariableContainer from '@/elements/VariableContainer';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faReply } from '@fortawesome/free-solid-svg-icons';
 
 export default function ServerStartup() {
   const { addToast } = useToast();
@@ -117,6 +119,16 @@ export default function ServerStartup() {
             onChange={(e) => setCommand(e.target.value)}
             disabled={!settings.server.allowEditingStartupCommand}
             autosize
+            rightSection={
+              <ActionIcon
+                variant='subtle'
+                hidden={!settings.server.allowEditingStartupCommand}
+                disabled={command === server.egg.startup}
+                onClick={() => setCommand(server.egg.startup)}
+              >
+                <FontAwesomeIcon icon={faReply} />
+              </ActionIcon>
+            }
           />
         </Card>
         <Card className='flex flex-col justify-between rounded-md p-4 h-full'>

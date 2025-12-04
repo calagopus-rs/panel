@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationServers from '@/api/admin/backup-configurations/servers/getBackupConfigurationServers';
 import { getEmptyPaginationSet } from '@/api/axios';
@@ -6,6 +6,7 @@ import Table from '@/elements/Table';
 import { serverTableColumns } from '@/lib/tableColumns';
 import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminBackupConfigurationServers({
   backupConfiguration,
@@ -16,16 +17,19 @@ export default function AdminBackupConfigurationServers({
     getEmptyPaginationSet(),
   );
 
-  const { loading, setPage } = useSearchablePaginatedTable({
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getBackupConfigurationServers(backupConfiguration.uuid, page, search),
     setStoreData: setBackupConfigurationServers,
   });
 
   return (
     <>
-      <Title order={2} mb='md'>
-        Backup Configuration Servers
-      </Title>
+      <Group justify='space-between' mb='md'>
+        <Title order={2}>Backup Configuration Servers</Title>
+        <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        </Group>
+      </Group>
 
       <Table
         columns={serverTableColumns}

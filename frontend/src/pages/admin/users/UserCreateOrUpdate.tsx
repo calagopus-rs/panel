@@ -55,7 +55,10 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
     }
   }, [contextUser]);
 
-  const roles = useSearchableResource<Role>({ fetcher: (search) => getRoles(1, search) });
+  const roles = useSearchableResource<Role>({
+    fetcher: (search) => getRoles(1, search),
+    defaultSearchValue: contextUser?.role?.name,
+  });
 
   const doDisableTwoFactor = async () => {
     await disableUserTwoFactor(contextUser.uuid)

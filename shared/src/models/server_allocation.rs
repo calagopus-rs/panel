@@ -157,7 +157,8 @@ impl ServerAllocation {
             SELECT {}, COUNT(*) OVER() AS total_count
             FROM server_allocations
             JOIN node_allocations ON server_allocations.allocation_uuid = node_allocations.uuid
-            WHERE server_allocations.server_uuid = $1 AND ($2 IS NULL OR server_allocations.notes ILIKE '%' || $2 || '%')
+            WHERE server_allocations.server_uuid = $1
+                AND ($2 IS NULL OR host(node_allocations.ip) || ':' || node_allocations.port ILIKE '%' || $2 || '%' OR server_allocations.notes ILIKE '%' || $2 || '%')
             ORDER BY server_allocations.created
             LIMIT $3 OFFSET $4
             "#,

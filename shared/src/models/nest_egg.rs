@@ -358,6 +358,207 @@ impl NestEgg {
         Self::map(None, &row)
     }
 
+    pub async fn import(
+        database: &crate::database::Database,
+        nest_uuid: uuid::Uuid,
+        egg_repository_egg_uuid: Option<uuid::Uuid>,
+        exported_egg: ExportedNestEgg,
+    ) -> Result<Self, crate::database::DatabaseError> {
+        let egg = Self::create(
+            database,
+            nest_uuid,
+            egg_repository_egg_uuid,
+            &exported_egg.author,
+            &exported_egg.name,
+            exported_egg.description.as_deref(),
+            exported_egg
+                .config
+                .files
+                .into_iter()
+                .map(|(file, config)| ProcessConfigurationFile {
+                    file,
+                    parser: config.parser,
+                    replace: config
+                        .find
+                        .into_iter()
+                        .map(|(r#match, value)| ProcessConfigurationFileReplacement {
+                            r#match,
+                            if_value: None,
+                            replace_with: value,
+                        })
+                        .collect(),
+                })
+                .collect(),
+            exported_egg.config.startup,
+            exported_egg.config.stop,
+            exported_egg.scripts.installation,
+            exported_egg.config.allocations,
+            &exported_egg.startup,
+            exported_egg.force_outgoing_ip,
+            exported_egg.separate_port,
+            &exported_egg.features,
+            exported_egg.docker_images,
+            &exported_egg.file_denylist,
+        )
+        .await?;
+
+        for variable in exported_egg.variables {
+            if rule_validator::validate_rules(&variable.rules).is_err() {
+                continue;
+            }
+
+            if let Err(err) = super::nest_egg_variable::NestEggVariable::create(
+                database,
+                egg.uuid,
+                &variable.name,
+                variable.description.as_deref(),
+                variable.order,
+                &variable.env_variable,
+                variable.default_value.as_deref(),
+                variable.user_viewable,
+                variable.user_editable,
+                &variable.rules,
+            )
+            .await
+            {
+                tracing::warn!("error while importing nest egg variable: {:?}", err);
+            }
+        }
+
+        Ok(egg)
+    }
+
+    pub async fn import_update(
+        &self,
+        database: &crate::database::Database,
+        exported_egg: ExportedNestEgg,
+    ) -> Result<(), crate::database::DatabaseError> {
+        sqlx::query!(
+            "UPDATE nest_eggs
+            SET
+                author = $2, name = $3, description = $4,
+                config_files = $5, config_startup = $6, config_stop = $7,
+                config_script = $8, config_allocations = $9, startup = $10,
+                force_outgoing_ip = $11, separate_port = $12, features = $13,
+                docker_images = $14, file_denylist = $15
+            WHERE nest_eggs.uuid = $1",
+            self.uuid,
+            exported_egg.author,
+            exported_egg.name,
+            exported_egg.description,
+            serde_json::to_value(
+                &exported_egg
+                    .config
+                    .files
+                    .into_iter()
+                    .map(|(file, config)| ProcessConfigurationFile {
+                        file,
+                        parser: config.parser,
+                        replace: config
+                            .find
+                            .into_iter()
+                            .map(|(r#match, value)| ProcessConfigurationFileReplacement {
+                                r#match,
+                                if_value: None,
+                                replace_with: value,
+                            })
+                            .collect(),
+                    })
+                    .collect::<Vec<_>>(),
+            )?,
+            serde_json::to_value(&exported_egg.config.startup)?,
+            serde_json::to_value(&exported_egg.config.stop)?,
+            serde_json::to_value(&exported_egg.scripts.installation)?,
+            serde_json::to_value(&exported_egg.config.allocations)?,
+            exported_egg.startup,
+            exported_egg.force_outgoing_ip,
+            exported_egg.separate_port,
+            &exported_egg.features,
+            serde_json::to_string(&exported_egg.docker_images)?,
+            &exported_egg.file_denylist,
+        )
+        .execute(database.write())
+        .await?;
+
+        let unused_variables = sqlx::query!(
+            "SELECT nest_egg_variables.uuid
+            FROM nest_egg_variables
+            WHERE nest_egg_variables.egg_uuid = $1 AND nest_egg_variables.env_variable != ALL($2)",
+            self.uuid,
+            &exported_egg
+                .variables
+                .iter()
+                .map(|v| &v.env_variable)
+                .collect::<Vec<_>>() as &[&String]
+        )
+        .fetch_all(database.read())
+        .await?;
+
+        for (i, variable) in exported_egg.variables.iter().enumerate() {
+            if rule_validator::validate_rules(&variable.rules).is_err() {
+                continue;
+            }
+
+            if let Err(err) = sqlx::query!(
+                "INSERT INTO nest_egg_variables (  
+                    egg_uuid, name, description, order_, env_variable,  
+                    default_value, user_viewable, user_editable, rules  
+                )  
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                ON CONFLICT (egg_uuid, env_variable) DO UPDATE SET
+                    name = EXCLUDED.name,
+                    description = EXCLUDED.description,
+                    order_ = EXCLUDED.order_,
+                    default_value = EXCLUDED.default_value,
+                    user_viewable = EXCLUDED.user_viewable,
+                    user_editable = EXCLUDED.user_editable,
+                    rules = EXCLUDED.rules",
+                self.uuid,
+                &variable.name,
+                variable.description.as_deref(),
+                if variable.order == 0 {
+                    i as i16 + 1
+                } else {
+                    variable.order
+                },
+                &variable.env_variable,
+                variable.default_value.as_deref(),
+                variable.user_viewable,
+                variable.user_editable,
+                &variable.rules
+            )
+            .execute(database.read())
+            .await
+            {
+                tracing::warn!("error while importing nest egg variable: {:?}", err);
+            }
+        }
+
+        let order_base = exported_egg.variables.len() as i16
+            + exported_egg
+                .variables
+                .iter()
+                .map(|v| v.order)
+                .max()
+                .unwrap_or_default();
+
+        sqlx::query!(
+            "UPDATE nest_egg_variables
+            SET order_ = $1 + array_position($2, nest_egg_variables.uuid)
+            WHERE nest_egg_variables.uuid = ANY($2) AND nest_egg_variables.egg_uuid = $3",
+            order_base as i32,
+            &unused_variables
+                .into_iter()
+                .map(|v| v.uuid)
+                .collect::<Vec<_>>(),
+            self.uuid,
+        )
+        .execute(database.write())
+        .await?;
+
+        Ok(())
+    }
+
     pub async fn by_nest_uuid_with_pagination(
         database: &crate::database::Database,
         nest_uuid: uuid::Uuid,
@@ -487,9 +688,22 @@ impl NestEgg {
     }
 
     #[inline]
-    pub fn into_admin_api_object(self) -> AdminApiNestEgg {
-        AdminApiNestEgg {
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+    ) -> Result<AdminApiNestEgg, crate::database::DatabaseError> {
+        Ok(AdminApiNestEgg {
             uuid: self.uuid,
+            egg_repository_egg: match self.egg_repository_egg {
+                Some(egg_repository_egg) => Some(
+                    egg_repository_egg
+                        .fetch_cached(database)
+                        .await?
+                        .into_admin_egg_api_object(database)
+                        .await?,
+                ),
+                None => None,
+            },
             name: self.name,
             description: self.description,
             author: self.author,
@@ -505,7 +719,7 @@ impl NestEgg {
             docker_images: self.docker_images,
             file_denylist: self.file_denylist,
             created: self.created.and_utc(),
-        }
+        })
     }
 
     #[inline]
@@ -586,6 +800,7 @@ impl DeletableModel for NestEgg {
 #[schema(title = "AdminNestEgg")]
 pub struct AdminApiNestEgg {
     pub uuid: uuid::Uuid,
+    pub egg_repository_egg: Option<super::egg_repository_egg::AdminApiEggEggRepositoryEgg>,
 
     pub name: String,
     pub description: Option<String>,

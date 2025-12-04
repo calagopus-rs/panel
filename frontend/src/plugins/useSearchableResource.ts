@@ -5,15 +5,21 @@ import { useToast } from '@/providers/ToastProvider';
 
 interface UseSearchableResourceOptions<T> {
   fetcher: (search: string) => Promise<ResponseMeta<T>>;
+  defaultSearchValue?: string;
   deps?: unknown[];
   debounceMs?: number;
 }
 
-export function useSearchableResource<T>({ fetcher, deps = [], debounceMs = 150 }: UseSearchableResourceOptions<T>) {
+export function useSearchableResource<T>({
+  fetcher,
+  defaultSearchValue = '',
+  deps = [],
+  debounceMs = 150,
+}: UseSearchableResourceOptions<T>) {
   const { addToast } = useToast();
 
   const [items, setItems] = useState<T[]>([]);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(defaultSearchValue);
   const [doRefetch, setDoRefetch] = useState(false);
 
   const fetchData = (searchValue: string) => {
@@ -45,7 +51,7 @@ export function useSearchableResource<T>({ fetcher, deps = [], debounceMs = 150 
       return;
     }
 
-    fetchData('');
+    fetchData(defaultSearchValue);
   }, deps);
 
   return { items, search, setSearch, doRefetch, setDoRefetch, refetch: () => fetchData(search) };

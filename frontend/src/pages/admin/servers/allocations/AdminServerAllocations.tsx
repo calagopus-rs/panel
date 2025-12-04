@@ -11,14 +11,15 @@ import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/S
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import ServerAllocationRow from './ServerAllocationRow';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminServerAllocations({ server }: { server: AdminServer }) {
   const { serverAllocations, setServerAllocations } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add' | null>(null);
 
-  const { loading, setPage } = useSearchablePaginatedTable({
-    fetcher: (page) => getServerAllocations(server.uuid, page),
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getServerAllocations(server.uuid, page, search),
     setStoreData: setServerAllocations,
   });
 
@@ -29,6 +30,7 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Server Allocations</Title>
         <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
           </Button>

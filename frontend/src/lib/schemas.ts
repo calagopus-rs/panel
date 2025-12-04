@@ -66,6 +66,7 @@ export const adminNestSchema = z.object({
 });
 
 export const adminEggSchema = z.object({
+  eggRepositoryEggUuid: z.uuid().nullable(),
   author: z.string().min(2).max(255),
   name: z.string().min(3).max(255),
   description: z.string().max(1024).nullable(),

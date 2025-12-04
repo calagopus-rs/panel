@@ -8,13 +8,8 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            ByUuid,
-            admin_activity::GetAdminActivityLogger,
-            egg_repository_egg::EggRepositoryEgg,
-            nest::Nest,
-            nest_egg::{NestEgg, ProcessConfigurationFile, ProcessConfigurationFileReplacement},
-            nest_egg_variable::NestEggVariable,
-            user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger, egg_repository_egg::EggRepositoryEgg,
+            nest::Nest, nest_egg::NestEgg, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -79,42 +74,11 @@ mod post {
             }
         };
 
-        let egg = match NestEgg::create(
+        let egg = match NestEgg::import(
             &state.database,
             nest.uuid,
-            None,
-            &egg_repository_egg.exported_egg.author,
-            &egg_repository_egg.exported_egg.name,
-            egg_repository_egg.exported_egg.description.as_deref(),
-            egg_repository_egg
-                .exported_egg
-                .config
-                .files
-                .into_iter()
-                .map(|(file, config)| ProcessConfigurationFile {
-                    file,
-                    parser: config.parser,
-                    replace: config
-                        .find
-                        .into_iter()
-                        .map(|(r#match, value)| ProcessConfigurationFileReplacement {
-                            r#match,
-                            if_value: None,
-                            replace_with: value,
-                        })
-                        .collect(),
-                })
-                .collect(),
-            egg_repository_egg.exported_egg.config.startup,
-            egg_repository_egg.exported_egg.config.stop,
-            egg_repository_egg.exported_egg.scripts.installation,
-            egg_repository_egg.exported_egg.config.allocations,
-            &egg_repository_egg.exported_egg.startup,
-            egg_repository_egg.exported_egg.force_outgoing_ip,
-            egg_repository_egg.exported_egg.separate_port,
-            &egg_repository_egg.exported_egg.features,
-            egg_repository_egg.exported_egg.docker_images,
-            &egg_repository_egg.exported_egg.file_denylist,
+            Some(egg_repository_egg.uuid),
+            egg_repository_egg.exported_egg,
         )
         .await
         {
@@ -133,33 +97,13 @@ mod post {
             }
         };
 
-        for variable in egg_repository_egg.exported_egg.variables {
-            if rule_validator::validate_rules(&variable.rules).is_err() {
-                continue;
-            }
-
-            NestEggVariable::create(
-                &state.database,
-                egg.uuid,
-                &variable.name,
-                variable.description.as_deref(),
-                variable.order,
-                &variable.env_variable,
-                variable.default_value.as_deref(),
-                variable.user_viewable,
-                variable.user_editable,
-                &variable.rules,
-            )
-            .await
-            .ok();
-        }
-
         activity_logger
             .log(
                 "nest:egg.create",
                 serde_json::json!({
                     "uuid": egg.uuid,
                     "nest_uuid": nest.uuid,
+                    "egg_repository_egg_uuid": egg_repository_egg.uuid,
 
                     "author": egg.author,
                     "name": egg.name,
@@ -183,7 +127,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            egg: egg.into_admin_api_object(),
+            egg: egg.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }

@@ -11,13 +11,14 @@ import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTabl
 import { useAdminStore } from '@/stores/admin';
 import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal';
 import UserOAuthLinkRow from './UserOAuthLinkRow';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add'>(null);
 
-  const { loading, setPage } = useSearchablePaginatedTable({
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getUserOAuthLinks(user.uuid, page, search),
     setStoreData: setUserOAuthLinks,
   });
@@ -29,6 +30,7 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>User OAuth Links</Title>
         <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
           </Button>

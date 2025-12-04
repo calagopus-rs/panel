@@ -41,7 +41,7 @@ mod get {
             "SELECT user_security_keys.passkey
             FROM user_security_keys
             JOIN users ON users.uuid = user_security_keys.user_uuid
-            WHERE user_security_keys.passkey IS NOT NULL AND (users.email = $1 OR users.username = $1)",
+            WHERE user_security_keys.passkey IS NOT NULL AND (lower(users.email) = lower($1) OR lower(users.username) = lower($1))",
             data.user
         )
         .fetch_all(state.database.read())

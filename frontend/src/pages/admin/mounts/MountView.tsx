@@ -8,7 +8,7 @@ import Spinner from '@/elements/Spinner';
 import SubNavigation from '@/elements/SubNavigation';
 import MountCreateOrUpdate from '@/pages/admin/mounts/MountCreateOrUpdate';
 import { useToast } from '@/providers/ToastProvider';
-import AdminMountNestEggs from './nest-eggs/AdminMountNestEggs';
+import AdminMountEggs from './eggs/AdminMountEggs';
 import AdminMountNodes from './nodes/AdminMountNodes';
 import AdminMountServers from './servers/AdminMountServers';
 
@@ -43,9 +43,9 @@ export default function MountView() {
             link: `/admin/mounts/${params.id}`,
           },
           {
-            name: 'Nest Eggs',
+            name: 'Eggs',
             icon: faEgg,
-            link: `/admin/mounts/${params.id}/nest-eggs`,
+            link: `/admin/mounts/${params.id}/eggs`,
           },
           {
             name: 'Nodes',
@@ -62,7 +62,7 @@ export default function MountView() {
 
       <Routes>
         <Route path='/' element={<MountCreateOrUpdate contextMount={mount} />} />
-        <Route path='/nest-eggs' element={<AdminMountNestEggs mount={mount} />} />
+        <Route path='/eggs' element={<AdminMountEggs mount={mount} />} />
         <Route path='/nodes' element={<AdminMountNodes mount={mount} />} />
         <Route path='/servers' element={<AdminMountServers mount={mount} />} />
       </Routes>

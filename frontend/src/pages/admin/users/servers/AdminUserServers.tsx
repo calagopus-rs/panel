@@ -1,4 +1,4 @@
-import { Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getUserServers from '@/api/admin/users/servers/getUserServers';
 import { getEmptyPaginationSet } from '@/api/axios';
@@ -6,20 +6,32 @@ import Table from '@/elements/Table';
 import { serverTableColumns } from '@/lib/tableColumns';
 import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import TextInput from '@/elements/input/TextInput';
+import Switch from '@/elements/input/Switch';
 
 export default function AdminUserServers({ user }: { user: User }) {
+  const [showOwnedUserServers, setShowOwnedUserServers] = useState(false);
   const [userServers, setUserServers] = useState<ResponseMeta<AdminServer>>(getEmptyPaginationSet());
 
-  const { loading, setPage } = useSearchablePaginatedTable({
-    fetcher: (page, search) => getUserServers(user.uuid, page, search),
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getUserServers(user.uuid, page, search, showOwnedUserServers),
     setStoreData: setUserServers,
+    deps: [showOwnedUserServers],
   });
 
   return (
     <>
-      <Title order={2} mb='md'>
-        User Servers
-      </Title>
+      <Group justify='space-between' mb='md'>
+        <Title order={2}>User Servers</Title>
+        <Group>
+          <Switch
+            label="Only show users' owned servers"
+            checked={showOwnedUserServers}
+            onChange={(e) => setShowOwnedUserServers(e.currentTarget.checked)}
+          />
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        </Group>
+      </Group>
 
       <Table columns={serverTableColumns} loading={loading} pagination={userServers} onPageSelect={setPage}>
         {userServers.data.map((server) => (

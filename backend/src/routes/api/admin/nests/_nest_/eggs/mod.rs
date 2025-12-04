@@ -70,16 +70,9 @@ mod get {
         .await?;
 
         ApiResponse::json(Response {
-            eggs: Pagination {
-                total: eggs.total,
-                per_page: eggs.per_page,
-                page: eggs.page,
-                data: eggs
-                    .data
-                    .into_iter()
-                    .map(|egg| egg.into_admin_api_object())
-                    .collect(),
-            },
+            eggs: eggs
+                .try_async_map(|egg| egg.into_admin_api_object(&state.database))
+                .await?,
         })
         .ok()
     }
@@ -93,7 +86,8 @@ mod post {
     use shared::{
         ApiError, GetState,
         models::{
-            admin_activity::GetAdminActivityLogger, nest_egg::NestEgg, user::GetPermissionManager,
+            ByUuid, admin_activity::GetAdminActivityLogger, egg_repository_egg::EggRepositoryEgg,
+            nest_egg::NestEgg, user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
     };
@@ -102,6 +96,8 @@ mod post {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
+        egg_repository_egg_uuid: Option<uuid::Uuid>,
+
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         author: String,
@@ -165,6 +161,23 @@ mod post {
 
         permissions.has_admin_permission("eggs.create")?;
 
+        let egg_repository_egg = if let Some(egg_repository_egg_uuid) = data.egg_repository_egg_uuid
+            && !egg_repository_egg_uuid.is_nil()
+        {
+            match EggRepositoryEgg::by_uuid_optional(&state.database, egg_repository_egg_uuid)
+                .await?
+            {
+                Some(egg_repository_egg) => Some(egg_repository_egg),
+                None => {
+                    return ApiResponse::error("egg repository egg not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
+            }
+        } else {
+            None
+        };
+
         if !data.config_allocations.user_self_assign.is_valid() {
             return ApiResponse::error("config_allocations.user_self_assign: port ranges must be 1024-65535 and start_port < end_port")
                 .with_status(StatusCode::BAD_REQUEST)
@@ -174,7 +187,7 @@ mod post {
         let egg = match NestEgg::create(
             &state.database,
             nest.uuid,
-            None,
+            egg_repository_egg.map(|e| e.uuid),
             &data.author,
             &data.name,
             data.description.as_deref(),
@@ -213,6 +226,7 @@ mod post {
                 serde_json::json!({
                     "uuid": egg.uuid,
                     "nest_uuid": nest.uuid,
+                    "egg_repository_egg_uuid": egg.egg_repository_egg.as_ref().map(|e| e.uuid),
 
                     "author": egg.author,
                     "name": egg.name,
@@ -236,7 +250,7 @@ mod post {
             .await;
 
         ApiResponse::json(Response {
-            egg: egg.into_admin_api_object(),
+            egg: egg.into_admin_api_object(&state.database).await?,
         })
         .ok()
     }

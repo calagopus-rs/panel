@@ -11,14 +11,15 @@ import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMount
 import ServerMountRow from '@/pages/admin/servers/mounts/ServerMountRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
+import TextInput from '@/elements/input/TextInput';
 
 export default function AdminServerMounts({ server }: { server: AdminServer }) {
   const { serverMounts, setServerMounts } = useAdminStore();
 
   const [openModal, setOpenModal] = useState<'add' | null>(null);
 
-  const { loading, setPage } = useSearchablePaginatedTable({
-    fetcher: (page) => getServerMounts(server.uuid, page),
+  const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
+    fetcher: (page, search) => getServerMounts(server.uuid, page, search),
     setStoreData: setServerMounts,
   });
 
@@ -29,6 +30,7 @@ export default function AdminServerMounts({ server }: { server: AdminServer }) {
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Server Mounts</Title>
         <Group>
+          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
             Add
           </Button>
