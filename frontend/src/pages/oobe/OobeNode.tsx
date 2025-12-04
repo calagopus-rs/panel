@@ -21,16 +21,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-
-const schema = z.object({
-  name: z.string().min(3).max(255),
-  publicUrl: z.url().optional(),
-  url: z.url().min(3).max(255),
-  sftpHost: z.string().optional(),
-  sftpPort: z.number().min(1).max(65535),
-  memory: z.number(),
-  disk: z.number(),
-});
+import { oobeNodeSchema } from "@/lib/schemas";
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
@@ -40,18 +31,18 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [diskInput, setDiskInput] = useState('');
   const [locationUuid, setLocationUuid] = useState('');
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof oobeNodeSchema>>({
     initialValues: {
       name: '',
       url: '',
       publicUrl: null,
       sftpHost: null,
       sftpPort: 2022,
-      memory: null,
-      disk: null,
+      memory: 0,
+      disk: 0,
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(oobeNodeSchema),
   });
 
   useEffect(() => {
@@ -176,9 +167,11 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
         </Group>
 
         <Group justify='flex-end' mt='xl'>
-          <Button variant='outline' onClick={() => skipFrom('node')}>
-            Skip
-          </Button>
+          {!!skipFrom && (
+            <Button variant='outline' onClick={() => skipFrom('node')}>
+              Skip
+            </Button>
+          )}
           <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
             Create & Continue
           </Button>

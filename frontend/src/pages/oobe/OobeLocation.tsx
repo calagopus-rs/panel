@@ -13,7 +13,11 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import { backupDiskLabelMapping } from '@/lib/enums';
-import { adminBackupConfigurationSchema } from '@/lib/schemas';
+import {
+  adminBackupConfigurationResticSchema,
+  adminBackupConfigurationS3Schema,
+  oobeLocationSchema
+} from "@/lib/schemas";
 import { OobeComponentProps } from '@/routers/OobeRouter';
 import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic';
 import BackupS3 from '../admin/backupConfigurations/forms/BackupS3';
@@ -22,30 +26,38 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<z.infer<typeof adminBackupConfigurationSchema>>({
+  const form = useForm<z.infer<typeof oobeLocationSchema>>({
     initialValues: {
       locationName: '',
       backupName: '',
       backupDisk: 'local',
-      backupConfigs: {
-        s3: {
-          accessKey: '',
-          secretKey: '',
-          bucket: '',
-          region: '',
-          endpoint: '',
-          pathStyle: true,
-          partSize: 0,
-        },
-        restic: {
-          repository: '',
-          retryLockSeconds: 0,
-          environment: {},
-        },
-      },
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminBackupConfigurationSchema),
+    validate: zod4Resolver(oobeLocationSchema),
+  });
+
+  const backupConfigS3Form = useForm<z.infer<typeof adminBackupConfigurationS3Schema>>({
+    initialValues: {
+      accessKey: '',
+      secretKey: '',
+      bucket: '',
+      region: '',
+      endpoint: '',
+      pathStyle: true,
+      partSize: 0,
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminBackupConfigurationS3Schema),
+  });
+
+  const backupConfigResticForm = useForm<z.infer<typeof adminBackupConfigurationResticSchema>>({
+    initialValues: {
+      repository: '',
+      retryLockSeconds: 0,
+      environment: {},
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminBackupConfigurationResticSchema),
   });
 
   const onSubmit = async () => {
@@ -55,7 +67,10 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
       name: form.values.backupName,
       description: null,
       backupDisk: form.values.backupDisk,
-      backupConfigs: form.values.backupConfigs,
+      backupConfigs: {
+        s3: backupConfigS3Form.values,
+        restic: backupConfigResticForm.values,
+      },
     })
       .then((backupConfig) => {
         createLocation({
@@ -112,8 +127,8 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
           {...form.getInputProps('backupDisk')}
         />
 
-        {form.values.backupDisk === 's3' || form.values.backupConfigs?.s3 ? <BackupS3 form={form} /> : null}
-        {form.values.backupDisk === 'restic' || form.values.backupConfigs?.restic ? <BackupRestic form={form} /> : null}
+        {form.values.backupDisk === 's3' ? <BackupS3 form={backupConfigS3Form} /> : null}
+        {form.values.backupDisk === 'restic' ? <BackupRestic form={backupConfigResticForm} /> : null}
 
         <Group justify='flex-end' mt='xl'>
           <Button variant='outline' onClick={() => skipFrom!('location')}>

@@ -1,9 +1,20 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminBackupConfigurationSchema } from '@/lib/schemas';
+import {
+  adminBackupConfigurationResticSchema,
+  adminBackupConfigurationS3Schema,
+  adminBackupConfigurationSchema
+} from "@/lib/schemas";
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 
-export default async (data: z.infer<typeof adminBackupConfigurationSchema>): Promise<BackupConfiguration> => {
+interface Data extends z.infer<typeof adminBackupConfigurationSchema> {
+  backupConfigs: {
+    s3: z.infer<typeof adminBackupConfigurationS3Schema>;
+    restic: z.infer<typeof adminBackupConfigurationResticSchema>;
+  };
+}
+
+export default async (data: Data): Promise<BackupConfiguration> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post('/api/admin/backup-configurations', {

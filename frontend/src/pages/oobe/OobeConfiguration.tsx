@@ -13,19 +13,13 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-
-const schema = z.object({
-  applicationName: z.string().min(3).max(255),
-  applicationUrl: z.url(),
-  applicationTelemetry: z.boolean(),
-  applicationRegistration: z.boolean(),
-});
+import { oobeConfigurationSchema } from "@/lib/schemas";
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof oobeConfigurationSchema>>({
     initialValues: {
       applicationName: '',
       applicationUrl: '',
@@ -33,7 +27,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
       applicationRegistration: true,
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(oobeConfigurationSchema),
   });
 
   useEffect(() => {
