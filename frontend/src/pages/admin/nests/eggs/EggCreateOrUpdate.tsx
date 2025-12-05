@@ -367,7 +367,7 @@ export default function EggCreateOrUpdate({
       </Stack>
 
       <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         {contextEgg && (

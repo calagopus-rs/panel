@@ -23,8 +23,8 @@ import BackupS3 from "@/pages/admin/backupConfigurations/forms/BackupS3";
 import { useResourceForm } from "@/plugins/useResourceForm";
 
 export default function BackupConfigurationCreateOrUpdate({
-                                                            contextBackupConfiguration
-                                                          }: {
+  contextBackupConfiguration
+}: {
   contextBackupConfiguration?: BackupConfiguration;
 }) {
   const [openModal, setOpenModal] = useState<"delete" | null>(null);
@@ -122,11 +122,19 @@ export default function BackupConfigurationCreateOrUpdate({
           <TextArea label="Description" placeholder="Description" rows={3} {...form.getInputProps("description")} />
         </Group>
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button
+            onClick={() => doCreateOrUpdate(false)}
+            disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+            loading={loading}
+          >
             Save
           </Button>
           {!contextBackupConfiguration && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button
+              onClick={() => doCreateOrUpdate(true)}
+              disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+              loading={loading}
+            >
               Save & Stay
             </Button>
           )}

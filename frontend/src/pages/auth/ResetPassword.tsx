@@ -13,16 +13,7 @@ import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import { useToast } from '@/providers/ToastProvider';
 import AuthWrapper from './AuthWrapper';
-
-const schema = z
-  .object({
-    password: z.string().min(8).max(512),
-    confirmPassword: z.string().min(8).max(512),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { authResetPasswordSchema } from "@/lib/schemas";
 
 export default function ResetPassword() {
   const { addToast } = useToast();
@@ -33,13 +24,13 @@ export default function ResetPassword() {
   const [error, setError] = useState('');
   const token = searchParams.get('token');
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof authResetPasswordSchema>>({
     initialValues: {
       password: '',
       confirmPassword: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(authResetPasswordSchema),
   });
 
   useEffect(() => {
@@ -51,7 +42,7 @@ export default function ResetPassword() {
   const submit = () => {
     setLoading(true);
 
-    resetPassword(token, form.values)
+    resetPassword(token!, form.values)
       .then(() => {
         addToast('Password has been reset.', 'success');
         navigate('/auth/login');
@@ -89,7 +80,7 @@ export default function ResetPassword() {
             <PasswordInput placeholder='Password' {...form.getInputProps('password')} />
             <PasswordInput placeholder='Confirm Password' {...form.getInputProps('confirmPassword')} />
 
-            <Button onClick={submit} loading={loading} disabled={!form.isValid()} size='md' fullWidth>
+            <Button onClick={submit} loading={loading} disabled={!token || !form.isValid()} size='md' fullWidth>
               Reset Password
             </Button>
           </Stack>

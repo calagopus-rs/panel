@@ -10,7 +10,7 @@ import login from '@/api/auth/login';
 import postSecurityKeyChallenge from '@/api/auth/postSecurityKeyChallenge';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Captcha from '@/elements/Captcha';
+import Captcha, { CaptchaRef } from "@/elements/Captcha";
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import PinInput from '@/elements/input/PinInput';
@@ -18,6 +18,9 @@ import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import AuthWrapper from './AuthWrapper';
+import { useForm } from "@mantine/form";
+import { zod4Resolver } from "mantine-form-zod-resolver";
+import { authPasswordSchema, authTotpSchema, authUsernameSchema } from "@/lib/schemas";
 
 export default function Login() {
   const { doLogin } = useAuth();
@@ -28,13 +31,34 @@ export default function Login() {
   const [error, setError] = useState('');
   const [step, setStep] = useState<'username' | 'passkey' | 'password' | 'totp' | 'totp-recovery'>('username');
   const [oAuthProviders, setOAuthProviders] = useState<OAuthProvider[]>([]);
-  const [username, setUsername] = useState('');
   const [passkeyUuid, setPasskeyUuid] = useState('');
-  const [passkeyOptions, setPasskeyOptions] = useState<CredentialRequestOptions>(null);
-  const [password, setPassword] = useState('');
+  const [passkeyOptions, setPasskeyOptions] = useState<CredentialRequestOptions>();
   const [twoFactorToken, setTwoFactorToken] = useState('');
-  const [totpCode, setTotpCode] = useState('');
-  const captchaRef = useRef(null);
+  const captchaRef = useRef<CaptchaRef>(null);
+
+  const usernameForm = useForm({
+    initialValues: {
+      username: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(authUsernameSchema)
+  });
+
+  const passwordForm = useForm({
+    initialValues: {
+      password: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(authPasswordSchema)
+  });
+
+  const totpForm = useForm({
+    initialValues: {
+      code: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(authTotpSchema)
+  });
 
   useEffect(() => {
     getOAuthProviders().then((oAuthProviders) => {
@@ -43,7 +67,7 @@ export default function Login() {
   }, []);
 
   const doSubmitUsername = () => {
-    if (!username) {
+    if (!usernameForm.values.username) {
       setError('Please enter a username');
       return;
     }
@@ -51,9 +75,9 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    getSecurityKeys(username)
+    getSecurityKeys(usernameForm.values.username)
       .then((keys) => {
-        if (keys.options.publicKey.allowCredentials.length === 0) {
+        if (keys.options.publicKey?.allowCredentials?.length === 0) {
           setStep('password');
         } else {
           setPasskeyUuid(keys.uuid);
@@ -126,7 +150,11 @@ export default function Login() {
     setLoading(true);
 
     captchaRef.current?.getToken().then((token) => {
-      login({ user: username, password, captcha: token })
+      login({
+        user: usernameForm.values.username,
+        password: passwordForm.values.password,
+        captcha: token,
+      })
         .then((response) => {
           if (response.type === 'two_factor_required') {
             setTwoFactorToken(response.token!);
@@ -134,7 +162,7 @@ export default function Login() {
             return;
           }
 
-          doLogin(response.user);
+          doLogin(response.user!);
         })
         .catch((msg) => {
           setError(httpErrorToHuman(msg));
@@ -146,7 +174,7 @@ export default function Login() {
   const doSubmitTotp = () => {
     setLoading(true);
 
-    checkpointLogin({ code: totpCode, confirmation_token: twoFactorToken })
+    checkpointLogin({ code: totpForm.values.code, confirmation_token: twoFactorToken })
       .then((response) => {
         doLogin(response.user);
       })
@@ -183,14 +211,13 @@ export default function Login() {
               <TextInput
                 label='Username'
                 placeholder='Enter your username'
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitUsername()}
                 leftSection={<FontAwesomeIcon icon={faUser} />}
                 size='md'
+                {...usernameForm.getInputProps('username')}
               />
 
-              <Button onClick={doSubmitUsername} loading={loading} size='md' fullWidth>
+              <Button onClick={doSubmitUsername} disabled={!usernameForm.isValid()} loading={loading} size='md' fullWidth>
                 Continue
               </Button>
 
@@ -222,7 +249,7 @@ export default function Login() {
                 Authenticate with Passkey
               </Title>
               <Text c='dimmed' ta='center'>
-                We found a passkey associated with <strong>{username}</strong>
+                We found a passkey associated with <strong>{usernameForm.values.username}</strong>
               </Text>
 
               <Button
@@ -247,21 +274,20 @@ export default function Login() {
                 Enter Password
               </Title>
               <Text c='dimmed' ta='center'>
-                Please enter your password for <strong>{username}</strong>
+                Please enter your password for <strong>{usernameForm.values.username}</strong>
               </Text>
 
               <PasswordInput
                 label='Password'
                 placeholder='Enter your password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitPassword()}
                 size='md'
+                {...passwordForm.getInputProps('password')}
               />
 
               <Captcha ref={captchaRef} />
 
-              <Button onClick={doSubmitPassword} loading={loading} size='md' fullWidth>
+              <Button onClick={doSubmitPassword} disabled={!passwordForm.isValid()} loading={loading} size='md' fullWidth>
                 Sign In
               </Button>
 
@@ -281,10 +307,10 @@ export default function Login() {
               </Text>
 
               <Center>
-                <PinInput length={6} value={totpCode} onChange={setTotpCode} placeholder='0' size='md' type='number' />
+                <PinInput length={6} placeholder='0' size='md' type='number' {...totpForm.getInputProps('code')} />
               </Center>
 
-              <Button onClick={doSubmitTotp} loading={loading} disabled={totpCode.length !== 6} size='md' fullWidth>
+              <Button onClick={doSubmitTotp} loading={loading} disabled={!totpForm.isValid()} size='md' fullWidth>
                 Verify Code
               </Button>
 
@@ -293,7 +319,7 @@ export default function Login() {
               <Button
                 variant='light'
                 onClick={() => {
-                  setTotpCode('');
+                  totpForm.reset();
                   setStep('totp-recovery');
                 }}
                 size='md'
@@ -315,14 +341,13 @@ export default function Login() {
                 <TextInput
                   label='Recovery Code'
                   placeholder='Enter a recovery code'
-                  value={totpCode}
-                  onChange={(e) => setTotpCode(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && doSubmitTotp()}
                   size='md'
+                  {...totpForm.getInputProps('code')}
                 />
               </Center>
 
-              <Button onClick={doSubmitTotp} loading={loading} disabled={!totpCode} size='md' fullWidth>
+              <Button onClick={doSubmitTotp} loading={loading} disabled={!totpForm.isValid()} size='md' fullWidth>
                 Verify Code
               </Button>
 
@@ -331,7 +356,7 @@ export default function Login() {
               <Button
                 variant='light'
                 onClick={() => {
-                  setTotpCode('');
+                  totpForm.reset();
                   setStep('totp');
                 }}
                 size='md'

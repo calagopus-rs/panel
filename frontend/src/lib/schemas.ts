@@ -108,6 +108,17 @@ export const adminEggSchema = z.object({
   fileDenylist: z.array(z.string()),
 });
 
+export const adminEggVariableSchema = z.object({
+  name: z.string().min(3).max(255),
+  description: z.string().max(1024).nullable(),
+  order: z.number(),
+  envVariable: z.string().min(1).max(255),
+  defaultValue: z.string().max(1024).nullable(),
+  userViewable: z.boolean(),
+  userEditable: z.boolean(),
+  rules: z.array(z.string()),
+});
+
 export const adminNodeAllocationsSchema = z.object({
   ip: z.string(),
   ipAlias: z.string().min(1).max(255).nullable(),
@@ -338,3 +349,42 @@ export const oobeRegister = z
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
+
+export const authForgotPasswordSchema = z.object({
+  email: z.email(),
+});
+
+export const authRegisterSchema = z.object({
+  username: z
+    .string()
+    .min(3)
+    .max(15)
+    .regex(/^[a-zA-Z0-9_]+$/),
+  email: z.email(),
+  nameFirst: z.string().min(2).max(255),
+  nameLast: z.string().min(2).max(255),
+  password: z.string().min(8).max(512),
+});
+
+export const authResetPasswordSchema = z
+  .object({
+    password: z.string().min(8).max(512),
+    confirmPassword: z.string().min(8).max(512),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
+
+export const authUsernameSchema = z.object({
+  username: z.string().nonempty(),
+});
+
+export const authPasswordSchema = z.object({
+  password: z.string().max(512),
+});
+
+export const authTotpSchema = z.object({
+  code: z.string().min(6).max(10),
+});

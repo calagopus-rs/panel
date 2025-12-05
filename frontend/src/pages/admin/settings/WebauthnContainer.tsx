@@ -71,7 +71,7 @@ export default function WebauthnContainer() {
       </Stack>
 
       <Group mt='md'>
-        <Button onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         <Button variant='outline' onClick={doAutofill} disabled={loading}>

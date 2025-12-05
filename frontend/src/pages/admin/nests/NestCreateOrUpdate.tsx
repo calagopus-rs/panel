@@ -69,11 +69,11 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
       </Stack>
 
       <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         {!contextNest && (
-          <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
             Save & Stay
           </Button>
         )}

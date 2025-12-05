@@ -392,7 +392,7 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
                   variant='subtle'
                   disabled={form.values.startup === eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup}
                   onClick={() =>
-                    form.setFieldValue('startup', eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup)
+                    form.setFieldValue('startup', eggs.items.find((e) => e.uuid === form.values.eggUuid)?.startup || '')
                   }
                 >
                   <FontAwesomeIcon icon={faReply} />
@@ -539,11 +539,11 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       )}
 
       <Group>
-        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         {!contextServer && (
-          <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
             Save & Stay
           </Button>
         )}

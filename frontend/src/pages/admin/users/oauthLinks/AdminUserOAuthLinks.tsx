@@ -16,7 +16,7 @@ import TextInput from '@/elements/input/TextInput';
 export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'add'>(null);
+  const [openModal, setOpenModal] = useState<'add' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getUserOAuthLinks(user.uuid, page, search),

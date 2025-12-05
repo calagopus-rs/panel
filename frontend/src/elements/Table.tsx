@@ -138,11 +138,14 @@ interface TableProps {
 export default ({ columns, loading, pagination, onPageSelect, allowSelect = true, children }: TableProps) => {
   return (
     <Paper withBorder radius='md' className='overflow-x-auto'>
-      {pagination.total > pagination.perPage && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
+      {pagination
+        && onPageSelect
+        && pagination.total > pagination.perPage
+        && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
 
       <Table
         stickyHeader
-        highlightOnHover={pagination?.total > 0 && !loading}
+        highlightOnHover={(pagination?.total ?? 0) > 0 && !loading}
         className={allowSelect ? undefined : 'select-none'}
       >
         <TableHead>
@@ -169,7 +172,9 @@ export default ({ columns, loading, pagination, onPageSelect, allowSelect = true
         </Table.Tbody>
       </Table>
 
-      {pagination && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
+      {pagination
+        && onPageSelect
+        && <Pagination data={pagination} m='xs' onPageSelect={onPageSelect} />}
     </Paper>
   );
 };

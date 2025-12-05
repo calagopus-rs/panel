@@ -1,12 +1,17 @@
-import { Turnstile } from '@marsidev/react-turnstile';
+import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
+import ReCAPTCHA, { ReCAPTCHA as ReCAPTCHAInstance } from "react-google-recaptcha";
 import { useGlobalStore } from '@/stores/global';
+
+export interface CaptchaRef {
+  getToken: () => Promise<string | null>;
+  resetCaptcha: () => void;
+}
 
 const Captcha = forwardRef((_, ref) => {
   const { captchaProvider } = useGlobalStore((state) => state.settings);
-  const turnstileRef = useRef(null);
-  const recaptchaRef = useRef(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const recaptchaRef = useRef<ReCAPTCHAInstance>(null);
 
   // Expose getToken and resetCaptcha
   useImperativeHandle(ref, () => ({

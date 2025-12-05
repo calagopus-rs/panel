@@ -200,11 +200,11 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
         />
 
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
             Save
           </Button>
           {!contextNode && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
               Save & Stay
             </Button>
           )}

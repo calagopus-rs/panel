@@ -2,6 +2,8 @@ export const backupConfigurationTableColumns = ['ID', 'Name', 'Disk', 'Created']
 
 export const databaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Created'];
 
+export const databaseHostDatabaseTableColumns = ['Name', 'Server', 'Type', 'Address', 'Username', 'Size', 'Created'];
+
 export const locationDatabaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Added', ''];
 
 export const locationTableColumns = ['ID', 'Name', 'Backup Configuration', 'Created'];

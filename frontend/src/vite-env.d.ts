@@ -170,7 +170,8 @@ declare global {
     created: Date;
   }
 
-  interface UpdateNestEggVariable {
+  interface NestEggVariable {
+    uuid: string;
     name: string;
     description: string | null;
     order: number;
@@ -179,10 +180,6 @@ declare global {
     userViewable: boolean;
     userEditable: boolean;
     rules: string[];
-  }
-
-  interface NestEggVariable extends UpdateNestEggVariable {
-    uuid: string;
     created: Date;
   }
 

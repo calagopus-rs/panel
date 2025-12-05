@@ -9,24 +9,13 @@ import { z } from 'zod';
 import register from '@/api/auth/register';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Captcha from '@/elements/Captcha';
+import Captcha, { CaptchaRef } from "@/elements/Captcha";
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthWrapper from './AuthWrapper';
-
-const schema = z.object({
-  username: z
-    .string()
-    .min(3)
-    .max(15)
-    .regex(/^[a-zA-Z0-9_]+$/),
-  email: z.email(),
-  nameFirst: z.string().min(2).max(255),
-  nameLast: z.string().min(2).max(255),
-  password: z.string().min(8).max(512),
-});
+import { authRegisterSchema } from "@/lib/schemas";
 
 export default function Register() {
   const { doLogin } = useAuth();
@@ -34,9 +23,9 @@ export default function Register() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const captchaRef = useRef(null);
+  const captchaRef = useRef<CaptchaRef>(null);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof authRegisterSchema>>({
     initialValues: {
       username: '',
       email: '',
@@ -45,7 +34,7 @@ export default function Register() {
       password: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(authRegisterSchema),
   });
 
   const submit = () => {
@@ -93,7 +82,7 @@ export default function Register() {
             <PasswordInput placeholder='Password' {...form.getInputProps('password')} />
             <Captcha ref={captchaRef} />
 
-            <Button onClick={submit} loading={loading} size='md' fullWidth>
+            <Button onClick={submit} loading={loading} disabled={!form.isValid()} size='md' fullWidth>
               Register
             </Button>
 

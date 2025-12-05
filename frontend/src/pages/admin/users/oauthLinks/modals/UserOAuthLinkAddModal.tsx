@@ -33,7 +33,7 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
   const doAdd = () => {
     setLoading(true);
 
-    createUserOAuthLink(user.uuid, selectedOAuthProvider.uuid, identifier)
+    createUserOAuthLink(user.uuid, selectedOAuthProvider!.uuid, identifier)
       .then((oauthLink) => {
         addToast('OAuth Link added.', 'success');
 
@@ -54,7 +54,7 @@ export default function UserOAuthLinkAddModal({ user, opened, onClose }: ModalPr
           label='OAuth Provider'
           placeholder='OAuth Provider'
           value={selectedOAuthProvider?.uuid}
-          onChange={(value) => setSelectedOAuthProvider(oauthProviders.items.find((p) => p.uuid === value))}
+          onChange={(value) => setSelectedOAuthProvider(oauthProviders.items.find((p) => p.uuid === value) || null)}
           data={oauthProviders.items.map((oauthProvider) => ({
             label: oauthProvider.name,
             value: oauthProvider.uuid,

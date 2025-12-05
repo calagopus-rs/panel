@@ -22,7 +22,7 @@ export default function NodeAllocationsUpdateModal({
 
     for (const allocation of selectedNodeAllocations) {
       if (ipCounts.get(allocation.ip)) {
-        ipCounts.set(allocation.ip, ipCounts.get(allocation.ip) + 1);
+        ipCounts.set(allocation.ip, ipCounts.get(allocation.ip)! + 1);
       } else {
         ipCounts.set(allocation.ip, 1);
       }
@@ -45,8 +45,12 @@ export default function NodeAllocationsUpdateModal({
     const ipAliasCounts = new Map<string, number>();
 
     for (const allocation of selectedNodeAllocations) {
+      if (!allocation.ipAlias) {
+        continue;
+      }
+
       if (ipAliasCounts.get(allocation.ipAlias)) {
-        ipAliasCounts.set(allocation.ipAlias, ipAliasCounts.get(allocation.ipAlias) + 1);
+        ipAliasCounts.set(allocation.ipAlias, ipAliasCounts.get(allocation.ipAlias)! + 1);
       } else {
         ipAliasCounts.set(allocation.ipAlias, 1);
       }

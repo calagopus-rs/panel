@@ -14,6 +14,10 @@ import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
+import { useForm } from "@mantine/form";
+import { zod4Resolver } from "mantine-form-zod-resolver";
+import { adminEggVariableSchema } from "@/lib/schemas";
+import { z } from "zod";
 
 export default function EggVariableContainer({
   contextNest,
@@ -29,28 +33,26 @@ export default function EggVariableContainer({
 
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
   const [loading, setLoading] = useState(false);
-  const [variable, setVariable] = useState<UpdateNestEggVariable>({
-    name: '',
-    description: null,
-    order: 0,
-    envVariable: '',
-    defaultValue: null,
-    userViewable: true,
-    userEditable: false,
-    rules: [],
-  });
+
+  const form = useForm<z.infer<typeof adminEggVariableSchema>>({
+    initialValues: {
+      name: '',
+      description: null,
+      order: 0,
+      envVariable: '',
+      defaultValue: null,
+      userViewable: true,
+      userEditable: false,
+      rules: [],
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminEggVariableSchema)
+  })
 
   useEffect(() => {
     if (contextVariable) {
-      setVariable({
-        name: contextVariable.name,
-        description: contextVariable.description,
-        order: contextVariable.order,
-        envVariable: contextVariable.envVariable,
-        defaultValue: contextVariable.defaultValue,
-        userViewable: contextVariable.userViewable,
-        userEditable: contextVariable.userEditable,
-        rules: contextVariable.rules,
+      form.setValues({
+        ...contextVariable
       });
     }
   }, [contextVariable]);
@@ -59,7 +61,7 @@ export default function EggVariableContainer({
     setLoading(true);
 
     if (contextVariable?.uuid) {
-      updateEggVariable(contextNest.uuid, contextEgg.uuid, contextVariable.uuid, variable)
+      updateEggVariable(contextNest.uuid, contextEgg.uuid, contextVariable.uuid, form.values)
         .then(() => {
           addToast('Egg variable updated.', 'success');
         })
@@ -70,9 +72,9 @@ export default function EggVariableContainer({
           setLoading(false);
         });
     } else {
-      createEggVariable(contextNest.uuid, contextEgg.uuid, variable)
+      createEggVariable(contextNest.uuid, contextEgg.uuid, form.values)
         .then((variable) => {
-          setEggVariables([...eggVariables.filter((v) => v.uuid || v.order !== contextVariable.order), variable]);
+          setEggVariables([...eggVariables.filter((v) => v.uuid || v.order !== contextVariable!.order), variable]);
           addToast('Egg variable created.', 'success');
         })
         .catch((msg) => {
@@ -112,9 +114,9 @@ export default function EggVariableContainer({
         onConfirmed={doRemove}
       >
         Are you sure you want to remove&nbsp;
-        {variable.name && variable.envVariable ? (
+        {form.values.name && form.values.envVariable ? (
           <Code>
-            {variable.name} ({variable.envVariable})
+            {form.values.name} ({form.values.envVariable})
           </Code>
         ) : (
           'this empty variable'
@@ -128,15 +130,13 @@ export default function EggVariableContainer({
             withAsterisk
             label='Name'
             placeholder='Name'
-            value={variable.name || ''}
-            onChange={(e) => setVariable({ ...variable, name: e.target.value })}
+            {...form.getInputProps('name')}
           />
 
           <TextArea
             label='Description'
             placeholder='Description'
-            value={variable.description || ''}
-            onChange={(e) => setVariable({ ...variable, description: e.target.value })}
+            {...form.getInputProps('description')}
           />
 
           <Group grow>
@@ -144,16 +144,15 @@ export default function EggVariableContainer({
               withAsterisk
               label='Environment Variable'
               placeholder='Environment Variable'
-              value={variable.envVariable || ''}
-              onChange={(e) => setVariable({ ...variable, envVariable: e.target.value.toUpperCase() })}
+              {...form.getInputProps('envVariable')}
+              onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
             />
 
             <TextInput
               withAsterisk
               label='Default Value'
               placeholder='server.jar'
-              value={variable.defaultValue || ''}
-              onChange={(e) => setVariable({ ...variable, defaultValue: e.target.value })}
+              {...form.getInputProps('defaultValue')}
             />
           </Group>
 
@@ -161,27 +160,24 @@ export default function EggVariableContainer({
             <Switch
               label='User Viewable'
               name='user_viewable'
-              checked={variable.userViewable}
-              onChange={(e) => setVariable({ ...variable, userViewable: e.target.checked })}
+              {...form.getInputProps('userViewable')}
             />
 
             <Switch
               label='User Editable'
               name='user_editable'
-              checked={variable.userEditable}
-              onChange={(e) => setVariable({ ...variable, userEditable: e.target.checked })}
+              {...form.getInputProps('userEditable')}
             />
           </Group>
 
           <TagsInput
             label='Rules'
-            value={variable.rules}
-            onChange={(value) => setVariable({ ...variable, rules: value })}
+            {...form.getInputProps('rules')}
           />
         </Stack>
 
         <Group pt='md' mt='auto'>
-          <Button onClick={doCreateOrUpdate} loading={loading}>
+          <Button onClick={doCreateOrUpdate} disabled={!form.isValid()} loading={loading}>
             Save
           </Button>
           <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
