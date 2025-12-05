@@ -36,16 +36,14 @@ export default function BackupRestic({ form }: { form: UseFormReturnType<z.infer
           label='Password'
           placeholder='Password'
           value={form.values.backupConfigs.restic?.environment?.RESTIC_PASSWORD || ''}
-          onChange={(e) =>
-            form.setFieldValue('form.values.backupConfigs.restic.environment.RESTIC_PASSWORD', e.target.value)
-          }
+          onChange={(e) => form.setFieldValue('backupConfigs.restic.environment.RESTIC_PASSWORD', e.target.value)}
         />
 
         <MultiKeyValueInput
           label='Environment Variables'
           allowReordering={false}
           options={form.values.backupConfigs.restic?.environment}
-          onChange={(e) => form.setFieldValue('form.values.backupConfigs.restic.environment', e)}
+          onChange={(e) => form.setFieldValue('backupConfigs.restic.environment', e)}
           transformValue={(key, value) => (key === 'AWS_SECRET_ACCESS_KEY' ? '*'.repeat(value.length) : value)}
           hideKey={(key) => key === 'RESTIC_PASSWORD'}
         />
