@@ -1,7 +1,9 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { backupConfigurationSchema } from '@/schemas';
 
-export default async (backupConfigUuid: string, data: UpdateBackupConfiguration): Promise<void> => {
+export default async (backupConfigUuid: string, data: z.infer<typeof backupConfigurationSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/admin/backup-configurations/${backupConfigUuid}`, {

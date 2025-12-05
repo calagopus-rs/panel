@@ -20,14 +20,11 @@ declare global {
     created: Date;
   }
 
-  interface UpdateBackupConfiguration {
+  interface BackupConfiguration {
     name: string;
-    description: string | null;
+    description?: string;
     backupDisk: BackupDisk;
     backupConfigs: BackupDiskConfigurations;
-  }
-
-  interface BackupConfiguration extends UpdateBackupConfiguration {
     uuid: string;
     created: Date;
   }
@@ -917,8 +914,8 @@ declare global {
   }
 
   interface BackupDiskConfigurations {
-    s3: BackupDiskConfigurationS3 | null;
-    restic: BackupDiskConfigurationRestic | null;
+    s3: BackupDiskConfigurationS3;
+    restic: BackupDiskConfigurationRestic;
   }
 
   type StorageDriverType = 'filesystem' | 's3';

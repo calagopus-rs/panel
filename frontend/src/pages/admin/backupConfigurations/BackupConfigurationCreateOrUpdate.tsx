@@ -1,6 +1,8 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
 import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration';
 import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
@@ -11,31 +13,52 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { backupDiskLabelMapping } from '@/lib/enums';
-import BackupRestic from '@/pages/admin/locations/forms/BackupRestic';
-import BackupS3 from '@/pages/admin/locations/forms/BackupS3';
+import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
+import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { backupConfigurationSchema } from '@/schemas';
 
 export default function BackupConfigurationCreateOrUpdate({
   contextBackupConfiguration,
 }: {
   contextBackupConfiguration?: BackupConfiguration;
 }) {
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateBackupConfiguration>({
+  const form = useForm<z.infer<typeof backupConfigurationSchema>>({
     initialValues: {
       name: '',
       description: null,
       backupDisk: 'local',
-      backupConfigs: { s3: null, restic: null },
+      backupConfigs: {
+        s3: {
+          accessKey: '',
+          secretKey: '',
+          bucket: '',
+          region: '',
+          endpoint: '',
+          pathStyle: true,
+          partSize: 0,
+        },
+        restic: {
+          repository: '',
+          retryLockSeconds: 0,
+          environment: {},
+        },
+      },
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(backupConfigurationSchema),
   });
 
-  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateBackupConfiguration, BackupConfiguration>({
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<
+    z.infer<typeof backupConfigurationSchema>,
+    BackupConfiguration
+  >({
     form,
     createFn: () => createBackupConfiguration(form.values),
-    updateFn: () => updateBackupConfiguration(contextBackupConfiguration?.uuid, form.values),
-    deleteFn: () => deleteBackupConfiguration(contextBackupConfiguration?.uuid),
+    updateFn: () => updateBackupConfiguration(contextBackupConfiguration!.uuid, form.values),
+    deleteFn: () => deleteBackupConfiguration(contextBackupConfiguration!.uuid),
     doUpdate: !!contextBackupConfiguration,
     basePath: '/admin/backup-configurations',
     resourceName: 'Backup configuration',
@@ -95,34 +118,8 @@ export default function BackupConfigurationCreateOrUpdate({
             </Button>
           )}
         </Group>
-        {form.values.backupDisk === 's3' || form.values.backupConfigs?.s3 ? (
-          <BackupS3
-            backupConfig={
-              form.values.backupConfigs?.s3 ?? {
-                accessKey: '',
-                secretKey: '',
-                bucket: '',
-                region: '',
-                endpoint: '',
-                pathStyle: false,
-                partSize: 512 * 1024 * 1024,
-              }
-            }
-            setBackupConfigs={(config) => form.setFieldValue('backupConfigs.s3', config)}
-          />
-        ) : null}
-        {form.values.backupDisk === 'restic' || form.values.backupConfigs?.restic ? (
-          <BackupRestic
-            backupConfig={
-              form.values.backupConfigs?.restic ?? {
-                repository: '',
-                retryLockSeconds: 60,
-                environment: {},
-              }
-            }
-            setBackupConfigs={(config) => form.setFieldValue('backupConfigs.restic', config)}
-          />
-        ) : null}
+        {form.values.backupDisk === 's3' || form.values.backupConfigs?.s3 ? <BackupS3 form={form} /> : null}
+        {form.values.backupDisk === 'restic' || form.values.backupConfigs?.restic ? <BackupRestic form={form} /> : null}
       </Stack>
     </>
   );
