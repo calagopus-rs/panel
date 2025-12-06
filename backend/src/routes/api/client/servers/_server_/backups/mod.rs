@@ -158,18 +158,7 @@ mod post {
             .await?;
 
         let backup =
-            match ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files)
-                .await
-            {
-                Ok(backup) => backup,
-                Err(err) => {
-                    tracing::error!(name = %data.name, "failed to create backup: {:?}", err);
-
-                    return ApiResponse::error("failed to create backup")
-                        .with_status(StatusCode::INTERNAL_SERVER_ERROR)
-                        .ok();
-                }
-            };
+            ServerBackup::create(&state.database, server.0, &data.name, data.ignored_files).await?;
 
         activity_logger
             .log(

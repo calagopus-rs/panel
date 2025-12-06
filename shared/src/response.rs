@@ -81,12 +81,12 @@ where
     fn from(err: T) -> Self {
         let err: anyhow::Error = err.into();
 
-        tracing::error!("a request error occurred: {:?}", err);
-        sentry_anyhow::capture_anyhow(&err);
-
-        if let Ok(error) = err.downcast::<DisplayError>() {
+        if let Some(error) = err.downcast_ref::<DisplayError>() {
             return ApiResponse::error(&error.message).with_status(error.status);
         }
+
+        tracing::error!("a request error occurred: {:?}", err);
+        sentry_anyhow::capture_anyhow(&err);
 
         ApiResponse::error("internal server error")
             .with_status(axum::http::StatusCode::INTERNAL_SERVER_ERROR)
@@ -127,12 +127,11 @@ impl<'a> DisplayError<'a> {
 
 impl<'a> Display for DisplayError<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("DisplayError").finish()
+        f.debug_struct("DisplayError")
+            .field("status", &self.status)
+            .field("message", &self.message)
+            .finish()
     }
 }
 
-impl<'a> From<DisplayError<'a>> for anyhow::Error {
-    fn from(value: DisplayError<'a>) -> Self {
-        anyhow::anyhow!(value)
-    }
-}
+impl<'a> std::error::Error for DisplayError<'a> {}

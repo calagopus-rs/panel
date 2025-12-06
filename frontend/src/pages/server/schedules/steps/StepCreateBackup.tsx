@@ -15,7 +15,7 @@ export default function StepCreateBackup({
       <TextInput
         label='Backup Name'
         placeholder='Auto-generated if empty'
-        value={action.name || null}
+        value={action.name || ''}
         onChange={(e) => setAction({ ...action, name: e.target.value || null })}
       />
       <Switch

@@ -178,13 +178,15 @@ impl Cache {
                 bincode::config::standard(),
             )
         {
-            self.memory_cache.write().await.insert(
-                key.to_string(),
-                CacheEntry {
-                    value: value.into(),
-                    expires_at: now + Duration::from_secs(ttl),
-                },
-            );
+            if self.use_internal_cache {
+                self.memory_cache.write().await.insert(
+                    key.to_string(),
+                    CacheEntry {
+                        value: value.into(),
+                        expires_at: now + Duration::from_secs(ttl),
+                    },
+                );
+            }
 
             tracing::debug!("found in redis cache");
             return Ok(val);
@@ -230,13 +232,15 @@ impl Cache {
                 bincode::config::standard(),
             )
         {
-            self.memory_cache.write().await.insert(
-                key.to_string(),
-                CacheEntry {
-                    value: value.into(),
-                    expires_at: now + Duration::from_secs(ttl),
-                },
-            );
+            if self.use_internal_cache {
+                self.memory_cache.write().await.insert(
+                    key.to_string(),
+                    CacheEntry {
+                        value: value.into(),
+                        expires_at: now + Duration::from_secs(ttl),
+                    },
+                );
+            }
 
             tracing::debug!("found in redis cache after lock");
             return Ok(val);
