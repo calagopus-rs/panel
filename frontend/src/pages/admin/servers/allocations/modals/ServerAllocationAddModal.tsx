@@ -16,7 +16,7 @@ export default function ServerAllocationAddModal({ server, opened, onClose }: Mo
   const { addServerAllocation } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [selectedAllocationUuids, setSelectedAllocationUuids] = useState([]);
+  const [selectedAllocationUuids, setSelectedAllocationUuids] = useState<string[]>([]);
 
   const availableAllocations = useSearchableResource<NodeAllocation>({
     fetcher: (search) => getAvailableNodeAllocations(server.node.uuid, 1, search),

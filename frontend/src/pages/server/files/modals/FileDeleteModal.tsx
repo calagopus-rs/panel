@@ -23,7 +23,7 @@ export default function FileDeleteModal({ files, opened, onClose }: Props) {
 
     deleteFiles(
       server.uuid,
-      browsingDirectory,
+      browsingDirectory!,
       files.map((f) => f.name),
     )
       .then(() => {

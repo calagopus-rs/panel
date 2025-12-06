@@ -3,7 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
 import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider';
 import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider';
@@ -20,6 +22,7 @@ import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
 
 export default function OAuthProviderCreateOrUpdate({
   contextOAuthProvider,
@@ -29,9 +32,9 @@ export default function OAuthProviderCreateOrUpdate({
   const { addToast } = useToast();
   const { settings } = useGlobalStore();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateAdminOAuthProvider>({
+  const form = useForm<z.infer<typeof adminOAuthProviderSchema>>({
     initialValues: {
       name: '',
       description: null,
@@ -52,13 +55,18 @@ export default function OAuthProviderCreateOrUpdate({
       userManageable: true,
       basicAuth: false,
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminOAuthProviderSchema),
   });
 
-  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateAdminOAuthProvider, AdminOAuthProvider>({
+  const { loading, doCreateOrUpdate, doDelete } = useResourceForm<
+    z.infer<typeof adminOAuthProviderSchema>,
+    AdminOAuthProvider
+  >({
     form,
     createFn: () => createOAuthProvider(form.values),
-    updateFn: () => updateOAuthProvider(contextOAuthProvider?.uuid, form.values),
-    deleteFn: () => deleteOAuthProvider(contextOAuthProvider?.uuid),
+    updateFn: () => updateOAuthProvider(contextOAuthProvider!.uuid, form.values),
+    deleteFn: () => deleteOAuthProvider(contextOAuthProvider!.uuid),
     doUpdate: !!contextOAuthProvider,
     basePath: '/admin/oauth-providers',
     resourceName: 'OAuth Provider',
@@ -73,13 +81,21 @@ export default function OAuthProviderCreateOrUpdate({
   }, [contextOAuthProvider]);
 
   const doExport = (format: 'json' | 'yaml') => {
+    if (!contextOAuthProvider) return;
+
     addToast('OAuth Provider exported.', 'success');
 
-    let data: AdminOAuthProvider = JSON.parse(JSON.stringify(contextOAuthProvider));
-    data.uuid = undefined;
-    data.created = undefined;
-    data.clientId = undefined;
-    data.clientSecret = undefined;
+    let data: Partial<AdminOAuthProvider> & {
+      uuid?: string;
+      created?: Date;
+      clientId?: string;
+      clientSecret?: string;
+    } = JSON.parse(JSON.stringify(contextOAuthProvider));
+
+    delete data.uuid;
+    delete data.created;
+    delete data.clientId;
+    delete data.clientSecret;
     data.description = data.description || null;
     data.emailPath = data.emailPath || null;
     data.usernamePath = data.usernamePath || null;
@@ -242,11 +258,11 @@ export default function OAuthProviderCreateOrUpdate({
         </Group>
 
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
             Save
           </Button>
           {!contextOAuthProvider && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
               Save & Stay
             </Button>
           )}

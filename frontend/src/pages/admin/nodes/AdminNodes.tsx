@@ -6,10 +6,11 @@ import getNodes from '@/api/admin/nodes/getNodes';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { nodeTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import NodeCreateOrUpdate from './NodeCreateOrUpdate';
-import NodeRow, { nodeTableColumns } from './NodeRow';
+import NodeRow from './NodeRow';
 import NodeView from './NodeView';
 
 function NodesContainer() {

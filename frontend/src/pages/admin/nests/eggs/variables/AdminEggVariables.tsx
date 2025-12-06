@@ -1,17 +1,17 @@
+import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
-import Button from '@/elements/Button';
-import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
-import { useAdminStore } from '@/stores/admin';
-import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
 import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder';
 import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import Button from '@/elements/Button';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
 import Spinner from '@/elements/Spinner';
-import { rectSortingStrategy } from '@dnd-kit/sortable';
+import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 
 interface DndEggVariable extends NestEggVariable, DndItem {
   id: string;
@@ -87,16 +87,14 @@ export default function AdminEggVariables({
               }));
               setEggVariables(variablesWithNewOrder);
 
-              try {
-                await updateEggVariableOrder(
-                  contextNest.uuid,
-                  contextEgg.uuid,
-                  reorderedVariables.map((s) => s.uuid),
-                );
-              } catch (error) {
+              await updateEggVariableOrder(
+                contextNest.uuid,
+                contextEgg.uuid,
+                reorderedVariables.map((s) => s.uuid),
+              ).catch((error) => {
                 addToast(httpErrorToHuman(error), 'error');
                 setEggVariables(eggVariables);
-              }
+              });
             },
           }}
           renderOverlay={(activeVariable) =>

@@ -145,6 +145,8 @@ export default function WebsocketListener() {
 
   useWebsocketEvent(SocketEvent.OPERATION_COMPLETED, (uuid) => {
     const fileOperation = fileOperations.get(uuid);
+    if (!fileOperation) return;
+
     switch (fileOperation.type) {
       case 'compress':
         addToast(`Compressed files to ${fileOperation.path} successfully.`, 'success');
@@ -165,6 +167,8 @@ export default function WebsocketListener() {
 
   useWebsocketEvent(SocketEvent.OPERATION_ERROR, (uuid, error) => {
     const fileOperation = fileOperations.get(uuid);
+    if (!fileOperation) return;
+
     switch (fileOperation.type) {
       case 'compress':
         addToast(`Failed to compress files to ${fileOperation.path}:\n${error}`, 'error');

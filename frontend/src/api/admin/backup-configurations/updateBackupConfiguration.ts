@@ -1,9 +1,20 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
-import { backupConfigurationSchema } from '@/schemas';
+import {
+  adminBackupConfigurationResticSchema,
+  adminBackupConfigurationS3Schema,
+  adminBackupConfigurationSchema,
+} from '@/lib/schemas/admin/backupConfigurations';
 
-export default async (backupConfigUuid: string, data: z.infer<typeof backupConfigurationSchema>): Promise<void> => {
+interface Data extends z.infer<typeof adminBackupConfigurationSchema> {
+  backupConfigs: {
+    s3: z.infer<typeof adminBackupConfigurationS3Schema>;
+    restic: z.infer<typeof adminBackupConfigurationResticSchema>;
+  };
+}
+
+export default async (backupConfigUuid: string, data: Data): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/admin/backup-configurations/${backupConfigUuid}`, {

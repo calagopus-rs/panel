@@ -16,7 +16,7 @@ import DatabaseCreateModal from './modals/DatabaseCreateModal';
 export default function ServerDatabases() {
   const { server, databases, setDatabases } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getDatabases(server.uuid, page, search),

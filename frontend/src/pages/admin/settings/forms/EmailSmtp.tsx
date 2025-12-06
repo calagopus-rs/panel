@@ -1,67 +1,40 @@
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { UseFormReturnType } from '@mantine/form';
+import { useEffect } from 'react';
+import { z } from 'zod';
 import NumberInput from '@/elements/input/NumberInput';
+import PasswordInput from '@/elements/input/PasswordInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
+import { adminSettingsEmailSmtpSchema } from '@/lib/schemas/admin/settings';
 
-export default function EmailSmtp({
-  settings,
-  setSettings,
-}: {
-  settings: MailModeSmtp;
-  setSettings: Dispatch<SetStateAction<MailMode>>;
-}) {
+export default function EmailSmtp({ form }: { form: UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>> }) {
   useEffect(() => {
-    setSettings((settings: MailModeSmtp) => ({
-      ...settings,
-      host: settings.host || '',
-      port: settings.port || 587,
-      useTls: settings.useTls ?? true,
-      fromAddress: settings.fromAddress || '',
-      fromName: settings.fromName || '',
-    }));
+    form.setValues({
+      host: form.values.host ?? '',
+      port: form.values.port ?? 587,
+      useTls: form.values.useTls ?? true,
+      fromAddress: form.values.fromAddress ?? '',
+      fromName: form.values.fromName ?? null,
+    });
   }, []);
 
   return (
     <Stack mt='md'>
       <Group grow>
-        <TextInput
-          withAsterisk
-          label='Host'
-          placeholder='Host'
-          value={settings.host || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, host: e.target.value }))}
-        />
-        <NumberInput
-          withAsterisk
-          label='Port'
-          placeholder='Port'
-          min={0}
-          value={settings.port || 587}
-          onChange={(e) => setSettings((settings) => ({ ...settings, port: Number(e) }))}
-        />
+        <TextInput withAsterisk label='Host' placeholder='Host' {...form.getInputProps('host')} />
+        <NumberInput withAsterisk label='Port' placeholder='Port' min={0} {...form.getInputProps('port')} />
       </Group>
 
       <Switch
         label='Use TLS'
-        checked={settings.useTls}
-        onChange={(e) => setSettings((settings) => ({ ...settings, useTls: e.target.checked }))}
+        checked={form.values.useTls}
+        onChange={(e) => form.setFieldValue('useTls', e.target.checked)}
       />
 
       <Group grow>
-        <TextInput
-          label='Username'
-          placeholder='Username'
-          value={settings.username || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, username: e.target.value }))}
-        />
-        <TextInput
-          label='Password'
-          placeholder='Password'
-          type='password'
-          value={settings.password || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, password: e.target.value }))}
-        />
+        <TextInput label='Username' placeholder='Username' {...form.getInputProps('username')} />
+        <PasswordInput label='Password' placeholder='Password' {...form.getInputProps('password')} />
       </Group>
 
       <Group grow>
@@ -69,15 +42,9 @@ export default function EmailSmtp({
           withAsterisk
           label='From Address'
           placeholder='From Address'
-          value={settings.fromAddress || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, fromAddress: e.target.value }))}
+          {...form.getInputProps('fromAddress')}
         />
-        <TextInput
-          label='From Name'
-          placeholder='From Name'
-          value={settings.fromName || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, fromName: e.target.value }))}
-        />
+        <TextInput label='From Name' placeholder='From Name' {...form.getInputProps('fromName')} />
       </Group>
     </Stack>
   );

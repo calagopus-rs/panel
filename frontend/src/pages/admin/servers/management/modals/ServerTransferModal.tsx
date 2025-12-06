@@ -23,9 +23,9 @@ export default function ServerTransferModal({ server, opened, onClose }: ModalPr
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [openModal, setOpenModal] = useState<'confirm'>(null);
-  const [selectedNodeUuid, setSelectedNodeUuid] = useState(null);
-  const [selectedPrimaryAllocationUuid, setSelectedPrimaryAllocationUuid] = useState(null);
+  const [openModal, setOpenModal] = useState<'confirm' | null>(null);
+  const [selectedNodeUuid, setSelectedNodeUuid] = useState<string | null>(null);
+  const [selectedPrimaryAllocationUuid, setSelectedPrimaryAllocationUuid] = useState<string | null>(null);
   const [selectedAllocationUuids, setSelectedAllocationUuids] = useState<string[]>([]);
   const [selectedBackupUuids, setSelectedBackupsUuids] = useState<string[]>([]);
   const [deleteSourceBackups, setDeleteSourceBackups] = useState(false);
@@ -35,11 +35,11 @@ export default function ServerTransferModal({ server, opened, onClose }: ModalPr
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid, 1, search),
+    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid!, 1, search),
     deps: [selectedNodeUuid],
   });
   const availableAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid, 1, search),
+    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid!, 1, search),
     deps: [selectedNodeUuid],
   });
   const backups = useSearchableResource<ServerBackup>({ fetcher: (search) => getBackups(server.uuid, 1, search) });
@@ -51,7 +51,7 @@ export default function ServerTransferModal({ server, opened, onClose }: ModalPr
 
   const doTransfer = async () => {
     await postTransfer(server.uuid, {
-      nodeUuid: selectedNodeUuid,
+      nodeUuid: selectedNodeUuid!,
       allocationUuid: selectedPrimaryAllocationUuid,
       allocationUuids: selectedAllocationUuids,
       backups: selectedBackupUuids,

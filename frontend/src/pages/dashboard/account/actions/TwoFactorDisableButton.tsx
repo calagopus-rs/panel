@@ -21,7 +21,7 @@ export default function TwoFactorDisableButton() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
 
-  const [openModal, setOpenModal] = useState<'disable'>(null);
+  const [openModal, setOpenModal] = useState<'disable' | null>(null);
   const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof schema>>({

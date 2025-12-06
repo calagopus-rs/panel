@@ -1,6 +1,9 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
 
-export default async (data: AdminSettings['webauthn']): Promise<void> => {
+import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
+
+export default async (data: z.infer<typeof adminSettingsWebauthnSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .put('/api/admin/settings', {

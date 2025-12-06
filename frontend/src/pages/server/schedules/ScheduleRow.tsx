@@ -22,7 +22,7 @@ export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) 
   const { server, removeSchedule } = useServerStore();
   const navigateUrl = `/server/${server.uuidShort}/schedules/${schedule.uuid}`;
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteSchedule(server.uuid, schedule.uuid)
@@ -98,7 +98,7 @@ export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) 
           {
             icon: faPlay,
             label: 'Trigger',
-            onClick: undefined,
+            onClick: () => null,
             items: [
               {
                 icon: faPlayCircle,

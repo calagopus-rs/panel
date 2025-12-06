@@ -65,7 +65,7 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
   const doCopy = () => {
     setLoading(true);
 
-    copyFile(server.uuid, join(browsingDirectory, file.name), newFileName || null)
+    copyFile(server.uuid, join(browsingDirectory!, file.name), newFileName || null)
       .then((entry) => {
         addToast('File has been copied.', 'success');
         onClose();
@@ -91,7 +91,7 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
         <Code>
           /home/container/
           <span className='text-cyan-200'>
-            {join(browsingDirectory, newFileName || generateNewName()).replace(/^(\.\.\/|\/)+/, '')}
+            {join(browsingDirectory!, newFileName || generateNewName()).replace(/^(\.\.\/|\/)+/, '')}
           </span>
         </Code>
       </p>

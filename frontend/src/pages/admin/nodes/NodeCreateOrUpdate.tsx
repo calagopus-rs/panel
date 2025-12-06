@@ -1,7 +1,9 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { NIL as uuidNil } from 'uuid';
+import { z } from 'zod';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import getLocations from '@/api/admin/locations/getLocations';
 import createNode from '@/api/admin/nodes/createNode';
@@ -20,13 +22,14 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
+import { adminNodeSchema } from '@/lib/schemas/admin/nodes';
 
 export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateNode>({
+  const form = useForm<z.infer<typeof adminNodeSchema>>({
     initialValues: {
       locationUuid: '',
       backupConfigurationUuid: uuidNil,
@@ -41,13 +44,15 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
       memory: 8192,
       disk: 10240,
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminNodeSchema),
   });
 
-  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateNode, Node>({
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminNodeSchema>, Node>({
     form,
     createFn: () => createNode(form.values),
-    updateFn: () => updateNode(contextNode?.uuid, form.values),
-    deleteFn: () => deleteNode(contextNode?.uuid),
+    updateFn: () => updateNode(contextNode!.uuid, form.values),
+    deleteFn: () => deleteNode(contextNode!.uuid),
     doUpdate: !!contextNode,
     basePath: '/admin/nodes',
     resourceName: 'Node',
@@ -73,7 +78,10 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
   });
 
   const doResetToken = () => {
+    if (!contextNode) return;
+
     setLoading(true);
+
     resetNodeToken(contextNode.uuid)
       .then(({ tokenId, token }) => {
         addToast('Node token reset.', 'success');
@@ -192,11 +200,11 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
         />
 
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
             Save
           </Button>
           {!contextNode && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
               Save & Stay
             </Button>
           )}

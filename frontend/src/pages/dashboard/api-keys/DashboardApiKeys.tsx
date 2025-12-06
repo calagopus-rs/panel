@@ -15,7 +15,7 @@ import ApiKeyRow from './ApiKeyRow';
 export default function DashboardApiKeys() {
   const { apiKeys, setApiKeys } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: getApiKeys,

@@ -9,7 +9,9 @@ import ServerUnsuspendModal from '@/pages/admin/servers/management/modals/Server
 import ServerClearStateModal from './modals/ServerClearStateModal';
 
 export default function AdminServerManagement({ server }: { server: AdminServer }) {
-  const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'clear-state' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'clear-state' | 'delete' | null>(
+    null,
+  );
 
   return (
     <>

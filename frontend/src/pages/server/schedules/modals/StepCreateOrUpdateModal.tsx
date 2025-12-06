@@ -72,7 +72,7 @@ export default function StepCreateOrUpdateModal({
         })
         .finally(() => setLoading(false));
     } else {
-      createScheduleStep(server.uuid, schedule.uuid, { ...step, order: nextStepOrder })
+      createScheduleStep(server.uuid, schedule.uuid, { ...step, order: nextStepOrder! })
         .then((step) => {
           onClose();
           addToast('Schedule step created.', 'success');
@@ -95,7 +95,9 @@ export default function StepCreateOrUpdateModal({
             label,
           }))}
           value={step.action.type}
-          onChange={(value) => setStep({ ...step, action: scheduleStepDefaultMapping[value] })}
+          onChange={(value) =>
+            setStep({ ...step, action: scheduleStepDefaultMapping[value as ScheduleAction['type']] })
+          }
         />
 
         <Divider />

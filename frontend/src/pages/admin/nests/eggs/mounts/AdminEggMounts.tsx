@@ -21,7 +21,7 @@ export default function AdminEggMounts({
 }) {
   const { eggMounts, setEggMounts } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'add'>(null);
+  const [openModal, setOpenModal] = useState<'add' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getEggMounts(contextNest.uuid, contextEgg.uuid, page, search),

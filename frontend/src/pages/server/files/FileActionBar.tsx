@@ -28,7 +28,7 @@ export default function FileActionBar() {
     refreshFiles,
   } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'archive' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'archive' | 'delete' | null>(null);
   const [loading, setLoading] = useState(false);
 
   const doMove = () => {
@@ -38,8 +38,8 @@ export default function FileActionBar() {
       uuid: server.uuid,
       root: '/',
       files: [...movingFiles].map((f) => ({
-        from: join(movingFilesDirectory, f.name),
-        to: join(browsingDirectory, f.name),
+        from: join(movingFilesDirectory!, f.name),
+        to: join(browsingDirectory!, f.name),
       })),
     })
       .then(({ renamed }) => {
@@ -63,7 +63,7 @@ export default function FileActionBar() {
 
     downloadFiles(
       server.uuid,
-      browsingDirectory,
+      browsingDirectory!,
       Array.from(selectedFiles.values()).map((f) => f.name),
       false,
       'zip',

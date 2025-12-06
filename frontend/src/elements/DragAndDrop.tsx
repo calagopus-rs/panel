@@ -218,7 +218,9 @@ export function DndContainer<T extends DndItem>({
       <SortableContext items={items.map((item) => item.id)} strategy={strategy}>
         {children(localItems)}
       </SortableContext>
-      <DragOverlay dropAnimation={dropAnimation}>{renderOverlay ? renderOverlay(activeItem) : null}</DragOverlay>
+      <DragOverlay dropAnimation={dropAnimation}>
+        {renderOverlay && activeItem ? renderOverlay(activeItem) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

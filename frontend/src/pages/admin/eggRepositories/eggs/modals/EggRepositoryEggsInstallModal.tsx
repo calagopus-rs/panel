@@ -1,13 +1,13 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
+import installEgg from '@/api/admin/egg-repositories/eggs/installEgg';
+import getNests from '@/api/admin/nests/getNests';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
-import installEgg from '@/api/admin/egg-repositories/eggs/installEgg';
-import getNests from '@/api/admin/nests/getNests';
 
 export default function EggRepositoryEggsInstallModal({
   eggRepository,
@@ -32,7 +32,7 @@ export default function EggRepositoryEggsInstallModal({
   const doInstall = () => {
     setLoading(true);
 
-    installEgg(eggRepository.uuid, egg.uuid, selectedNest.uuid)
+    installEgg(eggRepository.uuid, egg.uuid, selectedNest!.uuid)
       .then(() => {
         addToast('Egg installed.', 'success');
 
@@ -52,7 +52,7 @@ export default function EggRepositoryEggsInstallModal({
           label='Nest'
           placeholder='Nest'
           value={selectedNest?.uuid}
-          onChange={(value) => setSelectedNest(nests.items.find((m) => m.uuid === value))}
+          onChange={(value) => setSelectedNest(nests.items.find((m) => m.uuid === value) ?? null)}
           data={nests.items.map((mount) => ({
             label: mount.name,
             value: mount.uuid,

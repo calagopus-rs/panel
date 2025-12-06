@@ -6,7 +6,7 @@ export const toSnakeCase = (str: string): string => {
   return str.replace(/([A-Z])/g, '_$1').toLowerCase();
 };
 
-export const transformKeysToCamelCase = (obj: object): object => {
+export const transformKeysToCamelCase = (obj: any): object => {
   if (Array.isArray(obj)) {
     return obj.map((item) => transformKeysToCamelCase(item));
   } else if (obj !== null && typeof obj === 'object') {
@@ -22,7 +22,7 @@ export const transformKeysToCamelCase = (obj: object): object => {
   return obj;
 };
 
-export const transformKeysToSnakeCase = (obj: object) => {
+export const transformKeysToSnakeCase = (obj: any): object => {
   if (Array.isArray(obj)) {
     return obj.map((item) => transformKeysToSnakeCase(item));
   } else if (obj !== null && typeof obj === 'object') {
@@ -55,7 +55,7 @@ export const base64ToArrayBuffer = (base64String: string): ArrayBuffer => {
     }
 
     return bytes.buffer;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error decoding base64 string:', error);
     console.error('Problematic string:', base64String);
     throw new Error('Failed to decode base64 string: ' + error.message);

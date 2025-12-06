@@ -6,10 +6,11 @@ import getNests from '@/api/admin/nests/getNests';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { nestTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import NestCreateOrUpdate from './NestCreateOrUpdate';
-import NestRow, { nestTableColumns } from './NestRow';
+import NestRow from './NestRow';
 import NestView from './NestView';
 
 function NestsContainer() {

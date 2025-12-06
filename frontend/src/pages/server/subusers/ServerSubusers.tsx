@@ -22,7 +22,7 @@ export default function ServerSubusers() {
   const { server, subusers, setSubusers, addSubuser } = useServerStore();
   const { setAvailablePermissions } = useGlobalStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   useEffect(() => {
     getPermissions().then((res) => {
@@ -35,7 +35,7 @@ export default function ServerSubusers() {
     setStoreData: setSubusers,
   });
 
-  const doCreate = (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => {
+  const doCreate = (email: string, permissions: string[], ignoredFiles: string[], captcha: string | null) => {
     createSubuser(server.uuid, { email, permissions, ignoredFiles, captcha })
       .then((subuser) => {
         addSubuser(subuser);

@@ -1,47 +1,35 @@
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { UseFormReturnType } from '@mantine/form';
+import { useEffect } from 'react';
+import { z } from 'zod';
 import TextInput from '@/elements/input/TextInput';
+import { adminSettingsEmailFilesystemSchema } from '@/lib/schemas/admin/settings';
 
 export default function EmailFile({
-  settings,
-  setSettings,
+  form,
 }: {
-  settings: MailModeFilesystem;
-  setSettings: Dispatch<SetStateAction<MailMode>>;
+  form: UseFormReturnType<z.infer<typeof adminSettingsEmailFilesystemSchema>>;
 }) {
   useEffect(() => {
-    setSettings((settings: MailModeFilesystem) => ({
-      ...settings,
-      path: settings.path || '',
-      fromAddress: settings.fromAddress || '',
-      fromName: settings.fromName || '',
-    }));
+    form.setValues({
+      path: form.values.path ?? '',
+      fromAddress: form.values.fromAddress ?? '',
+      fromName: form.values.fromName ?? null,
+    });
   }, []);
 
   return (
     <Stack mt='md'>
-      <TextInput
-        withAsterisk
-        label='Path'
-        placeholder='Path'
-        value={settings.path || ''}
-        onChange={(e) => setSettings((settings) => ({ ...settings, path: e.target.value }))}
-      />
+      <TextInput withAsterisk label='Path' placeholder='Path' {...form.getInputProps('path')} />
 
       <Group grow>
         <TextInput
           withAsterisk
           label='From Address'
           placeholder='From Address'
-          value={settings.fromAddress || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, fromAddress: e.target.value }))}
+          {...form.getInputProps('fromAddress')}
         />
-        <TextInput
-          label='From Name'
-          placeholder='From Name'
-          value={settings.fromName || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, fromName: e.target.value }))}
-        />
+        <TextInput label='From Name' placeholder='From Name' {...form.getInputProps('fromName')} />
       </Group>
     </Stack>
   );

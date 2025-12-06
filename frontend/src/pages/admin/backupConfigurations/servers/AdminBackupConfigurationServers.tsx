@@ -3,14 +3,15 @@ import { useState } from 'react';
 import getBackupConfigurationServers from '@/api/admin/backup-configurations/servers/getBackupConfigurationServers';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
-import ServerRow, { serverTableColumns } from '@/pages/admin/servers/ServerRow';
+import { serverTableColumns } from '@/lib/tableColumns';
+import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 
 export default function AdminBackupConfigurationServers({
   backupConfiguration,
 }: {
-  backupConfiguration?: BackupConfiguration;
+  backupConfiguration: BackupConfiguration;
 }) {
   const [backupConfigurationServers, setBackupConfigurationServers] = useState<ResponseMeta<AdminServer>>(
     getEmptyPaginationSet(),

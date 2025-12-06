@@ -2,15 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
+import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { eggRepositoryTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate';
+import EggRepositoryRow from './EggRepositoryRow';
 import EggRepositoryView from './EggRepositoryView';
-import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
-import EggRepositoryRow, { eggRepositoryTableColumns } from './EggRepositoryRow';
 
 function EggRepositoriesContainer() {
   const navigate = useNavigate();

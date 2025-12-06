@@ -22,10 +22,10 @@ export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
   const makeDirectory = () => {
     setLoading(true);
 
-    createDirectory(server.uuid, browsingDirectory, dirName)
+    createDirectory(server.uuid, browsingDirectory!, dirName)
       .then(() => {
         onClose();
-        setSearchParams({ directory: join(browsingDirectory, dirName) });
+        setSearchParams({ directory: join(browsingDirectory!, dirName) });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -47,7 +47,7 @@ export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
         <span className='text-neutral-200'>This directory will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className='text-cyan-200'>{join(browsingDirectory, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className='text-cyan-200'>{join(browsingDirectory!, dirName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
 

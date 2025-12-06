@@ -31,7 +31,7 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
   const { server, removeBackup } = useServerStore();
   const navigate = useNavigate();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'restore' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'restore' | 'delete' | null>(null);
 
   const doDownload = (archiveFormat: StreamingArchiveFormat) => {
     downloadBackup(server.uuid, backup.uuid, archiveFormat)
@@ -89,7 +89,7 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
           {
             icon: faFileArrowDown,
             label: 'Download',
-            onClick: !backup.isStreaming ? () => doDownload('tar_gz') : undefined,
+            onClick: !backup.isStreaming ? () => doDownload('tar_gz') : () => null,
             color: 'gray',
             items: backup.isStreaming
               ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({

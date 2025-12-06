@@ -53,7 +53,7 @@ function FileTableRow({
   const { browsingDirectory, selectedFiles, movingFiles, movingFilesDirectory } = useServerStore();
   const { settings } = useGlobalStore();
 
-  return (isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory ? (
+  return (isEditableFile(file.mime) && file.size <= settings!.server.maxFileManagerViewSize) || file.directory ? (
     <TableRow
       className='cursor-pointer select-none'
       bg={
@@ -66,12 +66,12 @@ function FileTableRow({
       onClick={() => {
         if (file.directory) {
           setSearchParams({
-            directory: join(browsingDirectory, file.name),
+            directory: join(browsingDirectory!, file.name),
           });
         } else {
           navigate(
             `/server/${server.uuidShort}/files/edit?${createSearchParams({
-              directory: browsingDirectory,
+              directory: browsingDirectory!,
               file: file.name,
             })}`,
           );
@@ -119,20 +119,20 @@ export default function FileRow({
     removeSelectedFile,
   } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'rename' | 'copy' | 'permissions' | 'archive' | 'delete' | null>(null);
 
   useEffect(() => {
     setChildOpenModal(openModal !== null);
   }, [openModal]);
 
   const doUnarchive = () => {
-    decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {
+    decompressFile(server.uuid, browsingDirectory!, file.name).catch((msg) => {
       addToast(httpErrorToHuman(msg), 'error');
     });
   };
 
   const doDownload = (archiveFormat: StreamingArchiveFormat) => {
-    downloadFiles(server.uuid, browsingDirectory, [file.name], file.directory, archiveFormat)
+    downloadFiles(server.uuid, browsingDirectory!, [file.name], file.directory, archiveFormat)
       .then(({ url }) => {
         addToast('Download started.', 'success');
         window.open(url);
@@ -197,7 +197,7 @@ export default function FileRow({
           {
             icon: faFileArrowDown,
             label: 'Download',
-            onClick: file.file ? () => doDownload('tar_gz') : undefined,
+            onClick: file.file ? () => doDownload('tar_gz') : () => null,
             color: 'gray',
             items: file.directory
               ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({

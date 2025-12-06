@@ -5,8 +5,6 @@ import Tooltip from '@/elements/Tooltip';
 import { backupDiskLabelMapping } from '@/lib/enums';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const backupConfigurationTableColumns = ['ID', 'Name', 'Disk', 'Created'];
-
 export default function BackupConfigurationRow({ backupConfiguration }: { backupConfiguration: BackupConfiguration }) {
   return (
     <TableRow>

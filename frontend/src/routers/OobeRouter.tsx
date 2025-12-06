@@ -33,8 +33,8 @@ export interface OobeComponentProps {
 interface OobeStep {
   path: string;
   stepKey: OobeStepKey | null;
-  label: string;
-  icon: IconDefinition;
+  label: string | null;
+  icon: IconDefinition | null;
   component: ComponentType<OobeComponentProps>;
   preAuth?: boolean;
   skipTo?: OobeStepKey;
@@ -149,7 +149,7 @@ export default function OobeRouter() {
     if (!step || !step.skipTo) return;
 
     const skipToStep = steps.find((s) => s.stepKey === step.skipTo);
-    if (!skipToStep) return;
+    if (!skipToStep?.stepKey) return;
 
     updateOobeSettings(skipToStep.stepKey).then(() => {
       setSettings({ ...settings, oobeStep: skipToStep.stepKey });
@@ -164,7 +164,11 @@ export default function OobeRouter() {
           <Card>
             <Stepper active={filteredSteps().findIndex((s) => s.path === activeStep?.path)}>
               {filteredSteps().map((step, index) => (
-                <Stepper.Step key={index} label={step.label} icon={<FontAwesomeIcon icon={step.icon} />} />
+                <Stepper.Step
+                  key={index}
+                  label={step.label}
+                  icon={step.icon ? <FontAwesomeIcon icon={step.icon} /> : null}
+                />
               ))}
             </Stepper>
 

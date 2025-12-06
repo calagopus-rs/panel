@@ -2,7 +2,7 @@ import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
-import { useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import getSchedules from '@/api/server/schedules/getSchedules';
 import importSchedule from '@/api/server/schedules/importSchedule';
@@ -21,7 +21,7 @@ export default function ServerSchedules() {
   const { addToast } = useToast();
   const { server, schedules, setSchedules, addSchedule } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -30,37 +30,33 @@ export default function ServerSchedules() {
     setStoreData: setSchedules,
   });
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    event.target.value = null;
+    event.target.value = '';
 
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse schedule: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      importSchedule(server.uuid, data)
-        .then((data) => {
-          addSchedule(data);
-          addToast('Schedule imported.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
     } catch (err) {
-      addToast(httpErrorToHuman(err), 'error');
+      addToast(`Failed to parse schedule: ${err}`, 'error');
+      return;
     }
+
+    importSchedule(server.uuid, data)
+      .then((data) => {
+        addSchedule(data);
+        addToast('Schedule imported.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (

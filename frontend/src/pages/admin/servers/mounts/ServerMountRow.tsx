@@ -12,13 +12,11 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const serverMountTableColumns = ['ID', 'Name', 'Source', 'Target', 'Added', ''];
-
 export default function ServerMountRow({ server, mount }: { server: AdminServer; mount: AdminServerMount }) {
   const { addToast } = useToast();
   const { removeServerMount } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteServerMount(server.uuid, mount.mount.uuid)

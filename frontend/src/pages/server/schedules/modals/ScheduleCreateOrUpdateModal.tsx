@@ -93,7 +93,7 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
         .then(() => {
           addToast('Schedule updated.', 'success');
           onClose();
-          onScheduleUpdate({ name, enabled, triggers });
+          onScheduleUpdate!({ name, enabled, triggers });
         })
         .catch((msg) => {
           addToast(httpErrorToHuman(msg), 'error');
@@ -152,14 +152,14 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
                     case 'power_action':
                       setTriggers((triggers) => [
                         ...triggers.slice(0, index),
-                        { type: 'power_action', action: null } as ScheduleTriggerPowerAction,
+                        { type: 'power_action', action: 'start' } as ScheduleTriggerPowerAction,
                         ...triggers.slice(index + 1),
                       ]);
                       break;
                     case 'server_state':
                       setTriggers((triggers) => [
                         ...triggers.slice(0, index),
-                        { type: 'server_state', state: null } as ScheduleTriggerServerState,
+                        { type: 'server_state', state: 'running' } as ScheduleTriggerServerState,
                         ...triggers.slice(index + 1),
                       ]);
                       break;

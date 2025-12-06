@@ -6,16 +6,17 @@ import getServerAllocations from '@/api/admin/servers/allocations/getServerAlloc
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Table from '@/elements/Table';
+import { serverAllocationTableColumns } from '@/lib/tableColumns';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import ServerAllocationRow, { serverAllocationTableColumns } from './ServerAllocationRow';
+import ServerAllocationRow from './ServerAllocationRow';
 import TextInput from '@/elements/input/TextInput';
 
 export default function AdminServerAllocations({ server }: { server: AdminServer }) {
   const { serverAllocations, setServerAllocations } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'add'>(null);
+  const [openModal, setOpenModal] = useState<'add' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getServerAllocations(server.uuid, page, search),

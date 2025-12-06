@@ -5,10 +5,9 @@ import { Route, Routes, useNavigate } from 'react-router';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
+import { backupConfigurationTableColumns } from '@/lib/tableColumns';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
-import BackupConfigurationRow, {
-  backupConfigurationTableColumns,
-} from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
+import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
 import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';

@@ -22,7 +22,7 @@ export default function PullFileModal({ opened, onClose }: ModalProps) {
     setLoading(true);
 
     pullFile(server.uuid, {
-      root: browsingDirectory,
+      root: browsingDirectory!,
       url: url,
       name: fileName,
     })
@@ -57,7 +57,7 @@ export default function PullFileModal({ opened, onClose }: ModalProps) {
         <span className='text-neutral-200'>This file will be created as&nbsp;</span>
         <Code>
           /home/container/
-          <span className='text-cyan-200'>{join(browsingDirectory, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
+          <span className='text-cyan-200'>{join(browsingDirectory!, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
         </Code>
       </p>
 

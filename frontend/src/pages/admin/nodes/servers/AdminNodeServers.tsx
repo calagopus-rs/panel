@@ -2,10 +2,11 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
-import ServerRow, { serverTableColumns } from '@/pages/admin/servers/ServerRow';
+import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 import getNodeServers from '@/api/admin/nodes/servers/getNodeServers';
+import { serverTableColumns } from '@/lib/tableColumns';
 
 export default function AdminNodeServers({ node }: { node: Node }) {
   const [nodeServers, setNodeServers] = useState<ResponseMeta<AdminServer>>(getEmptyPaginationSet());

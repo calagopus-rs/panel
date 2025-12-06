@@ -15,7 +15,7 @@ import DatabaseDetailsModal from './modals/DatabaseDetailsModal';
 import DatabaseEditModal from './modals/DatabaseEditModal';
 
 export default function DatabaseRow({ database }: { database: ServerDatabase }) {
-  const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete' | null>(null);
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);
   const server = useServerStore((state) => state.server);

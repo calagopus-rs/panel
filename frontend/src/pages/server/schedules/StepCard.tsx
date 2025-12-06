@@ -25,7 +25,7 @@ export default function StepCard({ schedule, step, onStepUpdate, onStepDelete }:
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
-  const [openModal, setOpenModal] = useState<'update' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'update' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteScheduleStep(server.uuid, schedule.uuid, step.uuid)

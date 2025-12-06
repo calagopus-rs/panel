@@ -32,7 +32,7 @@ export interface FilesSlice {
 }
 
 export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (set, get): FilesSlice => ({
-  browsingDirectory: null,
+  browsingDirectory: '',
   setBrowsingDirectory: (value) => set((state) => ({ ...state, browsingDirectory: value })),
 
   browsingBackup: null,
@@ -92,7 +92,7 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
   refreshFiles: (page: number) => {
     const state = get();
 
-    loadDirectory(state.server.uuid, state.browsingDirectory, page).then((data) => {
+    loadDirectory(state.server.uuid, state.browsingDirectory!, page).then((data) => {
       set((state) => ({ ...state, browsingEntries: data }));
     });
   },

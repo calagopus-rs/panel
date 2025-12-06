@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const serverTableColumns = ['ID', 'Name', 'Node', 'Owner', 'Allocation', 'Created'];
-
 export default function ServerRow({ server }: { server: AdminServer }) {
   return (
     <TableRow>

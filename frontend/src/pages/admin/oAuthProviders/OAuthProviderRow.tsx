@@ -4,16 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const oauthProviderTableColumns = [
-  'ID',
-  'Name',
-  'Enabled',
-  'Login Only',
-  'Link Viewable',
-  'User Manageable',
-  'Created',
-];
-
 export default function OAuthProviderRow({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) {
   return (
     <TableRow>

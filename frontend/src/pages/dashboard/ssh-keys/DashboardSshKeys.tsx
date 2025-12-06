@@ -16,7 +16,7 @@ import SshKeyRow from './SshKeyRow';
 export default function DashboardSshKeys() {
   const { sshKeys, setSshKeys } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'create' | 'import'>(null);
+  const [openModal, setOpenModal] = useState<'create' | 'import' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: getSshKeys,

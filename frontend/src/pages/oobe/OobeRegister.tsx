@@ -13,24 +13,7 @@ import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-
-const schema = z
-  .object({
-    username: z
-      .string()
-      .min(3)
-      .max(15)
-      .regex(/^[a-zA-Z0-9_]+$/),
-    email: z.email(),
-    nameFirst: z.string().min(2).max(255),
-    nameLast: z.string().min(2).max(255),
-    password: z.string().min(8).max(512),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
+import { oobeRegister } from '@/lib/schemas/oobe';
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -38,7 +21,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof oobeRegister>>({
     initialValues: {
       username: '',
       email: '',
@@ -48,7 +31,7 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
       confirmPassword: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(oobeRegister),
   });
 
   const onSubmit = async () => {
@@ -57,8 +40,8 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
     register({
       username: form.values.username,
       email: form.values.email,
-      name_first: form.values.nameFirst,
-      name_last: form.values.nameLast,
+      nameFirst: form.values.nameFirst,
+      nameLast: form.values.nameLast,
       password: form.values.password,
       captcha: '',
     })

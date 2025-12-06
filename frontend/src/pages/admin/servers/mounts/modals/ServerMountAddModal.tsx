@@ -29,6 +29,8 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
   }, [opened]);
 
   const doAdd = () => {
+    if (!selectedMount) return;
+
     setLoading(true);
 
     createServerMount(server.uuid, { mountUuid: selectedMount.mount.uuid })
@@ -52,7 +54,7 @@ export default function ServerMountAddModal({ server, opened, onClose }: ModalPr
           label='Mount'
           placeholder='Mount'
           value={selectedMount?.mount.uuid}
-          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.mount.uuid === value))}
+          onChange={(value) => setSelectedMount(mounts.items.find((m) => m.mount.uuid === value) ?? null)}
           data={mounts.items.map((mount) => ({
             label: mount.mount.name,
             value: mount.mount.uuid,

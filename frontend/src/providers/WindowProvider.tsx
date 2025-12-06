@@ -1,21 +1,21 @@
-import Card from '@/elements/Card';
 import { faX, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Title } from '@mantine/core';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
+import Card from '@/elements/Card';
 import { CurrentWindowProvider } from './CurrentWindowProvider';
 
 interface WindowType {
   id: number;
-  icon?: IconDefinition;
-  title: string;
+  icon: IconDefinition | undefined;
+  title: string | undefined;
   component: ReactNode;
   zIndex: number;
 }
 
 interface WindowContextType {
-  addWindow: (icon: IconDefinition | null, title: string, component: ReactNode) => number;
+  addWindow: (icon: IconDefinition | undefined, title: string | undefined, component: ReactNode) => number;
   closeWindow: (id: number) => void;
 }
 
@@ -32,7 +32,7 @@ export const WindowProvider: FC<{ children: ReactNode }> = ({ children }) => {
   }, []);
 
   const addWindow = useCallback(
-    (icon: IconDefinition | null, title: string, component: ReactNode) => {
+    (icon: IconDefinition | undefined, title: string | undefined, component: ReactNode) => {
       const id = windowId++;
       setMaxZIndex((prev) => prev + 1);
       setWindows((prev) => [...prev, { id, icon, title, component, zIndex: maxZIndex + 1 }]);

@@ -3,7 +3,8 @@ import { useState } from 'react';
 import getRoleUsers from '@/api/admin/roles/users/getRoleUsers';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
-import UserRow, { userTableColumns } from '@/pages/admin/users/UserRow';
+import { userTableColumns } from '@/lib/tableColumns';
+import UserRow from '@/pages/admin/users/UserRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 

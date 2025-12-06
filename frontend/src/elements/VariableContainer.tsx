@@ -69,7 +69,7 @@ export default function VariableContainer({
               .split(',')
               .map((option) => ({ value: option, label: option }))}
             value={value}
-            onChange={(value) => setValue(value)}
+            onChange={(value) => setValue(value ?? '')}
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
           />
         ) : variable.rules.includes('integer') ||
@@ -79,7 +79,7 @@ export default function VariableContainer({
           <NumberInput
             withAsterisk={variable.rules.includes('required')}
             id={variable.envVariable}
-            placeholder={variable.defaultValue}
+            placeholder={variable.defaultValue ?? ''}
             value={value}
             onChange={(value) => setValue(String(value))}
             disabled={loading || (!variable.isEditable && !overrideReadonly)}
@@ -88,7 +88,7 @@ export default function VariableContainer({
           <TextInput
             withAsterisk={variable.rules.includes('required')}
             id={variable.envVariable}
-            placeholder={variable.defaultValue}
+            placeholder={variable.defaultValue ?? ''}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             disabled={loading || (!variable.isEditable && !overrideReadonly)}

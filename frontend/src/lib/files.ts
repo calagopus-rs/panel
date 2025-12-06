@@ -1,4 +1,4 @@
-const languageMapping = {
+const languageMapping: Record<string, string> = {
   _coffee: 'coffeescript',
   _js: 'javascript',
   adp: 'tcl',
@@ -336,7 +336,7 @@ export function permissionStringToNumber(mode: string) {
 
   const perms = mode.slice(1); // Skip the first character
 
-  const mapping = {
+  const mapping: Record<string, number> = {
     r: 4,
     w: 2,
     x: 1,

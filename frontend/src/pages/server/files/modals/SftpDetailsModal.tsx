@@ -25,10 +25,10 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
           <TextInput label='Host' value={server.sftpHost} className='pointer-events-none' disabled />
         </CopyOnClick>
 
-        <CopyOnClick content={`${user.username}.${server.uuidShort}`} className='col-span-4 text-left'>
+        <CopyOnClick content={`${user!.username}.${server.uuidShort}`} className='col-span-4 text-left'>
           <TextInput
             label='Username'
-            value={`${user.username}.${server.uuidShort}`}
+            value={`${user!.username}.${server.uuidShort}`}
             className='pointer-events-none'
             disabled
           />
@@ -43,7 +43,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
       </div>
 
       <Group mt='md'>
-        <a href={`sftp://${user.username}.${server.uuidShort}@${server.sftpHost}:${server.sftpPort}`}>
+        <a href={`sftp://${user!.username}.${server.uuidShort}@${server.sftpHost}:${server.sftpPort}`}>
           <Button onClick={onClose} leftSection={<FontAwesomeIcon icon={faExternalLink} />}>
             Launch
           </Button>

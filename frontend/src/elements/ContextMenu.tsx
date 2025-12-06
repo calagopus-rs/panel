@@ -27,7 +27,7 @@ interface ContextMenuContextType {
   hideMenu: () => void;
 }
 
-const ContextMenuContext = createContext<ContextMenuContextType | null>(null);
+const ContextMenuContext = createContext<ContextMenuContextType | undefined>(undefined);
 
 export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNode; menuProps?: MenuProps }) => {
   const { getParent } = useCurrentWindow();
@@ -97,7 +97,7 @@ export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNo
           {state.items
             .filter((item) => !item.hidden)
             .map((item, idx) =>
-              item.items?.length > 0 ? (
+              (item.items || []).length > 0 ? (
                 <Menu.Sub key={idx} position={state.x + 300 > window.innerWidth ? 'left-start' : 'right-start'}>
                   <Menu.Sub.Target>
                     <Menu.Sub.Item
@@ -117,7 +117,7 @@ export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNo
                   </Menu.Sub.Target>
 
                   <Menu.Sub.Dropdown>
-                    {item.items.map((subItem, subIdx) => (
+                    {item.items!.map((subItem, subIdx) => (
                       <Menu.Item
                         key={idx.toString() + subIdx.toString()}
                         leftSection={<FontAwesomeIcon icon={subItem.icon} />}
@@ -165,7 +165,13 @@ const ContextMenu = ({
   items: Item[];
   children: (ctx: { openMenu: (x: number, y: number) => void; hideMenu: () => void }) => ReactNode;
 }) => {
-  const { showMenu, hideMenu } = useContext(ContextMenuContext);
+  const context = useContext(ContextMenuContext);
+
+  if (!context) {
+    throw new Error('ContextMenu must be used within a ContextMenuProvider');
+  }
+
+  const { showMenu, hideMenu } = context;
 
   const openMenu = (x: number, y: number) => {
     showMenu(

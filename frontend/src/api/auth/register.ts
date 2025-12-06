@@ -1,13 +1,11 @@
 import { axiosInstance } from '@/api/axios';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { z } from 'zod';
 
-interface Data {
-  username: string;
-  email: string;
-  nameFirst: string;
-  nameLast: string;
-  password: string;
-  captcha?: string;
+import { authRegisterSchema } from '@/lib/schemas/auth';
+
+interface Data extends z.infer<typeof authRegisterSchema> {
+  captcha?: string | null;
 }
 
 interface Response {

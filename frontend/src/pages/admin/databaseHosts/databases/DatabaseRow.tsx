@@ -10,8 +10,6 @@ import { databaseTypeLabelMapping } from '@/lib/enums';
 import { bytesToString } from '@/lib/size';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const databaseTableColumns = ['Name', 'Server', 'Type', 'Address', 'Username', 'Size', 'Created'];
-
 export default function DatabaseRow({ database }: { database: AdminServerDatabase }) {
   const [size, setSize] = useState(0);
   const [sizeLoading, setSizeLoading] = useState(true);

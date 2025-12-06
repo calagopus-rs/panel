@@ -4,8 +4,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const locationTableColumns = ['ID', 'Name', 'Backup Configuration', 'Created'];
-
 export default ({ location }: { location: Location }) => {
   return (
     <TableRow>

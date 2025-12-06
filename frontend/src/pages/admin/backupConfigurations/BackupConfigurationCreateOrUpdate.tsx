@@ -16,7 +16,11 @@ import { backupDiskLabelMapping } from '@/lib/enums';
 import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
 import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
 import { useResourceForm } from '@/plugins/useResourceForm';
-import { backupConfigurationSchema } from '@/schemas';
+import {
+  adminBackupConfigurationResticSchema,
+  adminBackupConfigurationS3Schema,
+  adminBackupConfigurationSchema,
+} from '@/lib/schemas/admin/backupConfigurations';
 
 export default function BackupConfigurationCreateOrUpdate({
   contextBackupConfiguration,
@@ -25,39 +29,55 @@ export default function BackupConfigurationCreateOrUpdate({
 }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<z.infer<typeof backupConfigurationSchema>>({
+  const form = useForm<z.infer<typeof adminBackupConfigurationSchema>>({
     initialValues: {
       name: '',
       description: null,
       backupDisk: 'local',
-      backupConfigs: {
-        s3: {
-          accessKey: '',
-          secretKey: '',
-          bucket: '',
-          region: '',
-          endpoint: '',
-          pathStyle: true,
-          partSize: 0,
-        },
-        restic: {
-          repository: '',
-          retryLockSeconds: 0,
-          environment: {},
-        },
-      },
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(backupConfigurationSchema),
+    validate: zod4Resolver(adminBackupConfigurationSchema),
+  });
+
+  const backupConfigS3Form = useForm<z.infer<typeof adminBackupConfigurationS3Schema>>({
+    initialValues: {
+      accessKey: '',
+      secretKey: '',
+      bucket: '',
+      region: '',
+      endpoint: '',
+      pathStyle: true,
+      partSize: 0,
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminBackupConfigurationS3Schema),
+  });
+
+  const backupConfigResticForm = useForm<z.infer<typeof adminBackupConfigurationResticSchema>>({
+    initialValues: {
+      repository: '',
+      retryLockSeconds: 0,
+      environment: {},
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminBackupConfigurationResticSchema),
   });
 
   const { loading, doCreateOrUpdate, doDelete } = useResourceForm<
-    z.infer<typeof backupConfigurationSchema>,
+    z.infer<typeof adminBackupConfigurationSchema>,
     BackupConfiguration
   >({
     form,
-    createFn: () => createBackupConfiguration(form.values),
-    updateFn: () => updateBackupConfiguration(contextBackupConfiguration!.uuid, form.values),
+    createFn: () =>
+      createBackupConfiguration({
+        ...form.values,
+        backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values },
+      }),
+    updateFn: () =>
+      updateBackupConfiguration(contextBackupConfiguration!.uuid, {
+        ...form.values,
+        backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values },
+      }),
     deleteFn: () => deleteBackupConfiguration(contextBackupConfiguration!.uuid),
     doUpdate: !!contextBackupConfiguration,
     basePath: '/admin/backup-configurations',
@@ -104,11 +124,19 @@ export default function BackupConfigurationCreateOrUpdate({
           <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
         </Group>
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button
+            onClick={() => doCreateOrUpdate(false)}
+            disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+            loading={loading}
+          >
             Save
           </Button>
           {!contextBackupConfiguration && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button
+              onClick={() => doCreateOrUpdate(true)}
+              disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+              loading={loading}
+            >
               Save & Stay
             </Button>
           )}
@@ -118,8 +146,8 @@ export default function BackupConfigurationCreateOrUpdate({
             </Button>
           )}
         </Group>
-        {form.values.backupDisk === 's3' || form.values.backupConfigs?.s3 ? <BackupS3 form={form} /> : null}
-        {form.values.backupDisk === 'restic' || form.values.backupConfigs?.restic ? <BackupRestic form={form} /> : null}
+        <BackupS3 form={backupConfigS3Form} />
+        <BackupRestic form={backupConfigResticForm} />
       </Stack>
     </>
   );

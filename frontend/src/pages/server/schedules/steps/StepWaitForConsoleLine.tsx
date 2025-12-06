@@ -16,7 +16,7 @@ export default function StepWaitForConsoleLine({
         label='Line contains'
         placeholder='Text to make sure is in the console line'
         value={action.contains || ''}
-        onChange={(e) => setAction({ ...action, contains: e.target.value || null })}
+        onChange={(e) => setAction({ ...action, contains: e.target.value || '' })}
       />
       <NumberInput
         withAsterisk

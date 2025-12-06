@@ -27,12 +27,12 @@ export default function EggMountAddModal({
   const doAdd = () => {
     setLoading(true);
 
-    createEggMount(nest.uuid, egg.uuid, mount.uuid)
+    createEggMount(nest.uuid, egg.uuid, mount!.uuid)
       .then(() => {
         addToast('Egg Mount added.', 'success');
 
         onClose();
-        addEggMount({ mount, created: new Date() });
+        addEggMount({ mount: mount!, created: new Date() });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -48,7 +48,7 @@ export default function EggMountAddModal({
           label='Mount'
           placeholder='Mount'
           value={mount?.uuid}
-          onChange={(value) => setMount(mounts.items.find((m) => m.uuid === value))}
+          onChange={(value) => setMount(mounts.items.find((m) => m.uuid === value) ?? null)}
           data={mounts.items.map((mount) => ({
             label: mount.name,
             value: mount.uuid,

@@ -6,10 +6,11 @@ import getLocations from '@/api/admin/locations/getLocations';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { locationTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import LocationCreateOrUpdate from './LocationCreateOrUpdate';
-import LocationRow, { locationTableColumns } from './LocationRow';
+import LocationRow from './LocationRow';
 import LocationView from './LocationView';
 
 function LocationsContainer() {

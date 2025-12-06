@@ -65,11 +65,11 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
                 }),
                 acc
               ),
-              {},
+              {} as GroupedDatabaseHosts,
             ),
           )}
           value={host}
-          onChange={setHost}
+          onChange={(value) => setHost(value ?? '')}
         />
 
         <Group>

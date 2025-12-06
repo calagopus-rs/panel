@@ -15,7 +15,7 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
   const { addToast } = useToast();
   const { server, removeAllocation } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const doRemove = async () => {
     await deleteAllocation(server.uuid, allocation.uuid)

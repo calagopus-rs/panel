@@ -1,27 +1,48 @@
 import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
+import { UseFormReturnType, useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import EmailFile from './forms/EmailFile';
 import EmailSendmail from './forms/EmailSendmail';
 import EmailSmtp from './forms/EmailSmtp';
+import {
+  adminSettingsEmailFilesystemSchema,
+  adminSettingsEmailSchema,
+  adminSettingsEmailSendmailSchema,
+  adminSettingsEmailSmtpSchema,
+} from '@/lib/schemas/admin/settings';
 
 export default function EmailContainer() {
   const { addToast } = useToast();
   const { mailMode } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<MailMode>(mailMode);
+
+  const form = useForm<z.infer<typeof adminSettingsEmailSchema>>({
+    initialValues: {
+      type: 'none',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminSettingsEmailSchema),
+  });
+
+  useEffect(() => {
+    form.setValues({
+      ...mailMode,
+    });
+  }, [mailMode]);
 
   const doUpdate = () => {
     setLoading(true);
-    updateEmailSettings(transformKeysToSnakeCase({ ...settings } as MailMode))
+    updateEmailSettings(form.values)
       .then(() => {
         addToast('Email settings updated.', 'success');
       })
@@ -39,24 +60,23 @@ export default function EmailContainer() {
 
       <Select
         label='Provider'
-        value={settings.type}
-        onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
         data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
           value,
           label,
         }))}
+        {...form.getInputProps('type')}
       />
 
-      {settings.type === 'smtp' ? (
-        <EmailSmtp settings={settings as MailModeSmtp} setSettings={setSettings} />
-      ) : settings.type === 'sendmail' ? (
-        <EmailSendmail settings={settings as MailModeSendmail} setSettings={setSettings} />
-      ) : settings.type === 'filesystem' ? (
-        <EmailFile settings={settings as MailModeFilesystem} setSettings={setSettings} />
+      {form.values.type === 'smtp' ? (
+        <EmailSmtp form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>>} />
+      ) : form.values.type === 'sendmail' ? (
+        <EmailSendmail form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSendmailSchema>>} />
+      ) : form.values.type === 'filesystem' ? (
+        <EmailFile form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailFilesystemSchema>>} />
       ) : null}
 
       <Group mt='md'>
-        <Button onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
       </Group>

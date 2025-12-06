@@ -17,7 +17,7 @@ export default function SshKeyRow({ sshKey }: { sshKey: UserSshKey }) {
   const { addToast } = useToast();
   const { removeSshKey } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteSshKey(sshKey.uuid)

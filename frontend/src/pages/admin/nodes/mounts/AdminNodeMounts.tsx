@@ -7,15 +7,16 @@ import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { nodeMountTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import NodeMountAddModal from './modals/NodeMountAddModal';
-import NodeMountRow, { nodeMountTableColumns } from './NodeMountRow';
+import NodeMountRow from './NodeMountRow';
 
 export default function AdminNodeMounts({ node }: { node: Node }) {
   const { nodeMounts, setNodeMounts } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'add'>(null);
+  const [openModal, setOpenModal] = useState<'add' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getNodeMounts(node.uuid, page, search),

@@ -118,7 +118,7 @@ export default function ApiKeyCreateOrUpdateModal({ contextApiKey, opened, onClo
             setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
           />
         )}
-        {user.admin && availablePermissions?.adminPermissions && (
+        {user!.admin && availablePermissions?.adminPermissions && (
           <PermissionSelector
             label='Admin Permissions'
             permissionsMapType='adminPermissions'

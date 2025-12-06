@@ -16,11 +16,14 @@ type Props = ModalProps & {
   file: DirectoryEntry;
 };
 
+type PermissionKey = 'owner' | 'group' | 'other';
+type PermissionType = 'read' | 'write' | 'execute';
+
 export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory } = useServerStore();
 
-  const [permissions, setPermissions] = useState({
+  const [permissions, setPermissions] = useState<Record<PermissionKey, Record<PermissionType, boolean>>>({
     owner: { read: false, write: false, execute: false },
     group: { read: false, write: false, execute: false },
     other: { read: false, write: false, execute: false },
@@ -55,7 +58,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
     }
   }, [file.mode]);
 
-  const togglePermission = (category, type) => {
+  const togglePermission = (category: PermissionKey, type: PermissionType) => {
     setPermissions((prev) => ({
       ...prev,
       [category]: {
@@ -68,7 +71,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   const getPermissionString = () => {
     const { owner, group, other } = permissions;
 
-    const getTriad = (perms) => {
+    const getTriad = (perms: Record<PermissionType, boolean>) => {
       return (perms.read ? 'r' : '-') + (perms.write ? 'w' : '-') + (perms.execute ? 'x' : '-');
     };
 
@@ -78,7 +81,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
   };
 
   const getOctalValue = () => {
-    const getValue = (perms) => {
+    const getValue = (perms: Record<PermissionType, boolean>) => {
       return (perms.read ? 4 : 0) + (perms.write ? 2 : 0) + (perms.execute ? 1 : 0);
     };
 
@@ -89,7 +92,15 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
     );
   };
 
-  const PermissionGroup = ({ title, category, perms }) => (
+  const PermissionGroup = ({
+    title,
+    category,
+    perms,
+  }: {
+    title: string;
+    category: PermissionKey;
+    perms: Record<PermissionType, boolean>;
+  }) => (
     <Card>
       <Title order={3} c='white'>
         {title}
@@ -100,7 +111,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
             key={type}
             label={type[0].toUpperCase().concat(type.slice(1))}
             checked={value}
-            onChange={() => togglePermission(category, type)}
+            onChange={() => togglePermission(category, type as PermissionType)}
           />
         ))}
       </Stack>
@@ -114,7 +125,7 @@ export default function FilePermissionsModal({ file, opened, onClose }: Props) {
 
     chmodFiles({
       uuid: server.uuid,
-      root: browsingDirectory,
+      root: browsingDirectory!,
       files: [{ file: file.name, mode: newPermissions.toString() }],
     })
       .then(() => {

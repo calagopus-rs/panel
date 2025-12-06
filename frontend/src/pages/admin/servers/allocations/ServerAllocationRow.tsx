@@ -18,8 +18,6 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const serverAllocationTableColumns = ['', 'ID', 'IP', 'IP Alias', 'Port', 'Notes', 'Created'];
-
 export default function ServerAllocationRow({
   server,
   allocation,
@@ -31,7 +29,7 @@ export default function ServerAllocationRow({
   const { serverAllocations, setServerAllocations, removeServerAllocation } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState<'edit' | 'remove'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'remove' | null>(null);
   const [allocationNote, setAllocationNote] = useState(allocation.notes ?? '');
 
   const doEdit = () => {

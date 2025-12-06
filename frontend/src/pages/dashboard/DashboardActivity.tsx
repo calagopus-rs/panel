@@ -53,7 +53,7 @@ export default function DashboardActivity() {
 
             <TableData>
               <Group gap={4} justify='right' wrap='nowrap'>
-                {Object.keys(activity.data).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
+                {Object.keys(activity.data ?? {}).length > 0 ? <ActivityInfoButton activity={activity} /> : null}
               </Group>
             </TableData>
           </TableRow>

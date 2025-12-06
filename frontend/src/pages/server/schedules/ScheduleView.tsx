@@ -264,7 +264,7 @@ export default function ScheduleView() {
   const { addToast } = useToast();
   const { server, scheduleStatus } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'update'>(null);
+  const [openModal, setOpenModal] = useState<'update' | null>(null);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
   const [loading, setLoading] = useState(false);
@@ -292,7 +292,7 @@ export default function ScheduleView() {
     if (params.id) {
       setLoading(true);
 
-      updateSchedule(server.uuid, params.id, { condition: schedule.condition })
+      updateSchedule(server.uuid, params.id, { condition: schedule!.condition })
         .then(() => {
           addToast('Schedule updated.', 'success');
         })
@@ -312,7 +312,7 @@ export default function ScheduleView() {
     <>
       <ScheduleCreateOrUpdateModal
         propSchedule={schedule}
-        onScheduleUpdate={(schedule) => setSchedule((s) => ({ ...s, ...schedule }))}
+        onScheduleUpdate={(schedule) => setSchedule((s) => ({ ...s!, ...schedule }))}
         opened={openModal === 'update'}
         onClose={() => setOpenModal(null)}
       />
@@ -463,7 +463,7 @@ export default function ScheduleView() {
               </Title>
               <ScheduleConditionBuilder
                 condition={schedule.condition}
-                onChange={(condition) => setSchedule((schedule) => ({ ...schedule, condition }))}
+                onChange={(condition) => setSchedule((schedule) => ({ ...schedule!, condition }))}
               />
 
               <div className='flex flex-row mt-6'>

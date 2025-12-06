@@ -1,8 +1,8 @@
 import { UseFormReturnType } from '@mantine/form';
 import { useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
 import { useNavigate } from 'react-router';
+import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider';
 
 interface HasUuid {
   uuid: string;
@@ -38,14 +38,14 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
   const doCreateOrUpdate = (stay: boolean, args?: CArgs | UArgs) => {
     setLoading(true);
 
-    if (doUpdate) {
+    if (doUpdate && updateFn) {
       updateFn(args as UArgs)
         .then(() => {
           addToast(`${resourceName} updated.`, 'success');
         })
         .catch((msg) => addToast(httpErrorToHuman(msg), 'error'))
         .finally(() => setLoading(false));
-    } else {
+    } else if (createFn) {
       createFn(args as CArgs)
         .then((result: U) => {
           addToast(`${resourceName} created.`, 'success');
@@ -60,7 +60,11 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
     }
   };
 
-  const doDelete = (args?: DArgs) =>
+  const doDelete = (args?: DArgs) => {
+    if (!deleteFn) {
+      return;
+    }
+
     deleteFn(args as DArgs)
       .then(() => {
         addToast(`${resourceName} deleted.`, 'success');
@@ -69,6 +73,7 @@ export const useResourceForm = <T, U extends HasUuid, CArgs = unknown, UArgs = u
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
+  };
 
   return {
     loading,

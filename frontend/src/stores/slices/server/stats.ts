@@ -2,7 +2,7 @@ import { ServerStore } from '@/stores/server';
 import { StateCreator } from 'zustand';
 
 export interface StatsSlice {
-  stats: ResourceUsage;
+  stats: ResourceUsage | null;
 
   setStats: (stats: ResourceUsage) => void;
 }

@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import createEgg from '@/api/admin/nests/eggs/createEgg';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
@@ -30,6 +32,7 @@ import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
 import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
 import getEgg from '@/api/admin/nests/eggs/getEgg';
 import EggMoveModal from './modals/EggMoveModal';
+import { adminEggSchema } from '@/lib/schemas/admin/eggs';
 
 export default function EggCreateOrUpdate({
   contextNest,
@@ -40,14 +43,14 @@ export default function EggCreateOrUpdate({
 }) {
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'move' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'move' | 'delete' | null>(null);
   const [selectedEggRepositoryUuid, setSelectedEggRepositoryUuid] = useState<string>(
     contextEgg?.eggRepositoryEgg?.eggRepository.uuid ?? '',
   );
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const form = useForm<AdminUpdateNestEgg>({
+  const form = useForm<z.infer<typeof adminEggSchema>>({
     initialValues: {
       eggRepositoryEggUuid: null,
       author: '',
@@ -82,13 +85,18 @@ export default function EggCreateOrUpdate({
       dockerImages: {},
       fileDenylist: [],
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminEggSchema),
   });
 
-  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<AdminUpdateNestEgg, AdminNestEgg>({
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
+    z.infer<typeof adminEggSchema>,
+    AdminNestEgg
+  >({
     form,
     createFn: () => createEgg(contextNest.uuid, form.values),
-    updateFn: () => updateEgg(contextNest.uuid, contextEgg.uuid, form.values),
-    deleteFn: () => deleteEgg(contextNest.uuid, contextEgg.uuid),
+    updateFn: () => updateEgg(contextNest.uuid, contextEgg!.uuid, form.values),
+    deleteFn: () => deleteEgg(contextNest.uuid, contextEgg!.uuid),
     doUpdate: !!contextEgg,
     basePath: `/admin/nests/${contextNest.uuid}/eggs`,
     resourceName: 'Egg',
@@ -105,18 +113,18 @@ export default function EggCreateOrUpdate({
 
   const eggRepositories = useSearchableResource<AdminEggRepository>({
     fetcher: (search) => getEggRepositories(1, search),
-    defaultSearchValue: contextEgg.eggRepositoryEgg?.eggRepository.name,
+    defaultSearchValue: contextEgg?.eggRepositoryEgg?.eggRepository.name,
   });
   const eggRepositoryEggs = useSearchableResource<AdminEggRepositoryEgg>({
     fetcher: (search) => getEggRepositoryEggs(selectedEggRepositoryUuid, 1, search),
-    defaultSearchValue: contextEgg.eggRepositoryEgg?.name,
+    defaultSearchValue: contextEgg?.eggRepositoryEgg?.name,
     deps: [selectedEggRepositoryUuid],
   });
 
   const doExport = (format: 'json' | 'yaml') => {
     setLoading(true);
 
-    exportEgg(contextNest?.uuid, contextEgg.uuid)
+    exportEgg(contextNest?.uuid, contextEgg!.uuid)
       .then((data) => {
         addToast('Egg exported.', 'success');
 
@@ -125,7 +133,7 @@ export default function EggCreateOrUpdate({
           const fileURL = URL.createObjectURL(new Blob([jsonData], { type: 'text/plain' }));
           const downloadLink = document.createElement('a');
           downloadLink.href = fileURL;
-          downloadLink.download = `egg-${contextEgg.uuid}.json`;
+          downloadLink.download = `egg-${contextEgg!.uuid}.json`;
           document.body.appendChild(downloadLink);
           downloadLink.click();
 
@@ -136,7 +144,7 @@ export default function EggCreateOrUpdate({
           const fileURL = URL.createObjectURL(new Blob([yamlData], { type: 'text/plain' }));
           const downloadLink = document.createElement('a');
           downloadLink.href = fileURL;
-          downloadLink.download = `egg-${contextEgg.uuid}.yml`;
+          downloadLink.download = `egg-${contextEgg!.uuid}.yml`;
           document.body.appendChild(downloadLink);
           downloadLink.click();
 
@@ -153,8 +161,8 @@ export default function EggCreateOrUpdate({
   const doRepositoryUpdate = () => {
     setLoading(true);
 
-    updateEggUsingRepository(contextNest.uuid, contextEgg.uuid)
-      .then(() => getEgg(contextNest.uuid, contextEgg.uuid))
+    updateEggUsingRepository(contextNest.uuid, contextEgg!.uuid)
+      .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
       .then((egg) => {
         form.setValues({
           ...egg,
@@ -172,51 +180,49 @@ export default function EggCreateOrUpdate({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    event.target.value = null;
+    event.target.value = '';
 
+    setLoading(true);
+
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      setLoading(true);
-
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse egg: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      updateEggUsingImport(contextNest.uuid, contextEgg.uuid, data)
-        .then(() => getEgg(contextNest.uuid, contextEgg.uuid))
-        .then((egg) => {
-          form.setValues({
-            ...egg,
-            eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
-          });
-          addToast('Egg updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => setLoading(false));
     } catch (err) {
-      addToast(httpErrorToHuman(err), 'error');
+      addToast(`Failed to parse egg: ${err}`, 'error');
       setLoading(false);
+      return;
     }
+
+    updateEggUsingImport(contextNest.uuid, contextEgg!.uuid, data)
+      .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
+      .then((egg) => {
+        form.setValues({
+          ...egg,
+          eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
+        });
+        addToast('Egg updated.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
     <>
-      <EggMoveModal
-        opened={openModal === 'move'}
-        onClose={() => setOpenModal(null)}
-        nest={contextNest}
-        egg={contextEgg}
-      />
+      {contextEgg && (
+        <EggMoveModal
+          opened={openModal === 'move'}
+          onClose={() => setOpenModal(null)}
+          nest={contextNest}
+          egg={contextEgg}
+        />
+      )}
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -240,7 +246,7 @@ export default function EggCreateOrUpdate({
             label='Egg Repository'
             placeholder='Egg Repository'
             value={selectedEggRepositoryUuid}
-            onChange={(value) => setSelectedEggRepositoryUuid(value)}
+            onChange={(value) => setSelectedEggRepositoryUuid(value ?? '')}
             data={eggRepositories.items.map((eggRepository) => ({
               label: eggRepository.name,
               value: eggRepository.uuid,
@@ -360,7 +366,7 @@ export default function EggCreateOrUpdate({
       </Stack>
 
       <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         {contextEgg && (

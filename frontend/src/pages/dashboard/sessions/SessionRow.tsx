@@ -16,7 +16,7 @@ export default function SessionRow({ session }: { session: UserSession }) {
   const { addToast } = useToast();
   const { removeSession } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteSession(session.uuid)

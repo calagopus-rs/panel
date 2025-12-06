@@ -16,7 +16,7 @@ export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecur
   const { addToast } = useToast();
   const { removeSecurityKey } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteSecurityKey(securityKey.uuid)
