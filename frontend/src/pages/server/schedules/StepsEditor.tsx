@@ -25,7 +25,7 @@ export default function StepsEditor() {
   const server = useServerStore((state) => state.server);
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'create'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'create' | null>(null);
   const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
   const [steps, setSteps] = useState<ScheduleStep[]>([]);
 
@@ -119,16 +119,14 @@ export default function StepsEditor() {
                 }));
                 setSteps(stepsWithNewOrder);
 
-                try {
-                  await updateScheduleStepsOrder(
-                    server.uuid,
-                    schedule.uuid,
-                    reorderedSteps.map((s) => s.uuid),
-                  );
-                } catch (error) {
-                  addToast(httpErrorToHuman(error), 'error');
+                await updateScheduleStepsOrder(
+                  server.uuid,
+                  schedule.uuid,
+                  reorderedSteps.map((s) => s.uuid),
+                ).catch((err) => {
+                  addToast(httpErrorToHuman(err), 'error');
                   setSteps(steps);
-                }
+                });
               },
             }}
             renderOverlay={(activeStep) =>

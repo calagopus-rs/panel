@@ -47,7 +47,7 @@ export default function ServerGroupItem({
 
   const [isExpanded, setIsExpanded] = useState(true);
   const [servers, setServers] = useState(getEmptyPaginationSet<Server>());
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getServerGroupServers(serverGroup.uuid, page, search),
@@ -145,16 +145,14 @@ export default function ServerGroupItem({
                     // Update local state optimistically
                     setServers({ ...servers, data: items });
 
-                    try {
-                      await updateServerGroup(serverGroup.uuid, { serverOrder });
-                    } catch (msg) {
-                      addToast(httpErrorToHuman(msg), 'error');
+                    await updateServerGroup(serverGroup.uuid, { serverOrder }).catch((err) => {
+                      addToast(httpErrorToHuman(err), 'error');
                       updateStateServerGroup(serverGroup.uuid, {
                         serverOrder: serverGroup.serverOrder,
                       });
                       // Revert local state
                       setServers({ ...servers, data: servers.data });
-                    }
+                    });
                   },
                   onError: (error, originalItems) => {
                     // Additional error handling if needed

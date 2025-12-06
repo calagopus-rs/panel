@@ -14,7 +14,7 @@ export default function TwoFactorContainer() {
           Two-Step Verification
         </Title>
         <div className='mt-4'>
-          {user.totpEnabled ? (
+          {user!.totpEnabled ? (
             <p>Two-Step Verification is currently enabled.</p>
           ) : (
             <p>
@@ -24,7 +24,7 @@ export default function TwoFactorContainer() {
           )}
         </div>
         <div className='pt-4 flex mt-auto'>
-          {user.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}
+          {user!.totpEnabled ? <TwoFactorDisableButton /> : <TwoFactorSetupButton />}
         </div>
       </Card>
     </Grid.Col>

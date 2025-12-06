@@ -16,9 +16,9 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
-import { adminDatabaseHostSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
+import { adminDatabaseHostSchema } from '@/lib/schemas/admin/databaseHosts';
 
 export default function DatabaseHostCreateOrUpdate({
   contextDatabaseHost,

@@ -8,17 +8,17 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
-import {
-  adminSettingsEmailFilesystemSchema,
-  adminSettingsEmailSchema,
-  adminSettingsEmailSendmailSchema,
-  adminSettingsEmailSmtpSchema,
-} from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import EmailFile from './forms/EmailFile';
 import EmailSendmail from './forms/EmailSendmail';
 import EmailSmtp from './forms/EmailSmtp';
+import {
+  adminSettingsEmailFilesystemSchema,
+  adminSettingsEmailSchema,
+  adminSettingsEmailSendmailSchema,
+  adminSettingsEmailSmtpSchema,
+} from '@/lib/schemas/admin/settings';
 
 export default function EmailContainer() {
   const { addToast } = useToast();

@@ -12,8 +12,8 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminMountSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { adminMountSchema } from '@/lib/schemas/admin/mounts';
 
 export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);

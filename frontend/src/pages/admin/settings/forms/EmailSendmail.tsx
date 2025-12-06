@@ -3,7 +3,7 @@ import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsEmailSendmailSchema } from '@/lib/schemas';
+import { adminSettingsEmailSendmailSchema } from '@/lib/schemas/admin/settings';
 
 export default function EmailSendmail({
   form,

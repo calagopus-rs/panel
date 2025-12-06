@@ -8,17 +8,15 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { storageDriverTypeLabelMapping } from '@/lib/enums';
-import {
-  adminSettingsEmailSmtpSchema,
-  adminSettingsStorageFilesystemSchema,
-  adminSettingsStorageS3Schema,
-  adminSettingsStorageSchema,
-} from '@/lib/schemas';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import StorageFilesystem from './forms/StorageFilesystem';
 import StorageS3 from './forms/StorageS3';
+import {
+  adminSettingsStorageFilesystemSchema,
+  adminSettingsStorageS3Schema,
+  adminSettingsStorageSchema,
+} from '@/lib/schemas/admin/settings';
 
 export default function StorageContainer() {
   const { addToast } = useToast();

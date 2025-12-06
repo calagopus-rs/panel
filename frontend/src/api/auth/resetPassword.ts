@@ -1,6 +1,6 @@
 import { axiosInstance } from '@/api/axios';
-import { authResetPasswordSchema } from "@/lib/schemas";
-import { z } from "zod";
+import { z } from 'zod';
+import { authResetPasswordSchema } from '@/lib/schemas/auth';
 
 export default async (token: string, data: z.infer<typeof authResetPasswordSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

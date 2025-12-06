@@ -1,7 +1,8 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminSettingsEmailSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+
+import { adminSettingsEmailSchema } from '@/lib/schemas/admin/settings';
 
 export default async (data: z.infer<typeof adminSettingsEmailSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

@@ -16,7 +16,7 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
   const { addToast } = useToast();
   const { server, removeSubuser } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'update' | 'remove'>(null);
+  const [openModal, setOpenModal] = useState<'update' | 'remove' | null>(null);
 
   const doUpdate = (permissions: string[], ignoredFiles: string[]) => {
     updateSubuser(server.uuid, subuser.user.username, { permissions, ignoredFiles })

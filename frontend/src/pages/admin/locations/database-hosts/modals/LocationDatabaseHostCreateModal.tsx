@@ -11,13 +11,6 @@ import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-type GroupedDatabaseHosts = {
-  [key in DatabaseType]: {
-    group: string;
-    items: { value: string; label: string; }[];
-  };
-};
-
 export default function LocationDatabaseHostCreateModal({
   location,
   opened,

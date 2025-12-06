@@ -24,7 +24,7 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
 
     renameFiles({
       uuid: server.uuid,
-      root: browsingDirectory,
+      root: browsingDirectory!,
       files: [
         {
           from: file.name,

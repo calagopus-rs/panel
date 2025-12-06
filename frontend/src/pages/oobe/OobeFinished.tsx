@@ -68,7 +68,7 @@ export default function OobeFinished({ onNext }: OobeComponentProps) {
                 Administrator Account
               </Text>
               <Text size='xs' c='dimmed'>
-                {user.username} ({user.email})
+                {user!.username} ({user!.email})
               </Text>
             </div>
           </Group>

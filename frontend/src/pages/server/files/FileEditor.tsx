@@ -1,4 +1,4 @@
-import { Editor } from '@monaco-editor/react';
+import { Editor, type OnMount } from '@monaco-editor/react';
 import { join } from 'pathe';
 import { useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
@@ -26,7 +26,7 @@ export default function FileEditor() {
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('plaintext');
 
-  const editorRef = useRef(null);
+  const editorRef = useRef<Parameters<OnMount>[0]>(null);
   const contentRef = useRef(content);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function FileEditor() {
     setLoading(true);
     getFileContent(server.uuid, join(browsingDirectory, fileName)).then((content) => {
       setContent(content);
-      setLanguage(getLanguageFromExtension(fileName.split('.').pop()));
+      setLanguage(getLanguageFromExtension(fileName.split('.').pop()!));
       setLoading(false);
     });
   }, [fileName]);
@@ -56,14 +56,14 @@ export default function FileEditor() {
     const currentContent = editorRef.current.getValue();
     setLoading(true);
 
-    saveFileContent(server.uuid, join(browsingDirectory, name ?? fileName), currentContent).then(() => {
+    saveFileContent(server.uuid, join(browsingDirectory!, name ?? fileName), currentContent).then(() => {
       setLoading(false);
       setNameModalOpen(false);
 
       if (name) {
         navigate(
           `/server/${server.uuidShort}/files/edit?${createSearchParams({
-            directory: browsingDirectory,
+            directory: browsingDirectory!,
             file: name,
           })}`,
         );
@@ -71,7 +71,7 @@ export default function FileEditor() {
     });
   };
 
-  if (!['new', 'edit'].includes(params.action)) {
+  if (!['new', 'edit'].includes(params.action!)) {
     return <NotFound />;
   }
 
@@ -90,7 +90,7 @@ export default function FileEditor() {
       <div className='flex justify-between w-full p-4'>
         <FileBreadcrumbs
           hideSelectAll
-          path={join(decodeURIComponent(browsingDirectory), fileName)}
+          path={join(decodeURIComponent(browsingDirectory!), fileName)}
           browsingBackup={browsingBackup}
         />
         <div hidden={!!browsingBackup}>
@@ -107,7 +107,7 @@ export default function FileEditor() {
           theme='vs-dark'
           defaultLanguage={language}
           defaultValue={content}
-          onChange={setContent}
+          onChange={(value) => setContent(value || '')}
           onMount={(editor, monaco) => {
             editorRef.current = editor;
             editor.onDidChangeModelContent(() => {

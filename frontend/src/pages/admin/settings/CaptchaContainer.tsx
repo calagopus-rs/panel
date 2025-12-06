@@ -8,15 +8,15 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { captchaProviderTypeLabelMapping } from '@/lib/enums';
-import {
-  adminSettingsCaptchaProviderRecaptchaSchema,
-  adminSettingsCaptchaProviderSchema,
-  adminSettingsCaptchaProviderTurnstileSchema,
-} from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
 import CaptchaTurnstile from './forms/CaptchaTurnstile';
+import {
+  adminSettingsCaptchaProviderRecaptchaSchema,
+  adminSettingsCaptchaProviderSchema,
+  adminSettingsCaptchaProviderTurnstileSchema,
+} from '@/lib/schemas/admin/settings';
 
 export default function CaptchaContainer() {
   const { addToast } = useToast();

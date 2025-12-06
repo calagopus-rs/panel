@@ -6,7 +6,7 @@ import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import DatabaseRow from './DatabaseRow';
 import TextInput from '@/elements/input/TextInput';
-import { databaseHostDatabaseTableColumns } from "@/lib/tableColumns";
+import { databaseHostDatabaseTableColumns } from '@/lib/tableColumns';
 
 export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseHost: AdminDatabaseHost }) {
   const [databaseHostDatabases, setDatabaseHostDatabases] = useState<ResponseMeta<AdminServerDatabase>>(
@@ -27,7 +27,12 @@ export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseH
         </Group>
       </Group>
 
-      <Table columns={databaseHostDatabaseTableColumns} loading={loading} pagination={databaseHostDatabases} onPageSelect={setPage}>
+      <Table
+        columns={databaseHostDatabaseTableColumns}
+        loading={loading}
+        pagination={databaseHostDatabases}
+        onPageSelect={setPage}
+      >
         {databaseHostDatabases.data.map((database) => (
           <DatabaseRow key={database.uuid} database={database} />
         ))}

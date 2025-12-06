@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminNodeSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { adminNodeSchema } from '@/lib/schemas/admin/nodes';
 
 export default async (data: z.infer<typeof adminNodeSchema>): Promise<Node> => {
   return new Promise((resolve, reject) => {

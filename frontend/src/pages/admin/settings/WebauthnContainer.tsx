@@ -8,9 +8,9 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { isIP } from '@/lib/ip';
-import { adminSettingsWebauthnSchema } from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
+import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
 
 export default function WebauthnContainer() {
   const { addToast } = useToast();

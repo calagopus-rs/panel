@@ -13,9 +13,9 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import PermissionSelector from '@/elements/PermissionSelector';
-import { adminRoleSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useGlobalStore } from '@/stores/global';
+import { adminRoleSchema } from '@/lib/schemas/admin/roles';
 
 export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role }) {
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();

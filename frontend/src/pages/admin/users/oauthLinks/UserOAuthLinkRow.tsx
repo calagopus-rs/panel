@@ -16,7 +16,7 @@ export default function UserOAuthLinkRow({ user, userOAuthLink }: { user: User; 
   const { addToast } = useToast();
   const { removeUserOAuthLink } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteUserOAuthLink(user.uuid, userOAuthLink.uuid)

@@ -9,8 +9,8 @@ import Button from '@/elements/Button';
 import TagsInput from '@/elements/input/TagsInput';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { adminNodeAllocationsSchema } from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
+import { adminNodeAllocationsSchema } from '@/lib/schemas/admin/nodes';
 
 export default function NodeAllocationsCreateModal({
   node,

@@ -1,7 +1,7 @@
 import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
 import { useRef, useState } from 'react';
 import Button from '@/elements/Button';
-import Captcha, { CaptchaRef } from "@/elements/Captcha";
+import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import PermissionSelector from '@/elements/PermissionSelector';

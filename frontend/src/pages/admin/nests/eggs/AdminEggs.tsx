@@ -36,31 +36,27 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
 
     event.target.value = '';
 
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse egg: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      importEgg(contextNest.uuid, data)
-        .then((data) => {
-          addEgg(data);
-          addToast('Egg imported.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
     } catch (err) {
-      addToast('Something went wrong while importing the egg.', 'error');
+      addToast(`Failed to parse egg: ${err}`, 'error');
+      return;
     }
+
+    importEgg(contextNest.uuid, data)
+      .then((data) => {
+        addEgg(data);
+        addToast('Egg imported.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (

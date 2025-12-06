@@ -5,7 +5,7 @@ import { z } from 'zod';
 import PasswordInput from '@/elements/input/PasswordInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsStorageS3Schema } from '@/lib/schemas';
+import { adminSettingsStorageS3Schema } from '@/lib/schemas/admin/settings';
 
 export default function StorageS3({ form }: { form: UseFormReturnType<z.infer<typeof adminSettingsStorageS3Schema>> }) {
   useEffect(() => {

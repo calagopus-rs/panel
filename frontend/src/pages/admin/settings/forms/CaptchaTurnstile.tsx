@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { z } from 'zod';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsCaptchaProviderTurnstileSchema } from '@/lib/schemas';
+import { adminSettingsCaptchaProviderTurnstileSchema } from '@/lib/schemas/admin/settings';
 
 export default function CaptchaTurnstile({
   form,

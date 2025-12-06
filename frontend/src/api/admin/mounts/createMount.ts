@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminMountSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { adminMountSchema } from '@/lib/schemas/admin/mounts';
 
 export default async (data: z.infer<typeof adminMountSchema>): Promise<Mount> => {
   return new Promise((resolve, reject) => {

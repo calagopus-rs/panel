@@ -14,10 +14,10 @@ import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { useForm } from "@mantine/form";
-import { zod4Resolver } from "mantine-form-zod-resolver";
-import { adminEggVariableSchema } from "@/lib/schemas";
-import { z } from "zod";
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { z } from 'zod';
+import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
 
 export default function EggVariableContainer({
   contextNest,
@@ -46,13 +46,13 @@ export default function EggVariableContainer({
       rules: [],
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminEggVariableSchema)
-  })
+    validate: zod4Resolver(adminEggVariableSchema),
+  });
 
   useEffect(() => {
     if (contextVariable) {
       form.setValues({
-        ...contextVariable
+        ...contextVariable,
       });
     }
   }, [contextVariable]);
@@ -126,18 +126,9 @@ export default function EggVariableContainer({
 
       <Card className='flex flex-col justify-between h-full'>
         <Stack>
-          <TextInput
-            withAsterisk
-            label='Name'
-            placeholder='Name'
-            {...form.getInputProps('name')}
-          />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-          <TextArea
-            label='Description'
-            placeholder='Description'
-            {...form.getInputProps('description')}
-          />
+          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
 
           <Group grow>
             <TextInput
@@ -157,23 +148,12 @@ export default function EggVariableContainer({
           </Group>
 
           <Group grow>
-            <Switch
-              label='User Viewable'
-              name='user_viewable'
-              {...form.getInputProps('userViewable')}
-            />
+            <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
 
-            <Switch
-              label='User Editable'
-              name='user_editable'
-              {...form.getInputProps('userEditable')}
-            />
+            <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
           </Group>
 
-          <TagsInput
-            label='Rules'
-            {...form.getInputProps('rules')}
-          />
+          <TagsInput label='Rules' {...form.getInputProps('rules')} />
         </Stack>
 
         <Group pt='md' mt='auto'>

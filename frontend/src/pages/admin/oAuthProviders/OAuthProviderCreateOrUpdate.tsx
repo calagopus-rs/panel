@@ -18,11 +18,11 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminOAuthProviderSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
 
 export default function OAuthProviderCreateOrUpdate({
   contextOAuthProvider,

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminLocationSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { adminLocationSchema } from '@/lib/schemas/admin/locations';
 
 export default async (data: z.infer<typeof adminLocationSchema>): Promise<Location> => {
   return new Promise((resolve, reject) => {

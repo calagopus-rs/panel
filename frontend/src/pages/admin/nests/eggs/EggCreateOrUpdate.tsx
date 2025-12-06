@@ -21,7 +21,6 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminEggSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
@@ -33,6 +32,7 @@ import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
 import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
 import getEgg from '@/api/admin/nests/eggs/getEgg';
 import EggMoveModal from './modals/EggMoveModal';
+import { adminEggSchema } from '@/lib/schemas/admin/eggs';
 
 export default function EggCreateOrUpdate({
   contextNest,
@@ -89,7 +89,10 @@ export default function EggCreateOrUpdate({
     validate: zod4Resolver(adminEggSchema),
   });
 
-  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminEggSchema>, AdminNestEgg>({
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
+    z.infer<typeof adminEggSchema>,
+    AdminNestEgg
+  >({
     form,
     createFn: () => createEgg(contextNest.uuid, form.values),
     updateFn: () => updateEgg(contextNest.uuid, contextEgg!.uuid, form.values),
@@ -179,39 +182,35 @@ export default function EggCreateOrUpdate({
 
     event.target.value = '';
 
+    setLoading(true);
+
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      setLoading(true);
-
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse egg: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      updateEggUsingImport(contextNest.uuid, contextEgg!.uuid, data)
-        .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
-        .then((egg) => {
-          form.setValues({
-            ...egg,
-            eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
-          });
-          addToast('Egg updated.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        })
-        .finally(() => setLoading(false));
     } catch (err) {
-      addToast('Failed to upload egg.', 'error');
+      addToast(`Failed to parse egg: ${err}`, 'error');
       setLoading(false);
+      return;
     }
+
+    updateEggUsingImport(contextNest.uuid, contextEgg!.uuid, data)
+      .then(() => getEgg(contextNest.uuid, contextEgg!.uuid))
+      .then((egg) => {
+        form.setValues({
+          ...egg,
+          eggRepositoryEggUuid: egg.eggRepositoryEgg?.uuid || null,
+        });
+        addToast('Egg updated.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      })
+      .finally(() => setLoading(false));
   };
 
   return (

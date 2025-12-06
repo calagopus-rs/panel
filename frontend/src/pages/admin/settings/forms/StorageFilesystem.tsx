@@ -3,7 +3,7 @@ import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsStorageFilesystemSchema } from '@/lib/schemas';
+import { adminSettingsStorageFilesystemSchema } from '@/lib/schemas/admin/settings';
 
 export default function StorageFilesystem({
   form,

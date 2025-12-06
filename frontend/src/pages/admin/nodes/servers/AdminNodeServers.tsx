@@ -6,7 +6,7 @@ import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 import getNodeServers from '@/api/admin/nodes/servers/getNodeServers';
-import { serverTableColumns } from "@/lib/tableColumns";
+import { serverTableColumns } from '@/lib/tableColumns';
 
 export default function AdminNodeServers({ node }: { node: Node }) {
   const [nodeServers, setNodeServers] = useState<ResponseMeta<AdminServer>>(getEmptyPaginationSet());

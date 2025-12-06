@@ -9,7 +9,7 @@ import Table from '@/elements/Table';
 import { serverTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import ServerCreateOrUpdate from './ServerCreateOrUpdate';
+import ServerCreate from './ServerCreate';
 import ServerRow from './ServerRow';
 import ServerView from './ServerView';
 
@@ -53,7 +53,7 @@ export default function AdminServers() {
   return (
     <Routes>
       <Route path='/' element={<ServersContainer />} />
-      <Route path='/new' element={<ServerCreateOrUpdate />} />
+      <Route path='/new' element={<ServerCreate />} />
       <Route path='/:id/*' element={<ServerView />} />
     </Routes>
   );

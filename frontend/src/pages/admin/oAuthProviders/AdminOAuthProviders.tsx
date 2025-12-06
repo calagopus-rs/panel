@@ -10,7 +10,6 @@ import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Table from '@/elements/Table';
-import { adminOAuthProviderSchema } from '@/lib/schemas';
 import { oauthProviderTableColumns } from '@/lib/tableColumns';
 import { transformKeysToCamelCase } from '@/lib/transformers';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
@@ -19,6 +18,7 @@ import { useAdminStore } from '@/stores/admin';
 import DatabaseHostCreateOrUpdate from './OAuthProviderCreateOrUpdate';
 import DatabaseHostRow from './OAuthProviderRow';
 import DatabaseHostView from './OAuthProviderView';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
 
 function OAuthProvidersContainer() {
   const navigate = useNavigate();
@@ -38,35 +38,31 @@ function OAuthProvidersContainer() {
 
     event.target.value = '';
 
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse oauth provider: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      createOAuthProvider({
-        ...(transformKeysToCamelCase(data) as z.infer<typeof adminOAuthProviderSchema>),
-        clientId: 'example',
-        clientSecret: 'example',
-      })
-        .then((data) => {
-          addOAuthProvider(data);
-          addToast('OAuth Provider imported.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
     } catch (err) {
-      addToast('Something went wrong while importing the oauth provider.', 'error');
+      addToast(`Failed to parse oauth provider: ${err}`, 'error');
+      return;
     }
+
+    createOAuthProvider({
+      ...(transformKeysToCamelCase(data) as z.infer<typeof adminOAuthProviderSchema>),
+      clientId: 'example',
+      clientSecret: 'example',
+    })
+      .then((data) => {
+        addOAuthProvider(data);
+        addToast('OAuth Provider imported.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (

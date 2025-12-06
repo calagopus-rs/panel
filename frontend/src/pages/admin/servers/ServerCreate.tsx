@@ -1,4 +1,4 @@
-import { faCircleInfo, faReply } from '@fortawesome/free-solid-svg-icons';
+import { faReply } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Paper, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -14,7 +14,6 @@ import getNests from '@/api/admin/nests/getNests';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations';
 import getNodes from '@/api/admin/nodes/getNodes';
 import createServer from '@/api/admin/servers/createServer';
-import updateServer from '@/api/admin/servers/updateServer';
 import getUsers from '@/api/admin/users/getUsers';
 import { httpErrorToHuman } from '@/api/axios';
 import Alert from '@/elements/Alert';
@@ -28,9 +27,8 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import Spinner from '@/elements/Spinner';
 import VariableContainer from '@/elements/VariableContainer';
-import { adminServerSchema } from '@/lib/schemas';
+import { adminServerCreateSchema } from '@/lib/schemas/admin/servers';
 import { formatAllocation } from '@/lib/server';
-import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
@@ -42,10 +40,10 @@ const timezones = Object.keys(zones)
     label: zone,
   }));
 
-export default function ServerCreateOrUpdate({ contextServer }: { contextServer?: AdminServer }) {
+export default function ServerCreate() {
   const { addToast } = useToast();
 
-  const form = useForm<z.infer<typeof adminServerSchema>>({
+  const form = useForm<z.infer<typeof adminServerCreateSchema>>({
     initialValues: {
       externalId: null,
       name: '',
@@ -78,53 +76,36 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
       variables: [],
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminServerSchema),
+    validate: zod4Resolver(adminServerCreateSchema),
   });
 
-  const { loading, doCreateOrUpdate } = useResourceForm<z.infer<typeof adminServerSchema>, AdminServer>({
+  const { loading, doCreateOrUpdate } = useResourceForm<z.infer<typeof adminServerCreateSchema>, AdminServer>({
     form,
     createFn: () => createServer(form.values),
-    updateFn: () => updateServer(contextServer!.uuid, form.values),
-    doUpdate: !!contextServer,
+    doUpdate: false,
     basePath: '/admin/servers',
     resourceName: 'Server',
     toResetOnStay: ['allocationUuid', 'allocationUuids'],
   });
 
-  useEffect(() => {
-    if (contextServer) {
-      form.setValues({
-        ...contextServer,
-        nodeUuid: contextServer.node.uuid,
-        ownerUuid: contextServer.owner.uuid,
-        eggUuid: contextServer.egg.uuid,
-        backupConfigurationUuid: contextServer.backupConfiguration?.uuid ?? uuidNil,
-      });
-    }
-  }, [contextServer]);
-
   const [eggVariablesLoading, setEggVariablesLoading] = useState(false);
   const [memoryInput, setMemoryInput] = useState('');
   const [diskInput, setDiskInput] = useState('');
   const [swapInput, setSwapInput] = useState('');
-  const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>(contextServer?.nest.uuid ?? '');
+  const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>('');
   const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
   const nodes = useSearchableResource<Node>({
     fetcher: (search) => getNodes(1, search),
-    defaultSearchValue: contextServer?.node.name,
   });
   const users = useSearchableResource<User>({
     fetcher: (search) => getUsers(1, search),
-    defaultSearchValue: contextServer?.owner.username,
   });
   const nests = useSearchableResource<AdminNest>({
     fetcher: (search) => getNests(1, search),
-    defaultSearchValue: contextServer?.nest.name,
   });
   const eggs = useSearchableResource<AdminNestEgg>({
     fetcher: (search) => getEggs(selectedNestUuid!, 1, search),
-    defaultSearchValue: contextServer?.egg.name,
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
@@ -137,24 +118,9 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({
     fetcher: (search) => getBackupConfigurations(1, search),
-    defaultSearchValue: contextServer?.backupConfiguration?.name,
   });
 
   useEffect(() => {
-    setMemoryInput(
-      contextServer ? bytesToString(mbToBytes(contextServer?.limits.memory)) : bytesToString(mbToBytes(1024)),
-    );
-    setDiskInput(
-      contextServer ? bytesToString(mbToBytes(contextServer?.limits.disk)) : bytesToString(mbToBytes(10240)),
-    );
-    setSwapInput(contextServer ? bytesToString(mbToBytes(contextServer?.limits.swap)) : bytesToString(mbToBytes(0)));
-  }, [contextServer]);
-
-  useEffect(() => {
-    if (!form.values.eggUuid || contextServer) {
-      return;
-    }
-
     const egg = eggs.items.find((egg) => egg.uuid === form.values.eggUuid);
     if (!egg) {
       return;
@@ -162,10 +128,10 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
 
     form.setFieldValue('image', Object.values(egg.dockerImages)[0] ?? '');
     form.setFieldValue('startup', egg.startup);
-  }, [form.values.eggUuid, eggs.items, contextServer]);
+  }, [form.values.eggUuid, eggs.items]);
 
   useEffect(() => {
-    if (!selectedNestUuid || !form.values.eggUuid || contextServer) {
+    if (!selectedNestUuid || !form.values.eggUuid) {
       return;
     }
 
@@ -178,17 +144,11 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
         addToast(httpErrorToHuman(err), 'error');
       })
       .finally(() => setEggVariablesLoading(false));
-  }, [selectedNestUuid, form.values.eggUuid, contextServer]);
+  }, [selectedNestUuid, form.values.eggUuid]);
 
   return (
     <Stack>
-      <Title order={2}>{contextServer ? 'Update' : 'Create'} Server</Title>
-
-      {contextServer?.suspended && (
-        <Alert title='Server Suspended' color='orange' icon={<FontAwesomeIcon icon={faCircleInfo} />}>
-          This server is suspended.
-        </Alert>
-      )}
+      <Title order={2}>Create Server</Title>
 
       <Group grow align='normal'>
         <Paper withBorder p='md'>
@@ -401,22 +361,20 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
               {...form.getInputProps('startup')}
             />
 
-            {!contextServer && (
-              <Group grow>
-                <Switch
-                  label='Start on Completion'
-                  description='Start server after installation completes'
-                  checked={form.values.startOnCompletion}
-                  onChange={(e) => form.setFieldValue('startOnCompletion', e.target.checked)}
-                />
-                <Switch
-                  label='Skip Installer'
-                  description='Skip running the install script'
-                  checked={form.values.skipInstaller}
-                  onChange={(e) => form.setFieldValue('skipInstaller', e.target.checked)}
-                />
-              </Group>
-            )}
+            <Group grow>
+              <Switch
+                label='Start on Completion'
+                description='Start server after installation completes'
+                checked={form.values.startOnCompletion}
+                onChange={(e) => form.setFieldValue('startOnCompletion', e.target.checked)}
+              />
+              <Switch
+                label='Skip Installer'
+                description='Skip running the install script'
+                checked={form.values.skipInstaller}
+                onChange={(e) => form.setFieldValue('skipInstaller', e.target.checked)}
+              />
+            </Group>
           </Stack>
         </Paper>
       </Group>
@@ -459,94 +417,88 @@ export default function ServerCreateOrUpdate({ contextServer }: { contextServer?
           </Stack>
         </Paper>
 
-        {!contextServer && (
-          <Paper withBorder p='md'>
-            <Stack>
-              <Title order={3}>Allocations</Title>
-
-              <Group grow>
-                <Select
-                  label='Primary Allocation'
-                  placeholder='Primary Allocation'
-                  disabled={!form.values.nodeUuid}
-                  data={availablePrimaryAllocations.items
-                    .filter((alloc) => !form.values.allocationUuids.includes(alloc.uuid))
-                    .map((alloc) => ({
-                      label: formatAllocation(alloc),
-                      value: alloc.uuid,
-                    }))}
-                  searchable
-                  searchValue={availablePrimaryAllocations.search}
-                  onSearchChange={availablePrimaryAllocations.setSearch}
-                  allowDeselect
-                  {...form.getInputProps('allocationUuid')}
-                />
-                <MultiSelect
-                  label='Additional Allocations'
-                  placeholder='Additional Allocations'
-                  disabled={!form.values.nodeUuid}
-                  data={availableAllocations.items
-                    .filter((alloc) => alloc.uuid !== form.values.allocationUuid)
-                    .map((alloc) => ({
-                      label: formatAllocation(alloc),
-                      value: alloc.uuid,
-                    }))}
-                  searchable
-                  searchValue={availableAllocations.search}
-                  onSearchChange={availableAllocations.setSearch}
-                  {...form.getInputProps('allocationUuids')}
-                />
-              </Group>
-            </Stack>
-          </Paper>
-        )}
-      </Group>
-
-      {!contextServer && (
         <Paper withBorder p='md'>
           <Stack>
-            <Title order={3}>Variables</Title>
+            <Title order={3}>Allocations</Title>
 
-            {!selectedNestUuid || !form.values.eggUuid ? (
-              <Alert>Please select an egg before you can configure variables.</Alert>
-            ) : eggVariablesLoading ? (
-              <Spinner.Centered />
-            ) : (
-              <div className='grid grid-cols-1 xl:grid-cols-2 gap-4'>
-                {eggVariables.map((variable) => (
-                  <VariableContainer
-                    key={variable.envVariable}
-                    variable={{ ...variable, value: '', isEditable: variable.userEditable }}
-                    loading={loading}
-                    overrideReadonly
-                    value={
-                      form.values.variables.find((v) => v.envVariable === variable.envVariable)?.value ??
-                      variable.defaultValue ??
-                      ''
-                    }
-                    setValue={(value) =>
-                      form.setFieldValue('variables', (prev) => [
-                        ...prev.filter((v) => v.envVariable !== variable.envVariable),
-                        { envVariable: variable.envVariable, value },
-                      ])
-                    }
-                  />
-                ))}
-              </div>
-            )}
+            <Group grow>
+              <Select
+                label='Primary Allocation'
+                placeholder='Primary Allocation'
+                disabled={!form.values.nodeUuid}
+                data={availablePrimaryAllocations.items
+                  .filter((alloc) => !form.values.allocationUuids.includes(alloc.uuid))
+                  .map((alloc) => ({
+                    label: formatAllocation(alloc),
+                    value: alloc.uuid,
+                  }))}
+                searchable
+                searchValue={availablePrimaryAllocations.search}
+                onSearchChange={availablePrimaryAllocations.setSearch}
+                allowDeselect
+                {...form.getInputProps('allocationUuid')}
+              />
+              <MultiSelect
+                label='Additional Allocations'
+                placeholder='Additional Allocations'
+                disabled={!form.values.nodeUuid}
+                data={availableAllocations.items
+                  .filter((alloc) => alloc.uuid !== form.values.allocationUuid)
+                  .map((alloc) => ({
+                    label: formatAllocation(alloc),
+                    value: alloc.uuid,
+                  }))}
+                searchable
+                searchValue={availableAllocations.search}
+                onSearchChange={availableAllocations.setSearch}
+                {...form.getInputProps('allocationUuids')}
+              />
+            </Group>
           </Stack>
         </Paper>
-      )}
+      </Group>
+
+      <Paper withBorder p='md'>
+        <Stack>
+          <Title order={3}>Variables</Title>
+
+          {!selectedNestUuid || !form.values.eggUuid ? (
+            <Alert>Please select an egg before you can configure variables.</Alert>
+          ) : eggVariablesLoading ? (
+            <Spinner.Centered />
+          ) : (
+            <div className='grid grid-cols-1 xl:grid-cols-2 gap-4'>
+              {eggVariables.map((variable) => (
+                <VariableContainer
+                  key={variable.envVariable}
+                  variable={{ ...variable, value: '', isEditable: variable.userEditable }}
+                  loading={loading}
+                  overrideReadonly
+                  value={
+                    form.values.variables.find((v) => v.envVariable === variable.envVariable)?.value ??
+                    variable.defaultValue ??
+                    ''
+                  }
+                  setValue={(value) =>
+                    form.setFieldValue('variables', (prev) => [
+                      ...prev.filter((v) => v.envVariable !== variable.envVariable),
+                      { envVariable: variable.envVariable, value },
+                    ])
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </Stack>
+      </Paper>
 
       <Group>
         <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
-        {!contextServer && (
-          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-            Save & Stay
-          </Button>
-        )}
+        <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+          Save & Stay
+        </Button>
       </Group>
     </Stack>
   );

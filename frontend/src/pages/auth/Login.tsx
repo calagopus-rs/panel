@@ -10,7 +10,7 @@ import login from '@/api/auth/login';
 import postSecurityKeyChallenge from '@/api/auth/postSecurityKeyChallenge';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Captcha, { CaptchaRef } from "@/elements/Captcha";
+import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import PinInput from '@/elements/input/PinInput';
@@ -18,9 +18,9 @@ import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import AuthWrapper from './AuthWrapper';
-import { useForm } from "@mantine/form";
-import { zod4Resolver } from "mantine-form-zod-resolver";
-import { authPasswordSchema, authTotpSchema, authUsernameSchema } from "@/lib/schemas";
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { authPasswordSchema, authTotpSchema, authUsernameSchema } from '@/lib/schemas/auth';
 
 export default function Login() {
   const { doLogin } = useAuth();
@@ -41,7 +41,7 @@ export default function Login() {
       username: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(authUsernameSchema)
+    validate: zod4Resolver(authUsernameSchema),
   });
 
   const passwordForm = useForm({
@@ -49,7 +49,7 @@ export default function Login() {
       password: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(authPasswordSchema)
+    validate: zod4Resolver(authPasswordSchema),
   });
 
   const totpForm = useForm({
@@ -57,7 +57,7 @@ export default function Login() {
       code: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(authTotpSchema)
+    validate: zod4Resolver(authTotpSchema),
   });
 
   useEffect(() => {
@@ -217,7 +217,13 @@ export default function Login() {
                 {...usernameForm.getInputProps('username')}
               />
 
-              <Button onClick={doSubmitUsername} disabled={!usernameForm.isValid()} loading={loading} size='md' fullWidth>
+              <Button
+                onClick={doSubmitUsername}
+                disabled={!usernameForm.isValid()}
+                loading={loading}
+                size='md'
+                fullWidth
+              >
                 Continue
               </Button>
 
@@ -287,7 +293,13 @@ export default function Login() {
 
               <Captcha ref={captchaRef} />
 
-              <Button onClick={doSubmitPassword} disabled={!passwordForm.isValid()} loading={loading} size='md' fullWidth>
+              <Button
+                onClick={doSubmitPassword}
+                disabled={!passwordForm.isValid()}
+                loading={loading}
+                size='md'
+                fullWidth
+              >
                 Sign In
               </Button>
 

@@ -6,7 +6,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import PasswordInput from '@/elements/input/PasswordInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsEmailSmtpSchema } from '@/lib/schemas';
+import { adminSettingsEmailSmtpSchema } from '@/lib/schemas/admin/settings';
 
 export default function EmailSmtp({ form }: { form: UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>> }) {
   useEffect(() => {

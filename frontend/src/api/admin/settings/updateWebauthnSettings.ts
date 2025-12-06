@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminSettingsWebauthnSchema } from '@/lib/schemas';
+
+import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
 
 export default async (data: z.infer<typeof adminSettingsWebauthnSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

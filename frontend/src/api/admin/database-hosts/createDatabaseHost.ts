@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-import { adminDatabaseHostSchema } from '@/lib/schemas';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { adminDatabaseHostSchema } from '@/lib/schemas/admin/databaseHosts';
 
 export default async (data: z.infer<typeof adminDatabaseHostSchema>): Promise<AdminDatabaseHost> => {
   return new Promise((resolve, reject) => {

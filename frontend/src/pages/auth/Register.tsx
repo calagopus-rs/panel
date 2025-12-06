@@ -9,13 +9,13 @@ import { z } from 'zod';
 import register from '@/api/auth/register';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Captcha, { CaptchaRef } from "@/elements/Captcha";
+import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import AuthWrapper from './AuthWrapper';
-import { authRegisterSchema } from "@/lib/schemas";
+import { authRegisterSchema } from '@/lib/schemas/auth';
 
 export default function Register() {
   const { doLogin } = useAuth();

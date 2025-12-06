@@ -1,66 +1,66 @@
-import { Group, Stack, Title } from "@mantine/core";
-import { useForm } from "@mantine/form";
-import { zod4Resolver } from "mantine-form-zod-resolver";
-import { useEffect, useState } from "react";
-import { z } from "zod";
-import createBackupConfiguration from "@/api/admin/backup-configurations/createBackupConfiguration";
-import deleteBackupConfiguration from "@/api/admin/backup-configurations/deleteBackupConfiguration";
-import updateBackupConfiguration from "@/api/admin/backup-configurations/updateBackupConfiguration";
-import Button from "@/elements/Button";
-import Code from "@/elements/Code";
-import Select from "@/elements/input/Select";
-import TextArea from "@/elements/input/TextArea";
-import TextInput from "@/elements/input/TextInput";
-import ConfirmationModal from "@/elements/modals/ConfirmationModal";
-import { backupDiskLabelMapping } from "@/lib/enums";
+import { Group, Stack, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
+import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
+import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration';
+import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import Select from '@/elements/input/Select';
+import TextArea from '@/elements/input/TextArea';
+import TextInput from '@/elements/input/TextInput';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { backupDiskLabelMapping } from '@/lib/enums';
+import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
+import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
+import { useResourceForm } from '@/plugins/useResourceForm';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
-  adminBackupConfigurationSchema
-} from "@/lib/schemas";
-import BackupRestic from "@/pages/admin/backupConfigurations/forms/BackupRestic";
-import BackupS3 from "@/pages/admin/backupConfigurations/forms/BackupS3";
-import { useResourceForm } from "@/plugins/useResourceForm";
+  adminBackupConfigurationSchema,
+} from '@/lib/schemas/admin/backupConfigurations';
 
 export default function BackupConfigurationCreateOrUpdate({
-  contextBackupConfiguration
+  contextBackupConfiguration,
 }: {
   contextBackupConfiguration?: BackupConfiguration;
 }) {
-  const [openModal, setOpenModal] = useState<"delete" | null>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
   const form = useForm<z.infer<typeof adminBackupConfigurationSchema>>({
     initialValues: {
-      name: "",
+      name: '',
       description: null,
-      backupDisk: "local"
+      backupDisk: 'local',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminBackupConfigurationSchema)
+    validate: zod4Resolver(adminBackupConfigurationSchema),
   });
 
   const backupConfigS3Form = useForm<z.infer<typeof adminBackupConfigurationS3Schema>>({
     initialValues: {
-      accessKey: "",
-      secretKey: "",
-      bucket: "",
-      region: "",
-      endpoint: "",
+      accessKey: '',
+      secretKey: '',
+      bucket: '',
+      region: '',
+      endpoint: '',
       pathStyle: true,
-      partSize: 0
+      partSize: 0,
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminBackupConfigurationS3Schema)
+    validate: zod4Resolver(adminBackupConfigurationS3Schema),
   });
 
   const backupConfigResticForm = useForm<z.infer<typeof adminBackupConfigurationResticSchema>>({
     initialValues: {
-      repository: "",
+      repository: '',
       retryLockSeconds: 0,
-      environment: {}
+      environment: {},
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminBackupConfigurationResticSchema)
+    validate: zod4Resolver(adminBackupConfigurationResticSchema),
   });
 
   const { loading, doCreateOrUpdate, doDelete } = useResourceForm<
@@ -68,24 +68,26 @@ export default function BackupConfigurationCreateOrUpdate({
     BackupConfiguration
   >({
     form,
-    createFn: () => createBackupConfiguration({
-      ...form.values,
-      backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values }
-    }),
-    updateFn: () => updateBackupConfiguration(contextBackupConfiguration!.uuid, {
-      ...form.values,
-      backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values }
-    }),
+    createFn: () =>
+      createBackupConfiguration({
+        ...form.values,
+        backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values },
+      }),
+    updateFn: () =>
+      updateBackupConfiguration(contextBackupConfiguration!.uuid, {
+        ...form.values,
+        backupConfigs: { s3: backupConfigS3Form.values, restic: backupConfigResticForm.values },
+      }),
     deleteFn: () => deleteBackupConfiguration(contextBackupConfiguration!.uuid),
     doUpdate: !!contextBackupConfiguration,
-    basePath: "/admin/backup-configurations",
-    resourceName: "Backup configuration"
+    basePath: '/admin/backup-configurations',
+    resourceName: 'Backup configuration',
   });
 
   useEffect(() => {
     if (contextBackupConfiguration) {
       form.setValues({
-        ...contextBackupConfiguration
+        ...contextBackupConfiguration,
       });
     }
   }, [contextBackupConfiguration]);
@@ -93,33 +95,33 @@ export default function BackupConfigurationCreateOrUpdate({
   return (
     <>
       <ConfirmationModal
-        opened={openModal === "delete"}
+        opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title="Confirm Backup Configuration Deletion"
-        confirm="Delete"
+        title='Confirm Backup Configuration Deletion'
+        confirm='Delete'
         onConfirmed={doDelete}
       >
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
       <Stack>
-        <Title order={2}>{contextBackupConfiguration ? "Update" : "Create"} Backup Configuration</Title>
+        <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
 
         <Group grow>
-          <TextInput withAsterisk label="Name" placeholder="Name" {...form.getInputProps("name")} />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
           <Select
             withAsterisk
-            label="Backup Disk"
-            placeholder="Backup Disk"
+            label='Backup Disk'
+            placeholder='Backup Disk'
             data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
               value,
-              label
+              label,
             }))}
-            {...form.getInputProps("backupDisk")}
+            {...form.getInputProps('backupDisk')}
           />
         </Group>
-        <Group grow align="start">
-          <TextArea label="Description" placeholder="Description" rows={3} {...form.getInputProps("description")} />
+        <Group grow align='start'>
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
         </Group>
         <Group>
           <Button
@@ -139,7 +141,7 @@ export default function BackupConfigurationCreateOrUpdate({
             </Button>
           )}
           {contextBackupConfiguration && (
-            <Button color="red" onClick={() => setOpenModal("delete")} loading={loading}>
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
               Delete
             </Button>
           )}

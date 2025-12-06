@@ -13,7 +13,7 @@ import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-import { oobeRegister } from "@/lib/schemas";
+import { oobeRegister } from '@/lib/schemas/oobe';
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();

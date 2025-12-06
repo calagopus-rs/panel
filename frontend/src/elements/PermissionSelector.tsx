@@ -2,9 +2,19 @@ import { faChevronDown, faChevronUp, faX } from '@fortawesome/free-solid-svg-ico
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Input, Stack, Title } from '@mantine/core';
 import { useCallback, useMemo, useState } from 'react';
+import { ExtensionPermissionIconsBuilder } from 'shared';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import { permissionCategoryIconMapping } from '@/lib/enums';
+
+const permissionIconMap: Record<
+  keyof ApiPermissions,
+  keyof Pick<ExtensionPermissionIconsBuilder, 'userPermissionIcons' | 'adminPermissionIcons' | 'serverPermissionIcons'>
+> = {
+  userPermissions: 'userPermissionIcons',
+  adminPermissions: 'adminPermissionIcons',
+  serverPermissions: 'serverPermissionIcons',
+};
 
 export default function PermissionSelector({
   label,
@@ -22,6 +32,9 @@ export default function PermissionSelector({
   setSelectedPermissions: (selected: string[]) => void;
 }) {
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+  const permissionIcons = window.extensionContext.permissionIcons;
+
+  console.log(permissionIcons[permissionIconMap[permissionsMapType]]);
 
   const allPermissionKeys = useMemo(() => {
     return Object.entries(permissions).flatMap(([category, { permissions: perms }]) =>
@@ -104,7 +117,7 @@ export default function PermissionSelector({
               <Card key={category}>
                 <div className='flex items-center justify-between gap-1'>
                   <div className='flex items-center gap-3'>
-                    {window.extensionContext.permissionIcons[`${permissionsMapType.slice(0, -1)}Icons`][category] ?? (
+                    {permissionIcons[permissionIconMap[permissionsMapType]][category] ?? (
                       <FontAwesomeIcon
                         icon={permissionCategoryIconMapping[category]}
                         className='w-5 h-5 text-gray-50'

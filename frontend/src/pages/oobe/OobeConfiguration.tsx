@@ -13,7 +13,7 @@ import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-import { oobeConfigurationSchema } from "@/lib/schemas";
+import { oobeConfigurationSchema } from '@/lib/schemas/oobe';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);

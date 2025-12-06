@@ -17,7 +17,7 @@ export default function ApiKeyRow({ apiKey }: { apiKey: UserApiKey }) {
   const { addToast } = useToast();
   const { removeApiKey } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteApiKey(apiKey.uuid)

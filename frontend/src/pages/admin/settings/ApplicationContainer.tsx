@@ -8,9 +8,9 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { adminSettingsApplicationSchema } from '@/lib/schemas';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
+import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
 
 export default function ApplicationContainer() {
   const { addToast } = useToast();

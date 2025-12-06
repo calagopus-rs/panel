@@ -16,7 +16,7 @@ import { to } from '@/lib/routes';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps, steps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global';
-import { oobeLoginSchema } from "@/lib/schemas";
+import { oobeLoginSchema } from '@/lib/schemas/oobe';
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();

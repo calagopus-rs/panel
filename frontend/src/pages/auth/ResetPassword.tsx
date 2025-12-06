@@ -13,7 +13,7 @@ import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import { useToast } from '@/providers/ToastProvider';
 import AuthWrapper from './AuthWrapper';
-import { authResetPasswordSchema } from "@/lib/schemas";
+import { authResetPasswordSchema } from '@/lib/schemas/auth';
 
 export default function ResetPassword() {
   const { addToast } = useToast();

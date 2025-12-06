@@ -1036,4 +1036,11 @@ declare global {
   type ArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip' | 'seven_zip';
   type StreamingArchiveFormat = 'tar' | 'tar_gz' | 'tar_xz' | 'tar_bz2' | 'tar_lz4' | 'tar_zstd' | 'zip';
   type OobeStepKey = 'register' | 'configuration' | 'location' | 'node' | 'node_verify' | 'finished' | '';
+
+  type GroupedDatabaseHosts = {
+    [key in DatabaseType]: {
+      group: string;
+      items: { value: string; label: string }[];
+    };
+  };
 }

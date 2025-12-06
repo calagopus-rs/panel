@@ -61,7 +61,7 @@ export default function TimezoneContainer() {
               withAsterisk
               label='Timezone'
               value={timezone}
-              onChange={(value) => setTimezone(value)}
+              onChange={(value) => setTimezone(value || '')}
               data={[
                 {
                   label: 'System',

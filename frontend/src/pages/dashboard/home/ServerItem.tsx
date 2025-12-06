@@ -24,7 +24,7 @@ import { bytesToString, mbToBytes } from '@/lib/size';
 import { useUserStore } from '@/stores/user';
 import ServerAddGroupModal from './modals/ServerAddGroupModal';
 
-const statusToColor = (status: ServerPowerState) => {
+const statusToColor = (status: ServerPowerState | undefined) => {
   switch (status) {
     case 'running':
       return 'green';
@@ -37,7 +37,7 @@ const statusToColor = (status: ServerPowerState) => {
   }
 };
 
-const statusToText = (status: ServerPowerState) => {
+const statusToText = (status: ServerPowerState | undefined) => {
   switch (status) {
     case 'running':
       return 'Online';
@@ -59,7 +59,7 @@ export default function ServerItem({
 }) {
   const { serverGroups } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'add-group'>(null);
+  const [openModal, setOpenModal] = useState<'add-group' | null>(null);
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {

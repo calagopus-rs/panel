@@ -13,14 +13,14 @@ import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import { backupDiskLabelMapping } from '@/lib/enums';
-import {
-  adminBackupConfigurationResticSchema,
-  adminBackupConfigurationS3Schema,
-  oobeLocationSchema
-} from "@/lib/schemas";
 import { OobeComponentProps } from '@/routers/OobeRouter';
 import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic';
 import BackupS3 from '../admin/backupConfigurations/forms/BackupS3';
+import {
+  adminBackupConfigurationResticSchema,
+  adminBackupConfigurationS3Schema,
+} from '@/lib/schemas/admin/backupConfigurations';
+import { oobeLocationSchema } from '@/lib/schemas/oobe';
 
 export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);

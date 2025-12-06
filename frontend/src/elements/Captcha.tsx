@@ -1,6 +1,6 @@
-import { Turnstile, TurnstileInstance } from "@marsidev/react-turnstile";
+import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import ReCAPTCHA, { ReCAPTCHA as ReCAPTCHAInstance } from "react-google-recaptcha";
+import ReCAPTCHA, { ReCAPTCHA as ReCAPTCHAInstance } from 'react-google-recaptcha';
 import { useGlobalStore } from '@/stores/global';
 
 export interface CaptchaRef {

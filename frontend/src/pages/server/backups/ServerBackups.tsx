@@ -16,7 +16,7 @@ import BackupCreateModal from './modals/BackupCreateModal';
 export default function ServerBackups() {
   const { server, backups, setBackups } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getBackups(server.uuid, page, search),

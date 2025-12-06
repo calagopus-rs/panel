@@ -21,7 +21,7 @@ import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-import { oobeNodeSchema } from "@/lib/schemas";
+import { oobeNodeSchema } from '@/lib/schemas/oobe';
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);

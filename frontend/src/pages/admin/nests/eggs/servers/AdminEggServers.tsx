@@ -6,7 +6,7 @@ import ServerRow from '@/pages/admin/servers/ServerRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 import getEggServers from '@/api/admin/nests/eggs/servers/getEggServers';
-import { serverTableColumns } from "@/lib/tableColumns";
+import { serverTableColumns } from '@/lib/tableColumns';
 
 export default function AdminEggServers({
   contextNest,

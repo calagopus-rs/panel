@@ -29,7 +29,13 @@ axiosInstance.interceptors.response.use(
  * make sure we display the message from the server back to the user if we can.
  */
 export function httpErrorToHuman(error: object): string {
-  if ('response' in error && typeof error.response === 'object' && 'data' in error.response && error.response.data) {
+  if (
+    'response' in error &&
+    error.response &&
+    typeof error.response === 'object' &&
+    'data' in error.response &&
+    error.response.data
+  ) {
     let { data } = error.response;
 
     // Some non-JSON requests can still return the error as a JSON block. In those cases, attempt

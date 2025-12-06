@@ -24,7 +24,7 @@ export default function AvatarContainer() {
 
     try {
       editor.current?.getImageScaledToCanvas().toBlob((blob) => {
-        updateAvatar(blob)
+        updateAvatar(blob ?? new Blob())
           .then((avatar) => {
             addToast('Avatar updated.', 'success');
 
@@ -46,7 +46,7 @@ export default function AvatarContainer() {
       .then(() => {
         addToast('Avatar removed.', 'success');
 
-        setUser({ ...user!, avatar: null });
+        setUser({ ...user!, avatar: undefined });
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -62,7 +62,7 @@ export default function AvatarContainer() {
         <Group className='mt-4'>
           <AvatarEditor
             ref={editor}
-            image={file ?? user.avatar}
+            image={file ?? user!.avatar}
             height={512}
             width={512}
             showGrid
@@ -83,7 +83,7 @@ export default function AvatarContainer() {
               <Button loading={loading} disabled={!file} onClick={doUpdate}>
                 Update Avatar
               </Button>
-              <Button color='red' loading={loading} disabled={!user.avatar} onClick={doRemove}>
+              <Button color='red' loading={loading} disabled={!user!.avatar} onClick={doRemove}>
                 Remove Avatar
               </Button>
             </Group>

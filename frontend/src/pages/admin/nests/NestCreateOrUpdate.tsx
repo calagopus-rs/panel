@@ -11,8 +11,8 @@ import Code from '@/elements/Code';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminNestSchema } from '@/lib/schemas';
 import { useResourceForm } from '@/plugins/useResourceForm';
+import { adminNestSchema } from '@/lib/schemas/admin/nests';
 
 export default function NestCreateOrUpdate({ contextNest }: { contextNest?: AdminNest }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
