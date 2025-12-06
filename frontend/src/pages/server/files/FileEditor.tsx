@@ -89,7 +89,7 @@ export default function FileEditor() {
 
       <div className='flex justify-between w-full p-4'>
         <FileBreadcrumbs
-          hideSelectAll
+          inFileEditor
           path={join(decodeURIComponent(browsingDirectory!), fileName)}
           browsingBackup={browsingBackup}
         />

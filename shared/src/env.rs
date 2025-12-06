@@ -1,8 +1,7 @@
-use std::sync::Arc;
-
 use anyhow::Context;
 use colored::Colorize;
 use dotenvy::dotenv;
+use std::sync::Arc;
 use tracing_subscriber::fmt::writer::MakeWriterExt;
 
 #[derive(Clone)]

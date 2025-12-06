@@ -1,17 +1,20 @@
-import classNames from 'classnames';
-import { Fragment } from 'react/jsx-runtime';
 import { createSearchParams, NavLink } from 'react-router';
 import Checkbox from '@/elements/input/Checkbox';
 import { useServerStore } from '@/stores/server';
+import { Breadcrumbs } from '@mantine/core';
+import { ReactNode, useMemo } from 'react';
+import Button from '@/elements/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
 
 export default function FileBreadcrumbs({
   path,
   browsingBackup,
-  hideSelectAll,
+  inFileEditor,
 }: {
   path: string;
   browsingBackup: ServerBackup | null;
-  hideSelectAll?: boolean;
+  inFileEditor?: boolean;
 }) {
   const { server, browsingEntries, selectedFiles, setSelectedFiles, movingFiles } = useServerStore();
 
@@ -23,24 +26,11 @@ export default function FileBreadcrumbs({
     };
   });
 
-  return (
-    <div className='flex items-center text-gray-500'>
-      <Checkbox
-        disabled={movingFiles.size > 0}
-        checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
-        indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
-        className='mr-4'
-        hidden={hideSelectAll}
-        onChange={() => {
-          if (selectedFiles.size >= browsingEntries.data.length) {
-            setSelectedFiles([]);
-          } else {
-            setSelectedFiles(browsingEntries.data);
-          }
-        }}
-      />
-      /<span className='px-1 text-gray-300'>{browsingBackup ? 'backups' : 'home'}</span>/
+  const items = useMemo(() => {
+    const items: ReactNode[] = [
+      browsingBackup ? 'backups' : 'home',
       <NavLink
+        key='first-segment'
         to={
           browsingBackup
             ? `/server/${server?.uuidShort}/files?${createSearchParams({
@@ -48,27 +38,53 @@ export default function FileBreadcrumbs({
               })}`
             : `/server/${server?.uuidShort}/files`
         }
-        className='px-1 text-gray-200 hover:text-gray-400'
+        className='px-1 text-blue-300 hover:text-blue-200'
       >
         {browsingBackup ? browsingBackup.name : 'container'}
+      </NavLink>,
+      ...pathItems.slice(browsingBackup ? 2 : 0).map((item, index) =>
+        index === pathItems.length - 1 && inFileEditor ? (
+          item.name
+        ) : (
+          <NavLink
+            key={item.path}
+            to={`/server/${server?.uuidShort}/files?${createSearchParams({ directory: item.path })}`}
+            className='px-1 text-blue-300 hover:text-blue-200'
+          >
+            {item.name}
+          </NavLink>
+        ),
+      ),
+    ];
+
+    return items;
+  }, [inFileEditor, browsingBackup, pathItems]);
+
+  return (
+    <div className='flex flex-row items-center justify-between'>
+      <Breadcrumbs separatorMargin='xs'>
+        <Checkbox
+          disabled={movingFiles.size > 0}
+          checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
+          indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
+          className='mr-4'
+          hidden={inFileEditor}
+          onChange={() => {
+            if (selectedFiles.size >= browsingEntries.data.length) {
+              setSelectedFiles([]);
+            } else {
+              setSelectedFiles(browsingEntries.data);
+            }
+          }}
+        />
+        {items}
+      </Breadcrumbs>
+
+      <NavLink to={`/server/${server?.uuidShort}/files`} hidden={!browsingBackup}>
+        <Button variant='light' leftSection={<FontAwesomeIcon icon={faDoorOpen} />}>
+          Exit Backup
+        </Button>
       </NavLink>
-      /
-      {pathItems.slice(browsingBackup ? 2 : 0).map((item, index) => {
-        return (
-          <Fragment key={index}>
-            <NavLink
-              to={`/server/${server?.uuidShort}/files?${createSearchParams({ directory: item.path })}`}
-              className={classNames(
-                'px-1 text-gray-200 hover:text-gray-400',
-                index === pathItems.length - 1 && 'pointer-events-none',
-              )}
-            >
-              {item.name}
-            </NavLink>
-            {index !== pathItems.length - (browsingBackup ? 3 : 1) && <span>/</span>}
-          </Fragment>
-        );
-      })}
     </div>
   );
 }
