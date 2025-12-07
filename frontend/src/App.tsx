@@ -10,12 +10,16 @@ import ErrorBoundary from './elements/ErrorBoundary';
 import { WindowProvider } from './providers/WindowProvider';
 import RouterRoutes from './RouterRoutes';
 import { CurrentWindowProvider } from './providers/CurrentWindowProvider';
+import getLanguages from './api/getLanguages';
 
 export default function App() {
-  const { settings, setSettings } = useGlobalStore();
+  const { settings, setSettings, setLanguages } = useGlobalStore();
 
   useEffect(() => {
-    getSettings().then(setSettings);
+    Promise.all([getSettings(), getLanguages()]).then(([settings, languages]) => {
+      setSettings(settings);
+      setLanguages(languages);
+    });
   }, []);
 
   return settings ? (

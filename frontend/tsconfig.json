@@ -5,6 +5,7 @@
     "module": "esnext",
     "target": "esnext",
     "baseUrl": ".",
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": ["./src/*"]
     },

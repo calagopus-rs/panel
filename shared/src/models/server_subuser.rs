@@ -90,8 +90,19 @@ impl ServerSubuser {
                 );
                 let password = rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 32);
 
+                let app_settings = settings.get().await;
+
                 let user = match super::user::User::create(
-                    database, None, None, &username, email, "Server", "Subuser", &password, false,
+                    database,
+                    None,
+                    None,
+                    &username,
+                    email,
+                    "Server",
+                    "Subuser",
+                    &password,
+                    false,
+                    &app_settings.app.language,
                 )
                 .await
                 {
@@ -102,6 +113,7 @@ impl ServerSubuser {
                         return Err(err);
                     }
                 };
+                drop(app_settings);
 
                 match super::user_password_reset::UserPasswordReset::create(database, user.uuid)
                     .await

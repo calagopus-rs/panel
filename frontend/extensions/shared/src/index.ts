@@ -22,3 +22,4 @@ export interface ServerRouteDefinition extends RouteDefinition {
 }
 
 export * from './extension';
+export * from './translation';

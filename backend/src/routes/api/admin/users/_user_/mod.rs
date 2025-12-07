@@ -224,6 +224,13 @@ mod patch {
         password: Option<String>,
 
         admin: Option<bool>,
+
+        #[validate(
+            length(min = 5, max = 15),
+            custom(function = "shared::validate_language")
+        )]
+        #[schema(min_length = 5, max_length = 15)]
+        language: Option<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -306,10 +313,13 @@ mod patch {
         if let Some(admin) = data.admin {
             user.admin = admin;
         }
+        if let Some(language) = data.language {
+            user.language = language;
+        }
 
         match sqlx::query!(
             "UPDATE users
-            SET role_uuid = $2, external_id = $3, username = $4, email = $5, name_first = $6, name_last = $7, admin = $8
+            SET role_uuid = $2, external_id = $3, username = $4, email = $5, name_first = $6, name_last = $7, admin = $8, language = $9
             WHERE users.uuid = $1",
             user.uuid,
             user.role.as_ref().map(|role| role.uuid),
@@ -319,6 +329,7 @@ mod patch {
             user.name_first,
             user.name_last,
             user.admin,
+            user.language,
         )
         .execute(state.database.write())
         .await
@@ -349,6 +360,7 @@ mod patch {
                     "name_first": user.name_first,
                     "name_last": user.name_last,
                     "admin": user.admin,
+                    "language": user.language,
                 }),
             )
             .await;

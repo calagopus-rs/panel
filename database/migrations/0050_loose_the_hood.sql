@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "language" varchar(15) DEFAULT 'en-US' NOT NULL;

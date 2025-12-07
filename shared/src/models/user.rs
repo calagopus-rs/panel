@@ -175,6 +175,8 @@ pub struct User {
     pub totp_enabled: bool,
     pub totp_secret: Option<String>,
 
+    pub language: String,
+
     pub created: chrono::NaiveDateTime,
 }
 
@@ -196,7 +198,7 @@ impl BaseModel for User {
             ("users.admin", format!("{prefix}admin")),
             ("users.totp_enabled", format!("{prefix}totp_enabled")),
             ("users.totp_secret", format!("{prefix}totp_secret")),
-            ("users.created", format!("{prefix}created")),
+            ("users.language", format!("{prefix}language")),
             ("users.created", format!("{prefix}created")),
         ]);
 
@@ -228,6 +230,7 @@ impl BaseModel for User {
             admin: row.try_get(format!("{prefix}admin").as_str())?,
             totp_enabled: row.try_get(format!("{prefix}totp_enabled").as_str())?,
             totp_secret: row.try_get(format!("{prefix}totp_secret").as_str())?,
+            language: row.try_get(format!("{prefix}language").as_str())?,
             created: row.try_get(format!("{prefix}created").as_str())?,
         })
     }
@@ -245,11 +248,12 @@ impl User {
         name_last: &str,
         password: &str,
         admin: bool,
+        language: &str,
     ) -> Result<uuid::Uuid, crate::database::DatabaseError> {
         let row = sqlx::query(
             r#"
-            INSERT INTO users (role_uuid, external_id, username, email, name_first, name_last, password, admin)
-            VALUES ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8)), $8)
+            INSERT INTO users (role_uuid, external_id, username, email, name_first, name_last, password, admin, language)
+            VALUES ($1, $2, $3, $4, $5, $6, crypt($7, gen_salt('bf', 8)), $8, $9)
             RETURNING users.uuid
             "#,
         )
@@ -261,6 +265,7 @@ impl User {
         .bind(name_last)
         .bind(password)
         .bind(admin)
+        .bind(language)
         .fetch_one(database.write())
         .await?;
 
@@ -675,6 +680,7 @@ impl User {
             name_last: self.name_last,
             admin: self.admin,
             totp_enabled: self.totp_enabled,
+            language: self.language,
             created: self.created.and_utc(),
         }
     }
@@ -770,6 +776,8 @@ pub struct ApiFullUser {
 
     pub admin: bool,
     pub totp_enabled: bool,
+
+    pub language: String,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

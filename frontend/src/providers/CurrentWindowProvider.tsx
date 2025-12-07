@@ -14,7 +14,7 @@ export const CurrentWindowProvider: FC<{ children: ReactNode; id: number | null 
     }
 
     return document.getElementById(`window_${id}_card`) as HTMLDivElement;
-  }, []);
+  }, [id]);
 
   const contextValue = useMemo(
     () => ({

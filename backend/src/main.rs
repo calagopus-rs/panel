@@ -8,11 +8,11 @@ use axum::{
     routing::get,
 };
 use colored::Colorize;
-use include_dir::{Dir, include_dir};
 use sentry_tower::SentryHttpLayer;
 use sha2::Digest;
 use shared::{
-    ApiError, GetState, extensions::commands::CliCommandGroupBuilder, response::ApiResponse,
+    ApiError, FRONTEND_ASSETS, GetState, extensions::commands::CliCommandGroupBuilder,
+    response::ApiResponse,
 };
 use std::{net::SocketAddr, path::PathBuf, sync::Arc, time::Instant};
 use tower::Layer;
@@ -24,8 +24,6 @@ use utoipa_axum::router::OpenApiRouter;
 #[cfg(target_os = "linux")]
 #[global_allocator]
 static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
-
-const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
 async fn handle_request(
     connect_info: ConnectInfo<SocketAddr>,

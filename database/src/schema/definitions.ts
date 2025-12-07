@@ -61,6 +61,7 @@ export const usersTable = new DatabaseTable('users')
   .addColumn('admin', boolean().default(false).notNull())
   .addColumn('totp_enabled', boolean().default(false).notNull())
   .addColumn('totp_secret', char({ length: 32 }))
+  .addColumn('language', varchar({ length: 15 }).default('en-US').notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     uniqueIndex('users_external_id_idx').on(cols.external_id),

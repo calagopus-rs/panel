@@ -793,6 +793,7 @@ declare global {
     password?: string;
     admin: boolean;
     totpEnabled: boolean;
+    language: string;
     roleUuid: string;
   }
 
@@ -1020,6 +1021,7 @@ declare global {
     app: {
       url: string;
       name: string;
+      language: string;
       registrationEnabled: boolean;
     };
     server: {
@@ -1038,6 +1040,7 @@ declare global {
     app: {
       name: string;
       url: string;
+      language: string;
       telemetryEnabled: boolean;
       registrationEnabled: boolean;
     };

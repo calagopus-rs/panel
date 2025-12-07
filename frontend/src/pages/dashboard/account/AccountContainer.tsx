@@ -10,6 +10,8 @@ import Card from '@/elements/Card';
 import TextInput from '@/elements/input/TextInput';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
+import Select from '@/elements/input/Select';
+import { useGlobalStore } from '@/stores/global';
 
 const schema = z.object({
   username: z
@@ -19,11 +21,13 @@ const schema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/),
   nameFirst: z.string().min(2).max(255),
   nameLast: z.string().min(2).max(255),
+  language: z.string(),
 });
 
 export default function AccountContainer() {
   const { addToast } = useToast();
   const { user, setUser } = useAuth();
+  const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
 
@@ -32,6 +36,7 @@ export default function AccountContainer() {
       username: '',
       nameFirst: '',
       nameLast: '',
+      language: '',
     },
     validateInputOnBlur: true,
     validate: zod4Resolver(schema),
@@ -43,6 +48,7 @@ export default function AccountContainer() {
         username: user.username,
         nameFirst: user.nameFirst,
         nameLast: user.nameLast,
+        language: user.language,
       });
     }
   }, [user]);
@@ -72,10 +78,21 @@ export default function AccountContainer() {
           Account
         </Title>
         <Stack className='mt-4'>
-          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
           <Group grow>
             <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
             <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
+          </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
+            <Select
+              withAsterisk
+              label='Language'
+              placeholder='Language'
+              data={languages}
+              searchable
+              allowDeselect
+              {...form.getInputProps('language')}
+            />
           </Group>
           <Group>
             <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>

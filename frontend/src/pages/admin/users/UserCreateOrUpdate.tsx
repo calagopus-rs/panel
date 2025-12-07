@@ -17,8 +17,10 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
+import { useGlobalStore } from '@/stores/global';
 
 export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User }) {
+  const { settings, languages } = useGlobalStore();
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor'>(null);
@@ -32,6 +34,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       password: null,
       admin: false,
       totpEnabled: false,
+      language: settings.app.language,
       roleUuid: uuidNil,
     },
   });
@@ -108,12 +111,14 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk={!contextUser}
-            label='Password'
-            placeholder='Password'
-            type='password'
-            {...form.getInputProps('password')}
+          <Select
+            withAsterisk
+            label='Language'
+            placeholder='Language'
+            data={languages}
+            searchable
+            allowDeselect
+            {...form.getInputProps('language')}
           />
 
           <Select
@@ -130,6 +135,14 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
             {...form.getInputProps('roleUuid')}
           />
         </Group>
+
+        <TextInput
+          withAsterisk={!contextUser}
+          label='Password'
+          placeholder='Password'
+          type='password'
+          {...form.getInputProps('password')}
+        />
 
         <Switch
           label='Admin'

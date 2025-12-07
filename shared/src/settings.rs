@@ -108,6 +108,7 @@ pub enum PublicCaptchaProvider<'a> {
 pub struct AppSettingsApp {
     pub name: String,
     pub url: String,
+    pub language: String,
 
     pub telemetry_enabled: bool,
     pub registration_enabled: bool,
@@ -122,6 +123,8 @@ impl AppSettingsApp {
         values.push(self.name.clone());
         keys.push("app::url");
         values.push(self.url.clone());
+        keys.push("app::language");
+        values.push(self.language.clone());
         keys.push("app::telemetry_enabled");
         values.push(self.telemetry_enabled.to_string());
         keys.push("app::registration_enabled");
@@ -138,6 +141,9 @@ impl AppSettingsApp {
             url: map
                 .remove("app::url")
                 .unwrap_or_else(|| "http://localhost:8000".to_string()),
+            language: map
+                .remove("app::language")
+                .unwrap_or_else(|| "en-US".to_string()),
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
                 .map(|s| s == "true")

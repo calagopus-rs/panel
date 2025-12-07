@@ -1,6 +1,11 @@
+use include_dir::{Dir, include_dir};
 use serde::Serialize;
-use std::{sync::Arc, time::Instant};
+use std::{
+    sync::{Arc, LazyLock},
+    time::Instant,
+};
 use utoipa::ToSchema;
+use validator::ValidationError;
 
 pub mod cache;
 pub mod cap;
@@ -97,4 +102,38 @@ pub fn unlikely(b: bool) -> bool {
     } else {
         false
     }
+}
+
+pub const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
+
+pub static FRONTEND_LANGUAGES: LazyLock<Vec<String>> = LazyLock::new(|| {
+    let mut languages = Vec::new();
+
+    let Some(translations) = FRONTEND_ASSETS.get_dir("translations") else {
+        return languages;
+    };
+
+    for translation in translations.files() {
+        let Some(file_name) = translation.path().file_name() else {
+            continue;
+        };
+
+        languages.push(
+            file_name
+                .to_string_lossy()
+                .trim_end_matches(".json")
+                .to_string(),
+        );
+    }
+
+    languages
+});
+
+pub fn validate_language(language: &String) -> Result<(), ValidationError> {
+    if !FRONTEND_LANGUAGES.contains(language) {
+        return Err(ValidationError::new("language")
+            .with_message(format!("invalid language: {language}").into()));
+    }
+
+    Ok(())
 }
