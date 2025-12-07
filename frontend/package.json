@@ -89,9 +89,6 @@
     "vite-tsconfig-paths": "^5.1.4"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "@tailwindcss/oxide",
-      "esbuild"
-    ]
+    "onlyBuiltDependencies": ["@tailwindcss/oxide", "esbuild"]
   }
 }

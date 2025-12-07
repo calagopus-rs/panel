@@ -117,7 +117,6 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
             placeholder='Language'
             data={languages}
             searchable
-            allowDeselect
             {...form.getInputProps('language')}
           />
 

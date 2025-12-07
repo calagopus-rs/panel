@@ -7,10 +7,13 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
+import Select from '@/elements/input/Select';
+import { useGlobalStore } from '@/stores/global';
 
 export default function ApplicationContainer() {
   const { addToast } = useToast();
   const { app } = useAdminStore();
+  const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
   const [appSettings, setAppSettings] = useState<AdminSettings['app']>(app);
@@ -42,14 +45,24 @@ export default function ApplicationContainer() {
             value={appSettings.name || ''}
             onChange={(e) => setAppSettings({ ...appSettings, name: e.target.value })}
           />
-          <TextInput
+          <Select
             withAsterisk
-            label='URL'
-            placeholder='URL'
-            value={appSettings.url || ''}
-            onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
+            label='Language'
+            placeholder='Language'
+            data={languages}
+            searchable
+            value={appSettings.language}
+            onChange={(value) => setAppSettings({ ...appSettings, language: value || 'en-US' })}
           />
         </Group>
+
+        <TextInput
+          withAsterisk
+          label='URL'
+          placeholder='URL'
+          value={appSettings.url || ''}
+          onChange={(e) => setAppSettings({ ...appSettings, url: e.target.value })}
+        />
 
         <Group grow>
           <Switch

@@ -90,7 +90,6 @@ export default function AccountContainer() {
               placeholder='Language'
               data={languages}
               searchable
-              allowDeselect
               {...form.getInputProps('language')}
             />
           </Group>
