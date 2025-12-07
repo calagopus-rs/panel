@@ -67,7 +67,7 @@ export default function FileBreadcrumbs({
           disabled={movingFiles.size > 0}
           checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
           indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
-          className='mr-4'
+          className='mr-2'
           hidden={inFileEditor}
           onChange={() => {
             if (selectedFiles.size >= browsingEntries.data.length) {
