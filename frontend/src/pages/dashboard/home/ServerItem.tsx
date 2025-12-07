@@ -75,11 +75,9 @@ export default function ServerItem({
       <ServerAddGroupModal server={server} opened={openModal === 'add-group'} onClose={() => setOpenModal(null)} />
 
       <NavLink to={`/server/${server.uuidShort}`}>
-
         <Card className='hover:border-gray-300! duration-200 h-full'>
           <div className='flex items-center gap-2 justify-between'>
             <span className='text-xl font-medium truncate flex items-center gap-2 flex-row' title={server.name}>
-
               <Badge color={statusToColor(stats?.state)}>{statusToText(stats?.state)}</Badge>
               {server.name}
               {serverGroups.every((g) => !g.serverOrder.includes(server.uuid)) && (
@@ -129,14 +127,10 @@ export default function ServerItem({
                   </Tooltip>
                 )}
               </div>
-
             </div>
           </div>
 
-
           <div className='flex flex-col justify-between gap-2'>
-
-
             <Divider my='md' />
 
             {server.status === 'installing' ? (
@@ -189,11 +183,9 @@ export default function ServerItem({
                 </div>
               </div>
             )}
-
-
           </div>
-        </Card >
-      </ NavLink>
+        </Card>
+      </NavLink>
     </>
   );
 }

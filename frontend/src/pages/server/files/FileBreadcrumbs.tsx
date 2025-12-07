@@ -34,8 +34,8 @@ export default function FileBreadcrumbs({
         to={
           browsingBackup
             ? `/server/${server?.uuidShort}/files?${createSearchParams({
-              directory: `/.backups/${browsingBackup.uuid}`,
-            })}`
+                directory: `/.backups/${browsingBackup.uuid}`,
+              })}`
             : `/server/${server?.uuidShort}/files`
         }
         className='px-1 text-blue-300 hover:text-blue-200'
