@@ -1,3 +1,4 @@
+use indexmap::IndexMap;
 use serde::{Deserialize, Deserializer, de::DeserializeOwned};
 
 #[inline]
@@ -93,6 +94,59 @@ where
     };
 
     Ok(value)
+}
+
+pub fn deserialize_nest_egg_config_files<'de, D>(
+    deserializer: D,
+) -> Result<IndexMap<String, crate::models::nest_egg::ExportedNestEggConfigsFilesFile>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
+    let value: serde_json::Value = match value {
+        serde_json::Value::String(value) => {
+            serde_json::from_str(&value).map_err(serde::de::Error::custom)?
+        }
+        value => value,
+    };
+
+    #[derive(Deserialize, Clone)]
+    pub struct OldExportedNestEggConfigsFilesFile {
+        pub parser: crate::models::nest_egg::ServerConfigurationFileParser,
+        pub find: IndexMap<String, serde_json::Value>,
+    }
+
+    if let Ok(value) = serde_json::from_value::<IndexMap<String, OldExportedNestEggConfigsFilesFile>>(
+        value.clone(),
+    ) {
+        Ok(value
+            .into_iter()
+            .map(|(k, v)| {
+                (
+                    k,
+                    crate::models::nest_egg::ExportedNestEggConfigsFilesFile {
+                        create_new: true,
+                        parser: v.parser,
+                        replace: v
+                            .find
+                            .into_iter()
+                            .map(|(k, replace_with)| {
+                                crate::models::nest_egg::ProcessConfigurationFileReplacement {
+                                    r#match: k,
+                                    insert_new: !matches!(v.parser, crate::models::nest_egg::ServerConfigurationFileParser::File),
+                                    update_existing: true,
+                                    if_value: None,
+                                    replace_with,
+                                }
+                            })
+                            .collect(),
+                    },
+                )
+            })
+            .collect())
+    } else {
+        serde_json::from_value(value).map_err(serde::de::Error::custom)
+    }
 }
 
 pub fn deserialize_nest_egg_variable_rules<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>

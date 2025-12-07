@@ -144,9 +144,12 @@ declare global {
     eggRepositoryEggUuid: string | null;
     configFiles: {
       file: string;
+      createNew: boolean;
       parser: ProcessConfigurationConfigParser;
       replace: {
         match: string;
+        insertNew: boolean;
+        updateExisting: boolean;
         ifValue: string | null;
         replaceWith: string;
       }[];
