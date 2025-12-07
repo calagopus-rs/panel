@@ -513,7 +513,7 @@ export default function ServerFiles() {
             </div>
           )}
 
-          <Card className='border border-b-0 border-[#424242] rounded-b-none!'>
+          <Card className='border border-[#424242] mb-2'>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
           </Card>
           <SelectionArea

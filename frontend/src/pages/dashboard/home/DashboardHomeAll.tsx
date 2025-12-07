@@ -42,7 +42,7 @@ export default function DashboardHomeAll() {
     <>
       <DashboardHomeTitle />
 
-      <Group mb='md'>
+      <Group mb='md' justify='space-between'>
         <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
         {user.admin && (
           <Switch
