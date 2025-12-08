@@ -37,7 +37,7 @@ export function useFileKeyboardActions({
             const selectedFiles = getSelectedFiles();
             if (selectedFiles.length > 0) {
               setMovingFiles(selectedFiles);
-              clearSelectedFiles();
+              setSelectedFiles([]);
             }
           }
         },
