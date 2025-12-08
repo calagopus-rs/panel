@@ -16,8 +16,7 @@ export default function FileBreadcrumbs({
   browsingBackup: ServerBackup | null;
   inFileEditor?: boolean;
 }) {
-  const { server, browsingEntries, selectedFileNames, setSelectedFiles, clearSelectedFiles, movingFileNames } =
-    useServerStore();
+  const { server, browsingEntries, selectedFileNames, setSelectedFiles, movingFileNames } = useServerStore();
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
@@ -72,7 +71,7 @@ export default function FileBreadcrumbs({
           hidden={inFileEditor}
           onChange={() => {
             if (selectedFileNames.size >= browsingEntries.data.length) {
-              clearSelectedFiles();
+              setSelectedFiles([]);
             } else {
               setSelectedFiles(browsingEntries.data);
             }

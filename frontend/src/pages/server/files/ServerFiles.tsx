@@ -114,6 +114,10 @@ export default function ServerFiles() {
   }, [browsingDirectory, page]);
 
   useEffect(() => {
+    setSelectedFiles([]);
+  }, [browsingDirectory]);
+
+  useEffect(() => {
     if (browsingDirectory?.startsWith('/.backups/') && !browsingBackup && !loading) {
       setLoading(true);
 
