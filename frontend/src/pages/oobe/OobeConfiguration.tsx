@@ -14,8 +14,8 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 import { oobeConfigurationSchema } from '@/lib/schemas/oobe';
-import { useGlobalStore } from "@/stores/global.ts";
-import Select from "@/elements/input/Select.tsx";
+import { useGlobalStore } from '@/stores/global.ts';
+import Select from '@/elements/input/Select.tsx';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const { languages } = useGlobalStore();

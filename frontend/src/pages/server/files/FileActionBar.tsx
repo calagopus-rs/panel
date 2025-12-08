@@ -21,7 +21,7 @@ export default function FileActionBar() {
     browsingDirectory,
     browsingBackup,
     selectedFileNames,
-    clearSelectedFiles,
+    setSelectedFiles,
     movingFileNames,
     movingFilesDirectory,
     setMovingFiles,
@@ -123,7 +123,7 @@ export default function FileActionBar() {
                 <Button
                   onClick={() => {
                     setMovingFiles(selectedFiles);
-                    clearSelectedFiles();
+                    setSelectedFiles([]);
                   }}
                 >
                   <FontAwesomeIcon icon={faAnglesUp} className='mr-2' /> Move

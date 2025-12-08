@@ -59,12 +59,7 @@ export default function ApplicationContainer() {
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='Name'
-            placeholder='Name'
-            {...form.getInputProps('name')}
-          />
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
           <Select
             withAsterisk
             label='Language'
@@ -75,12 +70,7 @@ export default function ApplicationContainer() {
           />
         </Group>
 
-        <TextInput
-          withAsterisk
-          label='URL'
-          placeholder='URL'
-          {...form.getInputProps('url')}
-        />
+        <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
 
         <Group grow>
           <Switch

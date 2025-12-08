@@ -5,7 +5,7 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
-import { NavLink } from "react-router";
+import { NavLink } from 'react-router';
 
 interface NodeAllocationRowProps {
   allocation: NodeAllocation;

@@ -108,7 +108,11 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
           {nodeAllocations.data.map((allocation) => (
             <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
               {(innerRef: Ref<HTMLElement>) => (
-                <NodeAllocationRow key={allocation.uuid} allocation={allocation} ref={innerRef as Ref<HTMLTableRowElement>} />
+                <NodeAllocationRow
+                  key={allocation.uuid}
+                  allocation={allocation}
+                  ref={innerRef as Ref<HTMLTableRowElement>}
+                />
               )}
             </SelectionArea.Selectable>
           ))}

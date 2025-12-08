@@ -1,4 +1,4 @@
-import { MouseEvent as ReactMouseEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@/elements/Button';
 import Can from '@/elements/Can';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
