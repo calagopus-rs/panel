@@ -12,6 +12,7 @@ import { useServerStore } from '@/stores/server';
 import ArchiveCreateModal from './modals/ArchiveCreateModal';
 import FileDeleteModal from './modals/FileDeleteModal';
 import ActionBar from '@/elements/ActionBar';
+import { useFileKeyboardActions } from './hooks/useFileKeyboardActions';
 
 export default function FileActionBar() {
   const [searchParams] = useSearchParams();
@@ -82,6 +83,12 @@ export default function FileActionBar() {
       })
       .finally(() => setLoading(false));
   };
+
+  useFileKeyboardActions({
+    onDelete: () => setOpenModal('delete'),
+    onPaste: () => doMove(),
+    browsingBackup: !!browsingBackup,
+  });
 
   const selectedFiles = getSelectedFiles();
 
