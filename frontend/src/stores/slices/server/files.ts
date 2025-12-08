@@ -15,14 +15,19 @@ export interface FilesSlice {
   addBrowsingEntry: (entry: DirectoryEntry) => void;
   removeBrowsingEntry: (entry: DirectoryEntry) => void;
 
-  selectedFiles: Set<DirectoryEntry>;
+  selectedFileNames: Set<string>;
   setSelectedFiles: (files: DirectoryEntry[]) => void;
   addSelectedFile: (file: DirectoryEntry) => void;
   removeSelectedFile: (file: DirectoryEntry) => void;
+  clearSelectedFiles: () => void;
+  isFileSelected: (file: DirectoryEntry) => boolean;
+  getSelectedFiles: () => DirectoryEntry[];
 
-  movingFiles: Set<DirectoryEntry>;
+  movingFileNames: Set<string>;
   movingFilesDirectory: string | null;
   setMovingFiles: (files: DirectoryEntry[]) => void;
+  clearMovingFiles: () => void;
+  getMovingFiles: () => DirectoryEntry[];
 
   fileOperations: Map<string, FileOperation>;
   setFileOperation: (uuid: string, operation: FileOperation) => void;
@@ -57,36 +62,54 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
       },
     })),
 
-  selectedFiles: new Set<DirectoryEntry>(),
-  setSelectedFiles: (value) => set((state) => ({ ...state, selectedFiles: new Set(value) })),
-  addSelectedFile: (value) =>
+  selectedFileNames: new Set<string>(),
+  setSelectedFiles: (files) => set((state) => ({ ...state, selectedFileNames: new Set(files.map((f) => f.name)) })),
+  addSelectedFile: (file) =>
     set((state) => {
-      state.selectedFiles.add(value);
-
-      return { ...state };
+      const newSet = new Set(state.selectedFileNames);
+      newSet.add(file.name);
+      return { ...state, selectedFileNames: newSet };
     }),
-  removeSelectedFile: (value) =>
+  removeSelectedFile: (file) =>
     set((state) => {
-      state.selectedFiles.delete(value);
-
-      return { ...state };
+      const newSet = new Set(state.selectedFileNames);
+      newSet.delete(file.name);
+      return { ...state, selectedFileNames: newSet };
     }),
+  clearSelectedFiles: () => set((state) => ({ ...state, selectedFileNames: new Set<string>() })),
+  isFileSelected: (file) => get().selectedFileNames.has(file.name),
+  getSelectedFiles: () => {
+    const state = get();
+    return state.browsingEntries.data.filter((entry) => state.selectedFileNames.has(entry.name));
+  },
 
-  movingFiles: new Set<DirectoryEntry>(),
+  movingFileNames: new Set<string>(),
   movingFilesDirectory: null,
   setMovingFiles: (files) =>
-    set((state) => ({ ...state, movingFiles: new Set(files), movingFilesDirectory: state.browsingDirectory })),
+    set((state) => ({
+      ...state,
+      movingFileNames: new Set(files.map((f) => f.name)),
+      movingFilesDirectory: state.browsingDirectory,
+    })),
+  clearMovingFiles: () =>
+    set((state) => ({ ...state, movingFileNames: new Set<string>(), movingFilesDirectory: null })),
+  getMovingFiles: () => {
+    const state = get();
+    return state.browsingEntries.data.filter((entry) => state.movingFileNames.has(entry.name));
+  },
 
   fileOperations: new Map<string, FileOperation>(),
   setFileOperation: (uuid, operation) =>
     set((state) => {
-      state.fileOperations.set(uuid, operation);
-      return { ...state };
+      const newMap = new Map(state.fileOperations);
+      newMap.set(uuid, operation);
+      return { ...state, fileOperations: newMap };
     }),
   removeFileOperation: (uuid) =>
     set((state) => {
-      state.fileOperations.delete(uuid);
-      return { ...state };
+      const newMap = new Map(state.fileOperations);
+      newMap.delete(uuid);
+      return { ...state, fileOperations: newMap };
     }),
 
   refreshFiles: (page: number) => {

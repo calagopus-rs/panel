@@ -5,6 +5,7 @@ import getMe from '@/api/me/getMe';
 import logout from '@/api/me/logout';
 import Spinner from '@/elements/Spinner';
 import { useToast } from './ToastProvider';
+import { useTranslations } from './TranslationProvider';
 
 interface AuthContextType {
   user: User | null;
@@ -19,9 +20,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
+  const { setLanguage } = useTranslations();
 
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setLanguage(user.language);
+    }
+  }, [user, setLanguage]);
 
   useEffect(() => {
     getMe()

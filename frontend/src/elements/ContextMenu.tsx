@@ -9,7 +9,7 @@ interface Item {
   label: string;
   hidden?: boolean;
   disabled?: boolean;
-  onClick: () => void;
+  onClick?: () => void;
   color?: 'gray' | 'red';
   items?: Omit<Item, 'items'>[];
 }
@@ -126,7 +126,7 @@ export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNo
                         onClick={(e) => {
                           if (!e.isTrusted) return;
 
-                          subItem.onClick();
+                          subItem.onClick?.();
                           hideMenu();
                         }}
                       >

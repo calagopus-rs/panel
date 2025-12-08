@@ -6,7 +6,7 @@ export interface NodesSlice {
   nodes: ResponseMeta<Node>;
   nodeMounts: ResponseMeta<NodeMount>;
   nodeAllocations: ResponseMeta<NodeAllocation>;
-  selectedNodeAllocations: Set<NodeAllocation>;
+  selectedNodeAllocations: NodeAllocation[];
 
   setNodes: (nodes: ResponseMeta<Node>) => void;
   addNode: (node: Node) => void;
@@ -21,14 +21,15 @@ export interface NodesSlice {
 
   setSelectedNodeAllocations: (allocations: NodeAllocation[]) => void;
   addSelectedNodeAllocation: (allocation: NodeAllocation) => void;
+  isNodeAllocationSelected: (allocation: NodeAllocation) => boolean;
   removeSelectedNodeAllocation: (allocation: NodeAllocation) => void;
 }
 
-export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (set): NodesSlice => ({
+export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (set, get): NodesSlice => ({
   nodes: getEmptyPaginationSet<Node>(),
   nodeMounts: getEmptyPaginationSet<NodeMount>(),
   nodeAllocations: getEmptyPaginationSet<NodeAllocation>(),
-  selectedNodeAllocations: new Set<NodeAllocation>(),
+  selectedNodeAllocations: [],
 
   setNodes: (value) => set((state) => ({ ...state, nodes: value })),
   addNode: (node) =>
@@ -76,17 +77,18 @@ export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (s
       },
     })),
 
-  setSelectedNodeAllocations: (value) => set((state) => ({ ...state, selectedNodeAllocations: new Set(value) })),
+  setSelectedNodeAllocations: (value) => set((state) => ({ ...state, selectedNodeAllocations: value })),
   addSelectedNodeAllocation: (value) =>
     set((state) => {
-      state.selectedNodeAllocations.add(value);
+      if (state.selectedNodeAllocations.every((a) => a.uuid !== value.uuid)) {
+        return { ...state, selectedNodeAllocations: [...state.selectedNodeAllocations, value] };
+      }
 
       return { ...state };
     }),
+  isNodeAllocationSelected: (value) => get().selectedNodeAllocations.some((a) => a.uuid === value.uuid),
   removeSelectedNodeAllocation: (value) =>
     set((state) => {
-      state.selectedNodeAllocations.delete(value);
-
-      return { ...state };
+      return { ...state, selectedNodeAllocations: state.selectedNodeAllocations.filter((a) => a.uuid !== value.uuid) };
     }),
 });

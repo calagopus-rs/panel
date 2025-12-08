@@ -1,7 +1,7 @@
 import { faAnglesDown, faAnglesUp, faArchive, faFileDownload, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import downloadFiles from '@/api/server/files/downloadFiles';
@@ -14,17 +14,20 @@ import FileDeleteModal from './modals/FileDeleteModal';
 import ActionBar from '@/elements/ActionBar';
 
 export default function FileActionBar() {
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { addToast } = useToast();
   const {
     server,
     browsingDirectory,
     browsingBackup,
-    selectedFiles,
-    setSelectedFiles,
-    movingFiles,
+    selectedFileNames,
+    clearSelectedFiles,
+    movingFileNames,
     movingFilesDirectory,
     setMovingFiles,
+    clearMovingFiles,
+    getSelectedFiles,
+    getMovingFiles,
     refreshFiles,
   } = useServerStore();
 
@@ -34,10 +37,11 @@ export default function FileActionBar() {
   const doMove = () => {
     setLoading(true);
 
+    const movingFiles = getMovingFiles();
     renameFiles({
       uuid: server.uuid,
       root: '/',
-      files: [...movingFiles].map((f) => ({
+      files: movingFiles.map((f) => ({
         from: join(movingFilesDirectory!, f.name),
         to: join(browsingDirectory!, f.name),
       })),
@@ -49,7 +53,7 @@ export default function FileActionBar() {
         }
 
         addToast(`${renamed} File${renamed === 1 ? ' has' : 's have'} been moved.`, 'success');
-        setMovingFiles([]);
+        clearMovingFiles();
         refreshFiles(Number(searchParams.get('page')) || 1);
       })
       .catch((msg) => {
@@ -61,10 +65,11 @@ export default function FileActionBar() {
   const doDownload = () => {
     setLoading(true);
 
+    const selectedFiles = getSelectedFiles();
     downloadFiles(
       server.uuid,
       browsingDirectory!,
-      Array.from(selectedFiles.values()).map((f) => f.name),
+      selectedFiles.map((f) => f.name),
       false,
       'zip',
     )
@@ -78,51 +83,7 @@ export default function FileActionBar() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
-
-      if ((event.ctrlKey || event.metaKey) && event.key === 'x' && !movingFiles.size && !isInputFocused) {
-        event.preventDefault();
-        setSelectedFiles([]);
-        setMovingFiles([...selectedFiles]);
-      }
-
-      if (event.key === 'Delete' && !movingFiles.size) {
-        event.preventDefault();
-        setOpenModal('delete');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [movingFiles, selectedFiles]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement;
-      const isInputFocused = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
-
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        event.key === 'v' &&
-        movingFiles.size > 0 &&
-        !loading &&
-        !isInputFocused
-      ) {
-        event.preventDefault();
-        doMove();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [movingFiles, loading, selectedFiles]);
+  const selectedFiles = getSelectedFiles();
 
   return (
     <>
@@ -138,14 +99,14 @@ export default function FileActionBar() {
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
       />
-      <ActionBar opened={movingFiles.size > 0 || selectedFiles.size > 0}>
-        {movingFiles.size > 0 ? (
+      <ActionBar opened={movingFileNames.size > 0 || selectedFileNames.size > 0}>
+        {movingFileNames.size > 0 ? (
           <>
             <Button onClick={doMove} loading={loading}>
-              <FontAwesomeIcon icon={faAnglesDown} className='mr-2' /> Move {movingFiles.size} File
-              {movingFiles.size === 1 ? '' : 's'} Here
+              <FontAwesomeIcon icon={faAnglesDown} className='mr-2' /> Move {movingFileNames.size} File
+              {movingFileNames.size === 1 ? '' : 's'} Here
             </Button>
-            <Button variant='default' onClick={() => setMovingFiles([])}>
+            <Button variant='default' onClick={clearMovingFiles}>
               Cancel
             </Button>
           </>
@@ -161,8 +122,8 @@ export default function FileActionBar() {
                 </Button>
                 <Button
                   onClick={() => {
-                    setMovingFiles([...selectedFiles]);
-                    setSelectedFiles([]);
+                    setMovingFiles(selectedFiles);
+                    clearSelectedFiles();
                   }}
                 >
                   <FontAwesomeIcon icon={faAnglesUp} className='mr-2' /> Move

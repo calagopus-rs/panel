@@ -1,0 +1,15 @@
+{
+  "": {
+    "items": {
+      "user": {
+        "zero": "{count} Users",
+        "one": "{count} User",
+        "two": "{count} Users",
+        "few": "{count} Users",
+        "many": "{count} Users",
+        "other": "{count} Users"
+      }
+    },
+    "translations": {}
+  }
+}

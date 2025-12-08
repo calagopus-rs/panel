@@ -7,6 +7,7 @@ import Button from '@/elements/Button';
 import VariableContainer from '@/elements/VariableContainer';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
+import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts';
 
 export default function AdminServerVariables({ server }: { server: AdminServer }) {
   const { addToast } = useToast();
@@ -40,22 +41,19 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault();
-
-        if (Object.keys(values).length > 0 && !loading) {
-          doUpdate();
-        }
+  useKeyboardShortcut(
+    's',
+    () => {
+      if (Object.keys(values).length > 0 && !loading) {
+        doUpdate();
       }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [values, loading]);
+    },
+    {
+      modifiers: ['ctrlOrMeta'],
+      allowWhenInputFocused: true,
+      deps: [values, loading],
+    },
+  );
 
   return (
     <>

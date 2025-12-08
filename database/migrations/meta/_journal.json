@@ -351,6 +351,13 @@
       "when": 1764510163955,
       "tag": "0049_nappy_kingpin",
       "breakpoints": false
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1765064044336,
+      "tag": "0050_loose_the_hood",
+      "breakpoints": false
     }
   ]
 }

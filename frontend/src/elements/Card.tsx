@@ -12,13 +12,19 @@ const Card = forwardRef<HTMLDivElement, CardProps & ComponentProps<'div'>>(
     return (
       <MantineCard
         ref={ref}
-        className={classNames('relative', className, hoverable && 'hover:opacity-60 cursor-pointer')}
+        className={classNames(
+          'relative',
+          className,
+          hoverable && 'transition-all! duration-190 hover:border-white/25! cursor-pointer',
+        )}
         pl={typeof pl === 'number' && leftStripeClassName ? pl + 4 : leftStripeClassName ? 20 : pl}
         radius='md'
         withBorder
         {...rest}
       >
-        {leftStripeClassName && <div className={classNames('absolute left-0 h-full w-1 mr-1', leftStripeClassName)} />}
+        {leftStripeClassName && (
+          <div className={classNames('absolute left-0 top-0 h-full w-1 mr-1', leftStripeClassName)} />
+        )}
         {children}
       </MantineCard>
     );

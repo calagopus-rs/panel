@@ -305,7 +305,6 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                                 .ok();
                         }
                         let secure = settings.app.url.starts_with("https://");
-                        drop(settings);
 
                         let username = match oauth_provider.extract_username(&info) {
                             Ok(username) => username,
@@ -351,6 +350,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                             &name_last,
                             &password,
                             false,
+                            &settings.app.language,
                         )
                         .await
                         {
@@ -368,6 +368,8 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
                                     .ok();
                             }
                         };
+
+                        drop(settings);
 
                         let key = UserSession::create(
                             &state.database,

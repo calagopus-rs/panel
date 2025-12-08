@@ -66,6 +66,13 @@ mod patch {
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
         name_last: Option<String>,
+
+        #[validate(
+            length(min = 5, max = 15),
+            custom(function = "shared::validate_language")
+        )]
+        #[schema(min_length = 5, max_length = 15)]
+        language: Option<String>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -95,15 +102,19 @@ mod patch {
         if let Some(name_last) = data.name_last {
             user.name_last = name_last;
         }
+        if let Some(language) = data.language {
+            user.language = language;
+        }
 
         sqlx::query!(
             "UPDATE users
-            SET username = $2, name_first = $3, name_last = $4
+            SET username = $2, name_first = $3, name_last = $4, language = $5
             WHERE users.uuid = $1",
             user.uuid,
             user.username,
             user.name_first,
-            user.name_last
+            user.name_last,
+            user.language,
         )
         .execute(state.database.write())
         .await?;
@@ -115,6 +126,7 @@ mod patch {
                     "username": user.username,
                     "name_first": user.name_first,
                     "name_last": user.name_last,
+                    "language": user.language,
                 }),
             )
             .await;

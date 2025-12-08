@@ -1,8 +1,3 @@
-import { rectSortingStrategy } from '@dnd-kit/sortable';
-import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon, Group } from '@mantine/core';
-import { ComponentProps, useState } from 'react';
 import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
 import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup';
 import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers';
@@ -18,6 +13,11 @@ import { Pagination } from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+import { rectSortingStrategy } from '@dnd-kit/sortable';
+import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { ComponentProps, useState } from 'react';
 import ServerGroupEditModal from './modals/ServerGroupEditModal';
 import ServerItem from './ServerItem';
 
@@ -91,11 +91,11 @@ export default function ServerGroupItem({
       </ConfirmationModal>
 
       <Card key={serverGroup.uuid} p={8}>
-        <Group justify='space-between' mb={isExpanded ? 'md' : undefined}>
+        <div className='grid grid-cols-2 gap-4 '>
           <Card
             p={6}
             radius='sm'
-            className='flex-1'
+            className='flex-1 flex flex-row! justify-between! items-center!'
             {...dragHandleProps}
             style={{
               ...dragHandleProps.style,
@@ -103,14 +103,19 @@ export default function ServerGroupItem({
             }}
           >
             <span className='text-sm font-mono text-white'>{serverGroup.name}</span>
+            <ActionIcon variant='subtle' onClick={() => setOpenModal('edit')} className='-mr-0.5 -my-2'>
+              <FontAwesomeIcon icon={faPen} />
+            </ActionIcon>
           </Card>
 
           <div className='flex flex-row items-center gap-2'>
-            <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+            <TextInput
+              placeholder='Search...'
+              className='h-full w-full'
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
 
-            <ActionIcon variant='subtle' onClick={() => setOpenModal('edit')}>
-              <FontAwesomeIcon icon={faPen} />
-            </ActionIcon>
             <ActionIcon color='red' variant='subtle' onClick={() => setOpenModal('delete')}>
               <FontAwesomeIcon icon={faTrash} />
             </ActionIcon>
@@ -122,14 +127,14 @@ export default function ServerGroupItem({
               )}
             </ActionIcon>
           </div>
-        </Group>
+        </div>
 
         {isExpanded && (
           <>
             {loading ? (
               <Spinner.Centered />
             ) : servers.total === 0 ? (
-              <p className='text-gray-400'>No servers found</p>
+              <p className='text-gray-400 mt-4'>No servers found</p>
             ) : (
               <DndContainer
                 items={dndServers}
@@ -168,10 +173,25 @@ export default function ServerGroupItem({
                 }
               >
                 {(items) => (
-                  <div className='gap-4 grid md:grid-cols-2'>
-                    {items.map((server) => (
+                  <div className='gap-4 grid md:grid-cols-2 mt-4'>
+                    {items.map((server, i) => (
                       <SortableItem key={server.id} id={server.id}>
-                        <ServerItem server={server} />
+                        <ServerItem
+                          server={server}
+                          onGroupRemove={() => {
+                            const serverOrder = serverGroup.serverOrder.filter(
+                              (_, orderI) => (servers.page - 1) * servers.perPage + i !== orderI,
+                            );
+                            updateStateServerGroup(serverGroup.uuid, {
+                              serverOrder,
+                            });
+                            setServers((prev) => ({ ...prev, data: prev.data.filter((_, dataI) => i !== dataI) }));
+
+                            updateServerGroup(serverGroup.uuid, { serverOrder }).catch((msg) => {
+                              addToast(httpErrorToHuman(msg), 'error');
+                            });
+                          }}
+                        />
                       </SortableItem>
                     ))}
                   </div>

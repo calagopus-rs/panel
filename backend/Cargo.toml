@@ -31,7 +31,7 @@ tower-cookies = "0.11.0"
 rand = { workspace = true }
 futures-util = { workspace = true }
 tower = "0.5.2"
-include_dir = "0.7.4"
+include_dir = { workspace = true }
 uuid = { workspace = true }
 totp-rs = { version = "5.7.0", features = ["gen_secret"] }
 validator = { workspace = true }

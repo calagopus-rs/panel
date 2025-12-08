@@ -10,7 +10,7 @@ for (const [path, module] of Object.entries(extensionModules)) {
   const identifier = path.split('/')[2];
   if (identifier === 'shared') continue;
 
-  if (module && typeof module === 'object' && 'default' in module && module.default instanceof Extension) {
+  if (module && typeof module === 'object' && module && 'default' in module && module.default instanceof Extension) {
     module.default.packageName = identifier.replaceAll('_', '.');
     extensions.push(module.default);
   } else {

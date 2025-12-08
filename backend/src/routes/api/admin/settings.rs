@@ -32,25 +32,34 @@ mod get {
 }
 
 mod put {
+    use axum::http::StatusCode;
     use serde::{Deserialize, Serialize};
     use shared::{
-        GetState,
+        ApiError, GetState,
         models::{admin_activity::GetAdminActivityLogger, user::GetPermissionManager},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
+    use validator::Validate;
 
-    #[derive(ToSchema, Deserialize)]
+    #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadApp {
         name: Option<String>,
+        #[validate(url)]
         url: Option<String>,
+        #[validate(
+            length(min = 5, max = 15),
+            custom(function = "shared::validate_language")
+        )]
+        language: Option<String>,
         telemetry_enabled: Option<bool>,
         registration_enabled: Option<bool>,
     }
 
-    #[derive(ToSchema, Deserialize)]
+    #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadWebauthn {
         rp_id: Option<String>,
+        #[validate(url)]
         rp_origin: Option<String>,
     }
 
@@ -63,7 +72,7 @@ mod put {
         allow_editing_startup_command: Option<bool>,
     }
 
-    #[derive(ToSchema, Deserialize)]
+    #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         oobe_step: Option<String>,
 
@@ -91,6 +100,12 @@ mod put {
         activity_logger: GetAdminActivityLogger,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
+        if let Err(errors) = shared::utils::validate_data(&data) {
+            return ApiResponse::json(ApiError::new_strings_value(errors))
+                .with_status(StatusCode::BAD_REQUEST)
+                .ok();
+        }
+
         permissions.has_admin_permission("settings.update")?;
 
         let mut settings = state.settings.get_mut().await;
@@ -119,6 +134,9 @@ mod put {
             }
             if let Some(url) = app.url {
                 settings.app.url = url;
+            }
+            if let Some(language) = app.language {
+                settings.app.language = language;
             }
             if let Some(telemetry_enabled) = app.telemetry_enabled {
                 settings.app.telemetry_enabled = telemetry_enabled;

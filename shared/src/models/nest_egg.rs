@@ -9,6 +9,10 @@ use std::{
 use utoipa::ToSchema;
 use validator::Validate;
 
+fn true_fn() -> bool {
+    true
+}
+
 #[derive(ToSchema, Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 #[schema(rename_all = "lowercase")]
@@ -24,6 +28,10 @@ pub enum ServerConfigurationFileParser {
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ProcessConfigurationFileReplacement {
     pub r#match: String,
+    #[serde(default)]
+    pub insert_new: bool,
+    #[serde(default = "true_fn")]
+    pub update_existing: bool,
     pub if_value: Option<String>,
     pub replace_with: serde_json::Value,
 }
@@ -31,6 +39,8 @@ pub struct ProcessConfigurationFileReplacement {
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ProcessConfigurationFile {
     pub file: String,
+    #[serde(default = "true_fn")]
+    pub create_new: bool,
     #[schema(inline)]
     pub parser: ServerConfigurationFileParser,
     #[schema(inline)]
@@ -108,9 +118,12 @@ pub struct NestEggConfigAllocations {
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ExportedNestEggConfigsFilesFile {
+    #[serde(default = "true_fn")]
+    pub create_new: bool,
     #[schema(inline)]
     pub parser: ServerConfigurationFileParser,
-    pub find: IndexMap<String, serde_json::Value>,
+    #[schema(inline)]
+    pub replace: Vec<ProcessConfigurationFileReplacement>,
 }
 
 #[derive(ToSchema, Validate, Serialize, Deserialize, Clone)]
@@ -118,7 +131,7 @@ pub struct ExportedNestEggConfigs {
     #[schema(inline)]
     #[serde(
         default,
-        deserialize_with = "crate::deserialize::deserialize_pre_stringified"
+        deserialize_with = "crate::deserialize::deserialize_nest_egg_config_files"
     )]
     pub files: IndexMap<String, ExportedNestEggConfigsFilesFile>,
     #[schema(inline)]
@@ -377,16 +390,9 @@ impl NestEgg {
                 .into_iter()
                 .map(|(file, config)| ProcessConfigurationFile {
                     file,
+                    create_new: config.create_new,
                     parser: config.parser,
-                    replace: config
-                        .find
-                        .into_iter()
-                        .map(|(r#match, value)| ProcessConfigurationFileReplacement {
-                            r#match,
-                            if_value: None,
-                            replace_with: value,
-                        })
-                        .collect(),
+                    replace: config.replace,
                 })
                 .collect(),
             exported_egg.config.startup,
@@ -453,16 +459,9 @@ impl NestEgg {
                     .into_iter()
                     .map(|(file, config)| ProcessConfigurationFile {
                         file,
+                        create_new: config.create_new,
                         parser: config.parser,
-                        replace: config
-                            .find
-                            .into_iter()
-                            .map(|(r#match, value)| ProcessConfigurationFileReplacement {
-                                r#match,
-                                if_value: None,
-                                replace_with: value,
-                            })
-                            .collect(),
+                        replace: config.replace,
                     })
                     .collect::<Vec<_>>(),
             )?,
@@ -654,12 +653,9 @@ impl NestEgg {
                         (
                             file.file,
                             ExportedNestEggConfigsFilesFile {
+                                create_new: file.create_new,
                                 parser: file.parser,
-                                find: file
-                                    .replace
-                                    .into_iter()
-                                    .map(|replace| (replace.r#match, replace.replace_with))
-                                    .collect(),
+                                replace: file.replace,
                             },
                         )
                     })

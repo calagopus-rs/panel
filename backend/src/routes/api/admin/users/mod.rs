@@ -125,6 +125,13 @@ mod post {
         password: String,
 
         admin: bool,
+
+        #[validate(
+            length(min = 5, max = 15),
+            custom(function = "shared::validate_language")
+        )]
+        #[schema(min_length = 5, max_length = 15)]
+        language: String,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -176,6 +183,7 @@ mod post {
             &data.name_last,
             &data.password,
             data.admin,
+            &data.language,
         )
         .await
         {
@@ -203,6 +211,7 @@ mod post {
                     "name_first": user.name_first,
                     "name_last": user.name_last,
                     "admin": user.admin,
+                    "language": user.language,
                 }),
             )
             .await;

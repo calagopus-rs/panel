@@ -128,9 +128,12 @@ declare global {
     eggRepositoryEggUuid: string | null;
     configFiles: {
       file: string;
+      createNew: boolean;
       parser: ProcessConfigurationConfigParser;
       replace: {
         match: string;
+        insertNew: boolean;
+        updateExisting: boolean;
         ifValue: string | null;
         replaceWith: string;
       }[];
@@ -734,6 +737,7 @@ declare global {
     password?: string;
     admin: boolean;
     totpEnabled: boolean;
+    language: string;
     roleUuid: string;
   }
 
@@ -961,6 +965,7 @@ declare global {
     app: {
       url: string;
       name: string;
+      language: string;
       registrationEnabled: boolean;
     };
     server: {
@@ -979,6 +984,7 @@ declare global {
     app: {
       name: string;
       url: string;
+      language: string;
       telemetryEnabled: boolean;
       registrationEnabled: boolean;
     };

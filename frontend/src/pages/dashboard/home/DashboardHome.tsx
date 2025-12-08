@@ -47,15 +47,6 @@ export default function DashboardHome() {
 
       <DashboardHomeTitle />
 
-      <Button
-        onClick={() => setOpenModal('create')}
-        color='blue'
-        leftSection={<FontAwesomeIcon icon={faPlus} />}
-        mb='md'
-      >
-        Create Group
-      </Button>
-
       {loading ? (
         <Spinner.Centered />
       ) : serverGroups.length === 0 ? (
@@ -102,6 +93,12 @@ export default function DashboardHome() {
           )}
         </DndContainer>
       )}
+
+      <div className='flex justify-center mt-4'>
+        <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Create Group
+        </Button>
+      </div>
     </>
   );
 }

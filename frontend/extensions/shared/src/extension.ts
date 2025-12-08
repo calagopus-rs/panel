@@ -1,6 +1,4 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: this is a dynamic system */
-
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { AdminRouteDefinition, GlobalRouteDefinition, RouteDefinition, ServerRouteDefinition } from '.';
 
 class ExtensionSkip {
@@ -29,7 +27,7 @@ export class ExtensionContext {
     }
   }
 
-  public call(name: string, args: object): any {
+  public call(name: string, args: object): unknown {
     for (const extension of this.extensions) {
       const result = extension.processCall(this, name, args);
 
@@ -149,7 +147,7 @@ export class Extension {
    *
    * Optimally (if applies) make sure your calls are globally unique, for example by prepending them with `yourauthorname_yourextensioname_`
    */
-  public processCall(ctx: ExtensionContext, name: string, args: object): any {
+  public processCall(ctx: ExtensionContext, name: string, args: object): unknown {
     return ctx.skip();
   }
 }

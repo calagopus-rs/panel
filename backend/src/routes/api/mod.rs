@@ -8,6 +8,7 @@ use utoipa_axum::router::OpenApiRouter;
 pub mod admin;
 pub mod auth;
 pub mod client;
+mod languages;
 pub mod remote;
 mod settings;
 
@@ -28,6 +29,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
             }),
         )
         .nest("/settings", settings::router(state))
+        .nest("/languages", languages::router(state))
         .nest("/auth", auth::router(state))
         .nest("/client", client::router(state))
         .nest("/admin", admin::router(state))

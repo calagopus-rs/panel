@@ -1,25 +1,23 @@
-import { Ref } from 'react';
-import { NavLink } from 'react-router';
+import { forwardRef, memo } from 'react';
 import Code from '@/elements/Code';
 import Checkbox from '@/elements/input/Checkbox';
 import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useAdminStore } from '@/stores/admin';
+import { NavLink } from "react-router";
 
-export default function NodeAllocationRow({
-  allocation,
-  ref,
-}: {
+interface NodeAllocationRowProps {
   allocation: NodeAllocation;
-  ref: Ref<HTMLTableRowElement>;
-}) {
-  const { selectedNodeAllocations, addSelectedNodeAllocation, removeSelectedNodeAllocation } = useAdminStore();
+}
 
-  return (
-    <>
+const NodeAllocationRow = memo(
+  forwardRef<HTMLTableRowElement, NodeAllocationRowProps>(function FileRow({ allocation }, ref) {
+    const { isNodeAllocationSelected, addSelectedNodeAllocation, removeSelectedNodeAllocation } = useAdminStore();
+
+    return (
       <TableRow
-        bg={selectedNodeAllocations.has(allocation) ? 'var(--mantine-color-blue-light)' : undefined}
+        bg={isNodeAllocationSelected(allocation) ? 'var(--mantine-color-blue-light)' : undefined}
         onClick={(e) => {
           if (e.ctrlKey || e.metaKey) {
             addSelectedNodeAllocation(allocation);
@@ -33,9 +31,9 @@ export default function NodeAllocationRow({
         <td className='pl-4 relative cursor-pointer w-10 text-center'>
           <Checkbox
             id={allocation.uuid}
-            checked={selectedNodeAllocations.has(allocation)}
+            checked={isNodeAllocationSelected(allocation)}
             onChange={() => {
-              if (selectedNodeAllocations.has(allocation)) {
+              if (isNodeAllocationSelected(allocation)) {
                 removeSelectedNodeAllocation(allocation);
               } else {
                 addSelectedNodeAllocation(allocation);
@@ -80,6 +78,8 @@ export default function NodeAllocationRow({
           <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>
         </TableData>
       </TableRow>
-    </>
-  );
-}
+    );
+  }),
+);
+
+export default NodeAllocationRow;

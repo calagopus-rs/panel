@@ -11,10 +11,13 @@ import TextInput from '@/elements/input/TextInput';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
+import Select from '@/elements/input/Select';
+import { useGlobalStore } from '@/stores/global';
 
 export default function ApplicationContainer() {
   const { addToast } = useToast();
   const { app } = useAdminStore();
+  const { languages } = useGlobalStore();
 
   const [loading, setLoading] = useState(false);
 
@@ -55,9 +58,28 @@ export default function ApplicationContainer() {
 
       <Stack>
         <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
+          <TextInput
+            withAsterisk
+            label='Name'
+            placeholder='Name'
+            {...form.getInputProps('name')}
+          />
+          <Select
+            withAsterisk
+            label='Language'
+            placeholder='Language'
+            data={languages}
+            searchable
+            {...form.getInputProps('language')}
+          />
         </Group>
+
+        <TextInput
+          withAsterisk
+          label='URL'
+          placeholder='URL'
+          {...form.getInputProps('url')}
+        />
 
         <Group grow>
           <Switch
