@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const oobeConfigurationSchema = z.object({
   applicationName: z.string().min(3).max(255),
+  applicationLanguage: z.string(),
   applicationUrl: z.url(),
   applicationTelemetry: z.boolean(),
   applicationRegistration: z.boolean(),

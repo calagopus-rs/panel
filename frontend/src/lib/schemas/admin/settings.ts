@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const adminSettingsApplicationSchema = z.object({
   name: z.string(),
   url: z.string(),
+  language: z.string(),
   telemetryEnabled: z.boolean(),
   registrationEnabled: z.boolean(),
 });

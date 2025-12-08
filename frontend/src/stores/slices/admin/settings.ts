@@ -19,6 +19,7 @@ export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice
   },
   app: {
     name: '',
+    language: '',
     url: '',
     telemetryEnabled: true,
     registrationEnabled: true,

@@ -14,14 +14,19 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import { OobeComponentProps } from '@/routers/OobeRouter';
 import { oobeConfigurationSchema } from '@/lib/schemas/oobe';
+import { useGlobalStore } from "@/stores/global.ts";
+import Select from "@/elements/input/Select.tsx";
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
+  const { languages } = useGlobalStore();
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const form = useForm<z.infer<typeof oobeConfigurationSchema>>({
     initialValues: {
       applicationName: '',
+      applicationLanguage: 'en-US',
       applicationUrl: '',
       applicationTelemetry: true,
       applicationRegistration: true,
@@ -50,6 +55,7 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
 
     updateApplicationSettings({
       name: form.values.applicationName,
+      language: form.values.applicationLanguage,
       url: form.values.applicationUrl,
       telemetryEnabled: form.values.applicationTelemetry,
       registrationEnabled: form.values.applicationRegistration,
@@ -78,6 +84,15 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
           leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
           required
           {...form.getInputProps('applicationName')}
+        />
+
+        <Select
+          withAsterisk
+          label='Language'
+          placeholder='Language'
+          data={languages}
+          searchable
+          {...form.getInputProps('language')}
         />
 
         <TextInput

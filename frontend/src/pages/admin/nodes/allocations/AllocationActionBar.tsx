@@ -50,11 +50,11 @@ export default function AllocationActionBar({ node, loadAllocations }: { node: N
         onConfirmed={doDelete}
       >
         Are you sure you want to delete
-        <Code>{selectedNodeAllocations.size}</Code>
+        <Code>{selectedNodeAllocations.length}</Code>
         allocations from <Code>{node.name}</Code>?
       </ConfirmationModal>
 
-      <ActionBar opened={selectedNodeAllocations.size > 0}>
+      <ActionBar opened={selectedNodeAllocations.length > 0}>
         <Button onClick={() => setOpenModal('update')}>
           <FontAwesomeIcon icon={faPen} className='mr-2' /> Update
         </Button>

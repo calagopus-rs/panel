@@ -1,5 +1,5 @@
 import { Card, Group, Title } from '@mantine/core';
-import { type Ref, useEffect, useRef, useState } from 'react';
+import { type Ref, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import getBackup from '@/api/server/backups/getBackup';

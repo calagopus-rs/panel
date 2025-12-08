@@ -25,6 +25,7 @@ export default function ApplicationContainer() {
     initialValues: {
       name: '',
       url: '',
+      language: 'en-US',
       telemetryEnabled: true,
       registrationEnabled: true,
     },

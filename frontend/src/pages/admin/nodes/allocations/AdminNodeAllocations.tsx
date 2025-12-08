@@ -27,7 +27,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
   });
 
   const onSelectedStart = (event: ReactMouseEvent | MouseEvent) => {
-    setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : new Set());
+    setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : []);
   };
 
   const onSelected = (selected: NodeAllocation[]) => {

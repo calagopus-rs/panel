@@ -108,7 +108,9 @@ export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNo
                       onClick={(e) => {
                         if (!e.isTrusted) return;
 
-                        item.onClick();
+                        if (item.onClick) {
+                          item.onClick();
+                        }
                         hideMenu();
                       }}
                     >
@@ -144,7 +146,9 @@ export const ContextMenuProvider = ({ children, menuProps }: { children: ReactNo
                   onClick={(e) => {
                     if (!e.isTrusted) return;
 
-                    item.onClick();
+                    if (item.onClick) {
+                      item.onClick();
+                    }
                     hideMenu();
                   }}
                 >
