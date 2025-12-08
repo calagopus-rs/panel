@@ -12,6 +12,7 @@ import { useAdminStore } from '@/stores/admin';
 import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
 import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
 import AllocationActionBar from './AllocationActionBar';
+import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts';
 
 export default function AdminNodeAllocations({ node }: { node: Node }) {
   const { nodeAllocations, setNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();
@@ -58,6 +59,22 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
     };
   }, [nodeAllocations.data]);
 
+  useKeyboardShortcuts({
+    shortcuts: [
+      {
+        key: 'a',
+        modifiers: ['ctrlOrMeta'],
+        callback: () => setSelectedNodeAllocations(nodeAllocations.data),
+      },
+      {
+        key: 'Escape',
+        modifiers: ['ctrlOrMeta'],
+        callback: () => setSelectedNodeAllocations([]),
+      },
+    ],
+    deps: [nodeAllocations.data],
+  });
+
   return (
     <>
       <NodeAllocationsCreateModal
@@ -89,7 +106,9 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
         >
           {nodeAllocations.data.map((allocation) => (
             <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
-              {(innerRef: Ref<HTMLTableRowElement>) => <NodeAllocationRow allocation={allocation} ref={innerRef} />}
+              {(innerRef: Ref<HTMLTableRowElement>) => (
+                <NodeAllocationRow key={allocation.uuid} allocation={allocation} ref={innerRef} />
+              )}
             </SelectionArea.Selectable>
           ))}
         </Table>

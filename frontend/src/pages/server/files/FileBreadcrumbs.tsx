@@ -16,7 +16,8 @@ export default function FileBreadcrumbs({
   browsingBackup: ServerBackup | null;
   inFileEditor?: boolean;
 }) {
-  const { server, browsingEntries, selectedFiles, setSelectedFiles, movingFiles } = useServerStore();
+  const { server, browsingEntries, selectedFileNames, setSelectedFiles, clearSelectedFiles, movingFileNames } =
+    useServerStore();
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
@@ -64,14 +65,14 @@ export default function FileBreadcrumbs({
     <div className='flex flex-row items-center justify-between'>
       <Breadcrumbs separatorMargin='xs'>
         <Checkbox
-          disabled={movingFiles.size > 0}
-          checked={selectedFiles.size > 0 && selectedFiles.size >= browsingEntries.data.length}
-          indeterminate={selectedFiles.size > 0 && selectedFiles.size < browsingEntries.data.length}
+          disabled={movingFileNames.size > 0}
+          checked={selectedFileNames.size > 0 && selectedFileNames.size >= browsingEntries.data.length}
+          indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
           className='mr-2'
           hidden={inFileEditor}
           onChange={() => {
-            if (selectedFiles.size >= browsingEntries.data.length) {
-              setSelectedFiles([]);
+            if (selectedFileNames.size >= browsingEntries.data.length) {
+              clearSelectedFiles();
             } else {
               setSelectedFiles(browsingEntries.data);
             }

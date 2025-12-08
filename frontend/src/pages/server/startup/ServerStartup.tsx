@@ -16,6 +16,7 @@ import { useGlobalStore } from '@/stores/global';
 import { useServerStore } from '@/stores/server';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faReply } from '@fortawesome/free-solid-svg-icons';
+import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts';
 
 export default function ServerStartup() {
   const { addToast } = useToast();
@@ -86,22 +87,19 @@ export default function ServerStartup() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 's') {
-        event.preventDefault();
-
-        if (Object.keys(values).length > 0 && !loading) {
-          doUpdate();
-        }
+  useKeyboardShortcut(
+    's',
+    () => {
+      if (Object.keys(values).length > 0 && !loading) {
+        doUpdate();
       }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [values, loading]);
+    },
+    {
+      modifiers: ['ctrlOrMeta'],
+      allowWhenInputFocused: true,
+      deps: [values, loading],
+    },
+  );
 
   return (
     <>

@@ -128,18 +128,19 @@ export default function ServerItem({
                 </Tooltip>
               )}
               {onGroupRemove && (
-                <ActionIcon
-                  size='input-sm'
-                  color='red'
-                  variant='light'
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onGroupRemove();
-                  }}
-                  className='ml-2'
-                >
-                  <FontAwesomeIcon icon={faMinus} />
-                </ActionIcon>
+                <Tooltip label='Remove from Group' className='ml-2'>
+                  <ActionIcon
+                    size='input-sm'
+                    color='red'
+                    variant='light'
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onGroupRemove();
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faMinus} />
+                  </ActionIcon>
+                </Tooltip>
               )}
             </div>
           </div>

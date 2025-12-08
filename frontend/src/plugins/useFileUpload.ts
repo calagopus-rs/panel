@@ -311,7 +311,6 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
         const updated = new Map(prev);
         batches.forEach((batch) => {
           batch.files.forEach((file, index) => {
-            // Use file.name which contains the full path for drag-dropped folders
             const path = file.name;
             const fileKey = `file-${batch.indices[index]}`;
             updated.set(fileKey, {
