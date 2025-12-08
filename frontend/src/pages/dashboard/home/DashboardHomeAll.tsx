@@ -72,9 +72,12 @@ export default function DashboardHomeAll() {
         </div>
       )}
 
-      <Divider my='md' />
-
-      <Pagination data={servers} onPageSelect={setPage} />
+      {servers.total > servers.perPage && (
+        <>
+          <Divider my='md' />
+          <Pagination data={servers} onPageSelect={setPage} />
+        </>
+      )}
     </>
   );
 }

@@ -178,7 +178,13 @@ export function SortableItem({
 
   return (
     <div ref={setNodeRef} style={style}>
-      {renderItem ? renderItem({ isDragging, dragHandleProps }) : <div {...dragHandleProps}>{children}</div>}
+      {renderItem ? (
+        renderItem({ isDragging, dragHandleProps })
+      ) : (
+        <div {...dragHandleProps} className='h-full'>
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -99,7 +99,7 @@ export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<
   const rangeStart = (data.page - 1) * data.perPage + 1;
   const rangeEnd = Math.min(data.page * data.perPage, data.total);
 
-  return (
+  return isFirstPage && isLastPage ? null : (
     <Group justify='space-between' hidden={rangeEnd === 0} {...props}>
       <p className='text-sm leading-5 text-gray-400'>
         Showing&nbsp;
@@ -108,9 +108,7 @@ export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<
         <span className='text-gray-300'>{rangeEnd}</span>
         &nbsp;of&nbsp;<span className='text-gray-300'>{data.total}</span> results
       </p>
-      {isFirstPage && isLastPage ? null : (
-        <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
-      )}
+      <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
     </Group>
   );
 }
