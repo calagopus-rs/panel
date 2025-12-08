@@ -118,7 +118,7 @@ export default function AdminEggVariables({
                   key={variable.id}
                   id={variable.id}
                   renderItem={({ dragHandleProps }) => (
-                    <div {...dragHandleProps}>
+                    <div {...dragHandleProps} className='h-full'>
                       <EggVariableContainer
                         key={variable.uuid ?? index}
                         contextNest={contextNest}
