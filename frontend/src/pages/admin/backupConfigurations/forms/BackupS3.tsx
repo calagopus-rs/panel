@@ -5,9 +5,13 @@ import NumberInput from '@/elements/input/NumberInput';
 import PasswordInput from '@/elements/input/PasswordInput';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { backupConfigurationSchema } from '@/schemas';
+import { adminBackupConfigurationS3Schema } from '@/lib/schemas/admin/backupConfigurations';
 
-export default function BackupS3({ form }: { form: UseFormReturnType<z.infer<typeof backupConfigurationSchema>> }) {
+export default function BackupS3({
+  form,
+}: {
+  form: UseFormReturnType<z.infer<typeof adminBackupConfigurationS3Schema>>;
+}) {
   return (
     <Stack gap='xs'>
       <Stack gap={0}>
@@ -17,54 +21,29 @@ export default function BackupS3({ form }: { form: UseFormReturnType<z.infer<typ
 
       <Stack>
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='Access Key'
-            placeholder='Access Key'
-            {...form.getInputProps('backupConfigs.s3.accessKey')}
-          />
+          <TextInput withAsterisk label='Access Key' placeholder='Access Key' {...form.getInputProps('accessKey')} />
           <PasswordInput
             withAsterisk
             label='Secret Key'
             placeholder='Secret Key'
-            {...form.getInputProps('backupConfigs.s3.secretKey')}
+            {...form.getInputProps('secretKey')}
           />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='Bucket'
-            placeholder='Bucket'
-            {...form.getInputProps('backupConfigs.s3.bucket')}
-          />
-          <TextInput
-            withAsterisk
-            label='Region'
-            placeholder='Region'
-            {...form.getInputProps('backupConfigs.s3.region')}
-          />
+          <TextInput withAsterisk label='Bucket' placeholder='Bucket' {...form.getInputProps('bucket')} />
+          <TextInput withAsterisk label='Region' placeholder='Region' {...form.getInputProps('region')} />
         </Group>
 
         <Group grow>
-          <TextInput
-            withAsterisk
-            label='Endpoint'
-            placeholder='Endpoint'
-            {...form.getInputProps('backupConfigs.s3.endpoint')}
-          />
-          <NumberInput
-            withAsterisk
-            label='Part Size'
-            placeholder='Part Size'
-            {...form.getInputProps('backupConfigs.s3.partSize')}
-          />
+          <TextInput withAsterisk label='Endpoint' placeholder='Endpoint' {...form.getInputProps('endpoint')} />
+          <NumberInput withAsterisk label='Part Size' placeholder='Part Size' {...form.getInputProps('partSize')} />
         </Group>
 
         <Switch
-          label={form.values.backupConfigs.s3.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
-          checked={form.values.backupConfigs.s3.pathStyle || false}
-          onChange={(e) => form.setFieldValue('form.values.backupConfigs.s3.pathStyle', e.target.checked)}
+          label={form.values.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
+          checked={form.values.pathStyle || false}
+          onChange={(e) => form.setFieldValue('form.values.pathStyle', e.target.checked)}
         />
       </Stack>
     </Stack>

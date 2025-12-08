@@ -16,10 +16,14 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
   const { addToast } = useToast();
   const { serverGroups, updateServerGroup: updateStateServerGroup } = useUserStore();
 
-  const [selectedServerGroup, setSelectedServerGroup] = useState<UserServerGroup>(null);
+  const [selectedServerGroup, setSelectedServerGroup] = useState<UserServerGroup | null>(null);
   const [loading, setLoading] = useState(false);
 
   const doAdd = () => {
+    if (!selectedServerGroup) {
+      return;
+    }
+
     setLoading(true);
 
     updateServerGroup(selectedServerGroup.uuid, { serverOrder: [...selectedServerGroup.serverOrder, server.uuid] })
@@ -43,7 +47,7 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
         value={selectedServerGroup?.uuid || ''}
         className='w-full'
         searchable
-        onChange={(value) => setSelectedServerGroup(serverGroups.find((g) => g.uuid === value))}
+        onChange={(value) => setSelectedServerGroup(serverGroups.find((g) => g.uuid === value) ?? null)}
         data={serverGroups
           .filter((g) => !g.serverOrder.includes(server.uuid))
           .map((g) => ({

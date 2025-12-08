@@ -1,40 +1,28 @@
 import { Group, Stack } from '@mantine/core';
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { UseFormReturnType } from '@mantine/form';
+import { useEffect } from 'react';
+import { z } from 'zod';
+import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
+import { adminSettingsCaptchaProviderTurnstileSchema } from '@/lib/schemas/admin/settings';
 
 export default function CaptchaTurnstile({
-  settings,
-  setSettings,
+  form,
 }: {
-  settings: CaptchaProviderTurnstile;
-  setSettings: Dispatch<SetStateAction<CaptchaProviderTurnstile>>;
+  form: UseFormReturnType<z.infer<typeof adminSettingsCaptchaProviderTurnstileSchema>>;
 }) {
   useEffect(() => {
-    setSettings((settings: CaptchaProviderTurnstile) => ({
-      ...settings,
-      siteKey: settings.siteKey || '',
-      secretKey: settings.secretKey || '',
-    }));
+    form.setValues({
+      siteKey: form.values.siteKey ?? '',
+      secretKey: form.values.secretKey ?? '',
+    });
   }, []);
 
   return (
     <Stack mt='md'>
       <Group grow>
-        <TextInput
-          withAsterisk
-          label='Site Key'
-          placeholder='Site Key'
-          value={settings.siteKey || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, siteKey: e.target.value }))}
-        />
-        <TextInput
-          withAsterisk
-          label='Secret Key'
-          placeholder='Secret Key'
-          type='password'
-          value={settings.secretKey || ''}
-          onChange={(e) => setSettings((settings) => ({ ...settings, secretKey: e.target.value }))}
-        />
+        <TextInput withAsterisk label='Site Key' placeholder='Site Key' {...form.getInputProps('siteKey')} />
+        <PasswordInput withAsterisk label='Secret Key' placeholder='Secret Key' {...form.getInputProps('secretKey')} />
       </Group>
     </Stack>
   );

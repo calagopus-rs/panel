@@ -113,7 +113,7 @@ class SelectionArea<T> extends Component<SelectionAreaProps<T>, SelectionAreaSta
 
   render(): ReactNode {
     const { children, className = '', style = {} } = this.props;
-    const contextValue = {
+    const contextValue: SelectionContextType<any> = {
       registerSelectable: this.registerSelectable,
       unregisterSelectable: this.unregisterSelectable,
     };

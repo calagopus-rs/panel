@@ -1,21 +1,21 @@
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import Button from '@/elements/Button';
-import { useToast } from '@/providers/ToastProvider';
-import ActionBar from '@/elements/ActionBar';
-import { useAdminStore } from '@/stores/admin';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
 import { httpErrorToHuman } from '@/api/axios';
+import ActionBar from '@/elements/ActionBar';
+import Button from '@/elements/Button';
+import Code from '@/elements/Code';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
 import NodeAllocationsUpdateModal from './modals/NodeAllocationsUpdateModal';
 
 export default function AllocationActionBar({ node, loadAllocations }: { node: Node; loadAllocations: () => void }) {
   const { addToast } = useToast();
   const { removeNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'update' | 'delete'>(null);
+  const [openModal, setOpenModal] = useState<'update' | 'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteNodeAllocations(
@@ -50,11 +50,11 @@ export default function AllocationActionBar({ node, loadAllocations }: { node: N
         onConfirmed={doDelete}
       >
         Are you sure you want to delete
-        <Code>{selectedNodeAllocations.size}</Code>
+        <Code>{selectedNodeAllocations.length}</Code>
         allocations from <Code>{node.name}</Code>?
       </ConfirmationModal>
 
-      <ActionBar opened={selectedNodeAllocations.size > 0}>
+      <ActionBar opened={selectedNodeAllocations.length > 0}>
         <Button onClick={() => setOpenModal('update')}>
           <FontAwesomeIcon icon={faPen} className='mr-2' /> Update
         </Button>

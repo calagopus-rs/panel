@@ -1,10 +1,8 @@
 import { axiosInstance } from '@/api/axios';
+import { z } from 'zod';
+import { authForgotPasswordSchema } from '@/lib/schemas/auth';
 
-interface Data {
-  email: string;
-}
-
-export default async (data: Data, captcha: string | null): Promise<void> => {
+export default async (data: z.infer<typeof authForgotPasswordSchema>, captcha: string | null): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post('/api/auth/password/forgot', { ...data, captcha })

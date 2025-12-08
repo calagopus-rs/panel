@@ -3,14 +3,15 @@ import { useState } from 'react';
 import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
-import LocationRow, { locationTableColumns } from '@/pages/admin/locations/LocationRow';
+import { locationTableColumns } from '@/lib/tableColumns';
+import LocationRow from '@/pages/admin/locations/LocationRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import TextInput from '@/elements/input/TextInput';
 
 export default function AdminBackupConfigurationLocations({
   backupConfiguration,
 }: {
-  backupConfiguration?: BackupConfiguration;
+  backupConfiguration: BackupConfiguration;
 }) {
   const [backupConfigurationLocations, setBackupConfigurationLocations] = useState<ResponseMeta<Location>>(
     getEmptyPaginationSet(),

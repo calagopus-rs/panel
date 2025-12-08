@@ -33,7 +33,7 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
         ? fileName.concat(archiveFormatLabelMapping[format])
         : generateArchiveName(archiveFormatLabelMapping[format]),
       format,
-      root: browsingDirectory,
+      root: browsingDirectory!,
       files: files.map((f) => f.name),
     })
       .then(() => {
@@ -73,7 +73,7 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
             /home/container/
             <span className='text-cyan-200'>
               {join(
-                browsingDirectory,
+                browsingDirectory!,
                 fileName
                   ? `${fileName}${archiveFormatLabelMapping[format]}`
                   : generateArchiveName(archiveFormatLabelMapping[format]),

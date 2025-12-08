@@ -7,17 +7,18 @@ import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import SelectionArea from '@/elements/SelectionArea';
 import Table from '@/elements/Table';
+import { nodeAllocationTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
-import NodeAllocationRow, { nodeAllocationTableColumns } from './NodeAllocationRow';
 import AllocationActionBar from './AllocationActionBar';
+import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal';
+import NodeAllocationRow from './NodeAllocationRow';
 import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts';
 
 export default function AdminNodeAllocations({ node }: { node: Node }) {
   const { nodeAllocations, setNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
   const [selectedNodeAllocationsPrevious, setSelectedNodeAllocationsPrevious] = useState(selectedNodeAllocations);
 
   const { loading, search, setSearch, setPage, refetch } = useSearchablePaginatedTable({
@@ -26,7 +27,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
   });
 
   const onSelectedStart = (event: ReactMouseEvent | MouseEvent) => {
-    setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : new Set());
+    setSelectedNodeAllocationsPrevious(event.shiftKey ? selectedNodeAllocations : []);
   };
 
   const onSelected = (selected: NodeAllocation[]) => {
@@ -106,8 +107,8 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
         >
           {nodeAllocations.data.map((allocation) => (
             <SelectionArea.Selectable key={allocation.uuid} item={allocation}>
-              {(innerRef: Ref<HTMLTableRowElement>) => (
-                <NodeAllocationRow key={allocation.uuid} allocation={allocation} ref={innerRef} />
+              {(innerRef: Ref<HTMLElement>) => (
+                <NodeAllocationRow key={allocation.uuid} allocation={allocation} ref={innerRef as Ref<HTMLTableRowElement>} />
               )}
             </SelectionArea.Selectable>
           ))}

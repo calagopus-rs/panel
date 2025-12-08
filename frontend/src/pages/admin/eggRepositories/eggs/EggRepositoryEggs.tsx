@@ -4,8 +4,9 @@ import { getEmptyPaginationSet } from '@/api/axios';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import EggRepositoryEggRow, { eggRepositoryEggTableColumns } from './EggRepositoryEggRow';
+import EggRepositoryEggRow from './EggRepositoryEggRow';
 import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs';
+import { eggRepositoryEggTableColumns } from '@/lib/tableColumns';
 
 export default function EggRepositoryEggs({ contextEggRepository }: { contextEggRepository: AdminEggRepository }) {
   const [eggRepositoryEggs, setEggRepositoryEggs] = useState(getEmptyPaginationSet<AdminEggRepositoryEgg>());

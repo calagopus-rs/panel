@@ -27,10 +27,10 @@ export default function EggMoveModal({
   const doMove = () => {
     setLoading(true);
 
-    moveEgg(nest.uuid, egg.uuid, selectedNest.uuid)
+    moveEgg(nest.uuid, egg.uuid, selectedNest!.uuid)
       .then(() => {
         addToast('Egg moved.', 'success');
-        navigate(`/admin/nests/${selectedNest.uuid}/eggs/${egg.uuid}`);
+        navigate(`/admin/nests/${selectedNest!.uuid}/eggs/${egg.uuid}`);
 
         onClose();
       })
@@ -48,7 +48,7 @@ export default function EggMoveModal({
           label='Nest'
           placeholder='Nest'
           value={selectedNest?.uuid}
-          onChange={(value) => setSelectedNest(nests.items.find((m) => m.uuid === value))}
+          onChange={(value) => setSelectedNest(nests.items.find((m) => m.uuid === value) ?? null)}
           data={nests.items.map((nest) => ({
             label: nest.name,
             value: nest.uuid,
@@ -59,7 +59,7 @@ export default function EggMoveModal({
         />
 
         <Group mt='md'>
-          <Button onClick={doMove} loading={loading} disabled={!nest}>
+          <Button onClick={doMove} loading={loading} disabled={!selectedNest}>
             Move
           </Button>
           <Button variant='default' onClick={onClose}>

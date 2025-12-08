@@ -13,8 +13,6 @@ import { formatDateTime, formatTimestamp } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
-export const locationDatabaseHostTableColumns = ['ID', 'Name', 'Type', 'Address', 'Added', ''];
-
 export default function LocationDatabaseHostRow({
   location,
   databaseHost,
@@ -25,7 +23,7 @@ export default function LocationDatabaseHostRow({
   const { addToast } = useToast();
   const { removeLocationDatabaseHost } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
   const doDelete = async () => {
     await deleteLocationDatabaseHost(location.uuid, databaseHost.databaseHost.uuid)

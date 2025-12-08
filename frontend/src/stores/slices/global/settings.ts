@@ -13,7 +13,7 @@ export interface SettingsSlice {
 
 export const createSettingsSlice: StateCreator<GlobalStore, [], [], SettingsSlice> = (set): SettingsSlice => ({
   serverListShowOthers: false,
-  settings: null,
+  settings: {} as PublicSettings,
   languages: [],
 
   setServerListShowOthers: (value) => set((state) => ({ ...state, serverListShowOthers: value })),

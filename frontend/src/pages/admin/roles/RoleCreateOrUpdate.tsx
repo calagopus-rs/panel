@@ -1,6 +1,8 @@
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createRole from '@/api/admin/roles/createRole';
 import deleteRole from '@/api/admin/roles/deleteRole';
 import updateRole from '@/api/admin/roles/updateRole';
@@ -13,26 +15,29 @@ import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import PermissionSelector from '@/elements/PermissionSelector';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useGlobalStore } from '@/stores/global';
+import { adminRoleSchema } from '@/lib/schemas/admin/roles';
 
 export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role }) {
   const { availablePermissions, setAvailablePermissions } = useGlobalStore();
 
-  const [openModal, setOpenModal] = useState<'delete'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<UpdateRole>({
+  const form = useForm<z.infer<typeof adminRoleSchema>>({
     initialValues: {
       name: '',
       description: null,
       adminPermissions: [],
       serverPermissions: [],
     },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminRoleSchema),
   });
 
-  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateRole, Role>({
+  const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<z.infer<typeof adminRoleSchema>, Role>({
     form,
     createFn: () => createRole(form.values),
-    updateFn: () => updateRole(contextRole?.uuid, form.values),
-    deleteFn: () => deleteRole(contextRole?.uuid),
+    updateFn: () => updateRole(contextRole!.uuid, form.values),
+    deleteFn: () => deleteRole(contextRole!.uuid),
     doUpdate: !!contextRole,
     basePath: '/admin/roles',
     resourceName: 'Role',
@@ -100,11 +105,11 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
         </Group>
 
         <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
             Save
           </Button>
           {!contextRole && (
-            <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
               Save & Stay
             </Button>
           )}

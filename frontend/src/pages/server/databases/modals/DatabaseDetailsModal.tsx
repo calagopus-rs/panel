@@ -45,7 +45,7 @@ export default function DatabaseDetailsModal({ database, opened, onClose }: Prop
         <TextInput label='Database Name' placeholder='Database Name' value={database.name} disabled />
         <TextInput label='Host' placeholder='Host' value={host} disabled />
         <TextInput label='Username' placeholder='Username' value={database.username} disabled />
-        <TextInput label='Password' placeholder='Password' value={database.password} disabled />
+        <TextInput label='Password' placeholder='Password' value={database.password ?? ''} disabled />
         <TextInput
           label='JDBC Connection String'
           placeholder='JDBC Connection String'

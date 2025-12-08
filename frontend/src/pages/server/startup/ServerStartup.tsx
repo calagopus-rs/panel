@@ -134,7 +134,7 @@ export default function ServerStartup() {
             withAsterisk
             label='Docker Image'
             value={dockerImage}
-            onChange={(value) => setDockerImage(value)}
+            onChange={(value) => setDockerImage(value ?? '')}
             data={Object.entries(server.egg.dockerImages).map(([key, value]) => ({
               value,
               label: key,

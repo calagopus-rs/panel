@@ -42,8 +42,8 @@ export default function FileActionBar() {
       uuid: server.uuid,
       root: '/',
       files: movingFiles.map((f) => ({
-        from: join(movingFilesDirectory, f.name),
-        to: join(browsingDirectory, f.name),
+        from: join(movingFilesDirectory!, f.name),
+        to: join(browsingDirectory!, f.name),
       })),
     })
       .then(({ renamed }) => {
@@ -68,7 +68,7 @@ export default function FileActionBar() {
     const selectedFiles = getSelectedFiles();
     downloadFiles(
       server.uuid,
-      browsingDirectory,
+      browsingDirectory!,
       selectedFiles.map((f) => f.name),
       false,
       'zip',

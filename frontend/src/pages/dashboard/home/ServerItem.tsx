@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import ServerAddGroupModal from './modals/ServerAddGroupModal';
 
-const statusToColor = (status: ServerPowerState) => {
+const statusToColor = (status: ServerPowerState | undefined) => {
   switch (status) {
     case 'running':
       return 'bg-green-500';
@@ -49,7 +49,7 @@ export default function ServerItem({
   const { serverGroups } = useUserStore();
   const { serverListShowOthers } = useGlobalStore();
 
-  const [openModal, setOpenModal] = useState<'add-group'>(null);
+  const [openModal, setOpenModal] = useState<'add-group' | null>(null);
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {

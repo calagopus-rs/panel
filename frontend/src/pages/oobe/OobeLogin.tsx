@@ -16,11 +16,7 @@ import { to } from '@/lib/routes';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps, steps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global';
-
-const schema = z.object({
-  username: z.string(),
-  password: z.string().max(512),
-});
+import { oobeLoginSchema } from '@/lib/schemas/oobe';
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -30,13 +26,13 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof oobeLoginSchema>>({
     initialValues: {
       username: '',
       password: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(oobeLoginSchema),
   });
 
   const onSubmit = async () => {
@@ -51,7 +47,6 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
         doLogin(response.user!, false);
 
         const nextStep = steps.find((step) => step.stepKey === settings.oobeStep);
-        console.log(nextStep);
         if (nextStep) {
           navigate(to(nextStep.path, '/oobe'));
         }

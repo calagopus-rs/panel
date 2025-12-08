@@ -15,7 +15,7 @@ import SshKeyRow from './SecurityKeyRow';
 export default function DashboardSecurityKeys() {
   const { securityKeys, setSecurityKeys } = useUserStore();
 
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: getSecurityKeys,

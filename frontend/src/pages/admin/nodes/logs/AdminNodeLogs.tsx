@@ -45,6 +45,8 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
   }, [selectedLog]);
 
   const doDownload = () => {
+    if (!selectedLog) return;
+
     setLoading(true);
 
     axiosInstance
@@ -72,6 +74,8 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
   };
 
   const doView = () => {
+    if (!selectedLog) return;
+
     setLoading(true);
 
     axiosInstance
@@ -104,7 +108,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
               placeholder='Log File'
               value={selectedLog?.name || ''}
               className='w-full'
-              onChange={(value) => setSelectedLog(logs.find((log) => log.name === value))}
+              onChange={(value) => setSelectedLog(logs.find((log) => log.name === value) ?? null)}
               data={logs.map((log) => ({
                 label: `${log.name} (${bytesToString(log.size)})`,
                 value: log.name,

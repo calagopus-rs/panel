@@ -14,7 +14,7 @@ export interface ServerSlice {
 }
 
 export const createServerSlice: StateCreator<ServerStore, [], [], ServerSlice> = (set): ServerSlice => ({
-  server: null,
+  server: {} as Server,
 
   imagePulls: new Map<string, ImagePullProgress>(),
 

@@ -3,8 +3,9 @@ import { useState } from 'react';
 import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
+import { nodeTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import NodeRow, { nodeTableColumns } from '../../nodes/NodeRow';
+import NodeRow from '../../nodes/NodeRow';
 import TextInput from '@/elements/input/TextInput';
 
 export default function AdminLocationNodes({ location }: { location: Location }) {

@@ -1,11 +1,11 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
+import updateNodeAllocations from '@/api/admin/nodes/allocations/updateNodeAllocations';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
-import updateNodeAllocations from '@/api/admin/nodes/allocations/updateNodeAllocations';
 import { useAdminStore } from '@/stores/admin';
 
 export default function NodeAllocationsUpdateModal({
@@ -22,7 +22,7 @@ export default function NodeAllocationsUpdateModal({
 
     for (const allocation of selectedNodeAllocations) {
       if (ipCounts.get(allocation.ip)) {
-        ipCounts.set(allocation.ip, ipCounts.get(allocation.ip) + 1);
+        ipCounts.set(allocation.ip, ipCounts.get(allocation.ip)! + 1);
       } else {
         ipCounts.set(allocation.ip, 1);
       }
@@ -45,8 +45,12 @@ export default function NodeAllocationsUpdateModal({
     const ipAliasCounts = new Map<string, number>();
 
     for (const allocation of selectedNodeAllocations) {
+      if (!allocation.ipAlias) {
+        continue;
+      }
+
       if (ipAliasCounts.get(allocation.ipAlias)) {
-        ipAliasCounts.set(allocation.ipAlias, ipAliasCounts.get(allocation.ipAlias) + 1);
+        ipAliasCounts.set(allocation.ipAlias, ipAliasCounts.get(allocation.ipAlias)! + 1);
       } else {
         ipAliasCounts.set(allocation.ipAlias, 1);
       }

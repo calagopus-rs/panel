@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, useEffect, useState } from 'react';
 import Button from '@/elements/Button';
 import Can from '@/elements/Can';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
@@ -10,11 +10,8 @@ export default function ServerPowerControls() {
   const instance = useServerStore((state) => state.socketInstance);
 
   const killable = state === 'stopping';
-  const onButtonClick = (
-    action: ServerPowerAction | 'kill-confirmed',
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ): void => {
-    e.preventDefault();
+
+  const onButtonClick = (action: ServerPowerAction | 'kill-confirmed') => {
     if (action === 'kill') {
       return setOpen(true);
     }
@@ -38,7 +35,7 @@ export default function ServerPowerControls() {
         onClose={() => setOpen(false)}
         title='Forcibly Stop Process'
         confirm='Continue'
-        onConfirmed={onButtonClick.bind(this, 'kill-confirmed')}
+        onConfirmed={() => onButtonClick('kill-confirmed')}
       >
         Forcibly stopping a server can lead to data corruption.
       </ConfirmationModal>
@@ -48,22 +45,18 @@ export default function ServerPowerControls() {
           color='green'
           disabled={state !== 'offline'}
           loading={state === 'starting'}
-          onClick={onButtonClick.bind(this, 'start')}
+          onClick={() => onButtonClick('start')}
         >
           Start
         </Button>
       </Can>
       <Can action='control.restart'>
-        <Button color='gray' disabled={!state} onClick={onButtonClick.bind(this, 'restart')}>
+        <Button color='gray' disabled={!state} onClick={() => onButtonClick('restart')}>
           Restart
         </Button>
       </Can>
       <Can action='control.stop'>
-        <Button
-          color='red'
-          disabled={state === 'offline'}
-          onClick={onButtonClick.bind(this, killable ? 'kill' : 'stop')}
-        >
+        <Button color='red' disabled={state === 'offline'} onClick={() => onButtonClick(killable ? 'kill' : 'stop')}>
           {killable ? 'Kill' : 'Stop'}
         </Button>
       </Can>

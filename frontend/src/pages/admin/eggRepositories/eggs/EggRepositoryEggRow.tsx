@@ -1,12 +1,10 @@
+import { faDownload } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { useState } from 'react';
 import Code from '@/elements/Code';
 import { TableData, TableRow } from '@/elements/Table';
 import EggRepositoryEggsInstallModal from './modals/EggRepositoryEggsInstallModal';
-import { useState } from 'react';
-import { ActionIcon } from '@mantine/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDownload } from '@fortawesome/free-solid-svg-icons';
-
-export const eggRepositoryEggTableColumns = ['Path', 'Name', 'Author', 'Description', ''];
 
 export default function EggRepositoryEggRow({
   eggRepository,
@@ -15,7 +13,7 @@ export default function EggRepositoryEggRow({
   eggRepository: AdminEggRepository;
   egg: AdminEggRepositoryEgg;
 }) {
-  const [openModal, setOpenModal] = useState<'install'>(null);
+  const [openModal, setOpenModal] = useState<'install' | null>(null);
 
   return (
     <>

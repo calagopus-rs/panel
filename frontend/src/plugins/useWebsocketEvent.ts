@@ -40,7 +40,7 @@ const useWebsocketEvent = (event: SocketEvent, callback: (...data: string[]) => 
   }, [callback]);
 
   return useEffect(() => {
-    const eventListener = (...data: string[]) => savedCallback.current(...data);
+    const eventListener = (...data: string[]) => savedCallback.current!(...data);
     if (socketConnected && socketInstance) {
       socketInstance.addListener(event, eventListener);
     }

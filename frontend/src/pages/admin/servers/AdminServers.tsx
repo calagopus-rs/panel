@@ -6,10 +6,11 @@ import getServers from '@/api/admin/servers/getServers';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { serverTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
-import ServerCreateOrUpdate from './ServerCreateOrUpdate';
-import ServerRow, { serverTableColumns } from './ServerRow';
+import ServerCreate from './ServerCreate';
+import ServerRow from './ServerRow';
 import ServerView from './ServerView';
 
 function ServersContainer() {
@@ -52,7 +53,7 @@ export default function AdminServers() {
   return (
     <Routes>
       <Route path='/' element={<ServersContainer />} />
-      <Route path='/new' element={<ServerCreateOrUpdate />} />
+      <Route path='/new' element={<ServerCreate />} />
       <Route path='/:id/*' element={<ServerView />} />
     </Routes>
   );

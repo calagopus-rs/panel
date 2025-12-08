@@ -1,7 +1,7 @@
 import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
 import { useRef, useState } from 'react';
 import Button from '@/elements/Button';
-import Captcha from '@/elements/Captcha';
+import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import PermissionSelector from '@/elements/PermissionSelector';
@@ -9,7 +9,7 @@ import { useGlobalStore } from '@/stores/global';
 
 type Props = ModalProps & {
   subuser?: ServerSubuser;
-  onCreate?: (email: string, permissions: string[], ignoredFiles: string[], captcha: string) => void;
+  onCreate?: (email: string, permissions: string[], ignoredFiles: string[], captcha: string | null) => void;
   onUpdate?: (permissions: string[], ignoredFiles: string[]) => void;
 };
 
@@ -19,7 +19,7 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
   const [email, setEmail] = useState('');
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>(subuser?.permissions ?? []);
   const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
-  const captchaRef = useRef(null);
+  const captchaRef = useRef<CaptchaRef>(null);
 
   const doCreateOrUpdate = () => {
     if (subuser && onUpdate) {
@@ -28,7 +28,7 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
     }
 
     captchaRef.current?.getToken().then((token) => {
-      onCreate(email, Array.from(selectedPermissions), ignoredFiles, token);
+      onCreate!(email, Array.from(selectedPermissions), ignoredFiles, token);
     });
   };
 

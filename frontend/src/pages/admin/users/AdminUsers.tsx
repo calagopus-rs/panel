@@ -6,11 +6,12 @@ import getUsers from '@/api/admin/users/getUsers';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { userTableColumns } from '@/lib/tableColumns';
 import UserView from '@/pages/admin/users/UserView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import UserCreateOrUpdate from './UserCreateOrUpdate';
-import UserRow, { userTableColumns } from './UserRow';
+import UserRow from './UserRow';
 
 function UsersContainer() {
   const navigate = useNavigate();

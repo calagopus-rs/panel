@@ -23,7 +23,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   const { settings, languages } = useGlobalStore();
   const { addToast } = useToast();
 
-  const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor'>(null);
+  const [openModal, setOpenModal] = useState<'delete' | 'disable_two_factor' | null>(null);
 
   const form = useForm<UpdateUser>({
     initialValues: {
@@ -31,7 +31,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       email: '',
       nameFirst: '',
       nameLast: '',
-      password: null,
+      password: '',
       admin: false,
       totpEnabled: false,
       language: settings.app.language,
@@ -42,8 +42,8 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   const { loading, doCreateOrUpdate, doDelete } = useResourceForm<UpdateUser, User>({
     form,
     createFn: () => createUser(form.values),
-    updateFn: () => updateUser(contextUser?.uuid, form.values),
-    deleteFn: () => deleteUser(contextUser?.uuid),
+    updateFn: () => updateUser(contextUser!.uuid, form.values),
+    deleteFn: () => deleteUser(contextUser!.uuid),
     doUpdate: !!contextUser,
     basePath: '/admin/users',
     resourceName: 'User',
@@ -64,7 +64,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   });
 
   const doDisableTwoFactor = async () => {
-    await disableUserTwoFactor(contextUser.uuid)
+    await disableUserTwoFactor(contextUser!.uuid)
       .then(() => {
         addToast('User two factor disabled.', 'success');
         form.setFieldValue('totpEnabled', false);
@@ -151,11 +151,11 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       </Stack>
 
       <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} loading={loading}>
+        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
         {!contextUser && (
-          <Button onClick={() => doCreateOrUpdate(true)} loading={loading}>
+          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
             Save & Stay
           </Button>
         )}

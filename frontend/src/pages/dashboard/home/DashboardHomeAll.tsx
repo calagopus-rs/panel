@@ -44,7 +44,7 @@ export default function DashboardHomeAll() {
 
       <Group mb='md' justify='space-between'>
         <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        {user.admin && (
+        {user!.admin && (
           <Switch
             label="Show other users' servers"
             checked={serverListShowOthers}

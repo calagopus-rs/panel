@@ -6,11 +6,20 @@ export interface SettingsSlice extends AdminSettings {
 }
 
 export const createSettingsSlice: StateCreator<AdminStore, [], [], SettingsSlice> = (set): SettingsSlice => ({
-  storageDriver: null,
-  mailMode: null,
-  captchaProvider: null,
+  oobeStep: null,
+  storageDriver: {
+    type: 'filesystem',
+    path: '',
+  },
+  mailMode: {
+    type: 'none',
+  },
+  captchaProvider: {
+    type: 'none',
+  },
   app: {
     name: '',
+    language: '',
     url: '',
     telemetryEnabled: true,
     registrationEnabled: true,

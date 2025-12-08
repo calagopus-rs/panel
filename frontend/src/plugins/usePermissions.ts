@@ -3,7 +3,7 @@ import { useServerStore } from '@/stores/server';
 export const usePermissions = (action: string | string[]): boolean[] => {
   const server = useServerStore((state) => state.server);
 
-  if (!server) {
+  if (!server || !server.permissions) {
     return Array(Array.isArray(action) ? action.length : 1).fill(false);
   }
 

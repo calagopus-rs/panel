@@ -12,7 +12,7 @@ import 'highlight.js/styles/a11y-dark.min.css';
 hljs.registerLanguage('json', json);
 
 export default function ActivityInfoButton({ activity }: { activity: ServerActivity | UserActivity }) {
-  const [openModal, setOpenModal] = useState<'view'>(null);
+  const [openModal, setOpenModal] = useState<'view' | null>(null);
 
   return (
     <>

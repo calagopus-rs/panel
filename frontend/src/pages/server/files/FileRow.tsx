@@ -58,13 +58,13 @@ const FileRow = memo(
     }, [openModal, setChildOpenModal]);
 
     const doUnarchive = () => {
-      decompressFile(server.uuid, browsingDirectory, file.name).catch((msg) => {
+      decompressFile(server.uuid, browsingDirectory!, file.name).catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
       });
     };
 
     const doDownload = (archiveFormat: StreamingArchiveFormat) => {
-      downloadFiles(server.uuid, browsingDirectory, [file.name], file.directory, archiveFormat)
+      downloadFiles(server.uuid, browsingDirectory!, [file.name], file.directory, archiveFormat)
         .then(({ url }) => {
           addToast('Download started.', 'success');
           window.open(url);
@@ -129,7 +129,7 @@ const FileRow = memo(
             {
               icon: faFileArrowDown,
               label: 'Download',
-              onClick: file.file ? () => doDownload('tar_gz') : undefined,
+              onClick: file.file ? () => doDownload('tar_gz') : () => null,
               color: 'gray',
               items: file.directory
                 ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({

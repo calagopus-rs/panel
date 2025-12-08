@@ -16,9 +16,9 @@ import SubNavigation from '@/elements/SubNavigation';
 import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations';
 import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement';
 import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts';
+import ServerUpdate from '@/pages/admin/servers/ServerUpdate';
 import AdminServerVariables from '@/pages/admin/servers/variables/AdminServerVariables';
 import { useToast } from '@/providers/ToastProvider';
-import ServerCreateOrUpdate from './ServerCreateOrUpdate';
 
 export default function ServerView() {
   const params = useParams<'id'>();
@@ -79,7 +79,7 @@ export default function ServerView() {
       />
 
       <Routes>
-        <Route path='/' element={<ServerCreateOrUpdate contextServer={server} />} />
+        <Route path='/' element={<ServerUpdate contextServer={server} />} />
         <Route path='/allocations' element={<AdminServerAllocations server={server} />} />
         <Route path='/variables' element={<AdminServerVariables server={server} />} />
         <Route path='/mounts' element={<AdminServerMounts server={server} />} />

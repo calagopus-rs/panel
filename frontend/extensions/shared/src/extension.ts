@@ -18,7 +18,7 @@ export class ExtensionContext {
     for (const extension of this.extensions) {
       try {
         extension.initialize(this);
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error while running module initialize function', extension.packageName, err);
       }
 

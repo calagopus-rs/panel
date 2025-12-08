@@ -6,8 +6,9 @@ import getServerMounts from '@/api/admin/servers/mounts/getServerMounts';
 import Button from '@/elements/Button';
 import { ContextMenuProvider } from '@/elements/ContextMenu';
 import Table from '@/elements/Table';
+import { serverMountTableColumns } from '@/lib/tableColumns';
 import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal';
-import ServerMountRow, { serverMountTableColumns } from '@/pages/admin/servers/mounts/ServerMountRow';
+import ServerMountRow from '@/pages/admin/servers/mounts/ServerMountRow';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useAdminStore } from '@/stores/admin';
 import TextInput from '@/elements/input/TextInput';
@@ -15,7 +16,7 @@ import TextInput from '@/elements/input/TextInput';
 export default function AdminServerMounts({ server }: { server: AdminServer }) {
   const { serverMounts, setServerMounts } = useAdminStore();
 
-  const [openModal, setOpenModal] = useState<'add'>(null);
+  const [openModal, setOpenModal] = useState<'add' | null>(null);
 
   const { loading, search, setSearch, setPage } = useSearchablePaginatedTable({
     fetcher: (page, search) => getServerMounts(server.uuid, page, search),

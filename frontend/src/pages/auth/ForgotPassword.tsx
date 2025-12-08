@@ -9,13 +9,10 @@ import { z } from 'zod';
 import forgotPassword from '@/api/auth/forgotPassword';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
-import Captcha from '@/elements/Captcha';
+import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import AuthWrapper from './AuthWrapper';
-
-const schema = z.object({
-  email: z.email(),
-});
+import { authForgotPasswordSchema } from '@/lib/schemas/auth';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -24,14 +21,14 @@ export default function ForgotPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [requested, setRequested] = useState(false);
-  const captchaRef = useRef(null);
+  const captchaRef = useRef<CaptchaRef>(null);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof authForgotPasswordSchema>>({
     initialValues: {
       email: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(authForgotPasswordSchema),
   });
 
   const submit = () => {

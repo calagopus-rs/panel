@@ -3,11 +3,12 @@ import { useState } from 'react';
 import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
+import { adminOAuthProviderUsersTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import UserOAuthLinkRow, { userOAuthLinkTableColumns } from './UserOAuthLinkRow';
+import UserOAuthLinkRow from './UserOAuthLinkRow';
 import TextInput from '@/elements/input/TextInput';
 
-export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvider?: AdminOAuthProvider }) {
+export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) {
   const [oauthProviderUsers, setOAuthProviderUsers] = useState<ResponseMeta<AdminUserOAuthLink>>(
     getEmptyPaginationSet(),
   );
@@ -27,7 +28,7 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
       </Group>
 
       <Table
-        columns={userOAuthLinkTableColumns}
+        columns={adminOAuthProviderUsersTableColumns}
         loading={loading}
         pagination={oauthProviderUsers}
         onPageSelect={setPage}

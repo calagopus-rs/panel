@@ -1,5 +1,5 @@
 import { Card, Group, Title } from '@mantine/core';
-import { type Ref, useEffect, useRef, useState } from 'react';
+import { type Ref, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import getBackup from '@/api/server/backups/getBackup';
@@ -41,7 +41,7 @@ export default function ServerFiles() {
     removeFileOperation,
   } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'sftpDetails' | 'nameDirectory' | 'pullFile'>(null);
+  const [openModal, setOpenModal] = useState<'sftpDetails' | 'nameDirectory' | 'pullFile' | null>(null);
   const [childOpenModal, setChildOpenModal] = useState(false);
   const [loading, setLoading] = useState(browsingEntries.data.length === 0);
   const [page, setPage] = useState(1);
@@ -57,7 +57,7 @@ export default function ServerFiles() {
     aggregatedUploadProgress,
     handleFileSelect,
     handleFolderSelect,
-  } = useFileUpload(server.uuid, browsingDirectory, () => loadDirectoryData());
+  } = useFileUpload(server.uuid, browsingDirectory!, () => loadDirectoryData());
 
   const { isDragging } = useFileDragAndDrop({
     onDrop: uploadFiles,
@@ -70,13 +70,13 @@ export default function ServerFiles() {
   }, [searchParams, setBrowsingDirectory]);
 
   const onPageSelect = (page: number) => {
-    setSearchParams({ directory: browsingDirectory, page: page.toString() });
+    setSearchParams({ directory: browsingDirectory!, page: page.toString() });
   };
 
   const loadDirectoryData = () => {
     setLoading(true);
 
-    loadDirectory(server.uuid, browsingDirectory, page)
+    loadDirectory(server.uuid, browsingDirectory!, page)
       .then((data) => {
         setBrowsingEntries(data);
       })
@@ -98,7 +98,7 @@ export default function ServerFiles() {
       });
   };
 
-  const onSelectedStart = (event: React.MouseEvent | MouseEvent) => {
+  const onSelectedStart = (event: ReactMouseEvent | MouseEvent) => {
     setSelectedFilesPrevious(event.shiftKey ? selectedFileNames : new Set<string>());
   };
 
@@ -210,8 +210,13 @@ export default function ServerFiles() {
               >
                 {browsingEntries.data.map((file) => (
                   <SelectionArea.Selectable key={file.name} item={file}>
-                    {(innerRef: Ref<HTMLTableRowElement>) => (
-                      <FileRow key={file.name} file={file} ref={innerRef} setChildOpenModal={setChildOpenModal} />
+                    {(innerRef: Ref<HTMLElement>) => (
+                      <FileRow
+                        key={file.name}
+                        file={file}
+                        ref={innerRef as Ref<HTMLTableRowElement>}
+                        setChildOpenModal={setChildOpenModal}
+                      />
                     )}
                   </SelectionArea.Selectable>
                 ))}

@@ -3,11 +3,12 @@ import { useState } from 'react';
 import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs';
 import { getEmptyPaginationSet } from '@/api/axios';
 import Table from '@/elements/Table';
+import { eggTableColumns } from '@/lib/tableColumns';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import EggRow, { eggTableColumns } from '../../nests/eggs/EggRow';
+import EggRow from '../../nests/eggs/EggRow';
 import TextInput from '@/elements/input/TextInput';
 
-export default function AdminMountNestEggs({ mount }: { mount?: Mount }) {
+export default function AdminMountNestEggs({ mount }: { mount: Mount }) {
   const [mountNestEggs, setMountNestEggs] = useState<
     ResponseMeta<AndCreated<{ nest: AdminNest; nestEgg: AdminNestEgg }>>
   >(getEmptyPaginationSet());

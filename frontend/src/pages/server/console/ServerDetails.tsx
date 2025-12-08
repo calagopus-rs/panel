@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover, ThemeIcon } from '@mantine/core';
-import { useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import CopyOnClick from '@/elements/CopyOnClick';
@@ -34,9 +34,9 @@ function StatCard({
   label: string;
   value: string;
   copyOnClick?: boolean;
-  popover?: React.ReactNode;
-  limit?: string;
-  details?: string;
+  popover?: ReactNode;
+  limit?: string | null;
+  details?: string | null;
 }) {
   return (
     <Card className='flex flex-row! items-center'>
@@ -77,7 +77,7 @@ function StatCard({
 
 export default function ServerDetails() {
   const server = useServerStore((state) => state.server);
-  const stats = useServerStore((state) => state.stats);
+  const stats = useServerStore((state) => state.stats!);
   const state = useServerStore((state) => state.state);
 
   const [doNormalizeCpuLoad, setDoNormalizeCpuLoad] = useState(localStorage.getItem('normalize_cpu_load') === 'true');

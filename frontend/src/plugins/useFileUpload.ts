@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useMemo } from 'react';
+import { ChangeEvent, RefObject, useCallback, useMemo, useRef, useState } from 'react';
 import { axiosInstance } from '@/api/axios';
 import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
 import { useToast } from '@/providers/ToastProvider';
@@ -157,7 +157,7 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
           }
           return updated;
         });
-      } catch (error) {
+      } catch (error: any) {
         if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') {
           setUploadingFiles((prev) => {
             const updated = new Map(prev);
@@ -476,7 +476,7 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
   }, [uploadingFiles]);
 
   const handleFileSelect = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, inputRef: React.RefObject<HTMLInputElement>) => {
+    (event: ChangeEvent<HTMLInputElement>, inputRef: RefObject<HTMLInputElement | null>) => {
       const files = Array.from(event.target.files || []);
       if (files.length > 0) {
         uploadFiles(files);
@@ -489,7 +489,7 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
   );
 
   const handleFolderSelect = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>, inputRef: React.RefObject<HTMLInputElement>) => {
+    (event: ChangeEvent<HTMLInputElement>, inputRef: RefObject<HTMLInputElement | null>) => {
       const files = Array.from(event.target.files || []);
       if (files.length > 0) {
         uploadFiles(files);

@@ -1,27 +1,47 @@
 import { Group, Title } from '@mantine/core';
-import { useState } from 'react';
+import { UseFormReturnType, useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { captchaProviderTypeLabelMapping } from '@/lib/enums';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
 import CaptchaTurnstile from './forms/CaptchaTurnstile';
+import {
+  adminSettingsCaptchaProviderRecaptchaSchema,
+  adminSettingsCaptchaProviderSchema,
+  adminSettingsCaptchaProviderTurnstileSchema,
+} from '@/lib/schemas/admin/settings';
 
 export default function CaptchaContainer() {
   const { addToast } = useToast();
   const { captchaProvider } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [settings, setSettings] = useState<AdminSettings['captchaProvider']>(captchaProvider);
+
+  const form = useForm<z.infer<typeof adminSettingsCaptchaProviderSchema>>({
+    initialValues: {
+      type: 'none',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(adminSettingsCaptchaProviderSchema),
+  });
+
+  useEffect(() => {
+    form.setValues({
+      ...captchaProvider,
+    });
+  }, [captchaProvider]);
 
   const doUpdate = () => {
     setLoading(true);
 
-    updateCaptchaSettings(transformKeysToSnakeCase({ ...settings } as CaptchaProvider))
+    updateCaptchaSettings(form.values)
       .then(() => {
         addToast('Captcha settings updated.', 'success');
       })
@@ -39,22 +59,25 @@ export default function CaptchaContainer() {
 
       <Select
         label='Provider'
-        value={settings.type}
-        onChange={(value) => setSettings((settings) => ({ ...settings, type: value as 'none' }))}
         data={Object.entries(captchaProviderTypeLabelMapping).map(([value, label]) => ({
           value,
           label,
         }))}
+        {...form.getInputProps('type')}
       />
 
-      {settings.type === 'turnstile' ? (
-        <CaptchaTurnstile settings={settings as CaptchaProviderTurnstile} setSettings={setSettings} />
-      ) : settings.type === 'recaptcha' ? (
-        <CaptchaRecaptcha settings={settings as CaptchaProviderRecaptcha} setSettings={setSettings} />
+      {form.values.type === 'turnstile' ? (
+        <CaptchaTurnstile
+          form={form as UseFormReturnType<z.infer<typeof adminSettingsCaptchaProviderTurnstileSchema>>}
+        />
+      ) : form.values.type === 'recaptcha' ? (
+        <CaptchaRecaptcha
+          form={form as UseFormReturnType<z.infer<typeof adminSettingsCaptchaProviderRecaptchaSchema>>}
+        />
       ) : null}
 
       <Group mt='md'>
-        <Button onClick={doUpdate} loading={loading}>
+        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
           Save
         </Button>
       </Group>

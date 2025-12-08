@@ -10,12 +10,13 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { eggTableColumns } from '@/lib/tableColumns';
 import EggView from '@/pages/admin/nests/eggs/EggView';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 import EggCreateOrUpdate from './EggCreateOrUpdate';
-import EggRow, { eggTableColumns } from './EggRow';
+import EggRow from './EggRow';
 
 function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   const navigate = useNavigate();
@@ -33,33 +34,29 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    event.target.value = null;
+    event.target.value = '';
 
+    const text = await file.text().then((t) => t.trim());
+    let data: object;
     try {
-      const text = await file.text().then((t) => t.trim());
-      let data: object;
-      try {
-        if (text.startsWith('{')) {
-          data = JSON.parse(text);
-        } else {
-          data = jsYaml.load(text) as object;
-        }
-      } catch (err) {
-        addToast(`Failed to parse egg: ${err}`, 'error');
-        return;
+      if (text.startsWith('{')) {
+        data = JSON.parse(text);
+      } else {
+        data = jsYaml.load(text) as object;
       }
-
-      importEgg(contextNest.uuid, data)
-        .then((data) => {
-          addEgg(data);
-          addToast('Egg imported.', 'success');
-        })
-        .catch((msg) => {
-          addToast(httpErrorToHuman(msg), 'error');
-        });
     } catch (err) {
-      addToast(httpErrorToHuman(err), 'error');
+      addToast(`Failed to parse egg: ${err}`, 'error');
+      return;
     }
+
+    importEgg(contextNest.uuid, data)
+      .then((data) => {
+        addEgg(data);
+        addToast('Egg imported.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
   };
 
   return (
@@ -99,7 +96,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   );
 }
 
-export default function AdminEggs({ contextNest }: { contextNest?: AdminNest }) {
+export default function AdminEggs({ contextNest }: { contextNest: AdminNest }) {
   return (
     <Routes>
       <Route path='/' element={<EggsContainer contextNest={contextNest} />} />

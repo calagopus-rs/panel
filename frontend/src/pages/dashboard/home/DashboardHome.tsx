@@ -22,7 +22,7 @@ export default function DashboardHome() {
   const { addToast } = useToast();
 
   const [loading, setLoading] = useState(true);
-  const [openModal, setOpenModal] = useState<'create'>(null);
+  const [openModal, setOpenModal] = useState<'create' | null>(null);
 
   useEffect(() => {
     getServerGroups()
@@ -59,12 +59,10 @@ export default function DashboardHome() {
               const reorderedGroups = items.map((g, i) => ({ ...g, order: i }));
               setServerGroups(reorderedGroups);
 
-              try {
-                await updateServerGroupsOrder(items.map((g) => g.uuid));
-              } catch (msg) {
-                addToast(httpErrorToHuman(msg), 'error');
+              await updateServerGroupsOrder(items.map((g) => g.uuid)).catch((err) => {
+                addToast(httpErrorToHuman(err), 'error');
                 setServerGroups(serverGroups);
-              }
+              });
             },
           }}
           renderOverlay={(activeItem) =>

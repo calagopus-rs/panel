@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
-import App from '@/App';
 import { Extension, ExtensionContext } from 'shared';
+import App from '@/App';
 import '@/app.css';
 
 const extensionModules = import.meta.glob('../extensions/*/src/index.ts', { eager: true });
@@ -10,7 +10,7 @@ for (const [path, module] of Object.entries(extensionModules)) {
   const identifier = path.split('/')[2];
   if (identifier === 'shared') continue;
 
-  if (typeof module === 'object' && module && 'default' in module && module.default instanceof Extension) {
+  if (module && typeof module === 'object' && module && 'default' in module && module.default instanceof Extension) {
     module.default.packageName = identifier.replaceAll('_', '.');
     extensions.push(module.default);
   } else {
