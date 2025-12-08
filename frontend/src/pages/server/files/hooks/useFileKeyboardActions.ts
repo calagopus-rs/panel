@@ -14,15 +14,8 @@ export function useFileKeyboardActions({
   enabled = true,
   browsingBackup = false,
 }: UseFileKeyboardActionsOptions = {}) {
-  const {
-    browsingEntries,
-    selectedFileNames,
-    movingFileNames,
-    setSelectedFiles,
-    clearSelectedFiles,
-    setMovingFiles,
-    getSelectedFiles,
-  } = useServerStore();
+  const { browsingEntries, selectedFileNames, movingFileNames, setSelectedFiles, setMovingFiles, getSelectedFiles } =
+    useServerStore();
 
   useKeyboardShortcuts({
     shortcuts: [
@@ -34,7 +27,7 @@ export function useFileKeyboardActions({
       {
         key: 'Escape',
         modifiers: ['ctrlOrMeta'],
-        callback: () => clearSelectedFiles(),
+        callback: () => setSelectedFiles([]),
       },
       {
         key: 'x',

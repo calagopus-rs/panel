@@ -36,7 +36,6 @@ export default function ServerFiles() {
     setBrowsingEntries,
     selectedFileNames,
     setSelectedFiles,
-    clearSelectedFiles,
     movingFileNames,
     fileOperations,
     removeFileOperation,
@@ -66,10 +65,9 @@ export default function ServerFiles() {
   });
 
   useEffect(() => {
-    clearSelectedFiles();
     setBrowsingDirectory(searchParams.get('directory') || '/');
     setPage(Number(searchParams.get('page')) || 1);
-  }, [searchParams, clearSelectedFiles, setBrowsingDirectory]);
+  }, [searchParams, setBrowsingDirectory]);
 
   const onPageSelect = (page: number) => {
     setSearchParams({ directory: browsingDirectory, page: page.toString() });

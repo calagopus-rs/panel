@@ -19,7 +19,6 @@ export interface FilesSlice {
   setSelectedFiles: (files: DirectoryEntry[]) => void;
   addSelectedFile: (file: DirectoryEntry) => void;
   removeSelectedFile: (file: DirectoryEntry) => void;
-  clearSelectedFiles: () => void;
   isFileSelected: (file: DirectoryEntry) => boolean;
   getSelectedFiles: () => DirectoryEntry[];
 
@@ -76,7 +75,6 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
       newSet.delete(file.name);
       return { ...state, selectedFileNames: newSet };
     }),
-  clearSelectedFiles: () => set((state) => ({ ...state, selectedFileNames: new Set<string>() })),
   isFileSelected: (file) => get().selectedFileNames.has(file.name),
   getSelectedFiles: () => {
     const state = get();
