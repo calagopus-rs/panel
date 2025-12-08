@@ -15,6 +15,7 @@ import {
   faInfoCircle,
   faMemory,
   faMicrochip,
+  faMinus,
   faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -39,9 +40,11 @@ const statusToColor = (status: ServerPowerState) => {
 export default function ServerItem({
   server,
   showGroupAddButton = false,
+  onGroupRemove,
 }: {
   server: Server;
   showGroupAddButton?: boolean;
+  onGroupRemove?: () => void;
 }) {
   const { serverGroups } = useUserStore();
   const { serverListShowOthers } = useGlobalStore();
@@ -115,11 +118,28 @@ export default function ServerItem({
                     size='input-sm'
                     variant='light'
                     disabled={serverGroups.length === 0}
-                    onClick={() => setOpenModal('add-group')}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpenModal('add-group');
+                    }}
                   >
                     <FontAwesomeIcon icon={faAdd} />
                   </ActionIcon>
                 </Tooltip>
+              )}
+              {onGroupRemove && (
+                <ActionIcon
+                  size='input-sm'
+                  color='red'
+                  variant='light'
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onGroupRemove();
+                  }}
+                  className='ml-2'
+                >
+                  <FontAwesomeIcon icon={faMinus} />
+                </ActionIcon>
               )}
             </div>
           </div>

@@ -176,9 +176,24 @@ export default function ServerGroupItem({
               >
                 {(items) => (
                   <div className='gap-4 grid md:grid-cols-2 mt-4'>
-                    {items.map((server) => (
+                    {items.map((server, i) => (
                       <SortableItem key={server.id} id={server.id}>
-                        <ServerItem server={server} />
+                        <ServerItem
+                          server={server}
+                          onGroupRemove={() => {
+                            const serverOrder = serverGroup.serverOrder.filter(
+                              (_, orderI) => (servers.page - 1) * servers.perPage + i !== orderI,
+                            );
+                            updateStateServerGroup(serverGroup.uuid, {
+                              serverOrder,
+                            });
+                            setServers((prev) => ({ ...prev, data: prev.data.filter((_, dataI) => i !== dataI) }));
+
+                            updateServerGroup(serverGroup.uuid, { serverOrder }).catch((msg) => {
+                              addToast(httpErrorToHuman(msg), 'error');
+                            });
+                          }}
+                        />
                       </SortableItem>
                     ))}
                   </div>
