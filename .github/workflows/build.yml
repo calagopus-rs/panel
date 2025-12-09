@@ -1,4 +1,5 @@
 name: Release
+
 on:
   push:
     branches:
@@ -13,6 +14,7 @@ jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
@@ -20,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -30,9 +32,7 @@ jobs:
 
       - name: Get pnpm store directory
         id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm cache
         uses: actions/cache@v3
@@ -44,12 +44,12 @@ jobs:
 
       - name: Install frontend dependencies
         run: |
-          cd ./frontend
+          cd frontend
           pnpm install
-          
+
       - name: Build frontend
         run: |
-          cd ./frontend
+          cd frontend
           pnpm build
 
       - name: Upload frontend build
@@ -65,38 +65,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        build: [x86_64-linux, aarch64-linux, x86_64-macos, aarch64-macos, x86_64-windows]
+        build:
+          [
+            x86_64-linux,
+            aarch64-linux,
+            riscv64-linux,
+            x86_64-macos,
+            aarch64-macos,
+            x86_64-windows,
+          ]
         include:
-        - build: x86_64-linux
-          os: ubuntu-22.04
-          rust: stable
-          target: x86_64-unknown-linux-musl
-          cross: true
-          binary_suffix: ""
-        - build: aarch64-linux
-          os: ubuntu-22.04
-          rust: stable
-          target: aarch64-unknown-linux-musl
-          cross: true
-          binary_suffix: ""
-        - build: x86_64-macos
-          os: macos-latest
-          rust: stable
-          target: x86_64-apple-darwin
-          cross: false
-          binary_suffix: ""
-        - build: aarch64-macos
-          os: macos-latest
-          rust: stable
-          target: aarch64-apple-darwin
-          cross: false
-          binary_suffix: ""
-        - build: x86_64-windows
-          os: windows-latest
-          rust: stable
-          target: x86_64-pc-windows-msvc
-          cross: false
-          binary_suffix: ".exe"
+          - build: x86_64-linux
+            os: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+            binary_suffix: ""
+          - build: aarch64-linux
+            os: ubuntu-24.04
+            target: aarch64-unknown-linux-musl
+            binary_suffix: ""
+          - build: riscv64-linux
+            os: ubuntu-24.04
+            target: riscv64gc-unknown-linux-musl
+            binary_suffix: ""
+          - build: x86_64-macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+            binary_suffix: ""
+          - build: aarch64-macos
+            os: macos-latest
+            target: aarch64-apple-darwin
+            binary_suffix: ""
+          - build: x86_64-windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            binary_suffix: ".exe"
 
     steps:
       - name: Checkout sources
@@ -108,40 +110,48 @@ jobs:
           name: frontend-build
           path: frontend/dist/
 
-      - name: Install dependencies (Windows)
+      - name: Install Windows extra tools
         if: runner.os == 'Windows'
         run: |
           choco install nasm
           echo "C:\Program Files\NASM" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Install ${{ matrix.rust }} toolchain
-        uses: actions-rs/toolchain@v1
+      - name: Install Rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
           target: ${{ matrix.target }}
-          override: true
+
+      - name: Install cross
+        if: contains(matrix.target, 'linux')
+        run: cargo install cross --git https://github.com/cross-rs/cross
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: ${{ runner.os }}-${{ matrix.rust }}-${{ matrix.target }}
+
+      - name: Run tests (cross for Linux targets)
+        run: |
+          if [[ "${{ matrix.os }}" == ubuntu* ]]; then
+            cross test --release --target ${{ matrix.target }}
+          else
+            cargo test --release --target ${{ matrix.target }}
+          fi
 
       - name: Build release binary
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.cross }}
-          command: build
-          args: --release --target ${{ matrix.target }}
+        run: |
+          if [[ "${{ matrix.os }}" == ubuntu* ]]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
 
-      - name: Prepare binary with platform name (Unix)
+      - name: Prepare binary (Unix)
         if: runner.os != 'Windows'
-        shell: bash
         run: |
           mkdir -p dist
           cp "target/${{ matrix.target }}/release/$BIN_NAME${{ matrix.binary_suffix }}" "dist/$BIN_NAME-${{ matrix.build }}"
 
-      - name: Prepare binary with platform name (Windows)
+      - name: Prepare binary (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -158,23 +168,24 @@ jobs:
     name: Publish
     needs: [dist]
     runs-on: ubuntu-latest
-    permissions: 
+    permissions:
       contents: write
+
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
 
-      - name: Download all artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts
           pattern: ${{ env.PROJECT_NAME }}*
 
-      - name: Get cli version from Cargo.toml
+      - name: Fetch version from Cargo.toml
         id: version
-        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' -r)" >> $GITHUB_OUTPUT
+        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[0].version')" >> $GITHUB_OUTPUT
 
-      - name: Upload binaries to release
+      - name: Upload binaries to GitHub Release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -190,7 +201,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -199,7 +210,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist
-          pattern: ${{ env.PROJECT_NAME }}*
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -213,25 +223,27 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-          
+
       - name: Prepare binaries
         run: |
-          mkdir -p .docker/amd64 .docker/arm64
+          mkdir -p .docker/amd64 .docker/arm64 .docker/riscv64
           cp dist/${{ env.PROJECT_NAME }}-x86_64-linux/${{ env.BIN_NAME }}-x86_64-linux .docker/amd64/panel-rs
           cp dist/${{ env.PROJECT_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux .docker/arm64/panel-rs
-          chmod +x .docker/amd64/panel-rs
-          chmod +x .docker/arm64/panel-rs
+          cp dist/${{ env.PROJECT_NAME }}-riscv64-linux/${{ env.BIN_NAME }}-riscv64-linux .docker/riscv64/panel-rs
+          chmod +x .docker/*/panel-rs
 
-      - name: Get cli version from Cargo.toml
+      - name: Extract version
         id: version
-        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq '.packages[0].version' -r)" >> $GITHUB_OUTPUT
+        run: echo "val=$(cargo metadata --format-version=1 --no-deps | jq -r '.packages[0].version')" >> $GITHUB_OUTPUT
 
-      - name: Build and push multi-arch Docker image
+      - name: Build & push multi-arch image
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64,linux/arm64,linux/riscv64
           push: true
-          tags: ghcr.io/${{ env.REPO_NAME }}:latest,ghcr.io/${{ env.REPO_NAME }}:${{ steps.version.outputs.val }}
+          tags: |
+            ghcr.io/${{ env.REPO_NAME }}:latest
+            ghcr.io/${{ env.REPO_NAME }}:${{ steps.version.outputs.val }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
