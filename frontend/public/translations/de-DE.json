@@ -1,0 +1,37 @@
+{
+  "": {
+    "items": {
+      "user": {
+        "zero": "{count} Benutzer",
+        "one": "{count} Benutzer",
+        "two": "{count} Benutzer",
+        "few": "{count} Benutzer",
+        "many": "{count} Benutzer",
+        "other": "{count} Benutzer"
+      }
+    },
+    "translations": {
+      "common": {
+        "button": {
+          "create": "Erstellen",
+          "add": "Hinzufügen",
+          "save": "Speichern",
+          "saveAndStay": "Speichern & Bleiben",
+          "delete": "Löschen",
+          "update": "Aktualisieren",
+          "close": "Schließen",
+          "cancel": "Abbrechen"
+        },
+        "input": {
+          "search": "Suchen..."
+        },
+        "table": {
+          "pagination": {
+            "results": "Zeige {start} bis {end} von {total} Ergebnissen.",
+            "empty": "Es konnten eine Elemente gefunden werden, fast schon wie wenn sie sich versteckten."
+          }
+        }
+      }
+    }
+  }
+}

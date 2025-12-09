@@ -2,6 +2,7 @@ import { DefaultMantineColor, Group, ModalProps } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, ReactNode, useState } from 'react';
 import Button from '../Button';
 import Modal from './Modal';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 type ConfirmationProps = Omit<ModalProps, 'children'> & {
   confirm?: string | undefined;
@@ -17,6 +18,8 @@ export default function ConfirmationModal({
   children,
   ...props
 }: ConfirmationProps) {
+  const { t } = useTranslations();
+
   const [loading, setLoading] = useState(false);
 
   const onConfirmedAlt = (e: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -37,7 +40,7 @@ export default function ConfirmationModal({
           {confirm}
         </Button>
         <Button variant='default' onClick={props.onClose}>
-          Cancel
+          {t('common.button.cancel', {})}
         </Button>
       </Group>
     </Modal>

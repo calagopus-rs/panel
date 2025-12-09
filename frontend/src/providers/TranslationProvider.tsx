@@ -1,7 +1,7 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
 import baseTranslations from '@/translations';
 import Spinner from '@/elements/Spinner';
-import { GetPlaceholders, TranslationContext, TranslationItemRecord } from 'shared';
+import { GetPlaceholders, getTranslationMapping, TranslationContext, TranslationItemRecord } from 'shared';
 import { axiosInstance } from '@/api/axios';
 
 type LanguageData = {
@@ -37,6 +37,12 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
             for (const translation in data.translation) {
               result.items[`${key}.${translation}`] = data.translations[translation];
             }
+          }
+
+          result.translations = getTranslationMapping(result.translations);
+
+          if (import.meta.env.DEV) {
+            console.debug('Loaded language data', language, result);
           }
 
           setLanguageData(result);

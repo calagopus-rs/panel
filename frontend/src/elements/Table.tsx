@@ -14,6 +14,7 @@ import { forwardRef, ReactNode, useEffect } from 'react';
 import Spinner from '@/elements/Spinner';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCubesStacked } from '@fortawesome/free-solid-svg-icons';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {
@@ -57,6 +58,8 @@ interface PaginationProps<T> {
 }
 
 export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<T> & GroupProps) {
+  const { t } = useTranslations();
+
   const totalPages = data.total === 0 ? 0 : Math.ceil(data.total / data.perPage);
 
   const setPage = (page: number) => {
@@ -102,11 +105,11 @@ export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<
   return isFirstPage && isLastPage ? null : (
     <Group justify='space-between' hidden={rangeEnd === 0} {...props}>
       <p className='text-sm leading-5 text-gray-400'>
-        Showing&nbsp;
-        <span className='text-gray-300'>{rangeStart}</span>
-        &nbsp;to&nbsp;
-        <span className='text-gray-300'>{rangeEnd}</span>
-        &nbsp;of&nbsp;<span className='text-gray-300'>{data.total}</span> results
+        {t('common.table.pagination.results', {
+          start: rangeStart,
+          end: rangeEnd,
+          total: data.total,
+        })}
       </p>
       <MantinePagination value={data.page} total={totalPages} withEdges onChange={setPage} />
     </Group>
@@ -114,11 +117,13 @@ export function Pagination<T>({ data, onPageSelect, ...props }: PaginationProps<
 }
 
 export const NoItems = () => {
+  const { t } = useTranslations();
+
   return (
     <Center py='lg'>
       <Stack align='center' c='dimmed'>
         <FontAwesomeIcon icon={faCubesStacked} size='3x' className='-mb-2' />
-        <Text>No items could be found, it&apos;s almost like they are hiding.</Text>
+        <Text>{t('common.table.pagination.empty', {})}</Text>
       </Stack>
     </Center>
   );

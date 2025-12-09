@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Badge, Button, Group, Input, Stack, Text, TextInput } from '@mantine/core';
 import { ComponentProps, useEffect, useRef, useState } from 'react';
 import Card from '../Card';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 interface MultiKeyValueInputProps {
   label?: string;
@@ -34,6 +35,8 @@ export default function MultiKeyValueInput({
   placeholderKey = 'Key',
   placeholderValue = 'Value',
 }: MultiKeyValueInputProps) {
+  const { t } = useTranslations();
+
   const [selectedOptions, setSelectedOptions] = useState<
     {
       key: string;
@@ -231,7 +234,7 @@ export default function MultiKeyValueInput({
             className='col-span-3'
           />
           <Button onClick={handleAdd} size='xs' disabled={!newKey.trim() || !newValue.trim()}>
-            Add
+            {t('common.button.add', {})}
           </Button>
         </div>
       </Stack>

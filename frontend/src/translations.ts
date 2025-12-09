@@ -6,7 +6,29 @@ const baseTranslations = defineTranslations({
   items: {
     user: defineEnglishItem('User', 'Users'),
   },
-  translations: {},
+  translations: {
+    common: {
+      button: {
+        create: 'Create',
+        add: 'Add',
+        save: 'Save',
+        saveAndStay: 'Save & Stay',
+        delete: 'Delete',
+        update: 'Update',
+        close: 'Close',
+        cancel: 'Cancel',
+      },
+      input: {
+        search: 'Search...',
+      },
+      table: {
+        pagination: {
+          results: 'Showing {start} to {end} of {total} results.',
+          empty: "No items could be found, it's almost like they are hiding.",
+        },
+      },
+    },
+  },
 });
 
 for (const [path, translations] of Object.entries(extensionTranslations ?? {})) {
