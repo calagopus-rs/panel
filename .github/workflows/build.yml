@@ -129,21 +129,21 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Run tests (cross for Linux targets)
-        run: |
-          if [[ "${{ matrix.os }}" == ubuntu* ]]; then
-            cross test --release --target ${{ matrix.target }}
-          else
-            cargo test --release --target ${{ matrix.target }}
-          fi
+      - name: Run tests (Linux)
+        if: contains(matrix.target, 'linux')
+        run: cross test --release --target ${{ matrix.target }}
+    
+      - name: Run tests (Non-Linux)
+        if: ${{ !contains(matrix.target, 'linux') }}
+        run: cargo test --release --target ${{ matrix.target }}
 
-      - name: Build release binary
-        run: |
-          if [[ "${{ matrix.os }}" == ubuntu* ]]; then
-            cross build --release --target ${{ matrix.target }}
-          else
-            cargo build --release --target ${{ matrix.target }}
-          fi
+      - name: Build release binary (Linux)
+        if: contains(matrix.target, 'linux')
+        run: cross build --release --target ${{ matrix.target }}
+    
+      - name: Build release binary (Non-Linux)
+        if: ${{ !contains(matrix.target, 'linux') }}
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Prepare binary (Unix)
         if: runner.os != 'Windows'
