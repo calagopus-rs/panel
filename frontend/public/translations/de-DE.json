@@ -28,7 +28,7 @@
         "table": {
           "pagination": {
             "results": "Zeige {start} bis {end} von {total} Ergebnissen.",
-            "empty": "Es konnten eine Elemente gefunden werden, fast schon wie wenn sie sich versteckten."
+            "empty": "Es konnten keine Elemente gefunden werden, fast schon wie wenn sie sich verstecken."
           }
         }
       }
