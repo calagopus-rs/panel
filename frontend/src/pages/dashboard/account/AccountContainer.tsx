@@ -88,7 +88,10 @@ export default function AccountContainer() {
               withAsterisk
               label='Language'
               placeholder='Language'
-              data={languages}
+              data={languages.map((language) => ({
+                label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
+                value: language,
+              }))}
               searchable
               {...form.getInputProps('language')}
             />
