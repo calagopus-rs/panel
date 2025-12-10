@@ -10,17 +10,13 @@ import getTwoFactor from '@/api/me/account/getTwoFactor';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import CopyOnClick from '@/elements/CopyOnClick';
-import NumberInput from '@/elements/input/NumberInput';
 import PasswordInput from '@/elements/input/PasswordInput';
+import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal';
 import Spinner from '@/elements/Spinner';
+import { dashboardTwoFactorEnableSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-
-const schema = z.object({
-  code: z.string().min(6).max(6),
-  password: z.string().max(512),
-});
 
 export interface TwoFactorSetupResponse {
   otpUrl: string;
@@ -37,13 +33,13 @@ export default function TwoFactorSetupButton() {
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof dashboardTwoFactorEnableSchema>>({
     initialValues: {
       code: '',
       password: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(dashboardTwoFactorEnableSchema),
   });
 
   useEffect(() => {
@@ -106,9 +102,21 @@ export default function TwoFactorSetupButton() {
               generated into the field below.
             </Text>
 
-            <NumberInput withAsterisk label='Code' placeholder='000000' {...form.getInputProps('code')} />
+            <TextInput
+              withAsterisk
+              label='Code'
+              placeholder='000000'
+              autoComplete='one-time-code'
+              {...form.getInputProps('code')}
+            />
 
-            <PasswordInput withAsterisk label='Password' placeholder='Password' {...form.getInputProps('password')} />
+            <PasswordInput
+              withAsterisk
+              label='Password'
+              placeholder='Password'
+              autoComplete='current-password'
+              {...form.getInputProps('password')}
+            />
 
             <Group>
               <Button onClick={doEnable} loading={loading} disabled={!form.isValid()}>

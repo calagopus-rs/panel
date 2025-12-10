@@ -10,7 +10,6 @@ import { z } from 'zod';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
 import getEggs from '@/api/admin/nests/eggs/getEggs';
 import getNests from '@/api/admin/nests/getNests';
-import getNodes from '@/api/admin/nodes/getNodes';
 import updateServer from '@/api/admin/servers/updateServer';
 import getUsers from '@/api/admin/users/getUsers';
 import Alert from '@/elements/Alert';
@@ -35,8 +34,8 @@ const timezones = Object.keys(zones)
 export default function ServerUpdate({ contextServer }: { contextServer: AdminServer }) {
   const form = useForm<z.infer<typeof adminServerUpdateSchema>>({
     initialValues: {
-      ownerUuid: '',
-      eggUuid: '',
+      ownerUuid: uuidNil,
+      eggUuid: uuidNil,
       backupConfigurationUuid: uuidNil,
       externalId: null,
       name: '',
@@ -60,7 +59,7 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
       },
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminServerCreateSchema),
+    validate: zod4Resolver(adminServerUpdateSchema),
   });
 
   const { loading, doCreateOrUpdate } = useResourceForm<z.infer<typeof adminServerUpdateSchema>, AdminServer>({
@@ -87,10 +86,6 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
   const [swapInput, setSwapInput] = useState('');
   const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>(contextServer?.nest.uuid ?? '');
 
-  const nodes = useSearchableResource<Node>({
-    fetcher: (search) => getNodes(1, search),
-    defaultSearchValue: contextServer?.node.name,
-  });
   const users = useSearchableResource<User>({
     fetcher: (search) => getUsers(1, search),
     defaultSearchValue: contextServer?.owner.username,
@@ -174,19 +169,6 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
             <Group grow>
               <Select
                 withAsterisk
-                label='Node'
-                placeholder='Node'
-                data={nodes.items.map((node) => ({
-                  label: node.name,
-                  value: node.uuid,
-                }))}
-                searchable
-                searchValue={nodes.search}
-                onSearchChange={nodes.setSearch}
-                {...form.getInputProps('nodeUuid')}
-              />
-              <Select
-                withAsterisk
                 label='Owner'
                 placeholder='Owner'
                 data={users.items.map((user) => ({
@@ -197,6 +179,24 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
                 searchValue={users.search}
                 onSearchChange={users.setSearch}
                 {...form.getInputProps('ownerUuid')}
+              />
+              <Select
+                allowDeselect
+                label='Backup Configuration'
+                data={[
+                  {
+                    label: 'Inherit from Node/Location',
+                    value: uuidNil,
+                  },
+                  ...backupConfigurations.items.map((backupConfiguration) => ({
+                    label: backupConfiguration.name,
+                    value: backupConfiguration.uuid,
+                  })),
+                ]}
+                searchable
+                searchValue={backupConfigurations.search}
+                onSearchChange={backupConfigurations.setSearch}
+                {...form.getInputProps('backupConfigurationUuid')}
               />
             </Group>
 
@@ -228,27 +228,6 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
                 searchValue={eggs.search}
                 onSearchChange={eggs.setSearch}
                 {...form.getInputProps('eggUuid')}
-              />
-            </Group>
-
-            <Group grow>
-              <Select
-                allowDeselect
-                label='Backup Configuration'
-                data={[
-                  {
-                    label: 'Inherit from Node/Location',
-                    value: uuidNil,
-                  },
-                  ...backupConfigurations.items.map((backupConfiguration) => ({
-                    label: backupConfiguration.name,
-                    value: backupConfiguration.uuid,
-                  })),
-                ]}
-                searchable
-                searchValue={backupConfigurations.search}
-                onSearchChange={backupConfigurations.setSearch}
-                {...form.getInputProps('backupConfigurationUuid')}
               />
             </Group>
           </Stack>

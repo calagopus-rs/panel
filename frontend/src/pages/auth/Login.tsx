@@ -1,6 +1,8 @@
 import { faExclamationTriangle, faFingerprint, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Center, Divider, Stack, Text, Title } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import checkpointLogin from '@/api/auth/checkpointLogin';
@@ -15,12 +17,10 @@ import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import PinInput from '@/elements/input/PinInput';
 import TextInput from '@/elements/input/TextInput';
+import { authPasswordSchema, authTotpSchema, authUsernameSchema } from '@/lib/schemas/auth';
 import { useAuth } from '@/providers/AuthProvider';
 import { useGlobalStore } from '@/stores/global';
 import AuthWrapper from './AuthWrapper';
-import { useForm } from '@mantine/form';
-import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { authPasswordSchema, authTotpSchema, authUsernameSchema } from '@/lib/schemas/auth';
 
 export default function Login() {
   const { doLogin } = useAuth();
@@ -211,6 +211,7 @@ export default function Login() {
               <TextInput
                 label='Username'
                 placeholder='Enter your username'
+                autoComplete='username'
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitUsername()}
                 leftSection={<FontAwesomeIcon icon={faUser} />}
                 size='md'
@@ -286,6 +287,7 @@ export default function Login() {
               <PasswordInput
                 label='Password'
                 placeholder='Enter your password'
+                autoComplete='current-password'
                 onKeyDown={(e) => e.key === 'Enter' && doSubmitPassword()}
                 size='md'
                 {...passwordForm.getInputProps('password')}
@@ -319,7 +321,14 @@ export default function Login() {
               </Text>
 
               <Center>
-                <PinInput length={6} placeholder='0' size='md' type='number' {...totpForm.getInputProps('code')} />
+                <PinInput
+                  length={6}
+                  placeholder='0'
+                  size='md'
+                  type='number'
+                  oneTimeCode
+                  {...totpForm.getInputProps('code')}
+                />
               </Center>
 
               <Button onClick={doSubmitTotp} loading={loading} disabled={!totpForm.isValid()} size='md' fullWidth>

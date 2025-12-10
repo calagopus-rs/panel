@@ -1,11 +1,8 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
+import { dashboardTwoFactorDisableSchema } from '@/lib/schemas/dashboard.ts';
 
-interface Data {
-  code: string;
-  password: string;
-}
-
-export default async (data: Data): Promise<void> => {
+export default async (data: z.infer<typeof dashboardTwoFactorDisableSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .delete('/api/client/account/two-factor', {

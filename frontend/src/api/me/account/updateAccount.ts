@@ -1,13 +1,8 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
+import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
 
-interface Data {
-  username: string;
-  nameFirst: string;
-  nameLast: string;
-  language: string;
-}
-
-export default async (data: Data): Promise<void> => {
+export default async (data: z.infer<typeof dashboardAccountSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch('/api/client/account', {

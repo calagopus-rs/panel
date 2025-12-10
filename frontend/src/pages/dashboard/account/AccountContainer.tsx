@@ -7,22 +7,12 @@ import { httpErrorToHuman } from '@/api/axios';
 import updateAccount from '@/api/me/account/updateAccount';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
+import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
+import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-import Select from '@/elements/input/Select';
 import { useGlobalStore } from '@/stores/global';
-
-const schema = z.object({
-  username: z
-    .string()
-    .min(3)
-    .max(15)
-    .regex(/^[a-zA-Z0-9_]+$/),
-  nameFirst: z.string().min(2).max(255),
-  nameLast: z.string().min(2).max(255),
-  language: z.string(),
-});
 
 export default function AccountContainer() {
   const { addToast } = useToast();
@@ -31,7 +21,7 @@ export default function AccountContainer() {
 
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof dashboardAccountSchema>>({
     initialValues: {
       username: '',
       nameFirst: '',
@@ -39,7 +29,7 @@ export default function AccountContainer() {
       language: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(dashboardAccountSchema),
   });
 
   useEffect(() => {
@@ -79,11 +69,29 @@ export default function AccountContainer() {
         </Title>
         <Stack className='mt-4'>
           <Group grow>
-            <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
-            <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
+            <TextInput
+              withAsterisk
+              label='First Name'
+              placeholder='First Name'
+              autoComplete='given-name'
+              {...form.getInputProps('nameFirst')}
+            />
+            <TextInput
+              withAsterisk
+              label='Last Name'
+              placeholder='Last Name'
+              autoComplete='family-name'
+              {...form.getInputProps('nameLast')}
+            />
           </Group>
           <Group grow>
-            <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
+            <TextInput
+              withAsterisk
+              label='Username'
+              placeholder='Username'
+              autoComplete='username'
+              {...form.getInputProps('username')}
+            />
             <Select
               withAsterisk
               label='Language'

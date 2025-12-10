@@ -9,13 +9,9 @@ import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
+import { dashboardEmailSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
-
-const schema = z.object({
-  email: z.email(),
-  password: z.string().max(512),
-});
 
 export default function EmailContainer() {
   const { addToast } = useToast();
@@ -23,13 +19,13 @@ export default function EmailContainer() {
 
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof dashboardEmailSchema>>({
     initialValues: {
       email: '',
       password: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(dashboardEmailSchema),
   });
 
   useEffect(() => {
@@ -61,11 +57,18 @@ export default function EmailContainer() {
           Email
         </Title>
         <Stack className='mt-4'>
-          <TextInput withAsterisk label='New Email' placeholder='New Email' {...form.getInputProps('email')} />
+          <TextInput
+            withAsterisk
+            label='New Email'
+            placeholder='New Email'
+            autoComplete='email'
+            {...form.getInputProps('email')}
+          />
           <PasswordInput
             withAsterisk
             label='Current Password'
             placeholder='Current Password'
+            autoComplete='current-password'
             {...form.getInputProps('password')}
           />
         </Stack>

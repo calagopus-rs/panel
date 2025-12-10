@@ -1,15 +1,12 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
-
-interface Data {
-  code: string;
-  password: string;
-}
+import { dashboardTwoFactorEnableSchema } from '@/lib/schemas/dashboard.ts';
 
 interface Response {
   recoveryCodes: string[];
 }
 
-export default async (data: Data): Promise<Response> => {
+export default async (data: z.infer<typeof dashboardTwoFactorEnableSchema>): Promise<Response> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post('/api/client/account/two-factor', data)

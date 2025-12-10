@@ -8,32 +8,22 @@ import updatePassword from '@/api/me/account/updatePassword';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
 import PasswordInput from '@/elements/input/PasswordInput';
+import { dashboardPasswordSchema } from '@/lib/schemas/dashboard.ts';
 import { useToast } from '@/providers/ToastProvider';
-
-const schema = z
-  .object({
-    currentPassword: z.string().max(512),
-    newPassword: z.string().min(8).max(512),
-    confirmNewPassword: z.string().min(8).max(512),
-  })
-  .refine((data) => data.newPassword === data.confirmNewPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmNewPassword'],
-  });
 
 export default function PasswordContainer() {
   const { addToast } = useToast();
 
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<z.infer<typeof dashboardPasswordSchema>>({
     initialValues: {
       currentPassword: '',
       newPassword: '',
       confirmNewPassword: '',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(schema),
+    validate: zod4Resolver(dashboardPasswordSchema),
   });
 
   const doUpdate = () => {
@@ -64,18 +54,21 @@ export default function PasswordContainer() {
             withAsterisk
             label='Current Password'
             placeholder='Current Password'
+            autoComplete='current-password'
             {...form.getInputProps('currentPassword')}
           />
           <PasswordInput
             withAsterisk
             label='New Password'
             placeholder='New Password'
+            autoComplete='new-password'
             {...form.getInputProps('newPassword')}
           />
           <PasswordInput
             withAsterisk
             label='Confirm New Password'
             placeholder='Confirm New Password'
+            autoComplete='new-password'
             {...form.getInputProps('confirmNewPassword')}
           />
           <Group>
