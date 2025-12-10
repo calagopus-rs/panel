@@ -25,12 +25,90 @@
         "input": {
           "search": "Suchen..."
         },
+        "form": {
+          "name": "Name",
+          "description": "Beschreibung"
+        },
         "table": {
           "pagination": {
             "results": "Zeige {start} bis {end} von {total} Ergebnissen.",
             "empty": "Es konnten keine Elemente gefunden werden, fast schon wie wenn sie sich verstecken."
           }
-        }
+        },
+        "server": {
+          "noAllocation": "Keine Allocation",
+          "state": {
+            "suspended": "Suspendiert",
+            "restoringBackup": "Stelle Backup wiederher",
+            "installing": "Installiere",
+            "InstallFailed": "Installation Fehlgeschlagen"
+          }
+        },
+        "unlimited": "Unendlich"
+      },
+      "pages": {
+        "auth": {},
+        "account": {
+          "home": {
+            "tooltip": {
+              "removeFromGroup": "Aus der Gruppe entfernen",
+              "addToGroup": "Zur Gruppe hinzufügen",
+              "noGroups": "Keine Gruppen zum hinzufügen verfügbar",
+              "noGroup": "Dieser Server ist noch in keiner Gruppe"
+            },
+            "tabs": {
+              "groupedServers": {
+                "title": "Gruppierte Server",
+                "page": {
+                  "button": {
+                    "createGroup": "Neue Gruppe"
+                  },
+                  "modal": {
+                    "createServerGroup": {
+                      "title": "Erstelle Server Gruppe",
+                      "toast": {
+                        "created": "Server Gruppe erstellt."
+                      }
+                    },
+                    "editServerGroup": {
+                      "title": "Bearbeite Server Gruppe",
+                      "toast": {
+                        "updated": "Server Gruppe aktualisiert."
+                      }
+                    },
+                    "deleteServerGroup": {
+                      "title": "Bestätige Server Gruppen Löschung",
+                      "content": "Bist du sicher, dass du die Gruppe {group} von deinem Account löschen möchtest?",
+                      "toast": {
+                        "deleted": "Server Gruppe gelöscht."
+                      }
+                    }
+                  },
+                  "noGroups": "Es konnten keine Gruppen gefunden werden, Zeit eine zu erstellen?"
+                }
+              },
+              "allServers": {
+                "title": "Alle Server",
+                "page": {
+                  "input": {
+                    "showOtherUsersServers": "Zeige die Server von anderen Benutzern"
+                  },
+                  "modal": {
+                    "addToServerGroup": {
+                      "title": "Füge {server} zu einer Server Gruppe hinzu",
+                      "form": {
+                        "serverGroup": "Server Gruppe"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "noServers": "Es konnten keine Server gefunden werden, Zeit einen hinzuzufügen?"
+          }
+        },
+        "admin": {},
+        "server": {}
       }
     }
   }

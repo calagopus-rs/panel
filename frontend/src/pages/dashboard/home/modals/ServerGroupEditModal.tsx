@@ -10,6 +10,7 @@ import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 const schema = z.object({
   name: z.string().min(2).max(31),
@@ -20,6 +21,7 @@ type Props = ModalProps & {
 };
 
 export default function ServerGroupEditModal({ serverGroup, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { updateServerGroup: updateStateServerGroup } = useUserStore();
 
@@ -41,7 +43,7 @@ export default function ServerGroupEditModal({ serverGroup, opened, onClose }: P
         updateStateServerGroup(serverGroup.uuid, form.values);
 
         onClose();
-        addToast('Server group updated.', 'success');
+        addToast(t('pages.account.home.tabs.groupedServers.page.modal.editServerGroup.toast.updated', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -50,16 +52,20 @@ export default function ServerGroupEditModal({ serverGroup, opened, onClose }: P
   };
 
   return (
-    <Modal title='Edit Server Group' onClose={onClose} opened={opened}>
+    <Modal
+      title={t('pages.account.home.tabs.groupedServers.page.modal.editServerGroup.title', {})}
+      onClose={onClose}
+      opened={opened}
+    >
       <Stack>
         <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
         <Group>
           <Button onClick={doUpdate} loading={loading} disabled={!form.isValid()}>
-            Edit
+            {t('common.button.save', {})}
           </Button>
           <Button variant='default' onClick={onClose}>
-            Close
+            {t('common.button.close', {})}
           </Button>
         </Group>
       </Stack>

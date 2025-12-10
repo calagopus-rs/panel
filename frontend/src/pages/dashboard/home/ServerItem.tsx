@@ -23,6 +23,7 @@ import { ActionIcon } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
 import ServerAddGroupModal from './modals/ServerAddGroupModal';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 const statusToColor = (status: ServerPowerState | undefined) => {
   switch (status) {
@@ -46,6 +47,7 @@ export default function ServerItem({
   showGroupAddButton?: boolean;
   onGroupRemove?: () => void;
 }) {
+  const { t } = useTranslations();
   const { serverGroups } = useUserStore();
   const { serverListShowOthers } = useGlobalStore();
 
@@ -53,12 +55,15 @@ export default function ServerItem({
   const [stats, setStats] = useState<ResourceUsage | null>(null);
 
   useEffect(() => {
-    getServerResourceUsage(server.uuid).then(setStats);
+    if (!server.suspended && !server.status) {
+      getServerResourceUsage(server.uuid).then(setStats);
+    }
   }, [server]);
 
-  const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : 'Unlimited';
-  const memoryLimit = server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : 'Unlimited';
-  const cpuLimit = server.limits.cpu !== 0 ? `${server.limits.cpu}%` : 'Unlimited';
+  const diskLimit = server.limits.disk !== 0 ? bytesToString(mbToBytes(server.limits.disk)) : t('common.unlimited', {});
+  const memoryLimit =
+    server.limits.memory !== 0 ? bytesToString(mbToBytes(server.limits.memory)) : t('common.unlimited', {});
+  const cpuLimit = server.limits.cpu !== 0 ? `${server.limits.cpu}%` : t('common.unlimited', {});
 
   return (
     <>
@@ -77,7 +82,7 @@ export default function ServerItem({
             >
               {server.name}
               {!serverListShowOthers && serverGroups.every((g) => !g.serverOrder.includes(server.uuid)) && (
-                <Tooltip className='ml-2' label='This server is not in any group'>
+                <Tooltip className='ml-2' label={t('pages.account.home.tooltip.noGroup', {})}>
                   <FontAwesomeIcon size='sm' icon={faInfoCircle} />
                 </Tooltip>
               )}
@@ -106,12 +111,16 @@ export default function ServerItem({
                 )
               ) : (
                 <Card p='xs' className='leading-[100%] text-nowrap'>
-                  No Allocation
+                  {t('common.server.noAllocation', {})}
                 </Card>
               )}
               {showGroupAddButton && (
                 <Tooltip
-                  label={serverGroups.length === 0 ? 'No groups available to add to' : 'Add to Group'}
+                  label={
+                    serverGroups.length === 0
+                      ? t('pages.account.home.tooltip.noGroups', {})
+                      : t('pages.account.home.tooltip.addToGroup', {})
+                  }
                   className='ml-2'
                 >
                   <ActionIcon
@@ -128,7 +137,7 @@ export default function ServerItem({
                 </Tooltip>
               )}
               {onGroupRemove && (
-                <Tooltip label='Remove from Group' className='ml-2'>
+                <Tooltip label={t('pages.account.home.tooltip.removeFromGroup', {})} className='ml-2'>
                   <ActionIcon
                     size='input-sm'
                     color='red'
@@ -151,22 +160,22 @@ export default function ServerItem({
             {server.suspended ? (
               <div className='col-span-3 flex flex-row items-center justify-center'>
                 <FontAwesomeIcon size='1x' icon={faBan} color='red' />
-                <p className='ml-2 text-sm'>Server Suspended</p>
+                <p className='ml-2 text-sm'>{t('common.server.state.suspended', {})}</p>
               </div>
             ) : server.status === 'installing' ? (
               <div className='col-span-3 flex flex-row items-center justify-center'>
                 <Spinner size={16} />
-                <p className='ml-2 text-sm'>Installing</p>
+                <p className='ml-2 text-sm'>{t('common.server.state.installing', {})}</p>
               </div>
             ) : server.status === 'restoring_backup' ? (
               <div className='col-span-3 flex flex-row items-center justify-center'>
                 <Spinner size={16} />
-                <p className='ml-2 text-sm'>Restoring Backup</p>
+                <p className='ml-2 text-sm'>{t('common.server.state.restoringBackup', {})}</p>
               </div>
             ) : server.status === 'install_failed' ? (
               <div className='col-span-3 flex flex-row items-center justify-center'>
                 <FontAwesomeIcon size='1x' icon={faTriangleExclamation} color='yellow' />
-                <p className='ml-2 text-sm'>Install Failed</p>
+                <p className='ml-2 text-sm'>{t('common.server.state.InstallFailed', {})}</p>
               </div>
             ) : stats === null ? (
               <div className='col-span-3 flex flex-row items-center justify-center'>

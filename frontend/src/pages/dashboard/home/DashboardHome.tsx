@@ -12,12 +12,14 @@ import { useUserStore } from '@/stores/user';
 import DashboardHomeTitle from './DashboardHomeTitle';
 import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
 import ServerGroupItem from './ServerGroupItem';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 interface DndServerGroup extends UserServerGroup, DndItem {
   id: string;
 }
 
 export default function DashboardHome() {
+  const { t } = useTranslations();
   const { serverGroups, setServerGroups } = useUserStore();
   const { addToast } = useToast();
 
@@ -50,7 +52,7 @@ export default function DashboardHome() {
       {loading ? (
         <Spinner.Centered />
       ) : serverGroups.length === 0 ? (
-        <p className='text-gray-400'>No server groups found</p>
+        <p className='text-gray-400'>{t('pages.account.home.tabs.groupedServers.page.noGroups', {})}</p>
       ) : (
         <DndContainer
           items={dndServerGroups}
@@ -96,7 +98,7 @@ export default function DashboardHome() {
 
       <div className='flex justify-center mt-4'>
         <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-          Create Group
+          {t('pages.account.home.tabs.groupedServers.page.button.createGroup', {})}
         </Button>
       </div>
     </>

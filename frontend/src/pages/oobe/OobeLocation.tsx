@@ -68,8 +68,8 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
       description: null,
       backupDisk: form.values.backupDisk,
       backupConfigs: {
-        s3: backupConfigS3Form.values,
-        restic: backupConfigResticForm.values,
+        s3: form.values.backupDisk === 's3' ? backupConfigS3Form.values : null,
+        restic: form.values.backupDisk === 'restic' ? backupConfigResticForm.values : null,
       },
     })
       .then((backupConfig) => {
@@ -131,7 +131,7 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
         {form.values.backupDisk === 'restic' ? <BackupRestic form={backupConfigResticForm} /> : null}
 
         <Group justify='flex-end' mt='xl'>
-          <Button variant='outline' onClick={() => skipFrom!('location')}>
+          <Button variant='outline' onClick={() => skipFrom('location')}>
             Skip
           </Button>
           <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>

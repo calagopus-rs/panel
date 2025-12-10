@@ -27,7 +27,7 @@ import { useGlobalStore } from '@/stores/global';
 
 export interface OobeComponentProps {
   onNext: () => void;
-  skipFrom?: (step: OobeStepKey) => void;
+  skipFrom: (step: OobeStepKey) => void;
 }
 
 interface OobeStep {

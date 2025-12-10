@@ -3,7 +3,6 @@ import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup';
 import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers';
 import updateServerGroup from '@/api/me/servers/groups/updateServerGroup';
 import Card from '@/elements/Card';
-import Code from '@/elements/Code';
 import Divider from '@/elements/Divider';
 import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
 import TextInput from '@/elements/input/TextInput';
@@ -20,6 +19,7 @@ import { ActionIcon } from '@mantine/core';
 import { ComponentProps, useState } from 'react';
 import ServerGroupEditModal from './modals/ServerGroupEditModal';
 import ServerItem from './ServerItem';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 function insertItems<T>(list: T[], items: T[], startIndex: number): T[] {
   if (startIndex > list.length) {
@@ -42,6 +42,7 @@ export default function ServerGroupItem({
   serverGroup: UserServerGroup;
   dragHandleProps: ComponentProps<'div'>;
 }) {
+  const { t } = useTranslations();
   const { updateServerGroup: updateStateServerGroup, removeServerGroup } = useUserStore();
   const { addToast } = useToast();
 
@@ -59,7 +60,7 @@ export default function ServerGroupItem({
     await deleteServerGroup(serverGroup.uuid)
       .then(() => {
         removeServerGroup(serverGroup);
-        addToast('Server group removed.', 'success');
+        addToast(t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.toast.deleted', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -81,13 +82,11 @@ export default function ServerGroupItem({
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
-        title='Confirm Server Group Deletion'
+        title={t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.title', {})}
         confirm='Delete'
         onConfirmed={doDelete}
       >
-        Are you sure you want to delete
-        <Code>{serverGroup.name}</Code>
-        from your account?
+        {t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.content', { group: serverGroup.name })}
       </ConfirmationModal>
 
       <Card key={serverGroup.uuid} p={8}>
@@ -110,7 +109,7 @@ export default function ServerGroupItem({
 
           <div className='flex flex-row items-center gap-2'>
             <TextInput
-              placeholder='Search...'
+              placeholder={t('common.input.search', {})}
               className='h-full w-full'
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -134,7 +133,7 @@ export default function ServerGroupItem({
             {loading ? (
               <Spinner.Centered />
             ) : servers.total === 0 ? (
-              <p className='text-gray-400 mt-4'>No servers found</p>
+              <p className='text-gray-400 mt-4'>{t('pages.account.home.noServers', {})}</p>
             ) : (
               <DndContainer
                 items={dndServers}
@@ -147,7 +146,6 @@ export default function ServerGroupItem({
                       (servers.page - 1) * servers.perPage,
                     );
 
-                    // Update local state optimistically
                     setServers({ ...servers, data: items });
 
                     await updateServerGroup(serverGroup.uuid, { serverOrder }).catch((err) => {
@@ -155,12 +153,10 @@ export default function ServerGroupItem({
                       updateStateServerGroup(serverGroup.uuid, {
                         serverOrder: serverGroup.serverOrder,
                       });
-                      // Revert local state
                       setServers({ ...servers, data: servers.data });
                     });
                   },
                   onError: (error, originalItems) => {
-                    // Additional error handling if needed
                     console.error('Drag error:', error);
                   },
                 }}

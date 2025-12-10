@@ -15,8 +15,10 @@ import { useGlobalStore } from '@/stores/global';
 import { useUserStore } from '@/stores/user';
 import DashboardHomeTitle from './DashboardHomeTitle';
 import ServerItem from './ServerItem';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 export default function DashboardHomeAll() {
+  const { t } = useTranslations();
   const { servers, setServers, setServerGroups } = useUserStore();
   const { serverListShowOthers, setServerListShowOthers } = useGlobalStore();
   const { addToast } = useToast();
@@ -43,10 +45,15 @@ export default function DashboardHomeAll() {
       <DashboardHomeTitle />
 
       <Group mb='md' justify='space-between'>
-        <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+        <TextInput
+          placeholder={t('common.input.search', {})}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          w={250}
+        />
         {user!.admin && (
           <Switch
-            label="Show other users' servers"
+            label={t('pages.account.home.tabs.allServers.page.input.showOtherUsersServers', {})}
             checked={serverListShowOthers}
             onChange={(e) => setServerListShowOthers(e.currentTarget.checked)}
           />
@@ -63,7 +70,7 @@ export default function DashboardHomeAll() {
       {loading ? (
         <Spinner.Centered />
       ) : servers.total === 0 ? (
-        <p className='text-gray-400'>No servers found</p>
+        <p className='text-gray-400'>{t('pages.account.home.noServers', {})}</p>
       ) : (
         <div className='gap-4 grid md:grid-cols-2'>
           {servers.data.map((server) => (

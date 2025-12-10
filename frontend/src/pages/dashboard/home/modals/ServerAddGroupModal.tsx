@@ -7,12 +7,14 @@ import Select from '@/elements/input/Select';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 type Props = ModalProps & {
   server: Server;
 };
 
 export default function ServerAddGroupModal({ server, opened, onClose }: Props) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { serverGroups, updateServerGroup: updateStateServerGroup } = useUserStore();
 
@@ -31,6 +33,7 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
         updateStateServerGroup(selectedServerGroup.uuid, {
           serverOrder: [...selectedServerGroup.serverOrder, server.uuid],
         });
+
         onClose();
       })
       .catch((msg) => {
@@ -40,10 +43,14 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
   };
 
   return (
-    <Modal title={`Add ${server.name} to Server Group`} onClose={onClose} opened={opened}>
+    <Modal
+      title={t('pages.account.home.tabs.allServers.page.modal.addToServerGroup.title', { server: server.name })}
+      onClose={onClose}
+      opened={opened}
+    >
       <Select
-        label='Server Group'
-        placeholder='Server Group'
+        label={t('pages.account.home.tabs.allServers.page.modal.addToServerGroup.form.serverGroup', {})}
+        placeholder={t('pages.account.home.tabs.allServers.page.modal.addToServerGroup.form.serverGroup', {})}
         value={selectedServerGroup?.uuid || ''}
         className='w-full'
         searchable
@@ -58,10 +65,10 @@ export default function ServerAddGroupModal({ server, opened, onClose }: Props) 
 
       <Group mt='md'>
         <Button onClick={doAdd} loading={loading} disabled={!selectedServerGroup}>
-          Add
+          {t('common.button.add', {})}
         </Button>
         <Button variant='default' onClick={onClose}>
-          Close
+          {t('common.button.close', {})}
         </Button>
       </Group>
     </Modal>

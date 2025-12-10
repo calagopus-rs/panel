@@ -9,8 +9,8 @@ import {
 
 interface Data extends z.infer<typeof adminBackupConfigurationSchema> {
   backupConfigs: {
-    s3: z.infer<typeof adminBackupConfigurationS3Schema>;
-    restic: z.infer<typeof adminBackupConfigurationResticSchema>;
+    s3: z.infer<typeof adminBackupConfigurationS3Schema> | null;
+    restic: z.infer<typeof adminBackupConfigurationResticSchema> | null;
   };
 }
 

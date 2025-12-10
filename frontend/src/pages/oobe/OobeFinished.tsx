@@ -17,10 +17,9 @@ import Button from '@/elements/Button';
 import Divider from '@/elements/Divider';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useAuth } from '@/providers/AuthProvider';
-import { OobeComponentProps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global';
 
-export default function OobeFinished({ onNext }: OobeComponentProps) {
+export default function OobeFinished() {
   const { user } = useAuth();
   const { settings, setSettings } = useGlobalStore();
   const navigate = useNavigate();

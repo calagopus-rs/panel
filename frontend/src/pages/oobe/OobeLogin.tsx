@@ -49,6 +49,8 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
         const nextStep = steps.find((step) => step.stepKey === settings.oobeStep);
         if (nextStep) {
           navigate(to(nextStep.path, '/oobe'));
+        } else {
+          onNext();
         }
       })
       .catch((msg) => {

@@ -10,12 +10,14 @@ import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { useToast } from '@/providers/ToastProvider';
 import { useUserStore } from '@/stores/user';
+import { useTranslations } from '@/providers/TranslationProvider';
 
 const schema = z.object({
   name: z.string().min(2).max(31),
 });
 
 export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) {
+  const { t } = useTranslations();
   const { addToast } = useToast();
   const { addServerGroup } = useUserStore();
 
@@ -38,7 +40,9 @@ export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) 
     })
       .then((serverGroup) => {
         addServerGroup(serverGroup);
+
         onClose();
+        addToast(t('pages.account.home.tabs.groupedServers.page.modal.createServerGroup.toast.created', {}), 'success');
       })
       .catch((msg) => {
         addToast(httpErrorToHuman(msg), 'error');
@@ -47,15 +51,24 @@ export default function ServerGroupCreateModal({ opened, onClose }: ModalProps) 
   };
 
   return (
-    <Modal title='Create Server Group' onClose={onClose} opened={opened}>
-      <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+    <Modal
+      title={t('pages.account.home.tabs.groupedServers.page.modal.createServerGroup.title', {})}
+      onClose={onClose}
+      opened={opened}
+    >
+      <TextInput
+        withAsterisk
+        label={t('common.form.name', {})}
+        placeholder={t('common.form.name', {})}
+        {...form.getInputProps('name')}
+      />
 
       <Group mt='md'>
         <Button onClick={doCreate} loading={loading} disabled={!form.isValid()}>
-          Create
+          {t('common.button.create', {})}
         </Button>
         <Button variant='default' onClick={onClose}>
-          Close
+          {t('common.button.close', {})}
         </Button>
       </Group>
     </Modal>

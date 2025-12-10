@@ -25,12 +25,90 @@
         "input": {
           "search": "Search..."
         },
+        "form": {
+          "name": "Name",
+          "description": "Description"
+        },
         "table": {
           "pagination": {
             "results": "Showing {start} to {end} of {total} results.",
             "empty": "No items could be found, it's almost like they are hiding."
           }
-        }
+        },
+        "server": {
+          "noAllocation": "No Allocation",
+          "state": {
+            "suspended": "Suspended",
+            "restoringBackup": "Restoring Backup",
+            "installing": "Installing",
+            "InstallFailed": "Install Failed"
+          }
+        },
+        "unlimited": "Unlimited"
+      },
+      "pages": {
+        "auth": {},
+        "account": {
+          "home": {
+            "tooltip": {
+              "removeFromGroup": "Remove from Group",
+              "addToGroup": "Add to Group",
+              "noGroups": "No groups available to add server to",
+              "noGroup": "This server is not in any group"
+            },
+            "tabs": {
+              "groupedServers": {
+                "title": "Grouped Servers",
+                "page": {
+                  "button": {
+                    "createGroup": "Create Group"
+                  },
+                  "modal": {
+                    "createServerGroup": {
+                      "title": "Create Server Group",
+                      "toast": {
+                        "created": "Server group created."
+                      }
+                    },
+                    "editServerGroup": {
+                      "title": "Edit Server Group",
+                      "toast": {
+                        "updated": "Server group updated."
+                      }
+                    },
+                    "deleteServerGroup": {
+                      "title": "Confirm Server Group Deletion",
+                      "content": "Are you sure you want to delete {group} from your account?",
+                      "toast": {
+                        "deleted": "Server group deleted."
+                      }
+                    }
+                  },
+                  "noGroups": "No Groups could be found, time to create one?"
+                }
+              },
+              "allServers": {
+                "title": "All Servers",
+                "page": {
+                  "input": {
+                    "showOtherUsersServers": "Show other user's servers"
+                  },
+                  "modal": {
+                    "addToServerGroup": {
+                      "title": "Add {server} to Server Group",
+                      "form": {
+                        "serverGroup": "Server Group"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "noServers": "No Servers could be found, time to add one?"
+          }
+        },
+        "admin": {},
+        "server": {}
       }
     }
   }
