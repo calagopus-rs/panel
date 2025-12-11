@@ -86,7 +86,7 @@ jobs:
             binary_suffix: ""
           - build: riscv64-linux
             os: ubuntu-24.04
-            target: riscv64gc-unknown-linux-musl
+            target: riscv64gc-unknown-linux-gnu
             binary_suffix: ""
           - build: powerpc64le-linux
             os: ubuntu-24.04
