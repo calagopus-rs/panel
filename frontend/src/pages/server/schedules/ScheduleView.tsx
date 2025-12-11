@@ -7,13 +7,14 @@ import {
   faPencil,
   faPlay,
   faPlayCircle,
+  faReply,
   faServer,
   faSkull,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
 import triggerSchedule from '@/api/server/schedules/triggerSchedule';
@@ -29,9 +30,11 @@ import { scheduleStepIconMapping } from '@/lib/enums';
 import { formatDateTime } from '@/lib/time';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
-import ScheduleConditionBuilder from './ScheduleConditionBuilder';
+import SchedulePreConditionBuilder from './SchedulePreConditionBuilder';
 import updateSchedule from '@/api/server/schedules/updateSchedule';
 import ScheduleCreateOrUpdateModal from './modals/ScheduleCreateOrUpdateModal';
+import ScheduleDynamicParameterRenderer from './ScheduleDynamicParameterRenderer';
+import StepsEditor from './StepsEditor';
 
 interface DetailCardProps {
   icon: React.ReactNode;
@@ -123,11 +126,25 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
     switch (action.type) {
       case 'sleep':
         return <Text size='sm'>Sleep for {action.duration}ms</Text>;
+      case 'ensure':
+        return <Text size='sm'>Ensure a condition matches</Text>;
+      case 'format':
+        return (
+          <Text size='sm'>
+            Format a string into <ScheduleDynamicParameterRenderer value={action.outputInto} />
+          </Text>
+        );
+      case 'match_regex':
+        return (
+          <Text size='sm'>
+            Match <ScheduleDynamicParameterRenderer value={action.input} /> with regex <Code>{action.regex}</Code>
+          </Text>
+        );
       case 'wait_for_console_line':
         return (
           <Stack gap='xs'>
             <Text size='sm'>
-              Line must contain: <Code>{action.contains}</Code>
+              Line must contain: <ScheduleDynamicParameterRenderer value={action.contains} />
             </Text>
             <Text size='sm'>
               Timeout: <Code>{action.timeout}ms</Code>
@@ -152,7 +169,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         return (
           <Stack gap='xs'>
             <Text size='sm'>
-              Command: <Code>{action.command}</Code>
+              Command: <ScheduleDynamicParameterRenderer value={action.command} />
             </Text>
             <Text size='xs' c='dimmed'>
               Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
@@ -162,7 +179,9 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
       case 'create_backup':
         return (
           <Stack gap='xs'>
-            <Text size='sm'>Backup Name: {action.name || 'Auto-generated'}</Text>
+            <Text size='sm'>
+              Backup Name: <ScheduleDynamicParameterRenderer value={action.name} />
+            </Text>
             <Text size='xs' c='dimmed'>
               Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
             </Text>
@@ -177,10 +196,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         return (
           <Stack gap='xs'>
             <Text size='sm'>
-              File: <Code>{action.file}</Code>
-            </Text>
-            <Text size='xs' c='dimmed'>
-              Content: {action.content.substring(0, 50)}...
+              File: <ScheduleDynamicParameterRenderer value={action.file} />
             </Text>
             <Text size='xs' c='dimmed'>
               Append: <Code>{action.append ? 'Yes' : 'No'}</Code>
@@ -194,10 +210,10 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         return (
           <Stack gap='xs'>
             <Text size='sm'>
-              From: <Code>{action.file}</Code>
+              From: <ScheduleDynamicParameterRenderer value={action.file} />
             </Text>
             <Text size='sm'>
-              To: <Code>{action.destination}</Code>
+              To: <ScheduleDynamicParameterRenderer value={action.destination} />
             </Text>
             <Text size='xs' c='dimmed'>
               Foreground: {action.foreground ? 'Yes' : 'No'} | Ignore Failure: {action.ignoreFailure ? 'Yes' : 'No'}
@@ -208,7 +224,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
         return (
           <Stack gap='xs'>
             <Text size='sm'>
-              Root: <Code>{action.root}</Code>
+              Root: <ScheduleDynamicParameterRenderer value={action.root} />
             </Text>
             <Text size='xs' c='dimmed'>
               Files: {action.files.join(', ')}
@@ -260,19 +276,16 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
 
 export default function ScheduleView() {
   const params = useParams<'id'>();
-  const navigate = useNavigate();
   const { addToast } = useToast();
-  const { server, scheduleStatus } = useServerStore();
+  const { server, schedule, setSchedule, scheduleStatus, scheduleSteps, setScheduleSteps } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'update' | null>(null);
-  const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
-  const [steps, setSteps] = useState<ScheduleStep[]>([]);
+  const [openModal, setOpenModal] = useState<'actions' | 'update' | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (params.id) {
       getSchedule(server.uuid, params.id).then(setSchedule);
-      getScheduleSteps(server.uuid, params.id).then(setSteps);
+      getScheduleSteps(server.uuid, params.id).then(setScheduleSteps);
     }
   }, [params.id]);
 
@@ -300,7 +313,7 @@ export default function ScheduleView() {
     }
   };
 
-  if (!schedule || !steps) {
+  if (!schedule || !scheduleSteps) {
     return (
       <div className='w-full'>
         <Spinner.Centered />
@@ -312,7 +325,7 @@ export default function ScheduleView() {
     <>
       <ScheduleCreateOrUpdateModal
         propSchedule={schedule}
-        onScheduleUpdate={(schedule) => setSchedule((s) => ({ ...s!, ...schedule }))}
+        onScheduleUpdate={(s) => setSchedule({ ...schedule, ...s })}
         opened={openModal === 'update'}
         onClose={() => setOpenModal(null)}
       />
@@ -329,7 +342,7 @@ export default function ScheduleView() {
           </Group>
 
           <Group>
-            {steps.length > 0 && (
+            {scheduleSteps.length > 0 && (
               <ContextMenuProvider>
                 <ContextMenu
                   items={[
@@ -421,25 +434,30 @@ export default function ScheduleView() {
                 </Title>
                 <Group>
                   <Button
-                    onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}/edit-steps`)}
+                    onClick={() => setOpenModal(openModal === 'actions' ? null : 'actions')}
                     variant='outline'
+                    leftSection={<FontAwesomeIcon icon={openModal === 'actions' ? faReply : faPencil} />}
                   >
-                    Edit
+                    {openModal === 'actions' ? 'Exit Editor' : 'Edit'}
                   </Button>
                 </Group>
               </Group>
-              {steps.length === 0 ? (
+              {openModal === 'actions' ? (
+                <StepsEditor schedule={schedule} />
+              ) : scheduleSteps.length === 0 ? (
                 <Alert icon={<FontAwesomeIcon icon={faExclamationTriangle} />} color='yellow'>
                   No actions configured for this schedule
                 </Alert>
               ) : (
                 <Timeline
-                  active={steps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1}
+                  active={
+                    scheduleSteps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1
+                  }
                   color='blue'
                   bulletSize={40}
                   lineWidth={2}
                 >
-                  {steps.map((step) => (
+                  {scheduleSteps.map((step) => (
                     <ActionStep
                       key={step.uuid}
                       step={step}
@@ -459,11 +477,11 @@ export default function ScheduleView() {
           <Tabs.Panel value='conditions' pt='md'>
             <Card p='lg'>
               <Title order={3} mb='md'>
-                Execution Conditions
+                Execution Pre-Conditions
               </Title>
-              <ScheduleConditionBuilder
+              <SchedulePreConditionBuilder
                 condition={schedule.condition}
-                onChange={(condition) => setSchedule((schedule) => ({ ...schedule!, condition }))}
+                onChange={(condition) => setSchedule({ ...schedule, condition })}
               />
 
               <div className='flex flex-row mt-6'>

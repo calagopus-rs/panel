@@ -1,0 +1,213 @@
+import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
+import { useState } from 'react';
+import Button from '@/elements/Button';
+import NumberInput from '@/elements/input/NumberInput';
+import SizeInput from '@/elements/input/SizeInput';
+import TextInput from '@/elements/input/TextInput';
+import {
+  scheduleComparatorLabelMapping,
+  schedulePreConditionLabelMapping,
+  serverPowerStateLabelMapping,
+} from '@/lib/enums';
+import { bytesToString } from '@/lib/size';
+
+const maxConditionDepth = 3;
+
+interface PreConditionBuilderProps {
+  condition: SchedulePreCondition;
+  onChange: (condition: SchedulePreCondition) => void;
+  depth?: number;
+}
+
+export default function SchedulePreConditionBuilder({ condition, onChange, depth = 0 }: PreConditionBuilderProps) {
+  const [sizeInput, setSizeInput] = useState(
+    condition.type === 'memory_usage' || condition.type === 'disk_usage' ? bytesToString(condition.value) : '',
+  );
+
+  const handleTypeChange = (type: string) => {
+    switch (type) {
+      case 'none':
+        onChange({ type: 'none' });
+        break;
+      case 'and':
+        onChange({ type: 'and', conditions: [] });
+        break;
+      case 'or':
+        onChange({ type: 'or', conditions: [] });
+        break;
+      case 'not':
+        onChange({ type: 'not', condition: { type: 'none' } });
+        break;
+      case 'server_state':
+        onChange({ type: 'server_state', state: 'running' });
+        break;
+      case 'uptime':
+        onChange({ type: 'uptime', comparator: 'greater_than', value: 0 });
+        break;
+      case 'cpu_usage':
+        onChange({ type: 'cpu_usage', comparator: 'greater_than', value: 0 });
+        break;
+      case 'memory_usage':
+        onChange({ type: 'memory_usage', comparator: 'greater_than', value: 0 });
+        break;
+      case 'disk_usage':
+        onChange({ type: 'disk_usage', comparator: 'greater_than', value: 0 });
+        break;
+      case 'file_exists':
+        onChange({ type: 'file_exists', file: '' });
+    }
+  };
+
+  const handleNestedConditionChange = (index: number, newCondition: SchedulePreCondition) => {
+    if (condition.type === 'and' || condition.type === 'or') {
+      const newConditions = [...condition.conditions];
+      newConditions[index] = newCondition;
+      onChange({ ...condition, conditions: newConditions });
+    }
+  };
+
+  const addNestedCondition = () => {
+    if (condition.type === 'and' || condition.type === 'or') {
+      onChange({
+        ...condition,
+        conditions: [...condition.conditions, { type: 'none' }],
+      });
+    }
+  };
+
+  const removeNestedCondition = (index: number) => {
+    if (condition.type === 'and' || condition.type === 'or') {
+      const newConditions = condition.conditions.filter((_, i) => i !== index);
+      onChange({ ...condition, conditions: newConditions });
+    }
+  };
+
+  return (
+    <div style={{ marginLeft: depth * 20 }}>
+      <Stack>
+        <Select
+          label='Condition Type'
+          value={condition.type}
+          onChange={(value) => value && handleTypeChange(value)}
+          data={Object.entries(schedulePreConditionLabelMapping)
+            .map(([value, label]) => ({
+              value,
+              label,
+            }))
+            .filter((c) => depth < maxConditionDepth || !['and', 'or', 'not'].includes(c.value))}
+        />
+
+        {condition.type === 'server_state' && (
+          <Select
+            label='Server State'
+            value={condition.state}
+            onChange={(value) => value && onChange({ ...condition, state: value as ServerPowerState })}
+            data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+          />
+        )}
+
+        {(condition.type === 'uptime' ||
+          condition.type === 'cpu_usage' ||
+          condition.type === 'memory_usage' ||
+          condition.type === 'disk_usage') && (
+          <Group grow>
+            <Select
+              label='Comparator'
+              value={condition.comparator}
+              onChange={(value) => value && onChange({ ...condition, comparator: value as ScheduleComparator })}
+              data={Object.entries(scheduleComparatorLabelMapping).map(([value, label]) => ({
+                value,
+                label,
+              }))}
+            />
+            {condition.type === 'uptime' && (
+              <NumberInput
+                label='Value (seconds)'
+                value={Number(condition.value) / 1000}
+                onChange={(value) => onChange({ ...condition, value: Number(value) * 1000 || 0 })}
+                min={0}
+              />
+            )}
+            {condition.type === 'cpu_usage' && (
+              <NumberInput
+                label='Value (%)'
+                value={condition.value}
+                onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
+                min={0}
+              />
+            )}
+            {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
+              <SizeInput
+                label='Value + Unit (e.g. 2GB)'
+                value={sizeInput}
+                setState={setSizeInput}
+                onChange={(value) => onChange({ ...condition, value })}
+              />
+            )}
+          </Group>
+        )}
+
+        {condition.type === 'file_exists' && (
+          <TextInput
+            label='File Path'
+            value={condition.file}
+            onChange={(e) => onChange({ ...condition, file: e.target.value })}
+          />
+        )}
+
+        {(condition.type === 'and' || condition.type === 'or') && (
+          <>
+            {depth < maxConditionDepth && (
+              <Group>
+                <Text size='sm'>
+                  {condition.type === 'and' ? 'All conditions must be true:' : 'Any condition must be true:'}
+                </Text>
+                <Button
+                  size='xs'
+                  variant='light'
+                  leftSection={<FontAwesomeIcon icon={faPlus} />}
+                  onClick={addNestedCondition}
+                >
+                  Add Condition
+                </Button>
+              </Group>
+            )}
+
+            {condition.conditions.map((nestedCondition, index) => (
+              <Group key={index} align='flex-start'>
+                <div style={{ flex: 1 }}>
+                  <SchedulePreConditionBuilder
+                    condition={nestedCondition}
+                    onChange={(newCondition) => handleNestedConditionChange(index, newCondition)}
+                    depth={depth + 1}
+                  />
+                </div>
+                <ActionIcon color='red' variant='light' onClick={() => removeNestedCondition(index)}>
+                  <FontAwesomeIcon icon={faMinus} />
+                </ActionIcon>
+              </Group>
+            ))}
+          </>
+        )}
+        {condition.type === 'not' && (
+          <>
+            <Text size='sm'>Condition must not be true:</Text>
+
+            <div style={{ flex: 1 }}>
+              <SchedulePreConditionBuilder
+                condition={condition.condition}
+                onChange={(nestedCondition) => onChange({ ...condition, condition: nestedCondition })}
+                depth={depth + 1}
+              />
+            </div>
+          </>
+        )}
+      </Stack>
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepCreateDirectory({
   action,
@@ -11,19 +11,19 @@ export default function StepCreateDirectory({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Root Path'
         placeholder='/'
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.target.value })}
+        onChange={(v) => setAction({ ...action, root: v })}
       />
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Directory Name'
         placeholder='new_folder'
         value={action.name}
-        onChange={(e) => setAction({ ...action, name: e.target.value })}
+        onChange={(v) => setAction({ ...action, name: v })}
       />
       <Switch
         label='Ignore Failure'

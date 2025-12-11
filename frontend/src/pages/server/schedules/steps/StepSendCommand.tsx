@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
-import TextArea from '@/elements/input/TextArea';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepSendCommand({
   action,
@@ -11,12 +11,12 @@ export default function StepSendCommand({
 }) {
   return (
     <Stack>
-      <TextArea
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Command'
         placeholder='say Hello World'
         value={action.command}
-        onChange={(e) => setAction({ ...action, command: e.target.value })}
+        onChange={(v) => setAction({ ...action, command: v })}
       />
       <Switch
         label='Ignore Failure'

@@ -96,7 +96,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
                     to={to(route.path, `/server/${params.id}`)}
                     end={route.exact}
                     icon={route.icon}
-                    name={route.name}
+                    name={typeof route.name === 'function' ? route.name() : route.name}
                   />
                 </Can>
               ) : (
@@ -105,7 +105,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
                   to={to(route.path, `/server/${params.id}`)}
                   end={route.exact}
                   icon={route.icon}
-                  name={route.name}
+                  name={typeof route.name === 'function' ? route.name() : route.name}
                 />
               ),
             )}
@@ -118,7 +118,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
                     to={to(route.path, `/server/${params.id}`)}
                     end={route.exact}
                     icon={route.icon}
-                    name={route.name}
+                    name={typeof route.name === 'function' ? route.name() : route.name}
                   />
                 </Can>
               ) : (
@@ -127,7 +127,7 @@ export default function ServerRouter({ isNormal }: { isNormal: boolean }) {
                   to={to(route.path, `/server/${params.id}`)}
                   end={route.exact}
                   icon={route.icon}
-                  name={route.name}
+                  name={typeof route.name === 'function' ? route.name() : route.name}
                 />
               ),
             )}

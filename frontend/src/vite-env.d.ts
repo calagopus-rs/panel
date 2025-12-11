@@ -466,6 +466,17 @@ declare global {
     state: ServerPowerState;
   }
 
+  interface ScheduleTriggerBackupStatus {
+    type: 'backup_status';
+    status: ServerBackupStatus;
+  }
+
+  interface ScheduleTriggerConsoleLine {
+    type: 'console_line';
+    contains: string;
+    outputInto: ScheduleVariable | null;
+  }
+
   interface ScheduleTriggerCrash {
     type: 'crash';
   }
@@ -474,6 +485,8 @@ declare global {
     | ScheduleTriggerCron
     | ScheduleTriggerPowerAction
     | ScheduleTriggerServerState
+    | ScheduleTriggerBackupStatus
+    | ScheduleTriggerConsoleLine
     | ScheduleTriggerCrash;
 
   type ScheduleTriggerType = ScheduleTrigger['type'];
@@ -484,6 +497,93 @@ declare global {
     | 'equal'
     | 'greater_than'
     | 'greater_than_or_equals';
+
+  interface SchedulePreConditionNone {
+    type: 'none';
+  }
+
+  interface SchedulePreConditionAnd {
+    type: 'and';
+    conditions: SchedulePreCondition[];
+  }
+
+  interface SchedulePreConditionOr {
+    type: 'or';
+    conditions: SchedulePreCondition[];
+  }
+
+  interface SchedulePreConditionNot {
+    type: 'not';
+    condition: SchedulePreCondition;
+  }
+
+  interface SchedulePreConditionServerState {
+    type: 'server_state';
+    state: ServerPowerState;
+  }
+
+  interface SchedulePreConditionUptime {
+    type: 'uptime';
+    comparator: ScheduleComparator;
+    value: number;
+  }
+
+  interface SchedulePreConditionCpuUsage {
+    type: 'cpu_usage';
+    comparator: ScheduleComparator;
+    value: number;
+  }
+
+  interface SchedulePreConditionMemoryUsage {
+    type: 'memory_usage';
+    comparator: ScheduleComparator;
+    value: number;
+  }
+
+  interface SchedulePreConditionDiskUsage {
+    type: 'disk_usage';
+    comparator: ScheduleComparator;
+    value: number;
+  }
+
+  interface SchedulePreConditionFileExists {
+    type: 'file_exists';
+    file: string;
+  }
+
+  type SchedulePreCondition =
+    | SchedulePreConditionNone
+    | SchedulePreConditionAnd
+    | SchedulePreConditionOr
+    | SchedulePreConditionNot
+    | SchedulePreConditionServerState
+    | SchedulePreConditionUptime
+    | SchedulePreConditionCpuUsage
+    | SchedulePreConditionMemoryUsage
+    | SchedulePreConditionDiskUsage
+    | SchedulePreConditionFileExists;
+
+  interface ServerSchedule {
+    uuid: string;
+    name: string;
+    enabled: boolean;
+    triggers: ScheduleTrigger[];
+    condition: SchedulePreCondition;
+    lastRun: Date | null;
+    lastFailure: Date | null;
+    created: Date;
+  }
+
+  interface ScheduleStatus {
+    running: boolean;
+    step: string | null;
+  }
+
+  interface ScheduleVariable {
+    variable: string;
+  }
+
+  type ScheduleDynamicParameter = string | ScheduleVariable;
 
   interface ScheduleConditionNone {
     type: 'none';
@@ -499,77 +599,80 @@ declare global {
     conditions: ScheduleCondition[];
   }
 
-  interface ScheduleConditionServerState {
-    type: 'server_state';
-    state: ServerPowerState;
+  interface ScheduleConditionNot {
+    type: 'not';
+    condition: ScheduleCondition;
   }
 
-  interface ScheduleConditionUptime {
-    type: 'uptime';
-    comparator: ScheduleComparator;
-    value: number;
+  interface ScheduleConditionVariableExists {
+    type: 'variable_exists';
+    variable: ScheduleVariable;
   }
 
-  interface ScheduleConditionCpuUsage {
-    type: 'cpu_usage';
-    comparator: ScheduleComparator;
-    value: number;
+  interface ScheduleConditionVariableEquals {
+    type: 'variable_equals';
+    variable: ScheduleVariable;
+    equals: ScheduleDynamicParameter;
   }
 
-  interface ScheduleConditionMemoryUsage {
-    type: 'memory_usage';
-    comparator: ScheduleComparator;
-    value: number;
+  interface ScheduleConditionVariableContains {
+    type: 'variable_contains';
+    variable: ScheduleVariable;
+    contains: ScheduleDynamicParameter;
   }
 
-  interface ScheduleConditionDiskUsage {
-    type: 'disk_usage';
-    comparator: ScheduleComparator;
-    value: number;
+  interface ScheduleConditionVariableStartsWith {
+    type: 'variable_starts_with';
+    variable: ScheduleVariable;
+    startsWith: ScheduleDynamicParameter;
   }
 
-  interface ScheduleConditionFileExists {
-    type: 'file_exists';
-    file: string;
+  interface ScheduleConditionVariableEndsWith {
+    type: 'variable_ends_with';
+    variable: ScheduleVariable;
+    endsWith: ScheduleDynamicParameter;
   }
 
   type ScheduleCondition =
     | ScheduleConditionNone
     | ScheduleConditionAnd
     | ScheduleConditionOr
-    | ScheduleConditionServerState
-    | ScheduleConditionUptime
-    | ScheduleConditionCpuUsage
-    | ScheduleConditionMemoryUsage
-    | ScheduleConditionDiskUsage
-    | ScheduleConditionFileExists;
-
-  interface ServerSchedule {
-    uuid: string;
-    name: string;
-    enabled: boolean;
-    triggers: ScheduleTrigger[];
-    condition: ScheduleCondition;
-    lastRun: Date | null;
-    lastFailure: Date | null;
-    created: Date;
-  }
-
-  interface ScheduleStatus {
-    running: boolean;
-    step: string | null;
-  }
+    | ScheduleConditionNot
+    | ScheduleConditionVariableExists
+    | ScheduleConditionVariableEquals
+    | ScheduleConditionVariableContains
+    | ScheduleConditionVariableStartsWith
+    | ScheduleConditionVariableEndsWith;
 
   interface ScheduleActionSleep {
     type: 'sleep';
     duration: number;
   }
 
+  interface ScheduleActionEnsure {
+    type: 'ensure';
+    condition: ScheduleCondition;
+  }
+
+  interface ScheduleActionFormat {
+    type: 'format';
+    format: string;
+    outputInto: ScheduleVariable;
+  }
+
+  interface ScheduleActionMatchRegex {
+    type: 'match_regex';
+    input: ScheduleDynamicParameter;
+    regex: string;
+    outputInto: (ScheduleVariable | null)[];
+  }
+
   interface ScheduleActionWaitForConsoleLine {
     type: 'wait_for_console_line';
     ignoreFailure: boolean;
-    contains: string;
+    contains: ScheduleDynamicParameter;
     timeout: number;
+    outputInto: ScheduleVariable | null;
   }
 
   interface ScheduleActionSendPower {
@@ -581,49 +684,49 @@ declare global {
   interface ScheduleActionSendCommand {
     type: 'send_command';
     ignoreFailure: boolean;
-    command: string;
+    command: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionCreateBackup {
     type: 'create_backup';
     ignoreFailure: boolean;
     foreground: boolean;
-    name: string | null;
+    name: ScheduleDynamicParameter | null;
     ignoredFiles: string[];
   }
 
   interface ScheduleActionCreateDirectory {
     type: 'create_directory';
     ignoreFailure: boolean;
-    root: string;
-    name: string;
+    root: ScheduleDynamicParameter;
+    name: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionWriteFile {
     type: 'write_file';
     ignoreFailure: boolean;
     append: boolean;
-    file: string;
-    content: string;
+    file: ScheduleDynamicParameter;
+    content: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionCopyFile {
     type: 'copy_file';
     ignoreFailure: boolean;
     foreground: boolean;
-    file: string;
-    destination: string;
+    file: ScheduleDynamicParameter;
+    destination: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionDeleteFiles {
     type: 'delete_files';
-    root: string;
+    root: ScheduleDynamicParameter;
     files: string[];
   }
 
   interface ScheduleActionRenameFiles {
     type: 'rename_files';
-    root: string;
+    root: ScheduleDynamicParameter;
     files: {
       from: string;
       to: string;
@@ -634,41 +737,44 @@ declare global {
     type: 'compress_files';
     ignoreFailure: boolean;
     foreground: boolean;
-    root: string;
+    root: ScheduleDynamicParameter;
     files: string[];
     format: ArchiveFormat;
-    name: string;
+    name: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionDecompressFile {
     type: 'decompress_file';
     ignoreFailure: boolean;
     foreground: boolean;
-    root: string;
-    file: string;
+    root: ScheduleDynamicParameter;
+    file: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionUpdateStartupVariable {
     type: 'update_startup_variable';
     ignoreFailure: boolean;
-    envVariable: string;
-    value: string;
+    envVariable: ScheduleDynamicParameter;
+    value: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionUpdateStartupCommand {
     type: 'update_startup_command';
     ignoreFailure: boolean;
-    command: string;
+    command: ScheduleDynamicParameter;
   }
 
   interface ScheduleActionUpdateStartupDockerImage {
     type: 'update_startup_docker_image';
     ignoreFailure: boolean;
-    image: string;
+    image: ScheduleDynamicParameter;
   }
 
   type ScheduleAction =
     | ScheduleActionSleep
+    | ScheduleActionEnsure
+    | ScheduleActionFormat
+    | ScheduleActionMatchRegex
     | ScheduleActionWaitForConsoleLine
     | ScheduleActionSendPower
     | ScheduleActionSendCommand
@@ -1023,6 +1129,8 @@ declare global {
   type ServerPowerState = 'offline' | 'starting' | 'stopping' | 'running';
 
   type ServerPowerAction = 'start' | 'stop' | 'restart' | 'kill';
+
+  type ServerBackupStatus = 'starting' | 'finished' | 'failed';
 
   type ServerStatus = 'installing' | 'install_failed' | 'restoring_backup';
 

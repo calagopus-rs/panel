@@ -19,7 +19,7 @@ import Select from '@/elements/input/Select';
 import SizeInput from '@/elements/input/SizeInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
-import { adminServerCreateSchema, adminServerUpdateSchema } from '@/lib/schemas/admin/servers';
+import { adminServerUpdateSchema } from '@/lib/schemas/admin/servers';
 import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';

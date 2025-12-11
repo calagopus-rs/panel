@@ -83,7 +83,7 @@ export default function ServerGroupItem({
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
         title={t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.title', {})}
-        confirm='Delete'
+        confirm={t('common.button.delete', {})}
         onConfirmed={doDelete}
       >
         {t('pages.account.home.tabs.groupedServers.page.modal.deleteServerGroup.content', { group: serverGroup.name })}

@@ -15,6 +15,7 @@ import {
   faEarthAmerica,
   faEdit,
   faEgg,
+  faEquals,
   faExpand,
   faFile,
   faFileZipper,
@@ -33,6 +34,7 @@ import {
   faServer,
   faStopwatch,
   faTerminal,
+  faTextSlash,
   faTrash,
   faUnlockKeyhole,
   faUser,
@@ -100,16 +102,29 @@ export const streamingArchiveFormatLabelMapping: Record<StreamingArchiveFormat, 
   zip: '.zip',
 };
 
-export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], string> = {
+export const schedulePreConditionLabelMapping: Record<SchedulePreCondition['type'], string> = {
   none: 'None',
   and: 'AND (All must be true)',
   or: 'OR (Any must be true)',
+  not: 'NOT (Must not be true)',
   server_state: 'Server State',
   uptime: 'Uptime',
   cpu_usage: 'CPU Usage',
   memory_usage: 'Memory Usage',
   disk_usage: 'Disk Usage',
   file_exists: 'File Exists',
+};
+
+export const scheduleConditionLabelMapping: Record<ScheduleCondition['type'], string> = {
+  none: 'None',
+  and: 'AND (All must be true)',
+  or: 'OR (Any must be true)',
+  not: 'NOT (Must not be true)',
+  variable_exists: 'Variable Exists',
+  variable_contains: 'Variable Contains',
+  variable_equals: 'Variable Equals',
+  variable_starts_with: 'Variable Starts With',
+  variable_ends_with: 'Variable Ends With',
 };
 
 export const scheduleComparatorLabelMapping: Record<ScheduleComparator, string> = {
@@ -142,8 +157,17 @@ export const serverPowerActionLabelMapping: Record<ServerPowerAction, string> = 
   kill: 'Kill',
 };
 
+export const serverBackupStatusLabelMapping: Record<ServerBackupStatus, string> = {
+  starting: 'Starting',
+  finished: 'Finished',
+  failed: 'Failed',
+};
+
 export const scheduleStepLabelMapping: Record<ScheduleAction['type'], string> = {
   sleep: 'Sleep',
+  ensure: 'Ensure',
+  format: 'Format',
+  match_regex: 'Match Regex',
   wait_for_console_line: 'Wait for Console Line',
   send_power: 'Send Power Signal',
   send_command: 'Send Command',
@@ -165,11 +189,27 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
     type: 'sleep',
     duration: 0,
   },
+  ensure: {
+    type: 'ensure',
+    condition: { type: 'none' },
+  },
+  format: {
+    type: 'format',
+    format: '',
+    outputInto: { variable: '' },
+  },
+  match_regex: {
+    type: 'match_regex',
+    input: '',
+    regex: '',
+    outputInto: [],
+  },
   wait_for_console_line: {
     type: 'wait_for_console_line',
     ignoreFailure: false,
     contains: '',
     timeout: 5000,
+    outputInto: null,
   },
   send_power: {
     type: 'send_power',
@@ -185,7 +225,7 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
     type: 'create_backup',
     ignoreFailure: false,
     foreground: false,
-    name: '',
+    name: null,
     ignoredFiles: [],
   },
   create_directory: {
@@ -254,6 +294,9 @@ export const scheduleStepDefaultMapping: Record<ScheduleAction['type'], Schedule
 
 export const scheduleStepIconMapping: Record<ScheduleAction['type'], IconDefinition> = {
   sleep: faHourglass,
+  ensure: faEquals,
+  format: faTextSlash,
+  match_regex: faEquals,
   wait_for_console_line: faTerminal,
   send_power: faPowerOff,
   send_command: faTerminal,

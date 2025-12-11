@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepCopyFile({
   action,
@@ -11,19 +11,19 @@ export default function StepCopyFile({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Source File'
         placeholder='/source.txt'
         value={action.file}
-        onChange={(e) => setAction({ ...action, file: e.target.value })}
+        onChange={(v) => setAction({ ...action, file: v })}
       />
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Destination'
         placeholder='/backup/target.txt'
         value={action.destination}
-        onChange={(e) => setAction({ ...action, destination: e.target.value })}
+        onChange={(v) => setAction({ ...action, destination: v })}
       />
       <Switch
         label='Run in Foreground'

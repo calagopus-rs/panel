@@ -42,7 +42,7 @@ export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
                 to={to(route.path, '/account')}
                 end={route.exact}
                 icon={route.icon}
-                name={route.name}
+                name={typeof route.name === 'function' ? route.name() : route.name}
               />
             ))}
           {window.extensionContext.routes.accountRoutes
@@ -53,7 +53,7 @@ export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
                 to={to(route.path, '/account')}
                 end={route.exact}
                 icon={route.icon}
-                name={route.name}
+                name={typeof route.name === 'function' ? route.name() : route.name}
               />
             ))}
 

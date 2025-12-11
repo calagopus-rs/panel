@@ -1,6 +1,7 @@
 import { Group, Stack, Text } from '@mantine/core';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepRenameFiles({
   action,
@@ -11,12 +12,12 @@ export default function StepRenameFiles({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Root Path'
         placeholder='/'
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.target.value })}
+        onChange={(v) => setAction({ ...action, root: v })}
       />
 
       <Stack gap='xs'>

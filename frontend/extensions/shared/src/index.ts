@@ -9,7 +9,7 @@ export interface GlobalRouteDefinition {
 }
 
 export interface RouteDefinition extends GlobalRouteDefinition {
-  name: string | undefined;
+  name: string | (() => string) | undefined;
   icon?: IconDefinition;
 }
 

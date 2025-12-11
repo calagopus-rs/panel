@@ -1,4 +1,4 @@
-import { faFileDownload, faPencil, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faFileDownload, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fortawesome/free-solid-svg-icons';
 import jsYaml from 'js-yaml';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
@@ -90,11 +90,6 @@ export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) 
 
       <ContextMenu
         items={[
-          {
-            icon: faPencil,
-            label: 'Edit',
-            onClick: () => navigate(`${navigateUrl}/edit`),
-          },
           {
             icon: faPlay,
             label: 'Trigger',

@@ -70,6 +70,7 @@ jobs:
             x86_64-linux,
             aarch64-linux,
             riscv64-linux,
+            powerpc64le-linux,
             x86_64-macos,
             aarch64-macos,
             x86_64-windows,
@@ -86,6 +87,10 @@ jobs:
           - build: riscv64-linux
             os: ubuntu-24.04
             target: riscv64gc-unknown-linux-musl
+            binary_suffix: ""
+          - build: powerpc64le-linux
+            os: ubuntu-24.04
+            target: powerpc64le-unknown-linux-gnu
             binary_suffix: ""
           - build: x86_64-macos
             os: macos-latest
@@ -132,15 +137,17 @@ jobs:
       - name: Run tests (Linux)
         if: contains(matrix.target, 'linux')
         run: cross test --release --target ${{ matrix.target }}
-    
+
       - name: Run tests (Non-Linux)
         if: ${{ !contains(matrix.target, 'linux') }}
         run: cargo test --release --target ${{ matrix.target }}
 
       - name: Build release binary (Linux)
         if: contains(matrix.target, 'linux')
-        run: cross build --release --target ${{ matrix.target }}
-    
+        run: |
+          RUSTFLAGS="-C target-feature=+crt-static" \
+          cross build --release --target ${{ matrix.target }}
+
       - name: Build release binary (Non-Linux)
         if: ${{ !contains(matrix.target, 'linux') }}
         run: cargo build --release --target ${{ matrix.target }}
@@ -226,10 +233,12 @@ jobs:
 
       - name: Prepare binaries
         run: |
-          mkdir -p .docker/amd64 .docker/arm64 .docker/riscv64
+          mkdir -p .docker/amd64 .docker/arm64 .docker/riscv64 .docker/ppc64le .docker/s390x
           cp dist/${{ env.PROJECT_NAME }}-x86_64-linux/${{ env.BIN_NAME }}-x86_64-linux .docker/amd64/panel-rs
           cp dist/${{ env.PROJECT_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux .docker/arm64/panel-rs
           cp dist/${{ env.PROJECT_NAME }}-riscv64-linux/${{ env.BIN_NAME }}-riscv64-linux .docker/riscv64/panel-rs
+          cp dist/${{ env.PROJECT_NAME }}-powerpc64le-linux/${{ env.BIN_NAME }}-powerpc64le-linux .docker/ppc64le/panel-rs
+
           chmod +x .docker/*/panel-rs
 
       - name: Extract version
@@ -240,7 +249,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          platforms: linux/amd64,linux/arm64,linux/riscv64
+          platforms: linux/amd64,linux/arm64,linux/riscv64,linux/ppc64le
           push: true
           tags: |
             ghcr.io/${{ env.REPO_NAME }}:latest

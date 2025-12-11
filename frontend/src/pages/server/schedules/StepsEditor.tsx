@@ -1,10 +1,7 @@
 import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
-import getSchedule from '@/api/server/schedules/getSchedule';
-import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps';
+import { useMemo, useState } from 'react';
 import updateScheduleStepsOrder from '@/api/server/schedules/steps/updateScheduleStepsOrder';
 import Button from '@/elements/Button';
 import Spinner from '@/elements/Spinner';
@@ -19,36 +16,28 @@ interface DndScheduleStep extends ScheduleStep, DndItem {
   id: string;
 }
 
-export default function StepsEditor() {
-  const params = useParams<'id'>();
-  const navigate = useNavigate();
-  const server = useServerStore((state) => state.server);
+export default function StepsEditor({ schedule }: { schedule: ServerSchedule }) {
+  const { server, scheduleSteps, setScheduleSteps } = useServerStore();
   const { addToast } = useToast();
 
   const [openModal, setOpenModal] = useState<'edit' | 'create' | null>(null);
-  const [schedule, setSchedule] = useState<ServerSchedule | null>(null);
-  const [steps, setSteps] = useState<ScheduleStep[]>([]);
 
   const nextStepOrder = useMemo(
-    () => (Number.isFinite(Math.max(...steps.map((s) => s.order))) ? Math.max(...steps.map((s) => s.order)) : 1),
-    [steps],
+    () =>
+      Number.isFinite(Math.max(...scheduleSteps.map((s) => s.order)))
+        ? Math.max(...scheduleSteps.map((s) => s.order))
+        : 1,
+    [scheduleSteps],
   );
 
-  useEffect(() => {
-    if (params.id) {
-      getSchedule(server.uuid, params.id).then(setSchedule);
-      getScheduleSteps(server.uuid, params.id).then(setSteps);
-    }
-  }, [params.id, server.uuid]);
-
   const onStepDelete = (stepUuid: string) => {
-    const newSteps = steps.filter((step) => step.uuid !== stepUuid);
-    setSteps(newSteps);
+    const newSteps = scheduleSteps.filter((step) => step.uuid !== stepUuid);
+    setScheduleSteps(newSteps);
   };
 
-  const sortedSteps = useMemo(() => [...steps].sort((a, b) => a.order - b.order), [steps]);
+  const sortedSteps = useMemo(() => [...scheduleSteps].sort((a, b) => a.order - b.order), [scheduleSteps]);
 
-  if (!schedule || !steps) {
+  if (!schedule || !scheduleSteps) {
     return (
       <div className='w-full'>
         <Spinner.Centered />
@@ -68,29 +57,14 @@ export default function StepsEditor() {
         onClose={() => setOpenModal(null)}
         schedule={schedule}
         nextStepOrder={nextStepOrder}
-        onStepCreate={(step) => setSteps([...steps, step])}
+        onStepCreate={(step) => setScheduleSteps([...scheduleSteps, step])}
       />
 
       <Stack>
         <Group justify='space-between'>
-          <Stack gap={4}>
-            <Title order={1} c='white'>
-              Manage Steps: {schedule.name}
-            </Title>
-            <Text c='dimmed'>Configure the actions that will be executed when this schedule runs</Text>
-          </Stack>
-
-          <Group>
-            <Button
-              onClick={() => navigate(`/server/${server.uuidShort}/schedules/${schedule.uuid}`)}
-              variant='outline'
-            >
-              Back to Schedule
-            </Button>
-            <Button onClick={() => setOpenModal('create')} leftSection={<FontAwesomeIcon icon={faPlus} />}>
-              Add Step
-            </Button>
-          </Group>
+          <Button onClick={() => setOpenModal('create')} leftSection={<FontAwesomeIcon icon={faPlus} />}>
+            Add Step
+          </Button>
         </Group>
 
         {sortedSteps.length === 0 ? (
@@ -117,7 +91,7 @@ export default function StepsEditor() {
                   ...step,
                   order: index + 1,
                 }));
-                setSteps(stepsWithNewOrder);
+                setScheduleSteps(stepsWithNewOrder);
 
                 await updateScheduleStepsOrder(
                   server.uuid,
@@ -125,7 +99,7 @@ export default function StepsEditor() {
                   reorderedSteps.map((s) => s.uuid),
                 ).catch((err) => {
                   addToast(httpErrorToHuman(err), 'error');
-                  setSteps(steps);
+                  setScheduleSteps(scheduleSteps);
                 });
               },
             }}
@@ -135,7 +109,9 @@ export default function StepsEditor() {
                   <StepCard
                     schedule={schedule}
                     step={activeStep}
-                    onStepUpdate={(step) => setSteps(steps.map((s) => (s.uuid === step.uuid ? step : s)))}
+                    onStepUpdate={(step) =>
+                      setScheduleSteps(scheduleSteps.map((s) => (s.uuid === step.uuid ? step : s)))
+                    }
                     onStepDelete={onStepDelete}
                   />
                 </div>
@@ -153,7 +129,9 @@ export default function StepsEditor() {
                         <StepCard
                           schedule={schedule}
                           step={step}
-                          onStepUpdate={(step) => setSteps(steps.map((s) => (s.uuid === step.uuid ? step : s)))}
+                          onStepUpdate={(step) =>
+                            setScheduleSteps(scheduleSteps.map((s) => (s.uuid === step.uuid ? step : s)))
+                          }
                           onStepDelete={onStepDelete}
                         />
                       </div>

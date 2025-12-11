@@ -40,7 +40,7 @@ export default function AdminRouter({ isNormal }: { isNormal: boolean }) {
                     to={to(route.path, '/admin')}
                     end={route.exact}
                     icon={route.icon}
-                    name={route.name}
+                    name={typeof route.name === 'function' ? route.name() : route.name}
                   />
                 </Can>
               ) : (
@@ -49,7 +49,7 @@ export default function AdminRouter({ isNormal }: { isNormal: boolean }) {
                   to={to(route.path, '/admin')}
                   end={route.exact}
                   icon={route.icon}
-                  name={route.name}
+                  name={typeof route.name === 'function' ? route.name() : route.name}
                 />
               ),
             )}
@@ -63,7 +63,7 @@ export default function AdminRouter({ isNormal }: { isNormal: boolean }) {
                     to={to(route.path, '/admin')}
                     end={route.exact}
                     icon={route.icon}
-                    name={route.name}
+                    name={typeof route.name === 'function' ? route.name() : route.name}
                   />
                 </Can>
               ) : (
@@ -72,7 +72,7 @@ export default function AdminRouter({ isNormal }: { isNormal: boolean }) {
                   to={to(route.path, '/admin')}
                   end={route.exact}
                   icon={route.icon}
-                  name={route.name}
+                  name={typeof route.name === 'function' ? route.name() : route.name}
                 />
               ),
             )}

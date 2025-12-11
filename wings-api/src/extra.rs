@@ -49,6 +49,15 @@ pub enum Algorithm {
     Curseforge,
 }
 
+#[derive(ToSchema, Debug, Clone, Copy, Deserialize, Serialize)]
+#[serde(rename_all = "lowercase")]
+#[schema(rename_all = "lowercase")]
+pub enum ServerBackupStatus {
+    Starting,
+    Finished,
+    Failed,
+}
+
 impl std::fmt::Display for Algorithm {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -87,6 +96,18 @@ impl std::fmt::Display for Game {
     }
 }
 
+#[derive(ToSchema, Clone, Deserialize, Serialize)]
+pub struct ScheduleVariable {
+    pub variable: String,
+}
+
+#[derive(ToSchema, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ScheduleDynamicParameter {
+    Raw(String),
+    Variable(ScheduleVariable),
+}
+
 #[derive(ToSchema, Deserialize, Serialize)]
 pub struct ScheduleAction {
     pub uuid: uuid::Uuid,
@@ -102,11 +123,29 @@ pub enum ScheduleActionInner {
     Sleep {
         duration: u64,
     },
+    Ensure {
+        condition: ScheduleCondition,
+    },
+    Format {
+        format: String,
+        output_into: ScheduleVariable,
+    },
+    MatchRegex {
+        input: ScheduleDynamicParameter,
+
+        #[serde(with = "serde_regex")]
+        #[schema(value_type = String, format = "regex")]
+        regex: regex::Regex,
+
+        output_into: Vec<Option<ScheduleVariable>>,
+    },
     WaitForConsoleLine {
         ignore_failure: bool,
 
-        contains: String,
+        contains: ScheduleDynamicParameter,
         timeout: u64,
+
+        output_into: Option<ScheduleVariable>,
     },
     SendPower {
         ignore_failure: bool,
@@ -116,75 +155,74 @@ pub enum ScheduleActionInner {
     SendCommand {
         ignore_failure: bool,
 
-        command: String,
+        command: ScheduleDynamicParameter,
     },
     CreateBackup {
         ignore_failure: bool,
         foreground: bool,
 
-        name: Option<String>,
+        name: Option<ScheduleDynamicParameter>,
         ignored_files: Vec<String>,
     },
     CreateDirectory {
         ignore_failure: bool,
 
-        root: String,
-        name: String,
+        root: ScheduleDynamicParameter,
+        name: ScheduleDynamicParameter,
     },
     WriteFile {
         ignore_failure: bool,
         append: bool,
 
-        file: String,
-        content: String,
+        file: ScheduleDynamicParameter,
+        content: ScheduleDynamicParameter,
     },
     CopyFile {
         ignore_failure: bool,
         foreground: bool,
 
-        file: String,
-        destination: String,
+        file: ScheduleDynamicParameter,
+        destination: ScheduleDynamicParameter,
     },
     DeleteFiles {
-        root: String,
+        root: ScheduleDynamicParameter,
         files: Vec<String>,
     },
     RenameFiles {
-        root: String,
-        #[schema(inline)]
+        root: ScheduleDynamicParameter,
         files: Vec<super::servers_server_files_rename::put::RequestBodyFiles>,
     },
     CompressFiles {
         ignore_failure: bool,
         foreground: bool,
 
-        root: String,
+        root: ScheduleDynamicParameter,
         files: Vec<String>,
         format: super::ArchiveFormat,
-        name: String,
+        name: ScheduleDynamicParameter,
     },
     DecompressFile {
         ignore_failure: bool,
         foreground: bool,
 
-        root: String,
-        file: String,
+        root: ScheduleDynamicParameter,
+        file: ScheduleDynamicParameter,
     },
     UpdateStartupVariable {
         ignore_failure: bool,
 
-        env_variable: String,
-        value: String,
+        env_variable: ScheduleDynamicParameter,
+        value: ScheduleDynamicParameter,
     },
     UpdateStartupCommand {
         ignore_failure: bool,
 
-        command: String,
+        command: ScheduleDynamicParameter,
     },
     UpdateStartupDockerImage {
         ignore_failure: bool,
 
-        image: String,
+        image: ScheduleDynamicParameter,
     },
 }
 
@@ -202,18 +240,63 @@ pub enum ScheduleTrigger {
     ServerState {
         state: super::ServerState,
     },
+    BackupStatus {
+        status: ServerBackupStatus,
+    },
+    ConsoleLine {
+        contains: String,
+        output_into: Option<ScheduleVariable>,
+    },
     Crash,
 }
 
 #[derive(ToSchema, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 #[schema(rename_all = "snake_case")]
-pub enum ScheduleComparator {
+pub enum SchedulePreConditionComparator {
     SmallerThan,
     SmallerThanOrEquals,
     Equal,
     GreaterThan,
     GreaterThanOrEquals,
+}
+
+#[derive(ToSchema, Deserialize, Serialize, Clone)]
+#[serde(rename_all = "snake_case", tag = "type")]
+#[schema(rename_all = "snake_case", no_recursion)]
+pub enum SchedulePreCondition {
+    None,
+    And {
+        conditions: Vec<SchedulePreCondition>,
+    },
+    Or {
+        conditions: Vec<SchedulePreCondition>,
+    },
+    Not {
+        condition: Box<SchedulePreCondition>,
+    },
+    ServerState {
+        state: super::ServerState,
+    },
+    Uptime {
+        comparator: SchedulePreConditionComparator,
+        value: u64,
+    },
+    CpuUsage {
+        comparator: SchedulePreConditionComparator,
+        value: f64,
+    },
+    MemoryUsage {
+        comparator: SchedulePreConditionComparator,
+        value: u64,
+    },
+    DiskUsage {
+        comparator: SchedulePreConditionComparator,
+        value: u64,
+    },
+    FileExists {
+        file: String,
+    },
 }
 
 #[derive(ToSchema, Deserialize, Serialize, Clone)]
@@ -227,26 +310,26 @@ pub enum ScheduleCondition {
     Or {
         conditions: Vec<ScheduleCondition>,
     },
-    ServerState {
-        state: super::ServerState,
+    Not {
+        condition: Box<ScheduleCondition>,
     },
-    Uptime {
-        comparator: ScheduleComparator,
-        value: u64,
+    VariableExists {
+        variable: ScheduleVariable,
     },
-    CpuUsage {
-        comparator: ScheduleComparator,
-        value: f64,
+    VariableEquals {
+        variable: ScheduleVariable,
+        equals: ScheduleDynamicParameter,
     },
-    MemoryUsage {
-        comparator: ScheduleComparator,
-        value: u64,
+    VariableContains {
+        variable: ScheduleVariable,
+        contains: ScheduleDynamicParameter,
     },
-    DiskUsage {
-        comparator: ScheduleComparator,
-        value: u64,
+    VariableStartsWith {
+        variable: ScheduleVariable,
+        starts_with: ScheduleDynamicParameter,
     },
-    FileExists {
-        file: String,
+    VariableEndsWith {
+        variable: ScheduleVariable,
+        ends_with: ScheduleDynamicParameter,
     },
 }

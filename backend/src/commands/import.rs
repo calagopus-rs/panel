@@ -1555,18 +1555,18 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 wings_api::ScheduleTrigger::Cron { schedule: Box::new(schedule) }
                             ])?)
                             .bind(serde_json::to_value(if only_when_online {
-                                wings_api::ScheduleCondition::Or {
+                                wings_api::SchedulePreCondition::Or {
                                     conditions: vec![
-                                        wings_api::ScheduleCondition::ServerState {
+                                        wings_api::SchedulePreCondition::ServerState {
                                             state: wings_api::ServerState::Starting
                                         },
-                                        wings_api::ScheduleCondition::ServerState {
+                                        wings_api::SchedulePreCondition::ServerState {
                                             state: wings_api::ServerState::Running
                                         }
                                     ]
                                 }
                             } else {
-                                wings_api::ScheduleCondition::None
+                                wings_api::SchedulePreCondition::None
                             })?)
                             .bind(last_run)
                             .bind(created)
@@ -1623,7 +1623,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                             match action {
                                 "command" => {
                                     actions.push(wings_api::ScheduleActionInner::SendCommand {
-                                        command: payload.to_string(),
+                                        command: wings_api::ScheduleDynamicParameter::Raw(payload.to_string()),
                                         ignore_failure: continue_on_failure,
                                     })
                                 }

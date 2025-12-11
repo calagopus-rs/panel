@@ -5,7 +5,7 @@ interface Data {
   name?: string;
   enabled?: boolean;
   triggers?: ScheduleTrigger[];
-  condition?: ScheduleCondition;
+  condition?: SchedulePreCondition;
 }
 
 export default async (serverUuid: string, scheduleUuid: string, data: Data): Promise<void> => {

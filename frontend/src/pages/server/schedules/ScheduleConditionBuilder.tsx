@@ -1,17 +1,9 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
 import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import SizeInput from '@/elements/input/SizeInput';
-import TextInput from '@/elements/input/TextInput';
-import {
-  scheduleComparatorLabelMapping,
-  scheduleConditionLabelMapping,
-  serverPowerStateLabelMapping,
-} from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
+import { scheduleConditionLabelMapping } from '@/lib/enums';
+import ScheduleDynamicParameterInput from './ScheduleDynamicParameterInput';
 
 const maxConditionDepth = 3;
 
@@ -22,10 +14,6 @@ interface ConditionBuilderProps {
 }
 
 export default function ScheduleConditionBuilder({ condition, onChange, depth = 0 }: ConditionBuilderProps) {
-  const [sizeInput, setSizeInput] = useState(
-    condition.type === 'memory_usage' || condition.type === 'disk_usage' ? bytesToString(condition.value) : '',
-  );
-
   const handleTypeChange = (type: string) => {
     switch (type) {
       case 'none':
@@ -37,23 +25,24 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
       case 'or':
         onChange({ type: 'or', conditions: [] });
         break;
-      case 'server_state':
-        onChange({ type: 'server_state', state: 'running' });
+      case 'not':
+        onChange({ type: 'not', condition: { type: 'none' } });
         break;
-      case 'uptime':
-        onChange({ type: 'uptime', comparator: 'greater_than', value: 0 });
+      case 'variable_exists':
+        onChange({ type: 'variable_exists', variable: { variable: '' } });
         break;
-      case 'cpu_usage':
-        onChange({ type: 'cpu_usage', comparator: 'greater_than', value: 0 });
+      case 'variable_equals':
+        onChange({ type: 'variable_equals', variable: { variable: '' }, equals: '' });
         break;
-      case 'memory_usage':
-        onChange({ type: 'memory_usage', comparator: 'greater_than', value: 0 });
+      case 'variable_contains':
+        onChange({ type: 'variable_contains', variable: { variable: '' }, contains: '' });
         break;
-      case 'disk_usage':
-        onChange({ type: 'disk_usage', comparator: 'greater_than', value: 0 });
+      case 'variable_starts_with':
+        onChange({ type: 'variable_starts_with', variable: { variable: '' }, startsWith: '' });
         break;
-      case 'file_exists':
-        onChange({ type: 'file_exists', file: '' });
+      case 'variable_ends_with':
+        onChange({ type: 'variable_ends_with', variable: { variable: '' }, endsWith: '' });
+        break;
     }
   };
 
@@ -93,67 +82,48 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
               value,
               label,
             }))
-            .filter((c) => depth < maxConditionDepth || !['and', 'or'].includes(c.value))}
+            .filter((c) => depth < maxConditionDepth || !['and', 'or', 'not'].includes(c.value))}
         />
 
-        {condition.type === 'server_state' && (
-          <Select
-            label='Server State'
-            value={condition.state}
-            onChange={(value) => value && onChange({ ...condition, state: value as ServerPowerState })}
-            data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
-              value,
-              label,
-            }))}
+        {(condition.type === 'variable_exists' ||
+          condition.type === 'variable_equals' ||
+          condition.type === 'variable_contains' ||
+          condition.type === 'variable_starts_with' ||
+          condition.type === 'variable_ends_with') && (
+          <ScheduleDynamicParameterInput
+            label='Variable'
+            allowString={false}
+            value={condition.variable}
+            onChange={(v) => onChange({ ...condition, variable: v })}
           />
         )}
 
-        {(condition.type === 'uptime' ||
-          condition.type === 'cpu_usage' ||
-          condition.type === 'memory_usage' ||
-          condition.type === 'disk_usage') && (
-          <Group grow>
-            <Select
-              label='Comparator'
-              value={condition.comparator}
-              onChange={(value) => value && onChange({ ...condition, comparator: value as ScheduleComparator })}
-              data={Object.entries(scheduleComparatorLabelMapping).map(([value, label]) => ({
-                value,
-                label,
-              }))}
-            />
-            {condition.type === 'uptime' && (
-              <NumberInput
-                label='Value (seconds)'
-                value={Number(condition.value) / 1000}
-                onChange={(value) => onChange({ ...condition, value: Number(value) * 1000 || 0 })}
-                min={0}
-              />
-            )}
-            {condition.type === 'cpu_usage' && (
-              <NumberInput
-                label='Value (%)'
-                value={condition.value}
-                onChange={(value) => onChange({ ...condition, value: Number(value) || 0 })}
-                min={0}
-              />
-            )}
-            {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
-              <SizeInput
-                label='Value + Unit (e.g. 2GB)'
-                value={sizeInput}
-                setState={setSizeInput}
-                onChange={(value) => onChange({ ...condition, value })}
-              />
-            )}
-          </Group>
+        {condition.type === 'variable_equals' && (
+          <ScheduleDynamicParameterInput
+            label='Equals'
+            value={condition.equals}
+            onChange={(v) => onChange({ ...condition, equals: v })}
+          />
         )}
-
-        {condition.type === 'file_exists' && (
-          <TextInput
-            label='File Path'
-            value={condition.file}
-            onChange={(e) => onChange({ ...condition, file: e.target.value })}
+        {condition.type === 'variable_contains' && (
+          <ScheduleDynamicParameterInput
+            label='Contains'
+            value={condition.contains}
+            onChange={(v) => onChange({ ...condition, contains: v })}
+          />
+        )}
+        {condition.type === 'variable_starts_with' && (
+          <ScheduleDynamicParameterInput
+            label='Starts With'
+            value={condition.startsWith}
+            onChange={(v) => onChange({ ...condition, startsWith: v })}
+          />
+        )}
+        {condition.type === 'variable_ends_with' && (
+          <ScheduleDynamicParameterInput
+            label='Ends With'
+            value={condition.endsWith}
+            onChange={(v) => onChange({ ...condition, endsWith: v })}
           />
         )}
 
@@ -189,6 +159,19 @@ export default function ScheduleConditionBuilder({ condition, onChange, depth = 
                 </ActionIcon>
               </Group>
             ))}
+          </>
+        )}
+        {condition.type === 'not' && (
+          <>
+            <Text size='sm'>Condition must not be true:</Text>
+
+            <div style={{ flex: 1 }}>
+              <ScheduleConditionBuilder
+                condition={condition.condition}
+                onChange={(nestedCondition) => onChange({ ...condition, condition: nestedCondition })}
+                depth={depth + 1}
+              />
+            </div>
           </>
         )}
       </Stack>

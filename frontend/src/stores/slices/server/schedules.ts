@@ -9,9 +9,13 @@ export interface SchedulesSlice {
   addSchedule: (schedule: ServerSchedule) => void;
   removeSchedule: (schedule: ServerSchedule) => void;
 
+  schedule: ServerSchedule | null;
+  scheduleSteps: ScheduleStep[];
   scheduleStatus: Map<string, ScheduleStatus>;
   scheduleStepErrors: Map<string, string>;
 
+  setSchedule: (scheduleStep: ServerSchedule) => void;
+  setScheduleSteps: (scheduleSteps: ScheduleStep[]) => void;
   setScheduleStatus: (schedule: string, status: ScheduleStatus) => void;
   getScheduleStatus: (schedule: string) => ScheduleStatus;
   setScheduleStepError: (scheduleStep: string, error: string) => void;
@@ -40,9 +44,13 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
       },
     })),
 
+  schedule: null,
+  scheduleSteps: [],
   scheduleStatus: new Map(),
   scheduleStepErrors: new Map(),
 
+  setSchedule: (schedule) => set((state) => ({ ...state, schedule })),
+  setScheduleSteps: (steps) => set((state) => ({ ...state, scheduleSteps: steps })),
   setScheduleStatus: (schedule, status) =>
     set((state) => {
       state.scheduleStatus.set(schedule, status);

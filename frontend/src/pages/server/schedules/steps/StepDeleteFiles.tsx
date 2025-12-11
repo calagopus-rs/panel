@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import TagsInput from '@/elements/input/TagsInput';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepDeleteFiles({
   action,
@@ -11,12 +11,12 @@ export default function StepDeleteFiles({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Root Path'
         placeholder='/'
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.target.value })}
+        onChange={(v) => setAction({ ...action, root: v })}
       />
       <TagsInput
         withAsterisk

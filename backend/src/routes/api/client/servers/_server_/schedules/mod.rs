@@ -109,7 +109,7 @@ mod post {
         enabled: bool,
 
         triggers: Vec<wings_api::ScheduleTrigger>,
-        condition: wings_api::ScheduleCondition,
+        condition: wings_api::SchedulePreCondition,
     }
 
     #[derive(ToSchema, Serialize)]

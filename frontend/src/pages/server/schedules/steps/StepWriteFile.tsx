@@ -1,7 +1,6 @@
-import { Stack } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepWriteFile({
   action,
@@ -12,32 +11,33 @@ export default function StepWriteFile({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='File Path'
         placeholder='/file.txt'
         value={action.file}
-        onChange={(e) => setAction({ ...action, file: e.target.value })}
+        onChange={(v) => setAction({ ...action, file: v })}
       />
-      <TextArea
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Content'
         placeholder='File content here...'
-        autosize
-        minRows={3}
+        textArea
         value={action.content}
-        onChange={(e) => setAction({ ...action, content: e.target.value })}
+        onChange={(v) => setAction({ ...action, content: v })}
       />
-      <Switch
-        label='Append to File'
-        checked={action.append}
-        onChange={(e) => setAction({ ...action, append: e.target.checked })}
-      />
-      <Switch
-        label='Ignore Failure'
-        checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
-      />
+      <Group>
+        <Switch
+          label='Append to File'
+          checked={action.append}
+          onChange={(e) => setAction({ ...action, append: e.target.checked })}
+        />
+        <Switch
+          label='Ignore Failure'
+          checked={action.ignoreFailure}
+          onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
+        />
+      </Group>
     </Stack>
   );
 }

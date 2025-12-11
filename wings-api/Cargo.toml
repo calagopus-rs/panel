@@ -15,4 +15,6 @@ indexmap = { workspace = true }
 urlencoding = { workspace = true }
 anyhow = { workspace = true }
 cron = { workspace = true }
+regex = { workspace = true }
+serde_regex = { workspace = true }
 nestify = "0.3.3"

@@ -26,6 +26,9 @@ import StepUpdateStartupDockerImage from '../steps/StepUpdateStartupDockerImage'
 import StepUpdateStartupVariable from '../steps/StepUpdateStartupVariable';
 import StepWaitForConsoleLine from '../steps/StepWaitForConsoleLine';
 import StepWriteFile from '../steps/StepWriteFile';
+import StepFormat from '../steps/StepFormat';
+import StepMatchRegex from '../steps/StepMatchRegex';
+import StepEnsure from '../steps/StepEnsure';
 
 type Props = ModalProps & {
   schedule: ServerSchedule;
@@ -98,12 +101,19 @@ export default function StepCreateOrUpdateModal({
           onChange={(value) =>
             setStep({ ...step, action: scheduleStepDefaultMapping[value as ScheduleAction['type']] })
           }
+          searchable
         />
 
         <Divider />
 
         {step.action.type === 'sleep' ? (
           <StepSleep action={step.action} setAction={(action) => setStep({ ...step, action })} />
+        ) : step.action.type === 'ensure' ? (
+          <StepEnsure action={step.action} setAction={(action) => setStep({ ...step, action })} />
+        ) : step.action.type === 'format' ? (
+          <StepFormat action={step.action} setAction={(action) => setStep({ ...step, action })} />
+        ) : step.action.type === 'match_regex' ? (
+          <StepMatchRegex action={step.action} setAction={(action) => setStep({ ...step, action })} />
         ) : step.action.type === 'wait_for_console_line' ? (
           <StepWaitForConsoleLine action={step.action} setAction={(action) => setStep({ ...step, action })} />
         ) : step.action.type === 'send_power' ? (
@@ -136,12 +146,12 @@ export default function StepCreateOrUpdateModal({
           <Text c='dimmed'>Select an action type to configure</Text>
         )}
 
-        <Group justify='flex-end' mt='md'>
-          <Button variant='outline' onClick={onClose}>
-            Cancel
-          </Button>
+        <Group mt='md'>
           <Button onClick={doCreateOrUpdate} leftSection={<FontAwesomeIcon icon={faSave} />} loading={loading}>
-            {propStep ? 'Update Step' : 'Create Step'}
+            {propStep ? 'Update' : 'Create'}
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Cancel
           </Button>
         </Group>
       </Stack>

@@ -283,7 +283,7 @@ mod patch {
                 }
             };
 
-            server.egg = Box::new(egg);
+            *server.egg = egg;
         }
         if let Some(backup_configuration_uuid) = data.backup_configuration_uuid {
             if backup_configuration_uuid.is_nil() {

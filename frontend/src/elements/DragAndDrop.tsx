@@ -2,7 +2,6 @@ import { ReactNode, useState, CSSProperties, ComponentProps, useEffect } from 'r
 import {
   DndContext,
   closestCenter,
-  KeyboardSensor,
   PointerSensor,
   TouchSensor,
   useSensor,
@@ -16,7 +15,6 @@ import {
 import {
   arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
   SortingStrategy,
   verticalListSortingStrategy,
@@ -56,9 +54,6 @@ export function useDndSensors(config: DndConfig = {}) {
         delay: touchActivationDelay,
         tolerance: touchActivationTolerance,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
 }

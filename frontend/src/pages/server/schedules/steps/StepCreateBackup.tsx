@@ -1,7 +1,7 @@
-import { Stack } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepCreateBackup({
   action,
@@ -12,22 +12,25 @@ export default function StepCreateBackup({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         label='Backup Name'
-        placeholder='Auto-generated if empty'
-        value={action.name || ''}
-        onChange={(e) => setAction({ ...action, name: e.target.value || null })}
+        placeholder='Backup Name'
+        allowNull
+        value={action.name}
+        onChange={(v) => setAction({ ...action, name: v })}
       />
-      <Switch
-        label='Run in Foreground'
-        checked={action.foreground}
-        onChange={(e) => setAction({ ...action, foreground: e.target.checked })}
-      />
-      <Switch
-        label='Ignore Failure'
-        checked={action.ignoreFailure}
-        onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
-      />
+      <Group>
+        <Switch
+          label='Run in Foreground'
+          checked={action.foreground}
+          onChange={(e) => setAction({ ...action, foreground: e.target.checked })}
+        />
+        <Switch
+          label='Ignore Failure'
+          checked={action.ignoreFailure}
+          onChange={(e) => setAction({ ...action, ignoreFailure: e.target.checked })}
+        />
+      </Group>
       <TagsInput
         label='Ignored Files'
         placeholder='Add files to ignore'

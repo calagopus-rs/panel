@@ -16,7 +16,7 @@ pub struct ExportedServerSchedule {
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
-    pub condition: wings_api::ScheduleCondition,
+    pub condition: wings_api::SchedulePreCondition,
 
     pub steps: Vec<super::server_schedule_step::ExportedServerScheduleStep>,
 }
@@ -29,7 +29,7 @@ pub struct ServerSchedule {
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
-    pub condition: wings_api::ScheduleCondition,
+    pub condition: wings_api::SchedulePreCondition,
 
     pub last_run: Option<chrono::NaiveDateTime>,
     pub last_failure: Option<chrono::NaiveDateTime>,
@@ -82,7 +82,7 @@ impl ServerSchedule {
         name: &str,
         enabled: bool,
         triggers: Vec<wings_api::ScheduleTrigger>,
-        condition: wings_api::ScheduleCondition,
+        condition: wings_api::SchedulePreCondition,
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
@@ -280,7 +280,7 @@ pub struct ApiServerSchedule {
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
-    pub condition: wings_api::ScheduleCondition,
+    pub condition: wings_api::SchedulePreCondition,
 
     pub last_run: Option<chrono::DateTime<chrono::Utc>>,
     pub last_failure: Option<chrono::DateTime<chrono::Utc>>,

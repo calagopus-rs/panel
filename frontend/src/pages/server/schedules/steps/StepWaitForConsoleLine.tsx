@@ -1,7 +1,7 @@
 import { Stack } from '@mantine/core';
 import NumberInput from '@/elements/input/NumberInput';
 import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepWaitForConsoleLine({
   action,
@@ -12,11 +12,11 @@ export default function StepWaitForConsoleLine({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         label='Line contains'
         placeholder='Text to make sure is in the console line'
-        value={action.contains || ''}
-        onChange={(e) => setAction({ ...action, contains: e.target.value || '' })}
+        value={action.contains}
+        onChange={(v) => setAction({ ...action, contains: v })}
       />
       <NumberInput
         withAsterisk
@@ -25,6 +25,14 @@ export default function StepWaitForConsoleLine({
         min={1}
         value={action.timeout}
         onChange={(value) => setAction({ ...action, timeout: Number(value) })}
+      />
+      <ScheduleDynamicParameterInput
+        label='Output into'
+        placeholder='Output the captured line into a variable'
+        allowNull
+        allowString={false}
+        value={action.outputInto}
+        onChange={(v) => setAction({ ...action, outputInto: v })}
       />
       <Switch
         label='Ignore Failure'

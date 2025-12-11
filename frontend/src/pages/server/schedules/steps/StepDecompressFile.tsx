@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
 import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepDecompressFile({
   action,
@@ -11,19 +11,19 @@ export default function StepDecompressFile({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Root Path'
         placeholder='/'
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.target.value })}
+        onChange={(v) => setAction({ ...action, root: v })}
       />
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='File'
         placeholder='backup.tar.gz'
         value={action.file}
-        onChange={(e) => setAction({ ...action, file: e.target.value })}
+        onChange={(v) => setAction({ ...action, file: v })}
       />
       <Switch
         label='Run in Foreground'

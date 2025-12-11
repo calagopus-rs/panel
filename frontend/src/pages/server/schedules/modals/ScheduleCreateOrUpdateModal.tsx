@@ -9,10 +9,12 @@ import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
-import { serverPowerStateLabelMapping } from '@/lib/enums';
+import { serverBackupStatusLabelMapping, serverPowerStateLabelMapping } from '@/lib/enums';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import updateSchedule from '@/api/server/schedules/updateSchedule';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import Divider from '@/elements/Divider';
 
 interface CrontabEditorProps {
   value: string;
@@ -74,7 +76,7 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
   const [name, setName] = useState('');
   const [enabled, setEnabled] = useState(true);
   const [triggers, setTriggers] = useState<ScheduleTrigger[]>([]);
-  const [condition, setCondition] = useState<ScheduleCondition>({ type: 'none' });
+  const [condition, setCondition] = useState<SchedulePreCondition>({ type: 'none' });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -134,132 +136,201 @@ export default function ScheduleCreateOrUpdateModal({ propSchedule, onScheduleUp
             Triggers
           </Title>
           {triggers.map((trigger, index) => (
-            <div key={`trigger-${index}`} className='flex flex-row items-end space-x-2 mb-2'>
-              <Select
-                label={`Trigger ${index + 1}`}
-                placeholder={`Trigger ${index + 1}`}
-                value={trigger.type}
-                className='flex-1'
-                onChange={(value) => {
-                  switch (value) {
-                    case 'cron':
-                      setTriggers((triggers) => [
-                        ...triggers.slice(0, index),
-                        { type: 'cron', schedule: '' } as ScheduleTriggerCron,
-                        ...triggers.slice(index + 1),
-                      ]);
-                      break;
-                    case 'power_action':
-                      setTriggers((triggers) => [
-                        ...triggers.slice(0, index),
-                        { type: 'power_action', action: 'start' } as ScheduleTriggerPowerAction,
-                        ...triggers.slice(index + 1),
-                      ]);
-                      break;
-                    case 'server_state':
-                      setTriggers((triggers) => [
-                        ...triggers.slice(0, index),
-                        { type: 'server_state', state: 'running' } as ScheduleTriggerServerState,
-                        ...triggers.slice(index + 1),
-                      ]);
-                      break;
-                    case 'crash':
-                      setTriggers((triggers) => [
-                        ...triggers.slice(0, index),
-                        { type: 'crash' } as ScheduleTriggerCrash,
-                        ...triggers.slice(index + 1),
-                      ]);
-                      break;
-                    default:
-                      throw new Error(`Unknown trigger type: ${value}`);
-                  }
-                }}
-                data={[
-                  { value: 'cron', label: 'Cron' },
-                  { value: 'power_action', label: 'Power Action' },
-                  { value: 'server_state', label: 'Server State' },
-                  { value: 'crash', label: 'Crash' },
-                ]}
-              />
+            <div key={`trigger-${index}`} className='flex flex-col'>
+              {index !== 0 && <Divider my='sm' />}
 
-              {trigger.type === 'cron' ? (
-                <Popover>
-                  <Popover.Target>
-                    <TextInput
-                      label='Cron Schedule'
-                      placeholder='Cron Schedule'
-                      value={trigger.schedule}
-                      className='flex-1'
-                      onChange={(e) => {
+              <div className='flex flex-row items-end space-x-2 mb-2'>
+                <Select
+                  label={`Trigger ${index + 1}`}
+                  placeholder={`Trigger ${index + 1}`}
+                  value={trigger.type}
+                  className='flex-1'
+                  onChange={(value) => {
+                    switch (value) {
+                      case 'cron':
                         setTriggers((triggers) => [
                           ...triggers.slice(0, index),
-                          { type: 'cron', schedule: e.target.value } as ScheduleTriggerCron,
+                          { type: 'cron', schedule: '' } as ScheduleTriggerCron,
                           ...triggers.slice(index + 1),
                         ]);
-                      }}
-                    />
-                  </Popover.Target>
-                  <Popover.Dropdown>
-                    <CrontabEditor
-                      value={trigger.schedule}
-                      setValue={(value) =>
+                        break;
+                      case 'power_action':
                         setTriggers((triggers) => [
                           ...triggers.slice(0, index),
-                          { type: 'cron', schedule: value } as ScheduleTriggerCron,
+                          { type: 'power_action', action: 'start' } as ScheduleTriggerPowerAction,
                           ...triggers.slice(index + 1),
-                        ])
-                      }
-                    />
-                  </Popover.Dropdown>
-                </Popover>
-              ) : trigger.type === 'power_action' ? (
-                <Select
-                  label='Power Action'
-                  placeholder='Power Action'
-                  value={trigger.action}
-                  className='flex-1'
-                  onChange={(value) => {
-                    setTriggers((triggers) => [
-                      ...triggers.slice(0, index),
-                      { type: 'power_action', action: value } as ScheduleTriggerPowerAction,
-                      ...triggers.slice(index + 1),
-                    ]);
+                        ]);
+                        break;
+                      case 'server_state':
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'server_state', state: 'running' } as ScheduleTriggerServerState,
+                          ...triggers.slice(index + 1),
+                        ]);
+                        break;
+                      case 'backup_status':
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'backup_status', status: 'starting' } as ScheduleTriggerBackupStatus,
+                          ...triggers.slice(index + 1),
+                        ]);
+                        break;
+                      case 'console_line':
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'console_line', contains: '', outputInto: null } as ScheduleTriggerConsoleLine,
+                          ...triggers.slice(index + 1),
+                        ]);
+                        break;
+                      case 'crash':
+                        setTriggers((triggers) => [
+                          ...triggers.slice(0, index),
+                          { type: 'crash' } as ScheduleTriggerCrash,
+                          ...triggers.slice(index + 1),
+                        ]);
+                        break;
+                      default:
+                        throw new Error(`Unknown trigger type: ${value}`);
+                    }
                   }}
                   data={[
-                    { value: 'start', label: 'Start' },
-                    { value: 'stop', label: 'Stop' },
-                    { value: 'restart', label: 'Restart' },
-                    { value: 'kill', label: 'Kill' },
+                    { value: 'cron', label: 'Cron' },
+                    { value: 'power_action', label: 'Power Action' },
+                    { value: 'server_state', label: 'Server State' },
+                    { value: 'backup_status', label: 'Backup Status' },
+                    { value: 'console_line', label: 'Console Line' },
+                    { value: 'crash', label: 'Crash' },
                   ]}
                 />
-              ) : trigger.type === 'server_state' ? (
-                <Select
-                  label='Server State'
-                  placeholder='Server State'
-                  value={trigger.state}
-                  className='flex-1'
-                  onChange={(value) => {
+
+                {trigger.type === 'cron' ? (
+                  <Popover>
+                    <Popover.Target>
+                      <TextInput
+                        label='Cron Schedule'
+                        placeholder='Cron Schedule'
+                        value={trigger.schedule}
+                        className='flex-1'
+                        onChange={(e) => {
+                          setTriggers((triggers) => [
+                            ...triggers.slice(0, index),
+                            { type: 'cron', schedule: e.target.value } as ScheduleTriggerCron,
+                            ...triggers.slice(index + 1),
+                          ]);
+                        }}
+                      />
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                      <CrontabEditor
+                        value={trigger.schedule}
+                        setValue={(value) =>
+                          setTriggers((triggers) => [
+                            ...triggers.slice(0, index),
+                            { type: 'cron', schedule: value } as ScheduleTriggerCron,
+                            ...triggers.slice(index + 1),
+                          ])
+                        }
+                      />
+                    </Popover.Dropdown>
+                  </Popover>
+                ) : trigger.type === 'power_action' ? (
+                  <Select
+                    label='Power Action'
+                    placeholder='Power Action'
+                    value={trigger.action}
+                    className='flex-1'
+                    onChange={(value) => {
+                      setTriggers((triggers) => [
+                        ...triggers.slice(0, index),
+                        { type: 'power_action', action: value } as ScheduleTriggerPowerAction,
+                        ...triggers.slice(index + 1),
+                      ]);
+                    }}
+                    data={[
+                      { value: 'start', label: 'Start' },
+                      { value: 'stop', label: 'Stop' },
+                      { value: 'restart', label: 'Restart' },
+                      { value: 'kill', label: 'Kill' },
+                    ]}
+                  />
+                ) : trigger.type === 'server_state' ? (
+                  <Select
+                    label='Server State'
+                    placeholder='Server State'
+                    value={trigger.state}
+                    className='flex-1'
+                    onChange={(value) => {
+                      setTriggers((triggers) => [
+                        ...triggers.slice(0, index),
+                        { type: 'server_state', state: value } as ScheduleTriggerServerState,
+                        ...triggers.slice(index + 1),
+                      ]);
+                    }}
+                    data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
+                      value,
+                      label,
+                    }))}
+                  />
+                ) : trigger.type === 'backup_status' ? (
+                  <Select
+                    label='Backup Status'
+                    placeholder='Backup Status'
+                    value={trigger.status}
+                    className='flex-1'
+                    onChange={(value) => {
+                      setTriggers((triggers) => [
+                        ...triggers.slice(0, index),
+                        { type: 'backup_status', status: value } as ScheduleTriggerBackupStatus,
+                        ...triggers.slice(index + 1),
+                      ]);
+                    }}
+                    data={Object.entries(serverBackupStatusLabelMapping).map(([value, label]) => ({
+                      value,
+                      label,
+                    }))}
+                  />
+                ) : trigger.type === 'console_line' ? (
+                  <TextInput
+                    label='Line Contains'
+                    placeholder='Line Contains'
+                    value={trigger.contains}
+                    className='flex-1'
+                    onChange={(e) => {
+                      setTriggers((triggers) => [
+                        ...triggers.slice(0, index),
+                        { ...triggers[index], contains: e.target.value } as ScheduleTriggerConsoleLine,
+                        ...triggers.slice(index + 1),
+                      ]);
+                    }}
+                  />
+                ) : null}
+
+                <ActionIcon
+                  size='input-sm'
+                  color='red'
+                  variant='light'
+                  onClick={() => setTriggers((triggers) => [...triggers.filter((t) => t !== trigger)])}
+                >
+                  <FontAwesomeIcon icon={faMinus} />
+                </ActionIcon>
+              </div>
+              {trigger.type === 'console_line' ? (
+                <ScheduleDynamicParameterInput
+                  label='Output into'
+                  placeholder='Output the captured line into a variable'
+                  className='mb-2'
+                  allowNull
+                  allowString={false}
+                  value={trigger.outputInto}
+                  onChange={(v) => {
                     setTriggers((triggers) => [
                       ...triggers.slice(0, index),
-                      { type: 'server_state', state: value } as ScheduleTriggerServerState,
+                      { ...triggers[index], outputInto: v } as ScheduleTriggerConsoleLine,
                       ...triggers.slice(index + 1),
                     ]);
                   }}
-                  data={Object.entries(serverPowerStateLabelMapping).map(([value, label]) => ({
-                    value,
-                    label,
-                  }))}
                 />
               ) : null}
-
-              <ActionIcon
-                size='input-sm'
-                color='red'
-                variant='light'
-                onClick={() => setTriggers((triggers) => [...triggers.filter((t) => t !== trigger)])}
-              >
-                <FontAwesomeIcon icon={faMinus} />
-              </ActionIcon>
             </div>
           ))}
 

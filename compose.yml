@@ -38,8 +38,9 @@ services:
       retries: 5
 
   cache:
-    image: valkey/valkey:latest
+    image: ghcr.io/calagopus-rs/valkey:latest
     restart: unless-stopped
+    command: --protected-mode no --save 60 1
     environment:
       TZ: Europe/Berlin
     volumes:

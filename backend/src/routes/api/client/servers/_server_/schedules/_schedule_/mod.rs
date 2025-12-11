@@ -204,7 +204,7 @@ mod patch {
         enabled: Option<bool>,
 
         triggers: Option<Vec<wings_api::ScheduleTrigger>>,
-        condition: Option<wings_api::ScheduleCondition>,
+        condition: Option<wings_api::SchedulePreCondition>,
     }
 
     #[derive(ToSchema, Serialize)]

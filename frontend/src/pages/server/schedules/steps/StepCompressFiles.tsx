@@ -2,8 +2,8 @@ import { Stack } from '@mantine/core';
 import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
-import TextInput from '@/elements/input/TextInput';
 import { archiveFormatLabelMapping } from '@/lib/enums';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
 
 export default function StepCompressFiles({
   action,
@@ -14,12 +14,12 @@ export default function StepCompressFiles({
 }) {
   return (
     <Stack>
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Root Path'
         placeholder='/'
         value={action.root}
-        onChange={(e) => setAction({ ...action, root: e.target.value })}
+        onChange={(v) => setAction({ ...action, root: v })}
       />
       <TagsInput
         withAsterisk
@@ -38,12 +38,12 @@ export default function StepCompressFiles({
         value={action.format}
         onChange={(value) => setAction({ ...action, format: value as ArchiveFormat })}
       />
-      <TextInput
+      <ScheduleDynamicParameterInput
         withAsterisk
         label='Archive Name'
         placeholder='backup.tar.gz'
         value={action.name}
-        onChange={(e) => setAction({ ...action, name: e.target.value })}
+        onChange={(v) => setAction({ ...action, name: v })}
       />
       <Switch
         label='Run in Foreground'
