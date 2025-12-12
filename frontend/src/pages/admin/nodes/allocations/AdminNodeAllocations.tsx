@@ -87,7 +87,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
 
       <AllocationActionBar node={node} loadAllocations={refetch} />
 
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={2}>Node Allocations</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

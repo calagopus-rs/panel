@@ -27,7 +27,7 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
     <>
       <ServerAllocationAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={2}>Server Allocations</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

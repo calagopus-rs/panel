@@ -163,7 +163,7 @@ export default function ServerFiles() {
 
       <FileActionBar />
 
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={1} c='white'>
           Files
         </Title>
@@ -196,9 +196,9 @@ export default function ServerFiles() {
         <>
           <FileUploadOverlay visible={isDragging && !browsingBackup} />
 
-          <Card className='border border-[#424242] mb-2'>
+          <div className='bg-[#282828] border border-[#424242] rounded-lg mb-2 p-4'>
             <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
-          </Card>
+          </div>
           <SelectionArea
             onSelectedStart={onSelectedStart}
             onSelected={onSelected}
