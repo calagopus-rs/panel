@@ -10,7 +10,6 @@ import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import Switch from '@/elements/input/Switch';
 import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings';
-import { bytesToString } from '@/lib/size';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
 
@@ -19,9 +18,6 @@ export default function ServerContainer() {
   const { server } = useAdminStore();
 
   const [loading, setLoading] = useState(false);
-  const [maxFileManagerViewSizeInput, setMaxFileManagerViewSizeInput] = useState<string>(
-    bytesToString(server.maxFileManagerViewSize),
-  );
 
   const form = useForm<z.infer<typeof adminSettingsServerSchema>>({
     initialValues: {
@@ -62,11 +58,11 @@ export default function ServerContainer() {
       <Stack>
         <Group grow>
           <SizeInput
-            label='Max File Manager View Size + Unit (e.g. 2GB)'
-            placeholder='Max File Manager View Size'
-            value={maxFileManagerViewSizeInput}
-            setState={setMaxFileManagerViewSizeInput}
-            onChange={(value) => form.setFieldValue('maxFileManagerViewSize', value)}
+            withAsterisk
+            label='Max File Manager View Size'
+            mode='b'
+            value={form.values.maxFileManagerViewSize}
+            onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
           />
 
           <NumberInput

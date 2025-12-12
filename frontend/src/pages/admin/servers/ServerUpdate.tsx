@@ -20,7 +20,6 @@ import SizeInput from '@/elements/input/SizeInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import { adminServerUpdateSchema } from '@/lib/schemas/admin/servers';
-import { bytesToString, mbToBytes } from '@/lib/size';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 
@@ -89,9 +88,6 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
     }
   }, [contextServer]);
 
-  const [memoryInput, setMemoryInput] = useState('');
-  const [diskInput, setDiskInput] = useState('');
-  const [swapInput, setSwapInput] = useState('');
   const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>(contextServer?.nest.uuid ?? '');
 
   const users = useSearchableResource<User>({
@@ -111,12 +107,6 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
     fetcher: (search) => getBackupConfigurations(1, search),
     defaultSearchValue: contextServer?.backupConfiguration?.name,
   });
-
-  useEffect(() => {
-    setMemoryInput(bytesToString(mbToBytes(contextServer.limits.memory)));
-    setDiskInput(bytesToString(mbToBytes(contextServer.limits.disk)));
-    setSwapInput(bytesToString(mbToBytes(contextServer?.limits.swap)));
-  }, [contextServer]);
 
   useEffect(() => {
     if (!form.values.eggUuid || contextServer) {
@@ -257,27 +247,27 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
               />
               <SizeInput
                 withAsterisk
-                label='Memory + Unit (e.g. 1 GiB)'
-                value={memoryInput}
-                setState={setMemoryInput}
-                onChange={(value) => form.setFieldValue('limits.memory', value / 1024 / 1024)}
+                label='Memory'
+                mode='mb'
+                value={form.values.limits.memory}
+                onChange={(value) => form.setFieldValue('limits.memory', value)}
               />
             </Group>
 
             <Group grow>
               <SizeInput
                 withAsterisk
-                label='Disk Space + Unit (e.g. 10 GiB)'
-                value={diskInput}
-                setState={setDiskInput}
-                onChange={(value) => form.setFieldValue('limits.disk', value / 1024 / 1024)}
+                label='Disk Space'
+                mode='mb'
+                value={form.values.limits.disk}
+                onChange={(value) => form.setFieldValue('limits.disk', value)}
               />
               <SizeInput
                 withAsterisk
-                label='Swap + Unit (e.g. 500 MiB)'
-                value={swapInput}
-                setState={setSwapInput}
-                onChange={(value) => form.setFieldValue('limits.swap', value / 1024 / 1024)}
+                label='Swap'
+                mode='mb'
+                value={form.values.limits.swap}
+                onChange={(value) => form.setFieldValue('limits.swap', value)}
               />
               <NumberInput label='IO Weight' {...form.getInputProps('limits.ioWeight')} />
             </Group>

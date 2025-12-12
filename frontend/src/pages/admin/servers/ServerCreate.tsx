@@ -89,9 +89,6 @@ export default function ServerCreate() {
   });
 
   const [eggVariablesLoading, setEggVariablesLoading] = useState(false);
-  const [memoryInput, setMemoryInput] = useState('');
-  const [diskInput, setDiskInput] = useState('');
-  const [swapInput, setSwapInput] = useState('');
   const [selectedNestUuid, setSelectedNestUuid] = useState<string | null>('');
   const [eggVariables, setEggVariables] = useState<NestEggVariable[]>([]);
 
@@ -281,27 +278,27 @@ export default function ServerCreate() {
               />
               <SizeInput
                 withAsterisk
-                label='Memory + Unit (e.g. 1 GiB)'
-                value={memoryInput}
-                setState={setMemoryInput}
-                onChange={(value) => form.setFieldValue('limits.memory', value / 1024 / 1024)}
+                label='Memory'
+                mode='mb'
+                value={form.values.limits.memory}
+                onChange={(value) => form.setFieldValue('limits.memory', value)}
               />
             </Group>
 
             <Group grow>
               <SizeInput
                 withAsterisk
-                label='Disk Space + Unit (e.g. 10 GiB)'
-                value={diskInput}
-                setState={setDiskInput}
-                onChange={(value) => form.setFieldValue('limits.disk', value / 1024 / 1024)}
+                label='Disk Space'
+                mode='mb'
+                value={form.values.limits.disk}
+                onChange={(value) => form.setFieldValue('limits.disk', value)}
               />
               <SizeInput
                 withAsterisk
-                label='Swap + Unit (e.g. 500 MiB)'
-                value={swapInput}
-                setState={setSwapInput}
-                onChange={(value) => form.setFieldValue('limits.swap', value / 1024 / 1024)}
+                label='Swap'
+                mode='mb'
+                value={form.values.limits.swap}
+                onChange={(value) => form.setFieldValue('limits.swap', value)}
               />
               <NumberInput label='IO Weight' {...form.getInputProps('limits.ioWeight')} />
             </Group>

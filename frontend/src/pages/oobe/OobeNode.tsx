@@ -1,11 +1,4 @@
-import {
-  faAddressCard,
-  faGlobe,
-  faGlobeAmericas,
-  faHardDrive,
-  faMemory,
-  faNetworkWired,
-} from '@fortawesome/free-solid-svg-icons';
+import { faAddressCard, faGlobe, faGlobeAmericas, faNetworkWired } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -27,8 +20,6 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const [memoryInput, setMemoryInput] = useState('');
-  const [diskInput, setDiskInput] = useState('');
   const [locationUuid, setLocationUuid] = useState('');
 
   const form = useForm<z.infer<typeof oobeNodeSchema>>({
@@ -146,22 +137,16 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
         <Group grow>
           <SizeInput
             withAsterisk
-            label='Memory + Unit (e.g. 1 GiB)'
-            placeholder='1 GiB'
-            leftSection={<FontAwesomeIcon icon={faMemory} size='sm' />}
-            {...form.getInputProps('memory')}
-            value={memoryInput}
-            setState={setMemoryInput}
+            label='Memory'
+            mode='mb'
+            value={form.values.memory}
             onChange={(value) => form.setFieldValue('memory', value)}
           />
           <SizeInput
             withAsterisk
-            label='Disk + Unit (e.g. 50 GiB)'
-            placeholder='50 GiB'
-            leftSection={<FontAwesomeIcon icon={faHardDrive} size='sm' />}
-            {...form.getInputProps('disk')}
-            value={diskInput}
-            setState={setDiskInput}
+            label='Disk'
+            mode='mb'
+            value={form.values.disk}
             onChange={(value) => form.setFieldValue('disk', value)}
           />
         </Group>

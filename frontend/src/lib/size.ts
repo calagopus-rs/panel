@@ -1,5 +1,7 @@
 const _CONVERSION_UNIT = 1024;
 
+export const UNITS = Object.freeze(['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'] as const);
+
 /**
  * Given a value in megabytes converts it back down into bytes.
  */
@@ -21,6 +23,39 @@ export function bytesToString(bytes: number, decimals = 2, shortBytes = false): 
   const value = Number((bytes / Math.pow(k, i)).toFixed(decimals));
 
   return `${value} ${[shortBytes ? 'B' : 'Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'][i]}`;
+}
+
+export function closestUnit(bytes: number): (typeof UNITS)[number] {
+  const k = _CONVERSION_UNIT;
+
+  if (!bytes || bytes < 1) return UNITS[0];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+  return UNITS[i];
+}
+
+export function formatUnitBytes(unit: (typeof UNITS)[number], bytes: number): number {
+  const k = _CONVERSION_UNIT;
+
+  const unitIndex = UNITS.indexOf(unit);
+
+  if (unitIndex === -1) {
+    throw new Error(`Invalid unit: ${unit}`);
+  }
+
+  return bytes / Math.pow(k, unitIndex);
+}
+
+export function unitToBytes(unit: (typeof UNITS)[number], value: number): number {
+  const k = _CONVERSION_UNIT;
+
+  const unitIndex = UNITS.indexOf(unit);
+
+  if (unitIndex === -1) {
+    throw new Error(`Invalid unit: ${unit}`);
+  }
+
+  return value * Math.pow(k, unitIndex);
 }
 
 export function parseSize(size: string): number {

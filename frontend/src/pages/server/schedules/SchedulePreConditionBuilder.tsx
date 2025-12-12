@@ -1,7 +1,6 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
-import { useState } from 'react';
 import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
@@ -11,7 +10,6 @@ import {
   schedulePreConditionLabelMapping,
   serverPowerStateLabelMapping,
 } from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
 
 const maxConditionDepth = 3;
 
@@ -22,10 +20,6 @@ interface PreConditionBuilderProps {
 }
 
 export default function SchedulePreConditionBuilder({ condition, onChange, depth = 0 }: PreConditionBuilderProps) {
-  const [sizeInput, setSizeInput] = useState(
-    condition.type === 'memory_usage' || condition.type === 'disk_usage' ? bytesToString(condition.value) : '',
-  );
-
   const handleTypeChange = (type: string) => {
     switch (type) {
       case 'none':
@@ -143,9 +137,9 @@ export default function SchedulePreConditionBuilder({ condition, onChange, depth
             )}
             {(condition.type === 'memory_usage' || condition.type === 'disk_usage') && (
               <SizeInput
-                label='Value + Unit (e.g. 2GB)'
-                value={sizeInput}
-                setState={setSizeInput}
+                label='Value'
+                mode='b'
+                value={condition.value}
                 onChange={(value) => onChange({ ...condition, value })}
               />
             )}
