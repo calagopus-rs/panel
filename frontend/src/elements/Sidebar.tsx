@@ -160,7 +160,10 @@ function Footer() {
               Calagopus
             </a>
           </Tooltip>
-          © 2025 - {new Date().getFullYear()}
+          {new Date().getFullYear() === 2025
+            ? `© 2025`
+            : `© 2025 - ${new Date().getFullYear()}`
+          }
         </span>
       </div>
     </>
