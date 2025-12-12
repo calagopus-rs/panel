@@ -1,4 +1,5 @@
 import {
+  faArchive,
   faBolt,
   faChevronDown,
   faClock,
@@ -10,6 +11,7 @@ import {
   faReply,
   faServer,
   faSkull,
+  faTerminal,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Group, Stack, Tabs, Text, ThemeIcon, Timeline, Title } from '@mantine/core';
@@ -69,6 +71,10 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
         return faBolt;
       case 'server_state':
         return faServer;
+      case 'backup_status':
+        return faArchive;
+      case 'console_line':
+        return faTerminal;
       case 'crash':
         return faSkull;
       default:
@@ -84,6 +90,10 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
         return 'orange';
       case 'server_state':
         return 'green';
+      case 'backup_status':
+        return 'green';
+      case 'console_line':
+        return 'gray';
       case 'crash':
         return 'red';
       default:
@@ -99,6 +109,10 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
         return `Power Action: ${trigger.action}`;
       case 'server_state':
         return `Server State: ${trigger.state}`;
+      case 'backup_status':
+        return `Backup Status: ${trigger.status}`;
+      case 'console_line':
+        return `Console Line contains: ${trigger.contains}`;
       case 'crash':
         return 'Server Crash';
       default:

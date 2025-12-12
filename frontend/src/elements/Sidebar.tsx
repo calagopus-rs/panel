@@ -124,11 +124,13 @@ function Footer() {
             <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'>
               {user!.nameFirst}
             </span>
-            {user!.admin &&
-              <NavLink to="/admin" className="cursor-pointer!">
-                <Badge size='xs' className="cursor-pointer!">Admin</Badge>
+            {user!.admin && (
+              <NavLink to='/admin' className='cursor-pointer!'>
+                <Badge size='xs' className='cursor-pointer!'>
+                  Admin
+                </Badge>
               </NavLink>
-            }
+            )}
           </div>
         </div>
 
