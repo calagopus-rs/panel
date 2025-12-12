@@ -37,7 +37,7 @@ export default function AdminEggMounts({
         onClose={() => setOpenModal(null)}
       />
 
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Egg Mounts</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

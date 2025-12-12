@@ -1,8 +1,3 @@
-import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon } from '@mantine/core';
-import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
-import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
@@ -13,7 +8,11 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useWindows } from '@/providers/WindowProvider';
 import RouterRoutes from '@/RouterRoutes';
 import { useGlobalStore } from '@/stores/global';
-import Tooltip from './Tooltip';
+import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
+import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 
 type SidebarProps = {
   children: ReactNode;
@@ -113,7 +112,6 @@ function Divider() {
 
 function Footer() {
   const { user, doLogout } = useAuth();
-  const { settings } = useGlobalStore();
 
   return (
     <>
@@ -147,25 +145,6 @@ function Footer() {
           </ActionIcon>
         </div>
       </Card>
-
-      <div className='mt-2 text-xs transition-all text-gray-400'>
-        <span className='flex flex-row justify-between'>
-          <Tooltip label={settings.version}>
-            <a
-              href='https://github.com/calagopus-rs/panel'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline'
-            >
-              Calagopus
-            </a>
-          </Tooltip>
-          {new Date().getFullYear() === 2025
-            ? `© 2025`
-            : `© 2025 - ${new Date().getFullYear()}`
-          }
-        </span>
-      </div>
     </>
   );
 }
