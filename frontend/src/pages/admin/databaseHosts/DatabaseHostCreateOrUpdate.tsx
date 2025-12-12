@@ -16,7 +16,7 @@ import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
-import { adminDatabaseHostSchema } from '@/lib/schemas/admin/databaseHosts';
+import { adminDatabaseHostCreateSchema, adminDatabaseHostUpdateSchema } from '@/lib/schemas/admin/databaseHosts';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 
@@ -29,7 +29,7 @@ export default function DatabaseHostCreateOrUpdate({
 
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
 
-  const form = useForm<z.infer<typeof adminDatabaseHostSchema>>({
+  const form = useForm<z.infer<typeof adminDatabaseHostUpdateSchema>>({
     initialValues: {
       name: '',
       username: '',
@@ -42,11 +42,11 @@ export default function DatabaseHostCreateOrUpdate({
       type: 'mysql',
     },
     validateInputOnBlur: true,
-    validate: zod4Resolver(adminDatabaseHostSchema),
+    validate: zod4Resolver(contextDatabaseHost ? adminDatabaseHostUpdateSchema : adminDatabaseHostCreateSchema),
   });
 
   const { loading, setLoading, doCreateOrUpdate, doDelete } = useResourceForm<
-    z.infer<typeof adminDatabaseHostSchema>,
+    z.infer<typeof adminDatabaseHostUpdateSchema>,
     AdminDatabaseHost
   >({
     form,
@@ -63,7 +63,7 @@ export default function DatabaseHostCreateOrUpdate({
       form.setValues({
         name: contextDatabaseHost.name,
         username: contextDatabaseHost.username,
-        password: '',
+        password: null,
         host: contextDatabaseHost.host,
         port: contextDatabaseHost.port,
         public: contextDatabaseHost.public,
@@ -123,6 +123,7 @@ export default function DatabaseHostCreateOrUpdate({
             placeholder='Password'
             type='password'
             {...form.getInputProps('password')}
+            onChange={(e) => form.setFieldValue('password', e.target.value || null)}
           />
         </Group>
 
