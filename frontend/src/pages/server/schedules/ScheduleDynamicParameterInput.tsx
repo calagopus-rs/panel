@@ -39,25 +39,29 @@ export default function ScheduleDynamicParameterInput<N extends boolean = false,
       return [];
     }
 
-    const outputVariables: string[] = [];
+    const outputVariables = new Set<string>();
 
     for (const trigger of schedule.triggers) {
       if ('outputInto' in trigger && trigger.outputInto) {
-        outputVariables.push(trigger.outputInto.variable);
+        outputVariables.add(trigger.outputInto.variable);
       }
     }
 
     for (const step of scheduleSteps) {
       if ('outputInto' in step.action && step.action.outputInto) {
         if (Array.isArray(step.action.outputInto)) {
-          outputVariables.push(...step.action.outputInto.filter(Boolean).map((o) => o!.variable));
+          for (const outputInto of step.action.outputInto) {
+            if (!outputInto) continue;
+
+            outputVariables.add(outputInto.variable);
+          }
         } else {
-          outputVariables.push(step.action.outputInto.variable);
+          outputVariables.add(step.action.outputInto.variable);
         }
       }
     }
 
-    return outputVariables;
+    return [...outputVariables];
   }, [schedule, scheduleSteps]);
 
   return (
