@@ -13,14 +13,14 @@ import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
 import { backupDiskLabelMapping } from '@/lib/enums';
-import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
-import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
-import { useResourceForm } from '@/plugins/useResourceForm';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
   adminBackupConfigurationSchema,
 } from '@/lib/schemas/admin/backupConfigurations';
+import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
+import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default function BackupConfigurationCreateOrUpdate({
   contextBackupConfiguration,
@@ -87,8 +87,12 @@ export default function BackupConfigurationCreateOrUpdate({
   useEffect(() => {
     if (contextBackupConfiguration) {
       form.setValues({
-        ...contextBackupConfiguration,
+        name: contextBackupConfiguration.name,
+        description: contextBackupConfiguration.description,
+        backupDisk: contextBackupConfiguration.backupDisk,
       });
+      backupConfigS3Form.setValues(contextBackupConfiguration.backupConfigs.s3);
+      backupConfigResticForm.setValues(contextBackupConfiguration.backupConfigs.restic);
     }
   }, [contextBackupConfiguration]);
 
@@ -134,7 +138,12 @@ export default function BackupConfigurationCreateOrUpdate({
           {!contextBackupConfiguration && (
             <Button
               onClick={() => doCreateOrUpdate(true)}
-              disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+              disabled={
+                !form.isValid() ||
+                ((form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && !backupConfigS3Form.isValid()) ||
+                ((form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) &&
+                  !backupConfigResticForm.isValid())
+              }
               loading={loading}
             >
               Save & Stay
@@ -146,8 +155,10 @@ export default function BackupConfigurationCreateOrUpdate({
             </Button>
           )}
         </Group>
-        <BackupS3 form={backupConfigS3Form} />
-        <BackupRestic form={backupConfigResticForm} />
+        {(form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && <BackupS3 form={backupConfigS3Form} />}
+        {(form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) && (
+          <BackupRestic form={backupConfigResticForm} />
+        )}
       </Stack>
     </>
   );

@@ -4,35 +4,35 @@ import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import jsYaml from 'js-yaml';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { z } from 'zod';
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { NIL as uuidNil } from 'uuid';
+import { z } from 'zod';
+import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs';
+import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
 import createEgg from '@/api/admin/nests/eggs/createEgg';
 import deleteEgg from '@/api/admin/nests/eggs/deleteEgg';
 import exportEgg from '@/api/admin/nests/eggs/exportEgg';
+import getEgg from '@/api/admin/nests/eggs/getEgg';
 import updateEgg from '@/api/admin/nests/eggs/updateEgg';
+import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
+import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
 import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput';
 import NumberInput from '@/elements/input/NumberInput';
+import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useToast } from '@/providers/ToastProvider';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
-import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs';
-import Select from '@/elements/input/Select';
-import { NIL as uuidNil } from 'uuid';
-import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
-import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
-import getEgg from '@/api/admin/nests/eggs/getEgg';
-import EggMoveModal from './modals/EggMoveModal';
 import { adminEggSchema } from '@/lib/schemas/admin/eggs';
+import { useResourceForm } from '@/plugins/useResourceForm';
+import { useSearchableResource } from '@/plugins/useSearchableResource';
+import { useToast } from '@/providers/ToastProvider';
+import EggMoveModal from './modals/EggMoveModal';
 
 export default function EggCreateOrUpdate({
   contextNest,
@@ -105,8 +105,21 @@ export default function EggCreateOrUpdate({
   useEffect(() => {
     if (contextEgg) {
       form.setValues({
-        ...contextEgg,
         eggRepositoryEggUuid: contextEgg.eggRepositoryEgg?.uuid || null,
+        author: contextEgg.author,
+        name: contextEgg.name,
+        description: contextEgg.description,
+        configFiles: contextEgg.configFiles,
+        configStartup: contextEgg.configStartup,
+        configStop: contextEgg.configStop,
+        configScript: contextEgg.configScript,
+        configAllocations: contextEgg.configAllocations,
+        startup: contextEgg.startup,
+        forceOutgoingIp: contextEgg.forceOutgoingIp,
+        separatePort: contextEgg.separatePort,
+        features: contextEgg.features,
+        dockerImages: contextEgg.dockerImages,
+        fileDenylist: contextEgg.fileDenylist,
       });
     }
   }, [contextEgg]);

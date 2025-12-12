@@ -12,8 +12,8 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useResourceForm } from '@/plugins/useResourceForm';
 import { adminMountSchema } from '@/lib/schemas/admin/mounts';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
@@ -44,7 +44,12 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
   useEffect(() => {
     if (contextMount) {
       form.setValues({
-        ...contextMount,
+        name: contextMount.name,
+        description: contextMount.description,
+        source: contextMount.source,
+        target: contextMount.target,
+        readOnly: contextMount.readOnly,
+        userMountable: contextMount.userMountable,
       });
     }
   }, [contextMount]);

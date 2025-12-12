@@ -1,5 +1,8 @@
 import { Group, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
 import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
 import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
@@ -12,12 +15,9 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { useForm } from '@mantine/form';
-import { zod4Resolver } from 'mantine-form-zod-resolver';
-import { z } from 'zod';
-import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
 
 export default function EggVariableContainer({
   contextNest,
@@ -52,7 +52,14 @@ export default function EggVariableContainer({
   useEffect(() => {
     if (contextVariable) {
       form.setValues({
-        ...contextVariable,
+        name: contextVariable.name,
+        description: contextVariable.description,
+        order: contextVariable.order,
+        envVariable: contextVariable.envVariable,
+        defaultValue: contextVariable.defaultValue,
+        userViewable: contextVariable.userViewable,
+        userEditable: contextVariable.userEditable,
+        rules: contextVariable.rules,
       });
     }
   }, [contextVariable]);

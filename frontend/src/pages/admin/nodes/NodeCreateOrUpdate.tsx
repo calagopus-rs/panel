@@ -19,10 +19,10 @@ import Switch from '@/elements/input/Switch';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminNodeSchema } from '@/lib/schemas/admin/nodes';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
 import { useToast } from '@/providers/ToastProvider';
-import { adminNodeSchema } from '@/lib/schemas/admin/nodes';
 
 export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node }) {
   const { addToast } = useToast();
@@ -61,9 +61,18 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
   useEffect(() => {
     if (contextNode) {
       form.setValues({
-        ...contextNode,
         locationUuid: contextNode.location.uuid,
         backupConfigurationUuid: contextNode.backupConfiguration?.uuid ?? uuidNil,
+        name: contextNode.name,
+        public: contextNode.public,
+        description: contextNode.description,
+        publicUrl: contextNode.publicUrl,
+        url: contextNode.url,
+        sftpHost: contextNode.sftpHost,
+        sftpPort: contextNode.sftpPort,
+        maintenanceMessage: contextNode.maintenanceMessage,
+        memory: contextNode.memory,
+        disk: contextNode.disk,
       });
     }
   }, [contextNode]);

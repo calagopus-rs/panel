@@ -13,9 +13,9 @@ import Code from '@/elements/Code';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
-import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories';
 
 export default function EggRepositoryCreateOrUpdate({
   contextEggRepository,
@@ -52,7 +52,9 @@ export default function EggRepositoryCreateOrUpdate({
   useEffect(() => {
     if (contextEggRepository) {
       form.setValues({
-        ...contextEggRepository,
+        name: contextEggRepository.name,
+        description: contextEggRepository.description,
+        gitRepository: contextEggRepository.gitRepository,
       });
     }
   }, [contextEggRepository]);

@@ -18,11 +18,11 @@ import TagsInput from '@/elements/input/TagsInput';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
 import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
-import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
 
 export default function OAuthProviderCreateOrUpdate({
   contextOAuthProvider,
@@ -75,7 +75,24 @@ export default function OAuthProviderCreateOrUpdate({
   useEffect(() => {
     if (contextOAuthProvider) {
       form.setValues({
-        ...contextOAuthProvider,
+        name: contextOAuthProvider.name,
+        description: contextOAuthProvider.description,
+        clientId: contextOAuthProvider.clientId,
+        clientSecret: contextOAuthProvider.clientSecret,
+        authUrl: contextOAuthProvider.authUrl,
+        tokenUrl: contextOAuthProvider.tokenUrl,
+        infoUrl: contextOAuthProvider.infoUrl,
+        scopes: contextOAuthProvider.scopes,
+        identifierPath: contextOAuthProvider.identifierPath,
+        emailPath: contextOAuthProvider.emailPath,
+        usernamePath: contextOAuthProvider.usernamePath,
+        nameFirstPath: contextOAuthProvider.nameFirstPath,
+        nameLastPath: contextOAuthProvider.nameLastPath,
+        enabled: contextOAuthProvider.enabled,
+        loginOnly: contextOAuthProvider.loginOnly,
+        linkViewable: contextOAuthProvider.linkViewable,
+        userManageable: contextOAuthProvider.userManageable,
+        basicAuth: contextOAuthProvider.basicAuth,
       });
     }
   }, [contextOAuthProvider]);

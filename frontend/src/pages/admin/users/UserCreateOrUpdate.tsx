@@ -52,7 +52,14 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   useEffect(() => {
     if (contextUser) {
       form.setValues({
-        ...contextUser,
+        username: contextUser.username,
+        email: contextUser.email,
+        nameFirst: contextUser.nameFirst,
+        nameLast: contextUser.nameLast,
+        password: '',
+        admin: contextUser.admin,
+        totpEnabled: contextUser.totpEnabled,
+        language: contextUser.language,
         roleUuid: contextUser.role?.uuid ?? uuidNil,
       });
     }
