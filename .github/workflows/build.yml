@@ -136,11 +136,11 @@ jobs:
 
       - name: Run tests (Linux)
         if: contains(matrix.target, 'linux')
-        run: cross test --release --target ${{ matrix.target }}
+        run: cross test --target ${{ matrix.target }}
 
       - name: Run tests (Non-Linux)
         if: ${{ !contains(matrix.target, 'linux') }}
-        run: cargo test --release --target ${{ matrix.target }}
+        run: cargo test --target ${{ matrix.target }}
 
       - name: Build release binary (Linux)
         if: contains(matrix.target, 'linux')
