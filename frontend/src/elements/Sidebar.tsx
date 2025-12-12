@@ -28,7 +28,7 @@ function Sidebar({ children }: SidebarProps) {
 
   return (
     <>
-      <Card className='lg:hidden! flex-row! justify-end -ml-1 my-4 w-16 rounded-l-none!' p='xs'>
+      <Card className='lg:hidden! sticky! top-5 z-1 flex-row! justify-end -ml-1 my-4 w-16 rounded-l-none!' p='xs'>
         <ActionIcon onClick={() => setIsMobileMenuOpen(true)} variant='subtle'>
           <FontAwesomeIcon size='lg' icon={faBars} />
         </ActionIcon>

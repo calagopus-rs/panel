@@ -37,12 +37,14 @@ export default function ServerNetwork() {
   return (
     <>
       <Group justify='space-between' align='center' mb='md'>
-        <Title order={1} c='white'>
-          Network
+        <div className="">
+          <Title order={1} c='white'>
+            Network
+          </Title>
           <p className='text-xs text-gray-300!'>
             {allocations.total} of {server.featureLimits.allocations} maximum allocations assigned.
           </p>
-        </Title>
+        </div>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <ConditionalTooltip

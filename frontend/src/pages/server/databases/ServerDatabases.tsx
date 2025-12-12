@@ -28,12 +28,14 @@ export default function ServerDatabases() {
       <DatabaseCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='center' mb='md'>
-        <Title order={1} c='white'>
-          Databases
+        <div className="">
+          <Title order={1} c='white'>
+            Databases
+          </Title>
           <p className='text-xs text-gray-300!'>
             {databases.total} of {server.featureLimits.databases} maximum databases created.
           </p>
-        </Title>
+        </div>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
           <ConditionalTooltip
