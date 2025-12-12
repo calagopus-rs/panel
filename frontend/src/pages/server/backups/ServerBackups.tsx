@@ -27,7 +27,7 @@ export default function ServerBackups() {
     <>
       <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <div>
           <Title order={1} c='white'>
             Backups

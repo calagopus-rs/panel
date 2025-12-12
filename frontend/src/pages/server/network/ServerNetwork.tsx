@@ -36,7 +36,7 @@ export default function ServerNetwork() {
 
   return (
     <>
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <div>
           <Title order={1} c='white'>
             Network

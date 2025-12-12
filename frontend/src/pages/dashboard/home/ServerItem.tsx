@@ -71,7 +71,7 @@ export default function ServerItem({
 
       <NavLink to={`/server/${server.uuidShort}`}>
         <Card
-          className='duration-200 h-full flex flex-col justify-between'
+          className='duration-200 h-full flex flex-col justify-between rounded-sm!'
           leftStripeClassName={statusToColor(stats?.state)}
           hoverable
         >

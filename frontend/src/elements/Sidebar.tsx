@@ -1,8 +1,3 @@
-import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon } from '@mantine/core';
-import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
-import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 import Badge from '@/elements/Badge';
 import Button from '@/elements/Button';
 import Card from '@/elements/Card';
@@ -13,7 +8,11 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useWindows } from '@/providers/WindowProvider';
 import RouterRoutes from '@/RouterRoutes';
 import { useGlobalStore } from '@/stores/global';
-import Tooltip from './Tooltip';
+import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
+import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 
 type SidebarProps = {
   children: ReactNode;
@@ -113,16 +112,19 @@ function Divider() {
 
 function Footer() {
   const { user, doLogout } = useAuth();
-  const { settings } = useGlobalStore();
 
   return (
     <>
-      <Card className='mt-auto flex-row! justify-between items-center min-h-fit' p='sm'>
+      <div className="mt-auto">
+        <Divider />
+      </div>
+
+      <div className='p-2 flex flex-row justify-between items-center min-h-fit'>
         <div className='flex items-center'>
           <img src={user!.avatar ?? '/icon.svg'} alt={user!.username} className='h-10 w-10 rounded-full select-none' />
           <div className='flex flex-col ml-3'>
-            <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'>
-              {user!.nameFirst}
+            <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight lg:w-25 overflow-hidden text-ellipsis'>
+              {user!.username}
             </span>
             {user!.admin && (
               <NavLink to='/admin' className='cursor-pointer!'>
@@ -146,22 +148,6 @@ function Footer() {
             <FontAwesomeIcon icon={faArrowRightFromBracket} />
           </ActionIcon>
         </div>
-      </Card>
-
-      <div className='mt-2 text-xs transition-all text-gray-400'>
-        <span className='flex flex-row justify-between'>
-          <Tooltip label={settings.version}>
-            <a
-              href='https://github.com/calagopus-rs/panel'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='underline'
-            >
-              Calagopus
-            </a>
-          </Tooltip>
-          © 2025 - {new Date().getFullYear()}
-        </span>
       </div>
     </>
   );

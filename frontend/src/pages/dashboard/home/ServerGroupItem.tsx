@@ -169,7 +169,7 @@ export default function ServerGroupItem({
                 }
               >
                 {(items) => (
-                  <div className='gap-4 grid md:grid-cols-2 mt-4'>
+                  <div className='gap-4 grid sm:grid-cols-2 mt-4'>
                     {items.map((server, i) => (
                       <SortableItem key={server.id} id={server.id}>
                         <ServerItem
@@ -195,9 +195,12 @@ export default function ServerGroupItem({
               </DndContainer>
             )}
 
-            <Divider my='md' />
-
-            <Pagination data={servers} onPageSelect={setPage} />
+            {servers.total > servers.perPage && (
+              <>
+                <Divider my='md' />
+                <Pagination data={servers} onPageSelect={setPage} />
+              </>
+            )}
           </>
         )}
       </Card>
