@@ -27,7 +27,7 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
     <>
       <UserOAuthLinkAddModal user={user} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>User OAuth Links</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

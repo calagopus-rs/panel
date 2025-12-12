@@ -66,7 +66,7 @@ export default function AdminEggVariables({
 
   return (
     <>
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Egg Variables</Title>
         <Button onClick={addVariable} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
           Add

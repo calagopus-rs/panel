@@ -18,7 +18,7 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
 
   return (
     <>
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Egg Repository Eggs</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

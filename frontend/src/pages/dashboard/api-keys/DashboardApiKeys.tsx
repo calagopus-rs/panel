@@ -26,7 +26,7 @@ export default function DashboardApiKeys() {
     <>
       <ApiKeyCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
-      <Group justify='space-between' align='center' mb='md'>
+      <Group justify='space-between' align='start' mb='md'>
         <Title order={1} c='white'>
           API Keys
         </Title>
