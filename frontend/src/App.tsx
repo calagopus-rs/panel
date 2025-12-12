@@ -22,7 +22,7 @@ export default function App() {
     });
   }, []);
 
-  return settings ? (
+  return Object.keys(settings).length > 0 ? (
     <ErrorBoundary>
       <MantineProvider forceColorScheme='dark'>
         <ToastProvider>
