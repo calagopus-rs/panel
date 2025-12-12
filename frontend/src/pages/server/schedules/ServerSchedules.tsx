@@ -64,7 +64,7 @@ export default function ServerSchedules() {
       <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='center' mb='md'>
-        <div className="">
+        <div>
           <Title order={1} c='white'>
             Schedules
           </Title>
