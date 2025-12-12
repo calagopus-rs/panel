@@ -19,6 +19,9 @@ export default defineConfig({
         assetFileNames: 'assets/[name].[hash].[ext]',
         experimentalMinChunkSize: 102400,
         manualChunks(id) {
+          if (id.includes('zod/v4/locales')) {
+            return 'zod-locale';
+          }
           if (
             id.includes('src/providers/') ||
             id.includes('src/plugins/') ||

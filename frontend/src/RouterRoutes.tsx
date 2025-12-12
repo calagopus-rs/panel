@@ -8,11 +8,11 @@ import UnauthenticatedGuard from './routers/guards/UnauthenticatedGuard';
 import '@mantine/core/styles.css';
 import { lazy } from 'react';
 import OobeGuard from '@/routers/guards/OobeGuard';
-import globalRoutes from './routers/routes/globalRoutes';
 import NotFound from './pages/NotFound';
+import TranslationProvider from './providers/TranslationProvider';
+import globalRoutes from './routers/routes/globalRoutes';
 import { AdminStoreContextProvider, createAdminStore } from './stores/admin';
 import { createServerStore, ServerStoreContextprovider } from './stores/server';
-import TranslationProvider from './providers/TranslationProvider';
 
 const OobeRouter = lazy(() => import('./routers/OobeRouter'));
 const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter'));

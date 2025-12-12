@@ -5,8 +5,6 @@ import { TableData, TableRow } from '@/elements/Table';
 import Tooltip from '@/elements/Tooltip';
 import { formatDateTime, formatTimestamp } from '@/lib/time';
 
-export const activityTableColumns = ['', 'Actor', 'Event', 'IP', 'When', ''];
-
 export default function ActivityRow({ activity }: { activity: AdminActivity }) {
   return (
     <TableRow>

@@ -6,11 +6,11 @@ import { ToastProvider } from './providers/ToastProvider';
 import { useGlobalStore } from './stores/global';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
+import getLanguages from './api/getLanguages';
 import ErrorBoundary from './elements/ErrorBoundary';
+import { CurrentWindowProvider } from './providers/CurrentWindowProvider';
 import { WindowProvider } from './providers/WindowProvider';
 import RouterRoutes from './RouterRoutes';
-import { CurrentWindowProvider } from './providers/CurrentWindowProvider';
-import getLanguages from './api/getLanguages';
 
 export default function App() {
   const { settings, setSettings, setLanguages } = useGlobalStore();

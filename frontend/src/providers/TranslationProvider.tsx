@@ -1,8 +1,13 @@
 import { ReactNode, useContext, useEffect, useState } from 'react';
-import baseTranslations from '@/translations';
-import Spinner from '@/elements/Spinner';
 import { GetPlaceholders, getTranslationMapping, TranslationContext, TranslationItemRecord } from 'shared';
+import { z } from 'zod';
+import { $ZodConfig } from 'zod/v4/core';
 import { axiosInstance } from '@/api/axios';
+import Spinner from '@/elements/Spinner';
+import { languageToZodLocaleMapping } from '@/lib/enums.ts';
+import baseTranslations from '@/translations';
+
+const modules = import.meta.glob('/node_modules/zod/v4/locales/*.js');
 
 type LanguageData = {
   items: TranslationItemRecord;
@@ -13,6 +18,18 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState('en-US');
   const [languageData, setLanguageData] = useState<LanguageData | null>(null);
+
+  const loadZod = async (lang: string) => {
+    if (!modules[`/node_modules/zod/v4/locales/${languageToZodLocaleMapping[lang]}.js`]) {
+      return;
+    }
+
+    const { default: locale } = (await modules[
+      `/node_modules/zod/v4/locales/${languageToZodLocaleMapping[lang]}.js`
+    ]()) as { default: () => $ZodConfig };
+
+    z.config(locale());
+  };
 
   useEffect(() => {
     if (language === 'en-US') {
@@ -50,6 +67,8 @@ const TranslationProvider = ({ children }: { children: ReactNode }) => {
         .catch(() => setLanguage('en-US'))
         .finally(() => setLoading(false));
     }
+
+    loadZod(language);
   }, [language]);
 
   const t = (key: string, values: Record<string, string | number>): string => {

@@ -47,3 +47,5 @@ export const eggRepositoryEggTableColumns = ['Path', 'Name', 'Author', 'Descript
 export const adminOAuthProviderUsersTableColumns = ['ID', 'User', 'Identifier', 'Last Used', 'Created'];
 
 export const adminUserOAuthLinkTableColumns = ['ID', 'OAuth Provider', 'Identifier', 'Last Used', 'Created', ''];
+
+export const adminActivityColumns = ['', 'Actor', 'Event', 'IP', 'When', ''];

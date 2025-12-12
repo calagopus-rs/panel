@@ -4,8 +4,9 @@ import getAdminActivity from '@/api/admin/getAdminActivity';
 import { getEmptyPaginationSet } from '@/api/axios';
 import TextInput from '@/elements/input/TextInput';
 import Table from '@/elements/Table';
+import { adminActivityColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import ActivityRow, { activityTableColumns } from './ActivityRow';
+import ActivityRow from './ActivityRow';
 
 export default function AdminActivity() {
   const [activities, setActivities] = useState<ResponseMeta<AdminActivity>>(getEmptyPaginationSet());
@@ -24,7 +25,7 @@ export default function AdminActivity() {
         <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
       </Group>
 
-      <Table columns={activityTableColumns} loading={loading} pagination={activities} onPageSelect={setPage}>
+      <Table columns={adminActivityColumns} loading={loading} pagination={activities} onPageSelect={setPage}>
         {activities.data.map((activity) => (
           <ActivityRow key={activity.created.toString()} activity={activity} />
         ))}
