@@ -134,7 +134,14 @@ export default function DatabaseHostCreateOrUpdate({
 
         <Group grow>
           <TextInput label='Public Host' placeholder='Public Host' {...form.getInputProps('publicHost')} />
-          <NumberInput label='Public Port' placeholder='Public Port' min={0} {...form.getInputProps('publicPort')} />
+          <NumberInput
+            label='Public Port'
+            placeholder='Public Port'
+            min={0}
+            {...form.getInputProps('publicPort')}
+            value={form.values.publicPort || ''}
+            onChange={(v) => form.setFieldValue('publicPort', Number(v) || 0)}
+          />
         </Group>
 
         <Switch

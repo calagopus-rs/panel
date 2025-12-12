@@ -19,7 +19,7 @@ export const adminDatabaseHostUpdateSchema = z.object({
   host: z.string().min(3).max(255),
   port: z.number().min(0).max(65535),
   public: z.boolean(),
-  publicHost: z.string().min(3).max(255).nullable(),
+  publicHost: z.string().max(255).nullable(),
   publicPort: z.number().min(0).max(65535).nullable(),
   type: z.enum(['mysql', 'postgres']),
 });
