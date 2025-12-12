@@ -38,7 +38,7 @@ export default function FileBreadcrumbs({
               })}`
             : `/server/${server?.uuidShort}/files`
         }
-        className='px-1 text-blue-300 hover:text-blue-200'
+        className=' text-blue-300 hover:text-blue-200'
       >
         {browsingBackup ? browsingBackup.name : 'container'}
       </NavLink>,
@@ -49,7 +49,7 @@ export default function FileBreadcrumbs({
           <NavLink
             key={item.path}
             to={`/server/${server?.uuidShort}/files?${createSearchParams({ directory: item.path })}`}
-            className='px-1 text-blue-300 hover:text-blue-200'
+            className=' text-blue-300 hover:text-blue-200'
           >
             {item.name}
           </NavLink>
@@ -65,7 +65,7 @@ export default function FileBreadcrumbs({
       <Breadcrumbs separatorMargin='xs'>
         <Checkbox
           disabled={movingFileNames.size > 0}
-          checked={selectedFileNames.size > 0 && selectedFileNames.size >= browsingEntries.data.length}
+          checked={!inFileEditor && selectedFileNames.size > 0 && selectedFileNames.size >= browsingEntries.data.length}
           indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
           className='mr-2'
           hidden={inFileEditor}

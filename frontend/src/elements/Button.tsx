@@ -11,7 +11,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <MantineButton
         ref={ref}
-        className={classNames(className, loading ? 'cursor-wait!' : null)}
+        className={classNames(className, loading ? 'cursor-wait!' : null, 'font-normal!')}
         onClick={onClick}
         loading={disabled ? false : loading}
         disabled={disabled}

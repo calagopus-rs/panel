@@ -31,7 +31,7 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
         onClose={() => setOpenModal(null)}
       />
 
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={2}>Location Database Hosts</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

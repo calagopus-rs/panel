@@ -61,7 +61,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
 
   return (
     <>
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={2}>Eggs</Title>
         <Group>
           <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />

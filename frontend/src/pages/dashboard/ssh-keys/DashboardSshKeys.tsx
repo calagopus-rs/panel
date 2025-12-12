@@ -28,7 +28,7 @@ export default function DashboardSshKeys() {
       <SshKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
       <SshKeyImportModal opened={openModal === 'import'} onClose={() => setOpenModal(null)} />
 
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={1} c='white'>
           SSH Keys
         </Title>

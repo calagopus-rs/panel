@@ -28,7 +28,7 @@ export default function DashboardOAuthLinks() {
 
   return (
     <>
-      <Group justify='space-between' align='start' mb='md'>
+      <Group justify='space-between' align='center' mb='md'>
         <Title order={1} c='white'>
           OAuth Links
         </Title>
