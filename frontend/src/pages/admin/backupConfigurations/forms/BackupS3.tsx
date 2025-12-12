@@ -42,8 +42,8 @@ export default function BackupS3({
 
         <Switch
           label={form.values.pathStyle ? 'Using path-style URLs' : 'Using virtual-hosted-style URLs'}
-          checked={form.values.pathStyle || false}
-          onChange={(e) => form.setFieldValue('form.values.pathStyle', e.target.checked)}
+          checked={form.values.pathStyle}
+          onChange={(e) => form.setFieldValue('pathStyle', e.target.checked)}
         />
       </Stack>
     </Stack>

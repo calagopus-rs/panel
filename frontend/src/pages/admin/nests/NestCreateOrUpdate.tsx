@@ -11,8 +11,8 @@ import Code from '@/elements/Code';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useResourceForm } from '@/plugins/useResourceForm';
 import { adminNestSchema } from '@/lib/schemas/admin/nests';
+import { useResourceForm } from '@/plugins/useResourceForm';
 
 export default function NestCreateOrUpdate({ contextNest }: { contextNest?: AdminNest }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
@@ -40,7 +40,9 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
   useEffect(() => {
     if (contextNest) {
       form.setValues({
-        ...contextNest,
+        author: contextNest.author,
+        name: contextNest.name,
+        description: contextNest.description,
       });
     }
   }, [contextNest]);

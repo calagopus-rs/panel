@@ -73,10 +73,18 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
   useEffect(() => {
     if (contextServer) {
       form.setValues({
-        ...contextServer,
         ownerUuid: contextServer.owner.uuid,
         eggUuid: contextServer.egg.uuid,
         backupConfigurationUuid: contextServer.backupConfiguration?.uuid ?? uuidNil,
+        externalId: contextServer.externalId,
+        name: contextServer.name,
+        description: contextServer.description,
+        limits: contextServer.limits,
+        pinnedCpus: contextServer.pinnedCpus,
+        startup: contextServer.startup,
+        image: contextServer.image,
+        timezone: contextServer.timezone,
+        featureLimits: contextServer.featureLimits,
       });
     }
   }, [contextServer]);

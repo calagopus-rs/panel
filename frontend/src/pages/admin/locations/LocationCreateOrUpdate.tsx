@@ -14,9 +14,9 @@ import Select from '@/elements/input/Select';
 import TextArea from '@/elements/input/TextArea';
 import TextInput from '@/elements/input/TextInput';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
+import { adminLocationSchema } from '@/lib/schemas/admin/locations';
 import { useResourceForm } from '@/plugins/useResourceForm';
 import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { adminLocationSchema } from '@/lib/schemas/admin/locations';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
@@ -44,7 +44,8 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   useEffect(() => {
     if (contextLocation) {
       form.setValues({
-        ...contextLocation,
+        name: contextLocation.name,
+        description: contextLocation.description,
         backupConfigurationUuid: contextLocation.backupConfiguration?.uuid ?? uuidNil,
       });
     }
