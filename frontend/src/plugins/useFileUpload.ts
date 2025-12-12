@@ -157,8 +157,13 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
           }
           return updated;
         });
-      } catch (error: any) {
-        if (error.name === 'CanceledError' || error.code === 'ERR_CANCELED') {
+      } catch (error) {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          (error.code === 'CanceledError' || error.code === 'ERR_CANCELED')
+        ) {
           setUploadingFiles((prev) => {
             const updated = new Map(prev);
             batch.indices.forEach((index) => {
@@ -214,7 +219,10 @@ export function useFileUpload(serverUuid: string, directory: string, onUploadCom
             return updated;
           });
 
-          addToast(`Failed to upload batch: ${error.message || 'Unknown error'}`, 'error');
+          addToast(
+            `Failed to upload batch: ${(error && typeof error === 'object' && 'message' in error && error?.message) || 'Unknown error'}`,
+            'error',
+          );
         }
       } finally {
         activeBatchCount.current--;
