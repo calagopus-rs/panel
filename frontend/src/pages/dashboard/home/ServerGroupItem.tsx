@@ -195,9 +195,13 @@ export default function ServerGroupItem({
               </DndContainer>
             )}
 
-            <Divider my='md' />
+            {servers.total > servers.perPage && (
+              <>
+                <Divider my='md' />
+                <Pagination data={servers} onPageSelect={setPage} />
+              </>
+            )}
 
-            <Pagination data={servers} onPageSelect={setPage} />
           </>
         )}
       </Card>
