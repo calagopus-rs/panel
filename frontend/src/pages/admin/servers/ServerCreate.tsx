@@ -280,6 +280,7 @@ export default function ServerCreate() {
                 withAsterisk
                 label='Memory'
                 mode='mb'
+                min={0}
                 value={form.values.limits.memory}
                 onChange={(value) => form.setFieldValue('limits.memory', value)}
               />
@@ -290,6 +291,7 @@ export default function ServerCreate() {
                 withAsterisk
                 label='Disk Space'
                 mode='mb'
+                min={0}
                 value={form.values.limits.disk}
                 onChange={(value) => form.setFieldValue('limits.disk', value)}
               />
@@ -297,6 +299,7 @@ export default function ServerCreate() {
                 withAsterisk
                 label='Swap'
                 mode='mb'
+                min={-1}
                 value={form.values.limits.swap}
                 onChange={(value) => form.setFieldValue('limits.swap', value)}
               />

@@ -139,6 +139,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
             withAsterisk
             label='Memory'
             mode='mb'
+            min={0}
             value={form.values.memory}
             onChange={(value) => form.setFieldValue('memory', value)}
           />
@@ -146,6 +147,7 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
             withAsterisk
             label='Disk'
             mode='mb'
+            min={0}
             value={form.values.disk}
             onChange={(value) => form.setFieldValue('disk', value)}
           />

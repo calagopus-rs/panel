@@ -61,6 +61,7 @@ export default function ServerContainer() {
             withAsterisk
             label='Max File Manager View Size'
             mode='b'
+            min={0}
             value={form.values.maxFileManagerViewSize}
             onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
           />

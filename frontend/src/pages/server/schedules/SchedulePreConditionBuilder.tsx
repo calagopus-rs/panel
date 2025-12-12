@@ -139,6 +139,7 @@ export default function SchedulePreConditionBuilder({ condition, onChange, depth
               <SizeInput
                 label='Value'
                 mode='b'
+                min={0}
                 value={condition.value}
                 onChange={(value) => onChange({ ...condition, value })}
               />
