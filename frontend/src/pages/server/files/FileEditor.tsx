@@ -8,6 +8,7 @@ import Button from '@/elements/Button';
 import Spinner from '@/elements/Spinner';
 import { getLanguageFromExtension } from '@/lib/files';
 import NotFound from '@/pages/NotFound';
+import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server';
 import FileBreadcrumbs from './FileBreadcrumbs';
 import FileNameModal from './modals/FileNameModal';
@@ -17,10 +18,12 @@ export default function FileEditor() {
 
   const [searchParams, _] = useSearchParams();
   const navigate = useNavigate();
+  const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
   const { browsingDirectory, setBrowsingDirectory, browsingBackup } = useServerStore();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [fileName, setFileName] = useState('');
   const [content, setContent] = useState('');
@@ -54,11 +57,13 @@ export default function FileEditor() {
     if (!editorRef.current) return;
 
     const currentContent = editorRef.current.getValue();
-    setLoading(true);
+    setSaving(true);
 
     saveFileContent(server.uuid, join(browsingDirectory!, name ?? fileName), currentContent).then(() => {
-      setLoading(false);
+      setSaving(false);
       setNameModalOpen(false);
+
+      addToast(`${name ?? fileName} was saved.`);
 
       if (name) {
         navigate(
@@ -95,9 +100,13 @@ export default function FileEditor() {
         />
         <div hidden={!!browsingBackup}>
           {params.action === 'edit' ? (
-            <Button onClick={() => saveFile()}>Save</Button>
+            <Button loading={saving} onClick={() => saveFile()}>
+              Save
+            </Button>
           ) : (
-            <Button onClick={() => setNameModalOpen(true)}>Create</Button>
+            <Button loading={saving} onClick={() => setNameModalOpen(true)}>
+              Create
+            </Button>
           )}
         </div>
       </div>
