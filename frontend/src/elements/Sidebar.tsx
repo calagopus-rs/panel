@@ -115,12 +115,16 @@ function Footer() {
 
   return (
     <>
-      <Card className='mt-auto flex-row! justify-between items-center min-h-fit' p='sm'>
+      <div className="mt-auto">
+        <Divider />
+      </div>
+
+      <div className='p-2 flex flex-row justify-between items-center min-h-fit'>
         <div className='flex items-center'>
           <img src={user!.avatar ?? '/icon.svg'} alt={user!.username} className='h-10 w-10 rounded-full select-none' />
           <div className='flex flex-col ml-3'>
-            <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight'>
-              {user!.nameFirst}
+            <span className='font-sans font-normal text-sm text-neutral-50 whitespace-nowrap leading-tight lg:w-25 overflow-hidden text-ellipsis'>
+              {user!.username}
             </span>
             {user!.admin && (
               <NavLink to='/admin' className='cursor-pointer!'>
@@ -144,7 +148,7 @@ function Footer() {
             <FontAwesomeIcon icon={faArrowRightFromBracket} />
           </ActionIcon>
         </div>
-      </Card>
+      </div>
     </>
   );
 }
