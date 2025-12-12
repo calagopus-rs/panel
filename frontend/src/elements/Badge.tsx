@@ -1,8 +1,9 @@
 import { BadgeProps, Badge as MantineBadge } from '@mantine/core';
+import classNames from 'classnames';
 import { forwardRef } from 'react';
 
 const Badge = forwardRef<HTMLDivElement, BadgeProps>(({ className, ...rest }, ref) => {
-  return <MantineBadge ref={ref} className={`${className} font-semibold!`} {...rest} />;
+  return <MantineBadge ref={ref} className={classNames(className, 'font-semibold!')} {...rest} />;
 });
 
 export default Badge;

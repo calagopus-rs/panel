@@ -9,7 +9,7 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import Switch from '@/elements/input/Switch';
-import { adminSettingsEmailSchema, adminSettingsServerSchema } from '@/lib/schemas/admin/settings';
+import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings';
 import { bytesToString } from '@/lib/size';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';

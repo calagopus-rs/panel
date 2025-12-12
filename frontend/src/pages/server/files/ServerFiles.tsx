@@ -1,4 +1,4 @@
-import { Card, Group, Title } from '@mantine/core';
+import { Group, Title } from '@mantine/core';
 import { type Ref, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';

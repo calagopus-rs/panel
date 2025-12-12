@@ -139,6 +139,7 @@ export default function ServerStartup() {
               value,
               label: key,
             }))}
+            searchable
             disabled={!settings.server.allowOverwritingCustomDockerImage}
           />
           <p className='text-gray-400 mt-2'>
