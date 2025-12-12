@@ -130,7 +130,12 @@ export default function BackupConfigurationCreateOrUpdate({
         <Group>
           <Button
             onClick={() => doCreateOrUpdate(false)}
-            disabled={!form.isValid() || backupConfigS3Form.isValid() || backupConfigResticForm.isValid()}
+            disabled={
+              !form.isValid() ||
+              ((form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && !backupConfigS3Form.isValid()) ||
+              ((form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) &&
+                !backupConfigResticForm.isValid())
+            }
             loading={loading}
           >
             Save
