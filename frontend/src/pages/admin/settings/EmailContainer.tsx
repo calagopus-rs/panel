@@ -8,17 +8,17 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Select from '@/elements/input/Select';
 import { mailModeTypeLabelMapping } from '@/lib/enums';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import EmailFile from './forms/EmailFile';
-import EmailSendmail from './forms/EmailSendmail';
-import EmailSmtp from './forms/EmailSmtp';
 import {
   adminSettingsEmailFilesystemSchema,
   adminSettingsEmailSchema,
   adminSettingsEmailSendmailSchema,
   adminSettingsEmailSmtpSchema,
 } from '@/lib/schemas/admin/settings';
+import { useToast } from '@/providers/ToastProvider';
+import { useAdminStore } from '@/stores/admin';
+import EmailFile from './forms/EmailFile';
+import EmailSendmail from './forms/EmailSendmail';
+import EmailSmtp from './forms/EmailSmtp';
 
 export default function EmailContainer() {
   const { addToast } = useToast();
@@ -58,28 +58,30 @@ export default function EmailContainer() {
         Email Settings
       </Title>
 
-      <Select
-        label='Provider'
-        data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
-          value,
-          label,
-        }))}
-        {...form.getInputProps('type')}
-      />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Select
+          label='Provider'
+          data={Object.entries(mailModeTypeLabelMapping).map(([value, label]) => ({
+            value,
+            label,
+          }))}
+          {...form.getInputProps('type')}
+        />
 
-      {form.values.type === 'smtp' ? (
-        <EmailSmtp form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>>} />
-      ) : form.values.type === 'sendmail' ? (
-        <EmailSendmail form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSendmailSchema>>} />
-      ) : form.values.type === 'filesystem' ? (
-        <EmailFile form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailFilesystemSchema>>} />
-      ) : null}
+        {form.values.type === 'smtp' ? (
+          <EmailSmtp form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>>} />
+        ) : form.values.type === 'sendmail' ? (
+          <EmailSendmail form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailSendmailSchema>>} />
+        ) : form.values.type === 'filesystem' ? (
+          <EmailFile form={form as UseFormReturnType<z.infer<typeof adminSettingsEmailFilesystemSchema>>} />
+        ) : null}
 
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
+        </Group>
+      </form>
     </>
   );
 }

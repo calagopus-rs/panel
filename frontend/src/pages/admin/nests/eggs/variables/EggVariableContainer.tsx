@@ -132,45 +132,47 @@ export default function EggVariableContainer({
       </ConfirmationModal>
 
       <Card className='flex flex-col justify-between h-full'>
-        <Stack>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <form onSubmit={form.onSubmit(doCreateOrUpdate)}>
+          <Stack>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
+            <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
 
-          <Group grow>
-            <TextInput
-              withAsterisk
-              label='Environment Variable'
-              placeholder='Environment Variable'
-              {...form.getInputProps('envVariable')}
-              onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
-            />
+            <Group grow>
+              <TextInput
+                withAsterisk
+                label='Environment Variable'
+                placeholder='Environment Variable'
+                {...form.getInputProps('envVariable')}
+                onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
+              />
 
-            <TextInput
-              withAsterisk
-              label='Default Value'
-              placeholder='server.jar'
-              {...form.getInputProps('defaultValue')}
-            />
+              <TextInput
+                withAsterisk
+                label='Default Value'
+                placeholder='server.jar'
+                {...form.getInputProps('defaultValue')}
+              />
+            </Group>
+
+            <Group grow>
+              <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
+
+              <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
+            </Group>
+
+            <TagsInput label='Rules' {...form.getInputProps('rules')} />
+          </Stack>
+
+          <Group pt='md' mt='auto'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
+            </Button>
+            <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
+              Remove
+            </Button>
           </Group>
-
-          <Group grow>
-            <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
-
-            <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
-          </Group>
-
-          <TagsInput label='Rules' {...form.getInputProps('rules')} />
-        </Stack>
-
-        <Group pt='md' mt='auto'>
-          <Button onClick={doCreateOrUpdate} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
-            Remove
-          </Button>
-        </Group>
+        </form>
       </Card>
     </>
   );

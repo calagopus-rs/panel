@@ -66,48 +66,50 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
 
-        <Group grow align='start'>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />
-        </Group>
+          <Group grow align='start'>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />
+          </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='Source' placeholder='Source' {...form.getInputProps('source')} />
-          <TextInput withAsterisk label='Target' placeholder='Target' {...form.getInputProps('target')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Source' placeholder='Source' {...form.getInputProps('source')} />
+            <TextInput withAsterisk label='Target' placeholder='Target' {...form.getInputProps('target')} />
+          </Group>
 
-        <Group grow>
-          <Switch
-            label='Read Only'
-            checked={form.values.readOnly}
-            onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
-          />
-          <Switch
-            label='User Mountable'
-            checked={form.values.userMountable}
-            onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
-          />
-        </Group>
+          <Group grow>
+            <Switch
+              label='Read Only'
+              checked={form.values.readOnly}
+              onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
+            />
+            <Switch
+              label='User Mountable'
+              checked={form.values.userMountable}
+              onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
+            />
+          </Group>
 
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextMount && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextMount && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            {!contextMount && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextMount && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }

@@ -249,232 +249,234 @@ export default function EggCreateOrUpdate({
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Group grow>
-          <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-        </Group>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Group grow>
+            <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          </Group>
 
-        <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
 
-        <Group grow>
-          <Select
-            label='Egg Repository'
-            placeholder='Egg Repository'
-            value={selectedEggRepositoryUuid}
-            onChange={(value) => setSelectedEggRepositoryUuid(value ?? '')}
-            data={eggRepositories.items.map((eggRepository) => ({
-              label: eggRepository.name,
-              value: eggRepository.uuid,
-            }))}
-            searchable
-            searchValue={eggRepositories.search}
-            onSearchChange={eggRepositories.setSearch}
-          />
-          <Select
-            label='Egg Repository Egg'
-            placeholder='Egg Repository Egg'
-            disabled={!selectedEggRepositoryUuid}
-            data={eggRepositoryEggs.items.map((eggRepositoryEgg) => ({
-              label: eggRepositoryEgg.name,
-              value: eggRepositoryEgg.uuid,
-            }))}
-            searchable
-            clearable
-            searchValue={eggRepositoryEggs.search}
-            onSearchChange={eggRepositoryEggs.setSearch}
-            value={form.values.eggRepositoryEggUuid}
-            onChange={(value) => form.setFieldValue('eggRepositoryEggUuid', value || uuidNil)}
-          />
-        </Group>
-
-        {/* TODO: configFiles */}
-
-        <TagsInput
-          withAsterisk
-          label='Startup Done'
-          placeholder='Startup Done'
-          {...form.getInputProps('configStartup.done')}
-        />
-
-        <Switch
-          label='Strip ANSI from startup messages'
-          checked={form.values.configStartup.stripAnsi}
-          onChange={(e) => form.setFieldValue('configStartup.stripAnsi', e.target.checked)}
-        />
-
-        {/* TODO: configStop */}
-
-        <Group grow>
-          <TextInput
-            withAsterisk
-            label='Install Script Container'
-            placeholder='Install Script Container'
-            {...form.getInputProps('configScript.container')}
-          />
-          <TextInput
-            withAsterisk
-            label='Install Script Entrypoint'
-            placeholder='Install Script Entrypoint'
-            {...form.getInputProps('configScript.entrypoint')}
-          />
-        </Group>
-
-        <TextArea
-          withAsterisk
-          label='Install Script Content'
-          placeholder='Install Script Content'
-          rows={6}
-          {...form.getInputProps('configScript.content')}
-        />
-
-        <Switch
-          label='Allocation Self Assign'
-          checked={form.values.configAllocations.userSelfAssign.enabled}
-          onChange={(e) => form.setFieldValue('configAllocations.userSelfAssign.enabled', e.target.checked)}
-        />
-
-        <Switch
-          label='Require Primary Allocation'
-          checked={form.values.configAllocations.userSelfAssign.requirePrimaryAllocation}
-          onChange={(e) =>
-            form.setFieldValue('configAllocations.userSelfAssign.requirePrimaryAllocation', e.target.checked)
-          }
-        />
-
-        <Group grow>
-          <NumberInput
-            label='Automatic Allocation Start'
-            placeholder='Automatic Allocation Start'
-            {...form.getInputProps('configAllocations.userSelfAssign.startPort')}
-          />
-          <NumberInput
-            label='Automatic Allocation End'
-            placeholder='Automatic Allocation End'
-            {...form.getInputProps('configAllocations.userSelfAssign.endPort')}
-          />
-        </Group>
-
-        <TextInput withAsterisk label='Startup' placeholder='Startup' {...form.getInputProps('startup')} />
-
-        <Switch
-          label='Force Outgoing IP'
-          checked={form.values.forceOutgoingIp}
-          onChange={(e) => form.setFieldValue('forceOutgoingIp', e.target.checked)}
-        />
-        <Switch
-          label='Separate IP and Port'
-          description='Separates the primary IP and Port in the Console page instead of joining them with ":"'
-          checked={form.values.separatePort}
-          onChange={(e) => form.setFieldValue('separatePort', e.target.checked)}
-        />
-
-        <TagsInput label='Features' placeholder='Feature' {...form.getInputProps('features')} />
-
-        <MultiKeyValueInput
-          label='Docker Images'
-          withAsterisk
-          options={form.values.dockerImages}
-          onChange={(e) => form.setFieldValue('dockerImages', e)}
-        />
-
-        <TagsInput label='File Deny List' placeholder='File Deny List' {...form.getInputProps('fileDenylist')} />
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-        {contextEgg && (
-          <>
-            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
-              <ContextMenu
-                items={[
-                  {
-                    icon: faUpload,
-                    label: 'from File',
-                    onClick: () => fileInputRef.current?.click(),
-                    color: 'gray',
-                  },
-                  {
-                    icon: faRefresh,
-                    label: 'from Repository',
-                    disabled: !contextEgg.eggRepositoryEgg,
-                    onClick: doRepositoryUpdate,
-                    color: 'gray',
-                  },
-                ]}
-              >
-                {({ openMenu }) => (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      openMenu(rect.left, rect.bottom);
-                    }}
-                    loading={loading}
-                    variant='outline'
-                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                  >
-                    Update
-                  </Button>
-                )}
-              </ContextMenu>
-            </ContextMenuProvider>
-            <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
-              <ContextMenu
-                items={[
-                  {
-                    icon: faFileDownload,
-                    label: 'as JSON',
-                    onClick: () => doExport('json'),
-                    color: 'gray',
-                  },
-                  {
-                    icon: faFileDownload,
-                    label: 'as YAML',
-                    onClick: () => doExport('yaml'),
-                    color: 'gray',
-                  },
-                ]}
-              >
-                {({ openMenu }) => (
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      openMenu(rect.left, rect.bottom);
-                    }}
-                    loading={loading}
-                    variant='outline'
-                    rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                  >
-                    Export
-                  </Button>
-                )}
-              </ContextMenu>
-            </ContextMenuProvider>
-
-            <input
-              type='file'
-              accept='.json,.yml,.yaml'
-              ref={fileInputRef}
-              className='hidden'
-              onChange={handleFileUpload}
+          <Group grow>
+            <Select
+              label='Egg Repository'
+              placeholder='Egg Repository'
+              value={selectedEggRepositoryUuid}
+              onChange={(value) => setSelectedEggRepositoryUuid(value ?? '')}
+              data={eggRepositories.items.map((eggRepository) => ({
+                label: eggRepository.name,
+                value: eggRepository.uuid,
+              }))}
+              searchable
+              searchValue={eggRepositories.search}
+              onSearchChange={eggRepositories.setSearch}
             />
-          </>
-        )}
-        {contextEgg && (
-          <Button variant='outline' onClick={() => setOpenModal('move')} loading={loading}>
-            Move
+            <Select
+              label='Egg Repository Egg'
+              placeholder='Egg Repository Egg'
+              disabled={!selectedEggRepositoryUuid}
+              data={eggRepositoryEggs.items.map((eggRepositoryEgg) => ({
+                label: eggRepositoryEgg.name,
+                value: eggRepositoryEgg.uuid,
+              }))}
+              searchable
+              clearable
+              searchValue={eggRepositoryEggs.search}
+              onSearchChange={eggRepositoryEggs.setSearch}
+              value={form.values.eggRepositoryEggUuid}
+              onChange={(value) => form.setFieldValue('eggRepositoryEggUuid', value || uuidNil)}
+            />
+          </Group>
+
+          {/* TODO: configFiles */}
+
+          <TagsInput
+            withAsterisk
+            label='Startup Done'
+            placeholder='Startup Done'
+            {...form.getInputProps('configStartup.done')}
+          />
+
+          <Switch
+            label='Strip ANSI from startup messages'
+            checked={form.values.configStartup.stripAnsi}
+            onChange={(e) => form.setFieldValue('configStartup.stripAnsi', e.target.checked)}
+          />
+
+          {/* TODO: configStop */}
+
+          <Group grow>
+            <TextInput
+              withAsterisk
+              label='Install Script Container'
+              placeholder='Install Script Container'
+              {...form.getInputProps('configScript.container')}
+            />
+            <TextInput
+              withAsterisk
+              label='Install Script Entrypoint'
+              placeholder='Install Script Entrypoint'
+              {...form.getInputProps('configScript.entrypoint')}
+            />
+          </Group>
+
+          <TextArea
+            withAsterisk
+            label='Install Script Content'
+            placeholder='Install Script Content'
+            rows={6}
+            {...form.getInputProps('configScript.content')}
+          />
+
+          <Switch
+            label='Allocation Self Assign'
+            checked={form.values.configAllocations.userSelfAssign.enabled}
+            onChange={(e) => form.setFieldValue('configAllocations.userSelfAssign.enabled', e.target.checked)}
+          />
+
+          <Switch
+            label='Require Primary Allocation'
+            checked={form.values.configAllocations.userSelfAssign.requirePrimaryAllocation}
+            onChange={(e) =>
+              form.setFieldValue('configAllocations.userSelfAssign.requirePrimaryAllocation', e.target.checked)
+            }
+          />
+
+          <Group grow>
+            <NumberInput
+              label='Automatic Allocation Start'
+              placeholder='Automatic Allocation Start'
+              {...form.getInputProps('configAllocations.userSelfAssign.startPort')}
+            />
+            <NumberInput
+              label='Automatic Allocation End'
+              placeholder='Automatic Allocation End'
+              {...form.getInputProps('configAllocations.userSelfAssign.endPort')}
+            />
+          </Group>
+
+          <TextInput withAsterisk label='Startup' placeholder='Startup' {...form.getInputProps('startup')} />
+
+          <Switch
+            label='Force Outgoing IP'
+            checked={form.values.forceOutgoingIp}
+            onChange={(e) => form.setFieldValue('forceOutgoingIp', e.target.checked)}
+          />
+          <Switch
+            label='Separate IP and Port'
+            description='Separates the primary IP and Port in the Console page instead of joining them with ":"'
+            checked={form.values.separatePort}
+            onChange={(e) => form.setFieldValue('separatePort', e.target.checked)}
+          />
+
+          <TagsInput label='Features' placeholder='Feature' {...form.getInputProps('features')} />
+
+          <MultiKeyValueInput
+            label='Docker Images'
+            withAsterisk
+            options={form.values.dockerImages}
+            onChange={(e) => form.setFieldValue('dockerImages', e)}
+          />
+
+          <TagsInput label='File Deny List' placeholder='File Deny List' {...form.getInputProps('fileDenylist')} />
+        </Stack>
+
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
           </Button>
-        )}
-        {contextEgg && (
-          <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-            Delete
-          </Button>
-        )}
-      </Group>
+          {contextEgg && (
+            <>
+              <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+                <ContextMenu
+                  items={[
+                    {
+                      icon: faUpload,
+                      label: 'from File',
+                      onClick: () => fileInputRef.current?.click(),
+                      color: 'gray',
+                    },
+                    {
+                      icon: faRefresh,
+                      label: 'from Repository',
+                      disabled: !contextEgg.eggRepositoryEgg,
+                      onClick: doRepositoryUpdate,
+                      color: 'gray',
+                    },
+                  ]}
+                >
+                  {({ openMenu }) => (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        openMenu(rect.left, rect.bottom);
+                      }}
+                      loading={loading}
+                      variant='outline'
+                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                    >
+                      Update
+                    </Button>
+                  )}
+                </ContextMenu>
+              </ContextMenuProvider>
+              <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+                <ContextMenu
+                  items={[
+                    {
+                      icon: faFileDownload,
+                      label: 'as JSON',
+                      onClick: () => doExport('json'),
+                      color: 'gray',
+                    },
+                    {
+                      icon: faFileDownload,
+                      label: 'as YAML',
+                      onClick: () => doExport('yaml'),
+                      color: 'gray',
+                    },
+                  ]}
+                >
+                  {({ openMenu }) => (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        openMenu(rect.left, rect.bottom);
+                      }}
+                      loading={loading}
+                      variant='outline'
+                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                    >
+                      Export
+                    </Button>
+                  )}
+                </ContextMenu>
+              </ContextMenuProvider>
+
+              <input
+                type='file'
+                accept='.json,.yml,.yaml'
+                ref={fileInputRef}
+                className='hidden'
+                onChange={handleFileUpload}
+              />
+            </>
+          )}
+          {contextEgg && (
+            <Button variant='outline' onClick={() => setOpenModal('move')} loading={loading}>
+              Move
+            </Button>
+          )}
+          {contextEgg && (
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
+        </Group>
+      </form>
     </>
   );
 }

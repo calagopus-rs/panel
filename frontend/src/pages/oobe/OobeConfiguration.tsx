@@ -10,12 +10,12 @@ import updateApplicationSettings from '@/api/admin/settings/updateApplicationSet
 import { httpErrorToHuman } from '@/api/axios';
 import AlertError from '@/elements/alerts/AlertError';
 import Button from '@/elements/Button';
+import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
-import { OobeComponentProps } from '@/routers/OobeRouter';
 import { oobeConfigurationSchema } from '@/lib/schemas/oobe';
+import { OobeComponentProps } from '@/routers/OobeRouter';
 import { useGlobalStore } from '@/stores/global.ts';
-import Select from '@/elements/input/Select.tsx';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {
   const { languages } = useGlobalStore();
@@ -77,55 +77,57 @@ export default function OobeConfiguration({ onNext }: OobeComponentProps) {
 
       {error && <AlertError error={error} setError={setError} />}
 
-      <Stack gap='md'>
-        <TextInput
-          label='Application Name'
-          placeholder='Calagopus'
-          leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
-          required
-          {...form.getInputProps('applicationName')}
-        />
+      <form onSubmit={form.onSubmit(() => onSubmit())}>
+        <Stack gap='md'>
+          <TextInput
+            label='Application Name'
+            placeholder='Calagopus'
+            leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
+            required
+            {...form.getInputProps('applicationName')}
+          />
 
-        <Select
-          withAsterisk
-          label='Language'
-          placeholder='Language'
-          data={languages.map((language) => ({
-            label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
-            value: language,
-          }))}
-          searchable
-          {...form.getInputProps('language')}
-        />
+          <Select
+            withAsterisk
+            label='Language'
+            placeholder='Language'
+            data={languages.map((language) => ({
+              label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
+              value: language,
+            }))}
+            searchable
+            {...form.getInputProps('language')}
+          />
 
-        <TextInput
-          label='Application URL'
-          placeholder='https://calagop.us'
-          leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
-          required
-          {...form.getInputProps('applicationUrl')}
-        />
+          <TextInput
+            label='Application URL'
+            placeholder='https://calagop.us'
+            leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
+            required
+            {...form.getInputProps('applicationUrl')}
+          />
 
-        <Switch
-          label='Enable Telemetry'
-          description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
-          checked={form.values.applicationTelemetry}
-          onChange={(e) => form.setFieldValue('applicationTelemetry', e.target.checked)}
-        />
+          <Switch
+            label='Enable Telemetry'
+            description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
+            checked={form.values.applicationTelemetry}
+            onChange={(e) => form.setFieldValue('applicationTelemetry', e.target.checked)}
+          />
 
-        <Switch
-          label='Enable Registration'
-          description='Allow new users to register their own account.'
-          checked={form.values.applicationRegistration}
-          onChange={(e) => form.setFieldValue('applicationRegistration', e.target.checked)}
-        />
+          <Switch
+            label='Enable Registration'
+            description='Allow new users to register their own account.'
+            checked={form.values.applicationRegistration}
+            onChange={(e) => form.setFieldValue('applicationRegistration', e.target.checked)}
+          />
 
-        <Group justify='flex-end' mt='xl'>
-          <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
-            Update Settings & Continue
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify='flex-end' mt='xl'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Update Settings & Continue
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Stack>
   );
 }

@@ -11,9 +11,9 @@ import AlertError from '@/elements/alerts/AlertError';
 import Button from '@/elements/Button';
 import PasswordInput from '@/elements/input/PasswordInput';
 import TextInput from '@/elements/input/TextInput';
+import { oobeRegister } from '@/lib/schemas/oobe';
 import { useAuth } from '@/providers/AuthProvider';
 import { OobeComponentProps } from '@/routers/OobeRouter';
-import { oobeRegister } from '@/lib/schemas/oobe';
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -68,62 +68,64 @@ export default function OobeRegister({ onNext }: OobeComponentProps) {
         Choose a strong password. This account will have complete administrative access to all servers and settings.
       </Alert>
 
-      <Stack gap='md'>
-        <TextInput
-          label='Username'
-          placeholder='admin'
-          leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
-          required
-          {...form.getInputProps('username')}
-        />
+      <form onSubmit={form.onSubmit(() => onSubmit())}>
+        <Stack gap='md'>
+          <TextInput
+            label='Username'
+            placeholder='admin'
+            leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
+            required
+            {...form.getInputProps('username')}
+          />
 
-        <TextInput
-          label='Email Address'
-          placeholder='admin@example.com'
-          leftSection={<FontAwesomeIcon icon={faEnvelope} size='sm' />}
-          type='email'
-          required
-          {...form.getInputProps('email')}
-        />
+          <TextInput
+            label='Email Address'
+            placeholder='admin@example.com'
+            leftSection={<FontAwesomeIcon icon={faEnvelope} size='sm' />}
+            type='email'
+            required
+            {...form.getInputProps('email')}
+          />
 
-        <TextInput
-          label='First Name'
-          placeholder='Alan'
-          leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
-          required
-          {...form.getInputProps('nameFirst')}
-        />
+          <TextInput
+            label='First Name'
+            placeholder='Alan'
+            leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
+            required
+            {...form.getInputProps('nameFirst')}
+          />
 
-        <TextInput
-          label='Last Name'
-          placeholder='Turing'
-          leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
-          required
-          {...form.getInputProps('nameLast')}
-        />
+          <TextInput
+            label='Last Name'
+            placeholder='Turing'
+            leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
+            required
+            {...form.getInputProps('nameLast')}
+          />
 
-        <PasswordInput
-          label='Password'
-          placeholder='Enter a strong password'
-          leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
-          required
-          {...form.getInputProps('password')}
-        />
+          <PasswordInput
+            label='Password'
+            placeholder='Enter a strong password'
+            leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
+            required
+            {...form.getInputProps('password')}
+          />
 
-        <PasswordInput
-          label='Confirm Password'
-          placeholder='Re-enter your password'
-          leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
-          required
-          {...form.getInputProps('confirmPassword')}
-        />
+          <PasswordInput
+            label='Confirm Password'
+            placeholder='Re-enter your password'
+            leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
+            required
+            {...form.getInputProps('confirmPassword')}
+          />
 
-        <Group justify='flex-end' mt='xl'>
-          <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
-            Create Account & Continue
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify='flex-end' mt='xl'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Create Account & Continue
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Stack>
   );
 }

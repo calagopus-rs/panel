@@ -13,8 +13,8 @@ import Button from '@/elements/Button';
 import NumberInput from '@/elements/input/NumberInput';
 import SizeInput from '@/elements/input/SizeInput';
 import TextInput from '@/elements/input/TextInput';
-import { OobeComponentProps } from '@/routers/OobeRouter';
 import { oobeNodeSchema } from '@/lib/schemas/oobe';
+import { OobeComponentProps } from '@/routers/OobeRouter';
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
@@ -87,83 +87,85 @@ export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
 
       {error && <AlertError error={error} setError={setError} />}
 
-      <Stack gap='md'>
-        <Group grow>
-          <TextInput
-            withAsterisk
-            label='Name'
-            placeholder='My Server'
-            leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
-            {...form.getInputProps('name')}
-          />
-        </Group>
+      <form onSubmit={form.onSubmit(() => onSubmit())}>
+        <Stack gap='md'>
+          <Group grow>
+            <TextInput
+              withAsterisk
+              label='Name'
+              placeholder='My Server'
+              leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
+              {...form.getInputProps('name')}
+            />
+          </Group>
 
-        <Group grow>
-          <TextInput
-            withAsterisk
-            label='URL'
-            description='used for internal communication with the node'
-            leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
-            placeholder='URL'
-            {...form.getInputProps('url')}
-          />
-          <TextInput
-            label='Public URL'
-            description='used for websocket/downloads'
-            leftSection={<FontAwesomeIcon icon={faGlobeAmericas} size='sm' />}
-            placeholder='URL'
-            {...form.getInputProps('publicUrl')}
-          />
-        </Group>
+          <Group grow>
+            <TextInput
+              withAsterisk
+              label='URL'
+              description='used for internal communication with the node'
+              leftSection={<FontAwesomeIcon icon={faGlobe} size='sm' />}
+              placeholder='URL'
+              {...form.getInputProps('url')}
+            />
+            <TextInput
+              label='Public URL'
+              description='used for websocket/downloads'
+              leftSection={<FontAwesomeIcon icon={faGlobeAmericas} size='sm' />}
+              placeholder='URL'
+              {...form.getInputProps('publicUrl')}
+            />
+          </Group>
 
-        <Group grow>
-          <TextInput
-            label='SFTP Host'
-            placeholder='SFTP Host'
-            leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
-            {...form.getInputProps('sftpHost')}
-          />
-          <NumberInput
-            withAsterisk
-            label='SFTP Port'
-            placeholder='SFTP Port'
-            leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
-            min={1}
-            max={65535}
-            {...form.getInputProps('sftpPort')}
-          />
-        </Group>
+          <Group grow>
+            <TextInput
+              label='SFTP Host'
+              placeholder='SFTP Host'
+              leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
+              {...form.getInputProps('sftpHost')}
+            />
+            <NumberInput
+              withAsterisk
+              label='SFTP Port'
+              placeholder='SFTP Port'
+              leftSection={<FontAwesomeIcon icon={faNetworkWired} size='sm' />}
+              min={1}
+              max={65535}
+              {...form.getInputProps('sftpPort')}
+            />
+          </Group>
 
-        <Group grow>
-          <SizeInput
-            withAsterisk
-            label='Memory'
-            mode='mb'
-            min={0}
-            value={form.values.memory}
-            onChange={(value) => form.setFieldValue('memory', value)}
-          />
-          <SizeInput
-            withAsterisk
-            label='Disk'
-            mode='mb'
-            min={0}
-            value={form.values.disk}
-            onChange={(value) => form.setFieldValue('disk', value)}
-          />
-        </Group>
+          <Group grow>
+            <SizeInput
+              withAsterisk
+              label='Memory'
+              mode='mb'
+              min={0}
+              value={form.values.memory}
+              onChange={(value) => form.setFieldValue('memory', value)}
+            />
+            <SizeInput
+              withAsterisk
+              label='Disk'
+              mode='mb'
+              min={0}
+              value={form.values.disk}
+              onChange={(value) => form.setFieldValue('disk', value)}
+            />
+          </Group>
 
-        <Group justify='flex-end' mt='xl'>
-          {!!skipFrom && (
-            <Button variant='outline' onClick={() => skipFrom('node')}>
-              Skip
+          <Group justify='flex-end' mt='xl'>
+            {!!skipFrom && (
+              <Button variant='outline' onClick={() => skipFrom('node')}>
+                Skip
+              </Button>
+            )}
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Create & Continue
             </Button>
-          )}
-          <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
-            Create & Continue
-          </Button>
-        </Group>
-      </Stack>
+          </Group>
+        </Stack>
+      </form>
     </Stack>
   );
 }

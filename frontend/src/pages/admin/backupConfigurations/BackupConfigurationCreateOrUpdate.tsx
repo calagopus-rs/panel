@@ -108,41 +108,29 @@ export default function BackupConfigurationCreateOrUpdate({
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <Select
-            withAsterisk
-            label='Backup Disk'
-            placeholder='Backup Disk'
-            data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
-              value,
-              label,
-            }))}
-            {...form.getInputProps('backupDisk')}
-          />
-        </Group>
-        <Group grow align='start'>
-          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-        </Group>
-        <Group>
-          <Button
-            onClick={() => doCreateOrUpdate(false)}
-            disabled={
-              !form.isValid() ||
-              ((form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && !backupConfigS3Form.isValid()) ||
-              ((form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) &&
-                !backupConfigResticForm.isValid())
-            }
-            loading={loading}
-          >
-            Save
-          </Button>
-          {!contextBackupConfiguration && (
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <Select
+              withAsterisk
+              label='Backup Disk'
+              placeholder='Backup Disk'
+              data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
+                value,
+                label,
+              }))}
+              {...form.getInputProps('backupDisk')}
+            />
+          </Group>
+          <Group grow align='start'>
+            <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+          </Group>
+          <Group>
             <Button
-              onClick={() => doCreateOrUpdate(true)}
+              type='submit'
               disabled={
                 !form.isValid() ||
                 ((form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && !backupConfigS3Form.isValid()) ||
@@ -151,20 +139,35 @@ export default function BackupConfigurationCreateOrUpdate({
               }
               loading={loading}
             >
-              Save & Stay
+              Save
             </Button>
+            {!contextBackupConfiguration && (
+              <Button
+                onClick={() => doCreateOrUpdate(true)}
+                disabled={
+                  !form.isValid() ||
+                  ((form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) &&
+                    !backupConfigS3Form.isValid()) ||
+                  ((form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) &&
+                    !backupConfigResticForm.isValid())
+                }
+                loading={loading}
+              >
+                Save & Stay
+              </Button>
+            )}
+            {contextBackupConfiguration && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+          {(form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && <BackupS3 form={backupConfigS3Form} />}
+          {(form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) && (
+            <BackupRestic form={backupConfigResticForm} />
           )}
-          {contextBackupConfiguration && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-        {(form.values.backupDisk === 's3' || backupConfigS3Form.isDirty()) && <BackupS3 form={backupConfigS3Form} />}
-        {(form.values.backupDisk === 'restic' || backupConfigResticForm.isDirty()) && (
-          <BackupRestic form={backupConfigResticForm} />
-        )}
-      </Stack>
+        </Stack>
+      </form>
     </>
   );
 }

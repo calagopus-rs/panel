@@ -104,88 +104,90 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         Are you sure you want to remove the two factor of <Code>{form.values.username}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
-          <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
+            <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />
+          </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
-          <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
+            <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
+          </Group>
 
-        <Group grow>
-          <Select
-            withAsterisk
-            label='Language'
-            placeholder='Language'
-            data={languages.map((language) => ({
-              label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
-              value: language,
-            }))}
-            searchable
-            {...form.getInputProps('language')}
+          <Group grow>
+            <Select
+              withAsterisk
+              label='Language'
+              placeholder='Language'
+              data={languages.map((language) => ({
+                label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
+                value: language,
+              }))}
+              searchable
+              {...form.getInputProps('language')}
+            />
+
+            <Select
+              label='Role'
+              placeholder='Role'
+              data={roles.items.map((nest) => ({
+                label: nest.name,
+                value: nest.uuid,
+              }))}
+              searchable
+              searchValue={roles.search}
+              onSearchChange={roles.setSearch}
+              allowDeselect
+              {...form.getInputProps('roleUuid')}
+            />
+          </Group>
+
+          <TextInput
+            withAsterisk={!contextUser}
+            label='Password'
+            placeholder='Password'
+            type='password'
+            {...form.getInputProps('password')}
           />
 
-          <Select
-            label='Role'
-            placeholder='Role'
-            data={roles.items.map((nest) => ({
-              label: nest.name,
-              value: nest.uuid,
-            }))}
-            searchable
-            searchValue={roles.search}
-            onSearchChange={roles.setSearch}
-            allowDeselect
-            {...form.getInputProps('roleUuid')}
+          <Switch
+            label='Admin'
+            checked={form.values.admin}
+            onChange={(e) => form.setFieldValue('admin', e.target.checked)}
           />
-        </Group>
+        </Stack>
 
-        <TextInput
-          withAsterisk={!contextUser}
-          label='Password'
-          placeholder='Password'
-          type='password'
-          {...form.getInputProps('password')}
-        />
-
-        <Switch
-          label='Admin'
-          checked={form.values.admin}
-          onChange={(e) => form.setFieldValue('admin', e.target.checked)}
-        />
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-        {!contextUser && (
-          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-            Save & Stay
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
           </Button>
-        )}
-        {contextUser && (
-          <>
-            <Button
-              color='red'
-              variant='outline'
-              onClick={() => setOpenModal('disable_two_factor')}
-              loading={loading}
-              disabled={!form.values.totpEnabled}
-            >
-              Disable Two Factor
+          {!contextUser && (
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+              Save & Stay
             </Button>
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          </>
-        )}
-      </Group>
+          )}
+          {contextUser && (
+            <>
+              <Button
+                color='red'
+                variant='outline'
+                onClick={() => setOpenModal('disable_two_factor')}
+                loading={loading}
+                disabled={!form.values.totpEnabled}
+              >
+                Disable Two Factor
+              </Button>
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            </>
+          )}
+        </Group>
+      </form>
     </>
   );
 }

@@ -6,12 +6,12 @@ import { z } from 'zod';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
 import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
+import Select from '@/elements/input/Select';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
+import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
-import Select from '@/elements/input/Select';
 import { useGlobalStore } from '@/stores/global';
 
 export default function ApplicationContainer() {
@@ -57,45 +57,47 @@ export default function ApplicationContainer() {
         Application Settings
       </Title>
 
-      <Stack>
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <Select
-            withAsterisk
-            label='Language'
-            placeholder='Language'
-            data={languages.map((language) => ({
-              label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
-              value: language,
-            }))}
-            searchable
-            {...form.getInputProps('language')}
-          />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Stack>
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <Select
+              withAsterisk
+              label='Language'
+              placeholder='Language'
+              data={languages.map((language) => ({
+                label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
+                value: language,
+              }))}
+              searchable
+              {...form.getInputProps('language')}
+            />
+          </Group>
+
+          <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
+
+          <Group grow>
+            <Switch
+              label='Enable Telemetry'
+              description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
+              checked={form.values.telemetryEnabled}
+              onChange={(e) => form.setFieldValue('telemetryEnabled', e.target.checked)}
+            />
+            <Switch
+              label='Enable Registration'
+              name='registrationEnabled'
+              checked={form.values.registrationEnabled}
+              onChange={(e) => form.setFieldValue('registrationEnabled', e.target.checked)}
+            />
+          </Group>
+        </Stack>
+
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
         </Group>
-
-        <TextInput withAsterisk label='URL' placeholder='URL' {...form.getInputProps('url')} />
-
-        <Group grow>
-          <Switch
-            label='Enable Telemetry'
-            description='Allow Calagopus to collect limited and anonymous usage data to help improve the application.'
-            checked={form.values.telemetryEnabled}
-            onChange={(e) => form.setFieldValue('telemetryEnabled', e.target.checked)}
-          />
-          <Switch
-            label='Enable Registration'
-            name='registrationEnabled'
-            checked={form.values.registrationEnabled}
-            onChange={(e) => form.setFieldValue('registrationEnabled', e.target.checked)}
-          />
-        </Group>
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-      </Group>
+      </form>
     </>
   );
 }

@@ -75,54 +75,55 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextRole ? 'Update' : 'Create'} Role</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextRole ? 'Update' : 'Create'} Role</Title>
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+          </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-        </Group>
+          <Group grow align='start'>
+            <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+          </Group>
 
-        <Group grow align='start'>
-          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-        </Group>
+          <Group grow align='normal'>
+            {availablePermissions?.serverPermissions && (
+              <PermissionSelector
+                label='Server Permissions'
+                permissionsMapType='serverPermissions'
+                permissions={availablePermissions.serverPermissions}
+                selectedPermissions={form.values.serverPermissions}
+                setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
+              />
+            )}
+            {availablePermissions?.adminPermissions && (
+              <PermissionSelector
+                label='Admin Permissions'
+                permissionsMapType='adminPermissions'
+                permissions={availablePermissions.adminPermissions}
+                selectedPermissions={form.values.adminPermissions}
+                setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
+              />
+            )}
+          </Group>
 
-        <Group grow align='normal'>
-          {availablePermissions?.serverPermissions && (
-            <PermissionSelector
-              label='Server Permissions'
-              permissionsMapType='serverPermissions'
-              permissions={availablePermissions.serverPermissions}
-              selectedPermissions={form.values.serverPermissions}
-              setSelectedPermissions={(permissions) => form.setFieldValue('serverPermissions', permissions)}
-            />
-          )}
-          {availablePermissions?.adminPermissions && (
-            <PermissionSelector
-              label='Admin Permissions'
-              permissionsMapType='adminPermissions'
-              permissions={availablePermissions.adminPermissions}
-              selectedPermissions={form.values.adminPermissions}
-              setSelectedPermissions={(permissions) => form.setFieldValue('adminPermissions', permissions)}
-            />
-          )}
-        </Group>
-
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextRole && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextRole && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            {!contextRole && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextRole && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }

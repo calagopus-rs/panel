@@ -98,79 +98,81 @@ export default function DatabaseHostCreateOrUpdate({
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextDatabaseHost ? 'Update' : 'Create'} Database Host</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextDatabaseHost ? 'Update' : 'Create'} Database Host</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <Select
-            withAsterisk
-            label='Type'
-            data={Object.entries(databaseTypeLabelMapping).map(([value, label]) => ({
-              value,
-              label,
-            }))}
-            disabled={!!contextDatabaseHost}
-            {...form.getInputProps('type')}
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <Select
+              withAsterisk
+              label='Type'
+              data={Object.entries(databaseTypeLabelMapping).map(([value, label]) => ({
+                value,
+                label,
+              }))}
+              disabled={!!contextDatabaseHost}
+              {...form.getInputProps('type')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
+            <TextInput
+              withAsterisk={!contextDatabaseHost}
+              label='Password'
+              placeholder='Password'
+              type='password'
+              {...form.getInputProps('password')}
+              onChange={(e) => form.setFieldValue('password', e.target.value || null)}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput withAsterisk label='Host' placeholder='Host' {...form.getInputProps('host')} />
+            <NumberInput withAsterisk label='Port' placeholder='Port' min={0} {...form.getInputProps('port')} />
+          </Group>
+
+          <Group grow>
+            <TextInput label='Public Host' placeholder='Public Host' {...form.getInputProps('publicHost')} />
+            <NumberInput
+              label='Public Port'
+              placeholder='Public Port'
+              min={0}
+              {...form.getInputProps('publicPort')}
+              value={form.values.publicPort || ''}
+              onChange={(v) => form.setFieldValue('publicPort', Number(v) || 0)}
+            />
+          </Group>
+
+          <Switch
+            label='Public'
+            checked={form.values.public}
+            onChange={(e) => form.setFieldValue('public', e.target.checked)}
           />
-        </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
-          <TextInput
-            withAsterisk={!contextDatabaseHost}
-            label='Password'
-            placeholder='Password'
-            type='password'
-            {...form.getInputProps('password')}
-            onChange={(e) => form.setFieldValue('password', e.target.value || null)}
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput withAsterisk label='Host' placeholder='Host' {...form.getInputProps('host')} />
-          <NumberInput withAsterisk label='Port' placeholder='Port' min={0} {...form.getInputProps('port')} />
-        </Group>
-
-        <Group grow>
-          <TextInput label='Public Host' placeholder='Public Host' {...form.getInputProps('publicHost')} />
-          <NumberInput
-            label='Public Port'
-            placeholder='Public Port'
-            min={0}
-            {...form.getInputProps('publicPort')}
-            value={form.values.publicPort || ''}
-            onChange={(v) => form.setFieldValue('publicPort', Number(v) || 0)}
-          />
-        </Group>
-
-        <Switch
-          label='Public'
-          checked={form.values.public}
-          onChange={(e) => form.setFieldValue('public', e.target.checked)}
-        />
-
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextDatabaseHost && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextDatabaseHost && (
-            <>
-              <Button variant='outline' onClick={doTest} loading={loading}>
-                Test
+            {!contextDatabaseHost && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
               </Button>
-              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-                Delete
-              </Button>
-            </>
-          )}
-        </Group>
-      </Stack>
+            )}
+            {contextDatabaseHost && (
+              <>
+                <Button variant='outline' onClick={doTest} loading={loading}>
+                  Test
+                </Button>
+                <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                  Delete
+                </Button>
+              </>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }

@@ -49,34 +49,36 @@ export default function PasswordContainer() {
         <Title order={2} c='white'>
           Password
         </Title>
-        <Stack className='mt-4'>
-          <PasswordInput
-            withAsterisk
-            label='Current Password'
-            placeholder='Current Password'
-            autoComplete='current-password'
-            {...form.getInputProps('currentPassword')}
-          />
-          <PasswordInput
-            withAsterisk
-            label='New Password'
-            placeholder='New Password'
-            autoComplete='new-password'
-            {...form.getInputProps('newPassword')}
-          />
-          <PasswordInput
-            withAsterisk
-            label='Confirm New Password'
-            placeholder='Confirm New Password'
-            autoComplete='new-password'
-            {...form.getInputProps('confirmNewPassword')}
-          />
-          <Group>
-            <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>
-              Update Password
-            </Button>
-          </Group>
-        </Stack>
+        <form onSubmit={form.onSubmit(() => doUpdate())}>
+          <Stack className='mt-4'>
+            <PasswordInput
+              withAsterisk
+              label='Current Password'
+              placeholder='Current Password'
+              autoComplete='current-password'
+              {...form.getInputProps('currentPassword')}
+            />
+            <PasswordInput
+              withAsterisk
+              label='New Password'
+              placeholder='New Password'
+              autoComplete='new-password'
+              {...form.getInputProps('newPassword')}
+            />
+            <PasswordInput
+              withAsterisk
+              label='Confirm New Password'
+              placeholder='Confirm New Password'
+              autoComplete='new-password'
+              {...form.getInputProps('confirmNewPassword')}
+            />
+            <Group>
+              <Button type='submit' disabled={!form.isValid()} loading={loading}>
+                Update Password
+              </Button>
+            </Group>
+          </Stack>
+        </form>
       </Card>
     </Grid.Col>
   );

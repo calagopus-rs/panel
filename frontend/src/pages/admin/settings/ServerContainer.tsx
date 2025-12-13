@@ -55,44 +55,46 @@ export default function ServerContainer() {
         Server Settings
       </Title>
 
-      <Stack>
-        <Group grow>
-          <SizeInput
-            withAsterisk
-            label='Max File Manager View Size'
-            mode='b'
-            min={0}
-            value={form.values.maxFileManagerViewSize}
-            onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
-          />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Stack>
+          <Group grow>
+            <SizeInput
+              withAsterisk
+              label='Max File Manager View Size'
+              mode='b'
+              min={0}
+              value={form.values.maxFileManagerViewSize}
+              onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
+            />
 
-          <NumberInput
-            label='Max Server Schedule Steps'
-            placeholder='Max Server Schedule Steps'
-            {...form.getInputProps('maxSchedulesStepCount')}
-          />
+            <NumberInput
+              label='Max Server Schedule Steps'
+              placeholder='Max Server Schedule Steps'
+              {...form.getInputProps('maxSchedulesStepCount')}
+            />
+          </Group>
+
+          <Group grow>
+            <Switch
+              label='Allow Overwriting Custom Docker Image'
+              checked={form.values.allowOverwritingCustomDockerImage}
+              onChange={(e) => form.setFieldValue('allowOverwritingCustomDockerImage', e.target.checked)}
+            />
+
+            <Switch
+              label='Allow Editing Startup Command'
+              checked={form.values.allowEditingStartupCommand}
+              onChange={(e) => form.setFieldValue('allowEditingStartupCommand', e.target.checked)}
+            />
+          </Group>
+        </Stack>
+
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
         </Group>
-
-        <Group grow>
-          <Switch
-            label='Allow Overwriting Custom Docker Image'
-            checked={form.values.allowOverwritingCustomDockerImage}
-            onChange={(e) => form.setFieldValue('allowOverwritingCustomDockerImage', e.target.checked)}
-          />
-
-          <Switch
-            label='Allow Editing Startup Command'
-            checked={form.values.allowEditingStartupCommand}
-            onChange={(e) => form.setFieldValue('allowEditingStartupCommand', e.target.checked)}
-          />
-        </Group>
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-      </Group>
+      </form>
     </>
   );
 }

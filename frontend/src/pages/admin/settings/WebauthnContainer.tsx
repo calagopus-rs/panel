@@ -8,9 +8,9 @@ import { httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import { isIP } from '@/lib/ip';
+import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
 import { useToast } from '@/providers/ToastProvider';
 import { useAdminStore } from '@/stores/admin';
-import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
 
 export default function WebauthnContainer() {
   const { addToast } = useToast();
@@ -63,21 +63,23 @@ export default function WebauthnContainer() {
         Webauthn Settings
       </Title>
 
-      <Stack>
-        <Group grow>
-          <TextInput withAsterisk label='RP Id' placeholder='RP Id' {...form.getInputProps('rpId')} />
-          <TextInput withAsterisk label='RP Origin' placeholder='RP Origin' {...form.getInputProps('rpOrigin')} />
-        </Group>
-      </Stack>
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Stack>
+          <Group grow>
+            <TextInput withAsterisk label='RP Id' placeholder='RP Id' {...form.getInputProps('rpId')} />
+            <TextInput withAsterisk label='RP Origin' placeholder='RP Origin' {...form.getInputProps('rpOrigin')} />
+          </Group>
+        </Stack>
 
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-        <Button variant='outline' onClick={doAutofill} disabled={loading}>
-          Autofill
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
+          <Button variant='outline' onClick={doAutofill} disabled={loading}>
+            Autofill
+          </Button>
+        </Group>
+      </form>
     </>
   );
 }

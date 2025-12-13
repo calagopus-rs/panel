@@ -115,120 +115,128 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextNode ? 'Update' : 'Create'} Node</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextNode ? 'Update' : 'Create'} Node</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <Select
-            withAsterisk
-            label='Location'
-            placeholder='Location'
-            data={locations.items.map((location) => ({
-              label: location.name,
-              value: location.uuid,
-            }))}
-            searchable
-            searchValue={locations.search}
-            onSearchChange={locations.setSearch}
-            {...form.getInputProps('locationUuid')}
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <Select
+              withAsterisk
+              label='Location'
+              placeholder='Location'
+              data={locations.items.map((location) => ({
+                label: location.name,
+                value: location.uuid,
+              }))}
+              searchable
+              searchValue={locations.search}
+              onSearchChange={locations.setSearch}
+              {...form.getInputProps('locationUuid')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput
+              withAsterisk
+              label='URL'
+              description='used for internal communication with the node'
+              placeholder='URL'
+              {...form.getInputProps('url')}
+            />
+            <TextInput
+              label='Public URL'
+              description='used for websocket/downloads'
+              placeholder='URL'
+              {...form.getInputProps('publicUrl')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput label='SFTP Host' placeholder='SFTP Host' {...form.getInputProps('sftpHost')} />
+            <NumberInput
+              withAsterisk
+              label='SFTP Port'
+              placeholder='SFTP Port'
+              min={1}
+              max={65535}
+              {...form.getInputProps('sftpPort')}
+            />
+          </Group>
+
+          <Group grow>
+            <NumberInput
+              withAsterisk
+              label='Memory MB'
+              placeholder='Memory MB'
+              min={1024}
+              {...form.getInputProps('memory')}
+            />
+            <NumberInput
+              withAsterisk
+              label='Disk MB'
+              placeholder='Disk MB'
+              min={1024}
+              {...form.getInputProps('disk')}
+            />
+          </Group>
+
+          <Group grow align='start'>
+            <Select
+              allowDeselect
+              label='Backup Configuration'
+              data={[
+                {
+                  label: 'Inherit from Location',
+                  value: uuidNil,
+                },
+                ...backupConfigurations.items.map((backupConfiguration) => ({
+                  label: backupConfiguration.name,
+                  value: backupConfiguration.uuid,
+                })),
+              ]}
+              searchable
+              searchValue={backupConfigurations.search}
+              onSearchChange={backupConfigurations.setSearch}
+              {...form.getInputProps('backupConfigurationUuid')}
+            />
+            <TextInput
+              label='Maintenance Message'
+              placeholder='Maintenance Message'
+              {...form.getInputProps('maintenanceMessage')}
+            />
+          </Group>
+
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+
+          <Switch
+            label='Public'
+            checked={form.values.public}
+            onChange={(e) => form.setFieldValue('public', e.target.checked)}
           />
-        </Group>
 
-        <Group grow>
-          <TextInput
-            withAsterisk
-            label='URL'
-            description='used for internal communication with the node'
-            placeholder='URL'
-            {...form.getInputProps('url')}
-          />
-          <TextInput
-            label='Public URL'
-            description='used for websocket/downloads'
-            placeholder='URL'
-            {...form.getInputProps('publicUrl')}
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput label='SFTP Host' placeholder='SFTP Host' {...form.getInputProps('sftpHost')} />
-          <NumberInput
-            withAsterisk
-            label='SFTP Port'
-            placeholder='SFTP Port'
-            min={1}
-            max={65535}
-            {...form.getInputProps('sftpPort')}
-          />
-        </Group>
-
-        <Group grow>
-          <NumberInput
-            withAsterisk
-            label='Memory MB'
-            placeholder='Memory MB'
-            min={1024}
-            {...form.getInputProps('memory')}
-          />
-          <NumberInput withAsterisk label='Disk MB' placeholder='Disk MB' min={1024} {...form.getInputProps('disk')} />
-        </Group>
-
-        <Group grow align='start'>
-          <Select
-            allowDeselect
-            label='Backup Configuration'
-            data={[
-              {
-                label: 'Inherit from Location',
-                value: uuidNil,
-              },
-              ...backupConfigurations.items.map((backupConfiguration) => ({
-                label: backupConfiguration.name,
-                value: backupConfiguration.uuid,
-              })),
-            ]}
-            searchable
-            searchValue={backupConfigurations.search}
-            onSearchChange={backupConfigurations.setSearch}
-            {...form.getInputProps('backupConfigurationUuid')}
-          />
-          <TextInput
-            label='Maintenance Message'
-            placeholder='Maintenance Message'
-            {...form.getInputProps('maintenanceMessage')}
-          />
-        </Group>
-
-        <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-
-        <Switch
-          label='Public'
-          checked={form.values.public}
-          onChange={(e) => form.setFieldValue('public', e.target.checked)}
-        />
-
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextNode && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextNode && (
-            <Button color='red' variant='outline' onClick={doResetToken} loading={loading}>
-              Reset Token
-            </Button>
-          )}
-          {contextNode && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            {!contextNode && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextNode && (
+              <Button color='red' variant='outline' onClick={doResetToken} loading={loading}>
+                Reset Token
+              </Button>
+            )}
+            {contextNode && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }
