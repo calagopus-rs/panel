@@ -167,19 +167,6 @@ mod patch {
                 .is_some_and(|a| a.uuid == allocation.uuid)
             {
                 if !primary {
-                    if server
-                        .egg
-                        .config_allocations
-                        .user_self_assign
-                        .require_primary_allocation
-                    {
-                        transaction.rollback().await?;
-
-                        return ApiResponse::error("cannot unset primary allocation")
-                            .with_status(StatusCode::BAD_REQUEST)
-                            .ok();
-                    }
-
                     sqlx::query!(
                         "UPDATE servers
                         SET allocation_uuid = NULL

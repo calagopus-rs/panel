@@ -15,7 +15,7 @@ import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvaila
 import getNodes from '@/api/admin/nodes/getNodes';
 import createServer from '@/api/admin/servers/createServer';
 import getUsers from '@/api/admin/users/getUsers';
-import { httpErrorToHuman } from '@/api/axios';
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
 import Alert from '@/elements/Alert';
 import Button from '@/elements/Button';
 import MultiSelect from '@/elements/input/MultiSelect';
@@ -102,15 +102,22 @@ export default function ServerCreate() {
     fetcher: (search) => getNests(1, search),
   });
   const eggs = useSearchableResource<AdminNestEgg>({
-    fetcher: (search) => getEggs(selectedNestUuid!, 1, search),
+    fetcher: (search) =>
+      selectedNestUuid ? getEggs(selectedNestUuid, 1, search) : Promise.resolve(getEmptyPaginationSet()),
     deps: [selectedNestUuid],
   });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(form.values.nodeUuid, 1, search),
+    fetcher: (search) =>
+      form.values.nodeUuid
+        ? getAvailableNodeAllocations(form.values.nodeUuid, 1, search)
+        : Promise.resolve(getEmptyPaginationSet()),
     deps: [form.values.nodeUuid],
   });
   const availableAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(form.values.nodeUuid, 1, search),
+    fetcher: (search) =>
+      form.values.nodeUuid
+        ? getAvailableNodeAllocations(form.values.nodeUuid, 1, search)
+        : Promise.resolve(getEmptyPaginationSet()),
     deps: [form.values.nodeUuid],
   });
   const backupConfigurations = useSearchableResource<BackupConfiguration>({

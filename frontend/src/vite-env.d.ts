@@ -834,6 +834,7 @@ declare global {
   }
 
   type FileOperation = FileOperationCompress | FileOperationDecompress | FileOperationPull;
+  type UserToastPosition = 'top_left' | 'top_center' | 'top_right' | 'bottom_left' | 'bottom_center' | 'bottom_right';
 
   interface UpdateUser {
     username: string;
@@ -851,6 +852,8 @@ declare global {
     uuid: string;
     role: Role;
     avatar?: string;
+    toastPosition: UserToastPosition;
+    startOnGroupedServers: boolean;
     created: Date;
   }
 

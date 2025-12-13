@@ -571,6 +571,17 @@ impl DeletableModel for ServerDatabase {
             if let Err(err) = run_delete().await
                 && !options.force
             {
+                if err
+                    .downcast_ref::<sqlx::Error>()
+                    .and_then(|e| e.as_database_error())
+                    .is_some_and(|e| e.message().contains("is being accessed"))
+                {
+                    return Err(crate::response::DisplayError::new(
+                        "this database is being accessed, unable to delete.",
+                    )
+                    .into());
+                }
+
                 return Err(err);
             }
 

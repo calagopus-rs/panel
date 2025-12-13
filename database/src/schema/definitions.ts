@@ -21,6 +21,14 @@ import {
 export const databaseTypeEnum = new DatabaseEnum('database_type', ['MYSQL', 'POSTGRES']);
 export const serverStatusEnum = new DatabaseEnum('server_status', ['INSTALLING', 'INSTALL_FAILED', 'RESTORING_BACKUP']);
 export const backupDiskEnum = new DatabaseEnum('backup_disk', ['LOCAL', 'S3', 'DDUP_BAK', 'BTRFS', 'ZFS', 'RESTIC']);
+export const userToastPositionEnum = new DatabaseEnum('user_toast_position', [
+  'TOP_LEFT',
+  'TOP_CENTER',
+  'TOP_RIGHT',
+  'BOTTOM_LEFT',
+  'BOTTOM_CENTER',
+  'BOTTOM_RIGHT',
+]);
 
 export const settingsTable = new DatabaseTable('settings')
   .addColumn('key', varchar({ length: 255 }).primaryKey().notNull())
@@ -62,6 +70,8 @@ export const usersTable = new DatabaseTable('users')
   .addColumn('totp_enabled', boolean().default(false).notNull())
   .addColumn('totp_secret', char({ length: 32 }))
   .addColumn('language', varchar({ length: 15 }).default('en-US').notNull())
+  .addColumn('toast_position', userToastPositionEnum.intoDrizzleEnum()().default('TOP_RIGHT').notNull())
+  .addColumn('start_on_grouped_servers', boolean().default(true).notNull())
   .addColumn('created', timestamp().defaultNow().notNull())
   .addConfigBuilder((cols) => [
     uniqueIndex('users_external_id_idx').on(cols.external_id),

@@ -65,7 +65,7 @@ export default function ServerNetwork() {
 
       <ContextMenuProvider>
         <Table
-          columns={['Hostname', 'Port', 'Notes', '', '']}
+          columns={['', 'Hostname', 'Port', 'Notes', 'Created', '']}
           loading={loading}
           pagination={allocations}
           onPageSelect={setPage}

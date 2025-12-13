@@ -2,7 +2,7 @@ use crate::{prelude::*, response::ApiResponse, storage::StorageUrlRetriever};
 use axum::http::StatusCode;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use sqlx::{Row, postgres::PgRow};
+use sqlx::{Row, postgres::PgRow, prelude::Type};
 use std::{
     collections::BTreeMap,
     sync::{Arc, LazyLock},
@@ -158,6 +158,19 @@ impl PermissionManager {
     }
 }
 
+#[derive(ToSchema, Serialize, Deserialize, Type, PartialEq, Eq, Hash, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+#[schema(rename_all = "snake_case")]
+#[sqlx(type_name = "user_toast_position", rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum UserToastPosition {
+    TopLeft,
+    TopCenter,
+    TopRight,
+    BottomLeft,
+    BottomCenter,
+    BottomRight,
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 pub struct User {
     pub uuid: uuid::Uuid,
@@ -176,6 +189,8 @@ pub struct User {
     pub totp_secret: Option<String>,
 
     pub language: String,
+    pub toast_position: UserToastPosition,
+    pub start_on_grouped_servers: bool,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -199,6 +214,11 @@ impl BaseModel for User {
             ("users.totp_enabled", format!("{prefix}totp_enabled")),
             ("users.totp_secret", format!("{prefix}totp_secret")),
             ("users.language", format!("{prefix}language")),
+            ("users.toast_position", format!("{prefix}toast_position")),
+            (
+                "users.start_on_grouped_servers",
+                format!("{prefix}start_on_grouped_servers"),
+            ),
             ("users.created", format!("{prefix}created")),
         ]);
 
@@ -231,6 +251,9 @@ impl BaseModel for User {
             totp_enabled: row.try_get(format!("{prefix}totp_enabled").as_str())?,
             totp_secret: row.try_get(format!("{prefix}totp_secret").as_str())?,
             language: row.try_get(format!("{prefix}language").as_str())?,
+            toast_position: row.try_get(format!("{prefix}toast_position").as_str())?,
+            start_on_grouped_servers: row
+                .try_get(format!("{prefix}start_on_grouped_servers").as_str())?,
             created: row.try_get(format!("{prefix}created").as_str())?,
         })
     }
@@ -335,7 +358,7 @@ impl User {
 
         database
             .cache
-            .cached(&format!("user::session::{session}"), 15, || async {
+            .cached(&format!("user::session::{session}"), 5, || async {
                 let row = sqlx::query(&format!(
                     r#"
                     SELECT {}, {}
@@ -368,7 +391,7 @@ impl User {
     ) -> Result<Option<(Self, super::user_api_key::UserApiKey)>, anyhow::Error> {
         database
             .cache
-            .cached(&format!("user::api_key::{key}"), 15, || async {
+            .cached(&format!("user::api_key::{key}"), 5, || async {
                 let row = sqlx::query(&format!(
                     r#"
                     SELECT {}, {}
@@ -681,6 +704,8 @@ impl User {
             admin: self.admin,
             totp_enabled: self.totp_enabled,
             language: self.language,
+            toast_position: self.toast_position,
+            start_on_grouped_servers: self.start_on_grouped_servers,
             created: self.created.and_utc(),
         }
     }
@@ -778,6 +803,8 @@ pub struct ApiFullUser {
     pub totp_enabled: bool,
 
     pub language: String,
+    pub toast_position: UserToastPosition,
+    pub start_on_grouped_servers: bool,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

@@ -115,7 +115,7 @@ function Footer() {
 
   return (
     <>
-      <div className="mt-auto">
+      <div className='mt-auto'>
         <Divider />
       </div>
 

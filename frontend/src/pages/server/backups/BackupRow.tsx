@@ -130,7 +130,7 @@ export default function BackupRow({ backup }: { backup: ServerBackupWithProgress
               <TableData>{bytesToString(backup.bytes)}</TableData>
             ) : (
               <TableData colSpan={2}>
-                <Progress value={((backup.progress?.progress || 0) / (backup.progress?.total || 0)) * 100} />
+                <Progress value={((backup.progress?.progress || 0) / (backup.progress?.total || 1)) * 100} />
               </TableData>
             )}
 

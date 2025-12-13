@@ -19,7 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
-  const { addToast } = useToast();
+  const { setToastPosition, addToast } = useToast();
   const { setLanguage } = useTranslations();
 
   const [loading, setLoading] = useState(true);
@@ -27,9 +27,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (user) {
+      setToastPosition(user.toastPosition);
       setLanguage(user.language);
     }
-  }, [user, setLanguage]);
+  }, [user, setToastPosition, setLanguage]);
 
   useEffect(() => {
     getMe()

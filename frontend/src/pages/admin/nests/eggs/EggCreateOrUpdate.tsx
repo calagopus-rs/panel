@@ -16,7 +16,7 @@ import getEgg from '@/api/admin/nests/eggs/getEgg';
 import updateEgg from '@/api/admin/nests/eggs/updateEgg';
 import updateEggUsingImport from '@/api/admin/nests/eggs/updateEggUsingImport';
 import updateEggUsingRepository from '@/api/admin/nests/eggs/updateEggUsingRepository';
-import { httpErrorToHuman } from '@/api/axios';
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
@@ -129,7 +129,10 @@ export default function EggCreateOrUpdate({
     defaultSearchValue: contextEgg?.eggRepositoryEgg?.eggRepository.name,
   });
   const eggRepositoryEggs = useSearchableResource<AdminEggRepositoryEgg>({
-    fetcher: (search) => getEggRepositoryEggs(selectedEggRepositoryUuid, 1, search),
+    fetcher: (search) =>
+      selectedEggRepositoryUuid
+        ? getEggRepositoryEggs(selectedEggRepositoryUuid, 1, search)
+        : Promise.resolve(getEmptyPaginationSet()),
     defaultSearchValue: contextEgg?.eggRepositoryEgg?.name,
     deps: [selectedEggRepositoryUuid],
   });

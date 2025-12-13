@@ -67,6 +67,23 @@ export default function ServerAllocationRow({
       });
   };
 
+  const doUnsetPrimary = () => {
+    updateServerAllocation(server.uuid, allocation.uuid, { primary: false })
+      .then(() => {
+        setServerAllocations({
+          ...serverAllocations,
+          data: serverAllocations.data.map((a) => ({
+            ...a,
+            isPrimary: false,
+          })),
+        });
+        addToast('Allocation unset as primary.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
   const doRemove = async () => {
     await deleteServerAllocation(server.uuid, allocation.uuid)
       .then(() => {
@@ -115,16 +132,28 @@ export default function ServerAllocationRow({
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faStar, label: 'Set Primary', onClick: doSetPrimary, color: 'gray' },
+          { icon: faStar, label: 'Set Primary', hidden: allocation.isPrimary, onClick: doSetPrimary, color: 'gray' },
+          {
+            icon: faStar,
+            label: 'Unset Primary',
+            hidden: !allocation.isPrimary,
+            onClick: doUnsetPrimary,
+            color: 'red',
+          },
           { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('remove'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
-          <TableRow>
-            <td className='relative cursor-pointer w-10 text-center'>
+          <TableRow
+            onContextMenu={(e) => {
+              e.preventDefault();
+              openMenu(e.pageX, e.pageY);
+            }}
+          >
+            <td className='relative w-10 text-center'>
               {allocation.isPrimary && (
                 <Tooltip label='Primary'>
-                  <FontAwesomeIcon icon={faStar} className='text-yellow-500' />
+                  <FontAwesomeIcon icon={faStar} className='text-yellow-500 ml-3' />
                 </Tooltip>
               )}
             </td>

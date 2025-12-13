@@ -1,8 +1,7 @@
-import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios';
 import deleteAllocation from '@/api/server/allocations/deleteAllocation';
-import Badge from '@/elements/Badge';
 import Code from '@/elements/Code';
 import ContextMenu from '@/elements/ContextMenu';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal';
@@ -10,12 +9,52 @@ import { TableData, TableRow } from '@/elements/Table';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 import AllocationEditModal from './modals/AllocationEditModal';
+import updateAllocation from '@/api/server/allocations/updateAllocation';
+import Tooltip from '@/elements/Tooltip';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { formatDateTime, formatTimestamp } from '@/lib/time';
 
 export default function AllocationRow({ allocation }: { allocation: ServerAllocation }) {
   const { addToast } = useToast();
-  const { server, removeAllocation } = useServerStore();
+  const { server, allocations, removeAllocation, setAllocations, updateServer } = useServerStore();
 
-  const [openModal, setOpenModal] = useState<'edit' | 'delete' | null>(null);
+  const [openModal, setOpenModal] = useState<'edit' | 'remove' | null>(null);
+
+  const doSetPrimary = () => {
+    updateAllocation(server.uuid, allocation.uuid, { primary: true })
+      .then(() => {
+        setAllocations({
+          ...allocations,
+          data: allocations.data.map((a) => ({
+            ...a,
+            isPrimary: a.uuid === allocation.uuid,
+          })),
+        });
+        updateServer({ allocation });
+        addToast('Allocation set as primary.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
+
+  const doUnsetPrimary = () => {
+    updateAllocation(server.uuid, allocation.uuid, { primary: false })
+      .then(() => {
+        setAllocations({
+          ...allocations,
+          data: allocations.data.map((a) => ({
+            ...a,
+            isPrimary: false,
+          })),
+        });
+        updateServer({ allocation: null });
+        addToast('Allocation unset as primary.', 'success');
+      })
+      .catch((msg) => {
+        addToast(httpErrorToHuman(msg), 'error');
+      });
+  };
 
   const doRemove = async () => {
     await deleteAllocation(server.uuid, allocation.uuid)
@@ -31,8 +70,9 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
   return (
     <>
       <AllocationEditModal allocation={allocation} opened={openModal === 'edit'} onClose={() => setOpenModal(null)} />
+
       <ConfirmationModal
-        opened={openModal === 'delete'}
+        opened={openModal === 'remove'}
         onClose={() => setOpenModal(null)}
         title='Confirm Allocation Removal'
         confirm='Remove'
@@ -48,7 +88,15 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
       <ContextMenu
         items={[
           { icon: faPencil, label: 'Edit', onClick: () => setOpenModal('edit'), color: 'gray' },
-          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('delete'), color: 'red' },
+          { icon: faStar, label: 'Set Primary', hidden: allocation.isPrimary, onClick: doSetPrimary, color: 'gray' },
+          {
+            icon: faStar,
+            label: 'Unset Primary',
+            hidden: !allocation.isPrimary,
+            onClick: doUnsetPrimary,
+            color: 'red',
+          },
+          { icon: faTrash, label: 'Remove', onClick: () => setOpenModal('remove'), color: 'red' },
         ]}
       >
         {({ openMenu }) => (
@@ -58,6 +106,14 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
               openMenu(e.pageX, e.pageY);
             }}
           >
+            <td className='relative w-10 text-center'>
+              {allocation.isPrimary && (
+                <Tooltip label='Primary'>
+                  <FontAwesomeIcon icon={faStar} className='text-yellow-500 ml-3' />
+                </Tooltip>
+              )}
+            </td>
+
             <TableData>
               <Code>{allocation.ipAlias ?? allocation.ip}</Code>
             </TableData>
@@ -68,7 +124,9 @@ export default function AllocationRow({ allocation }: { allocation: ServerAlloca
 
             <TableData>{allocation.notes ?? 'No notes'}</TableData>
 
-            <TableData>{allocation.isPrimary ? <Badge>Primary</Badge> : <Badge color='gray'>Other</Badge>}</TableData>
+            <TableData>
+              <Tooltip label={formatDateTime(allocation.created)}>{formatTimestamp(allocation.created)}</Tooltip>
+            </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

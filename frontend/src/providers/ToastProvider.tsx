@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import Notification from '@/elements/Notification';
+import classNames from 'classnames';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
@@ -11,6 +12,9 @@ interface Toast {
 }
 
 interface ToastContextType {
+  toastPosition: UserToastPosition;
+  setToastPosition: (position: UserToastPosition) => void;
+
   addToast: (message: string, type?: ToastType) => number;
   dismissToast: (id: number) => void;
 }
@@ -34,12 +38,43 @@ const getToastColor = (type: ToastType) => {
   }
 };
 
-export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [toasts, setToasts] = useState<Toast[]>([]);
+const getToastPositionClasses = (position: UserToastPosition) => {
+  switch (position) {
+    case 'top_left':
+      return 'top-4 left-4';
+    case 'top_center':
+      return 'top-4 left-1/2 -translate-x-1/2';
+    case 'top_right':
+      return 'top-4 right-4';
+    case 'bottom_left':
+      return 'bottom-4 left-4';
+    case 'bottom_center':
+      return 'bottom-4 left-1/2 -translate-x-1/2';
+    case 'bottom_right':
+      return 'bottom-4 right-4';
+  }
+};
 
-  const dismissToast = useCallback((id: number) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  }, []);
+const getToastPositionInitial = (position: UserToastPosition) => {
+  switch (position) {
+    case 'top_left':
+      return { opacity: 0, x: -50, y: 0 };
+    case 'top_center':
+      return { opacity: 0, x: 0, y: -75 };
+    case 'top_right':
+      return { opacity: 0, x: 50, y: 0 };
+    case 'bottom_left':
+      return { opacity: 0, x: -50, y: 0 };
+    case 'bottom_center':
+      return { opacity: 0, x: 0, y: 75 };
+    case 'bottom_right':
+      return { opacity: 0, x: 50, y: 0 };
+  }
+};
+
+export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [toastPosition, setToastPosition] = useState<UserToastPosition>('top_right');
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((message: string, type: ToastType = 'success') => {
     const id = toastId++;
@@ -52,25 +87,31 @@ export const ToastProvider: FC<{ children: ReactNode }> = ({ children }) => {
     return id;
   }, []);
 
+  const dismissToast = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  }, []);
+
   const contextValue = useMemo(
     () => ({
+      toastPosition,
+      setToastPosition,
       addToast,
       dismissToast,
     }),
-    [addToast, dismissToast],
+    [toastPosition, setToastPosition, addToast, dismissToast],
   );
 
   return (
     <ToastContext.Provider value={contextValue}>
       {children}
-      <div className='fixed top-4 right-4 z-999 space-y-2'>
+      <div className={classNames('fixed z-999 space-y-2', getToastPositionClasses(toastPosition))}>
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 50 }}
+              initial={getToastPositionInitial(toastPosition)}
+              animate={{ opacity: 1, x: 0, y: 0 }}
+              exit={getToastPositionInitial(toastPosition)}
               transition={{ duration: 0.3 }}
               className='w-72'
             >

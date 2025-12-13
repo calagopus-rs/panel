@@ -5,7 +5,7 @@ import Container from '@/elements/Container';
 import Sidebar from '@/elements/Sidebar';
 import Spinner from '@/elements/Spinner';
 import { to } from '@/lib/routes';
-import DashboardHome from '@/pages/dashboard/home/DashboardHome';
+import DashboardHomeGrouped from '@/pages/dashboard/home/DashboardHomeGrouped';
 import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll';
 import NotFound from '@/pages/NotFound';
 import { useAuth } from '@/providers/AuthProvider';
@@ -70,8 +70,17 @@ export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
         <Container isNormal={isNormal}>
           <Suspense fallback={<Spinner.Centered />}>
             <Routes>
-              <Route path='' element={<DashboardHome />} />
-              <Route path='/all' element={<DashboardHomeAll />} />
+              {user?.startOnGroupedServers ? (
+                <>
+                  <Route path='' element={<DashboardHomeGrouped />} />
+                  <Route path='/all' element={<DashboardHomeAll />} />
+                </>
+              ) : (
+                <>
+                  <Route path='' element={<DashboardHomeAll />} />
+                  <Route path='/grouped' element={<DashboardHomeGrouped />} />
+                </>
+              )}
               {accountRoutes
                 .filter((route) => !route.filter || route.filter())
                 .map(({ path, element: Element }) => (

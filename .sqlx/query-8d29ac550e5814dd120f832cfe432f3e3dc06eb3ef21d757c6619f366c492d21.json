@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE users\n            SET username = $2, name_first = $3, name_last = $4, language = $5, toast_position = $6, start_on_grouped_servers = $7\n            WHERE users.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "user_toast_position",
+            "kind": {
+              "Enum": [
+                "TOP_LEFT",
+                "TOP_CENTER",
+                "TOP_RIGHT",
+                "BOTTOM_LEFT",
+                "BOTTOM_CENTER",
+                "BOTTOM_RIGHT"
+              ]
+            }
+          }
+        },
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8d29ac550e5814dd120f832cfe432f3e3dc06eb3ef21d757c6619f366c492d21"
+}

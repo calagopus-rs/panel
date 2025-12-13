@@ -20,15 +20,11 @@ export function useSearchableResource<T>({
 
   const [items, setItems] = useState<T[]>([]);
   const [search, setSearch] = useState(defaultSearchValue);
-  const [doRefetch, setDoRefetch] = useState(false);
 
   const fetchData = (searchValue: string) => {
     fetcher(searchValue)
       .then((response) => {
         setItems(response.data);
-        if (response.total > response.data.length) {
-          setDoRefetch(true);
-        }
       })
       .catch((err) => {
         addToast(httpErrorToHuman(err), 'error');
@@ -41,10 +37,8 @@ export function useSearchableResource<T>({
   );
 
   useEffect(() => {
-    if (doRefetch) {
-      setDebouncedSearch(search);
-    }
-  }, [search, doRefetch, setDebouncedSearch]);
+    setDebouncedSearch(search);
+  }, [search, setDebouncedSearch]);
 
   useEffect(() => {
     if (deps.filter((d) => !!d).length !== deps.length) {
@@ -54,5 +48,5 @@ export function useSearchableResource<T>({
     fetchData(defaultSearchValue);
   }, deps);
 
-  return { items, search, setSearch, doRefetch, setDoRefetch, refetch: () => fetchData(search) };
+  return { items, search, setSearch, refetch: () => fetchData(search) };
 }

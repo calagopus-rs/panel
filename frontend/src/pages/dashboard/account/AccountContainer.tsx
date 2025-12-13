@@ -13,6 +13,7 @@ import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
 import { useAuth } from '@/providers/AuthProvider';
 import { useToast } from '@/providers/ToastProvider';
 import { useGlobalStore } from '@/stores/global';
+import Switch from '@/elements/input/Switch';
 
 export default function AccountContainer() {
   const { addToast } = useToast();
@@ -27,6 +28,8 @@ export default function AccountContainer() {
       nameFirst: '',
       nameLast: '',
       language: '',
+      toastPosition: 'top_left',
+      startOnGroupedServers: true,
     },
     validateInputOnBlur: true,
     validate: zod4Resolver(dashboardAccountSchema),
@@ -39,6 +42,8 @@ export default function AccountContainer() {
         nameFirst: user.nameFirst,
         nameLast: user.nameLast,
         language: user.language,
+        toastPosition: user.toastPosition,
+        startOnGroupedServers: user.startOnGroupedServers,
       });
     }
   }, [user]);
@@ -102,6 +107,45 @@ export default function AccountContainer() {
               }))}
               searchable
               {...form.getInputProps('language')}
+            />
+          </Group>
+          <Group grow>
+            <Select
+              withAsterisk
+              label='Toast Position'
+              placeholder='Toast Position'
+              data={[
+                {
+                  label: 'Top Left',
+                  value: 'top_left',
+                },
+                {
+                  label: 'Top Center',
+                  value: 'top_center',
+                },
+                {
+                  label: 'Top Right',
+                  value: 'top_right',
+                },
+                {
+                  label: 'Bottom Left',
+                  value: 'bottom_left',
+                },
+                {
+                  label: 'Bottom Center',
+                  value: 'bottom_center',
+                },
+                {
+                  label: 'Bottom Right',
+                  value: 'bottom_right',
+                },
+              ]}
+              {...form.getInputProps('toastPosition')}
+            />
+            <Switch
+              label='Start on the Grouped Servers page'
+              checked={form.values.startOnGroupedServers}
+              onChange={(e) => form.setFieldValue('startOnGroupedServers', e.target.checked)}
             />
           </Group>
           <Group>

@@ -50,7 +50,7 @@ urlencoding = { workspace = true }
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 futures-util = { workspace = true }
 bincode = { version = "2.0.1", features = ["serde"] }
-cap-std = "3.4.5"
+cap-std = "4.0.0"
 semver = { workspace = true }
 git2 = "0.20.2"
 tempfile = { workspace = true }

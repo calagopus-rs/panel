@@ -1,8 +1,8 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Data {
-  notes: string;
-  primary: boolean;
+  notes?: string;
+  primary?: boolean;
 }
 
 export default async (uuid: string, allocationUuid: string, data: Data): Promise<void> => {

@@ -10,6 +10,8 @@ export default async (data: z.infer<typeof dashboardAccountSchema>): Promise<voi
         name_first: data.nameFirst,
         name_last: data.nameLast,
         language: data.language,
+        toast_position: data.toastPosition,
+        start_on_grouped_servers: data.startOnGroupedServers,
       })
       .then(() => resolve())
       .catch(reject);

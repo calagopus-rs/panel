@@ -163,7 +163,7 @@ export default function ServerGroupItem({
                 renderOverlay={(activeServer) =>
                   activeServer ? (
                     <div style={{ cursor: 'grabbing' }}>
-                      <ServerItem server={activeServer} />
+                      <ServerItem server={activeServer} onGroupRemove={() => null} />
                     </div>
                   ) : null
                 }

@@ -45,7 +45,10 @@ mod patch {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::{user::GetUser, user_activity::GetUserActivityLogger},
+        models::{
+            user::{GetUser, UserToastPosition},
+            user_activity::GetUserActivityLogger,
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -73,6 +76,8 @@ mod patch {
         )]
         #[schema(min_length = 5, max_length = 15)]
         language: Option<String>,
+        toast_position: Option<UserToastPosition>,
+        start_on_grouped_servers: Option<bool>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -105,16 +110,24 @@ mod patch {
         if let Some(language) = data.language {
             user.language = language;
         }
+        if let Some(toast_position) = data.toast_position {
+            user.toast_position = toast_position;
+        }
+        if let Some(start_on_grouped_servers) = data.start_on_grouped_servers {
+            user.start_on_grouped_servers = start_on_grouped_servers;
+        }
 
         sqlx::query!(
             "UPDATE users
-            SET username = $2, name_first = $3, name_last = $4, language = $5
+            SET username = $2, name_first = $3, name_last = $4, language = $5, toast_position = $6, start_on_grouped_servers = $7
             WHERE users.uuid = $1",
             user.uuid,
             user.username,
             user.name_first,
             user.name_last,
             user.language,
+            user.toast_position as UserToastPosition,
+            user.start_on_grouped_servers,
         )
         .execute(state.database.write())
         .await?;
@@ -127,6 +140,8 @@ mod patch {
                     "name_first": user.name_first,
                     "name_last": user.name_last,
                     "language": user.language,
+                    "toast_position": user.toast_position,
+                    "start_on_grouped_servers": user.start_on_grouped_servers,
                 }),
             )
             .await;
