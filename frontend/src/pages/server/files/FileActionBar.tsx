@@ -6,13 +6,13 @@ import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios';
 import downloadFiles from '@/api/server/files/downloadFiles';
 import renameFiles from '@/api/server/files/renameFiles';
+import ActionBar from '@/elements/ActionBar';
 import Button from '@/elements/Button';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
+import { useFileKeyboardActions } from './hooks/useFileKeyboardActions';
 import ArchiveCreateModal from './modals/ArchiveCreateModal';
 import FileDeleteModal from './modals/FileDeleteModal';
-import ActionBar from '@/elements/ActionBar';
-import { useFileKeyboardActions } from './hooks/useFileKeyboardActions';
 
 export default function FileActionBar() {
   const [searchParams] = useSearchParams();
@@ -28,7 +28,6 @@ export default function FileActionBar() {
     setMovingFiles,
     clearMovingFiles,
     getSelectedFiles,
-    getMovingFiles,
     refreshFiles,
   } = useServerStore();
 
@@ -38,13 +37,12 @@ export default function FileActionBar() {
   const doMove = () => {
     setLoading(true);
 
-    const movingFiles = getMovingFiles();
     renameFiles({
       uuid: server.uuid,
       root: '/',
-      files: movingFiles.map((f) => ({
-        from: join(movingFilesDirectory!, f.name),
-        to: join(browsingDirectory!, f.name),
+      files: [...movingFileNames].map((f) => ({
+        from: join(movingFilesDirectory!, f),
+        to: join(browsingDirectory!, f),
       })),
     })
       .then(({ renamed }) => {

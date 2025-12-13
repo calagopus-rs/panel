@@ -1,7 +1,7 @@
+import { StateCreator } from 'zustand';
 import { getEmptyPaginationSet } from '@/api/axios';
 import loadDirectory from '@/api/server/files/loadDirectory';
 import { ServerStore } from '@/stores/server';
-import { StateCreator } from 'zustand';
 
 export interface FilesSlice {
   browsingDirectory: string;
@@ -26,7 +26,6 @@ export interface FilesSlice {
   movingFilesDirectory: string | null;
   setMovingFiles: (files: DirectoryEntry[]) => void;
   clearMovingFiles: () => void;
-  getMovingFiles: () => DirectoryEntry[];
 
   fileOperations: Map<string, FileOperation>;
   setFileOperation: (uuid: string, operation: FileOperation) => void;
@@ -91,10 +90,6 @@ export const createFilesSlice: StateCreator<ServerStore, [], [], FilesSlice> = (
     })),
   clearMovingFiles: () =>
     set((state) => ({ ...state, movingFileNames: new Set<string>(), movingFilesDirectory: null })),
-  getMovingFiles: () => {
-    const state = get();
-    return state.browsingEntries.data.filter((entry) => state.movingFileNames.has(entry.name));
-  },
 
   fileOperations: new Map<string, FileOperation>(),
   setFileOperation: (uuid, operation) =>
