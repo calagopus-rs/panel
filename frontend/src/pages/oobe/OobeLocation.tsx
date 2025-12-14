@@ -5,22 +5,22 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
-import createLocation from '@/api/admin/locations/createLocation';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import TextInput from '@/elements/input/TextInput';
-import { backupDiskLabelMapping } from '@/lib/enums';
+import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration.ts';
+import createLocation from '@/api/admin/locations/createLocation.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { backupDiskLabelMapping } from '@/lib/enums.ts';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
-} from '@/lib/schemas/admin/backupConfigurations';
-import { oobeLocationSchema } from '@/lib/schemas/oobe';
-import { OobeComponentProps } from '@/routers/OobeRouter';
-import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic';
-import BackupS3 from '../admin/backupConfigurations/forms/BackupS3';
+} from '@/lib/schemas/admin/backupConfigurations.ts';
+import { oobeLocationSchema } from '@/lib/schemas/oobe.ts';
+import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
+import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic.tsx';
+import BackupS3 from '../admin/backupConfigurations/forms/BackupS3.tsx';
 
 export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);

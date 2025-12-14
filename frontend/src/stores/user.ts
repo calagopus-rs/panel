@@ -1,10 +1,10 @@
 import { create } from 'zustand';
-import { ServerSlice, createServersSlice } from '@/stores/slices/user/servers';
-import { ApiKeySlice, createApiKeysSlice } from '@/stores/slices/user/apiKeys';
-import { createSessionsSlice, SessionSlice } from '@/stores/slices/user/sessions';
-import { createSshKeysSlice, SshKeySlice } from '@/stores/slices/user/sshKeys';
-import { createSecurityKeysSlice, SecurityKeySlice } from '@/stores/slices/user/securityKeys';
-import { createOAuthLinksSlice, OAuthLinksSlice } from '@/stores/slices/user/oauthLinks';
+import { ServerSlice, createServersSlice } from '@/stores/slices/user/servers.ts';
+import { ApiKeySlice, createApiKeysSlice } from '@/stores/slices/user/apiKeys.ts';
+import { createSessionsSlice, SessionSlice } from '@/stores/slices/user/sessions.ts';
+import { createSshKeysSlice, SshKeySlice } from '@/stores/slices/user/sshKeys.ts';
+import { createSecurityKeysSlice, SecurityKeySlice } from '@/stores/slices/user/securityKeys.ts';
+import { createOAuthLinksSlice, OAuthLinksSlice } from '@/stores/slices/user/oauthLinks.ts';
 
 export interface UserStore
   extends ServerSlice,

@@ -1,8 +1,8 @@
-import Autocomplete from '@/elements/input/Autocomplete';
-import Select from '@/elements/input/Select';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import { useServerStore } from '@/stores/server';
+import Autocomplete from '@/elements/input/Autocomplete.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { useServerStore } from '@/stores/server.ts';
 import classNames from 'classnames';
 import { useMemo } from 'react';
 

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
-import { adminRoleSchema } from '@/lib/schemas/admin/roles';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
+import { adminRoleSchema } from '@/lib/schemas/admin/roles.ts';
 
 export default async (data: z.infer<typeof adminRoleSchema>): Promise<Role> => {
   return new Promise((resolve, reject) => {

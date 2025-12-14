@@ -2,10 +2,10 @@ import { Group, Stack } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
-import PasswordInput from '@/elements/input/PasswordInput';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import { adminSettingsCaptchaProviderRecaptchaSchema } from '@/lib/schemas/admin/settings';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminSettingsCaptchaProviderRecaptchaSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default function CaptchaRecaptcha({
   form,

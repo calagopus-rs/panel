@@ -1,9 +1,9 @@
 import { forwardRef, memo, useCallback, type MouseEventHandler, type ReactNode } from 'react';
 import { createSearchParams, useNavigate, useSearchParams } from 'react-router';
-import { TableRow } from '@/elements/Table';
-import { isEditableFile } from '@/lib/files';
-import { useGlobalStore } from '@/stores/global';
-import { useServerStore } from '@/stores/server';
+import { TableRow } from '@/elements/Table.tsx';
+import { isEditableFile } from '@/lib/files.ts';
+import { useGlobalStore } from '@/stores/global.ts';
+import { useServerStore } from '@/stores/server.ts';
 
 interface FileTableRowProps {
   file: DirectoryEntry;

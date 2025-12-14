@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
-import { transformKeysToCamelCase } from '../lib/transformers';
+import { transformKeysToCamelCase } from '../lib/transformers.ts';
 
 export const axiosInstance: AxiosInstance = axios.create({
   headers: {

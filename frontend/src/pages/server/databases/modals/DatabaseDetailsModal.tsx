@@ -1,12 +1,12 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import rotateDatabasePassword from '@/api/server/databases/rotateDatabasePassword';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import rotateDatabasePassword from '@/api/server/databases/rotateDatabasePassword.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   database: ServerDatabase;

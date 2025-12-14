@@ -5,16 +5,16 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import getSettings from '@/api/admin/settings/getSettings';
-import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
+import getSettings from '@/api/admin/settings/getSettings.ts';
+import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
 import Select from '@/elements/input/Select.tsx';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import { oobeConfigurationSchema } from '@/lib/schemas/oobe';
-import { OobeComponentProps } from '@/routers/OobeRouter';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { oobeConfigurationSchema } from '@/lib/schemas/oobe.ts';
+import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeConfiguration({ onNext }: OobeComponentProps) {

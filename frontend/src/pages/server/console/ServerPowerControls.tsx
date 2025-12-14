@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import Button from '@/elements/Button';
-import Can from '@/elements/Can';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useServerStore } from '@/stores/server';
+import Button from '@/elements/Button.tsx';
+import Can from '@/elements/Can.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerPowerControls() {
   const [open, setOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
-import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
+import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default async (data: z.infer<typeof adminSettingsApplicationSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getSecurityKeys from '@/api/me/security-keys/getSecurityKeys';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useUserStore } from '@/stores/user';
-import SecurityKeyCreateModal from './modals/SecurityKeyCreateModal';
-import SshKeyRow from './SecurityKeyRow';
+import getSecurityKeys from '@/api/me/security-keys/getSecurityKeys.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useUserStore } from '@/stores/user.ts';
+import SecurityKeyCreateModal from './modals/SecurityKeyCreateModal.tsx';
+import SshKeyRow from './SecurityKeyRow.tsx';
 
 export default function DashboardSecurityKeys() {
   const { securityKeys, setSecurityKeys } = useUserStore();

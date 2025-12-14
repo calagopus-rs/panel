@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (nodeUuid: string): Promise<{ tokenId: string; token: string }> => {
   return new Promise((resolve, reject) => {

@@ -1,13 +1,13 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Modal from '@/elements/modals/Modal';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useToast } from '@/providers/ToastProvider';
-import moveEgg from '@/api/admin/nests/eggs/moveEgg';
-import getNests from '@/api/admin/nests/getNests';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import moveEgg from '@/api/admin/nests/eggs/moveEgg.ts';
+import getNests from '@/api/admin/nests/getNests.ts';
 import { useNavigate } from 'react-router';
 
 export default function EggMoveModal({

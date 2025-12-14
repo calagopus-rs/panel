@@ -1,22 +1,22 @@
 import { ActionIcon, Group, Title } from '@mantine/core';
 import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import getVariables from '@/api/server/startup/getVariables';
-import updateCommand from '@/api/server/startup/updateCommand';
-import updateDockerImage from '@/api/server/startup/updateDockerImage';
-import updateVariables from '@/api/server/startup/updateVariables';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Select from '@/elements/input/Select';
-import TextArea from '@/elements/input/TextArea';
-import VariableContainer from '@/elements/VariableContainer';
-import { useToast } from '@/providers/ToastProvider';
-import { useGlobalStore } from '@/stores/global';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import getVariables from '@/api/server/startup/getVariables.ts';
+import updateCommand from '@/api/server/startup/updateCommand.ts';
+import updateDockerImage from '@/api/server/startup/updateDockerImage.ts';
+import updateVariables from '@/api/server/startup/updateVariables.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import VariableContainer from '@/elements/VariableContainer.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
+import { useServerStore } from '@/stores/server.ts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faReply } from '@fortawesome/free-solid-svg-icons';
-import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts';
+import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 
 export default function ServerStartup() {
   const { addToast } = useToast();

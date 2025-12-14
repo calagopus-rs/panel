@@ -3,14 +3,14 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateDatabase from '@/api/server/databases/updateDatabase';
-import Button from '@/elements/Button';
-import Switch from '@/elements/input/Switch';
-import Modal from '@/elements/modals/Modal';
-import { serverDatabaseEditSchema } from '@/lib/schemas/server/databases';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateDatabase from '@/api/server/databases/updateDatabase.ts';
+import Button from '@/elements/Button.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { serverDatabaseEditSchema } from '@/lib/schemas/server/databases.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   database: ServerDatabase;

@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import EggMountRow from './EggMountRow';
-import EggMountAddModal from './modals/EggMountAddModal';
+import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import EggMountRow from './EggMountRow.tsx';
+import EggMountAddModal from './modals/EggMountAddModal.tsx';
 
 export default function AdminEggMounts({
   contextNest,

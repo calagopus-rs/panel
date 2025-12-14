@@ -1,5 +1,5 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { ServerStore } from '@/stores/server';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { ServerStore } from '@/stores/server.ts';
 import { StateCreator } from 'zustand';
 
 export interface BackupsSlice {

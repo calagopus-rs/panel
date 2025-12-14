@@ -1,11 +1,11 @@
 import { Group, Title } from '@mantine/core';
-import getSessions from '@/api/me/sessions/getSessions';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useUserStore } from '@/stores/user';
-import SessionRow from './SessionRow';
+import getSessions from '@/api/me/sessions/getSessions.ts';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useUserStore } from '@/stores/user.ts';
+import SessionRow from './SessionRow.tsx';
 
 export default function DashboardSessions() {
   const { sessions, setSessions } = useUserStore();

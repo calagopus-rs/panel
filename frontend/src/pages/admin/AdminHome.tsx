@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import getBackupStats, { type BackupStats } from '@/api/admin/stats/getBackupStats';
-import getGeneralStats, { type GeneralStats } from '@/api/admin/stats/getGeneralStats';
-import { httpErrorToHuman } from '@/api/axios';
-import Card from '@/elements/Card';
-import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { bytesToString } from '@/lib/size';
+import getBackupStats, { type BackupStats } from '@/api/admin/stats/getBackupStats.ts';
+import getGeneralStats, { type GeneralStats } from '@/api/admin/stats/getGeneralStats.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Card from '@/elements/Card.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { bytesToString } from '@/lib/size.ts';
 
 export default function AdminHome() {
   const { addToast } = useToast();

@@ -1,7 +1,7 @@
 import { StateCreator } from 'zustand';
-import { getEmptyPaginationSet } from '@/api/axios';
-import loadDirectory from '@/api/server/files/loadDirectory';
-import { ServerStore } from '@/stores/server';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import loadDirectory from '@/api/server/files/loadDirectory.ts';
+import { ServerStore } from '@/stores/server.ts';
 
 export interface FilesSlice {
   browsingDirectory: string;

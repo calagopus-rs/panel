@@ -4,15 +4,15 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { join } from 'pathe';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import pullFile from '@/api/server/files/pullFile';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import pullFile from '@/api/server/files/pullFile.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
 import { serverFilesPullSchema } from '@/lib/schemas/server/files.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function PullFileModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();

@@ -2,16 +2,16 @@ import { faDownload, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getSshKeys from '@/api/me/ssh-keys/getSshKeys';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useUserStore } from '@/stores/user';
-import SshKeyCreateModal from './modals/SshKeyCreateModal';
-import SshKeyImportModal from './modals/SshKeyImportModal';
-import SshKeyRow from './SshKeyRow';
+import getSshKeys from '@/api/me/ssh-keys/getSshKeys.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useUserStore } from '@/stores/user.ts';
+import SshKeyCreateModal from './modals/SshKeyCreateModal.tsx';
+import SshKeyImportModal from './modals/SshKeyImportModal.tsx';
+import SshKeyRow from './SshKeyRow.tsx';
 
 export default function DashboardSshKeys() {
   const { sshKeys, setSshKeys } = useUserStore();

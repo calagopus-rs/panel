@@ -2,8 +2,8 @@ import { Stack } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
-import TextInput from '@/elements/input/TextInput';
-import { adminSettingsStorageFilesystemSchema } from '@/lib/schemas/admin/settings';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminSettingsStorageFilesystemSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default function StorageFilesystem({
   form,

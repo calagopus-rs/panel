@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import createBackup from '@/api/server/backups/createBackup';
-import Button from '@/elements/Button';
-import TagsInput from '@/elements/input/TagsInput';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { serverBackupCreateSchema } from '@/lib/schemas/server/backups';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import createBackup from '@/api/server/backups/createBackup.ts';
+import Button from '@/elements/Button.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { serverBackupCreateSchema } from '@/lib/schemas/server/backups.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function BackupCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();

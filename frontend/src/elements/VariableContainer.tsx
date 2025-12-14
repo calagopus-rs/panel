@@ -1,11 +1,11 @@
 import { Group, Title } from '@mantine/core';
-import Badge from '@/elements/Badge';
-import Card from '@/elements/Card';
-import NumberInput from '@/elements/input/NumberInput';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import Tooltip from '@/elements/Tooltip';
+import Badge from '@/elements/Badge.tsx';
+import Card from '@/elements/Card.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
 
 export default function VariableContainer({
   variable,

@@ -3,15 +3,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
-import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables';
-import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
-import Spinner from '@/elements/Spinner';
-import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables.ts';
+import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 interface DndEggVariable extends NestEggVariable, DndItem {
   id: string;

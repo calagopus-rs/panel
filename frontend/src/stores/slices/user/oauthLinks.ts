@@ -1,5 +1,5 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { UserStore } from '@/stores/user';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { UserStore } from '@/stores/user.ts';
 import { StateCreator } from 'zustand';
 
 export interface OAuthLinksSlice {

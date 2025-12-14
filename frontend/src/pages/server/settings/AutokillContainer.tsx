@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateAutokill from '@/api/server/settings/updateAutokill';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import NumberInput from '@/elements/input/NumberInput';
-import Switch from '@/elements/input/Switch';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateAutokill from '@/api/server/settings/updateAutokill.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
 import { serverSettingsAutokillSchema } from '@/lib/schemas/server/settings.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function AutokillContainer() {
   const { addToast } = useToast();

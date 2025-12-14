@@ -1,5 +1,5 @@
-import { axiosInstance } from '@/api/axios';
-import { TwoFactorSetupResponse } from '@/pages/dashboard/account/actions/TwoFactorSetupButton';
+import { axiosInstance } from '@/api/axios.ts';
+import { TwoFactorSetupResponse } from '@/pages/dashboard/account/actions/TwoFactorSetupButton.tsx';
 
 export default async (): Promise<TwoFactorSetupResponse> => {
   return new Promise((resolve, reject) => {

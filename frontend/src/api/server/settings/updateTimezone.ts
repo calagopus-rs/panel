@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverSettingsTimezoneSchema } from '@/lib/schemas/server/settings.ts';
 import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 

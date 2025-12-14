@@ -1,15 +1,15 @@
 import { Route, Routes, useParams } from 'react-router';
-import SubNavigation from '@/elements/SubNavigation';
+import SubNavigation from '@/elements/SubNavigation.tsx';
 import { faCog, faDatabase, faServer } from '@fortawesome/free-solid-svg-icons';
 import { useEffect, useState } from 'react';
-import { useToast } from '@/providers/ToastProvider';
-import { httpErrorToHuman } from '@/api/axios';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { httpErrorToHuman } from '@/api/axios.ts';
 import { Title } from '@mantine/core';
-import Spinner from '@/elements/Spinner';
-import getLocation from '@/api/admin/locations/getLocation';
-import LocationCreateOrUpdate from './LocationCreateOrUpdate';
-import AdminLocationDatabaseHosts from './database-hosts/AdminLocationDatabaseHosts';
-import AdminLocationNodes from './nodes/AdminLocationNodes';
+import Spinner from '@/elements/Spinner.tsx';
+import getLocation from '@/api/admin/locations/getLocation.ts';
+import LocationCreateOrUpdate from './LocationCreateOrUpdate.tsx';
+import AdminLocationDatabaseHosts from './database-hosts/AdminLocationDatabaseHosts.tsx';
+import AdminLocationNodes from './nodes/AdminLocationNodes.tsx';
 
 export default () => {
   const params = useParams<'id'>();

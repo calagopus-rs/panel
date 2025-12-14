@@ -1,8 +1,8 @@
 import { Popover, Text, UnstyledButton } from '@mantine/core';
 import { memo, useMemo } from 'react';
-import CloseButton from '@/elements/CloseButton';
-import Progress from '@/elements/Progress';
-import RingProgress from '@/elements/RingProgress';
+import CloseButton from '@/elements/CloseButton.tsx';
+import Progress from '@/elements/Progress.tsx';
+import RingProgress from '@/elements/RingProgress.tsx';
 
 interface FileUploadInfo {
   fileName: string;

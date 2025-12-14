@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateServerSettings from '@/api/admin/settings/updateServerSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import SizeInput from '@/elements/input/SizeInput';
-import Switch from '@/elements/input/Switch';
-import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import updateServerSettings from '@/api/admin/settings/updateServerSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function ServerContainer() {
   const { addToast } = useToast();

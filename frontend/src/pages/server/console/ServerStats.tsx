@@ -9,12 +9,12 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactNode, useEffect, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
-import Card from '@/elements/Card';
-import Tooltip from '@/elements/Tooltip';
-import { hexToRgba } from '@/lib/color';
-import { bytesToString } from '@/lib/size';
-import { useServerStore } from '@/stores/server';
-import { useChart, useChartTickLabel } from './chart';
+import Card from '@/elements/Card.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { hexToRgba } from '@/lib/color.ts';
+import { bytesToString } from '@/lib/size.ts';
+import { useServerStore } from '@/stores/server.ts';
+import { useChart, useChartTickLabel } from './chart.ts';
 
 function ChartBlock({
   icon,

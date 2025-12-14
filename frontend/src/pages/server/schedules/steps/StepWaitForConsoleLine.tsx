@@ -1,7 +1,7 @@
 import { Stack } from '@mantine/core';
-import NumberInput from '@/elements/input/NumberInput';
-import Switch from '@/elements/input/Switch';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepWaitForConsoleLine({
   action,

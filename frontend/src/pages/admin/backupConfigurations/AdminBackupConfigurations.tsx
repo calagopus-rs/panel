@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import Button from '@/elements/Button';
-import Table from '@/elements/Table';
-import { backupConfigurationTableColumns } from '@/lib/tableColumns';
-import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate';
-import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow';
-import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations.ts';
+import Button from '@/elements/Button.tsx';
+import Table from '@/elements/Table.tsx';
+import { backupConfigurationTableColumns } from '@/lib/tableColumns.ts';
+import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate.tsx';
+import BackupConfigurationRow from '@/pages/admin/backupConfigurations/BackupConfigurationRow.tsx';
+import BackupConfigurationView from '@/pages/admin/backupConfigurations/BackupConfigurationView.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 function BackupConfigurationsContainer() {
   const navigate = useNavigate();

@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Title } from '@mantine/core';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
-import Card from '@/elements/Card';
-import { CurrentWindowProvider } from './CurrentWindowProvider';
+import Card from '@/elements/Card.tsx';
+import { CurrentWindowProvider } from './CurrentWindowProvider.tsx';
 
 interface WindowType {
   id: number;

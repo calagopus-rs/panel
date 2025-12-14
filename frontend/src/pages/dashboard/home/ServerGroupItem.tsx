@@ -1,25 +1,25 @@
-import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios';
-import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup';
-import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers';
-import updateServerGroup from '@/api/me/servers/groups/updateServerGroup';
-import Card from '@/elements/Card';
-import Divider from '@/elements/Divider';
-import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Spinner from '@/elements/Spinner';
-import { Pagination } from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
+import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup.ts';
+import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers.ts';
+import updateServerGroup from '@/api/me/servers/groups/updateServerGroup.ts';
+import Card from '@/elements/Card.tsx';
+import Divider from '@/elements/Divider.tsx';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { Pagination } from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
 import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { ComponentProps, useState } from 'react';
-import ServerGroupEditModal from './modals/ServerGroupEditModal';
-import ServerItem from './ServerItem';
-import { useTranslations } from '@/providers/TranslationProvider';
+import ServerGroupEditModal from './modals/ServerGroupEditModal.tsx';
+import ServerItem from './ServerItem.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 function insertItems<T>(list: T[], items: T[], startIndex: number): T[] {
   if (startIndex > list.length) {

@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
-import TextArea from '@/elements/input/TextArea';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
 
 export default function StepFormat({
   action,

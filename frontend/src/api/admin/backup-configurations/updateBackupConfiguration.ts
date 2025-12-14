@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
   adminBackupConfigurationSchema,
-} from '@/lib/schemas/admin/backupConfigurations';
+} from '@/lib/schemas/admin/backupConfigurations.ts';
 
 interface Data extends z.infer<typeof adminBackupConfigurationSchema> {
   backupConfigs: {

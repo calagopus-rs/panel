@@ -4,14 +4,14 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateTimezone from '@/api/server/settings/updateTimezone';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Select from '@/elements/input/Select';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateTimezone from '@/api/server/settings/updateTimezone.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Select from '@/elements/input/Select.tsx';
 import { serverSettingsTimezoneSchema } from '@/lib/schemas/server/settings.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 const timezones = Object.keys(zones)
   .sort()

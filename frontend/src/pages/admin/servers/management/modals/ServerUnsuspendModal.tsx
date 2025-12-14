@@ -1,10 +1,10 @@
 import { ModalProps } from '@mantine/core';
-import updateServer from '@/api/admin/servers/updateServer';
-import { httpErrorToHuman } from '@/api/axios';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import updateServer from '@/api/admin/servers/updateServer.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Code from '@/elements/Code.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function ServerUnsuspendModal({ server, opened, onClose }: ModalProps & { server: AdminServer }) {
   const { addToast } = useToast();

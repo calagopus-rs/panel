@@ -6,17 +6,17 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
-import login from '@/api/auth/login';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
-import { to } from '@/lib/routes';
-import { oobeLoginSchema } from '@/lib/schemas/oobe';
-import { useAuth } from '@/providers/AuthProvider';
-import { OobeComponentProps, steps } from '@/routers/OobeRouter';
-import { useGlobalStore } from '@/stores/global';
+import login from '@/api/auth/login.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { to } from '@/lib/routes.ts';
+import { oobeLoginSchema } from '@/lib/schemas/oobe.ts';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { OobeComponentProps, steps } from '@/routers/OobeRouter.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();

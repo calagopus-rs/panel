@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverDatabaseEditSchema } from '@/lib/schemas/server/databases.ts';
 
 export default async (

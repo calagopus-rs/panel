@@ -5,15 +5,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import register from '@/api/auth/register';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
-import { oobeRegister } from '@/lib/schemas/oobe';
-import { useAuth } from '@/providers/AuthProvider';
-import { OobeComponentProps } from '@/routers/OobeRouter';
+import register from '@/api/auth/register.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { oobeRegister } from '@/lib/schemas/oobe.ts';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 
 export default function OobeRegister({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();

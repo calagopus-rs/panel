@@ -9,15 +9,15 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { useNavigate } from 'react-router';
-import getLocations from '@/api/admin/locations/getLocations';
-import getNodes from '@/api/admin/nodes/getNodes';
-import updateOobeSettings from '@/api/admin/settings/updateOobeSettings';
-import Badge from '@/elements/Badge';
-import Button from '@/elements/Button';
-import Divider from '@/elements/Divider';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useAuth } from '@/providers/AuthProvider';
-import { useGlobalStore } from '@/stores/global';
+import getLocations from '@/api/admin/locations/getLocations.ts';
+import getNodes from '@/api/admin/nodes/getNodes.ts';
+import updateOobeSettings from '@/api/admin/settings/updateOobeSettings.ts';
+import Badge from '@/elements/Badge.tsx';
+import Button from '@/elements/Button.tsx';
+import Divider from '@/elements/Divider.tsx';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeFinished() {
   const { user } = useAuth();

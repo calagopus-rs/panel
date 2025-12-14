@@ -3,16 +3,16 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useGlobalStore } from '@/stores/global';
+import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminSettingsApplicationSchema } from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function ApplicationContainer() {
   const { addToast } = useToast();

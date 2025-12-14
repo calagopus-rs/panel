@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import { createPermissionsSlice, PermissionsSlice } from '@/stores/slices/global/permissions';
-import { createSettingsSlice, SettingsSlice } from './slices/global/settings';
+import { createPermissionsSlice, PermissionsSlice } from '@/stores/slices/global/permissions.ts';
+import { createSettingsSlice, SettingsSlice } from './slices/global/settings.ts';
 
 export interface GlobalStore extends PermissionsSlice, SettingsSlice {}
 

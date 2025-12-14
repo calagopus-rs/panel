@@ -3,21 +3,21 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
-import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
-import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import Switch from '@/elements/input/Switch';
-import TagsInput from '@/elements/input/TagsInput';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable.ts';
+import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable.ts';
+import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function EggVariableContainer({
   contextNest,

@@ -3,14 +3,14 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createNodeAllocations from '@/api/admin/nodes/allocations/createNodeAllocations';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import TagsInput from '@/elements/input/TagsInput';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { adminNodeAllocationsSchema } from '@/lib/schemas/admin/nodes';
+import createNodeAllocations from '@/api/admin/nodes/allocations/createNodeAllocations.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { adminNodeAllocationsSchema } from '@/lib/schemas/admin/nodes.ts';
 
 export default function NodeAllocationsCreateModal({
   node,

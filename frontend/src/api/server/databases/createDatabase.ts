@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverDatabaseCreateSchema } from '@/lib/schemas/server/databases.ts';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (uuid: string, data: z.infer<typeof serverDatabaseCreateSchema>): Promise<ServerDatabase> => {
   return new Promise((resolve, reject) => {

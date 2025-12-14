@@ -1,12 +1,12 @@
 import { Group, ModalProps } from '@mantine/core';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteFiles from '@/api/server/files/deleteFiles';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteFiles from '@/api/server/files/deleteFiles.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   files: DirectoryEntry[];

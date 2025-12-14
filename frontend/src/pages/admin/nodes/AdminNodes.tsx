@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getNodes from '@/api/admin/nodes/getNodes';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { nodeTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import NodeCreateOrUpdate from './NodeCreateOrUpdate';
-import NodeRow from './NodeRow';
-import NodeView from './NodeView';
+import getNodes from '@/api/admin/nodes/getNodes.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { nodeTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import NodeCreateOrUpdate from './NodeCreateOrUpdate.tsx';
+import NodeRow from './NodeRow.tsx';
+import NodeView from './NodeView.tsx';
 
 function NodesContainer() {
   const navigate = useNavigate();

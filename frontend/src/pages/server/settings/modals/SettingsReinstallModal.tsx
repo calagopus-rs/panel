@@ -4,14 +4,14 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import installServer from '@/api/server/settings/installServer';
-import Button from '@/elements/Button';
-import Switch from '@/elements/input/Switch';
-import Modal from '@/elements/modals/Modal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import installServer from '@/api/server/settings/installServer.ts';
+import Button from '@/elements/Button.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
 import { serverSettingssReinstallSchema } from '@/lib/schemas/server/settings.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function SettingsReinstallModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();

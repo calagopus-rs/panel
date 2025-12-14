@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import renameServer from '@/api/server/settings/renameServer';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import renameServer from '@/api/server/settings/renameServer.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import { serverSettingsRenameSchema } from '@/lib/schemas/server/settings.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function RenameContainer() {
   const { addToast } = useToast();

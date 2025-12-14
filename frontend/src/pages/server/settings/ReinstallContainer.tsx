@@ -1,8 +1,8 @@
 import { Grid, Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import SettingsReinstallModal from './modals/SettingsReinstallModal';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import SettingsReinstallModal from './modals/SettingsReinstallModal.tsx';
 
 export default function ReinstallContainer() {
   const [modalOpen, setModalOpen] = useState(false);

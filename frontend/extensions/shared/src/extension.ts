@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { AdminRouteDefinition, GlobalRouteDefinition, RouteDefinition, ServerRouteDefinition } from '.';
+import type { AdminRouteDefinition, GlobalRouteDefinition, RouteDefinition, ServerRouteDefinition } from './index.ts';
 
 class ExtensionSkip {
   protected __skip = 0xdeadbeeeeef;

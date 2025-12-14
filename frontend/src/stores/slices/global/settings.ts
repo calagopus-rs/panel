@@ -1,4 +1,4 @@
-import { GlobalStore } from '@/stores/global';
+import { GlobalStore } from '@/stores/global.ts';
 import { StateCreator } from 'zustand';
 
 export interface SettingsSlice {

@@ -1,11 +1,11 @@
 import { Divider, Group, Stack, Title } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { z } from 'zod';
-import NumberInput from '@/elements/input/NumberInput';
-import PasswordInput from '@/elements/input/PasswordInput';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import { adminBackupConfigurationS3Schema } from '@/lib/schemas/admin/backupConfigurations';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminBackupConfigurationS3Schema } from '@/lib/schemas/admin/backupConfigurations.ts';
 
 export default function BackupS3({
   form,

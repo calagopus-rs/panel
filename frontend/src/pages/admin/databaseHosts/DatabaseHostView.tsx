@@ -2,13 +2,13 @@ import { faCog, faDatabase } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getDatabaseHost from '@/api/admin/database-hosts/getDatabaseHost';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import AdminDatabaseHostDatabases from '@/pages/admin/databaseHosts/databases/AdminDatabaseHostDatabases';
-import { useToast } from '@/providers/ToastProvider';
-import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
+import getDatabaseHost from '@/api/admin/database-hosts/getDatabaseHost.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import AdminDatabaseHostDatabases from '@/pages/admin/databaseHosts/databases/AdminDatabaseHostDatabases.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate.tsx';
 
 export default function DatabaseHostView() {
   const params = useParams<'id'>();

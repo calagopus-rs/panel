@@ -4,9 +4,9 @@ import { ActionIcon, Group, Stack } from '@mantine/core';
 import hljs from 'highlight.js/lib/core';
 import json from 'highlight.js/lib/languages/json';
 import { useState } from 'react';
-import Button from '../Button';
-import Code from '../Code';
-import Modal from '../modals/Modal';
+import Button from '../Button.tsx';
+import Code from '../Code.tsx';
+import Modal from '../modals/Modal.tsx';
 import 'highlight.js/styles/a11y-dark.min.css';
 
 hljs.registerLanguage('json', json);

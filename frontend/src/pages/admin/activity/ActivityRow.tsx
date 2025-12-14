@@ -1,9 +1,9 @@
 import { Group } from '@mantine/core';
-import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
-import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
+import Code from '@/elements/Code.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 
 export default function ActivityRow({ activity }: { activity: AdminActivity }) {
   return (

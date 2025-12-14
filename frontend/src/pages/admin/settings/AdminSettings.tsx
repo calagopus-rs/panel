@@ -2,18 +2,18 @@ import { faAt, faDatabase, faLayerGroup, faRobot, faServer, faUserCheck } from '
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes } from 'react-router';
-import getSettings from '@/api/admin/settings/getSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import ApplicationContainer from './ApplicationContainer';
-import CaptchaContainer from './CaptchaContainer';
-import EmailContainer from './EmailContainer';
-import ServerContainer from './ServerContainer';
-import StorageContainer from './StorageContainer';
-import WebauthnContainer from './WebauthnContainer';
+import getSettings from '@/api/admin/settings/getSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import ApplicationContainer from './ApplicationContainer.tsx';
+import CaptchaContainer from './CaptchaContainer.tsx';
+import EmailContainer from './EmailContainer.tsx';
+import ServerContainer from './ServerContainer.tsx';
+import StorageContainer from './StorageContainer.tsx';
+import WebauthnContainer from './WebauthnContainer.tsx';
 
 export default function AdminSettings() {
   const { addToast } = useToast();

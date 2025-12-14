@@ -5,15 +5,15 @@ import { join } from 'pathe';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import createDirectory from '@/api/server/files/createDirectory';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { serverFilesDirectoryCreateSchema } from '@/lib/schemas/server/files';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import createDirectory from '@/api/server/files/createDirectory.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { serverFilesDirectoryCreateSchema } from '@/lib/schemas/server/files.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function DirectoryNameModal({ opened, onClose }: ModalProps) {
   const [_, setSearchParams] = useSearchParams();

@@ -2,9 +2,9 @@ import { Group, ModalProps } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { z } from 'zod';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
 import { serverFilesNameSchema } from '@/lib/schemas/server/files.ts';
 
 type Props = ModalProps & {

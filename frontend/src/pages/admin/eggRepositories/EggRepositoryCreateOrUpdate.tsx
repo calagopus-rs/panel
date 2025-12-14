@@ -3,19 +3,19 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createEggRepository from '@/api/admin/egg-repositories/createEggRepository';
-import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository';
-import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository';
-import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useToast } from '@/providers/ToastProvider';
+import createEggRepository from '@/api/admin/egg-repositories/createEggRepository.ts';
+import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository.ts';
+import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository.ts';
+import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function EggRepositoryCreateOrUpdate({
   contextEggRepository,

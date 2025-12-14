@@ -3,16 +3,16 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createNest from '@/api/admin/nests/createNest';
-import deleteNest from '@/api/admin/nests/deleteNest';
-import updateNest from '@/api/admin/nests/updateNest';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminNestSchema } from '@/lib/schemas/admin/nests';
-import { useResourceForm } from '@/plugins/useResourceForm';
+import createNest from '@/api/admin/nests/createNest.ts';
+import deleteNest from '@/api/admin/nests/deleteNest.ts';
+import updateNest from '@/api/admin/nests/updateNest.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminNestSchema } from '@/lib/schemas/admin/nests.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
 
 export default function NestCreateOrUpdate({ contextNest }: { contextNest?: AdminNest }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);

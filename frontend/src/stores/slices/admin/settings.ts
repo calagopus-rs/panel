@@ -1,4 +1,4 @@
-import { AdminStore } from '@/stores/admin';
+import { AdminStore } from '@/stores/admin.tsx';
 import { StateCreator } from 'zustand';
 
 export interface SettingsSlice extends AdminSettings {

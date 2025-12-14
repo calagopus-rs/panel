@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Checkbox, Group, Input, Stack, Title } from '@mantine/core';
 import { useCallback, useMemo, useState } from 'react';
 import { ExtensionPermissionIconsBuilder } from 'shared';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import { permissionCategoryIconMapping } from '@/lib/enums';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import { permissionCategoryIconMapping } from '@/lib/enums.ts';
 
 const permissionIconMap: Record<
   keyof ApiPermissions,

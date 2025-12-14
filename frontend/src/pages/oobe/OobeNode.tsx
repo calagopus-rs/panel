@@ -5,16 +5,16 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import getLocations from '@/api/admin/locations/getLocations';
-import createNode from '@/api/admin/nodes/createNode';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import SizeInput from '@/elements/input/SizeInput';
-import TextInput from '@/elements/input/TextInput';
-import { oobeNodeSchema } from '@/lib/schemas/oobe';
-import { OobeComponentProps } from '@/routers/OobeRouter';
+import getLocations from '@/api/admin/locations/getLocations.ts';
+import createNode from '@/api/admin/nodes/createNode.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { oobeNodeSchema } from '@/lib/schemas/oobe.ts';
+import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
 
 export default function OobeNode({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);

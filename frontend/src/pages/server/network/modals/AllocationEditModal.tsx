@@ -3,14 +3,14 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateAllocation from '@/api/server/allocations/updateAllocation';
-import Button from '@/elements/Button';
-import TextArea from '@/elements/input/TextArea';
-import Modal from '@/elements/modals/Modal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateAllocation from '@/api/server/allocations/updateAllocation.ts';
+import Button from '@/elements/Button.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
 import { serverAllocationsEditSchema } from '@/lib/schemas/server/allocations.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   allocation: ServerAllocation;

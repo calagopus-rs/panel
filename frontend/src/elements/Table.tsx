@@ -11,10 +11,10 @@ import {
   Text,
 } from '@mantine/core';
 import { forwardRef, ReactNode, useEffect } from 'react';
-import Spinner from '@/elements/Spinner';
+import Spinner from '@/elements/Spinner.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCubesStacked } from '@fortawesome/free-solid-svg-icons';
-import { useTranslations } from '@/providers/TranslationProvider';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export const TableHeader = ({ name }: { name?: string }) => {
   if (!name) {

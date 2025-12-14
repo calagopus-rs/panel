@@ -9,16 +9,16 @@ import {
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getServer from '@/api/admin/servers/getServer';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations';
-import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement';
-import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts';
-import ServerUpdate from '@/pages/admin/servers/ServerUpdate';
-import AdminServerVariables from '@/pages/admin/servers/variables/AdminServerVariables';
-import { useToast } from '@/providers/ToastProvider';
+import getServer from '@/api/admin/servers/getServer.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import AdminServerAllocations from '@/pages/admin/servers/allocations/AdminServerAllocations.tsx';
+import AdminServerManagement from '@/pages/admin/servers/management/AdminServerManagement.tsx';
+import AdminServerMounts from '@/pages/admin/servers/mounts/AdminServerMounts.tsx';
+import ServerUpdate from '@/pages/admin/servers/ServerUpdate.tsx';
+import AdminServerVariables from '@/pages/admin/servers/variables/AdminServerVariables.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function ServerView() {
   const params = useParams<'id'>();

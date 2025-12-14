@@ -3,14 +3,14 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import { isIP } from '@/lib/ip';
-import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { isIP } from '@/lib/ip.ts';
+import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function WebauthnContainer() {
   const { addToast } = useToast();

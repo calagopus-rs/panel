@@ -3,17 +3,17 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import createDatabase from '@/api/server/databases/createDatabase';
-import getDatabaseHosts from '@/api/server/databases/getDatabaseHosts';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { serverDatabaseCreateSchema } from '@/lib/schemas/server/databases';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import createDatabase from '@/api/server/databases/createDatabase.ts';
+import getDatabaseHosts from '@/api/server/databases/getDatabaseHosts.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { databaseTypeLabelMapping } from '@/lib/enums.ts';
+import { serverDatabaseCreateSchema } from '@/lib/schemas/server/databases.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();

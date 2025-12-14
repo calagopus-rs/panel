@@ -12,7 +12,7 @@ import {
 import 'chartjs-adapter-moment';
 import { deepmerge, deepmergeCustom } from 'deepmerge-ts';
 import { useState } from 'react';
-import { hexToRgba } from '@/lib/color';
+import { hexToRgba } from '@/lib/color.ts';
 
 ChartJS.register(LineElement, PointElement, Filler, LinearScale, StreamingPlugin);
 

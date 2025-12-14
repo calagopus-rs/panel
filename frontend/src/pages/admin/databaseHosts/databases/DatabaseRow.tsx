@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
-import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
-import Code from '@/elements/Code';
-import CopyOnClick from '@/elements/CopyOnClick';
-import Spinner from '@/elements/Spinner';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import getDatabaseSize from '@/api/server/databases/getDatabaseSize.ts';
+import Code from '@/elements/Code.tsx';
+import CopyOnClick from '@/elements/CopyOnClick.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { databaseTypeLabelMapping } from '@/lib/enums.ts';
+import { bytesToString } from '@/lib/size.ts';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 
 export default function DatabaseRow({ database }: { database: AdminServerDatabase }) {
   const [size, setSize] = useState(0);

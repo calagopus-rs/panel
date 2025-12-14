@@ -1,12 +1,12 @@
 import { Grid, Stack, Text, Title } from '@mantine/core';
 import { useState } from 'react';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import ServerDeleteModal from '@/pages/admin/servers/management/modals/ServerDeleteModal';
-import ServerSuspendModal from '@/pages/admin/servers/management/modals/ServerSuspendModal';
-import ServerTransferModal from '@/pages/admin/servers/management/modals/ServerTransferModal';
-import ServerUnsuspendModal from '@/pages/admin/servers/management/modals/ServerUnsuspendModal';
-import ServerClearStateModal from './modals/ServerClearStateModal';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import ServerDeleteModal from '@/pages/admin/servers/management/modals/ServerDeleteModal.tsx';
+import ServerSuspendModal from '@/pages/admin/servers/management/modals/ServerSuspendModal.tsx';
+import ServerTransferModal from '@/pages/admin/servers/management/modals/ServerTransferModal.tsx';
+import ServerUnsuspendModal from '@/pages/admin/servers/management/modals/ServerUnsuspendModal.tsx';
+import ServerClearStateModal from './modals/ServerClearStateModal.tsx';
 
 export default function AdminServerManagement({ server }: { server: AdminServer }) {
   const [openModal, setOpenModal] = useState<'transfer' | 'suspend' | 'unsuspend' | 'clear-state' | 'delete' | null>(

@@ -1,9 +1,9 @@
 import type { GlobalRouteDefinition } from 'shared';
-import ForgotPassword from '@/pages/auth/ForgotPassword';
-import Login from '@/pages/auth/Login';
-import LoginOAuth from '@/pages/auth/LoginSteps/LoginOAuth';
-import Register from '@/pages/auth/Register';
-import ResetPassword from '@/pages/auth/ResetPassword';
+import ForgotPassword from '@/pages/auth/ForgotPassword.tsx';
+import Login from '@/pages/auth/Login.tsx';
+import LoginOAuth from '@/pages/auth/LoginSteps/LoginOAuth.tsx';
+import Register from '@/pages/auth/Register.tsx';
+import ResetPassword from '@/pages/auth/ResetPassword.tsx';
 
 const routes: GlobalRouteDefinition[] = [
   {

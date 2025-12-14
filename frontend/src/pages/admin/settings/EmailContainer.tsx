@@ -3,22 +3,22 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateEmailSettings from '@/api/admin/settings/updateEmailSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import { mailModeTypeLabelMapping } from '@/lib/enums';
+import updateEmailSettings from '@/api/admin/settings/updateEmailSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import { mailModeTypeLabelMapping } from '@/lib/enums.ts';
 import {
   adminSettingsEmailFilesystemSchema,
   adminSettingsEmailSchema,
   adminSettingsEmailSendmailSchema,
   adminSettingsEmailSmtpSchema,
-} from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import EmailFile from './forms/EmailFile';
-import EmailSendmail from './forms/EmailSendmail';
-import EmailSmtp from './forms/EmailSmtp';
+} from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import EmailFile from './forms/EmailFile.tsx';
+import EmailSendmail from './forms/EmailSendmail.tsx';
+import EmailSmtp from './forms/EmailSmtp.tsx';
 
 export default function EmailContainer() {
   const { addToast } = useToast();

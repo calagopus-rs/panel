@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useToast } from '@/providers/ToastProvider';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function CopyOnClick({
   enabled = true,

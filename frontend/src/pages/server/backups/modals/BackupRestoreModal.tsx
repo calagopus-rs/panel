@@ -1,12 +1,12 @@
 import { Group, ModalProps, Switch } from '@mantine/core';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import restoreBackup from '@/api/server/backups/restoreBackup';
-import Button from '@/elements/Button';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import restoreBackup from '@/api/server/backups/restoreBackup.ts';
+import Button from '@/elements/Button.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   backup: ServerBackup;

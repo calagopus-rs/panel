@@ -1,9 +1,9 @@
 import { createSearchParams, NavLink } from 'react-router';
-import Checkbox from '@/elements/input/Checkbox';
-import { useServerStore } from '@/stores/server';
+import Checkbox from '@/elements/input/Checkbox.tsx';
+import { useServerStore } from '@/stores/server.ts';
 import { Breadcrumbs } from '@mantine/core';
 import { ReactNode, useMemo } from 'react';
-import Button from '@/elements/Button';
+import Button from '@/elements/Button.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
 

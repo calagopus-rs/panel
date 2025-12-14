@@ -1,18 +1,18 @@
 import { create, StoreApi } from 'zustand';
 import { createContext } from 'zustand-utils';
-import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs';
-import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations';
-import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts';
-import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders';
-import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations';
-import { createNestsSlice, NestsSlice } from '@/stores/slices/admin/nests';
-import { createEggRepositoriesSlice, EggRepositoriesSlice } from './slices/admin/eggRepositories';
-import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings';
-import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users';
-import { createNodesSlice, NodesSlice } from '@/stores/slices/admin/nodes';
-import { createRolesSlice, RolesSlice } from '@/stores/slices/admin/roles';
-import { createServersSlice, ServersSlice } from '@/stores/slices/admin/servers';
-import { createMountsSlice, MountsSlice } from '@/stores/slices/admin/mounts';
+import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs.ts';
+import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations.ts';
+import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts.ts';
+import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders.ts';
+import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations.ts';
+import { createNestsSlice, NestsSlice } from '@/stores/slices/admin/nests.ts';
+import { createEggRepositoriesSlice, EggRepositoriesSlice } from './slices/admin/eggRepositories.ts';
+import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings.ts';
+import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users.ts';
+import { createNodesSlice, NodesSlice } from '@/stores/slices/admin/nodes.ts';
+import { createRolesSlice, RolesSlice } from '@/stores/slices/admin/roles.ts';
+import { createServersSlice, ServersSlice } from '@/stores/slices/admin/servers.ts';
+import { createMountsSlice, MountsSlice } from '@/stores/slices/admin/mounts.ts';
 
 export interface AdminStore
   extends BackupConfigurationsSlice,

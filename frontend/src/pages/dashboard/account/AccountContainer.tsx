@@ -3,17 +3,17 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateAccount from '@/api/me/account/updateAccount';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateAccount from '@/api/me/account/updateAccount.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import { dashboardAccountSchema } from '@/lib/schemas/dashboard.ts';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/providers/ToastProvider';
-import { useGlobalStore } from '@/stores/global';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function AccountContainer() {
   const { addToast } = useToast();

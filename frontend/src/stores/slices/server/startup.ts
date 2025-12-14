@@ -1,4 +1,4 @@
-import { ServerStore } from '@/stores/server';
+import { ServerStore } from '@/stores/server.ts';
 import { StateCreator } from 'zustand';
 
 export interface StartupSlice {

@@ -1,5 +1,5 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (uuid: string, variables: EnvVariable[]): Promise<void> => {
   return new Promise((resolve, reject) => {

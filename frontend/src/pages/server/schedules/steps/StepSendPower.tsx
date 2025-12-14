@@ -1,7 +1,7 @@
 import { Stack } from '@mantine/core';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import { serverPowerActionLabelMapping } from '@/lib/enums';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import { serverPowerActionLabelMapping } from '@/lib/enums.ts';
 
 export default function StepSendPower({
   action,

@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { nodeMountTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import NodeMountAddModal from './modals/NodeMountAddModal';
-import NodeMountRow from './NodeMountRow';
+import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { nodeMountTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import NodeMountAddModal from './modals/NodeMountAddModal.tsx';
+import NodeMountRow from './NodeMountRow.tsx';
 
 export default function AdminNodeMounts({ node }: { node: Node }) {
   const { nodeMounts, setNodeMounts } = useAdminStore();

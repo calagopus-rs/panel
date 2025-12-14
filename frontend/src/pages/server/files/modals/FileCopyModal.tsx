@@ -4,15 +4,15 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { join } from 'pathe';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import copyFile from '@/api/server/files/copyFile';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import copyFile from '@/api/server/files/copyFile.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
 import { serverFilesCopySchema } from '@/lib/schemas/server/files.ts';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   file: DirectoryEntry;

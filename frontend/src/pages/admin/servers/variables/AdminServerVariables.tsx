@@ -1,13 +1,13 @@
 import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import getServerVariables from '@/api/admin/servers/variables/getServerVariables';
-import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import VariableContainer from '@/elements/VariableContainer';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts';
+import getServerVariables from '@/api/admin/servers/variables/getServerVariables.ts';
+import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import VariableContainer from '@/elements/VariableContainer.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 
 export default function AdminServerVariables({ server }: { server: AdminServer }) {
   const { addToast } = useToast();

@@ -1,8 +1,8 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
-import { adminSettingsCaptchaProviderSchema } from '@/lib/schemas/admin/settings';
+import { adminSettingsCaptchaProviderSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default async (data: z.infer<typeof adminSettingsCaptchaProviderSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

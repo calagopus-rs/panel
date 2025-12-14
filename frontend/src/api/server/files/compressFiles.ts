@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverFilesArchiveCreateSchema } from '@/lib/schemas/server/files.ts';
 
 type Data = z.infer<typeof serverFilesArchiveCreateSchema> & {

@@ -3,20 +3,20 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import { captchaProviderTypeLabelMapping } from '@/lib/enums';
+import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import { captchaProviderTypeLabelMapping } from '@/lib/enums.ts';
 import {
   adminSettingsCaptchaProviderRecaptchaSchema,
   adminSettingsCaptchaProviderSchema,
   adminSettingsCaptchaProviderTurnstileSchema,
-} from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import CaptchaRecaptcha from './forms/CaptchaRecaptcha';
-import CaptchaTurnstile from './forms/CaptchaTurnstile';
+} from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import CaptchaRecaptcha from './forms/CaptchaRecaptcha.tsx';
+import CaptchaTurnstile from './forms/CaptchaTurnstile.tsx';
 
 export default function CaptchaContainer() {
   const { addToast } = useToast();

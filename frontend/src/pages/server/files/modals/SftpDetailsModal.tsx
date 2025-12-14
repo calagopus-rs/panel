@@ -1,12 +1,12 @@
 import { faExternalLink } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, ModalProps } from '@mantine/core';
-import Button from '@/elements/Button';
-import CopyOnClick from '@/elements/CopyOnClick';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { useAuth } from '@/providers/AuthProvider';
-import { useServerStore } from '@/stores/server';
+import Button from '@/elements/Button.tsx';
+import CopyOnClick from '@/elements/CopyOnClick.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
   const { user } = useAuth();

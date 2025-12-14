@@ -1,5 +1,5 @@
-import { axiosInstance } from '@/api/axios';
-import { prepareCredentialForTransport } from '../me/security-keys/postSecurityKeyChallenge';
+import { axiosInstance } from '@/api/axios.ts';
+import { prepareCredentialForTransport } from '../me/security-keys/postSecurityKeyChallenge.ts';
 
 interface Response {
   user: User;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverBackupEditSchema } from '@/lib/schemas/server/backups.ts';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (
   uuid: string,

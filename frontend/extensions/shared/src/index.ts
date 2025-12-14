@@ -21,5 +21,5 @@ export interface ServerRouteDefinition extends RouteDefinition {
   permission?: string | string[] | null;
 }
 
-export * from './extension';
-export * from './translation';
+export * from './extension.ts';
+export * from './translation.ts';

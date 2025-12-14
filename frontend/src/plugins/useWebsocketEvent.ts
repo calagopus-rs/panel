@@ -1,4 +1,4 @@
-import { useServerStore } from '@/stores/server';
+import { useServerStore } from '@/stores/server.ts';
 import { useEffect, useRef } from 'react';
 
 export enum SocketEvent {

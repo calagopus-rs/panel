@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { serverScheduleSchema } from '@/lib/schemas/server/schedule.ts';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (uuid: string, data: z.infer<typeof serverScheduleSchema>): Promise<ServerSchedule> => {
   return new Promise((resolve, reject) => {

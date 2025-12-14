@@ -1,5 +1,5 @@
-import { Websocket } from '@/plugins/Websocket';
-import { ServerStore } from '@/stores/server';
+import { Websocket } from '@/plugins/Websocket.ts';
+import { ServerStore } from '@/stores/server.ts';
 import { StateCreator } from 'zustand';
 
 export interface WebsocketSlice {

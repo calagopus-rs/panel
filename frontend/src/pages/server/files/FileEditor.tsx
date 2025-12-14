@@ -2,16 +2,16 @@ import { Editor, type OnMount } from '@monaco-editor/react';
 import { join } from 'pathe';
 import { useEffect, useRef, useState } from 'react';
 import { createSearchParams, useNavigate, useParams, useSearchParams } from 'react-router';
-import getFileContent from '@/api/server/files/getFileContent';
-import saveFileContent from '@/api/server/files/saveFileContent';
-import Button from '@/elements/Button';
-import Spinner from '@/elements/Spinner';
-import { getLanguageFromExtension } from '@/lib/files';
-import NotFound from '@/pages/NotFound';
+import getFileContent from '@/api/server/files/getFileContent.ts';
+import saveFileContent from '@/api/server/files/saveFileContent.ts';
+import Button from '@/elements/Button.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { getLanguageFromExtension } from '@/lib/files.ts';
+import NotFound from '@/pages/NotFound.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
-import { useServerStore } from '@/stores/server';
-import FileBreadcrumbs from './FileBreadcrumbs';
-import FileNameModal from './modals/FileNameModal';
+import { useServerStore } from '@/stores/server.ts';
+import FileBreadcrumbs from './FileBreadcrumbs.tsx';
+import FileNameModal from './modals/FileNameModal.tsx';
 
 export default function FileEditor() {
   const params = useParams<'action'>();

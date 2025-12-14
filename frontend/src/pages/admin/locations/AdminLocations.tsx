@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getLocations from '@/api/admin/locations/getLocations';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { locationTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import LocationCreateOrUpdate from './LocationCreateOrUpdate';
-import LocationRow from './LocationRow';
-import LocationView from './LocationView';
+import getLocations from '@/api/admin/locations/getLocations.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { locationTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import LocationCreateOrUpdate from './LocationCreateOrUpdate.tsx';
+import LocationRow from './LocationRow.tsx';
+import LocationView from './LocationView.tsx';
 
 function LocationsContainer() {
   const navigate = useNavigate();

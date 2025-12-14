@@ -1,18 +1,18 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
-import { httpErrorToHuman } from '@/api/axios';
-import createAllocation from '@/api/server/allocations/createAllocation';
-import getAllocations from '@/api/server/allocations/getAllocations';
-import Button from '@/elements/Button';
-import ConditionalTooltip from '@/elements/ConditionalTooltip';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
-import AllocationRow from './AllocationRow';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import createAllocation from '@/api/server/allocations/createAllocation.ts';
+import getAllocations from '@/api/server/allocations/getAllocations.ts';
+import Button from '@/elements/Button.tsx';
+import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import AllocationRow from './AllocationRow.tsx';
 
 export default function ServerNetwork() {
   const { addToast } = useToast();

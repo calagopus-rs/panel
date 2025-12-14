@@ -2,15 +2,15 @@ import { faBriefcase, faCog, faComputer, faFingerprint } from '@fortawesome/free
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getUser from '@/api/admin/users/getUser';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import AdminUserServers from '@/pages/admin/users/servers/AdminUserServers';
-import UserCreateOrUpdate from '@/pages/admin/users/UserCreateOrUpdate';
-import { useToast } from '@/providers/ToastProvider';
-import AdminUserActivity from './activity/AdminUserActivity';
-import AdminUserOAuthLinks from './oauthLinks/AdminUserOAuthLinks';
+import getUser from '@/api/admin/users/getUser.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import AdminUserServers from '@/pages/admin/users/servers/AdminUserServers.tsx';
+import UserCreateOrUpdate from '@/pages/admin/users/UserCreateOrUpdate.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import AdminUserActivity from './activity/AdminUserActivity.tsx';
+import AdminUserOAuthLinks from './oauthLinks/AdminUserOAuthLinks.tsx';
 
 export default function UserView() {
   const params = useParams<'id'>();

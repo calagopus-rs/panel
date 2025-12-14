@@ -1,5 +1,5 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { AdminStore } from '@/stores/admin';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { AdminStore } from '@/stores/admin.tsx';
 import { StateCreator } from 'zustand';
 
 export interface RolesSlice {

@@ -1,14 +1,14 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
-import getMounts from '@/api/admin/mounts/getMounts';
-import createEggMount from '@/api/admin/nests/eggs/mounts/createEggMount';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Modal from '@/elements/modals/Modal';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import getMounts from '@/api/admin/mounts/getMounts.ts';
+import createEggMount from '@/api/admin/nests/eggs/mounts/createEggMount.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function EggMountAddModal({
   nest,

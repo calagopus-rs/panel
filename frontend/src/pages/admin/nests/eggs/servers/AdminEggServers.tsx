@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import ServerRow from '@/pages/admin/servers/ServerRow';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import TextInput from '@/elements/input/TextInput';
-import getEggServers from '@/api/admin/nests/eggs/servers/getEggServers';
-import { serverTableColumns } from '@/lib/tableColumns';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import Table from '@/elements/Table.tsx';
+import ServerRow from '@/pages/admin/servers/ServerRow.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import getEggServers from '@/api/admin/nests/eggs/servers/getEggServers.ts';
+import { serverTableColumns } from '@/lib/tableColumns.ts';
 
 export default function AdminEggServers({
   contextNest,

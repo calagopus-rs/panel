@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (serverUuid: string, scheduleUuid: string, order: string[]): Promise<void> => {
   return new Promise((resolve, reject) => {

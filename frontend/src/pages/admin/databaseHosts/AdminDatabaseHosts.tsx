@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
-import Button from '@/elements/Button';
-import Table from '@/elements/Table';
-import { databaseHostTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate';
-import DatabaseHostRow from './DatabaseHostRow';
-import DatabaseHostView from './DatabaseHostView';
+import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts.ts';
+import Button from '@/elements/Button.tsx';
+import Table from '@/elements/Table.tsx';
+import { databaseHostTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import DatabaseHostCreateOrUpdate from './DatabaseHostCreateOrUpdate.tsx';
+import DatabaseHostRow from './DatabaseHostRow.tsx';
+import DatabaseHostView from './DatabaseHostView.tsx';
 
 function DatabaseHostsContainer() {
   const navigate = useNavigate();

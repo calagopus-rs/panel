@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
-import { adminServerCreateSchema } from '@/lib/schemas/admin/servers';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
+import { adminServerCreateSchema } from '@/lib/schemas/admin/servers.ts';
 
 export default async (data: z.infer<typeof adminServerCreateSchema>): Promise<AdminServer> => {
   return new Promise((resolve, reject) => {

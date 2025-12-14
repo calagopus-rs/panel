@@ -1,4 +1,4 @@
-import { axiosInstance, getPaginationSet } from '@/api/axios';
+import { axiosInstance, getPaginationSet } from '@/api/axios.ts';
 
 export default async (page: number, search?: string, other?: boolean): Promise<ResponseMeta<Server>> => {
   return new Promise((resolve, reject) => {

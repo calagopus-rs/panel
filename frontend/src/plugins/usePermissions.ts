@@ -1,4 +1,4 @@
-import { useServerStore } from '@/stores/server';
+import { useServerStore } from '@/stores/server.ts';
 
 export const usePermissions = (action: string | string[]): boolean[] => {
   const server = useServerStore((state) => state.server);

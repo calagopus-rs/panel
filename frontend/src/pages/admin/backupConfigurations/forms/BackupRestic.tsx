@@ -1,11 +1,11 @@
 import { Divider, Group, Stack, Title } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { z } from 'zod';
-import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput';
-import NumberInput from '@/elements/input/NumberInput';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
-import { adminBackupConfigurationResticSchema } from '@/lib/schemas/admin/backupConfigurations';
+import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminBackupConfigurationResticSchema } from '@/lib/schemas/admin/backupConfigurations.ts';
 
 export default function BackupRestic({
   form,

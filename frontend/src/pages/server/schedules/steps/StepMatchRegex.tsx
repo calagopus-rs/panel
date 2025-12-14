@@ -1,9 +1,9 @@
 import { ActionIcon, Stack, Title } from '@mantine/core';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
-import Button from '@/elements/Button';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
+import Button from '@/elements/Button.tsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
-import TextInput from '@/elements/input/TextInput';
+import TextInput from '@/elements/input/TextInput.tsx';
 
 export default function StepMatchRegex({
   action,

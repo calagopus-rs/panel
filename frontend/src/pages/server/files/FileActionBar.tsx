@@ -3,16 +3,16 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { join } from 'pathe';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import downloadFiles from '@/api/server/files/downloadFiles';
-import renameFiles from '@/api/server/files/renameFiles';
-import ActionBar from '@/elements/ActionBar';
-import Button from '@/elements/Button';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
-import { useFileKeyboardActions } from './hooks/useFileKeyboardActions';
-import ArchiveCreateModal from './modals/ArchiveCreateModal';
-import FileDeleteModal from './modals/FileDeleteModal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import downloadFiles from '@/api/server/files/downloadFiles.ts';
+import renameFiles from '@/api/server/files/renameFiles.ts';
+import ActionBar from '@/elements/ActionBar.tsx';
+import Button from '@/elements/Button.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import { useFileKeyboardActions } from './hooks/useFileKeyboardActions.ts';
+import ArchiveCreateModal from './modals/ArchiveCreateModal.tsx';
+import FileDeleteModal from './modals/FileDeleteModal.tsx';
 
 export default function FileActionBar() {
   const [searchParams] = useSearchParams();

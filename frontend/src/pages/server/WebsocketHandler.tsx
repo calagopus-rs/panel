@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import getWebsocketToken from '@/api/server/getWebsocketToken';
-import { Websocket } from '@/plugins/Websocket';
-import { useServerStore } from '@/stores/server';
+import getWebsocketToken from '@/api/server/getWebsocketToken.ts';
+import { Websocket } from '@/plugins/Websocket.ts';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function WebsocketHandler() {
   let updatingToken = false;

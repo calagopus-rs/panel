@@ -7,21 +7,21 @@ import { useEffect, useState } from 'react';
 import { zones } from 'tzdata';
 import { NIL as uuidNil } from 'uuid';
 import { z } from 'zod';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import getEggs from '@/api/admin/nests/eggs/getEggs';
-import getNests from '@/api/admin/nests/getNests';
-import updateServer from '@/api/admin/servers/updateServer';
-import getUsers from '@/api/admin/users/getUsers';
-import Alert from '@/elements/Alert';
-import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import Select from '@/elements/input/Select';
-import SizeInput from '@/elements/input/SizeInput';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import { adminServerUpdateSchema } from '@/lib/schemas/admin/servers';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations.ts';
+import getEggs from '@/api/admin/nests/eggs/getEggs.ts';
+import getNests from '@/api/admin/nests/getNests.ts';
+import updateServer from '@/api/admin/servers/updateServer.ts';
+import getUsers from '@/api/admin/users/getUsers.ts';
+import Alert from '@/elements/Alert.tsx';
+import Button from '@/elements/Button.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import Select from '@/elements/input/Select.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminServerUpdateSchema } from '@/lib/schemas/admin/servers.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
 
 const timezones = Object.keys(zones)
   .sort()

@@ -3,22 +3,22 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost';
-import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost';
-import testDatabaseHost from '@/api/admin/database-hosts/testDatabaseHost';
-import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import NumberInput from '@/elements/input/NumberInput';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { adminDatabaseHostCreateSchema, adminDatabaseHostUpdateSchema } from '@/lib/schemas/admin/databaseHosts';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useToast } from '@/providers/ToastProvider';
+import createDatabaseHost from '@/api/admin/database-hosts/createDatabaseHost.ts';
+import deleteDatabaseHost from '@/api/admin/database-hosts/deleteDatabaseHost.ts';
+import testDatabaseHost from '@/api/admin/database-hosts/testDatabaseHost.ts';
+import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { databaseTypeLabelMapping } from '@/lib/enums.ts';
+import { adminDatabaseHostCreateSchema, adminDatabaseHostUpdateSchema } from '@/lib/schemas/admin/databaseHosts.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function DatabaseHostCreateOrUpdate({
   contextDatabaseHost,

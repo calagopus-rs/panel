@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { Extension, ExtensionContext } from 'shared';
-import App from '@/App';
+import App from '@/App.tsx';
 import '@/app.css';
 
 const extensionModules = import.meta.glob('../extensions/*/src/index.ts', { eager: true });

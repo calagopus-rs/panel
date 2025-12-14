@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getApiKeys from '@/api/me/api-keys/getApiKeys';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useUserStore } from '@/stores/user';
-import ApiKeyRow from './ApiKeyRow';
+import getApiKeys from '@/api/me/api-keys/getApiKeys.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useUserStore } from '@/stores/user.ts';
+import ApiKeyRow from './ApiKeyRow.tsx';
 
 export default function DashboardApiKeys() {
   const { apiKeys, setApiKeys } = useUserStore();

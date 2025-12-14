@@ -1,13 +1,13 @@
 import { Group, ModalProps } from '@mantine/core';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import updateServerGroup from '@/api/me/servers/groups/updateServerGroup';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
-import { useTranslations } from '@/providers/TranslationProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateServerGroup from '@/api/me/servers/groups/updateServerGroup.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 type Props = ModalProps & {
   server: Server;

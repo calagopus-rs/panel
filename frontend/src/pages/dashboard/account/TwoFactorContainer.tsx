@@ -1,8 +1,8 @@
 import { Grid, Title } from '@mantine/core';
-import Card from '@/elements/Card';
-import { useAuth } from '@/providers/AuthProvider';
-import TwoFactorDisableButton from './actions/TwoFactorDisableButton';
-import TwoFactorSetupButton from './actions/TwoFactorSetupButton';
+import Card from '@/elements/Card.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import TwoFactorDisableButton from './actions/TwoFactorDisableButton.tsx';
+import TwoFactorSetupButton from './actions/TwoFactorSetupButton.tsx';
 
 export default function TwoFactorContainer() {
   const { user } = useAuth();

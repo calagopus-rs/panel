@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { eggRepositoryTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate';
-import EggRepositoryRow from './EggRepositoryRow';
-import EggRepositoryView from './EggRepositoryView';
+import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { eggRepositoryTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate.tsx';
+import EggRepositoryRow from './EggRepositoryRow.tsx';
+import EggRepositoryView from './EggRepositoryView.tsx';
 
 function EggRepositoriesContainer() {
   const navigate = useNavigate();

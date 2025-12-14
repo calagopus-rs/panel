@@ -3,24 +3,24 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
-import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration';
-import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Select from '@/elements/input/Select';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { backupDiskLabelMapping } from '@/lib/enums';
+import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration.ts';
+import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteBackupConfiguration.ts';
+import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { backupDiskLabelMapping } from '@/lib/enums.ts';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
   adminBackupConfigurationSchema,
-} from '@/lib/schemas/admin/backupConfigurations';
-import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic';
-import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3';
-import { useResourceForm } from '@/plugins/useResourceForm';
+} from '@/lib/schemas/admin/backupConfigurations.ts';
+import BackupRestic from '@/pages/admin/backupConfigurations/forms/BackupRestic.tsx';
+import BackupS3 from '@/pages/admin/backupConfigurations/forms/BackupS3.tsx';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
 
 export default function BackupConfigurationCreateOrUpdate({
   contextBackupConfiguration,

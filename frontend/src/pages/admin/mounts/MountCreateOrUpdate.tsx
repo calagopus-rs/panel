@@ -3,17 +3,17 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createMount from '@/api/admin/mounts/createMount';
-import deleteMount from '@/api/admin/mounts/deleteMount';
-import updateMount from '@/api/admin/mounts/updateMount';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Switch from '@/elements/input/Switch';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminMountSchema } from '@/lib/schemas/admin/mounts';
-import { useResourceForm } from '@/plugins/useResourceForm';
+import createMount from '@/api/admin/mounts/createMount.ts';
+import deleteMount from '@/api/admin/mounts/deleteMount.ts';
+import updateMount from '@/api/admin/mounts/updateMount.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminMountSchema } from '@/lib/schemas/admin/mounts.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
 
 export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);

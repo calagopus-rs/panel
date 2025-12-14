@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getAdminActivity from '@/api/admin/getAdminActivity';
-import { getEmptyPaginationSet } from '@/api/axios';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
+import getAdminActivity from '@/api/admin/getAdminActivity.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
 import { adminActivityColumns } from '@/lib/tableColumns.ts';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import ActivityRow from './ActivityRow';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import ActivityRow from './ActivityRow.tsx';
 
 export default function AdminActivity() {
   const [activities, setActivities] = useState<ResponseMeta<AdminActivity>>(getEmptyPaginationSet());

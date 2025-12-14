@@ -3,13 +3,13 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useRef } from 'react';
 import { z } from 'zod';
-import Button from '@/elements/Button';
-import Captcha, { CaptchaRef } from '@/elements/Captcha';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import PermissionSelector from '@/elements/PermissionSelector';
+import Button from '@/elements/Button.tsx';
+import Captcha, { CaptchaRef } from '@/elements/Captcha.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import PermissionSelector from '@/elements/PermissionSelector.tsx';
 import { serverSubuserCreateSchema } from '@/lib/schemas/server/subusers.ts';
-import { useGlobalStore } from '@/stores/global';
+import { useGlobalStore } from '@/stores/global.ts';
 
 type Props = ModalProps & {
   subuser?: ServerSubuser;

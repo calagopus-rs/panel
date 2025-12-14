@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (oauthProviderUuid: string): Promise<AdminOAuthProvider> => {
   return new Promise((resolve, reject) => {

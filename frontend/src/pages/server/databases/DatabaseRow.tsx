@@ -1,18 +1,18 @@
 import { faEye, faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
-import getDatabaseSize from '@/api/server/databases/getDatabaseSize';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import CopyOnClick from '@/elements/CopyOnClick';
-import Spinner from '@/elements/Spinner';
-import { TableData, TableRow } from '@/elements/Table';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
-import { useServerStore } from '@/stores/server';
-import DatabaseDeleteModal from './modals/DatabaseDeleteModal';
-import DatabaseDetailsModal from './modals/DatabaseDetailsModal';
-import DatabaseEditModal from './modals/DatabaseEditModal';
+import getDatabaseSize from '@/api/server/databases/getDatabaseSize.ts';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import CopyOnClick from '@/elements/CopyOnClick.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import { databaseTypeLabelMapping } from '@/lib/enums.ts';
+import { bytesToString } from '@/lib/size.ts';
+import { useServerStore } from '@/stores/server.ts';
+import DatabaseDeleteModal from './modals/DatabaseDeleteModal.tsx';
+import DatabaseDetailsModal from './modals/DatabaseDetailsModal.tsx';
+import DatabaseEditModal from './modals/DatabaseEditModal.tsx';
 
 export default function DatabaseRow({ database }: { database: ServerDatabase }) {
   const [openModal, setOpenModal] = useState<'edit' | 'details' | 'delete' | null>(null);

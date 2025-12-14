@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from 'react-router';
-import { useGlobalStore } from '@/stores/global';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeGuard() {
   const { settings } = useGlobalStore();

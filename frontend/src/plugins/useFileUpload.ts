@@ -1,7 +1,7 @@
 import { ChangeEvent, RefObject, useCallback, useMemo, useRef, useState } from 'react';
-import { axiosInstance } from '@/api/axios';
-import getFileUploadUrl from '@/api/server/files/getFileUploadUrl';
-import { useToast } from '@/providers/ToastProvider';
+import { axiosInstance } from '@/api/axios.ts';
+import getFileUploadUrl from '@/api/server/files/getFileUploadUrl.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface FileUploadProgress {
   fileName: string;

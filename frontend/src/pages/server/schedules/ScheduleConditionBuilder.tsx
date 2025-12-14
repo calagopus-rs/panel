@@ -1,9 +1,9 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
-import Button from '@/elements/Button';
-import { scheduleConditionLabelMapping } from '@/lib/enums';
-import ScheduleDynamicParameterInput from './ScheduleDynamicParameterInput';
+import Button from '@/elements/Button.tsx';
+import { scheduleConditionLabelMapping } from '@/lib/enums.ts';
+import ScheduleDynamicParameterInput from './ScheduleDynamicParameterInput.tsx';
 
 const maxConditionDepth = 3;
 

@@ -1,4 +1,4 @@
-import { useCurrentWindow } from '@/providers/CurrentWindowProvider';
+import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Menu, MenuProps } from '@mantine/core';

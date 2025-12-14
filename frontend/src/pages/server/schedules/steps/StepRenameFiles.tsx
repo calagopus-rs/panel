@@ -1,7 +1,7 @@
 import { Group, Stack, Text } from '@mantine/core';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepRenameFiles({
   action,
