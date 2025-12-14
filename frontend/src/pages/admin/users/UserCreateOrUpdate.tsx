@@ -56,7 +56,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         email: contextUser.email,
         nameFirst: contextUser.nameFirst,
         nameLast: contextUser.nameLast,
-        password: '',
+        password: null,
         admin: contextUser.admin,
         totpEnabled: contextUser.totpEnabled,
         language: contextUser.language,
@@ -152,6 +152,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
             placeholder='Password'
             type='password'
             {...form.getInputProps('password')}
+            onChange={(e) => form.setFieldValue('password', e.target.value || null)}
           />
 
           <Switch
