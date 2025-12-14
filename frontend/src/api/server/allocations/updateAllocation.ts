@@ -1,7 +1,7 @@
 import { axiosInstance } from '@/api/axios';
 
 interface Data {
-  notes?: string;
+  notes?: string | null;
   primary?: boolean;
 }
 

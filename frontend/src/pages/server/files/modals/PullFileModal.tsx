@@ -1,12 +1,16 @@
 import { Group, ModalProps } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { join } from 'pathe';
 import { useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import pullFile from '@/api/server/files/pullFile';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { serverFilesPullSchema } from '@/lib/schemas/server/files.ts';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -14,17 +18,24 @@ export default function PullFileModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, browsingDirectory } = useServerStore();
 
-  const [url, setUrl] = useState('');
-  const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverFilesPullSchema>>({
+    initialValues: {
+      url: '',
+      name: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverFilesPullSchema),
+  });
 
   const makeDirectory = () => {
     setLoading(true);
 
     pullFile(server.uuid, {
       root: browsingDirectory!,
-      url: url,
-      name: fileName,
+      url: form.values.url,
+      name: form.values.name,
     })
       .then(() => {
         onClose();
@@ -37,38 +48,35 @@ export default function PullFileModal({ opened, onClose }: ModalProps) {
 
   return (
     <Modal title='Pull File' onClose={onClose} opened={opened}>
-      <TextInput
-        withAsterisk
-        label='File URL'
-        placeholder='File URL'
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-      />
-      <TextInput
-        withAsterisk
-        label='File Name'
-        placeholder='File Name'
-        className='mt-2'
-        value={fileName}
-        onChange={(e) => setFileName(e.target.value)}
-      />
+      <form onSubmit={form.onSubmit(() => makeDirectory())}>
+        <TextInput withAsterisk label='File URL' placeholder='File URL' {...form.getInputProps('url')} />
+        <TextInput
+          withAsterisk
+          label='File Name'
+          placeholder='File Name'
+          className='mt-2'
+          {...form.getInputProps('name')}
+        />
 
-      <p className='mt-2 text-sm md:text-base break-all'>
-        <span className='text-neutral-200'>This file will be created as&nbsp;</span>
-        <Code>
-          /home/container/
-          <span className='text-cyan-200'>{join(browsingDirectory!, fileName).replace(/^(\.\.\/|\/)+/, '')}</span>
-        </Code>
-      </p>
+        <p className='mt-2 text-sm md:text-base break-all'>
+          <span className='text-neutral-200'>This file will be created as&nbsp;</span>
+          <Code>
+            /home/container/
+            <span className='text-cyan-200'>
+              {join(browsingDirectory!, form.values.name ?? '').replace(/^(\.\.\/|\/)+/, '')}
+            </span>
+          </Code>
+        </p>
 
-      <Group mt='md'>
-        <Button onClick={makeDirectory} loading={loading} disabled={!url || !fileName}>
-          Pull
-        </Button>
-        <Button variant='default' onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' loading={loading} disabled={!form.isValid()}>
+            Pull
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </form>
     </Modal>
   );
 }

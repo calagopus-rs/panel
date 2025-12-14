@@ -22,7 +22,7 @@ export const transformKeysToCamelCase = (obj: Record<string, object>): object =>
   return obj;
 };
 
-export const transformKeysToSnakeCase = (obj: Record<string, object>): object => {
+export const transformKeysToSnakeCase = (obj: Record<string, unknown>): object => {
   if (Array.isArray(obj)) {
     return obj.map((item) => transformKeysToSnakeCase(item));
   } else if (obj !== null && typeof obj === 'object') {

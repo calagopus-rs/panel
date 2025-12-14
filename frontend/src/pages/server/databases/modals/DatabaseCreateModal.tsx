@@ -1,5 +1,8 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import createDatabase from '@/api/server/databases/createDatabase';
 import getDatabaseHosts from '@/api/server/databases/getDatabaseHosts';
@@ -8,6 +11,7 @@ import Select from '@/elements/input/Select';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import { databaseTypeLabelMapping } from '@/lib/enums';
+import { serverDatabaseCreateSchema } from '@/lib/schemas/server/databases';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -16,9 +20,16 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   const { server, addDatabase } = useServerStore();
 
   const [databaseHosts, setDatabaseHosts] = useState<DatabaseHost[]>([]);
-  const [name, setName] = useState('');
-  const [host, setHost] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverDatabaseCreateSchema>>({
+    initialValues: {
+      name: '',
+      databaseHostUuid: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverDatabaseCreateSchema),
+  });
 
   useEffect(() => {
     getDatabaseHosts(server.uuid).then((data) => setDatabaseHosts(data));
@@ -27,7 +38,7 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
   const doCreate = () => {
     setLoading(true);
 
-    createDatabase(server.uuid, { databaseHostUuid: host, name })
+    createDatabase(server.uuid, form.values)
       .then((database) => {
         addToast('Database created.', 'success');
         onClose();
@@ -41,46 +52,41 @@ export default function DatabaseCreateModal({ opened, onClose }: ModalProps) {
 
   return (
     <Modal title='Create Database' onClose={onClose} opened={opened}>
-      <Stack>
-        <TextInput
-          withAsterisk
-          label='Database Name'
-          placeholder='Database Name'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      <form onSubmit={form.onSubmit(() => doCreate())}>
+        <Stack>
+          <TextInput withAsterisk label='Database Name' placeholder='Database Name' {...form.getInputProps('name')} />
 
-        <Select
-          withAsterisk
-          label='Database Host'
-          placeholder='Database Host'
-          searchable
-          nothingFoundMessage='No hosts found'
-          data={Object.values(
-            databaseHosts.reduce(
-              (acc, { uuid, name, type }) => (
-                (acc[type] ??= { group: databaseTypeLabelMapping[type], items: [] }).items.push({
-                  value: uuid,
-                  label: name,
-                }),
-                acc
+          <Select
+            withAsterisk
+            label='Database Host'
+            placeholder='Database Host'
+            searchable
+            nothingFoundMessage='No hosts found'
+            data={Object.values(
+              databaseHosts.reduce(
+                (acc, { uuid, name, type }) => (
+                  (acc[type] ??= { group: databaseTypeLabelMapping[type], items: [] }).items.push({
+                    value: uuid,
+                    label: name,
+                  }),
+                  acc
+                ),
+                {} as GroupedDatabaseHosts,
               ),
-              {} as GroupedDatabaseHosts,
-            ),
-          )}
-          value={host}
-          onChange={(value) => setHost(value ?? '')}
-        />
+            )}
+            {...form.getInputProps('databaseHostUuid')}
+          />
 
-        <Group>
-          <Button onClick={doCreate} loading={loading} disabled={!name || !host}>
-            Create
-          </Button>
-          <Button variant='default' onClick={onClose}>
-            Close
-          </Button>
-        </Group>
-      </Stack>
+          <Group>
+            <Button type='submit' loading={loading} disabled={!form.isValid()}>
+              Create
+            </Button>
+            <Button variant='default' onClick={onClose}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 }

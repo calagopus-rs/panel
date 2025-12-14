@@ -1,10 +1,14 @@
 import { Group, ModalProps } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import renameFiles from '@/api/server/files/renameFiles';
 import Button from '@/elements/Button';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { serverFilesNameSchema } from '@/lib/schemas/server/files.ts';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -16,8 +20,15 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingEntries, setBrowsingEntries } = useServerStore();
 
-  const [newFileName, setNewFileName] = useState(file.name);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverFilesNameSchema>>({
+    initialValues: {
+      name: file.name,
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverFilesNameSchema),
+  });
 
   const doRename = () => {
     setLoading(true);
@@ -28,7 +39,7 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
       files: [
         {
           from: file.name,
-          to: newFileName,
+          to: form.values.name,
         },
       ],
     })
@@ -42,7 +53,7 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
         setBrowsingEntries({
           ...browsingEntries,
           data: browsingEntries.data.map((entry) =>
-            entry.name === file.name ? { ...entry, name: newFileName } : entry,
+            entry.name === file.name ? { ...entry, name: form.values.name } : entry,
           ),
         });
         onClose();
@@ -55,22 +66,18 @@ export default function FileRenameModal({ file, opened, onClose }: Props) {
 
   return (
     <Modal title='Rename File' onClose={onClose} opened={opened}>
-      <TextInput
-        withAsterisk
-        label='File Name'
-        placeholder='File Name'
-        value={newFileName}
-        onChange={(e) => setNewFileName(e.target.value)}
-      />
+      <form onSubmit={form.onSubmit(() => doRename())}>
+        <TextInput withAsterisk label='File Name' placeholder='File Name' {...form.getInputProps('name')} />
 
-      <Group mt='md'>
-        <Button onClick={doRename} loading={loading}>
-          Rename
-        </Button>
-        <Button variant='default' onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' loading={loading}>
+            Rename
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </form>
     </Modal>
   );
 }

@@ -1,11 +1,15 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import updateBackup from '@/api/server/backups/updateBackup';
 import Button from '@/elements/Button';
 import Switch from '@/elements/input/Switch';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { serverBackupEditSchema } from '@/lib/schemas/server/backups';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -17,17 +21,24 @@ export default function BackupEditModal({ backup, opened, onClose }: Props) {
   const { addToast } = useToast();
   const server = useServerStore((state) => state.server);
 
-  const [name, setName] = useState(backup.name);
-  const [locked, setLocked] = useState<boolean>(backup.isLocked);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverBackupEditSchema>>({
+    initialValues: {
+      name: backup.name,
+      locked: backup.isLocked,
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverBackupEditSchema),
+  });
 
   const doUpdate = () => {
     setLoading(false);
 
-    updateBackup(server.uuid, backup.uuid, { name, locked })
+    updateBackup(server.uuid, backup.uuid, form.values)
       .then(() => {
-        backup.name = name;
-        backup.isLocked = locked;
+        backup.name = form.values.name;
+        backup.isLocked = form.values.locked;
         onClose();
         addToast('Backup updated.', 'success');
       })
@@ -39,26 +50,27 @@ export default function BackupEditModal({ backup, opened, onClose }: Props) {
 
   return (
     <Modal title='Edit Backup' onClose={onClose} opened={opened}>
-      <Stack>
-        <TextInput
-          withAsterisk
-          label='Name'
-          placeholder='Name'
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Stack>
+          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-        <Switch label='Locked' name='locked' checked={locked} onChange={(e) => setLocked(e.target.checked)} />
+          <Switch
+            label='Locked'
+            name='locked'
+            checked={form.values.locked}
+            onChange={(e) => form.setFieldValue('locked', e.target.checked)}
+          />
 
-        <Group>
-          <Button onClick={doUpdate} loading={loading} disabled={!name}>
-            Save
-          </Button>
-          <Button variant='default' onClick={onClose}>
-            Close
-          </Button>
-        </Group>
-      </Stack>
+          <Group>
+            <Button type='submit' loading={loading} disabled={!form.isValid()}>
+              Save
+            </Button>
+            <Button variant='default' onClick={onClose}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 }

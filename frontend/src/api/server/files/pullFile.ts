@@ -3,7 +3,7 @@ import { axiosInstance } from '@/api/axios';
 interface Data {
   root: string;
   url: string;
-  name: string;
+  name: string | null;
 }
 
 export default async (uuid: string, data: Data): Promise<string> => {

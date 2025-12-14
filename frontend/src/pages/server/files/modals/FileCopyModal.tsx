@@ -1,12 +1,16 @@
 import { Group, ModalProps } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { join } from 'pathe';
 import { useState } from 'react';
+import { z } from 'zod';
 import { httpErrorToHuman } from '@/api/axios';
 import copyFile from '@/api/server/files/copyFile';
 import Button from '@/elements/Button';
 import Code from '@/elements/Code';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
+import { serverFilesCopySchema } from '@/lib/schemas/server/files.ts';
 import { useToast } from '@/providers/ToastProvider';
 import { useServerStore } from '@/stores/server';
 
@@ -18,8 +22,15 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory, browsingEntries, addBrowsingEntry } = useServerStore();
 
-  const [newFileName, setNewFileName] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverFilesCopySchema>>({
+    initialValues: {
+      name: '',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverFilesCopySchema),
+  });
 
   const generateNewName = () => {
     const lastDotIndex = file.name.lastIndexOf('.');
@@ -65,7 +76,7 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
   const doCopy = () => {
     setLoading(true);
 
-    copyFile(server.uuid, join(browsingDirectory!, file.name), newFileName || null)
+    copyFile(server.uuid, join(browsingDirectory!, file.name), form.values.name || null)
       .then((entry) => {
         addToast('File has been copied.', 'success');
         onClose();
@@ -79,31 +90,28 @@ export default function FileCopyModal({ file, opened, onClose }: Props) {
 
   return (
     <Modal title='Copy File' onClose={onClose} opened={opened}>
-      <TextInput
-        label='File Name'
-        placeholder='File Name'
-        value={newFileName}
-        onChange={(e) => setNewFileName(e.target.value)}
-      />
+      <form onSubmit={form.onSubmit(() => doCopy())}>
+        <TextInput label='File Name' placeholder='File Name' {...form.getInputProps('name')} />
 
-      <p className='mt-2 text-sm md:text-base break-all'>
-        <span className='text-neutral-200'>This file will be created as&nbsp;</span>
-        <Code>
-          /home/container/
-          <span className='text-cyan-200'>
-            {join(browsingDirectory!, newFileName || generateNewName()).replace(/^(\.\.\/|\/)+/, '')}
-          </span>
-        </Code>
-      </p>
+        <p className='mt-2 text-sm md:text-base break-all'>
+          <span className='text-neutral-200'>This file will be created as&nbsp;</span>
+          <Code>
+            /home/container/
+            <span className='text-cyan-200'>
+              {join(browsingDirectory!, form.values.name || generateNewName()).replace(/^(\.\.\/|\/)+/, '')}
+            </span>
+          </Code>
+        </p>
 
-      <Group mt='md'>
-        <Button onClick={doCopy} loading={loading}>
-          Copy
-        </Button>
-        <Button variant='default' onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' loading={loading}>
+            Copy
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </form>
     </Modal>
   );
 }

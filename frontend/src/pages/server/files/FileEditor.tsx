@@ -22,7 +22,7 @@ export default function FileEditor() {
   const server = useServerStore((state) => state.server);
   const { browsingDirectory, setBrowsingDirectory, browsingBackup } = useServerStore();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [fileName, setFileName] = useState('');

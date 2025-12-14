@@ -1,10 +1,14 @@
 import { Group, ModalProps, Stack, TagsInput } from '@mantine/core';
-import { useRef, useState } from 'react';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
+import { useEffect, useRef } from 'react';
+import { z } from 'zod';
 import Button from '@/elements/Button';
 import Captcha, { CaptchaRef } from '@/elements/Captcha';
 import TextInput from '@/elements/input/TextInput';
 import Modal from '@/elements/modals/Modal';
 import PermissionSelector from '@/elements/PermissionSelector';
+import { serverSubuserCreateSchema } from '@/lib/schemas/server/subusers.ts';
 import { useGlobalStore } from '@/stores/global';
 
 type Props = ModalProps & {
@@ -16,60 +20,75 @@ type Props = ModalProps & {
 export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate, opened, onClose }: Props) {
   const { availablePermissions } = useGlobalStore();
 
-  const [email, setEmail] = useState('');
-  const [selectedPermissions, setSelectedPermissions] = useState<string[]>(subuser?.permissions ?? []);
-  const [ignoredFiles, setIgnoredFiles] = useState<string[]>(subuser?.ignoredFiles ?? []);
   const captchaRef = useRef<CaptchaRef>(null);
+
+  const form = useForm<z.infer<typeof serverSubuserCreateSchema>>({
+    initialValues: {
+      email: '',
+      permissions: [],
+      ignoredFiles: [],
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverSubuserCreateSchema),
+  });
+
+  useEffect(() => {
+    if (subuser) {
+      form.setValues({
+        email: subuser.user.email,
+        permissions: subuser.permissions,
+        ignoredFiles: subuser.ignoredFiles,
+      });
+    }
+  }, [subuser]);
 
   const doCreateOrUpdate = () => {
     if (subuser && onUpdate) {
-      onUpdate(Array.from(selectedPermissions), ignoredFiles);
+      onUpdate(Array.from(form.values.permissions), form.values.ignoredFiles);
       return;
     }
 
     captchaRef.current?.getToken().then((token) => {
-      onCreate!(email, Array.from(selectedPermissions), ignoredFiles, token);
+      onCreate!(form.values.email, Array.from(form.values.permissions), form.values.ignoredFiles, token);
     });
   };
 
   return (
     <Modal title={subuser ? 'Update Subuser' : 'Create Subuser'} onClose={onClose} opened={opened} size='xl'>
-      <Stack>
-        {subuser ? (
-          <TextInput label='Username' placeholder='Username' value={subuser.user.username} disabled />
-        ) : (
-          <TextInput
-            label='Email'
-            placeholder='Enter the email that this subuser should be saved as.'
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate())}>
+        <Stack>
+          {subuser ? (
+            <TextInput label='Username' placeholder='Username' value={subuser.user.username} disabled />
+          ) : (
+            <TextInput
+              label='Email'
+              placeholder='Enter the email that this subuser should be saved as.'
+              {...form.getInputProps('email')}
+            />
+          )}
+
+          <PermissionSelector
+            label='Permissions'
+            permissionsMapType='serverPermissions'
+            permissions={availablePermissions.serverPermissions}
+            selectedPermissions={form.values.permissions}
+            setSelectedPermissions={(permissions) => form.setFieldValue('permissions', permissions)}
           />
-        )}
 
-        <PermissionSelector
-          label='Permissions'
-          permissionsMapType='serverPermissions'
-          permissions={availablePermissions.serverPermissions}
-          selectedPermissions={selectedPermissions}
-          setSelectedPermissions={setSelectedPermissions}
-        />
+          <TagsInput label='Ignored Files' placeholder='Ignored Files' {...form.getInputProps('ignoredFiles')} />
 
-        <TagsInput
-          label='Ignored Files'
-          placeholder='Ignored Files'
-          value={ignoredFiles || []}
-          onChange={(e) => setIgnoredFiles(e)}
-        />
+          {!subuser && <Captcha ref={captchaRef} />}
 
-        {!subuser && <Captcha ref={captchaRef} />}
-
-        <Group>
-          <Button onClick={doCreateOrUpdate}>{subuser ? 'Update' : 'Create'}</Button>
-          <Button variant='default' onClick={onClose}>
-            Close
-          </Button>
-        </Group>
-      </Stack>
+          <Group>
+            <Button type='submit' disabled={!form.isValid()}>
+              {subuser ? 'Update' : 'Create'}
+            </Button>
+            <Button variant='default' onClick={onClose}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 }

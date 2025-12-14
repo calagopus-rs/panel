@@ -1,11 +1,11 @@
+import { z } from 'zod';
 import { axiosInstance } from '@/api/axios';
+import { serverFilesArchiveCreateSchema } from '@/lib/schemas/server/files.ts';
 
-interface Data {
-  name: string | null;
-  format: ArchiveFormat;
+type Data = z.infer<typeof serverFilesArchiveCreateSchema> & {
   root: string;
   files: string[];
-}
+};
 
 export default async (uuid: string, data: Data): Promise<string> => {
   return new Promise((resolve, reject) => {
