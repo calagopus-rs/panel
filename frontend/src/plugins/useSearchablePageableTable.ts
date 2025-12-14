@@ -1,6 +1,6 @@
+import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import debounce from 'debounce';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 

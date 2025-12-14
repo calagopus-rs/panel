@@ -13,9 +13,9 @@ import Captcha, { CaptchaRef } from '@/elements/Captcha.tsx';
 import Card from '@/elements/Card.tsx';
 import PasswordInput from '@/elements/input/PasswordInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
+import { authRegisterSchema } from '@/lib/schemas/auth.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import AuthWrapper from './AuthWrapper.tsx';
-import { authRegisterSchema } from '@/lib/schemas/auth.ts';
 
 export default function Register() {
   const { doLogin } = useAuth();

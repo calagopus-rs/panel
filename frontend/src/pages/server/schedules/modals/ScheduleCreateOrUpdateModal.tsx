@@ -4,7 +4,9 @@ import { ActionIcon, Group, ModalProps, Popover, Stack, Title } from '@mantine/c
 import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import createSchedule from '@/api/server/schedules/createSchedule.ts';
+import updateSchedule from '@/api/server/schedules/updateSchedule.ts';
 import Button from '@/elements/Button.tsx';
+import Divider from '@/elements/Divider.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -12,9 +14,7 @@ import Modal from '@/elements/modals/Modal.tsx';
 import { serverBackupStatusLabelMapping, serverPowerStateLabelMapping } from '@/lib/enums.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
-import updateSchedule from '@/api/server/schedules/updateSchedule.ts';
 import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
-import Divider from '@/elements/Divider.tsx';
 
 interface CrontabEditorProps {
   value: string;

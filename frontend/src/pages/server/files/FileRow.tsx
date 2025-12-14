@@ -25,12 +25,12 @@ import { bytesToString } from '@/lib/size.ts';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
+import { FileTableRow } from './FileTableRow.tsx';
 import ArchiveCreateModal from './modals/ArchiveCreateModal.tsx';
 import FileCopyModal from './modals/FileCopyModal.tsx';
 import FileDeleteModal from './modals/FileDeleteModal.tsx';
 import FilePermissionsModal from './modals/FilePermissionsModal.tsx';
 import FileRenameModal from './modals/FileRenameModal.tsx';
-import { FileTableRow } from './FileTableRow.tsx';
 
 interface FileRowProps {
   file: DirectoryEntry;

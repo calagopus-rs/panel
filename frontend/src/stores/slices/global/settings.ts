@@ -1,5 +1,5 @@
-import { GlobalStore } from '@/stores/global.ts';
 import { StateCreator } from 'zustand';
+import { GlobalStore } from '@/stores/global.ts';
 
 export interface SettingsSlice {
   serverListShowOthers: boolean;

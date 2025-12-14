@@ -5,13 +5,13 @@ import { useState } from 'react';
 import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { adminUserOAuthLinkTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useAdminStore } from '@/stores/admin.tsx';
 import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal.tsx';
 import UserOAuthLinkRow from './UserOAuthLinkRow.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 
 export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();

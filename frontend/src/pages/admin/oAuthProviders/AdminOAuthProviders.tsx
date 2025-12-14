@@ -10,6 +10,7 @@ import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders.ts'
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Table from '@/elements/Table.tsx';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders.ts';
 import { oauthProviderTableColumns } from '@/lib/tableColumns.ts';
 import { transformKeysToCamelCase } from '@/lib/transformers.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -18,7 +19,6 @@ import { useAdminStore } from '@/stores/admin.tsx';
 import DatabaseHostCreateOrUpdate from './OAuthProviderCreateOrUpdate.tsx';
 import DatabaseHostRow from './OAuthProviderRow.tsx';
 import DatabaseHostView from './OAuthProviderView.tsx';
-import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders.ts';
 
 function OAuthProvidersContainer() {
   const navigate = useNavigate();

@@ -1,8 +1,8 @@
 import { faServer } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import SubNavigation from '@/elements/SubNavigation.tsx';
-import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export default function DashboardHomeTitle() {
   const { t } = useTranslations();

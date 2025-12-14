@@ -1,4 +1,4 @@
-import { defineTranslations, defineEnglishItem, DefinedTranslations } from 'shared';
+import { DefinedTranslations, defineEnglishItem, defineTranslations } from 'shared';
 
 const extensionTranslations = import.meta.glob?.('../extensions/*/src/translations.ts', { eager: true });
 

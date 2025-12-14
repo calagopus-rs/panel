@@ -2,11 +2,11 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getLocationNodes from '@/api/admin/locations/nodes/getLocationNodes.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import NodeRow from '../../nodes/NodeRow.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 
 export default function AdminLocationNodes({ location }: { location: Location }) {
   const [locationNodes, setLocationNodes] = useState<ResponseMeta<Node>>(getEmptyPaginationSet());

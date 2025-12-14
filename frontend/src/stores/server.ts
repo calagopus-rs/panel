@@ -1,15 +1,15 @@
 import { create, StoreApi } from 'zustand';
 import { createContext } from 'zustand-utils';
-import { BackupsSlice, createBackupsSlice } from '@/stores/slices/server/backups.ts';
 import { AllocationsSlice, createAllocationsSlice } from '@/stores/slices/server/allocations.ts';
+import { BackupsSlice, createBackupsSlice } from '@/stores/slices/server/backups.ts';
 import { createDatabasesSlice, DatabasesSlice } from '@/stores/slices/server/databases.ts';
 import { createFilesSlice, FilesSlice } from '@/stores/slices/server/files.ts';
 import { createSchedulesSlice, SchedulesSlice } from '@/stores/slices/server/schedules.ts';
 import { createServerSlice, ServerSlice } from '@/stores/slices/server/server.ts';
-import { createStatsSlice, StatsSlice } from '@/stores/slices/server/stats.ts';
-import { createStateSlice, StateSlice } from '@/stores/slices/server/state.ts';
-import { createSubusersSlice, SubusersSlice } from '@/stores/slices/server/subusers.ts';
 import { createStartupSlice, StartupSlice } from '@/stores/slices/server/startup.ts';
+import { createStateSlice, StateSlice } from '@/stores/slices/server/state.ts';
+import { createStatsSlice, StatsSlice } from '@/stores/slices/server/stats.ts';
+import { createSubusersSlice, SubusersSlice } from '@/stores/slices/server/subusers.ts';
 import { createWebsocketSlice, WebsocketSlice } from '@/stores/slices/server/websocket.ts';
 
 export interface ServerStore

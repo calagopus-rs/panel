@@ -1,3 +1,8 @@
+import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
+import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 import Badge from '@/elements/Badge.tsx';
 import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
@@ -8,11 +13,6 @@ import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useWindows } from '@/providers/WindowProvider.tsx';
 import RouterRoutes from '@/RouterRoutes.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
-import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon } from '@mantine/core';
-import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
-import { MemoryRouter, NavLink, useNavigate } from 'react-router';
 
 type SidebarProps = {
   children: ReactNode;

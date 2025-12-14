@@ -2,12 +2,12 @@ import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
+import getEggRepository from '@/api/admin/egg-repositories/getEggRepository.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Spinner from '@/elements/Spinner.tsx';
 import SubNavigation from '@/elements/SubNavigation.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate.tsx';
-import getEggRepository from '@/api/admin/egg-repositories/getEggRepository.ts';
 import EggRepositoryEggs from './eggs/EggRepositoryEggs.tsx';
 
 export default function EggRepositoryView() {

@@ -13,16 +13,16 @@ import {
   faUsers,
   faWrench,
 } from '@fortawesome/free-solid-svg-icons';
-import type { AdminRouteDefinition } from 'shared';
 import { faComputer } from '@fortawesome/free-solid-svg-icons/faComputer';
+import type { AdminRouteDefinition } from 'shared';
 import AdminHome from '@/pages/admin/AdminHome.tsx';
 import AdminActivity from '@/pages/admin/activity/AdminActivity.tsx';
 import AdminBackupConfigurations from '@/pages/admin/backupConfigurations/AdminBackupConfigurations.tsx';
 import AdminDatabaseHosts from '@/pages/admin/databaseHosts/AdminDatabaseHosts.tsx';
+import AdminEggRepositories from '@/pages/admin/eggRepositories/AdminEggRepositories.tsx';
 import AdminLocations from '@/pages/admin/locations/AdminLocations.tsx';
 import AdminMounts from '@/pages/admin/mounts/AdminMounts.tsx';
 import AdminNests from '@/pages/admin/nests/AdminNests.tsx';
-import AdminEggRepositories from '@/pages/admin/eggRepositories/AdminEggRepositories.tsx';
 import AdminNodes from '@/pages/admin/nodes/AdminNodes.tsx';
 import AdminOAuthProviders from '@/pages/admin/oAuthProviders/AdminOAuthProviders.tsx';
 import AdminRoles from '@/pages/admin/roles/AdminRoles.tsx';

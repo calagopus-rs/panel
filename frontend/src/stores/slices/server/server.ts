@@ -1,5 +1,5 @@
-import { ServerStore } from '@/stores/server.ts';
 import { StateCreator } from 'zustand';
+import { ServerStore } from '@/stores/server.ts';
 
 export interface ServerSlice {
   server: Server;

@@ -1,6 +1,7 @@
 import { faReply } from '@fortawesome/free-solid-svg-icons';
 import { Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
+import Can from '@/elements/Can.tsx';
 import Container from '@/elements/Container.tsx';
 import Sidebar from '@/elements/Sidebar.tsx';
 import Spinner from '@/elements/Spinner.tsx';
@@ -8,7 +9,6 @@ import { to } from '@/lib/routes.ts';
 import NotFound from '@/pages/NotFound.tsx';
 import adminRoutes from '@/routers/routes/adminRoutes.ts';
 import { useGlobalStore } from '@/stores/global.ts';
-import Can from '@/elements/Can.tsx';
 
 export default function AdminRouter({ isNormal }: { isNormal: boolean }) {
   const { settings } = useGlobalStore();

@@ -1,18 +1,21 @@
 import { create, StoreApi } from 'zustand';
 import { createContext } from 'zustand-utils';
-import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs.ts';
-import { BackupConfigurationsSlice, createBackupConfigurationsSlice } from '@/stores/slices/admin/backupConfigurations.ts';
+import {
+  BackupConfigurationsSlice,
+  createBackupConfigurationsSlice,
+} from '@/stores/slices/admin/backupConfigurations.ts';
 import { createDatabaseHostsSlice, DatabaseHostsSlice } from '@/stores/slices/admin/databaseHosts.ts';
-import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders.ts';
+import { createEggsSlice, EggsSlice } from '@/stores/slices/admin/eggs.ts';
 import { createLocationsSlice, LocationsSlice } from '@/stores/slices/admin/locations.ts';
+import { createMountsSlice, MountsSlice } from '@/stores/slices/admin/mounts.ts';
 import { createNestsSlice, NestsSlice } from '@/stores/slices/admin/nests.ts';
-import { createEggRepositoriesSlice, EggRepositoriesSlice } from './slices/admin/eggRepositories.ts';
-import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings.ts';
-import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users.ts';
 import { createNodesSlice, NodesSlice } from '@/stores/slices/admin/nodes.ts';
+import { createOAuthProvidersSlice, OAuthProvidersSlice } from '@/stores/slices/admin/oauthProviders.ts';
 import { createRolesSlice, RolesSlice } from '@/stores/slices/admin/roles.ts';
 import { createServersSlice, ServersSlice } from '@/stores/slices/admin/servers.ts';
-import { createMountsSlice, MountsSlice } from '@/stores/slices/admin/mounts.ts';
+import { createSettingsSlice, SettingsSlice } from '@/stores/slices/admin/settings.ts';
+import { createUsersSlice, UsersSlice } from '@/stores/slices/admin/users.ts';
+import { createEggRepositoriesSlice, EggRepositoriesSlice } from './slices/admin/eggRepositories.ts';
 
 export interface AdminStore
   extends BackupConfigurationsSlice,

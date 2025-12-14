@@ -11,8 +11,8 @@ import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Captcha, { CaptchaRef } from '@/elements/Captcha.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
-import AuthWrapper from './AuthWrapper.tsx';
 import { authForgotPasswordSchema } from '@/lib/schemas/auth.ts';
+import AuthWrapper from './AuthWrapper.tsx';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();

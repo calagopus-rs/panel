@@ -9,8 +9,8 @@ import Button from '@/elements/Button.tsx';
 import TagsInput from '@/elements/input/TagsInput.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
-import { useToast } from '@/providers/ToastProvider.tsx';
 import { adminNodeAllocationsSchema } from '@/lib/schemas/admin/nodes.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function NodeAllocationsCreateModal({
   node,

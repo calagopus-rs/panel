@@ -1,4 +1,4 @@
-import { CardProps as MantineCardProps, Card as MantineCard } from '@mantine/core';
+import { Card as MantineCard, CardProps as MantineCardProps } from '@mantine/core';
 import classNames from 'classnames';
 import { ComponentProps, forwardRef } from 'react';
 

@@ -5,13 +5,13 @@ import { useState } from 'react';
 import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverAllocationTableColumns } from '@/lib/tableColumns.ts';
 import ServerAllocationAddModal from '@/pages/admin/servers/allocations/modals/ServerAllocationAddModal.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useAdminStore } from '@/stores/admin.tsx';
 import ServerAllocationRow from './ServerAllocationRow.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 
 export default function AdminServerAllocations({ server }: { server: AdminServer }) {
   const { serverAllocations, setServerAllocations } = useAdminStore();

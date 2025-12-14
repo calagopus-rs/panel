@@ -1,6 +1,6 @@
+import { StateCreator } from 'zustand';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import { UserStore } from '@/stores/user.ts';
-import { StateCreator } from 'zustand';
 
 export interface ServerSlice {
   servers: ResponseMeta<Server>;

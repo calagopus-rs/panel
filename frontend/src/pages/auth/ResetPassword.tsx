@@ -11,9 +11,9 @@ import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
 import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import { authResetPasswordSchema } from '@/lib/schemas/auth.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import AuthWrapper from './AuthWrapper.tsx';
-import { authResetPasswordSchema } from '@/lib/schemas/auth.ts';
 
 export default function ResetPassword() {
   const { addToast } = useToast();

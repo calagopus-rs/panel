@@ -2,11 +2,11 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { adminOAuthProviderUsersTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import UserOAuthLinkRow from './UserOAuthLinkRow.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 
 export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvider: AdminOAuthProvider }) {
   const [oauthProviderUsers, setOAuthProviderUsers] = useState<ResponseMeta<AdminUserOAuthLink>>(

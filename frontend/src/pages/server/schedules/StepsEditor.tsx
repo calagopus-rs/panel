@@ -2,15 +2,15 @@ import { faGear, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { useMemo, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios.ts';
 import updateScheduleStepsOrder from '@/api/server/schedules/steps/updateScheduleStepsOrder.ts';
 import Button from '@/elements/Button.tsx';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
 import Spinner from '@/elements/Spinner.tsx';
-import { useServerStore } from '@/stores/server.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
-import { httpErrorToHuman } from '@/api/axios.ts';
+import { useServerStore } from '@/stores/server.ts';
 import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal.tsx';
 import StepCard from './StepCard.tsx';
-import { DndContainer, SortableItem, DndItem } from '@/elements/DragAndDrop.tsx';
 
 interface DndScheduleStep extends ScheduleStep, DndItem {
   id: string;

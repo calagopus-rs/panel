@@ -1,6 +1,6 @@
+import { StateCreator } from 'zustand';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import { AdminStore } from '@/stores/admin.tsx';
-import { StateCreator } from 'zustand';
 
 export interface BackupConfigurationsSlice {
   backupConfigurations: ResponseMeta<BackupConfiguration>;

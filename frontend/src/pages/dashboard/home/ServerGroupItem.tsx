@@ -1,3 +1,8 @@
+import { rectSortingStrategy } from '@dnd-kit/sortable';
+import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ActionIcon } from '@mantine/core';
+import { ComponentProps, useState } from 'react';
 import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
 import deleteServerGroup from '@/api/me/servers/groups/deleteServerGroup.ts';
 import getServerGroupServers from '@/api/me/servers/groups/getServerGroupServers.ts';
@@ -11,15 +16,10 @@ import Spinner from '@/elements/Spinner.tsx';
 import { Pagination } from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
-import { rectSortingStrategy } from '@dnd-kit/sortable';
-import { faChevronDown, faChevronUp, faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ActionIcon } from '@mantine/core';
-import { ComponentProps, useState } from 'react';
 import ServerGroupEditModal from './modals/ServerGroupEditModal.tsx';
 import ServerItem from './ServerItem.tsx';
-import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 function insertItems<T>(list: T[], items: T[], startIndex: number): T[] {
   if (startIndex > list.length) {

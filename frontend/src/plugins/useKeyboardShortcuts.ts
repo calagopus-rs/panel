@@ -1,4 +1,4 @@
-import { useEffect, useRef, type DependencyList } from 'react';
+import { type DependencyList, useEffect, useRef } from 'react';
 
 type ModifierKey = 'ctrl' | 'meta' | 'shift' | 'alt' | 'ctrlOrMeta';
 

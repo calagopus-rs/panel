@@ -1,8 +1,8 @@
-import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
 import { faEllipsis, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Menu, MenuProps } from '@mantine/core';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { useCurrentWindow } from '@/providers/CurrentWindowProvider.tsx';
 
 interface Item {
   icon: IconDefinition;

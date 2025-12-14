@@ -11,11 +11,11 @@ import { Pagination } from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useGlobalStore } from '@/stores/global.ts';
 import { useUserStore } from '@/stores/user.ts';
 import DashboardHomeTitle from './DashboardHomeTitle.tsx';
 import ServerItem from './ServerItem.tsx';
-import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 export default function DashboardHomeAll() {
   const { t } = useTranslations();

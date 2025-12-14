@@ -17,6 +17,9 @@ import StepCreateBackup from '../steps/StepCreateBackup.tsx';
 import StepCreateDirectory from '../steps/StepCreateDirectory.tsx';
 import StepDecompressFile from '../steps/StepDecompressFile.tsx';
 import StepDeleteFiles from '../steps/StepDeleteFiles.tsx';
+import StepEnsure from '../steps/StepEnsure.tsx';
+import StepFormat from '../steps/StepFormat.tsx';
+import StepMatchRegex from '../steps/StepMatchRegex.tsx';
 import StepRenameFiles from '../steps/StepRenameFiles.tsx';
 import StepSendCommand from '../steps/StepSendCommand.tsx';
 import StepSendPower from '../steps/StepSendPower.tsx';
@@ -26,9 +29,6 @@ import StepUpdateStartupDockerImage from '../steps/StepUpdateStartupDockerImage.
 import StepUpdateStartupVariable from '../steps/StepUpdateStartupVariable.tsx';
 import StepWaitForConsoleLine from '../steps/StepWaitForConsoleLine.tsx';
 import StepWriteFile from '../steps/StepWriteFile.tsx';
-import StepFormat from '../steps/StepFormat.tsx';
-import StepMatchRegex from '../steps/StepMatchRegex.tsx';
-import StepEnsure from '../steps/StepEnsure.tsx';
 
 type Props = ModalProps & {
   schedule: ServerSchedule;

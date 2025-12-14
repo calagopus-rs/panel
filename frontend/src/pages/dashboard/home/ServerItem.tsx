@@ -1,13 +1,3 @@
-import getServerResourceUsage from '@/api/server/getServerResourceUsage.ts';
-import Card from '@/elements/Card.tsx';
-import CopyOnClick from '@/elements/CopyOnClick.tsx';
-import Divider from '@/elements/Divider.tsx';
-import Spinner from '@/elements/Spinner.tsx';
-import Tooltip from '@/elements/Tooltip.tsx';
-import { formatAllocation } from '@/lib/server.ts';
-import { bytesToString, mbToBytes } from '@/lib/size.ts';
-import { useGlobalStore } from '@/stores/global.ts';
-import { useUserStore } from '@/stores/user.ts';
 import {
   faAdd,
   faBan,
@@ -22,8 +12,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
-import ServerAddGroupModal from './modals/ServerAddGroupModal.tsx';
+import getServerResourceUsage from '@/api/server/getServerResourceUsage.ts';
+import Card from '@/elements/Card.tsx';
+import CopyOnClick from '@/elements/CopyOnClick.tsx';
+import Divider from '@/elements/Divider.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatAllocation } from '@/lib/server.ts';
+import { bytesToString, mbToBytes } from '@/lib/size.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
+import { useUserStore } from '@/stores/user.ts';
+import ServerAddGroupModal from './modals/ServerAddGroupModal.tsx';
 
 const statusToColor = (status: ServerPowerState | undefined) => {
   switch (status) {

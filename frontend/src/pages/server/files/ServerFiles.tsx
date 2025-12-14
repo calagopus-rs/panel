@@ -1,5 +1,5 @@
 import { Group, Title } from '@mantine/core';
-import { type Ref, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from 'react';
+import { MouseEvent as ReactMouseEvent, type Ref, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import getBackup from '@/api/server/backups/getBackup.ts';
@@ -9,19 +9,19 @@ import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
 import SelectionArea from '@/elements/SelectionArea.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import Table from '@/elements/Table.tsx';
+import { useFileUpload } from '@/plugins/useFileUpload.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
-import { useFileUpload } from '@/plugins/useFileUpload.ts';
 import FileActionBar from './FileActionBar.tsx';
 import FileBreadcrumbs from './FileBreadcrumbs.tsx';
+import FileOperationsProgress from './FileOperationsProgress.tsx';
 import FileRow from './FileRow.tsx';
 import FileToolbar from './FileToolbar.tsx';
 import FileUploadOverlay from './FileUploadOverlay.tsx';
-import FileOperationsProgress from './FileOperationsProgress.tsx';
+import { useFileDragAndDrop } from './hooks/useFileDragAndDrop.ts';
 import DirectoryNameModal from './modals/DirectoryNameModal.tsx';
 import PullFileModal from './modals/PullFileModal.tsx';
 import SftpDetailsModal from './modals/SftpDetailsModal.tsx';
-import { useFileDragAndDrop } from './hooks/useFileDragAndDrop.ts';
 
 export default function ServerFiles() {
   const [searchParams, setSearchParams] = useSearchParams();

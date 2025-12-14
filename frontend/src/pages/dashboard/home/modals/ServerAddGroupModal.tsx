@@ -6,8 +6,8 @@ import Button from '@/elements/Button.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Modal from '@/elements/modals/Modal.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
-import { useUserStore } from '@/stores/user.ts';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
 
 type Props = ModalProps & {
   server: Server;

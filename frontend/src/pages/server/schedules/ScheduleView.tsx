@@ -20,6 +20,7 @@ import { useParams } from 'react-router';
 import getSchedule from '@/api/server/schedules/getSchedule.ts';
 import getScheduleSteps from '@/api/server/schedules/steps/getScheduleSteps.ts';
 import triggerSchedule from '@/api/server/schedules/triggerSchedule.ts';
+import updateSchedule from '@/api/server/schedules/updateSchedule.ts';
 import AnimatedHourglass from '@/elements/AnimatedHourglass.tsx';
 import Badge from '@/elements/Badge.tsx';
 import Button from '@/elements/Button.tsx';
@@ -32,10 +33,9 @@ import { scheduleStepIconMapping } from '@/lib/enums.ts';
 import { formatDateTime } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
-import SchedulePreConditionBuilder from './SchedulePreConditionBuilder.tsx';
-import updateSchedule from '@/api/server/schedules/updateSchedule.ts';
 import ScheduleCreateOrUpdateModal from './modals/ScheduleCreateOrUpdateModal.tsx';
 import ScheduleDynamicParameterRenderer from './ScheduleDynamicParameterRenderer.tsx';
+import SchedulePreConditionBuilder from './SchedulePreConditionBuilder.tsx';
 import StepsEditor from './StepsEditor.tsx';
 
 interface DetailCardProps {

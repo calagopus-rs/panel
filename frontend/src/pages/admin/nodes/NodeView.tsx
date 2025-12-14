@@ -20,8 +20,8 @@ import AdminNodeConfiguration from './configuration/AdminNodeConfiguration.tsx';
 import AdminNodeLogs from './logs/AdminNodeLogs.tsx';
 import AdminNodeMounts from './mounts/AdminNodeMounts.tsx';
 import NodeCreateOrUpdate from './NodeCreateOrUpdate.tsx';
-import AdminNodeStatistics from './statistics/AdminNodeStatistics.tsx';
 import AdminNodeServers from './servers/AdminNodeServers.tsx';
+import AdminNodeStatistics from './statistics/AdminNodeStatistics.tsx';
 
 export default function NodeView() {
   const params = useParams<'id'>();

@@ -8,11 +8,11 @@ import Button from '@/elements/Button.tsx';
 import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
 import { useUserStore } from '@/stores/user.ts';
 import DashboardHomeTitle from './DashboardHomeTitle.tsx';
 import ServerGroupCreateModal from './modals/ServerGroupCreateModal.tsx';
 import ServerGroupItem from './ServerGroupItem.tsx';
-import { useTranslations } from '@/providers/TranslationProvider.tsx';
 
 interface DndServerGroup extends UserServerGroup, DndItem {
   id: string;

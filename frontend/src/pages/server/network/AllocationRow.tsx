@@ -1,18 +1,18 @@
 import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import deleteAllocation from '@/api/server/allocations/deleteAllocation.ts';
+import updateAllocation from '@/api/server/allocations/updateAllocation.ts';
 import Code from '@/elements/Code.tsx';
 import ContextMenu from '@/elements/ContextMenu.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
 import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import AllocationEditModal from './modals/AllocationEditModal.tsx';
-import updateAllocation from '@/api/server/allocations/updateAllocation.ts';
-import Tooltip from '@/elements/Tooltip.tsx';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 
 export default function AllocationRow({ allocation }: { allocation: ServerAllocation }) {
   const { addToast } = useToast();

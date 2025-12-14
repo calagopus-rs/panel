@@ -5,9 +5,9 @@ import updateServerVariables from '@/api/admin/servers/variables/updateServerVar
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import VariableContainer from '@/elements/VariableContainer.tsx';
+import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useAdminStore } from '@/stores/admin.tsx';
-import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 
 export default function AdminServerVariables({ server }: { server: AdminServer }) {
   const { addToast } = useToast();

@@ -8,12 +8,12 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import SelectionArea from '@/elements/SelectionArea.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeAllocationTableColumns } from '@/lib/tableColumns.ts';
+import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useAdminStore } from '@/stores/admin.tsx';
 import AllocationActionBar from './AllocationActionBar.tsx';
 import NodeAllocationsCreateModal from './modals/NodeAllocationsCreateModal.tsx';
 import NodeAllocationRow from './NodeAllocationRow.tsx';
-import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts.ts';
 
 export default function AdminNodeAllocations({ node }: { node: Node }) {
   const { nodeAllocations, setNodeAllocations, selectedNodeAllocations, setSelectedNodeAllocations } = useAdminStore();

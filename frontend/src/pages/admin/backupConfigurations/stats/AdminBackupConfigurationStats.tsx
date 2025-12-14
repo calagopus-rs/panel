@@ -6,8 +6,8 @@ import getBackupConfigurationStats, {
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Card from '@/elements/Card.tsx';
 import Spinner from '@/elements/Spinner.tsx';
-import { useToast } from '@/providers/ToastProvider.tsx';
 import { bytesToString } from '@/lib/size.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function AdminBackupConfigurationStats({
   backupConfiguration,

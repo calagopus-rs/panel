@@ -1,5 +1,5 @@
-import { useGlobalStore } from '@/stores/global.ts';
 import { ReactNode, useRef } from 'react';
+import { useGlobalStore } from '@/stores/global.ts';
 import Tooltip from './Tooltip.tsx';
 
 interface LayoutProps {

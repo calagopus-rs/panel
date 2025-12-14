@@ -1,11 +1,11 @@
 import { forwardRef, memo } from 'react';
+import { NavLink } from 'react-router';
 import Code from '@/elements/Code.tsx';
 import Checkbox from '@/elements/input/Checkbox.tsx';
 import { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useAdminStore } from '@/stores/admin.tsx';
-import { NavLink } from 'react-router';
 
 interface NodeAllocationRowProps {
   allocation: NodeAllocation;

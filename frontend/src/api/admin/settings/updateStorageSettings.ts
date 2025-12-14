@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { axiosInstance } from '@/api/axios.ts';
-import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
-
 import { adminSettingsStorageSchema } from '@/lib/schemas/admin/settings.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (data: z.infer<typeof adminSettingsStorageSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

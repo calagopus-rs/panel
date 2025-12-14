@@ -1,7 +1,7 @@
+import classNames from 'classnames';
 import { AnimatePresence, motion } from 'motion/react';
 import { createContext, FC, ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 import Notification from '@/elements/Notification.tsx';
-import classNames from 'classnames';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
 
