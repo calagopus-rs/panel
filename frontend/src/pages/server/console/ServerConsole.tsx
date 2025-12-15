@@ -34,9 +34,12 @@ export default function ServerConsole() {
   return (
     <>
       <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          {server.name}
-        </Title>
+        <div className='flex flex-col'>
+          <Title order={1} c='white'>
+            {server.name}
+          </Title>
+          <p className='text-sm text-gray-300!'>{server.description}</p>
+        </div>
         <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
           <ServerPowerControls />
         </Can>
