@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updateEmail from '@/api/me/account/updateEmail';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updateEmail from '@/api/me/account/updateEmail.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import { dashboardEmailSchema } from '@/lib/schemas/dashboard.ts';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/providers/ToastProvider';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function EmailContainer() {
   const { addToast } = useToast();
@@ -56,27 +56,29 @@ export default function EmailContainer() {
         <Title order={2} c='white'>
           Email
         </Title>
-        <Stack className='mt-4'>
-          <TextInput
-            withAsterisk
-            label='New Email'
-            placeholder='New Email'
-            autoComplete='email'
-            {...form.getInputProps('email')}
-          />
-          <PasswordInput
-            withAsterisk
-            label='Current Password'
-            placeholder='Current Password'
-            autoComplete='current-password'
-            {...form.getInputProps('password')}
-          />
-        </Stack>
-        <Group className='mt-auto pt-4'>
-          <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>
-            Update Email
-          </Button>
-        </Group>
+        <form onSubmit={form.onSubmit(() => doUpdate())}>
+          <Stack className='mt-4'>
+            <TextInput
+              withAsterisk
+              label='New Email'
+              placeholder='New Email'
+              autoComplete='email'
+              {...form.getInputProps('email')}
+            />
+            <PasswordInput
+              withAsterisk
+              label='Current Password'
+              placeholder='Current Password'
+              autoComplete='current-password'
+              {...form.getInputProps('password')}
+            />
+          </Stack>
+          <Group className='mt-auto pt-4'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Update Email
+            </Button>
+          </Group>
+        </form>
       </Card>
     </Grid.Col>
   );

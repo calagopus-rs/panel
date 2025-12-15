@@ -3,13 +3,13 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import updatePassword from '@/api/me/account/updatePassword';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import PasswordInput from '@/elements/input/PasswordInput';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import updatePassword from '@/api/me/account/updatePassword.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
 import { dashboardPasswordSchema } from '@/lib/schemas/dashboard.ts';
-import { useToast } from '@/providers/ToastProvider';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function PasswordContainer() {
   const { addToast } = useToast();
@@ -49,34 +49,36 @@ export default function PasswordContainer() {
         <Title order={2} c='white'>
           Password
         </Title>
-        <Stack className='mt-4'>
-          <PasswordInput
-            withAsterisk
-            label='Current Password'
-            placeholder='Current Password'
-            autoComplete='current-password'
-            {...form.getInputProps('currentPassword')}
-          />
-          <PasswordInput
-            withAsterisk
-            label='New Password'
-            placeholder='New Password'
-            autoComplete='new-password'
-            {...form.getInputProps('newPassword')}
-          />
-          <PasswordInput
-            withAsterisk
-            label='Confirm New Password'
-            placeholder='Confirm New Password'
-            autoComplete='new-password'
-            {...form.getInputProps('confirmNewPassword')}
-          />
-          <Group>
-            <Button loading={loading} disabled={!form.isValid()} onClick={doUpdate}>
-              Update Password
-            </Button>
-          </Group>
-        </Stack>
+        <form onSubmit={form.onSubmit(() => doUpdate())}>
+          <Stack className='mt-4'>
+            <PasswordInput
+              withAsterisk
+              label='Current Password'
+              placeholder='Current Password'
+              autoComplete='current-password'
+              {...form.getInputProps('currentPassword')}
+            />
+            <PasswordInput
+              withAsterisk
+              label='New Password'
+              placeholder='New Password'
+              autoComplete='new-password'
+              {...form.getInputProps('newPassword')}
+            />
+            <PasswordInput
+              withAsterisk
+              label='Confirm New Password'
+              placeholder='Confirm New Password'
+              autoComplete='new-password'
+              {...form.getInputProps('confirmNewPassword')}
+            />
+            <Group>
+              <Button type='submit' disabled={!form.isValid()} loading={loading}>
+                Update Password
+              </Button>
+            </Group>
+          </Stack>
+        </form>
       </Card>
     </Grid.Col>
   );

@@ -10,7 +10,7 @@ pub struct NodeAllocation {
     pub server: Option<Fetchable<super::server::Server>>,
 
     pub ip: sqlx::types::ipnetwork::IpNetwork,
-    pub ip_alias: Option<String>,
+    pub ip_alias: Option<compact_str::CompactString>,
     pub port: i32,
 
     pub created: chrono::NaiveDateTime,
@@ -20,15 +20,30 @@ impl BaseModel for NodeAllocation {
     const NAME: &'static str = "node_allocation";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("node_allocations.uuid", format!("{prefix}uuid")),
-            ("node_allocations.ip", format!("{prefix}ip")),
-            ("node_allocations.ip_alias", format!("{prefix}ip_alias")),
-            ("node_allocations.port", format!("{prefix}port")),
-            ("node_allocations.created", format!("{prefix}created")),
+            (
+                "node_allocations.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "node_allocations.ip",
+                compact_str::format_compact!("{prefix}ip"),
+            ),
+            (
+                "node_allocations.ip_alias",
+                compact_str::format_compact!("{prefix}ip_alias"),
+            ),
+            (
+                "node_allocations.port",
+                compact_str::format_compact!("{prefix}port"),
+            ),
+            (
+                "node_allocations.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -37,16 +52,16 @@ impl BaseModel for NodeAllocation {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             server: if let Ok(server_uuid) = row.try_get::<uuid::Uuid, _>("server_uuid") {
                 Some(super::server::Server::get_fetchable(server_uuid))
             } else {
                 None
             },
-            ip: row.try_get(format!("{prefix}ip").as_str())?,
-            ip_alias: row.try_get(format!("{prefix}ip_alias").as_str())?,
-            port: row.try_get(format!("{prefix}port").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            ip: row.try_get(compact_str::format_compact!("{prefix}ip").as_str())?,
+            ip_alias: row.try_get(compact_str::format_compact!("{prefix}ip_alias").as_str())?,
+            port: row.try_get(compact_str::format_compact!("{prefix}port").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -218,7 +233,7 @@ impl NodeAllocation {
         Ok(AdminApiNodeAllocation {
             uuid: self.uuid,
             server,
-            ip: self.ip.ip().to_string(),
+            ip: compact_str::format_compact!("{}", self.ip.ip()),
             ip_alias: self.ip_alias,
             port: self.port,
             created: self.created.and_utc(),
@@ -232,8 +247,8 @@ pub struct AdminApiNodeAllocation {
     pub uuid: uuid::Uuid,
     pub server: Option<super::server::AdminApiServer>,
 
-    pub ip: String,
-    pub ip_alias: Option<String>,
+    pub ip: compact_str::CompactString,
+    pub ip_alias: Option<compact_str::CompactString>,
     pub port: i32,
 
     pub created: chrono::DateTime<chrono::Utc>,

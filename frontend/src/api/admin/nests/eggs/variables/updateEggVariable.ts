@@ -1,8 +1,7 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { z } from 'zod';
-
-import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
+import { axiosInstance } from '@/api/axios.ts';
+import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (
   nestUuid: string,

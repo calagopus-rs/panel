@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getServers from '@/api/admin/servers/getServers';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { serverTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import ServerCreate from './ServerCreate';
-import ServerRow from './ServerRow';
-import ServerView from './ServerView';
+import getServers from '@/api/admin/servers/getServers.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { serverTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import ServerCreate from './ServerCreate.tsx';
+import ServerRow from './ServerRow.tsx';
+import ServerView from './ServerView.tsx';
 
 function ServersContainer() {
   const navigate = useNavigate();

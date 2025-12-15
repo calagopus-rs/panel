@@ -1,16 +1,16 @@
 import { faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
-import SecurityKeyEditModal from './modals/SecurityKeyEditModal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey.ts';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
+import SecurityKeyEditModal from './modals/SecurityKeyEditModal.tsx';
 
 export default function SecurityKeyRow({ securityKey }: { securityKey: UserSecurityKey }) {
   const { addToast } = useToast();

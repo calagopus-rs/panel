@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router';
-import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { backupDiskLabelMapping } from '@/lib/enums';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import Code from '@/elements/Code.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { backupDiskLabelMapping } from '@/lib/enums.ts';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 
 export default function BackupConfigurationRow({ backupConfiguration }: { backupConfiguration: BackupConfiguration }) {
   return (

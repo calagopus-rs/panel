@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 interface Data {
   permissions: string[];

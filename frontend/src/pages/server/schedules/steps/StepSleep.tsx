@@ -1,4 +1,4 @@
-import NumberInput from '@/elements/input/NumberInput';
+import NumberInput from '@/elements/input/NumberInput.tsx';
 
 export default function StepSleep({
   action,

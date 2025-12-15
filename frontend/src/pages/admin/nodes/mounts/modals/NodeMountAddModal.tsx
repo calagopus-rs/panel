@@ -1,14 +1,14 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import getMounts from '@/api/admin/mounts/getMounts';
-import createNodeMount from '@/api/admin/nodes/mounts/createNodeMount';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Modal from '@/elements/modals/Modal';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import getMounts from '@/api/admin/mounts/getMounts.ts';
+import createNodeMount from '@/api/admin/nodes/mounts/createNodeMount.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function NodeMountAddModal({ node, opened, onClose }: ModalProps & { node: Node }) {
   const { addToast } = useToast();

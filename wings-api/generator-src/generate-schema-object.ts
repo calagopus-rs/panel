@@ -18,9 +18,9 @@ export default function generateSchemaObject(output: fs.WriteStream, _spaces: nu
     } else {
         if (object.additionalProperties) {
             if (!parent) {
-                output.write(`${spaces}type ${pascalCase(name)} = IndexMap<String, ${convertType(object.additionalProperties as any)}>;\n`)
+                output.write(`${spaces}type ${pascalCase(name)} = IndexMap<compact_str::CompactString, ${convertType(object.additionalProperties as any)}>;\n`)
             } else {
-                output.write(`IndexMap<String, ${convertType(object.additionalProperties as any)}>,\n`)
+                output.write(`IndexMap<compact_str::CompactString, ${convertType(object.additionalProperties as any)}>,\n`)
             }
 
             return

@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (uuid: string, directory: string): Promise<{ url: string }> => {
   return new Promise((resolve, reject) => {

@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export interface BackupStats {
   total: number;

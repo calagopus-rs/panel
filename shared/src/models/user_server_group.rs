@@ -10,7 +10,7 @@ use utoipa::ToSchema;
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UserServerGroup {
     pub uuid: uuid::Uuid,
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub order: i16,
 
     pub server_order: Vec<uuid::Uuid>,
@@ -22,18 +22,30 @@ impl BaseModel for UserServerGroup {
     const NAME: &'static str = "user_server_group";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_server_groups.uuid", format!("{prefix}uuid")),
-            ("user_server_groups.name", format!("{prefix}name")),
-            ("user_server_groups.order_", format!("{prefix}order")),
+            (
+                "user_server_groups.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_server_groups.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "user_server_groups.order_",
+                compact_str::format_compact!("{prefix}order"),
+            ),
             (
                 "user_server_groups.server_order",
-                format!("{prefix}server_order"),
+                compact_str::format_compact!("{prefix}server_order"),
             ),
-            ("user_server_groups.created", format!("{prefix}created")),
+            (
+                "user_server_groups.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -42,11 +54,12 @@ impl BaseModel for UserServerGroup {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            order: row.try_get(format!("{prefix}order").as_str())?,
-            server_order: row.try_get(format!("{prefix}server_order").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            order: row.try_get(compact_str::format_compact!("{prefix}order").as_str())?,
+            server_order: row
+                .try_get(compact_str::format_compact!("{prefix}server_order").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -189,7 +202,7 @@ impl DeletableModel for UserServerGroup {
 pub struct ApiUserServerGroup {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub order: i16,
 
     pub server_order: Vec<uuid::Uuid>,

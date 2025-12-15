@@ -18,7 +18,7 @@ mod put {
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
+        root: compact_str::CompactString,
 
         #[schema(inline)]
         files: Vec<wings_api::servers_server_files_rename::put::RequestBodyFiles>,

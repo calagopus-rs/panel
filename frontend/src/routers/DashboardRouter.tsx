@@ -1,16 +1,16 @@
 import { faGraduationCap, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Suspense } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
-import Container from '@/elements/Container';
-import Sidebar from '@/elements/Sidebar';
-import Spinner from '@/elements/Spinner';
-import { to } from '@/lib/routes';
-import DashboardHomeGrouped from '@/pages/dashboard/home/DashboardHomeGrouped';
-import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll';
-import NotFound from '@/pages/NotFound';
-import { useAuth } from '@/providers/AuthProvider';
-import accountRoutes from '@/routers/routes/accountRoutes';
-import { useGlobalStore } from '@/stores/global';
+import Container from '@/elements/Container.tsx';
+import Sidebar from '@/elements/Sidebar.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { to } from '@/lib/routes.ts';
+import DashboardHomeAll from '@/pages/dashboard/home/DashboardHomeAll.tsx';
+import DashboardHomeGrouped from '@/pages/dashboard/home/DashboardHomeGrouped.tsx';
+import NotFound from '@/pages/NotFound.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import accountRoutes from '@/routers/routes/accountRoutes.ts';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function DashboardRouter({ isNormal }: { isNormal: boolean }) {
   const { user } = useAuth();

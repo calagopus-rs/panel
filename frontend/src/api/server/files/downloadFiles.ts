@@ -1,5 +1,5 @@
-import { axiosInstance } from '@/api/axios';
 import { createSearchParams } from 'react-router';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (
   uuid: string,

@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (nestUuid: string, page: number, search?: string): Promise<ResponseMeta<AdminNestEgg>> => {
   return new Promise((resolve, reject) => {

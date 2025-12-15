@@ -1,6 +1,7 @@
 use base64::Engine;
 use clap::{Args, FromArgMatches};
 use colored::Colorize;
+use compact_str::ToCompactString;
 use openssl::symm::Cipher;
 use serde::Deserialize;
 use sqlx::Row;
@@ -200,13 +201,13 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                     async |rows| {
                         let mut settings = settings.get_mut().await;
 
-                        let mut source_settings: HashMap<&str, String> = rows
+                        let mut source_settings: HashMap<&str, compact_str::CompactString> = rows
                             .iter()
                             .map(|r| (r.get("key"), r.get("value")))
                             .collect();
 
                         settings.oobe_step = None;
-                        settings.app.url = source_app_url.clone();
+                        settings.app.url = source_app_url.to_compact_string();
                         if let Some(app_name) = source_settings.remove("settings::app:name") {
                             settings.app.name = app_name;
                         }
@@ -272,7 +273,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 let password: &str = row.try_get("password")?;
                                 let admin: bool = row.try_get("root_admin")?;
                                 let totp_enabled: bool = row.try_get("use_totp")?;
-                                let totp_secret: Option<String> = row.try_get::<Option<&str>, _>("totp_secret")?
+                                let totp_secret: Option<compact_str::CompactString> = row.try_get::<Option<&str>, _>("totp_secret")?
                                     .and_then(|s| decrypt_laravel_value(s, &source_app_key).ok());
                                 let created: chrono::DateTime<chrono::Utc> = row.try_get("created_at")?;
 
@@ -679,7 +680,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 row.try_get("config_files")?;
                             let config_startup: Option<serde_json::Value> =
                                 row.try_get("config_startup")?;
-                            let config_stop: Option<String> = row.try_get("config_stop")?;
+                            let config_stop: Option<compact_str::CompactString> = row.try_get("config_stop")?;
                             let config_script = shared::models::nest_egg::NestEggConfigScript {
                                 container: row.try_get("script_container")?,
                                 entrypoint: row.try_get("script_entry")?,
@@ -716,7 +717,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 serde_json::from_str(config_stop.as_deref().unwrap_or(""))
                                     .unwrap_or_else(|_| {
                                         shared::models::nest_egg::NestEggConfigStop {
-                                            r#type: "".to_string(),
+                                            r#type: "".into(),
                                             value: config_stop,
                                         }
                                     });
@@ -726,7 +727,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 };
 
                             if config_startup.done.is_empty() {
-                                config_startup.done.push("".to_string());
+                                config_startup.done.push("".into());
                             }
 
                             sqlx::query(
@@ -799,7 +800,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                 None => continue,
                             };
 
-                            let rules = rules.split('|').map(String::from).collect::<Vec<String>>();
+                            let rules = rules.split('|').map(compact_str::CompactString::from).collect::<Vec<_>>();
 
                             if rule_validator::validate_rules(&rules).is_err() {
                                 continue;
@@ -1623,7 +1624,7 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                             match action {
                                 "command" => {
                                     actions.push(wings_api::ScheduleActionInner::SendCommand {
-                                        command: wings_api::ScheduleDynamicParameter::Raw(payload.to_string()),
+                                        command: wings_api::ScheduleDynamicParameter::Raw(payload.into()),
                                         ignore_failure: continue_on_failure,
                                     })
                                 }
@@ -1646,8 +1647,8 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
                                         name: None,
                                         ignored_files: payload
                                             .split('\n')
-                                            .map(String::from)
-                                            .collect::<Vec<String>>(),
+                                            .map(compact_str::CompactString::from)
+                                            .collect::<Vec<_>>(),
                                         foreground: true,
                                         ignore_failure: continue_on_failure,
                                     })
@@ -1785,9 +1786,11 @@ impl shared::extensions::commands::CliCommand<ImportArgs> for ImportCommand {
 }
 
 #[inline]
-fn extract_php_serialized_string(serialized_data: &str) -> Result<String, anyhow::Error> {
+fn extract_php_serialized_string(
+    serialized_data: &str,
+) -> Result<compact_str::CompactString, anyhow::Error> {
     if !serialized_data.starts_with("s:") {
-        return Ok(serialized_data.to_string());
+        return Ok(serialized_data.into());
     }
 
     let first_colon = match serialized_data.find(':') {
@@ -1827,20 +1830,20 @@ fn extract_php_serialized_string(serialized_data: &str) -> Result<String, anyhow
         ));
     }
 
-    Ok(serialized_data[content_start..expected_end].to_string())
+    Ok(serialized_data[content_start..expected_end].into())
 }
 
 fn decrypt_laravel_value(
     encrypted_value: &str,
     decoded_key: &[u8],
-) -> Result<String, anyhow::Error> {
+) -> Result<compact_str::CompactString, anyhow::Error> {
     let clean_value = encrypted_value.trim_start_matches("base64:");
     let decoded = BASE64_ENGINE.decode(clean_value)?;
 
     #[derive(Deserialize)]
     struct LaravelEncrypted {
-        iv: String,
-        value: String,
+        iv: compact_str::CompactString,
+        value: compact_str::CompactString,
     }
 
     let payload: LaravelEncrypted = serde_json::from_slice(&decoded)?;
@@ -1851,7 +1854,7 @@ fn decrypt_laravel_value(
     let key = &decoded_key[0..32];
     let decrypted = openssl::symm::decrypt(Cipher::aes_256_cbc(), key, Some(&iv), &value)?;
 
-    let result = String::from_utf8(decrypted)?;
+    let result = compact_str::CompactString::from_utf8(decrypted)?;
 
     extract_php_serialized_string(&result)
 }

@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { locationTableColumns } from '@/lib/tableColumns';
-import LocationRow from '@/pages/admin/locations/LocationRow';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import TextInput from '@/elements/input/TextInput';
+import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { locationTableColumns } from '@/lib/tableColumns.ts';
+import LocationRow from '@/pages/admin/locations/LocationRow.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 
 export default function AdminBackupConfigurationLocations({
   backupConfiguration,

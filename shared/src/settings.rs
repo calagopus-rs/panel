@@ -1,4 +1,5 @@
 use crate::{cap::CapFilesystem, prelude::AsyncOptionExtension};
+use compact_str::ToCompactString;
 use futures_util::FutureExt;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -14,15 +15,15 @@ use utoipa::ToSchema;
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum StorageDriver {
     Filesystem {
-        path: String,
+        path: compact_str::CompactString,
     },
     S3 {
-        public_url: String,
-        access_key: String,
-        secret_key: String,
-        bucket: String,
-        region: String,
-        endpoint: String,
+        public_url: compact_str::CompactString,
+        access_key: compact_str::CompactString,
+        secret_key: compact_str::CompactString,
+        bucket: compact_str::CompactString,
+        region: compact_str::CompactString,
+        endpoint: compact_str::CompactString,
         path_style: bool,
     },
 }
@@ -43,26 +44,26 @@ impl StorageDriver {
 pub enum MailMode {
     None,
     Smtp {
-        host: String,
+        host: compact_str::CompactString,
         port: u16,
-        username: Option<String>,
-        password: Option<String>,
+        username: Option<compact_str::CompactString>,
+        password: Option<compact_str::CompactString>,
         use_tls: bool,
 
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
     Sendmail {
-        command: String,
+        command: compact_str::CompactString,
 
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
     Filesystem {
-        path: String,
+        path: compact_str::CompactString,
 
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
 }
 
@@ -71,13 +72,13 @@ pub enum MailMode {
 pub enum CaptchaProvider {
     None,
     Turnstile {
-        site_key: String,
-        secret_key: String,
+        site_key: compact_str::CompactString,
+        secret_key: compact_str::CompactString,
     },
     Recaptcha {
         v3: bool,
-        site_key: String,
-        secret_key: String,
+        site_key: compact_str::CompactString,
+        secret_key: compact_str::CompactString,
     },
 }
 
@@ -106,16 +107,16 @@ pub enum PublicCaptchaProvider<'a> {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsApp {
-    pub name: String,
-    pub url: String,
-    pub language: String,
+    pub name: compact_str::CompactString,
+    pub url: compact_str::CompactString,
+    pub language: compact_str::CompactString,
 
     pub telemetry_enabled: bool,
     pub registration_enabled: bool,
 }
 
 impl AppSettingsApp {
-    pub fn serialize(&self) -> (Vec<&'static str>, Vec<String>) {
+    pub fn serialize(&self) -> (Vec<&'static str>, Vec<compact_str::CompactString>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
@@ -126,24 +127,26 @@ impl AppSettingsApp {
         keys.push("app::language");
         values.push(self.language.clone());
         keys.push("app::telemetry_enabled");
-        values.push(self.telemetry_enabled.to_string());
+        values.push(self.telemetry_enabled.to_compact_string());
         keys.push("app::registration_enabled");
-        values.push(self.registration_enabled.to_string());
+        values.push(self.registration_enabled.to_compact_string());
 
         (keys, values)
     }
 
-    pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
+    pub fn deserialize(
+        map: &mut HashMap<compact_str::CompactString, compact_str::CompactString>,
+    ) -> Self {
         AppSettingsApp {
             name: map
                 .remove("app::name")
-                .unwrap_or_else(|| "Calagopus".to_string()),
+                .unwrap_or_else(|| "Calagopus".into()),
             url: map
                 .remove("app::url")
-                .unwrap_or_else(|| "http://localhost:8000".to_string()),
+                .unwrap_or_else(|| "http://localhost:8000".into()),
             language: map
                 .remove("app::language")
-                .unwrap_or_else(|| "en-US".to_string()),
+                .unwrap_or_else(|| "en-US".into()),
             telemetry_enabled: map
                 .remove("app::telemetry_enabled")
                 .map(|s| s == "true")
@@ -158,12 +161,12 @@ impl AppSettingsApp {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsWebauthn {
-    pub rp_id: String,
-    pub rp_origin: String,
+    pub rp_id: compact_str::CompactString,
+    pub rp_origin: compact_str::CompactString,
 }
 
 impl AppSettingsWebauthn {
-    pub fn serialize(&self) -> (Vec<&'static str>, Vec<String>) {
+    pub fn serialize(&self) -> (Vec<&'static str>, Vec<compact_str::CompactString>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
@@ -175,14 +178,16 @@ impl AppSettingsWebauthn {
         (keys, values)
     }
 
-    pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
+    pub fn deserialize(
+        map: &mut HashMap<compact_str::CompactString, compact_str::CompactString>,
+    ) -> Self {
         AppSettingsWebauthn {
             rp_id: map
                 .remove("webauthn::rp_id")
-                .unwrap_or_else(|| "localhost".to_string()),
+                .unwrap_or_else(|| "localhost".into()),
             rp_origin: map
                 .remove("webauthn::rp_origin")
-                .unwrap_or_else(|| "http://localhost".to_string()),
+                .unwrap_or_else(|| "http://localhost".into()),
         }
     }
 }
@@ -197,23 +202,28 @@ pub struct AppSettingsServer {
 }
 
 impl AppSettingsServer {
-    pub fn serialize(&self) -> (Vec<&'static str>, Vec<String>) {
+    pub fn serialize(&self) -> (Vec<&'static str>, Vec<compact_str::CompactString>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
         keys.push("server::max_file_manager_view_size");
-        values.push(self.max_file_manager_view_size.to_string());
+        values.push(self.max_file_manager_view_size.to_compact_string());
         keys.push("server::max_schedules_step_count");
-        values.push(self.max_schedules_step_count.to_string());
+        values.push(self.max_schedules_step_count.to_compact_string());
         keys.push("server::allow_overwriting_custom_docker_image");
-        values.push(self.allow_overwriting_custom_docker_image.to_string());
+        values.push(
+            self.allow_overwriting_custom_docker_image
+                .to_compact_string(),
+        );
         keys.push("server::allow_editing_startup_command");
-        values.push(self.allow_editing_startup_command.to_string());
+        values.push(self.allow_editing_startup_command.to_compact_string());
 
         (keys, values)
     }
 
-    pub fn deserialize(map: &mut HashMap<String, String>) -> Self {
+    pub fn deserialize(
+        map: &mut HashMap<compact_str::CompactString, compact_str::CompactString>,
+    ) -> Self {
         AppSettingsServer {
             max_file_manager_view_size: map
                 .remove("server::max_file_manager_view_size")
@@ -238,7 +248,7 @@ impl AppSettingsServer {
 
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettings {
-    pub oobe_step: Option<String>,
+    pub oobe_step: Option<compact_str::CompactString>,
 
     pub storage_driver: StorageDriver,
     pub mail_mode: MailMode,
@@ -256,7 +266,7 @@ impl AppSettings {
     pub fn serialize(
         &self,
         database: &crate::database::Database,
-    ) -> (Vec<&'static str>, Vec<String>) {
+    ) -> (Vec<&'static str>, Vec<compact_str::CompactString>) {
         let mut keys = Vec::new();
         let mut values = Vec::new();
 
@@ -266,7 +276,7 @@ impl AppSettings {
         match &self.storage_driver {
             StorageDriver::Filesystem { path } => {
                 keys.push("::storage_driver");
-                values.push("filesystem".to_string());
+                values.push("filesystem".into());
                 keys.push("::storage_filesystem_path");
                 values.push(path.clone());
             }
@@ -280,7 +290,7 @@ impl AppSettings {
                 path_style,
             } => {
                 keys.push("::storage_driver");
-                values.push("s3".to_string());
+                values.push("s3".into());
                 keys.push("::storage_s3_public_url");
                 values.push(public_url.clone());
                 keys.push("::storage_s3_access_key");
@@ -288,14 +298,16 @@ impl AppSettings {
                     database
                         .encrypt_sync(access_key)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
-                        .unwrap_or_default(),
+                        .unwrap_or_default()
+                        .into(),
                 );
                 keys.push("::storage_s3_secret_key");
                 values.push(
                     database
                         .encrypt_sync(secret_key)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
-                        .unwrap_or_default(),
+                        .unwrap_or_default()
+                        .into(),
                 );
                 keys.push("::storage_s3_bucket");
                 values.push(bucket.clone());
@@ -304,14 +316,14 @@ impl AppSettings {
                 keys.push("::storage_s3_endpoint");
                 values.push(endpoint.clone());
                 keys.push("::storage_s3_path_style");
-                values.push(path_style.to_string());
+                values.push(path_style.to_compact_string());
             }
         }
 
         match &self.mail_mode {
             MailMode::None => {
                 keys.push("::mail_mode");
-                values.push("none".to_string());
+                values.push("none".into());
             }
             MailMode::Smtp {
                 host,
@@ -323,19 +335,20 @@ impl AppSettings {
                 from_name,
             } => {
                 keys.push("::mail_mode");
-                values.push("smtp".to_string());
+                values.push("smtp".into());
                 keys.push("::mail_smtp_host");
-                values.push(host.clone());
+                values.push(host.to_compact_string());
                 keys.push("::mail_smtp_port");
-                values.push(port.to_string());
+                values.push(port.to_compact_string());
                 keys.push("::mail_smtp_username");
                 values.push(if let Some(username) = username {
                     database
                         .encrypt_sync(username)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default()
+                        .into()
                 } else {
-                    String::new()
+                    Default::default()
                 });
                 keys.push("::mail_smtp_password");
                 values.push(if let Some(password) = password {
@@ -343,15 +356,20 @@ impl AppSettings {
                         .encrypt_sync(password)
                         .map(|b| base32::encode(base32::Alphabet::Z, &b))
                         .unwrap_or_default()
+                        .into()
                 } else {
-                    String::new()
+                    Default::default()
                 });
                 keys.push("::mail_smtp_use_tls");
-                values.push(use_tls.to_string());
+                values.push(use_tls.to_compact_string());
                 keys.push("::mail_smtp_from_address");
-                values.push(from_address.clone());
+                values.push(from_address.to_compact_string());
                 keys.push("::mail_smtp_from_name");
-                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
+                values.push(
+                    from_name
+                        .clone()
+                        .map_or_else(|| "".into(), compact_str::CompactString::from),
+                );
             }
             MailMode::Sendmail {
                 command,
@@ -359,13 +377,17 @@ impl AppSettings {
                 from_name,
             } => {
                 keys.push("::mail_mode");
-                values.push("sendmail".to_string());
+                values.push("sendmail".to_compact_string());
                 keys.push("::mail_sendmail_command");
-                values.push(command.clone());
+                values.push(command.to_compact_string());
                 keys.push("::mail_sendmail_from_address");
-                values.push(from_address.clone());
+                values.push(from_address.to_compact_string());
                 keys.push("::mail_sendmail_from_name");
-                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
+                values.push(
+                    from_name
+                        .clone()
+                        .map_or_else(|| "".into(), compact_str::CompactString::from),
+                );
             }
             MailMode::Filesystem {
                 path,
@@ -373,31 +395,35 @@ impl AppSettings {
                 from_name,
             } => {
                 keys.push("::mail_mode");
-                values.push("filesystem".to_string());
+                values.push("filesystem".into());
                 keys.push("::mail_filesystem_path");
-                values.push(path.clone());
+                values.push(path.to_compact_string());
                 keys.push("::mail_filesystem_from_address");
-                values.push(from_address.clone());
+                values.push(from_address.to_compact_string());
                 keys.push("::mail_filesystem_from_name");
-                values.push(from_name.clone().unwrap_or_else(|| "".to_string()));
+                values.push(
+                    from_name
+                        .clone()
+                        .map_or_else(|| "".into(), compact_str::CompactString::from),
+                );
             }
         }
 
         match &self.captcha_provider {
             CaptchaProvider::None => {
                 keys.push("::captcha_provider");
-                values.push("none".to_string());
+                values.push("none".into());
             }
             CaptchaProvider::Turnstile {
                 site_key,
                 secret_key,
             } => {
                 keys.push("::captcha_provider");
-                values.push("turnstile".to_string());
+                values.push("turnstile".into());
                 keys.push("::turnstile_site_key");
-                values.push(site_key.clone());
+                values.push(site_key.to_compact_string());
                 keys.push("::turnstile_secret_key");
-                values.push(secret_key.clone());
+                values.push(secret_key.to_compact_string());
             }
             CaptchaProvider::Recaptcha {
                 v3,
@@ -405,13 +431,13 @@ impl AppSettings {
                 secret_key,
             } => {
                 keys.push("::captcha_provider");
-                values.push("recaptcha".to_string());
+                values.push("recaptcha".into());
                 keys.push("::recaptcha_v3");
-                values.push(if *v3 { "true" } else { "false" }.to_string());
+                values.push(v3.to_compact_string());
                 keys.push("::recaptcha_site_key");
-                values.push(site_key.clone());
+                values.push(site_key.to_compact_string());
                 keys.push("::recaptcha_secret_key");
-                values.push(secret_key.clone());
+                values.push(secret_key.to_compact_string());
             }
         }
 
@@ -429,7 +455,7 @@ impl AppSettings {
     }
 
     pub async fn deserialize(
-        map: &mut HashMap<String, String>,
+        map: &mut HashMap<compact_str::CompactString, compact_str::CompactString>,
         database: &crate::database::Database,
     ) -> Self {
         AppSettings {
@@ -448,16 +474,16 @@ impl AppSettings {
                 Some("filesystem") => StorageDriver::Filesystem {
                     path: map.remove("::storage_filesystem_path").unwrap_or_else(|| {
                         if std::env::consts::OS == "windows" {
-                            "C:\\calagopus_data".to_string()
+                            "C:\\calagopus_data".into()
                         } else {
-                            "/var/lib/calagopus".to_string()
+                            "/var/lib/calagopus".into()
                         }
                     }),
                 },
                 Some("s3") => StorageDriver::S3 {
                     public_url: map
                         .remove("::storage_s3_public_url")
-                        .unwrap_or_else(|| "https://your-s3-bucket.s3.amazonaws.com".to_string()),
+                        .unwrap_or_else(|| "https://your-s3-bucket.s3.amazonaws.com".into()),
                     access_key: match map.remove("::storage_s3_access_key") {
                         Some(access_key) => base32::decode(base32::Alphabet::Z, &access_key)
                             .map(|b| database.decrypt(b).map(Result::ok))
@@ -478,13 +504,13 @@ impl AppSettings {
                     .unwrap_or_else(|| "your-secret-key".into()),
                     bucket: map
                         .remove("::storage_s3_bucket")
-                        .unwrap_or_else(|| "your-s3-bucket".to_string()),
+                        .unwrap_or_else(|| "your-s3-bucket".into()),
                     region: map
                         .remove("::storage_s3_region")
-                        .unwrap_or_else(|| "us-east-1".to_string()),
+                        .unwrap_or_else(|| "us-east-1".into()),
                     endpoint: map
                         .remove("::storage_s3_endpoint")
-                        .unwrap_or_else(|| "https://s3.amazonaws.com".to_string()),
+                        .unwrap_or_else(|| "https://s3.amazonaws.com".into()),
                     path_style: map
                         .remove("::storage_s3_path_style")
                         .map(|s| s == "true")
@@ -493,9 +519,9 @@ impl AppSettings {
                 _ => StorageDriver::Filesystem {
                     path: map.remove("::storage_filesystem_path").unwrap_or_else(|| {
                         if std::env::consts::OS == "windows" {
-                            "C:\\calagopus_data".to_string()
+                            "C:\\calagopus_data".into()
                         } else {
-                            "/var/lib/calagopus".to_string()
+                            "/var/lib/calagopus".into()
                         }
                     }),
                 },
@@ -505,7 +531,7 @@ impl AppSettings {
                 Some("smtp") => MailMode::Smtp {
                     host: map
                         .remove("::mail_smtp_host")
-                        .unwrap_or_else(|| "smtp.example.com".to_string()),
+                        .unwrap_or_else(|| "smtp.example.com".into()),
                     port: map
                         .remove("::mail_smtp_port")
                         .and_then(|s| s.parse().ok())
@@ -544,7 +570,7 @@ impl AppSettings {
                         .unwrap_or(true),
                     from_address: map
                         .remove("::mail_smtp_from_address")
-                        .unwrap_or_else(|| "noreply@example.com".to_string()),
+                        .unwrap_or_else(|| "noreply@example.com".into()),
                     from_name: map
                         .remove("::mail_smtp_from_name")
                         .filter(|s| !s.is_empty()),
@@ -552,10 +578,10 @@ impl AppSettings {
                 Some("sendmail") => MailMode::Sendmail {
                     command: map
                         .remove("::mail_sendmail_command")
-                        .unwrap_or_else(|| "sendmail".to_string()),
+                        .unwrap_or_else(|| "sendmail".into()),
                     from_address: map
                         .remove("::mail_sendmail_from_address")
-                        .unwrap_or_else(|| "noreply@example.com".to_string()),
+                        .unwrap_or_else(|| "noreply@example.com".into()),
                     from_name: map
                         .remove("::mail_sendmail_from_name")
                         .filter(|s| !s.is_empty()),
@@ -563,10 +589,10 @@ impl AppSettings {
                 Some("filesystem") => MailMode::Filesystem {
                     path: map
                         .remove("::mail_filesystem_path")
-                        .unwrap_or_else(|| "/var/lib/calagopus/mails".to_string()),
+                        .unwrap_or_else(|| "/var/lib/calagopus/mails".into()),
                     from_address: map
                         .remove("::mail_filesystem_from_address")
-                        .unwrap_or_else(|| "noreply@example.com".to_string()),
+                        .unwrap_or_else(|| "noreply@example.com".into()),
                     from_name: map
                         .remove("::mail_filesystem_from_name")
                         .filter(|s| !s.is_empty()),
@@ -578,10 +604,10 @@ impl AppSettings {
                 Some("turnstile") => CaptchaProvider::Turnstile {
                     site_key: map
                         .remove("::turnstile_site_key")
-                        .unwrap_or_else(|| "your-turnstile-site-key".to_string()),
+                        .unwrap_or_else(|| "your-turnstile-site-key".into()),
                     secret_key: map
                         .remove("::turnstile_secret_key")
-                        .unwrap_or_else(|| "your-turnstile-secret-key".to_string()),
+                        .unwrap_or_else(|| "your-turnstile-secret-key".into()),
                 },
                 Some("recaptcha") => CaptchaProvider::Recaptcha {
                     v3: map
@@ -590,10 +616,10 @@ impl AppSettings {
                         .unwrap_or(false),
                     site_key: map
                         .remove("::recaptcha_site_key")
-                        .unwrap_or_else(|| "your-recaptcha-site-key".to_string()),
+                        .unwrap_or_else(|| "your-recaptcha-site-key".into()),
                     secret_key: map
                         .remove("::recaptcha_secret_key")
-                        .unwrap_or_else(|| "your-recaptcha-secret-key".to_string()),
+                        .unwrap_or_else(|| "your-recaptcha-secret-key".into()),
                 },
                 _ => CaptchaProvider::None,
             },
@@ -620,7 +646,7 @@ impl<'a> SettingsGuard<'a> {
             SELECT * FROM UNNEST($1::text[], $2::text[])
             ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
             &keys as &[&str],
-            &values
+            &values.into_iter().map(String::from).collect::<Vec<_>>()
         )
         .execute(self.database.write())
         .await?;
@@ -683,7 +709,7 @@ impl Settings {
 
         let mut map = HashMap::new();
         for row in rows {
-            map.insert(row.key, row.value);
+            map.insert(row.key.into(), row.value.into());
         }
 
         AppSettings::deserialize(&mut map, database).await

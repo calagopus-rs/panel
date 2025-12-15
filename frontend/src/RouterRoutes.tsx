@@ -1,24 +1,24 @@
 import { Suspense } from 'react';
 import { Route, Routes } from 'react-router';
-import Spinner from './elements/Spinner';
-import AuthProvider from './providers/AuthProvider';
-import AdminGuard from './routers/guards/AdminGuard';
-import AuthenticatedGuard from './routers/guards/AuthenticatedGuard';
-import UnauthenticatedGuard from './routers/guards/UnauthenticatedGuard';
+import Spinner from './elements/Spinner.tsx';
+import AuthProvider from './providers/AuthProvider.tsx';
+import AdminGuard from './routers/guards/AdminGuard.tsx';
+import AuthenticatedGuard from './routers/guards/AuthenticatedGuard.tsx';
+import UnauthenticatedGuard from './routers/guards/UnauthenticatedGuard.tsx';
 import '@mantine/core/styles.css';
 import { lazy } from 'react';
-import OobeGuard from '@/routers/guards/OobeGuard';
-import NotFound from './pages/NotFound';
-import TranslationProvider from './providers/TranslationProvider';
-import globalRoutes from './routers/routes/globalRoutes';
-import { AdminStoreContextProvider, createAdminStore } from './stores/admin';
-import { createServerStore, ServerStoreContextprovider } from './stores/server';
+import OobeGuard from '@/routers/guards/OobeGuard.tsx';
+import NotFound from './pages/NotFound.tsx';
+import TranslationProvider from './providers/TranslationProvider.tsx';
+import globalRoutes from './routers/routes/globalRoutes.ts';
+import { AdminStoreContextProvider, createAdminStore } from './stores/admin.tsx';
+import { createServerStore, ServerStoreContextprovider } from './stores/server.ts';
 
-const OobeRouter = lazy(() => import('./routers/OobeRouter'));
-const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter'));
-const DashboardRouter = lazy(() => import('./routers/DashboardRouter'));
-const AdminRouter = lazy(() => import('./routers/AdminRouter'));
-const ServerRouter = lazy(() => import('./routers/ServerRouter'));
+const OobeRouter = lazy(() => import('./routers/OobeRouter.tsx'));
+const AuthenticationRouter = lazy(() => import('./routers/AuthenticationRouter.tsx'));
+const DashboardRouter = lazy(() => import('./routers/DashboardRouter.tsx'));
+const AdminRouter = lazy(() => import('./routers/AdminRouter.tsx'));
+const ServerRouter = lazy(() => import('./routers/ServerRouter.tsx'));
 
 export default function RouterRoutes({ isNormal }: { isNormal: boolean }) {
   return (

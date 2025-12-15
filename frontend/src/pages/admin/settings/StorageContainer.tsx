@@ -3,20 +3,20 @@ import { UseFormReturnType, useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateStorageSettings from '@/api/admin/settings/updateStorageSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import { storageDriverTypeLabelMapping } from '@/lib/enums';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import StorageFilesystem from './forms/StorageFilesystem';
-import StorageS3 from './forms/StorageS3';
+import updateStorageSettings from '@/api/admin/settings/updateStorageSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import { storageDriverTypeLabelMapping } from '@/lib/enums.ts';
 import {
   adminSettingsStorageFilesystemSchema,
   adminSettingsStorageS3Schema,
   adminSettingsStorageSchema,
-} from '@/lib/schemas/admin/settings';
+} from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import StorageFilesystem from './forms/StorageFilesystem.tsx';
+import StorageS3 from './forms/StorageS3.tsx';
 
 export default function StorageContainer() {
   const { addToast } = useToast();
@@ -57,26 +57,28 @@ export default function StorageContainer() {
         Storage Settings
       </Title>
 
-      <Select
-        label='Driver'
-        data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
-          value,
-          label,
-        }))}
-        {...form.getInputProps('type')}
-      />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Select
+          label='Driver'
+          data={Object.entries(storageDriverTypeLabelMapping).map(([value, label]) => ({
+            value,
+            label,
+          }))}
+          {...form.getInputProps('type')}
+        />
 
-      {form.values.type === 'filesystem' ? (
-        <StorageFilesystem form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageFilesystemSchema>>} />
-      ) : form.values.type === 's3' ? (
-        <StorageS3 form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageS3Schema>>} />
-      ) : null}
+        {form.values.type === 'filesystem' ? (
+          <StorageFilesystem form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageFilesystemSchema>>} />
+        ) : form.values.type === 's3' ? (
+          <StorageS3 form={form as UseFormReturnType<z.infer<typeof adminSettingsStorageS3Schema>>} />
+        ) : null}
 
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
+        </Group>
+      </form>
     </>
   );
 }

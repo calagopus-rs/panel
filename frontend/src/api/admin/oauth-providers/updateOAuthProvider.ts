@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
-import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
+import { axiosInstance } from '@/api/axios.ts';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (oauthProviderUuid: string, data: z.infer<typeof adminOAuthProviderSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {

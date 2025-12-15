@@ -1,8 +1,8 @@
+import debounce from 'debounce';
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import debounce from 'debounce';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface UseSearchablePaginatedTableOptions<T> {
   fetcher: (page: number, search: string) => Promise<ResponseMeta<T>>;

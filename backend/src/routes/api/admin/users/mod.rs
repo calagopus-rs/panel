@@ -102,7 +102,7 @@ mod post {
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        external_id: Option<String>,
+        external_id: Option<compact_str::CompactString>,
 
         #[validate(
             length(min = 3, max = 15),
@@ -110,16 +110,16 @@ mod post {
         )]
         #[schema(min_length = 3, max_length = 15)]
         #[schema(pattern = "^[a-zA-Z0-9_]+$")]
-        username: String,
+        username: compact_str::CompactString,
         #[validate(email)]
         #[schema(format = "email")]
         email: String,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_first: String,
+        name_first: compact_str::CompactString,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_last: String,
+        name_last: compact_str::CompactString,
         #[validate(length(min = 8, max = 512))]
         #[schema(min_length = 8, max_length = 512)]
         password: String,
@@ -131,7 +131,7 @@ mod post {
             custom(function = "shared::validate_language")
         )]
         #[schema(min_length = 5, max_length = 15)]
-        language: String,
+        language: compact_str::CompactString,
     }
 
     #[derive(ToSchema, Serialize)]

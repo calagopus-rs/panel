@@ -152,6 +152,7 @@ mod delete {
 
 mod patch {
     use axum::http::StatusCode;
+    use compact_str::ToCompactString;
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
@@ -173,21 +174,21 @@ mod patch {
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         public: Option<bool>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(length(min = 3, max = 255), url)]
         #[schema(min_length = 3, max_length = 255, format = "uri")]
-        public_url: Option<String>,
+        public_url: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255), url)]
         #[schema(min_length = 3, max_length = 255, format = "uri")]
-        url: Option<String>,
+        url: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        sftp_host: Option<String>,
+        sftp_host: Option<compact_str::CompactString>,
         sftp_port: Option<u16>,
 
         #[validate(length(max = 1024))]
@@ -321,12 +322,12 @@ mod patch {
             node.backup_configuration
                 .as_ref()
                 .map(|backup_configuration| backup_configuration.uuid),
-            node.name,
+            &node.name,
             node.public,
-            node.description,
+            node.description.as_deref(),
             node.public_url.as_ref().map(|url| url.to_string()),
-            node.url.to_string(),
-            node.sftp_host,
+            &node.url.to_compact_string(),
+            node.sftp_host.as_deref(),
             node.sftp_port,
             node.maintenance_message,
             node.memory,

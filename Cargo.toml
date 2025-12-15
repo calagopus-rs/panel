@@ -3,7 +3,7 @@ resolver = "3"
 members = ["backend", "rule-validator", "wings-api", "shared", "backend-extensions/*"]
 default-members = ["backend"]
 package.license = "MIT"
-package.version = "0.17.1"
+package.version = "0.17.2"
 package.edition = "2024"
 
 [workspace.dependencies]
@@ -51,6 +51,7 @@ dotenvy = "0.15.7"
 oauth2 = "5.0.0"
 semver = { version = "1.0.27", features = ["serde"] }
 tempfile = "3.23.0"
+compact_str = { git = "https://github.com/0x7d8/compact_str.git", version = "0.9.0", features = ["serde", "utoipa", "sqlx", "sqlx-postgres", "sqlx-mysql"] }
 
 # dev (for development)
 [profile.dev.package."*"]

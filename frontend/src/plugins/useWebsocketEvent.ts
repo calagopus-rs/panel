@@ -1,5 +1,5 @@
-import { useServerStore } from '@/stores/server';
 import { useEffect, useRef } from 'react';
+import { useServerStore } from '@/stores/server.ts';
 
 export enum SocketEvent {
   DAEMON_MESSAGE = 'daemon message',

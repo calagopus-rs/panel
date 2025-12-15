@@ -841,7 +841,7 @@ declare global {
     email: string;
     nameFirst: string;
     nameLast: string;
-    password?: string;
+    password?: string | null;
     admin: boolean;
     totpEnabled: boolean;
     language: string;

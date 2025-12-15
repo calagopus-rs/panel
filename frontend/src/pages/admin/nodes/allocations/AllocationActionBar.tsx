@@ -1,15 +1,15 @@
 import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations';
-import { httpErrorToHuman } from '@/api/axios';
-import ActionBar from '@/elements/ActionBar';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
-import NodeAllocationsUpdateModal from './modals/NodeAllocationsUpdateModal';
+import deleteNodeAllocations from '@/api/admin/nodes/allocations/deleteNodeAllocations.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import ActionBar from '@/elements/ActionBar.tsx';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
+import NodeAllocationsUpdateModal from './modals/NodeAllocationsUpdateModal.tsx';
 
 export default function AllocationActionBar({ node, loadAllocations }: { node: Node; loadAllocations: () => void }) {
   const { addToast } = useToast();

@@ -10,18 +10,18 @@ import {
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getNode from '@/api/admin/nodes/getNode';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import { useToast } from '@/providers/ToastProvider';
-import AdminNodeAllocations from './allocations/AdminNodeAllocations';
-import AdminNodeConfiguration from './configuration/AdminNodeConfiguration';
-import AdminNodeLogs from './logs/AdminNodeLogs';
-import AdminNodeMounts from './mounts/AdminNodeMounts';
-import NodeCreateOrUpdate from './NodeCreateOrUpdate';
-import AdminNodeStatistics from './statistics/AdminNodeStatistics';
-import AdminNodeServers from './servers/AdminNodeServers';
+import getNode from '@/api/admin/nodes/getNode.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import AdminNodeAllocations from './allocations/AdminNodeAllocations.tsx';
+import AdminNodeConfiguration from './configuration/AdminNodeConfiguration.tsx';
+import AdminNodeLogs from './logs/AdminNodeLogs.tsx';
+import AdminNodeMounts from './mounts/AdminNodeMounts.tsx';
+import NodeCreateOrUpdate from './NodeCreateOrUpdate.tsx';
+import AdminNodeServers from './servers/AdminNodeServers.tsx';
+import AdminNodeStatistics from './statistics/AdminNodeStatistics.tsx';
 
 export default function NodeView() {
   const params = useParams<'id'>();

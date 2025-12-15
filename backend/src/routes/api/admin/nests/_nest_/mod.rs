@@ -163,14 +163,14 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        author: Option<String>,
+        author: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
 
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -221,9 +221,9 @@ mod patch {
             "UPDATE nests
             SET author = $1, name = $2, description = $3
             WHERE nests.uuid = $4",
-            nest.author,
-            nest.name,
-            nest.description,
+            &nest.author,
+            &nest.name,
+            nest.description.as_deref(),
             nest.uuid,
         )
         .execute(state.database.write())

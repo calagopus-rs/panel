@@ -1,4 +1,4 @@
-import { Autocomplete as MantineAutocomplete, AutocompleteProps } from '@mantine/core';
+import { AutocompleteProps, Autocomplete as MantineAutocomplete } from '@mantine/core';
 import { forwardRef } from 'react';
 
 const Autocomplete = forwardRef<HTMLInputElement, AutocompleteProps>(({ className, ...rest }, ref) => {

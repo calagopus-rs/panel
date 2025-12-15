@@ -6,16 +6,16 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
-import register from '@/api/auth/register';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Captcha, { CaptchaRef } from '@/elements/Captcha';
-import Card from '@/elements/Card';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
-import { useAuth } from '@/providers/AuthProvider';
-import AuthWrapper from './AuthWrapper';
-import { authRegisterSchema } from '@/lib/schemas/auth';
+import register from '@/api/auth/register.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Captcha, { CaptchaRef } from '@/elements/Captcha.tsx';
+import Card from '@/elements/Card.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { authRegisterSchema } from '@/lib/schemas/auth.ts';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import AuthWrapper from './AuthWrapper.tsx';
 
 export default function Register() {
   const { doLogin } = useAuth();

@@ -98,7 +98,7 @@ mod post {
                 .mail
                 .send(
                     user.email,
-                    format!("{} - Password Reset", settings.app.name),
+                    format!("{} - Password Reset", settings.app.name).into(),
                     mail,
                 )
                 .await;

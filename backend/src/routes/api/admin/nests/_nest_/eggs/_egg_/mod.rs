@@ -194,14 +194,14 @@ mod patch {
 
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        author: Option<String>,
+        author: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
 
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[schema(inline)]
         config_files: Option<Vec<shared::models::nest_egg::ProcessConfigurationFile>>,
@@ -216,13 +216,13 @@ mod patch {
 
         #[validate(length(min = 1, max = 4096))]
         #[schema(min_length = 1, max_length = 4096)]
-        startup: Option<String>,
+        startup: Option<compact_str::CompactString>,
         force_outgoing_ip: Option<bool>,
         separate_port: Option<bool>,
 
-        features: Option<Vec<String>>,
-        docker_images: Option<IndexMap<String, String>>,
-        file_denylist: Option<Vec<String>>,
+        features: Option<Vec<compact_str::CompactString>>,
+        docker_images: Option<IndexMap<compact_str::CompactString, compact_str::CompactString>>,
+        file_denylist: Option<Vec<compact_str::CompactString>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -347,20 +347,20 @@ mod patch {
             WHERE nest_eggs.uuid = $1",
             egg.uuid,
             egg.egg_repository_egg.as_ref().map(|e| e.uuid),
-            egg.author,
-            egg.name,
-            egg.description,
+            &egg.author,
+            &egg.name,
+            egg.description.as_deref(),
             serde_json::to_value(&egg.config_files)?,
             serde_json::to_value(&egg.config_startup)?,
             serde_json::to_value(&egg.config_stop)?,
             serde_json::to_value(&egg.config_script)?,
             serde_json::to_value(&egg.config_allocations)?,
-            egg.startup,
+            &egg.startup,
             egg.force_outgoing_ip,
             egg.separate_port,
-            &egg.features,
+            &egg.features as &[compact_str::CompactString],
             serde_json::to_string(&egg.docker_images)?,
-            &egg.file_denylist,
+            &egg.file_denylist as &[compact_str::CompactString],
         )
         .execute(state.database.write())
         .await

@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router';
-import NotFound from '@/pages/NotFound';
-import authenticationRoutes from '@/routers/routes/authenticationRoutes';
+import NotFound from '@/pages/NotFound.tsx';
+import authenticationRoutes from '@/routers/routes/authenticationRoutes.ts';
 
 export default function AuthenticationRouter() {
   return (

@@ -67,12 +67,12 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
 
             let settings = state.settings.get().await;
 
-            let client = BasicClient::new(ClientId::new(oauth_provider.client_id.clone()))
+            let client = BasicClient::new(ClientId::new(oauth_provider.client_id.to_string()))
                 .set_client_secret(ClientSecret::new(
                     state
                         .database
                         .decrypt(oauth_provider.client_secret.clone())
-                        .await?,
+                        .await?.into(),
                 ))
                 .set_auth_uri(AuthUrl::new(oauth_provider.auth_url.clone())?)
                 .set_token_uri(TokenUrl::new(oauth_provider.token_url.clone())?)

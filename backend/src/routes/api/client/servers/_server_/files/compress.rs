@@ -16,13 +16,13 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         format: wings_api::ArchiveFormat,
 
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
-        files: Vec<String>,
+        root: compact_str::CompactString,
+        files: Vec<compact_str::CompactString>,
 
         #[serde(default)]
         foreground: bool,

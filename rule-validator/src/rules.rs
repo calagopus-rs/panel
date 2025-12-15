@@ -1,11 +1,17 @@
 use super::{ParseValidationRule, ValidateRule, Validator};
 
-pub fn parse_validation_rule(rule: &str) -> Result<Box<dyn ValidateRule>, String> {
+pub fn parse_validation_rule(
+    rule: &str,
+) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
     let mut rule_parts = rule.splitn(2, ':');
     let rule_name = rule_parts.next().ok_or("invalid rule format".to_string())?;
-    let rule_args: Vec<String> = rule_parts
+    let rule_args: Vec<compact_str::CompactString> = rule_parts
         .next()
-        .map(|args| args.split(',').map(String::from).collect())
+        .map(|args| {
+            args.split(',')
+                .map(compact_str::CompactString::from)
+                .collect()
+        })
         .unwrap_or_default();
 
     match rule_name {
@@ -63,14 +69,18 @@ pub fn parse_validation_rule(rule: &str) -> Result<Box<dyn ValidateRule>, String
         "uppercase" => Uppercase::parse_rule(&rule_args),
         "url" => Url::parse_rule(&rule_args),
         "uuid" => Uuid::parse_rule(&rule_args),
-        rule => Err(format!("unknown or unsupported validation rule: {rule}")),
+        rule => Err(compact_str::format_compact!(
+            "unknown or unsupported validation rule: {rule}"
+        )),
     }
 }
 
 pub struct Accepted;
 
 impl ParseValidationRule for Accepted {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Accepted))
     }
 }
@@ -80,22 +90,24 @@ impl ValidateRule for Accepted {
         "accepted"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         match data.data.get(key).copied() {
             Some("true") | Some("1") | Some("yes") | Some("on") => Ok(false),
-            _ => Err("value must be 'true', '1', 'yes', or 'on'".to_string()),
+            _ => Err("value must be 'true', '1', 'yes', or 'on'".into()),
         }
     }
 }
 
 pub struct AcceptedIf {
-    keys: Vec<(String, String)>,
+    keys: Vec<(compact_str::CompactString, compact_str::CompactString)>,
 }
 
 impl ParseValidationRule for AcceptedIf {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() < 2 {
-            return Err("accepted_if requires a key and value to check".to_string());
+            return Err("accepted_if requires a key and value to check".into());
         }
 
         let mut keys = Vec::new();
@@ -103,7 +115,7 @@ impl ParseValidationRule for AcceptedIf {
             if i + 1 < rule.len() {
                 keys.push((rule[i].clone(), rule[i + 1].clone()));
             } else {
-                return Err("accepted_if requires an even number of arguments".to_string());
+                return Err("accepted_if requires an even number of arguments".into());
             }
         }
 
@@ -116,7 +128,7 @@ impl ValidateRule for AcceptedIf {
         "accepted_if"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key.as_str())
                 && value == check_value
@@ -124,7 +136,7 @@ impl ValidateRule for AcceptedIf {
                 match data.data.get(key).copied() {
                     Some("true") | Some("1") | Some("yes") | Some("on") => return Ok(false),
                     _ => {
-                        return Err("must be 'true', '1', 'yes', or 'on'".to_string());
+                        return Err("must be 'true', '1', 'yes', or 'on'".into());
                     }
                 }
             }
@@ -139,7 +151,9 @@ pub struct Alpha {
 }
 
 impl ParseValidationRule for Alpha {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         let only_ascii = rule.first().is_some_and(|s| s == "ascii");
 
         Ok(Box::new(Alpha { only_ascii }))
@@ -151,7 +165,7 @@ impl ValidateRule for Alpha {
         "alpha"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value.chars().all(|c| c.is_ascii_alphabetic()) {
@@ -162,7 +176,7 @@ impl ValidateRule for Alpha {
             }
         }
 
-        Err("must contain only alphabetic characters".to_string())
+        Err("must contain only alphabetic characters".into())
     }
 }
 
@@ -171,7 +185,9 @@ pub struct AlphaDash {
 }
 
 impl ParseValidationRule for AlphaDash {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         let only_ascii = rule.first().is_some_and(|s| s == "ascii");
 
         Ok(Box::new(AlphaDash { only_ascii }))
@@ -183,7 +199,7 @@ impl ValidateRule for AlphaDash {
         "alpha_dash"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value
@@ -200,7 +216,7 @@ impl ValidateRule for AlphaDash {
             }
         }
 
-        Err("must contain only alphanumeric characters, dashes, or underscores".to_string())
+        Err("must contain only alphanumeric characters, dashes, or underscores".into())
     }
 }
 
@@ -209,7 +225,9 @@ pub struct AlphaNum {
 }
 
 impl ParseValidationRule for AlphaNum {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         let only_ascii = rule.first().is_some_and(|s| s == "ascii");
 
         Ok(Box::new(AlphaNum { only_ascii }))
@@ -221,7 +239,7 @@ impl ValidateRule for AlphaNum {
         "alpha_num"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if self.only_ascii {
                 if value.chars().all(|c| c.is_ascii_alphanumeric()) {
@@ -232,14 +250,16 @@ impl ValidateRule for AlphaNum {
             }
         }
 
-        Err("must contain only alphanumeric characters".to_string())
+        Err("must contain only alphanumeric characters".into())
     }
 }
 
 pub struct Ascii;
 
 impl ParseValidationRule for Ascii {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Ascii))
     }
 }
@@ -249,14 +269,14 @@ impl ValidateRule for Ascii {
         "ascii"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.is_ascii()
         {
             return Ok(false);
         }
 
-        Err("must contain only ASCII characters".to_string())
+        Err("must contain only ASCII characters".into())
     }
 }
 
@@ -266,17 +286,19 @@ pub struct Between {
 }
 
 impl ParseValidationRule for Between {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 2 {
-            return Err("between requires two numeric values".to_string());
+            return Err("between requires two numeric values".into());
         }
 
         let min = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid minimum value".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid minimum value"))?;
         let max = rule[1]
             .parse::<f64>()
-            .map_err(|_| "invalid maximum value".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid maximum value"))?;
 
         Ok(Box::new(Between { min, max }))
     }
@@ -287,7 +309,7 @@ impl ValidateRule for Between {
         "between"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num >= self.min && num <= self.max {
@@ -298,14 +320,20 @@ impl ValidateRule for Between {
             }
         }
 
-        Err(format!("must be between {} and {}", self.min, self.max))
+        Err(compact_str::format_compact!(
+            "must be between {} and {}",
+            self.min,
+            self.max
+        ))
     }
 }
 
 pub struct Boolean;
 
 impl ParseValidationRule for Boolean {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Boolean))
     }
 }
@@ -315,11 +343,11 @@ impl ValidateRule for Boolean {
         "boolean"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         match data.data.get(key).copied() {
             Some("true") | Some("1") | Some("yes") | Some("on") | Some("false") | Some("0")
             | Some("no") | Some("off") => Ok(false),
-            _ => Err("must be a boolean (true/false, 1/0, yes/no, on/off)".to_string()),
+            _ => Err("must be a boolean (true/false, 1/0, yes/no, on/off)".into()),
         }
     }
 }
@@ -327,7 +355,9 @@ impl ValidateRule for Boolean {
 pub struct Confirmed;
 
 impl ParseValidationRule for Confirmed {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Confirmed))
     }
 }
@@ -337,7 +367,7 @@ impl ValidateRule for Confirmed {
         "confirmed"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         let confirm_key = format!("{}{}", key, "_confirmation");
         if let Some(value) = data.data.get(key)
             && let Some(confirm_value) = data.data.get(confirm_key.as_str())
@@ -346,14 +376,18 @@ impl ValidateRule for Confirmed {
             return Ok(false);
         }
 
-        Err(format!("does not match confirmation field '{confirm_key}'"))
+        Err(compact_str::format_compact!(
+            "does not match confirmation field '{confirm_key}'"
+        ))
     }
 }
 
 pub struct Date;
 
 impl ParseValidationRule for Date {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Date))
     }
 }
@@ -363,25 +397,27 @@ impl ValidateRule for Date {
         "date"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.parse::<chrono::NaiveDate>().is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid date".to_string())
+        Err("must be a valid date".into())
     }
 }
 
 pub struct DateFormat {
-    format: String,
+    format: compact_str::CompactString,
 }
 
 impl ParseValidationRule for DateFormat {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("date_format requires a format string".to_string());
+            return Err("date_format requires a format string".into());
         }
 
         let format = rule[0].clone();
@@ -394,21 +430,26 @@ impl ValidateRule for DateFormat {
         "date_format"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && chrono::NaiveDate::parse_from_str(value, &self.format).is_ok()
         {
             return Ok(false);
         }
 
-        Err(format!("must match the format '{}'", self.format))
+        Err(compact_str::format_compact!(
+            "must match the format '{}'",
+            self.format
+        ))
     }
 }
 
 pub struct Declined;
 
 impl ParseValidationRule for Declined {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Declined))
     }
 }
@@ -418,22 +459,24 @@ impl ValidateRule for Declined {
         "declined"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         match data.data.get(key).copied() {
             Some("false") | Some("0") | Some("no") | Some("off") => Ok(false),
-            _ => Err("value must be 'false', '0', 'no', or 'off'".to_string()),
+            _ => Err("value must be 'false', '0', 'no', or 'off'".into()),
         }
     }
 }
 
 pub struct DeclinedIf {
-    keys: Vec<(String, String)>,
+    keys: Vec<(compact_str::CompactString, compact_str::CompactString)>,
 }
 
 impl ParseValidationRule for DeclinedIf {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() < 2 {
-            return Err("declined_if requires a key and value to check".to_string());
+            return Err("declined_if requires a key and value to check".into());
         }
 
         let mut keys = Vec::new();
@@ -441,7 +484,7 @@ impl ParseValidationRule for DeclinedIf {
             if i + 1 < rule.len() {
                 keys.push((rule[i].clone(), rule[i + 1].clone()));
             } else {
-                return Err("declined_if requires an even number of arguments".to_string());
+                return Err("declined_if requires an even number of arguments".into());
             }
         }
 
@@ -454,7 +497,7 @@ impl ValidateRule for DeclinedIf {
         "declined_if"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key.as_str())
                 && value == check_value
@@ -462,7 +505,7 @@ impl ValidateRule for DeclinedIf {
                 match data.data.get(key).copied() {
                     Some("false") | Some("0") | Some("no") | Some("off") => return Ok(false),
                     _ => {
-                        return Err("must be 'false', '0', 'no', or 'off'".to_string());
+                        return Err("must be 'false', '0', 'no', or 'off'".into());
                     }
                 }
             }
@@ -473,13 +516,15 @@ impl ValidateRule for DeclinedIf {
 }
 
 pub struct Different {
-    other_key: String,
+    other_key: compact_str::CompactString,
 }
 
 impl ParseValidationRule for Different {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("different requires one key to compare against".to_string());
+            return Err("different requires one key to compare against".into());
         }
 
         Ok(Box::new(Different {
@@ -493,7 +538,7 @@ impl ValidateRule for Different {
         "different"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && let Some(other_value) = data.data.get(self.other_key.as_str())
             && value != other_value
@@ -501,7 +546,10 @@ impl ValidateRule for Different {
             return Ok(false);
         }
 
-        Err(format!("must be different from '{}'", self.other_key))
+        Err(compact_str::format_compact!(
+            "must be different from '{}'",
+            self.other_key
+        ))
     }
 }
 
@@ -510,14 +558,16 @@ pub struct Digits {
 }
 
 impl ParseValidationRule for Digits {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("digits requires one numeric value for length".to_string());
+            return Err("digits requires one numeric value for length".into());
         }
 
         let length = rule[0]
             .parse::<usize>()
-            .map_err(|_| "invalid length value".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid length value"))?;
 
         Ok(Box::new(Digits { length }))
     }
@@ -528,7 +578,7 @@ impl ValidateRule for Digits {
         "digits"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_ascii_digit())
             && value.len() == self.length
@@ -536,7 +586,10 @@ impl ValidateRule for Digits {
             return Ok(false);
         }
 
-        Err(format!("must contain exactly {} digits", self.length))
+        Err(compact_str::format_compact!(
+            "must contain exactly {} digits",
+            self.length
+        ))
     }
 }
 
@@ -546,17 +599,19 @@ pub struct DigitsBetween {
 }
 
 impl ParseValidationRule for DigitsBetween {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 2 {
-            return Err("digits_between requires two numeric values".to_string());
+            return Err("digits_between requires two numeric values".into());
         }
 
         let minimum = rule[0]
             .parse::<usize>()
-            .map_err(|_| "invalid minimum value".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid minimum value"))?;
         let maximum = rule[1]
             .parse::<usize>()
-            .map_err(|_| "invalid maximum value".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid maximum value"))?;
 
         Ok(Box::new(DigitsBetween { minimum, maximum }))
     }
@@ -567,7 +622,7 @@ impl ValidateRule for DigitsBetween {
         "digits_between"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_ascii_digit())
         {
@@ -577,21 +632,24 @@ impl ValidateRule for DigitsBetween {
             }
         }
 
-        Err(format!(
+        Err(compact_str::format_compact!(
             "must contain between {} and {} digits",
-            self.minimum, self.maximum
+            self.minimum,
+            self.maximum
         ))
     }
 }
 
 pub struct DoesntStartWith {
-    prefixes: Vec<String>,
+    prefixes: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for DoesntStartWith {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("doesnt_start_with requires at least one prefix".to_string());
+            return Err("doesnt_start_with requires at least one prefix".into());
         }
 
         Ok(Box::new(DoesntStartWith {
@@ -605,11 +663,13 @@ impl ValidateRule for DoesntStartWith {
         "doesnt_start_with"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             for prefix in &self.prefixes {
-                if value.starts_with(prefix) {
-                    return Err(format!("must not start with '{prefix}'"));
+                if value.starts_with(&**prefix) {
+                    return Err(compact_str::format_compact!(
+                        "must not start with '{prefix}'"
+                    ));
                 }
             }
         }
@@ -619,13 +679,15 @@ impl ValidateRule for DoesntStartWith {
 }
 
 pub struct DoesntEndWith {
-    suffixes: Vec<String>,
+    suffixes: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for DoesntEndWith {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("doesnt_end_with requires at least one suffix".to_string());
+            return Err("doesnt_end_with requires at least one suffix".into());
         }
 
         Ok(Box::new(DoesntEndWith {
@@ -639,11 +701,11 @@ impl ValidateRule for DoesntEndWith {
         "doesnt_end_with"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             for suffix in &self.suffixes {
-                if value.ends_with(suffix) {
-                    return Err(format!("must not end with '{suffix}'"));
+                if value.ends_with(&**suffix) {
+                    return Err(compact_str::format_compact!("must not end with '{suffix}'"));
                 }
             }
         }
@@ -653,13 +715,15 @@ impl ValidateRule for DoesntEndWith {
 }
 
 pub struct EndsWith {
-    suffixes: Vec<String>,
+    suffixes: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for EndsWith {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("ends_with requires at least one suffix".to_string());
+            return Err("ends_with requires at least one suffix".into());
         }
 
         Ok(Box::new(EndsWith {
@@ -673,11 +737,11 @@ impl ValidateRule for EndsWith {
         "ends_with"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             for suffix in &self.suffixes {
-                if value.ends_with(suffix) {
-                    return Err(format!("must not end with '{suffix}'"));
+                if value.ends_with(&**suffix) {
+                    return Err(compact_str::format_compact!("must not end with '{suffix}'"));
                 }
             }
         }
@@ -691,14 +755,16 @@ pub struct Gt {
 }
 
 impl ParseValidationRule for Gt {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("gt requires one numeric value".to_string());
+            return Err("gt requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for gt".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for gt"))?;
 
         Ok(Box::new(Gt { value }))
     }
@@ -709,7 +775,7 @@ impl ValidateRule for Gt {
         "gt"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num > self.value {
@@ -720,7 +786,10 @@ impl ValidateRule for Gt {
             }
         }
 
-        Err(format!("must be greater than {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be greater than {}",
+            self.value
+        ))
     }
 }
 
@@ -729,14 +798,16 @@ pub struct Gte {
 }
 
 impl ParseValidationRule for Gte {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("gte requires one numeric value".to_string());
+            return Err("gte requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for gte".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for gte"))?;
 
         Ok(Box::new(Gte { value }))
     }
@@ -747,7 +818,7 @@ impl ValidateRule for Gte {
         "gte"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num >= self.value {
@@ -758,14 +829,19 @@ impl ValidateRule for Gte {
             }
         }
 
-        Err(format!("must be greater than or equal to {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be greater than or equal to {}",
+            self.value
+        ))
     }
 }
 
 pub struct HexColor;
 
 impl ParseValidationRule for HexColor {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(HexColor))
     }
 }
@@ -775,7 +851,7 @@ impl ValidateRule for HexColor {
         "hex_color"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.starts_with('#')
             && value.len() == 7
@@ -784,18 +860,20 @@ impl ValidateRule for HexColor {
             return Ok(false);
         }
 
-        Err("must be a valid hex color code".to_string())
+        Err("must be a valid hex color code".into())
     }
 }
 
 pub struct In {
-    options: Vec<String>,
+    options: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for In {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("in requires at least one option".to_string());
+            return Err("in requires at least one option".into());
         }
 
         Ok(Box::new(In {
@@ -809,21 +887,26 @@ impl ValidateRule for In {
         "in"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key).copied()
             && self.options.iter().any(|option| option == value)
         {
             return Ok(false);
         }
 
-        Err(format!("must be one of: {}", self.options.join(", ")))
+        Err(compact_str::format_compact!(
+            "must be one of: {}",
+            self.options.join(", ")
+        ))
     }
 }
 
 pub struct Integer;
 
 impl ParseValidationRule for Integer {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Integer))
     }
 }
@@ -833,21 +916,23 @@ impl ValidateRule for Integer {
         "integer"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.parse::<i64>().is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid integer".to_string())
+        Err("must be a valid integer".into())
     }
 }
 
 pub struct Ip;
 
 impl ParseValidationRule for Ip {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Ip))
     }
 }
@@ -857,21 +942,23 @@ impl ValidateRule for Ip {
         "ip"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.parse::<std::net::IpAddr>().is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid IP address".to_string())
+        Err("must be a valid IP address".into())
     }
 }
 
 pub struct Ipv4;
 
 impl ParseValidationRule for Ipv4 {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Ipv4))
     }
 }
@@ -881,21 +968,23 @@ impl ValidateRule for Ipv4 {
         "ipv4"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.parse::<std::net::Ipv4Addr>().is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid IPv4 address".to_string())
+        Err("must be a valid IPv4 address".into())
     }
 }
 
 pub struct Ipv6;
 
 impl ParseValidationRule for Ipv6 {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Ipv6))
     }
 }
@@ -905,21 +994,23 @@ impl ValidateRule for Ipv6 {
         "ipv6"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.parse::<std::net::Ipv6Addr>().is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid IPv6 address".to_string())
+        Err("must be a valid IPv6 address".into())
     }
 }
 
 pub struct Json;
 
 impl ParseValidationRule for Json {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Json))
     }
 }
@@ -929,14 +1020,14 @@ impl ValidateRule for Json {
         "json"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && serde_json::from_str::<serde_json::Value>(value).is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be valid JSON".to_string())
+        Err("must be valid JSON".into())
     }
 }
 
@@ -945,14 +1036,16 @@ pub struct Lt {
 }
 
 impl ParseValidationRule for Lt {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("lt requires one numeric value".to_string());
+            return Err("lt requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for lt".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for lt"))?;
 
         Ok(Box::new(Lt { value }))
     }
@@ -963,7 +1056,7 @@ impl ValidateRule for Lt {
         "lt"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num < self.value {
@@ -974,7 +1067,10 @@ impl ValidateRule for Lt {
             }
         }
 
-        Err(format!("must be less than {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be less than {}",
+            self.value
+        ))
     }
 }
 
@@ -983,14 +1079,16 @@ pub struct Lte {
 }
 
 impl ParseValidationRule for Lte {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("lte requires one numeric value".to_string());
+            return Err("lte requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for lte".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for lte"))?;
 
         Ok(Box::new(Lte { value }))
     }
@@ -1001,7 +1099,7 @@ impl ValidateRule for Lte {
         "lte"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num <= self.value {
@@ -1012,14 +1110,19 @@ impl ValidateRule for Lte {
             }
         }
 
-        Err(format!("must be less than or equal to {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be less than or equal to {}",
+            self.value
+        ))
     }
 }
 
 pub struct Lowercase;
 
 impl ParseValidationRule for Lowercase {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Lowercase))
     }
 }
@@ -1029,21 +1132,23 @@ impl ValidateRule for Lowercase {
         "lowercase"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_lowercase())
         {
             return Ok(false);
         }
 
-        Err("must be lowercase".to_string())
+        Err("must be lowercase".into())
     }
 }
 
 pub struct MacAddress;
 
 impl ParseValidationRule for MacAddress {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(MacAddress))
     }
 }
@@ -1053,7 +1158,7 @@ impl ValidateRule for MacAddress {
         "mac_address"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             let parts: Vec<&str> = value.split(':').collect();
             if parts.len() == 6
@@ -1065,7 +1170,7 @@ impl ValidateRule for MacAddress {
             }
         }
 
-        Err("must be a valid MAC address".to_string())
+        Err("must be a valid MAC address".into())
     }
 }
 
@@ -1074,14 +1179,16 @@ pub struct Max {
 }
 
 impl ParseValidationRule for Max {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("max requires one numeric value".to_string());
+            return Err("max requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for max".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for max"))?;
 
         Ok(Box::new(Max { value }))
     }
@@ -1092,7 +1199,7 @@ impl ValidateRule for Max {
         "max"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if !data.has_rule(key, "string")
                 && let Ok(num) = value.parse::<f64>()
@@ -1105,7 +1212,10 @@ impl ValidateRule for Max {
             }
         }
 
-        Err(format!("must be less than or equal to {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be less than or equal to {}",
+            self.value
+        ))
     }
 }
 
@@ -1114,14 +1224,16 @@ pub struct MaxDigits {
 }
 
 impl ParseValidationRule for MaxDigits {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("max_digits requires one numeric value".to_string());
+            return Err("max_digits requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<usize>()
-            .map_err(|_| "invalid value for max_digits".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for max_digits"))?;
 
         Ok(Box::new(MaxDigits { value }))
     }
@@ -1132,7 +1244,7 @@ impl ValidateRule for MaxDigits {
         "max_digits"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_ascii_digit())
             && value.len() <= self.value
@@ -1140,7 +1252,10 @@ impl ValidateRule for MaxDigits {
             return Ok(false);
         }
 
-        Err(format!("must contain at most {} digits", self.value))
+        Err(compact_str::format_compact!(
+            "must contain at most {} digits",
+            self.value
+        ))
     }
 }
 
@@ -1149,14 +1264,16 @@ pub struct Min {
 }
 
 impl ParseValidationRule for Min {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("min requires one numeric value".to_string());
+            return Err("min requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for min".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for min"))?;
 
         Ok(Box::new(Min { value }))
     }
@@ -1167,7 +1284,7 @@ impl ValidateRule for Min {
         "min"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if !data.has_rule(key, "string")
                 && let Ok(num) = value.parse::<f64>()
@@ -1180,7 +1297,10 @@ impl ValidateRule for Min {
             }
         }
 
-        Err(format!("must be greater than or equal to {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be greater than or equal to {}",
+            self.value
+        ))
     }
 }
 
@@ -1189,14 +1309,16 @@ pub struct MinDigits {
 }
 
 impl ParseValidationRule for MinDigits {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("min_digits requires one numeric value".to_string());
+            return Err("min_digits requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<usize>()
-            .map_err(|_| "invalid value for min_digits".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for min_digits"))?;
 
         Ok(Box::new(MinDigits { value }))
     }
@@ -1207,7 +1329,7 @@ impl ValidateRule for MinDigits {
         "min_digits"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_ascii_digit())
             && value.len() >= self.value
@@ -1215,7 +1337,10 @@ impl ValidateRule for MinDigits {
             return Ok(false);
         }
 
-        Err(format!("must contain at least {} digits", self.value))
+        Err(compact_str::format_compact!(
+            "must contain at least {} digits",
+            self.value
+        ))
     }
 }
 
@@ -1224,14 +1349,16 @@ pub struct MultipleOf {
 }
 
 impl ParseValidationRule for MultipleOf {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("multiple_of requires one numeric value".to_string());
+            return Err("multiple_of requires one numeric value".into());
         }
 
         let value = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for multiple_of".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for multiple_of"))?;
 
         Ok(Box::new(MultipleOf { value }))
     }
@@ -1242,7 +1369,7 @@ impl ValidateRule for MultipleOf {
         "multiple_of"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && let Ok(num) = value.parse::<f64>()
             && num % self.value == 0.0
@@ -1250,18 +1377,23 @@ impl ValidateRule for MultipleOf {
             return Ok(false);
         }
 
-        Err(format!("must be a multiple of {}", self.value))
+        Err(compact_str::format_compact!(
+            "must be a multiple of {}",
+            self.value
+        ))
     }
 }
 
 pub struct NotIn {
-    options: Vec<String>,
+    options: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for NotIn {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("not_in requires at least one option".to_string());
+            return Err("not_in requires at least one option".into());
         }
 
         Ok(Box::new(NotIn {
@@ -1275,14 +1407,17 @@ impl ValidateRule for NotIn {
         "not_in"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key).copied()
             && !self.options.iter().any(|option| option == value)
         {
             return Ok(false);
         }
 
-        Err(format!("must not be one of: {}", self.options.join(", ")))
+        Err(compact_str::format_compact!(
+            "must not be one of: {}",
+            self.options.join(", ")
+        ))
     }
 }
 
@@ -1291,13 +1426,16 @@ pub struct NotRegex {
 }
 
 impl ParseValidationRule for NotRegex {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("not_regex requires a regex pattern".to_string());
+            return Err("not_regex requires a regex pattern".into());
         }
 
         let pattern = rule[0].trim_matches('/').to_string();
-        let regex = regex::Regex::new(&pattern).map_err(|_| "invalid regex pattern".to_string())?;
+        let regex = regex::Regex::new(&pattern)
+            .map_err(|_| compact_str::CompactString::const_new("invalid regex pattern"))?;
 
         Ok(Box::new(NotRegex { pattern: regex }))
     }
@@ -1308,14 +1446,14 @@ impl ValidateRule for NotRegex {
         "not_regex"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && !self.pattern.is_match(value)
         {
             return Ok(false);
         }
 
-        Err(format!(
+        Err(compact_str::format_compact!(
             "must not match the regex pattern '{}'",
             self.pattern
         ))
@@ -1325,7 +1463,9 @@ impl ValidateRule for NotRegex {
 pub struct Nullable;
 
 impl ParseValidationRule for Nullable {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Nullable))
     }
 }
@@ -1335,7 +1475,7 @@ impl ValidateRule for Nullable {
         "nullable"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key).copied()
             && (value.is_empty() || value == "null")
         {
@@ -1349,7 +1489,9 @@ impl ValidateRule for Nullable {
 pub struct Numeric;
 
 impl ParseValidationRule for Numeric {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Numeric))
     }
 }
@@ -1359,7 +1501,7 @@ impl ValidateRule for Numeric {
         "numeric"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value
                 .chars()
@@ -1368,7 +1510,7 @@ impl ValidateRule for Numeric {
             return Ok(false);
         }
 
-        Err("must be a valid numeric value".to_string())
+        Err("must be a valid numeric value".into())
     }
 }
 
@@ -1377,13 +1519,16 @@ pub struct Regex {
 }
 
 impl ParseValidationRule for Regex {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("regex requires a regex pattern".to_string());
+            return Err("regex requires a regex pattern".into());
         }
 
         let pattern = rule[0].trim_matches('/').to_string();
-        let regex = regex::Regex::new(&pattern).map_err(|_| "invalid regex pattern".to_string())?;
+        let regex = regex::Regex::new(&pattern)
+            .map_err(|_| compact_str::CompactString::const_new("invalid regex pattern"))?;
 
         Ok(Box::new(Regex { pattern: regex }))
     }
@@ -1394,21 +1539,26 @@ impl ValidateRule for Regex {
         "regex"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && self.pattern.is_match(value)
         {
             return Ok(false);
         }
 
-        Err(format!("must match the regex pattern '{}'", self.pattern))
+        Err(compact_str::format_compact!(
+            "must match the regex pattern '{}'",
+            self.pattern
+        ))
     }
 }
 
 pub struct Required;
 
 impl ParseValidationRule for Required {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Required))
     }
 }
@@ -1418,25 +1568,27 @@ impl ValidateRule for Required {
         "required"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && !value.is_empty()
         {
             return Ok(false);
         }
 
-        Err("is required and cannot be empty".to_string())
+        Err("is required and cannot be empty".into())
     }
 }
 
 pub struct RequiredIf {
-    keys: Vec<(String, String)>,
+    keys: Vec<(compact_str::CompactString, compact_str::CompactString)>,
 }
 
 impl ParseValidationRule for RequiredIf {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() < 2 {
-            return Err("required_if requires a key and value to check".to_string());
+            return Err("required_if requires a key and value to check".into());
         }
 
         let mut keys = Vec::new();
@@ -1444,7 +1596,7 @@ impl ParseValidationRule for RequiredIf {
             if i + 1 < rule.len() {
                 keys.push((rule[i].clone(), rule[i + 1].clone()));
             } else {
-                return Err("required_if requires an even number of arguments".to_string());
+                return Err("required_if requires an even number of arguments".into());
             }
         }
 
@@ -1457,7 +1609,7 @@ impl ValidateRule for RequiredIf {
         "required_if"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         for (check_key, check_value) in &self.keys {
             if let Some(value) = data.data.get(check_key.as_str()).copied()
                 && value == check_value
@@ -1468,7 +1620,9 @@ impl ValidateRule for RequiredIf {
                     return Ok(false);
                 }
 
-                return Err(format!("is required when '{check_key}' is '{check_value}'"));
+                return Err(compact_str::format_compact!(
+                    "is required when '{check_key}' is '{check_value}'"
+                ));
             }
         }
 
@@ -1477,13 +1631,15 @@ impl ValidateRule for RequiredIf {
 }
 
 pub struct RequiredIfAccepted {
-    other_key: String,
+    other_key: compact_str::CompactString,
 }
 
 impl ParseValidationRule for RequiredIfAccepted {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("required_if_accepted requires one key to check".to_string());
+            return Err("required_if_accepted requires one key to check".into());
         }
 
         Ok(Box::new(RequiredIfAccepted {
@@ -1497,7 +1653,7 @@ impl ValidateRule for RequiredIfAccepted {
         "required_if_accepted"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(self.other_key.as_str()).copied()
             && (value == "true" || value == "1" || value == "yes" || value == "on")
         {
@@ -1507,7 +1663,10 @@ impl ValidateRule for RequiredIfAccepted {
                 return Ok(false);
             }
 
-            return Err(format!("is required when '{}' is accepted", self.other_key));
+            return Err(compact_str::format_compact!(
+                "is required when '{}' is accepted",
+                self.other_key
+            ));
         }
 
         Ok(true)
@@ -1515,13 +1674,15 @@ impl ValidateRule for RequiredIfAccepted {
 }
 
 pub struct RequiredIfDeclined {
-    other_key: String,
+    other_key: compact_str::CompactString,
 }
 
 impl ParseValidationRule for RequiredIfDeclined {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("required_if_declined requires one key to check".to_string());
+            return Err("required_if_declined requires one key to check".into());
         }
 
         Ok(Box::new(RequiredIfDeclined {
@@ -1535,7 +1696,7 @@ impl ValidateRule for RequiredIfDeclined {
         "required_if_declined"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(self.other_key.as_str()).copied()
             && (value == "false" || value == "0" || value == "no" || value == "off")
         {
@@ -1545,7 +1706,10 @@ impl ValidateRule for RequiredIfDeclined {
                 return Ok(false);
             }
 
-            return Err(format!("is required when '{}' is declined", self.other_key));
+            return Err(compact_str::format_compact!(
+                "is required when '{}' is declined",
+                self.other_key
+            ));
         }
 
         Ok(true)
@@ -1553,13 +1717,15 @@ impl ValidateRule for RequiredIfDeclined {
 }
 
 pub struct Same {
-    other_key: String,
+    other_key: compact_str::CompactString,
 }
 
 impl ParseValidationRule for Same {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("same requires one key to compare against".to_string());
+            return Err("same requires one key to compare against".into());
         }
 
         Ok(Box::new(Same {
@@ -1573,7 +1739,7 @@ impl ValidateRule for Same {
         "same"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && let Some(other_value) = data.data.get(self.other_key.as_str())
             && value == other_value
@@ -1581,7 +1747,10 @@ impl ValidateRule for Same {
             return Ok(false);
         }
 
-        Err(format!("must be the same as '{}'", self.other_key))
+        Err(compact_str::format_compact!(
+            "must be the same as '{}'",
+            self.other_key
+        ))
     }
 }
 
@@ -1590,14 +1759,16 @@ pub struct Size {
 }
 
 impl ParseValidationRule for Size {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.len() != 1 {
-            return Err("size requires one numeric value".to_string());
+            return Err("size requires one numeric value".into());
         }
 
         let size = rule[0]
             .parse::<f64>()
-            .map_err(|_| "invalid value for size".to_string())?;
+            .map_err(|_| compact_str::CompactString::const_new("invalid value for size"))?;
 
         Ok(Box::new(Size { size }))
     }
@@ -1608,7 +1779,7 @@ impl ValidateRule for Size {
         "size"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             if let Ok(num) = value.parse::<f64>() {
                 if num == self.size {
@@ -1619,18 +1790,23 @@ impl ValidateRule for Size {
             }
         }
 
-        Err(format!("must be equal to {}", self.size))
+        Err(compact_str::format_compact!(
+            "must be equal to {}",
+            self.size
+        ))
     }
 }
 
 pub struct StartsWith {
-    prefixes: Vec<String>,
+    prefixes: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for StartsWith {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         if rule.is_empty() {
-            return Err("starts_with requires at least one prefix".to_string());
+            return Err("starts_with requires at least one prefix".into());
         }
 
         Ok(Box::new(StartsWith {
@@ -1644,16 +1820,16 @@ impl ValidateRule for StartsWith {
         "starts_with"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key) {
             for prefix in &self.prefixes {
-                if value.starts_with(prefix) {
+                if value.starts_with(&**prefix) {
                     return Ok(false);
                 }
             }
         }
 
-        Err(format!(
+        Err(compact_str::format_compact!(
             "must start with one of: {}",
             self.prefixes.join(", ")
         ))
@@ -1663,7 +1839,9 @@ impl ValidateRule for StartsWith {
 pub struct StringRule;
 
 impl ParseValidationRule for StringRule {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(StringRule))
     }
 }
@@ -1673,7 +1851,7 @@ impl ValidateRule for StringRule {
         "string"
     }
 
-    fn validate(&self, _key: &str, _data: &Validator) -> Result<bool, String> {
+    fn validate(&self, _key: &str, _data: &Validator) -> Result<bool, compact_str::CompactString> {
         Ok(false)
     }
 }
@@ -1681,7 +1859,9 @@ impl ValidateRule for StringRule {
 pub struct Timezone;
 
 impl ParseValidationRule for Timezone {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Timezone))
     }
 }
@@ -1691,21 +1871,23 @@ impl ValidateRule for Timezone {
         "timezone"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key).copied()
             && (value.parse::<chrono::FixedOffset>().is_ok() || value == "UTC")
         {
             return Ok(false);
         }
 
-        Err("must be a valid timezone".to_string())
+        Err("must be a valid timezone".into())
     }
 }
 
 pub struct Uppercase;
 
 impl ParseValidationRule for Uppercase {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Uppercase))
     }
 }
@@ -1715,23 +1897,25 @@ impl ValidateRule for Uppercase {
         "uppercase"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && value.chars().all(|c| c.is_uppercase())
         {
             return Ok(false);
         }
 
-        Err("must be uppercase".to_string())
+        Err("must be uppercase".into())
     }
 }
 
 pub struct Url {
-    protocols: Vec<String>,
+    protocols: Vec<compact_str::CompactString>,
 }
 
 impl ParseValidationRule for Url {
-    fn parse_rule(rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Url {
             protocols: rule.to_vec(),
         }))
@@ -1743,15 +1927,15 @@ impl ValidateRule for Url {
         "url"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && let Ok(url) = reqwest::Url::parse(value)
-            && (self.protocols.is_empty() || self.protocols.contains(&url.scheme().to_string()))
+            && (self.protocols.is_empty() || self.protocols.contains(&url.scheme().into()))
         {
             return Ok(false);
         }
 
-        Err(format!(
+        Err(compact_str::format_compact!(
             "must be a valid URL with one of the following protocols: {}",
             self.protocols.join(", ")
         ))
@@ -1761,7 +1945,9 @@ impl ValidateRule for Url {
 pub struct Uuid;
 
 impl ParseValidationRule for Uuid {
-    fn parse_rule(_rule: &[String]) -> Result<Box<dyn ValidateRule>, String> {
+    fn parse_rule(
+        _rule: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString> {
         Ok(Box::new(Uuid))
     }
 }
@@ -1771,13 +1957,13 @@ impl ValidateRule for Uuid {
         "uuid"
     }
 
-    fn validate(&self, key: &str, data: &Validator) -> Result<bool, String> {
+    fn validate(&self, key: &str, data: &Validator) -> Result<bool, compact_str::CompactString> {
         if let Some(value) = data.data.get(key)
             && uuid::Uuid::parse_str(value).is_ok()
         {
             return Ok(false);
         }
 
-        Err("must be a valid UUID".to_string())
+        Err("must be a valid UUID".into())
     }
 }

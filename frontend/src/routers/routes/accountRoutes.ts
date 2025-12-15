@@ -8,13 +8,13 @@ import {
   faUserSecret,
 } from '@fortawesome/free-solid-svg-icons';
 import type { RouteDefinition } from 'shared';
-import DashboardAccount from '@/pages/dashboard/account/DashboardAccount';
-import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys';
-import DashboardActivity from '@/pages/dashboard/DashboardActivity';
-import DashboardOAuthLinks from '@/pages/dashboard/oauth-links/DashboardOAuthLinks';
-import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys';
-import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions';
-import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys';
+import DashboardAccount from '@/pages/dashboard/account/DashboardAccount.tsx';
+import DashboardApiKeys from '@/pages/dashboard/api-keys/DashboardApiKeys.tsx';
+import DashboardActivity from '@/pages/dashboard/DashboardActivity.tsx';
+import DashboardOAuthLinks from '@/pages/dashboard/oauth-links/DashboardOAuthLinks.tsx';
+import DashboardSecurityKeys from '@/pages/dashboard/security-keys/DashboardSecurityKeys.tsx';
+import DashboardSessions from '@/pages/dashboard/sessions/DashboardSessions.tsx';
+import DashboardSshKeys from '@/pages/dashboard/ssh-keys/DashboardSshKeys.tsx';
 
 const routes: RouteDefinition[] = [
   {

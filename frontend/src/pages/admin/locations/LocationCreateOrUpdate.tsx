@@ -4,19 +4,19 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { NIL as uuidNil } from 'uuid';
 import { z } from 'zod';
-import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations';
-import createLocation from '@/api/admin/locations/createLocation';
-import deleteLocation from '@/api/admin/locations/deleteLocation';
-import updateLocation from '@/api/admin/locations/updateLocation';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Select from '@/elements/input/Select';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminLocationSchema } from '@/lib/schemas/admin/locations';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
+import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations.ts';
+import createLocation from '@/api/admin/locations/createLocation.ts';
+import deleteLocation from '@/api/admin/locations/deleteLocation.ts';
+import updateLocation from '@/api/admin/locations/updateLocation.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminLocationSchema } from '@/lib/schemas/admin/locations.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
 
 export default ({ contextLocation }: { contextLocation?: Location }) => {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
@@ -68,51 +68,53 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <Select
-            allowDeselect
-            label='Backup Configuration'
-            data={[
-              {
-                label: 'None',
-                value: uuidNil,
-              },
-              ...backupConfigurations.items.map((backupConfiguration) => ({
-                label: backupConfiguration.name,
-                value: backupConfiguration.uuid,
-              })),
-            ]}
-            searchable
-            searchValue={backupConfigurations.search}
-            onSearchChange={backupConfigurations.setSearch}
-            {...form.getInputProps('backupConfigurationUuid')}
-          />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <Select
+              allowDeselect
+              label='Backup Configuration'
+              data={[
+                {
+                  label: 'None',
+                  value: uuidNil,
+                },
+                ...backupConfigurations.items.map((backupConfiguration) => ({
+                  label: backupConfiguration.name,
+                  value: backupConfiguration.uuid,
+                })),
+              ]}
+              searchable
+              searchValue={backupConfigurations.search}
+              onSearchChange={backupConfigurations.setSearch}
+              {...form.getInputProps('backupConfigurationUuid')}
+            />
+          </Group>
 
-        <Group grow align='start'>
-          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-        </Group>
+          <Group grow align='start'>
+            <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+          </Group>
 
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextLocation && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextLocation && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            {!contextLocation && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextLocation && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 };

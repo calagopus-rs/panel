@@ -2,13 +2,13 @@ import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getNest from '@/api/admin/nests/getNest';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import { useToast } from '@/providers/ToastProvider';
-import AdminEggs from './eggs/AdminEggs';
-import NestCreateOrUpdate from './NestCreateOrUpdate';
+import getNest from '@/api/admin/nests/getNest.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import AdminEggs from './eggs/AdminEggs.tsx';
+import NestCreateOrUpdate from './NestCreateOrUpdate.tsx';
 
 export default function NestView() {
   const params = useParams<'nestId'>();

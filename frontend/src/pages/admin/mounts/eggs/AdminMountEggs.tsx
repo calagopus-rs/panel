@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { eggTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import EggRow from '../../nests/eggs/EggRow';
-import TextInput from '@/elements/input/TextInput';
+import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { eggTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import EggRow from '../../nests/eggs/EggRow.tsx';
 
 export default function AdminMountNestEggs({ mount }: { mount: Mount }) {
   const [mountNestEggs, setMountNestEggs] = useState<

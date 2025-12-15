@@ -57,7 +57,7 @@ pub enum ServerStatus {
 pub struct Server {
     pub uuid: uuid::Uuid,
     pub uuid_short: i32,
-    pub external_id: Option<String>,
+    pub external_id: Option<compact_str::CompactString>,
     pub allocation: Option<super::server_allocation::ServerAllocation>,
     pub destination_allocation_uuid: Option<uuid::Uuid>,
     pub node: Fetchable<super::node::Node>,
@@ -70,8 +70,8 @@ pub struct Server {
     pub status: Option<ServerStatus>,
     pub suspended: bool,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     pub memory: i64,
     pub swap: i64,
@@ -80,18 +80,18 @@ pub struct Server {
     pub cpu: i32,
     pub pinned_cpus: Vec<i16>,
 
-    pub startup: String,
-    pub image: String,
+    pub startup: compact_str::CompactString,
+    pub image: compact_str::CompactString,
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
-    pub timezone: Option<String>,
+    pub timezone: Option<compact_str::CompactString>,
 
     pub allocation_limit: i32,
     pub database_limit: i32,
     pub backup_limit: i32,
     pub schedule_limit: i32,
 
-    pub subuser_permissions: Option<Arc<Vec<String>>>,
-    pub subuser_ignored_files: Option<Vec<String>>,
+    pub subuser_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    pub subuser_ignored_files: Option<Vec<compact_str::CompactString>>,
     #[serde(skip_serializing, skip_deserializing)]
     subuser_ignored_files_overrides: Option<Box<ignore::overrides::Override>>,
 
@@ -102,48 +102,99 @@ impl BaseModel for Server {
     const NAME: &'static str = "server";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("servers.uuid", format!("{prefix}uuid")),
-            ("servers.uuid_short", format!("{prefix}uuid_short")),
-            ("servers.external_id", format!("{prefix}external_id")),
+            ("servers.uuid", compact_str::format_compact!("{prefix}uuid")),
+            (
+                "servers.uuid_short",
+                compact_str::format_compact!("{prefix}uuid_short"),
+            ),
+            (
+                "servers.external_id",
+                compact_str::format_compact!("{prefix}external_id"),
+            ),
             (
                 "servers.destination_allocation_uuid",
-                format!("{prefix}destination_allocation_uuid"),
+                compact_str::format_compact!("{prefix}destination_allocation_uuid"),
             ),
-            ("servers.node_uuid", format!("{prefix}node_uuid")),
+            (
+                "servers.node_uuid",
+                compact_str::format_compact!("{prefix}node_uuid"),
+            ),
             (
                 "servers.destination_node_uuid",
-                format!("{prefix}destination_node_uuid"),
+                compact_str::format_compact!("{prefix}destination_node_uuid"),
             ),
             (
                 "servers.backup_configuration_uuid",
-                format!("{prefix}backup_configuration_uuid"),
+                compact_str::format_compact!("{prefix}backup_configuration_uuid"),
             ),
-            ("servers.status", format!("{prefix}status")),
-            ("servers.suspended", format!("{prefix}suspended")),
-            ("servers.name", format!("{prefix}name")),
-            ("servers.description", format!("{prefix}description")),
-            ("servers.memory", format!("{prefix}memory")),
-            ("servers.swap", format!("{prefix}swap")),
-            ("servers.disk", format!("{prefix}disk")),
-            ("servers.io_weight", format!("{prefix}io_weight")),
-            ("servers.cpu", format!("{prefix}cpu")),
-            ("servers.pinned_cpus", format!("{prefix}pinned_cpus")),
-            ("servers.startup", format!("{prefix}startup")),
-            ("servers.image", format!("{prefix}image")),
-            ("servers.auto_kill", format!("{prefix}auto_kill")),
-            ("servers.timezone", format!("{prefix}timezone")),
+            (
+                "servers.status",
+                compact_str::format_compact!("{prefix}status"),
+            ),
+            (
+                "servers.suspended",
+                compact_str::format_compact!("{prefix}suspended"),
+            ),
+            ("servers.name", compact_str::format_compact!("{prefix}name")),
+            (
+                "servers.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "servers.memory",
+                compact_str::format_compact!("{prefix}memory"),
+            ),
+            ("servers.swap", compact_str::format_compact!("{prefix}swap")),
+            ("servers.disk", compact_str::format_compact!("{prefix}disk")),
+            (
+                "servers.io_weight",
+                compact_str::format_compact!("{prefix}io_weight"),
+            ),
+            ("servers.cpu", compact_str::format_compact!("{prefix}cpu")),
+            (
+                "servers.pinned_cpus",
+                compact_str::format_compact!("{prefix}pinned_cpus"),
+            ),
+            (
+                "servers.startup",
+                compact_str::format_compact!("{prefix}startup"),
+            ),
+            (
+                "servers.image",
+                compact_str::format_compact!("{prefix}image"),
+            ),
+            (
+                "servers.auto_kill",
+                compact_str::format_compact!("{prefix}auto_kill"),
+            ),
+            (
+                "servers.timezone",
+                compact_str::format_compact!("{prefix}timezone"),
+            ),
             (
                 "servers.allocation_limit",
-                format!("{prefix}allocation_limit"),
+                compact_str::format_compact!("{prefix}allocation_limit"),
             ),
-            ("servers.database_limit", format!("{prefix}database_limit")),
-            ("servers.backup_limit", format!("{prefix}backup_limit")),
-            ("servers.schedule_limit", format!("{prefix}schedule_limit")),
-            ("servers.created", format!("{prefix}created")),
+            (
+                "servers.database_limit",
+                compact_str::format_compact!("{prefix}database_limit"),
+            ),
+            (
+                "servers.backup_limit",
+                compact_str::format_compact!("{prefix}backup_limit"),
+            ),
+            (
+                "servers.schedule_limit",
+                compact_str::format_compact!("{prefix}schedule_limit"),
+            ),
+            (
+                "servers.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::server_allocation::ServerAllocation::columns(Some(
@@ -161,11 +212,14 @@ impl BaseModel for Server {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            uuid_short: row.try_get(format!("{prefix}uuid_short").as_str())?,
-            external_id: row.try_get(format!("{prefix}external_id").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            uuid_short: row.try_get(compact_str::format_compact!("{prefix}uuid_short").as_str())?,
+            external_id: row
+                .try_get(compact_str::format_compact!("{prefix}external_id").as_str())?,
             allocation: if row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}allocation_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    compact_str::format_compact!("{prefix}allocation_uuid").as_str(),
+                )
                 .is_ok()
             {
                 Some(super::server_allocation::ServerAllocation::map(
@@ -176,14 +230,16 @@ impl BaseModel for Server {
                 None
             },
             destination_allocation_uuid: row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}destination_allocation_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    compact_str::format_compact!("{prefix}destination_allocation_uuid").as_str(),
+                )
                 .ok(),
             node: super::node::Node::get_fetchable(
-                row.try_get(format!("{prefix}node_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}node_uuid").as_str())?,
             ),
             destination_node: super::node::Node::get_fetchable_from_row(
                 row,
-                format!("{prefix}destination_node_uuid"),
+                compact_str::format_compact!("{prefix}destination_node_uuid"),
             ),
             owner: super::user::User::map(Some("owner_"), row)?,
             egg: Box::new(super::nest_egg::NestEgg::map(Some("egg_"), row)?),
@@ -191,35 +247,43 @@ impl BaseModel for Server {
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
-                    format!("{prefix}backup_configuration_uuid"),
+                    compact_str::format_compact!("{prefix}backup_configuration_uuid"),
                 ),
-            status: row.try_get(format!("{prefix}status").as_str())?,
-            suspended: row.try_get(format!("{prefix}suspended").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            memory: row.try_get(format!("{prefix}memory").as_str())?,
-            swap: row.try_get(format!("{prefix}swap").as_str())?,
-            disk: row.try_get(format!("{prefix}disk").as_str())?,
-            io_weight: row.try_get(format!("{prefix}io_weight").as_str())?,
-            cpu: row.try_get(format!("{prefix}cpu").as_str())?,
-            pinned_cpus: row.try_get(format!("{prefix}pinned_cpus").as_str())?,
-            startup: row.try_get(format!("{prefix}startup").as_str())?,
-            image: row.try_get(format!("{prefix}image").as_str())?,
-            auto_kill: serde_json::from_value(
-                row.try_get::<serde_json::Value, _>(format!("{prefix}auto_kill").as_str())?,
-            )?,
-            timezone: row.try_get(format!("{prefix}timezone").as_str())?,
-            allocation_limit: row.try_get(format!("{prefix}allocation_limit").as_str())?,
-            database_limit: row.try_get(format!("{prefix}database_limit").as_str())?,
-            backup_limit: row.try_get(format!("{prefix}backup_limit").as_str())?,
-            schedule_limit: row.try_get(format!("{prefix}schedule_limit").as_str())?,
+            status: row.try_get(compact_str::format_compact!("{prefix}status").as_str())?,
+            suspended: row.try_get(compact_str::format_compact!("{prefix}suspended").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            memory: row.try_get(compact_str::format_compact!("{prefix}memory").as_str())?,
+            swap: row.try_get(compact_str::format_compact!("{prefix}swap").as_str())?,
+            disk: row.try_get(compact_str::format_compact!("{prefix}disk").as_str())?,
+            io_weight: row.try_get(compact_str::format_compact!("{prefix}io_weight").as_str())?,
+            cpu: row.try_get(compact_str::format_compact!("{prefix}cpu").as_str())?,
+            pinned_cpus: row
+                .try_get(compact_str::format_compact!("{prefix}pinned_cpus").as_str())?,
+            startup: row.try_get(compact_str::format_compact!("{prefix}startup").as_str())?,
+            image: row.try_get(compact_str::format_compact!("{prefix}image").as_str())?,
+            auto_kill: serde_json::from_value(row.try_get::<serde_json::Value, _>(
+                compact_str::format_compact!("{prefix}auto_kill").as_str(),
+            )?)?,
+            timezone: row.try_get(compact_str::format_compact!("{prefix}timezone").as_str())?,
+            allocation_limit: row
+                .try_get(compact_str::format_compact!("{prefix}allocation_limit").as_str())?,
+            database_limit: row
+                .try_get(compact_str::format_compact!("{prefix}database_limit").as_str())?,
+            backup_limit: row
+                .try_get(compact_str::format_compact!("{prefix}backup_limit").as_str())?,
+            schedule_limit: row
+                .try_get(compact_str::format_compact!("{prefix}schedule_limit").as_str())?,
             subuser_permissions: row
-                .try_get::<Vec<String>, _>("permissions")
+                .try_get::<Vec<compact_str::CompactString>, _>("permissions")
                 .map(Arc::new)
                 .ok(),
-            subuser_ignored_files: row.try_get::<Vec<String>, _>("ignored_files").ok(),
+            subuser_ignored_files: row
+                .try_get::<Vec<compact_str::CompactString>, _>("ignored_files")
+                .ok(),
             subuser_ignored_files_overrides: None,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -1157,7 +1221,7 @@ impl Server {
                     .into_iter()
                     .map(|v| {
                         (
-                            v.env_variable,
+                            v.env_variable.into(),
                             serde_json::Value::String(v.value.unwrap_or_default()),
                         )
                     })
@@ -1189,7 +1253,7 @@ impl Server {
                     force_outgoing_ip: self.egg.force_outgoing_ip,
                     default: self.allocation.map(|a| {
                         wings_api::ServerConfigurationAllocationsDefault {
-                            ip: a.allocation.ip.ip().to_string(),
+                            ip: compact_str::format_compact!("{}", a.allocation.ip.ip()),
                             port: a.allocation.port as u32,
                         }
                     }),
@@ -1197,7 +1261,7 @@ impl Server {
                         let mut mappings = IndexMap::new();
                         for allocation in allocations {
                             mappings
-                                .entry(allocation.ip.ip().to_string())
+                                .entry(compact_str::format_compact!("{}", allocation.ip.ip()))
                                 .or_insert_with(Vec::new)
                                 .push(allocation.port as u32);
                         }
@@ -1212,7 +1276,7 @@ impl Server {
                     cpu_limit: self.cpu as i64,
                     disk_space: self.disk as u64,
                     threads: {
-                        let mut threads = String::new();
+                        let mut threads = compact_str::CompactString::default();
                         for cpu in &self.pinned_cpus {
                             if !threads.is_empty() {
                                 threads.push(',');
@@ -1231,8 +1295,8 @@ impl Server {
                 mounts: mounts
                     .into_iter()
                     .map(|m| wings_api::Mount {
-                        source: m.source,
-                        target: m.target,
+                        source: m.source.into(),
+                        target: m.target.into(),
                         read_only: m.read_only,
                     })
                     .collect(),
@@ -1294,7 +1358,7 @@ impl Server {
 
         Ok(AdminApiServer {
             uuid: self.uuid,
-            uuid_short: format!("{:08x}", self.uuid_short),
+            uuid_short: compact_str::format_compact!("{:08x}", self.uuid_short),
             external_id: self.external_id,
             allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             node: node?,
@@ -1339,15 +1403,15 @@ impl Server {
 
         Ok(ApiServer {
             uuid: self.uuid,
-            uuid_short: format!("{:08x}", self.uuid_short),
+            uuid_short: compact_str::format_compact!("{:08x}", self.uuid_short),
             allocation: self.allocation.map(|a| a.into_api_object(allocation_uuid)),
             egg: self.egg.into_api_object(),
             is_owner: self.owner.uuid == user.uuid,
             permissions: if user.admin {
-                vec!["*".to_string()]
+                vec!["*".into()]
             } else {
                 self.subuser_permissions
-                    .map_or_else(|| vec!["*".to_string()], |p| p.to_vec())
+                    .map_or_else(|| vec!["*".into()], |p| p.to_vec())
             },
             node_uuid: node.uuid,
             node_name: node.name,
@@ -1357,7 +1421,7 @@ impl Server {
                     .unwrap_or(node.url)
                     .host_str()
                     .unwrap()
-                    .to_string()
+                    .into()
             }),
             sftp_port: node.sftp_port,
             status: self.status,
@@ -1536,8 +1600,8 @@ pub struct ApiServerFeatureLimits {
 #[schema(title = "AdminServer")]
 pub struct AdminApiServer {
     pub uuid: uuid::Uuid,
-    pub uuid_short: String,
-    pub external_id: Option<String>,
+    pub uuid_short: compact_str::CompactString,
+    pub external_id: Option<compact_str::CompactString>,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,
     pub node: super::node::AdminApiNode,
     pub owner: super::user::ApiFullUser,
@@ -1548,8 +1612,8 @@ pub struct AdminApiServer {
     pub status: Option<ServerStatus>,
     pub suspended: bool,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     #[schema(inline)]
     pub limits: ApiServerLimits,
@@ -1557,11 +1621,11 @@ pub struct AdminApiServer {
     #[schema(inline)]
     pub feature_limits: ApiServerFeatureLimits,
 
-    pub startup: String,
-    pub image: String,
+    pub startup: compact_str::CompactString,
+    pub image: compact_str::CompactString,
     #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
-    pub timezone: Option<String>,
+    pub timezone: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -1570,7 +1634,7 @@ pub struct AdminApiServer {
 #[schema(title = "Server")]
 pub struct ApiServer {
     pub uuid: uuid::Uuid,
-    pub uuid_short: String,
+    pub uuid_short: compact_str::CompactString,
     pub allocation: Option<super::server_allocation::ApiServerAllocation>,
     pub egg: super::nest_egg::ApiNestEgg,
 
@@ -1578,28 +1642,28 @@ pub struct ApiServer {
     pub suspended: bool,
 
     pub is_owner: bool,
-    pub permissions: Vec<String>,
+    pub permissions: Vec<compact_str::CompactString>,
 
     pub node_uuid: uuid::Uuid,
-    pub node_name: String,
+    pub node_name: compact_str::CompactString,
     pub node_maintenance_message: Option<String>,
 
-    pub sftp_host: String,
+    pub sftp_host: compact_str::CompactString,
     pub sftp_port: i32,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     #[schema(inline)]
     pub limits: ApiServerLimits,
     #[schema(inline)]
     pub feature_limits: ApiServerFeatureLimits,
 
-    pub startup: String,
-    pub image: String,
+    pub startup: compact_str::CompactString,
+    pub image: compact_str::CompactString,
     #[schema(inline)]
     pub auto_kill: wings_api::ServerConfigurationAutoKill,
-    pub timezone: Option<String>,
+    pub timezone: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

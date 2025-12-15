@@ -1,18 +1,18 @@
-import Badge from '@/elements/Badge';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import CloseButton from '@/elements/CloseButton';
-import MantineDivider from '@/elements/Divider';
-import Drawer from '@/elements/Drawer';
-import { useAuth } from '@/providers/AuthProvider';
-import { useWindows } from '@/providers/WindowProvider';
-import RouterRoutes from '@/RouterRoutes';
-import { useGlobalStore } from '@/stores/global';
 import { faArrowRightFromBracket, faBars, faUserCog, IconDefinition } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, ReactNode, startTransition, useEffect, useState } from 'react';
 import { MemoryRouter, NavLink, useNavigate } from 'react-router';
+import Badge from '@/elements/Badge.tsx';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import CloseButton from '@/elements/CloseButton.tsx';
+import MantineDivider from '@/elements/Divider.tsx';
+import Drawer from '@/elements/Drawer.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useWindows } from '@/providers/WindowProvider.tsx';
+import RouterRoutes from '@/RouterRoutes.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 type SidebarProps = {
   children: ReactNode;

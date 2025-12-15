@@ -77,7 +77,7 @@ mod post {
                     installation_script: Some(wings_api::InstallationScript {
                         container_image: server.0.egg.config_script.container,
                         entrypoint: server.0.egg.config_script.entrypoint,
-                        script: server.0.egg.config_script.content,
+                        script: server.0.egg.config_script.content.into(),
                         environment: Default::default(),
                     }),
                 },

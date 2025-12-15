@@ -1,16 +1,16 @@
 import { Group, ModalProps, Stack, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import chmodFiles from '@/api/server/files/chmodFiles';
-import Badge from '@/elements/Badge';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import Checkbox from '@/elements/input/Checkbox';
-import Modal from '@/elements/modals/Modal';
-import { permissionStringToNumber } from '@/lib/files';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import chmodFiles from '@/api/server/files/chmodFiles.ts';
+import Badge from '@/elements/Badge.tsx';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import Checkbox from '@/elements/input/Checkbox.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { permissionStringToNumber } from '@/lib/files.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   file: DirectoryEntry;

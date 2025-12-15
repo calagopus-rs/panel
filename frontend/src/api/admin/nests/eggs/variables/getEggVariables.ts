@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (nestUuid: string, eggUuid: string): Promise<NestEggVariable[]> => {
   return new Promise((resolve, reject) => {

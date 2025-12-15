@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import DatabaseRow from './DatabaseRow';
-import TextInput from '@/elements/input/TextInput';
-import { databaseHostDatabaseTableColumns } from '@/lib/tableColumns';
+import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { databaseHostDatabaseTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import DatabaseRow from './DatabaseRow.tsx';
 
 export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseHost: AdminDatabaseHost }) {
   const [databaseHostDatabases, setDatabaseHostDatabases] = useState<ResponseMeta<AdminServerDatabase>>(

@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import importSshKeys from '@/api/me/ssh-keys/importSshKeys';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { sshKeyProviderLabelMapping } from '@/lib/enums';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import importSshKeys from '@/api/me/ssh-keys/importSshKeys.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { sshKeyProviderLabelMapping } from '@/lib/enums.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
   provider: z.enum(['github', 'gitlab', 'launchpad']),

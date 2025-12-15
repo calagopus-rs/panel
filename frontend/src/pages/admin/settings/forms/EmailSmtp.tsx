@@ -2,11 +2,11 @@ import { Group, Stack } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
-import NumberInput from '@/elements/input/NumberInput';
-import PasswordInput from '@/elements/input/PasswordInput';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import { adminSettingsEmailSmtpSchema } from '@/lib/schemas/admin/settings';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminSettingsEmailSmtpSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default function EmailSmtp({ form }: { form: UseFormReturnType<z.infer<typeof adminSettingsEmailSmtpSchema>> }) {
   useEffect(() => {

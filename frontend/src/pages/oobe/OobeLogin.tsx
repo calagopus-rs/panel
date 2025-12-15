@@ -6,17 +6,17 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { z } from 'zod';
-import login from '@/api/auth/login';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import PasswordInput from '@/elements/input/PasswordInput';
-import TextInput from '@/elements/input/TextInput';
-import { to } from '@/lib/routes';
-import { useAuth } from '@/providers/AuthProvider';
-import { OobeComponentProps, steps } from '@/routers/OobeRouter';
-import { useGlobalStore } from '@/stores/global';
-import { oobeLoginSchema } from '@/lib/schemas/oobe';
+import login from '@/api/auth/login.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { to } from '@/lib/routes.ts';
+import { oobeLoginSchema } from '@/lib/schemas/oobe.ts';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { OobeComponentProps, steps } from '@/routers/OobeRouter.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OobeLogin({ onNext }: OobeComponentProps) {
   const { doLogin } = useAuth();
@@ -71,29 +71,31 @@ export default function OobeLogin({ onNext }: OobeComponentProps) {
         You got logged out during the setup process. Please log back in to continue where you left off.
       </Alert>
 
-      <Stack gap='md'>
-        <TextInput
-          label='Username'
-          placeholder='admin'
-          leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
-          required
-          {...form.getInputProps('username')}
-        />
+      <form onSubmit={form.onSubmit(() => onSubmit())}>
+        <Stack gap='md'>
+          <TextInput
+            label='Username'
+            placeholder='admin'
+            leftSection={<FontAwesomeIcon icon={faUser} size='sm' />}
+            required
+            {...form.getInputProps('username')}
+          />
 
-        <PasswordInput
-          label='Password'
-          placeholder='Enter a strong password'
-          leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
-          required
-          {...form.getInputProps('password')}
-        />
+          <PasswordInput
+            label='Password'
+            placeholder='Enter a strong password'
+            leftSection={<FontAwesomeIcon icon={faLock} size='sm' />}
+            required
+            {...form.getInputProps('password')}
+          />
 
-        <Group justify='flex-end' mt='xl'>
-          <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
-            Log in & Continue
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify='flex-end' mt='xl'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Log in & Continue
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Stack>
   );
 }

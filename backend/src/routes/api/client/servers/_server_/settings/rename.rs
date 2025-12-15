@@ -19,10 +19,10 @@ mod post {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -69,8 +69,8 @@ mod post {
             "UPDATE servers
             SET name = $1, description = $2
             WHERE servers.uuid = $3",
-            server.name,
-            server.description,
+            &server.name,
+            server.description.as_deref(),
             server.uuid
         )
         .execute(state.database.write())

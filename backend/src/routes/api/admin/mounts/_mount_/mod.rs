@@ -147,17 +147,17 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        source: Option<String>,
+        source: Option<compact_str::CompactString>,
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        target: Option<String>,
+        target: Option<compact_str::CompactString>,
 
         read_only: Option<bool>,
         user_mountable: Option<bool>,
@@ -220,10 +220,10 @@ mod patch {
             "UPDATE mounts
             SET name = $1, description = $2, source = $3, target = $4, read_only = $5, user_mountable = $6
             WHERE mounts.uuid = $7",
-            mount.name,
-            mount.description,
-            mount.source,
-            mount.target,
+            &mount.name,
+            mount.description.as_deref(),
+            &mount.source,
+            &mount.target,
             mount.read_only,
             mount.user_mountable,
             mount.uuid,

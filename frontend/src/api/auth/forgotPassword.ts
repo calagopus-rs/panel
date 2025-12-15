@@ -1,6 +1,6 @@
-import { axiosInstance } from '@/api/axios';
 import { z } from 'zod';
-import { authForgotPasswordSchema } from '@/lib/schemas/auth';
+import { axiosInstance } from '@/api/axios.ts';
+import { authForgotPasswordSchema } from '@/lib/schemas/auth.ts';
 
 export default async (data: z.infer<typeof authForgotPasswordSchema>, captcha: string | null): Promise<void> => {
   return new Promise((resolve, reject) => {

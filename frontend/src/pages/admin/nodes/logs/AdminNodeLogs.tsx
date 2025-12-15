@@ -2,12 +2,12 @@ import { Title } from '@mantine/core';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useState } from 'react';
 import stripAnsi from 'strip-ansi';
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Spinner from '@/elements/Spinner';
-import { bytesToString } from '@/lib/size';
-import { useToast } from '@/providers/ToastProvider';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { bytesToString } from '@/lib/size.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface NodeLog {
   name: string;

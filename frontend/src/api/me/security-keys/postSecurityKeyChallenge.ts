@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 type SerializedCredentialResponse = {
   clientDataJSON?: string;

@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 pub struct UserSshKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub fingerprint: String,
 
     pub created: chrono::NaiveDateTime,
@@ -21,14 +21,26 @@ impl BaseModel for UserSshKey {
     const NAME: &'static str = "user_ssh_key";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_ssh_keys.uuid", format!("{prefix}uuid")),
-            ("user_ssh_keys.name", format!("{prefix}name")),
-            ("user_ssh_keys.fingerprint", format!("{prefix}fingerprint")),
-            ("user_ssh_keys.created", format!("{prefix}created")),
+            (
+                "user_ssh_keys.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_ssh_keys.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "user_ssh_keys.fingerprint",
+                compact_str::format_compact!("{prefix}fingerprint"),
+            ),
+            (
+                "user_ssh_keys.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -37,10 +49,11 @@ impl BaseModel for UserSshKey {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            fingerprint: row.try_get(format!("{prefix}fingerprint").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            fingerprint: row
+                .try_get(compact_str::format_compact!("{prefix}fingerprint").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -187,7 +200,7 @@ impl DeletableModel for UserSshKey {
 pub struct ApiUserSshKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub fingerprint: String,
 
     pub created: chrono::DateTime<chrono::Utc>,

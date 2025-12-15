@@ -2,15 +2,15 @@ import { faCodeCommit, faCog, faComputer, faEgg } from '@fortawesome/free-solid-
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getEgg from '@/api/admin/nests/eggs/getEgg';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate';
-import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts';
-import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables';
-import { useToast } from '@/providers/ToastProvider';
-import AdminEggServers from './servers/AdminEggServers';
+import getEgg from '@/api/admin/nests/eggs/getEgg.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import EggCreateOrUpdate from '@/pages/admin/nests/eggs/EggCreateOrUpdate.tsx';
+import AdminEggMounts from '@/pages/admin/nests/eggs/mounts/AdminEggMounts.tsx';
+import AdminEggVariables from '@/pages/admin/nests/eggs/variables/AdminEggVariables.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import AdminEggServers from './servers/AdminEggServers.tsx';
 
 export default function EggView({ contextNest }: { contextNest: AdminNest }) {
   const params = useParams<'eggId'>();

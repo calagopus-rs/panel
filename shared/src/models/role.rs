@@ -11,11 +11,11 @@ use utoipa::ToSchema;
 pub struct Role {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub admin_permissions: Arc<Vec<String>>,
-    pub server_permissions: Arc<Vec<String>>,
+    pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -24,22 +24,28 @@ impl BaseModel for Role {
     const NAME: &'static str = "role";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("roles.uuid", format!("{prefix}uuid")),
-            ("roles.name", format!("{prefix}name")),
-            ("roles.description", format!("{prefix}description")),
+            ("roles.uuid", compact_str::format_compact!("{prefix}uuid")),
+            ("roles.name", compact_str::format_compact!("{prefix}name")),
+            (
+                "roles.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
             (
                 "roles.admin_permissions",
-                format!("{prefix}admin_permissions"),
+                compact_str::format_compact!("{prefix}admin_permissions"),
             ),
             (
                 "roles.server_permissions",
-                format!("{prefix}server_permissions"),
+                compact_str::format_compact!("{prefix}server_permissions"),
             ),
-            ("roles.created", format!("{prefix}created")),
+            (
+                "roles.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -48,16 +54,17 @@ impl BaseModel for Role {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
             admin_permissions: Arc::new(
-                row.try_get(format!("{prefix}admin_permissions").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}admin_permissions").as_str())?,
             ),
             server_permissions: Arc::new(
-                row.try_get(format!("{prefix}server_permissions").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}server_permissions").as_str())?,
             ),
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -67,8 +74,8 @@ impl Role {
         database: &crate::database::Database,
         name: &str,
         description: Option<&str>,
-        admin_permissions: &[String],
-        server_permissions: &[String],
+        admin_permissions: &[compact_str::CompactString],
+        server_permissions: &[compact_str::CompactString],
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
@@ -202,11 +209,11 @@ impl DeletableModel for Role {
 pub struct AdminApiRole {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub admin_permissions: Arc<Vec<String>>,
-    pub server_permissions: Arc<Vec<String>>,
+    pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

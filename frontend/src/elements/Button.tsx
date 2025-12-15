@@ -3,14 +3,16 @@ import classNames from 'classnames';
 import { forwardRef, MouseEvent as ReactMouseEvent } from 'react';
 
 export interface ButtonProps extends Omit<MantineButtonProps, 'onClick'> {
+  type?: 'button' | 'submit' | 'reset';
   onClick?: (event: ReactMouseEvent<HTMLButtonElement, MouseEvent>) => void | Promise<void>;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, onClick, loading, disabled, ...rest }, ref) => {
+  ({ children, className, type, onClick, loading, disabled, ...rest }, ref) => {
     return (
       <MantineButton
         ref={ref}
+        type={type}
         className={classNames(className, loading ? 'cursor-wait!' : null, 'font-normal!')}
         onClick={onClick}
         loading={disabled ? false : loading}

@@ -18,9 +18,9 @@ mod post {
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
+        root: compact_str::CompactString,
 
-        name: String,
+        name: compact_str::CompactString,
     }
 
     #[derive(ToSchema, Serialize)]

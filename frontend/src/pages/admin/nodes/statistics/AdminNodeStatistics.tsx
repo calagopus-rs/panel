@@ -1,11 +1,11 @@
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
-import { axiosInstance, httpErrorToHuman } from '@/api/axios';
-import Card from '@/elements/Card';
-import SemiCircleProgress from '@/elements/SemiCircleProgress';
-import Spinner from '@/elements/Spinner';
-import { bytesToString } from '@/lib/size';
-import { useToast } from '@/providers/ToastProvider';
+import { axiosInstance, httpErrorToHuman } from '@/api/axios.ts';
+import Card from '@/elements/Card.tsx';
+import SemiCircleProgress from '@/elements/SemiCircleProgress.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { bytesToString } from '@/lib/size.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface NodeStatistics {
   cpu: {

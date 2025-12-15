@@ -152,10 +152,10 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
         enabled: Option<bool>,
         login_only: Option<bool>,
         link_viewable: Option<bool>,
@@ -164,10 +164,10 @@ mod patch {
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        client_id: Option<String>,
+        client_id: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        client_secret: Option<String>,
+        client_secret: Option<compact_str::CompactString>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -180,7 +180,7 @@ mod patch {
         info_url: Option<String>,
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        scopes: Option<Vec<String>>,
+        scopes: Option<Vec<compact_str::CompactString>>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
@@ -312,13 +312,13 @@ mod patch {
                 link_viewable = $16, user_manageable = $17
             WHERE oauth_providers.uuid = $1",
             oauth_provider.uuid,
-            oauth_provider.name,
-            oauth_provider.description,
-            oauth_provider.client_id,
+            &oauth_provider.name,
+            oauth_provider.description.as_deref(),
+            &oauth_provider.client_id,
             oauth_provider.client_secret,
             oauth_provider.auth_url,
             oauth_provider.token_url,
-            &oauth_provider.scopes as &[String],
+            &oauth_provider.scopes as &[compact_str::CompactString],
             oauth_provider.identifier_path,
             oauth_provider.email_path,
             oauth_provider.username_path,

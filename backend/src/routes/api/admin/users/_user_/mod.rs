@@ -201,7 +201,7 @@ mod patch {
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        external_id: Option<String>,
+        external_id: Option<compact_str::CompactString>,
 
         #[validate(
             length(min = 3, max = 15),
@@ -209,19 +209,19 @@ mod patch {
         )]
         #[schema(min_length = 3, max_length = 15)]
         #[schema(pattern = "^[a-zA-Z0-9_]+$")]
-        username: Option<String>,
+        username: Option<compact_str::CompactString>,
         #[validate(email)]
         #[schema(format = "email")]
         email: Option<String>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_first: Option<String>,
+        name_first: Option<compact_str::CompactString>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_last: Option<String>,
+        name_last: Option<compact_str::CompactString>,
         #[validate(length(min = 8, max = 512))]
         #[schema(min_length = 8, max_length = 512)]
-        password: Option<String>,
+        password: Option<compact_str::CompactString>,
 
         admin: Option<bool>,
 
@@ -230,7 +230,7 @@ mod patch {
             custom(function = "shared::validate_language")
         )]
         #[schema(min_length = 5, max_length = 15)]
-        language: Option<String>,
+        language: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -290,7 +290,7 @@ mod patch {
             user.username = username;
         }
         if let Some(email) = data.email {
-            user.email = email;
+            user.email = email.into();
         }
         if let Some(name_first) = data.name_first {
             user.name_first = name_first;
@@ -323,13 +323,13 @@ mod patch {
             WHERE users.uuid = $1",
             user.uuid,
             user.role.as_ref().map(|role| role.uuid),
-            user.external_id,
-            user.username,
-            user.email,
-            user.name_first,
-            user.name_last,
+            user.external_id.as_deref(),
+            &user.username,
+            &user.email,
+            &user.name_first,
+            &user.name_last,
             user.admin,
-            user.language,
+            &user.language,
         )
         .execute(state.database.write())
         .await

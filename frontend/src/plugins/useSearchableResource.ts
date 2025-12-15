@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
 import debounce from 'debounce';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { useCallback, useEffect, useState } from 'react';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface UseSearchableResourceOptions<T> {
   fetcher: (search: string) => Promise<ResponseMeta<T>>;

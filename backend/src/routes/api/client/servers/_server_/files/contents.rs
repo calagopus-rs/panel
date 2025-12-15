@@ -16,7 +16,7 @@ mod get {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Params {
-        file: String,
+        file: compact_str::CompactString,
     }
 
     #[utoipa::path(get, path = "/", responses(

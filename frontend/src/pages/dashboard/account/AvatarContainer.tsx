@@ -1,14 +1,14 @@
 import { Grid, Group, Stack, Title } from '@mantine/core';
 import { useRef, useState } from 'react';
 import AvatarEditor from 'react-avatar-editor';
-import { httpErrorToHuman } from '@/api/axios';
-import removeAvatar from '@/api/me/account/removeAvatar';
-import updateAvatar from '@/api/me/account/updateAvatar';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import FileInput from '@/elements/input/FileInput';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/providers/ToastProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import removeAvatar from '@/api/me/account/removeAvatar.ts';
+import updateAvatar from '@/api/me/account/updateAvatar.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import FileInput from '@/elements/input/FileInput.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function AvatarContainer() {
   const { addToast } = useToast();

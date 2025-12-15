@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
-import TagsInput from '@/elements/input/TagsInput';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepDeleteFiles({
   action,

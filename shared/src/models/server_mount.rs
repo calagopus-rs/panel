@@ -19,13 +19,22 @@ impl BaseModel for ServerMount {
     const NAME: &'static str = "server_mount";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("server_mounts.mount_uuid", format!("{prefix}mount_uuid")),
-            ("server_mounts.server_uuid", format!("{prefix}server_uuid")),
-            ("server_mounts.created", format!("{prefix}created")),
+            (
+                "server_mounts.mount_uuid",
+                compact_str::format_compact!("{prefix}mount_uuid"),
+            ),
+            (
+                "server_mounts.server_uuid",
+                compact_str::format_compact!("{prefix}server_uuid"),
+            ),
+            (
+                "server_mounts.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -35,14 +44,14 @@ impl BaseModel for ServerMount {
 
         Ok(Self {
             mount: super::mount::Mount::get_fetchable(
-                row.try_get(format!("{prefix}mount_uuid").as_str())
+                row.try_get(compact_str::format_compact!("{prefix}mount_uuid").as_str())
                     .or_else(|_| row.try_get("alt_mount_uuid"))?,
             ),
             server: super::server::Server::get_fetchable_from_row(
                 row,
-                format!("{prefix}server_uuid"),
+                compact_str::format_compact!("{prefix}server_uuid"),
             ),
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -372,10 +381,10 @@ impl DeletableModel for ServerMount {
 pub struct ApiServerMount {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub target: String,
+    pub target: compact_str::CompactString,
     pub read_only: bool,
 
     pub created: Option<chrono::DateTime<chrono::Utc>>,

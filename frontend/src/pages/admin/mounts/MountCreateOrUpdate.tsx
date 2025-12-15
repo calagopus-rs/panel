@@ -3,17 +3,17 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createMount from '@/api/admin/mounts/createMount';
-import deleteMount from '@/api/admin/mounts/deleteMount';
-import updateMount from '@/api/admin/mounts/updateMount';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Switch from '@/elements/input/Switch';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminMountSchema } from '@/lib/schemas/admin/mounts';
-import { useResourceForm } from '@/plugins/useResourceForm';
+import createMount from '@/api/admin/mounts/createMount.ts';
+import deleteMount from '@/api/admin/mounts/deleteMount.ts';
+import updateMount from '@/api/admin/mounts/updateMount.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminMountSchema } from '@/lib/schemas/admin/mounts.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
 
 export default function MountCreateOrUpdate({ contextMount }: { contextMount?: Mount }) {
   const [openModal, setOpenModal] = useState<'delete' | null>(null);
@@ -66,48 +66,50 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
 
-        <Group grow align='start'>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />
-        </Group>
+          <Group grow align='start'>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />
+          </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='Source' placeholder='Source' {...form.getInputProps('source')} />
-          <TextInput withAsterisk label='Target' placeholder='Target' {...form.getInputProps('target')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Source' placeholder='Source' {...form.getInputProps('source')} />
+            <TextInput withAsterisk label='Target' placeholder='Target' {...form.getInputProps('target')} />
+          </Group>
 
-        <Group grow>
-          <Switch
-            label='Read Only'
-            checked={form.values.readOnly}
-            onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
-          />
-          <Switch
-            label='User Mountable'
-            checked={form.values.userMountable}
-            onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
-          />
-        </Group>
+          <Group grow>
+            <Switch
+              label='Read Only'
+              checked={form.values.readOnly}
+              onChange={(e) => form.setFieldValue('readOnly', e.target.checked)}
+            />
+            <Switch
+              label='User Mountable'
+              checked={form.values.userMountable}
+              onChange={(e) => form.setFieldValue('userMountable', e.target.checked)}
+            />
+          </Group>
 
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextMount && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
             </Button>
-          )}
-          {contextMount && (
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          )}
-        </Group>
-      </Stack>
+            {!contextMount && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextMount && (
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }

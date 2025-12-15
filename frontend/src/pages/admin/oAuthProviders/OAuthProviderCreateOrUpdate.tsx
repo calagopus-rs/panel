@@ -6,23 +6,23 @@ import jsYaml from 'js-yaml';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider';
-import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider';
-import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
-import Switch from '@/elements/input/Switch';
-import TagsInput from '@/elements/input/TagsInput';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useToast } from '@/providers/ToastProvider';
-import { useGlobalStore } from '@/stores/global';
+import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider.ts';
+import deleteOAuthProvider from '@/api/admin/oauth-providers/deleteOAuthProvider.ts';
+import updateOAuthProvider from '@/api/admin/oauth-providers/updateOAuthProvider.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function OAuthProviderCreateOrUpdate({
   contextOAuthProvider,
@@ -157,174 +157,176 @@ export default function OAuthProviderCreateOrUpdate({
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider</Title>
 
-        <Group grow align='start'>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-        </Group>
+          <Group grow align='start'>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+          </Group>
 
-        {contextOAuthProvider && (
-          <Card className='flex flex-row! items-center justify-between'>
-            <Title order={4}>Redirect URL</Title>
-            <Code>
-              {settings.app.url}/api/auth/oauth/{contextOAuthProvider.uuid}
-            </Code>
-          </Card>
-        )}
-
-        <Group grow>
-          <TextInput withAsterisk label='Client Id' placeholder='Client Id' {...form.getInputProps('clientId')} />
-          <TextInput
-            withAsterisk={!contextOAuthProvider}
-            label='Client Secret'
-            placeholder='Client Secret'
-            type='password'
-            {...form.getInputProps('clientSecret')}
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput withAsterisk label='Auth URL' placeholder='Auth URL' {...form.getInputProps('authUrl')} />
-          <TextInput withAsterisk label='Token URL' placeholder='Token URL' {...form.getInputProps('tokenUrl')} />
-        </Group>
-
-        <Group grow>
-          <TextInput withAsterisk label='Info URL' placeholder='Info URL' {...form.getInputProps('infoUrl')} />
-          <Switch
-            label='Basic Auth'
-            description='Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'
-            checked={form.values.basicAuth}
-            onChange={(e) => form.setFieldValue('basicAuth', e.target.checked)}
-          />
-        </Group>
-
-        <Group grow>
-          <TagsInput
-            label='Scopes'
-            description='The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'
-            {...form.getInputProps('scopes')}
-          />
-          <TextInput
-            withAsterisk
-            label='Identifier Path'
-            placeholder='Identifier Path'
-            description='The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
-            {...form.getInputProps('identifierPath')}
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput
-            label='Email Path'
-            placeholder='Email Path'
-            description='The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'
-            {...form.getInputProps('emailPath')}
-          />
-          <TextInput
-            withAsterisk
-            label='Username Path'
-            placeholder='Username Path'
-            description='The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
-            {...form.getInputProps('usernamePath')}
-          />
-        </Group>
-
-        <Group grow>
-          <TextInput
-            label='First Name Path'
-            placeholder='First Name URL'
-            description='The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
-            {...form.getInputProps('nameFirstPath')}
-          />
-          <TextInput
-            label='Last Name Path'
-            placeholder='Last Name Path'
-            description='The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
-            {...form.getInputProps('nameLastPath')}
-          />
-        </Group>
-
-        <Group grow>
-          <Switch
-            label='Enabled'
-            checked={form.values.enabled}
-            onChange={(e) => form.setFieldValue('enabled', e.target.checked)}
-          />
-          <Switch
-            label='Only allow Login'
-            checked={form.values.loginOnly}
-            onChange={(e) => form.setFieldValue('loginOnly', e.target.checked)}
-          />
-        </Group>
-
-        <Group grow>
-          <Switch
-            label='Link Viewable to User'
-            description='Allows the User to see the Connection and its identifier in the Client UI'
-            checked={form.values.linkViewable}
-            onChange={(e) => form.setFieldValue('linkViewable', e.target.checked)}
-          />
-          <Switch
-            label='Link Manageable by User'
-            description='Allows the User to connect and disconnect with this provider'
-            checked={form.values.userManageable}
-            onChange={(e) => form.setFieldValue('userManageable', e.target.checked)}
-          />
-        </Group>
-
-        <Group>
-          <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          {!contextOAuthProvider && (
-            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-              Save & Stay
-            </Button>
-          )}
           {contextOAuthProvider && (
-            <>
-              <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
-                <ContextMenu
-                  items={[
-                    {
-                      icon: faFileDownload,
-                      label: 'as JSON',
-                      onClick: () => doExport('json'),
-                      color: 'gray',
-                    },
-                    {
-                      icon: faFileDownload,
-                      label: 'as YAML',
-                      onClick: () => doExport('yaml'),
-                      color: 'gray',
-                    },
-                  ]}
-                >
-                  {({ openMenu }) => (
-                    <Button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const rect = e.currentTarget.getBoundingClientRect();
-                        openMenu(rect.left, rect.bottom);
-                      }}
-                      loading={loading}
-                      variant='outline'
-                      rightSection={<FontAwesomeIcon icon={faChevronDown} />}
-                    >
-                      Export
-                    </Button>
-                  )}
-                </ContextMenu>
-              </ContextMenuProvider>
-              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-                Delete
-              </Button>
-            </>
+            <Card className='flex flex-row! items-center justify-between'>
+              <Title order={4}>Redirect URL</Title>
+              <Code>
+                {settings.app.url}/api/auth/oauth/{contextOAuthProvider.uuid}
+              </Code>
+            </Card>
           )}
-        </Group>
-      </Stack>
+
+          <Group grow>
+            <TextInput withAsterisk label='Client Id' placeholder='Client Id' {...form.getInputProps('clientId')} />
+            <TextInput
+              withAsterisk={!contextOAuthProvider}
+              label='Client Secret'
+              placeholder='Client Secret'
+              type='password'
+              {...form.getInputProps('clientSecret')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput withAsterisk label='Auth URL' placeholder='Auth URL' {...form.getInputProps('authUrl')} />
+            <TextInput withAsterisk label='Token URL' placeholder='Token URL' {...form.getInputProps('tokenUrl')} />
+          </Group>
+
+          <Group grow>
+            <TextInput withAsterisk label='Info URL' placeholder='Info URL' {...form.getInputProps('infoUrl')} />
+            <Switch
+              label='Basic Auth'
+              description='Uses HTTP Basic Authentication to transmit client id and secret, not common anymore'
+              checked={form.values.basicAuth}
+              onChange={(e) => form.setFieldValue('basicAuth', e.target.checked)}
+            />
+          </Group>
+
+          <Group grow>
+            <TagsInput
+              label='Scopes'
+              description='The OAuth2 Scopes to request, make sure to include scopes for email/profile info when needed'
+              {...form.getInputProps('scopes')}
+            />
+            <TextInput
+              withAsterisk
+              label='Identifier Path'
+              placeholder='Identifier Path'
+              description='The Path to use to extract the unique user identifier from the Info URL response (https://serdejsonpath.live)'
+              {...form.getInputProps('identifierPath')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput
+              label='Email Path'
+              placeholder='Email Path'
+              description='The Path to use to extract the email from the Info URL response (https://serdejsonpath.live)'
+              {...form.getInputProps('emailPath')}
+            />
+            <TextInput
+              withAsterisk
+              label='Username Path'
+              placeholder='Username Path'
+              description='The Path to use to extract the username from the Info URL response (https://serdejsonpath.live)'
+              {...form.getInputProps('usernamePath')}
+            />
+          </Group>
+
+          <Group grow>
+            <TextInput
+              label='First Name Path'
+              placeholder='First Name URL'
+              description='The Path to use to extract the first name from the Info URL response (https://serdejsonpath.live)'
+              {...form.getInputProps('nameFirstPath')}
+            />
+            <TextInput
+              label='Last Name Path'
+              placeholder='Last Name Path'
+              description='The Path to use to extract the last name from the Info URL response (https://serdejsonpath.live)'
+              {...form.getInputProps('nameLastPath')}
+            />
+          </Group>
+
+          <Group grow>
+            <Switch
+              label='Enabled'
+              checked={form.values.enabled}
+              onChange={(e) => form.setFieldValue('enabled', e.target.checked)}
+            />
+            <Switch
+              label='Only allow Login'
+              checked={form.values.loginOnly}
+              onChange={(e) => form.setFieldValue('loginOnly', e.target.checked)}
+            />
+          </Group>
+
+          <Group grow>
+            <Switch
+              label='Link Viewable to User'
+              description='Allows the User to see the Connection and its identifier in the Client UI'
+              checked={form.values.linkViewable}
+              onChange={(e) => form.setFieldValue('linkViewable', e.target.checked)}
+            />
+            <Switch
+              label='Link Manageable by User'
+              description='Allows the User to connect and disconnect with this provider'
+              checked={form.values.userManageable}
+              onChange={(e) => form.setFieldValue('userManageable', e.target.checked)}
+            />
+          </Group>
+
+          <Group>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
+            </Button>
+            {!contextOAuthProvider && (
+              <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+                Save & Stay
+              </Button>
+            )}
+            {contextOAuthProvider && (
+              <>
+                <ContextMenuProvider menuProps={{ position: 'top', offset: 40 }}>
+                  <ContextMenu
+                    items={[
+                      {
+                        icon: faFileDownload,
+                        label: 'as JSON',
+                        onClick: () => doExport('json'),
+                        color: 'gray',
+                      },
+                      {
+                        icon: faFileDownload,
+                        label: 'as YAML',
+                        onClick: () => doExport('yaml'),
+                        color: 'gray',
+                      },
+                    ]}
+                  >
+                    {({ openMenu }) => (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          openMenu(rect.left, rect.bottom);
+                        }}
+                        loading={loading}
+                        variant='outline'
+                        rightSection={<FontAwesomeIcon icon={faChevronDown} />}
+                      >
+                        Export
+                      </Button>
+                    )}
+                  </ContextMenu>
+                </ContextMenuProvider>
+                <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                  Delete
+                </Button>
+              </>
+            )}
+          </Group>
+        </Stack>
+      </form>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { Stack } from '@mantine/core';
-import ScheduleConditionBuilder from '../ScheduleConditionBuilder';
+import ScheduleConditionBuilder from '../ScheduleConditionBuilder.tsx';
 
 export default function StepEnsure({
   action,

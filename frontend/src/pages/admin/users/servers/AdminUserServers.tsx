@@ -1,13 +1,13 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getUserServers from '@/api/admin/users/servers/getUserServers';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { serverTableColumns } from '@/lib/tableColumns';
-import ServerRow from '@/pages/admin/servers/ServerRow';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import TextInput from '@/elements/input/TextInput';
-import Switch from '@/elements/input/Switch';
+import getUserServers from '@/api/admin/users/servers/getUserServers.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { serverTableColumns } from '@/lib/tableColumns.ts';
+import ServerRow from '@/pages/admin/servers/ServerRow.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 
 export default function AdminUserServers({ user }: { user: User }) {
   const [showOwnedUserServers, setShowOwnedUserServers] = useState(false);

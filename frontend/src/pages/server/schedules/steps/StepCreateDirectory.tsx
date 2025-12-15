@@ -1,6 +1,6 @@
 import { Stack } from '@mantine/core';
-import Switch from '@/elements/input/Switch';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import Switch from '@/elements/input/Switch.tsx';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepCreateDirectory({
   action,

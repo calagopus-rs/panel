@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { nodeTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import NodeRow from '../../nodes/NodeRow';
-import TextInput from '@/elements/input/TextInput';
+import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { nodeTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import NodeRow from '../../nodes/NodeRow.tsx';
 
 export default function AdminMountNodes({ mount }: { mount: Mount }) {
   const [mountNodes, setMountNodes] = useState<ResponseMeta<AndCreated<{ node: Node }>>>(getEmptyPaginationSet());

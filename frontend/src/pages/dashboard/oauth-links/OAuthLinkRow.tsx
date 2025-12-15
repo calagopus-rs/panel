@@ -1,15 +1,15 @@
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteOAuthLink from '@/api/me/oauth-links/deleteOAuthLink';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteOAuthLink from '@/api/me/oauth-links/deleteOAuthLink.ts';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
 
 export default function OAuthLinkRow({ oauthLink }: { oauthLink: UserOAuthLink }) {
   const { addToast } = useToast();

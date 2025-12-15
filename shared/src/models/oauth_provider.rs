@@ -12,15 +12,15 @@ use utoipa::ToSchema;
 pub struct OAuthProvider {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub client_id: String,
+    pub client_id: compact_str::CompactString,
     pub client_secret: Vec<u8>,
     pub auth_url: String,
     pub token_url: String,
     pub info_url: String,
-    pub scopes: Vec<String>,
+    pub scopes: Vec<compact_str::CompactString>,
 
     pub identifier_path: String,
     pub email_path: Option<String>,
@@ -41,54 +41,90 @@ impl BaseModel for OAuthProvider {
     const NAME: &'static str = "oauth_provider";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("oauth_providers.uuid", format!("{prefix}uuid")),
-            ("oauth_providers.name", format!("{prefix}name")),
+            (
+                "oauth_providers.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "oauth_providers.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
             (
                 "oauth_providers.description",
-                format!("{prefix}description"),
+                compact_str::format_compact!("{prefix}description"),
             ),
-            ("oauth_providers.client_id", format!("{prefix}client_id")),
+            (
+                "oauth_providers.client_id",
+                compact_str::format_compact!("{prefix}client_id"),
+            ),
             (
                 "oauth_providers.client_secret",
-                format!("{prefix}client_secret"),
+                compact_str::format_compact!("{prefix}client_secret"),
             ),
-            ("oauth_providers.auth_url", format!("{prefix}auth_url")),
-            ("oauth_providers.token_url", format!("{prefix}token_url")),
-            ("oauth_providers.info_url", format!("{prefix}info_url")),
-            ("oauth_providers.scopes", format!("{prefix}scopes")),
+            (
+                "oauth_providers.auth_url",
+                compact_str::format_compact!("{prefix}auth_url"),
+            ),
+            (
+                "oauth_providers.token_url",
+                compact_str::format_compact!("{prefix}token_url"),
+            ),
+            (
+                "oauth_providers.info_url",
+                compact_str::format_compact!("{prefix}info_url"),
+            ),
+            (
+                "oauth_providers.scopes",
+                compact_str::format_compact!("{prefix}scopes"),
+            ),
             (
                 "oauth_providers.identifier_path",
-                format!("{prefix}identifier_path"),
+                compact_str::format_compact!("{prefix}identifier_path"),
             ),
-            ("oauth_providers.email_path", format!("{prefix}email_path")),
+            (
+                "oauth_providers.email_path",
+                compact_str::format_compact!("{prefix}email_path"),
+            ),
             (
                 "oauth_providers.username_path",
-                format!("{prefix}username_path"),
+                compact_str::format_compact!("{prefix}username_path"),
             ),
             (
                 "oauth_providers.name_first_path",
-                format!("{prefix}name_first_path"),
+                compact_str::format_compact!("{prefix}name_first_path"),
             ),
             (
                 "oauth_providers.name_last_path",
-                format!("{prefix}name_last_path"),
+                compact_str::format_compact!("{prefix}name_last_path"),
             ),
-            ("oauth_providers.enabled", format!("{prefix}enabled")),
-            ("oauth_providers.login_only", format!("{prefix}login_only")),
+            (
+                "oauth_providers.enabled",
+                compact_str::format_compact!("{prefix}enabled"),
+            ),
+            (
+                "oauth_providers.login_only",
+                compact_str::format_compact!("{prefix}login_only"),
+            ),
             (
                 "oauth_providers.link_viewable",
-                format!("{prefix}link_viewable"),
+                compact_str::format_compact!("{prefix}link_viewable"),
             ),
             (
                 "oauth_providers.user_manageable",
-                format!("{prefix}user_manageable"),
+                compact_str::format_compact!("{prefix}user_manageable"),
             ),
-            ("oauth_providers.basic_auth", format!("{prefix}basic_auth")),
-            ("oauth_providers.created", format!("{prefix}created")),
+            (
+                "oauth_providers.basic_auth",
+                compact_str::format_compact!("{prefix}basic_auth"),
+            ),
+            (
+                "oauth_providers.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -97,26 +133,34 @@ impl BaseModel for OAuthProvider {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            client_id: row.try_get(format!("{prefix}client_id").as_str())?,
-            client_secret: row.try_get(format!("{prefix}client_secret").as_str())?,
-            auth_url: row.try_get(format!("{prefix}auth_url").as_str())?,
-            token_url: row.try_get(format!("{prefix}token_url").as_str())?,
-            info_url: row.try_get(format!("{prefix}info_url").as_str())?,
-            scopes: row.try_get(format!("{prefix}scopes").as_str())?,
-            identifier_path: row.try_get(format!("{prefix}identifier_path").as_str())?,
-            email_path: row.try_get(format!("{prefix}email_path").as_str())?,
-            username_path: row.try_get(format!("{prefix}username_path").as_str())?,
-            name_first_path: row.try_get(format!("{prefix}name_first_path").as_str())?,
-            name_last_path: row.try_get(format!("{prefix}name_last_path").as_str())?,
-            enabled: row.try_get(format!("{prefix}enabled").as_str())?,
-            login_only: row.try_get(format!("{prefix}login_only").as_str())?,
-            link_viewable: row.try_get(format!("{prefix}link_viewable").as_str())?,
-            user_manageable: row.try_get(format!("{prefix}user_manageable").as_str())?,
-            basic_auth: row.try_get(format!("{prefix}basic_auth").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            client_id: row.try_get(compact_str::format_compact!("{prefix}client_id").as_str())?,
+            client_secret: row
+                .try_get(compact_str::format_compact!("{prefix}client_secret").as_str())?,
+            auth_url: row.try_get(compact_str::format_compact!("{prefix}auth_url").as_str())?,
+            token_url: row.try_get(compact_str::format_compact!("{prefix}token_url").as_str())?,
+            info_url: row.try_get(compact_str::format_compact!("{prefix}info_url").as_str())?,
+            scopes: row.try_get(compact_str::format_compact!("{prefix}scopes").as_str())?,
+            identifier_path: row
+                .try_get(compact_str::format_compact!("{prefix}identifier_path").as_str())?,
+            email_path: row.try_get(compact_str::format_compact!("{prefix}email_path").as_str())?,
+            username_path: row
+                .try_get(compact_str::format_compact!("{prefix}username_path").as_str())?,
+            name_first_path: row
+                .try_get(compact_str::format_compact!("{prefix}name_first_path").as_str())?,
+            name_last_path: row
+                .try_get(compact_str::format_compact!("{prefix}name_last_path").as_str())?,
+            enabled: row.try_get(compact_str::format_compact!("{prefix}enabled").as_str())?,
+            login_only: row.try_get(compact_str::format_compact!("{prefix}login_only").as_str())?,
+            link_viewable: row
+                .try_get(compact_str::format_compact!("{prefix}link_viewable").as_str())?,
+            user_manageable: row
+                .try_get(compact_str::format_compact!("{prefix}user_manageable").as_str())?,
+            basic_auth: row.try_get(compact_str::format_compact!("{prefix}basic_auth").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -132,7 +176,7 @@ impl OAuthProvider {
         auth_url: &str,
         token_url: &str,
         info_url: &str,
-        scopes: &[String],
+        scopes: &[compact_str::CompactString],
         identifier_path: &str,
         email_path: Option<&str>,
         username_path: Option<&str>,
@@ -434,15 +478,15 @@ impl DeletableModel for OAuthProvider {
 pub struct AdminApiOAuthProvider {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub client_id: String,
-    pub client_secret: String,
+    pub client_id: compact_str::CompactString,
+    pub client_secret: compact_str::CompactString,
     pub auth_url: String,
     pub token_url: String,
     pub info_url: String,
-    pub scopes: Vec<String>,
+    pub scopes: Vec<compact_str::CompactString>,
 
     pub identifier_path: String,
     pub email_path: Option<String>,
@@ -464,7 +508,7 @@ pub struct AdminApiOAuthProvider {
 pub struct ApiOAuthProvider {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
 
     pub link_viewable: bool,
     pub user_manageable: bool,

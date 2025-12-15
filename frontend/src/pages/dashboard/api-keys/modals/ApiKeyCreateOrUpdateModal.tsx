@@ -3,18 +3,18 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import getPermissions from '@/api/getPermissions';
-import createApiKey from '@/api/me/api-keys/createApiKey';
-import updateApiKey from '@/api/me/api-keys/updateApiKey';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import PermissionSelector from '@/elements/PermissionSelector';
-import { useAuth } from '@/providers/AuthProvider';
-import { useToast } from '@/providers/ToastProvider';
-import { useGlobalStore } from '@/stores/global';
-import { useUserStore } from '@/stores/user';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import getPermissions from '@/api/getPermissions.ts';
+import createApiKey from '@/api/me/api-keys/createApiKey.ts';
+import updateApiKey from '@/api/me/api-keys/updateApiKey.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import PermissionSelector from '@/elements/PermissionSelector.tsx';
+import { useAuth } from '@/providers/AuthProvider.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
+import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
   name: z.string().min(3).max(31),

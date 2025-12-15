@@ -3,10 +3,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Alert, Divider, Stack, Text, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import getOAuthProviders from '@/api/auth/getOAuthProviders';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import AuthWrapper from '../AuthWrapper';
+import getOAuthProviders from '@/api/auth/getOAuthProviders.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import AuthWrapper from '../AuthWrapper.tsx';
 
 export default function LoginOAuth() {
   const navigate = useNavigate();

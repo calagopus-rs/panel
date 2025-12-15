@@ -2,21 +2,21 @@ import { faPencil, faStar, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Stack } from '@mantine/core';
 import { useState } from 'react';
-import deleteServerAllocation from '@/api/admin/servers/allocations/deleteServerAllocation';
-import updateServerAllocation from '@/api/admin/servers/allocations/updateServerAllocation';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Modal from '@/elements/modals/Modal';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatAllocation } from '@/lib/server';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import deleteServerAllocation from '@/api/admin/servers/allocations/deleteServerAllocation.ts';
+import updateServerAllocation from '@/api/admin/servers/allocations/updateServerAllocation.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatAllocation } from '@/lib/server.ts';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function ServerAllocationRow({
   server,

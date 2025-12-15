@@ -2,16 +2,16 @@ import { faChartBar, faCog, faDesktop, faEarthAmerica, faServer } from '@fortawe
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getBackupConfiguration from '@/api/admin/backup-configurations/getBackupConfiguration';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import AdminBackupConfigurationLocations from '@/pages/admin/backupConfigurations/locations/AdminBackupConfigurationLocations';
-import AdminBackupConfigurationNodes from '@/pages/admin/backupConfigurations/nodes/AdminBackupConfigurationNodes';
-import AdminBackupConfigurationServers from '@/pages/admin/backupConfigurations/servers/AdminBackupConfigurationServers';
-import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats';
-import { useToast } from '@/providers/ToastProvider';
-import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate';
+import getBackupConfiguration from '@/api/admin/backup-configurations/getBackupConfiguration.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import AdminBackupConfigurationLocations from '@/pages/admin/backupConfigurations/locations/AdminBackupConfigurationLocations.tsx';
+import AdminBackupConfigurationNodes from '@/pages/admin/backupConfigurations/nodes/AdminBackupConfigurationNodes.tsx';
+import AdminBackupConfigurationServers from '@/pages/admin/backupConfigurations/servers/AdminBackupConfigurationServers.tsx';
+import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate.tsx';
 
 export default function BackupConfigurationView() {
   const params = useParams<'id'>();

@@ -1,6 +1,6 @@
-import { useGlobalStore } from '@/stores/global';
 import { ReactNode, useRef } from 'react';
-import Tooltip from './Tooltip';
+import { useGlobalStore } from '@/stores/global.ts';
+import Tooltip from './Tooltip.tsx';
 
 interface LayoutProps {
   children: ReactNode;

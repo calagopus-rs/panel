@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getRoles from '@/api/admin/roles/getRoles';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { roleTableColumns } from '@/lib/tableColumns';
-import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
-import RoleRow from '@/pages/admin/roles/RoleRow';
-import RoleView from '@/pages/admin/roles/RoleView';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
+import getRoles from '@/api/admin/roles/getRoles.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { roleTableColumns } from '@/lib/tableColumns.ts';
+import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate.tsx';
+import RoleRow from '@/pages/admin/roles/RoleRow.tsx';
+import RoleView from '@/pages/admin/roles/RoleView.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 function RolesContainer() {
   const navigate = useNavigate();

@@ -2,13 +2,13 @@ import { faCog, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getRole from '@/api/admin/roles/getRole';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate';
-import AdminRoleUsers from '@/pages/admin/roles/users/AdminRoleUsers';
-import { useToast } from '@/providers/ToastProvider';
+import getRole from '@/api/admin/roles/getRole.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import RoleCreateOrUpdate from '@/pages/admin/roles/RoleCreateOrUpdate.tsx';
+import AdminRoleUsers from '@/pages/admin/roles/users/AdminRoleUsers.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function RoleView() {
   const params = useParams<'id'>();

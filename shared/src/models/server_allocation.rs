@@ -21,13 +21,22 @@ impl BaseModel for ServerAllocation {
     const NAME: &'static str = "server_allocation";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("server_allocations.uuid", format!("{prefix}uuid")),
-            ("server_allocations.notes", format!("{prefix}notes")),
-            ("server_allocations.created", format!("{prefix}created")),
+            (
+                "server_allocations.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "server_allocations.notes",
+                compact_str::format_compact!("{prefix}notes"),
+            ),
+            (
+                "server_allocations.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::node_allocation::NodeAllocation::columns(Some(
@@ -42,10 +51,10 @@ impl BaseModel for ServerAllocation {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             allocation: super::node_allocation::NodeAllocation::map(Some("allocation_"), row)?,
-            notes: row.try_get(format!("{prefix}notes").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            notes: row.try_get(compact_str::format_compact!("{prefix}notes").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -205,7 +214,7 @@ impl ServerAllocation {
     pub fn into_api_object(self, primary: Option<uuid::Uuid>) -> ApiServerAllocation {
         ApiServerAllocation {
             uuid: self.uuid,
-            ip: self.allocation.ip.ip().to_string(),
+            ip: compact_str::format_compact!("{}", self.allocation.ip.ip()),
             ip_alias: self.allocation.ip_alias,
             port: self.allocation.port,
             notes: self.notes,
@@ -257,8 +266,8 @@ impl DeletableModel for ServerAllocation {
 pub struct ApiServerAllocation {
     pub uuid: uuid::Uuid,
 
-    pub ip: String,
-    pub ip_alias: Option<String>,
+    pub ip: compact_str::CompactString,
+    pub ip_alias: Option<compact_str::CompactString>,
     pub port: i32,
 
     pub notes: Option<String>,

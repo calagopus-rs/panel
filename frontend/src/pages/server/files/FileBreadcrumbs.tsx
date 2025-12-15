@@ -1,11 +1,11 @@
-import { createSearchParams, NavLink } from 'react-router';
-import Checkbox from '@/elements/input/Checkbox';
-import { useServerStore } from '@/stores/server';
+import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breadcrumbs } from '@mantine/core';
 import { ReactNode, useMemo } from 'react';
-import Button from '@/elements/Button';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import { createSearchParams, NavLink } from 'react-router';
+import Button from '@/elements/Button.tsx';
+import Checkbox from '@/elements/input/Checkbox.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function FileBreadcrumbs({
   path,

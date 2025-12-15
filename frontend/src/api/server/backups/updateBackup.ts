@@ -1,12 +1,13 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { z } from 'zod';
+import { axiosInstance } from '@/api/axios.ts';
+import { serverBackupEditSchema } from '@/lib/schemas/server/backups.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
-interface Data {
-  name: string;
-  locked: boolean;
-}
-
-export default async (uuid: string, backupUuid: string, data: Data): Promise<void> => {
+export default async (
+  uuid: string,
+  backupUuid: string,
+  data: z.infer<typeof serverBackupEditSchema>,
+): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .patch(`/api/client/servers/${uuid}/backups/${backupUuid}`, transformKeysToSnakeCase(data))

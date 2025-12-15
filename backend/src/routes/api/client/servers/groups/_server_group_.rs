@@ -107,7 +107,7 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 2, max = 31))]
         #[schema(min_length = 2, max_length = 31)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 512))]
         #[schema(max_length = 512)]
         server_order: Option<Vec<uuid::Uuid>>,
@@ -165,7 +165,7 @@ mod patch {
             SET name = $2, server_order = $3
             WHERE user_server_groups.uuid = $1",
             server_group.uuid,
-            server_group.name,
+            &server_group.name,
             &server_group.server_order
         )
         .execute(state.database.write())

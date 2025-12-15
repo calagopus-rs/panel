@@ -1,5 +1,5 @@
-import Badge from '@/elements/Badge';
-import Code from '@/elements/Code';
+import Badge from '@/elements/Badge.tsx';
+import Code from '@/elements/Code.tsx';
 
 interface ScheduleDynamicParameterRendererProps {
   value: ScheduleDynamicParameter | null;

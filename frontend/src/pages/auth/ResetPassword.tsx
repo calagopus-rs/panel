@@ -6,14 +6,14 @@ import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { z } from 'zod';
-import resetPassword from '@/api/auth/resetPassword';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import PasswordInput from '@/elements/input/PasswordInput';
-import { useToast } from '@/providers/ToastProvider';
-import AuthWrapper from './AuthWrapper';
-import { authResetPasswordSchema } from '@/lib/schemas/auth';
+import resetPassword from '@/api/auth/resetPassword.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import PasswordInput from '@/elements/input/PasswordInput.tsx';
+import { authResetPasswordSchema } from '@/lib/schemas/auth.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import AuthWrapper from './AuthWrapper.tsx';
 
 export default function ResetPassword() {
   const { addToast } = useToast();

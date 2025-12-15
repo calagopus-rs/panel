@@ -12,14 +12,14 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover, ThemeIcon } from '@mantine/core';
 import { ReactNode, useEffect, useRef, useState } from 'react';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import CopyOnClick from '@/elements/CopyOnClick';
-import Checkbox from '@/elements/input/Checkbox';
-import { formatAllocation } from '@/lib/server';
-import { bytesToString, mbToBytes } from '@/lib/size';
-import { formatMiliseconds } from '@/lib/time';
-import { useServerStore } from '@/stores/server';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import CopyOnClick from '@/elements/CopyOnClick.tsx';
+import Checkbox from '@/elements/input/Checkbox.tsx';
+import { formatAllocation } from '@/lib/server.ts';
+import { bytesToString, mbToBytes } from '@/lib/size.ts';
+import { formatMiliseconds } from '@/lib/time.ts';
+import { useServerStore } from '@/stores/server.ts';
 
 function StatCard({
   icon,

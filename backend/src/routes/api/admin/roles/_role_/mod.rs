@@ -147,15 +147,15 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
-        admin_permissions: Option<Vec<String>>,
+        admin_permissions: Option<Vec<compact_str::CompactString>>,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
-        server_permissions: Option<Vec<String>>,
+        server_permissions: Option<Vec<compact_str::CompactString>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -210,10 +210,10 @@ mod patch {
             SET name = $2, description = $3, admin_permissions = $4, server_permissions = $5
             WHERE roles.uuid = $1",
             role.uuid,
-            role.name,
-            role.description,
-            &*role.admin_permissions,
-            &*role.server_permissions
+            &role.name,
+            role.description.as_deref(),
+            &*role.admin_permissions as &[compact_str::CompactString],
+            &*role.server_permissions as &[compact_str::CompactString]
         )
         .execute(state.database.write())
         .await

@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getMountServers from '@/api/admin/mounts/servers/getMountServers';
-import { getEmptyPaginationSet } from '@/api/axios';
-import Table from '@/elements/Table';
-import { serverTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import ServerRow from '../../servers/ServerRow';
-import TextInput from '@/elements/input/TextInput';
+import getMountServers from '@/api/admin/mounts/servers/getMountServers.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { serverTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import ServerRow from '../../servers/ServerRow.tsx';
 
 export default function AdminMountServers({ mount }: { mount: Mount }) {
   const [mountServers, setMountServers] = useState<ResponseMeta<AndCreated<{ server: AdminServer }>>>(

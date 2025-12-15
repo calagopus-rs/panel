@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getNests from '@/api/admin/nests/getNests';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { nestTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import NestCreateOrUpdate from './NestCreateOrUpdate';
-import NestRow from './NestRow';
-import NestView from './NestView';
+import getNests from '@/api/admin/nests/getNests.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { nestTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import NestCreateOrUpdate from './NestCreateOrUpdate.tsx';
+import NestRow from './NestRow.tsx';
+import NestView from './NestView.tsx';
 
 function NestsContainer() {
   const navigate = useNavigate();

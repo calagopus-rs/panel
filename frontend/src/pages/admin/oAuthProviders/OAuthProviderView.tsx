@@ -2,13 +2,13 @@ import { faCog, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import getOAuthProvider from '@/api/admin/oauth-providers/getOAuthProvider';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import AdminOAuthProviderUsers from '@/pages/admin/oAuthProviders/users/AdminOAuthProviderUsers';
-import { useToast } from '@/providers/ToastProvider';
-import OAuthProviderCreateOrUpdate from './OAuthProviderCreateOrUpdate';
+import getOAuthProvider from '@/api/admin/oauth-providers/getOAuthProvider.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import AdminOAuthProviderUsers from '@/pages/admin/oAuthProviders/users/AdminOAuthProviderUsers.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import OAuthProviderCreateOrUpdate from './OAuthProviderCreateOrUpdate.tsx';
 
 export default function OAuthProviderView() {
   const params = useParams<'id'>();

@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (page: number, search?: string): Promise<ResponseMeta<Role>> => {
   return new Promise((resolve, reject) => {

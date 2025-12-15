@@ -26,7 +26,7 @@ mod get {
             default,
             deserialize_with = "shared::deserialize::deserialize_string_option"
         )]
-        pub search: Option<String>,
+        pub search: Option<compact_str::CompactString>,
 
         #[serde(default)]
         owned: bool,

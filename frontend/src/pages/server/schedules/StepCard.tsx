@@ -2,17 +2,17 @@ import { faGear, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Stack, Text, ThemeIcon } from '@mantine/core';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteScheduleStep from '@/api/server/schedules/steps/deleteScheduleStep';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { scheduleStepIconMapping, scheduleStepLabelMapping } from '@/lib/enums';
-import { formatMiliseconds } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
-import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal';
-import ScheduleDynamicParameterRenderer from './ScheduleDynamicParameterRenderer';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteScheduleStep from '@/api/server/schedules/steps/deleteScheduleStep.ts';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { scheduleStepIconMapping, scheduleStepLabelMapping } from '@/lib/enums.ts';
+import { formatMiliseconds } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import StepCreateOrUpdateModal from './modals/StepCreateOrUpdateModal.tsx';
+import ScheduleDynamicParameterRenderer from './ScheduleDynamicParameterRenderer.tsx';
 
 interface Props {
   schedule: ServerSchedule;

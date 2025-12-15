@@ -2,12 +2,12 @@ import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import getBackupConfigurationStats, {
   type BackupStats,
-} from '@/api/admin/backup-configurations/getBackupConfigurationStats';
-import { httpErrorToHuman } from '@/api/axios';
-import Card from '@/elements/Card';
-import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { bytesToString } from '@/lib/size';
+} from '@/api/admin/backup-configurations/getBackupConfigurationStats.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Card from '@/elements/Card.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { bytesToString } from '@/lib/size.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function AdminBackupConfigurationStats({
   backupConfiguration,

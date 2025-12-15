@@ -1,10 +1,10 @@
 import { Stack, Title } from '@mantine/core';
 import hljs from 'highlight.js/lib/core';
 import yaml from 'highlight.js/lib/languages/yaml';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import NumberInput from '@/elements/input/NumberInput';
-import TextInput from '@/elements/input/TextInput';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import 'highlight.js/styles/a11y-dark.min.css';
 import jsYaml from 'js-yaml';
 import { useState } from 'react';

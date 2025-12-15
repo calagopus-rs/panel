@@ -1,17 +1,12 @@
-import { axiosInstance } from '@/api/axios';
+import { z } from 'zod';
+import { axiosInstance } from '@/api/axios.ts';
+import { serverSettingsRenameSchema } from '@/lib/schemas/server/settings.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
-interface Data {
-  name: string;
-  description: string;
-}
-
-export default async (uuid: string, data: Data): Promise<void> => {
+export default async (uuid: string, data: z.infer<typeof serverSettingsRenameSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .post(`/api/client/servers/${uuid}/settings/rename`, {
-        name: data.name,
-        description: data.description,
-      })
+      .post(`/api/client/servers/${uuid}/settings/rename`, transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

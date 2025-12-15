@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import { httpErrorToHuman } from '@/api/axios';
-import createSecurityKey from '@/api/me/security-keys/createSecurityKey';
-import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey';
-import postSecurityKeyChallenge from '@/api/me/security-keys/postSecurityKeyChallenge';
-import Button from '@/elements/Button';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import createSecurityKey from '@/api/me/security-keys/createSecurityKey.ts';
+import deleteSecurityKey from '@/api/me/security-keys/deleteSecurityKey.ts';
+import postSecurityKeyChallenge from '@/api/me/security-keys/postSecurityKeyChallenge.ts';
+import Button from '@/elements/Button.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
 
 const schema = z.object({
   name: z.string().min(3).max(31),

@@ -11,3 +11,4 @@ reqwest = { workspace = true }
 chrono = { workspace = true }
 uuid = { workspace = true }
 regex = { workspace = true }
+compact_str = { workspace = true }

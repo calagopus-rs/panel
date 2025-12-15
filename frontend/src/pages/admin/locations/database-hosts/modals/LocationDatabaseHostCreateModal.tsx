@@ -1,15 +1,15 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
 import { useState } from 'react';
-import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts';
-import createLocationDatabaseHost from '@/api/admin/locations/database-hosts/createLocationDatabaseHost';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import Modal from '@/elements/modals/Modal';
-import { databaseTypeLabelMapping } from '@/lib/enums';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts.ts';
+import createLocationDatabaseHost from '@/api/admin/locations/database-hosts/createLocationDatabaseHost.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { databaseTypeLabelMapping } from '@/lib/enums.ts';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function LocationDatabaseHostCreateModal({
   location,

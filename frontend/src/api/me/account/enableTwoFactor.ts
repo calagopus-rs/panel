@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 import { dashboardTwoFactorEnableSchema } from '@/lib/schemas/dashboard.ts';
 
 interface Response {

@@ -2,22 +2,22 @@ import { Group, Stack, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useEffect, useState } from 'react';
 import { NIL as uuidNil } from 'uuid';
-import getRoles from '@/api/admin/roles/getRoles';
-import createUser from '@/api/admin/users/createUser';
-import deleteUser from '@/api/admin/users/deleteUser';
-import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor';
-import updateUser from '@/api/admin/users/updateUser';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useSearchableResource } from '@/plugins/useSearchableResource';
-import { useToast } from '@/providers/ToastProvider';
-import { useGlobalStore } from '@/stores/global';
+import getRoles from '@/api/admin/roles/getRoles.ts';
+import createUser from '@/api/admin/users/createUser.ts';
+import deleteUser from '@/api/admin/users/deleteUser.ts';
+import disableUserTwoFactor from '@/api/admin/users/disableUserTwoFactor.ts';
+import updateUser from '@/api/admin/users/updateUser.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 
 export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User }) {
   const { settings, languages } = useGlobalStore();
@@ -56,7 +56,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         email: contextUser.email,
         nameFirst: contextUser.nameFirst,
         nameLast: contextUser.nameLast,
-        password: '',
+        password: null,
         admin: contextUser.admin,
         totpEnabled: contextUser.totpEnabled,
         language: contextUser.language,
@@ -104,88 +104,91 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
         Are you sure you want to remove the two factor of <Code>{form.values.username}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
-          <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
+            <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />
+          </Group>
 
-        <Group grow>
-          <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
-          <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
-        </Group>
+          <Group grow>
+            <TextInput withAsterisk label='First Name' placeholder='First Name' {...form.getInputProps('nameFirst')} />
+            <TextInput withAsterisk label='Last Name' placeholder='Last Name' {...form.getInputProps('nameLast')} />
+          </Group>
 
-        <Group grow>
-          <Select
-            withAsterisk
-            label='Language'
-            placeholder='Language'
-            data={languages.map((language) => ({
-              label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
-              value: language,
-            }))}
-            searchable
-            {...form.getInputProps('language')}
+          <Group grow>
+            <Select
+              withAsterisk
+              label='Language'
+              placeholder='Language'
+              data={languages.map((language) => ({
+                label: new Intl.DisplayNames([language], { type: 'language' }).of(language) ?? language,
+                value: language,
+              }))}
+              searchable
+              {...form.getInputProps('language')}
+            />
+
+            <Select
+              label='Role'
+              placeholder='Role'
+              data={roles.items.map((nest) => ({
+                label: nest.name,
+                value: nest.uuid,
+              }))}
+              searchable
+              searchValue={roles.search}
+              onSearchChange={roles.setSearch}
+              allowDeselect
+              {...form.getInputProps('roleUuid')}
+            />
+          </Group>
+
+          <TextInput
+            withAsterisk={!contextUser}
+            label='Password'
+            placeholder='Password'
+            type='password'
+            {...form.getInputProps('password')}
+            onChange={(e) => form.setFieldValue('password', e.target.value || null)}
           />
 
-          <Select
-            label='Role'
-            placeholder='Role'
-            data={roles.items.map((nest) => ({
-              label: nest.name,
-              value: nest.uuid,
-            }))}
-            searchable
-            searchValue={roles.search}
-            onSearchChange={roles.setSearch}
-            allowDeselect
-            {...form.getInputProps('roleUuid')}
+          <Switch
+            label='Admin'
+            checked={form.values.admin}
+            onChange={(e) => form.setFieldValue('admin', e.target.checked)}
           />
-        </Group>
+        </Stack>
 
-        <TextInput
-          withAsterisk={!contextUser}
-          label='Password'
-          placeholder='Password'
-          type='password'
-          {...form.getInputProps('password')}
-        />
-
-        <Switch
-          label='Admin'
-          checked={form.values.admin}
-          onChange={(e) => form.setFieldValue('admin', e.target.checked)}
-        />
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-        {!contextUser && (
-          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-            Save & Stay
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
           </Button>
-        )}
-        {contextUser && (
-          <>
-            <Button
-              color='red'
-              variant='outline'
-              onClick={() => setOpenModal('disable_two_factor')}
-              loading={loading}
-              disabled={!form.values.totpEnabled}
-            >
-              Disable Two Factor
+          {!contextUser && (
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+              Save & Stay
             </Button>
-            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-              Delete
-            </Button>
-          </>
-        )}
-      </Group>
+          )}
+          {contextUser && (
+            <>
+              <Button
+                color='red'
+                variant='outline'
+                onClick={() => setOpenModal('disable_two_factor')}
+                loading={loading}
+                disabled={!form.values.totpEnabled}
+              >
+                Disable Two Factor
+              </Button>
+              <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+                Delete
+              </Button>
+            </>
+          )}
+        </Group>
+      </form>
     </>
   );
 }

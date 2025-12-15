@@ -1,6 +1,6 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { ServerStore } from '@/stores/server';
 import { StateCreator } from 'zustand';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { ServerStore } from '@/stores/server.ts';
 
 export interface AllocationsSlice {
   allocations: ResponseMeta<ServerAllocation>;

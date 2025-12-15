@@ -31,11 +31,6 @@ services:
       - PGDATA=/data
     volumes:
       - ./postgres:/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d postgres"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
 
   cache:
     image: ghcr.io/calagopus-rs/valkey:latest

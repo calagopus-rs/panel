@@ -2,10 +2,10 @@ import { ReactNode, useContext, useEffect, useState } from 'react';
 import { GetPlaceholders, getTranslationMapping, TranslationContext, TranslationItemRecord } from 'shared';
 import { z } from 'zod';
 import { $ZodConfig } from 'zod/v4/core';
-import { axiosInstance } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
+import { axiosInstance } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
 import { languageToZodLocaleMapping } from '@/lib/enums.ts';
-import baseTranslations from '@/translations';
+import baseTranslations from '@/translations.ts';
 
 const modules = import.meta.glob('/node_modules/zod/v4/locales/*.js');
 

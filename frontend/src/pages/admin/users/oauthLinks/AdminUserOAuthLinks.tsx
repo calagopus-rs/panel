@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks';
-import Button from '@/elements/Button';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import Table from '@/elements/Table';
-import { adminUserOAuthLinkTableColumns } from '@/lib/tableColumns';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal';
-import UserOAuthLinkRow from './UserOAuthLinkRow';
-import TextInput from '@/elements/input/TextInput';
+import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks.ts';
+import Button from '@/elements/Button.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { adminUserOAuthLinkTableColumns } from '@/lib/tableColumns.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import UserOAuthLinkAddModal from './modals/UserOAuthLinkAddModal.tsx';
+import UserOAuthLinkRow from './UserOAuthLinkRow.tsx';
 
 export default function AdminUserOAuthLinks({ user }: { user: User }) {
   const { userOAuthLinks, setUserOAuthLinks } = useAdminStore();

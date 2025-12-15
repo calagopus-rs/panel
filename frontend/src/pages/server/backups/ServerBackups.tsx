@@ -2,16 +2,16 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import getBackups from '@/api/server/backups/getBackups';
-import Button from '@/elements/Button';
-import ConditionalTooltip from '@/elements/ConditionalTooltip';
-import { ContextMenuProvider } from '@/elements/ContextMenu';
-import TextInput from '@/elements/input/TextInput';
-import Table from '@/elements/Table';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useServerStore } from '@/stores/server';
-import BackupRow from './BackupRow';
-import BackupCreateModal from './modals/BackupCreateModal';
+import getBackups from '@/api/server/backups/getBackups.ts';
+import Button from '@/elements/Button.tsx';
+import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
+import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table from '@/elements/Table.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useServerStore } from '@/stores/server.ts';
+import BackupRow from './BackupRow.tsx';
+import BackupCreateModal from './modals/BackupCreateModal.tsx';
 
 export default function ServerBackups() {
   const { server, backups, setBackups } = useServerStore();

@@ -1,7 +1,7 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 interface Data {
-  notes?: string;
+  notes?: string | null;
   primary?: boolean;
 }
 

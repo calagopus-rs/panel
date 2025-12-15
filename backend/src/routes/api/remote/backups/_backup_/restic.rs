@@ -15,9 +15,9 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response {
-        repository: String,
+        repository: compact_str::CompactString,
         retry_lock_seconds: u64,
-        environment: IndexMap<String, String>,
+        environment: IndexMap<compact_str::CompactString, compact_str::CompactString>,
     }
 
     #[utoipa::path(get, path = "/", responses(

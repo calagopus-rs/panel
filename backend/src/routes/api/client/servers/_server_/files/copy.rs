@@ -16,8 +16,8 @@ mod post {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        file: String,
-        destination: Option<String>,
+        file: compact_str::CompactString,
+        destination: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]

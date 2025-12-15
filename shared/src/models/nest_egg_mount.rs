@@ -19,13 +19,22 @@ impl BaseModel for NestEggMount {
     const NAME: &'static str = "nest_egg_mount";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("nest_egg_mounts.mount_uuid", format!("{prefix}mount_uuid")),
-            ("nest_egg_mounts.egg_uuid", format!("{prefix}egg_uuid")),
-            ("nest_egg_mounts.created", format!("{prefix}created")),
+            (
+                "nest_egg_mounts.mount_uuid",
+                compact_str::format_compact!("{prefix}mount_uuid"),
+            ),
+            (
+                "nest_egg_mounts.egg_uuid",
+                compact_str::format_compact!("{prefix}egg_uuid"),
+            ),
+            (
+                "nest_egg_mounts.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -35,12 +44,12 @@ impl BaseModel for NestEggMount {
 
         Ok(Self {
             mount: super::mount::Mount::get_fetchable(
-                row.try_get(format!("{prefix}mount_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}mount_uuid").as_str())?,
             ),
             nest_egg: super::nest_egg::NestEgg::get_fetchable(
-                row.try_get(format!("{prefix}egg_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}egg_uuid").as_str())?,
             ),
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

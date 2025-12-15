@@ -1,12 +1,12 @@
 import { Group, Title } from '@mantine/core';
 import debounce from 'debounce';
 import { useEffect, useRef, useState } from 'react';
-import Can from '@/elements/Can';
-import { useServerStore } from '@/stores/server';
-import Console from './Console';
-import ServerDetails from './ServerDetails';
-import ServerPowerControls from './ServerPowerControls';
-import ServerStats from './ServerStats';
+import Can from '@/elements/Can.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import Console from './Console.tsx';
+import ServerDetails from './ServerDetails.tsx';
+import ServerPowerControls from './ServerPowerControls.tsx';
+import ServerStats from './ServerStats.tsx';
 
 export default function ServerConsole() {
   const server = useServerStore((state) => state.server);
@@ -34,9 +34,12 @@ export default function ServerConsole() {
   return (
     <>
       <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          {server.name}
-        </Title>
+        <div className='flex flex-col'>
+          <Title order={1} c='white'>
+            {server.name}
+          </Title>
+          <p className='text-sm text-gray-300!'>{server.description}</p>
+        </div>
         <Can action={['control.start', 'control.stop', 'control.restart']} matchAny>
           <ServerPowerControls />
         </Can>

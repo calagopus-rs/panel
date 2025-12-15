@@ -2,9 +2,9 @@ import { faDownload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon } from '@mantine/core';
 import { useState } from 'react';
-import Code from '@/elements/Code';
-import { TableData, TableRow } from '@/elements/Table';
-import EggRepositoryEggsInstallModal from './modals/EggRepositoryEggsInstallModal';
+import Code from '@/elements/Code.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import EggRepositoryEggsInstallModal from './modals/EggRepositoryEggsInstallModal.tsx';
 
 export default function EggRepositoryEggRow({
   eggRepository,

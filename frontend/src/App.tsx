@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
 import { BrowserRouter } from 'react-router';
-import getSettings from './api/getSettings';
-import Spinner from './elements/Spinner';
-import { ToastProvider } from './providers/ToastProvider';
-import { useGlobalStore } from './stores/global';
+import getSettings from './api/getSettings.ts';
+import Spinner from './elements/Spinner.tsx';
+import { ToastProvider } from './providers/ToastProvider.tsx';
+import { useGlobalStore } from './stores/global.ts';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
-import getLanguages from './api/getLanguages';
-import ErrorBoundary from './elements/ErrorBoundary';
-import { CurrentWindowProvider } from './providers/CurrentWindowProvider';
-import { WindowProvider } from './providers/WindowProvider';
-import RouterRoutes from './RouterRoutes';
+import getLanguages from './api/getLanguages.ts';
+import ErrorBoundary from './elements/ErrorBoundary.tsx';
+import { CurrentWindowProvider } from './providers/CurrentWindowProvider.tsx';
+import { WindowProvider } from './providers/WindowProvider.tsx';
+import RouterRoutes from './RouterRoutes.tsx';
 
 export default function App() {
   const { settings, setSettings, setLanguages } = useGlobalStore();

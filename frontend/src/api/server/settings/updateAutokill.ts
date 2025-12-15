@@ -1,17 +1,12 @@
-import { axiosInstance } from '@/api/axios';
+import { z } from 'zod';
+import { axiosInstance } from '@/api/axios.ts';
+import { serverSettingsAutokillSchema } from '@/lib/schemas/server/settings.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
-interface Data {
-  enabled: boolean;
-  seconds: number;
-}
-
-export default async (uuid: string, data: Data): Promise<void> => {
+export default async (uuid: string, data: z.infer<typeof serverSettingsAutokillSchema>): Promise<void> => {
   return new Promise((resolve, reject) => {
     axiosInstance
-      .put(`/api/client/servers/${uuid}/settings/auto-kill`, {
-        enabled: data.enabled,
-        seconds: data.seconds,
-      })
+      .put(`/api/client/servers/${uuid}/settings/auto-kill`, transformKeysToSnakeCase(data))
       .then(() => resolve())
       .catch(reject);
   });

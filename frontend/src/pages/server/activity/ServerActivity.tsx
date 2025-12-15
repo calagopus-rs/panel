@@ -1,15 +1,15 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import { getEmptyPaginationSet } from '@/api/axios';
-import getServerActivity from '@/api/server/getServerActivity';
-import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Table, { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useServerStore } from '@/stores/server';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import getServerActivity from '@/api/server/getServerActivity.ts';
+import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
+import Code from '@/elements/Code.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table, { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function ServerActivity() {
   const [activities, setActivities] = useState<ResponseMeta<ServerActivity>>(getEmptyPaginationSet());

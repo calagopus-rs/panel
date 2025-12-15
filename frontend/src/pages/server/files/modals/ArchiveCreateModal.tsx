@@ -1,17 +1,21 @@
 import { Group, ModalProps, Stack } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { join } from 'pathe';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import compressFiles from '@/api/server/files/compressFiles';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import Select from '@/elements/input/Select';
-import TextInput from '@/elements/input/TextInput';
-import Modal from '@/elements/modals/Modal';
-import { archiveFormatLabelMapping } from '@/lib/enums';
-import { generateArchiveName } from '@/lib/files';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { z } from 'zod';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import compressFiles from '@/api/server/files/compressFiles.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { archiveFormatLabelMapping } from '@/lib/enums.ts';
+import { generateArchiveName } from '@/lib/files.ts';
+import { serverFilesArchiveCreateSchema } from '@/lib/schemas/server/files.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 type Props = ModalProps & {
   files: DirectoryEntry[];
@@ -21,18 +25,25 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
   const { addToast } = useToast();
   const { server, browsingDirectory } = useServerStore();
 
-  const [fileName, setFileName] = useState('');
-  const [format, setFormat] = useState<ArchiveFormat>('tar_gz');
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverFilesArchiveCreateSchema>>({
+    initialValues: {
+      name: '',
+      format: 'tar_gz',
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverFilesArchiveCreateSchema),
+  });
 
   const doArchive = () => {
     setLoading(true);
 
     compressFiles(server.uuid, {
-      name: fileName
-        ? fileName.concat(archiveFormatLabelMapping[format])
-        : generateArchiveName(archiveFormatLabelMapping[format]),
-      format,
+      name: form.values.name
+        ? form.values.name.concat(archiveFormatLabelMapping[form.values.format as ArchiveFormat])
+        : generateArchiveName(archiveFormatLabelMapping[form.values.format as ArchiveFormat]),
+      format: form.values.format,
       root: browsingDirectory!,
       files: files.map((f) => f.name),
     })
@@ -48,49 +59,45 @@ export default function ArchiveCreateModal({ files, opened, onClose }: Props) {
 
   return (
     <Modal title='Create Archive' onClose={onClose} opened={opened}>
-      <Stack>
-        <TextInput
-          label='Archive Name'
-          placeholder='Archive Name'
-          value={fileName}
-          onChange={(e) => setFileName(e.target.value)}
-        />
+      <form onSubmit={form.onSubmit(() => doArchive())}>
+        <Stack>
+          <TextInput label='Archive Name' placeholder='Archive Name' {...form.getInputProps('name')} />
 
-        <Select
-          withAsterisk
-          label='Format'
-          data={Object.entries(archiveFormatLabelMapping).map(([format, extension]) => ({
-            label: extension,
-            value: format,
-          }))}
-          value={format}
-          onChange={(value) => setFormat(value as ArchiveFormat)}
-        />
+          <Select
+            withAsterisk
+            label='Format'
+            data={Object.entries(archiveFormatLabelMapping).map(([format, extension]) => ({
+              label: extension,
+              value: format,
+            }))}
+            {...form.getInputProps('format')}
+          />
 
-        <p className='text-sm md:text-base break-all'>
-          <span className='text-neutral-200'>This archive will be created as&nbsp;</span>
-          <Code>
-            /home/container/
-            <span className='text-cyan-200'>
-              {join(
-                browsingDirectory!,
-                fileName
-                  ? `${fileName}${archiveFormatLabelMapping[format]}`
-                  : generateArchiveName(archiveFormatLabelMapping[format]),
-              ).replace(/^(\.\.\/|\/)+/, '')}
-            </span>
-          </Code>
-        </p>
+          <p className='text-sm md:text-base break-all'>
+            <span className='text-neutral-200'>This archive will be created as&nbsp;</span>
+            <Code>
+              /home/container/
+              <span className='text-cyan-200'>
+                {join(
+                  browsingDirectory!,
+                  form.values.name
+                    ? `${form.values.name}${archiveFormatLabelMapping[form.values.format as ArchiveFormat]}`
+                    : generateArchiveName(archiveFormatLabelMapping[form.values.format as ArchiveFormat]),
+                ).replace(/^(\.\.\/|\/)+/, '')}
+              </span>
+            </Code>
+          </p>
 
-        <Group>
-          <Button onClick={doArchive} loading={loading}>
-            Create
-          </Button>
-          <Button variant='default' onClick={onClose}>
-            Close
-          </Button>
-        </Group>
-      </Stack>
+          <Group>
+            <Button type='submit' loading={loading}>
+              Create
+            </Button>
+            <Button variant='default' onClick={onClose}>
+              Close
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Modal>
   );
 }

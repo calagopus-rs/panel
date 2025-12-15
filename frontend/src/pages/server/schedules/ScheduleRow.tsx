@@ -2,19 +2,19 @@ import { faFileDownload, faPlay, faPlayCircle, faShareAlt, faTrash } from '@fort
 import jsYaml from 'js-yaml';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteSchedule from '@/api/server/schedules/deleteSchedule';
-import exportSchedule from '@/api/server/schedules/exportSchedule';
-import triggerSchedule from '@/api/server/schedules/triggerSchedule';
-import Badge from '@/elements/Badge';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteSchedule from '@/api/server/schedules/deleteSchedule.ts';
+import exportSchedule from '@/api/server/schedules/exportSchedule.ts';
+import triggerSchedule from '@/api/server/schedules/triggerSchedule.ts';
+import Badge from '@/elements/Badge.tsx';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function ScheduleRow({ schedule }: { schedule: ServerSchedule }) {
   const { addToast } = useToast();

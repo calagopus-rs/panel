@@ -3,19 +3,19 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createEggRepository from '@/api/admin/egg-repositories/createEggRepository';
-import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository';
-import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository';
-import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Code from '@/elements/Code';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories';
-import { useResourceForm } from '@/plugins/useResourceForm';
-import { useToast } from '@/providers/ToastProvider';
+import createEggRepository from '@/api/admin/egg-repositories/createEggRepository.ts';
+import deleteEggRepository from '@/api/admin/egg-repositories/deleteEggRepository.ts';
+import syncEggRepository from '@/api/admin/egg-repositories/syncEggRepository.ts';
+import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepository.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Code from '@/elements/Code.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminEggRepositorySchema } from '@/lib/schemas/admin/eggRepositories.ts';
+import { useResourceForm } from '@/plugins/useResourceForm.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 export default function EggRepositoryCreateOrUpdate({
   contextEggRepository,
@@ -83,42 +83,44 @@ export default function EggRepositoryCreateOrUpdate({
         Are you sure you want to delete <Code>{form.values.name}</Code>?
       </ConfirmationModal>
 
-      <Stack>
-        <Title order={2}>{contextEggRepository ? 'Update' : 'Create'} Egg Repository</Title>
+      <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
+        <Stack>
+          <Title order={2}>{contextEggRepository ? 'Update' : 'Create'} Egg Repository</Title>
 
-        <Group grow>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
-          <TextInput
-            withAsterisk
-            label='Git Repository'
-            placeholder='Git Repository'
-            {...form.getInputProps('gitRepository')}
-          />
+          <Group grow>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+            <TextInput
+              withAsterisk
+              label='Git Repository'
+              placeholder='Git Repository'
+              {...form.getInputProps('gitRepository')}
+            />
+          </Group>
+
+          <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
+        </Stack>
+
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
+          {!contextEggRepository && (
+            <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
+              Save & Stay
+            </Button>
+          )}
+          {contextEggRepository && (
+            <Button variant='outline' onClick={doSync} loading={loading}>
+              Sync
+            </Button>
+          )}
+          {contextEggRepository && (
+            <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
+              Delete
+            </Button>
+          )}
         </Group>
-
-        <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={() => doCreateOrUpdate(false)} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-        {!contextEggRepository && (
-          <Button onClick={() => doCreateOrUpdate(true)} disabled={!form.isValid()} loading={loading}>
-            Save & Stay
-          </Button>
-        )}
-        {contextEggRepository && (
-          <Button variant='outline' onClick={doSync} loading={loading}>
-            Sync
-          </Button>
-        )}
-        {contextEggRepository && (
-          <Button color='red' onClick={() => setOpenModal('delete')} loading={loading}>
-            Delete
-          </Button>
-        )}
-      </Group>
+      </form>
     </>
   );
 }

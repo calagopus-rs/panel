@@ -2,15 +2,15 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
-import getMounts from '@/api/admin/mounts/getMounts';
-import Button from '@/elements/Button';
-import Table from '@/elements/Table';
-import { mountTableColumns } from '@/lib/tableColumns';
-import MountView from '@/pages/admin/mounts/MountView';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
-import { useAdminStore } from '@/stores/admin';
-import MountCreateOrUpdate from './MountCreateOrUpdate';
-import MountRow from './MountRow';
+import getMounts from '@/api/admin/mounts/getMounts.ts';
+import Button from '@/elements/Button.tsx';
+import Table from '@/elements/Table.tsx';
+import { mountTableColumns } from '@/lib/tableColumns.ts';
+import MountView from '@/pages/admin/mounts/MountView.tsx';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
+import { useAdminStore } from '@/stores/admin.tsx';
+import MountCreateOrUpdate from './MountCreateOrUpdate.tsx';
+import MountRow from './MountRow.tsx';
 
 function MountsContainer() {
   const navigate = useNavigate();

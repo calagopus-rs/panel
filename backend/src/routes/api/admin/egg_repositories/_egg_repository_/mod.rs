@@ -159,14 +159,14 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(url)]
         #[schema(example = "https://github.com/example/repo.git", format = "uri")]
-        git_repository: Option<String>,
+        git_repository: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -217,9 +217,9 @@ mod patch {
             "UPDATE egg_repositories
             SET name = $1, description = $2, git_repository = $3
             WHERE egg_repositories.uuid = $4",
-            egg_repository.name,
-            egg_repository.description,
-            egg_repository.git_repository,
+            &egg_repository.name,
+            egg_repository.description.as_deref(),
+            &egg_repository.git_repository,
             egg_repository.uuid,
         )
         .execute(state.database.write())

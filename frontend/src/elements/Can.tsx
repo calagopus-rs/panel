@@ -1,6 +1,6 @@
 import { memo, ReactNode } from 'react';
 import isEqual from 'react-fast-compare';
-import { usePermissions } from '@/plugins/usePermissions';
+import { usePermissions } from '@/plugins/usePermissions.ts';
 
 interface Props {
   action: string | string[];

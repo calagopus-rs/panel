@@ -1,26 +1,37 @@
 import { Group, ModalProps } from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import installServer from '@/api/server/settings/installServer';
-import Button from '@/elements/Button';
-import Switch from '@/elements/input/Switch';
-import Modal from '@/elements/modals/Modal';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
+import { z } from 'zod';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import installServer from '@/api/server/settings/installServer.ts';
+import Button from '@/elements/Button.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import Modal from '@/elements/modals/Modal.tsx';
+import { serverSettingssReinstallSchema } from '@/lib/schemas/server/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function SettingsReinstallModal({ opened, onClose }: ModalProps) {
   const { addToast } = useToast();
   const { server, updateServer } = useServerStore();
   const navigate = useNavigate();
 
-  const [truncate, setTruncate] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof serverSettingssReinstallSchema>>({
+    initialValues: {
+      truncateDirectory: false,
+    },
+    validateInputOnBlur: true,
+    validate: zod4Resolver(serverSettingssReinstallSchema),
+  });
 
   const doReinstall = () => {
     setLoading(true);
 
-    installServer(server.uuid, { truncateDirectory: truncate })
+    installServer(server.uuid, form.values)
       .then(() => {
         addToast('Reinstalling server...', 'success');
 
@@ -35,21 +46,23 @@ export default function SettingsReinstallModal({ opened, onClose }: ModalProps) 
 
   return (
     <Modal title='Reinstall Server' onClose={onClose} opened={opened}>
-      <Switch
-        label='Do you want to empty the filesystem of this server before reinstallation?'
-        name='truncate'
-        defaultChecked={truncate}
-        onChange={(e) => setTruncate(e.target.checked)}
-      />
+      <form onSubmit={form.onSubmit(() => doReinstall())}>
+        <Switch
+          label='Do you want to empty the filesystem of this server before reinstallation?'
+          name='truncate'
+          defaultChecked={form.values.truncateDirectory}
+          onChange={(e) => form.setFieldValue('truncateDirectory', e.target.checked)}
+        />
 
-      <Group mt='md'>
-        <Button color='red' onClick={doReinstall} loading={loading}>
-          Reinstall
-        </Button>
-        <Button variant='default' onClick={onClose}>
-          Close
-        </Button>
-      </Group>
+        <Group mt='md'>
+          <Button color='red' type='submit' loading={loading} disabled={!form.isValid()}>
+            Reinstall
+          </Button>
+          <Button variant='default' onClick={onClose}>
+            Close
+          </Button>
+        </Group>
+      </form>
     </Modal>
   );
 }

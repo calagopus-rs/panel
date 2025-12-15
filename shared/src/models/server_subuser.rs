@@ -13,8 +13,8 @@ pub struct ServerSubuser {
     pub user: super::user::User,
     pub server: Fetchable<super::server::Server>,
 
-    pub permissions: Vec<String>,
-    pub ignored_files: Vec<String>,
+    pub permissions: Vec<compact_str::CompactString>,
+    pub ignored_files: Vec<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -23,23 +23,26 @@ impl BaseModel for ServerSubuser {
     const NAME: &'static str = "server_subuser";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
             (
                 "server_subusers.server_uuid",
-                format!("{prefix}server_uuid"),
+                compact_str::format_compact!("{prefix}server_uuid"),
             ),
             (
                 "server_subusers.permissions",
-                format!("{prefix}permissions"),
+                compact_str::format_compact!("{prefix}permissions"),
             ),
             (
                 "server_subusers.ignored_files",
-                format!("{prefix}ignored_files"),
+                compact_str::format_compact!("{prefix}ignored_files"),
             ),
-            ("server_subusers.created", format!("{prefix}created")),
+            (
+                "server_subusers.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::user::User::columns(Some("user_")));
@@ -54,11 +57,13 @@ impl BaseModel for ServerSubuser {
         Ok(Self {
             user: super::user::User::map(Some("user_"), row)?,
             server: super::server::Server::get_fetchable(
-                row.try_get(format!("{prefix}server_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}server_uuid").as_str())?,
             ),
-            permissions: row.try_get(format!("{prefix}permissions").as_str())?,
-            ignored_files: row.try_get(format!("{prefix}ignored_files").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            permissions: row
+                .try_get(compact_str::format_compact!("{prefix}permissions").as_str())?,
+            ignored_files: row
+                .try_get(compact_str::format_compact!("{prefix}ignored_files").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -70,9 +75,9 @@ impl ServerSubuser {
         mail: &Arc<crate::mail::Mail>,
         server: &super::server::Server,
         email: &str,
-        permissions: &[String],
-        ignored_files: &[String],
-    ) -> Result<String, crate::database::DatabaseError> {
+        permissions: &[compact_str::CompactString],
+        ignored_files: &[compact_str::CompactString],
+    ) -> Result<compact_str::CompactString, crate::database::DatabaseError> {
         let user = match super::user::User::by_email(database, email).await? {
             Some(user) => user,
             None => {
@@ -145,7 +150,7 @@ impl ServerSubuser {
 
                         mail.send(
                             user.email.clone(),
-                            format!("{} - Account Created", settings.app.name),
+                            format!("{} - Account Created", settings.app.name).into(),
                             mail_content,
                         )
                         .await;
@@ -328,8 +333,8 @@ impl DeletableModel for ServerSubuser {
 pub struct ApiServerSubuser {
     pub user: super::user::ApiUser,
 
-    pub permissions: Vec<String>,
-    pub ignored_files: Vec<String>,
+    pub permissions: Vec<compact_str::CompactString>,
+    pub ignored_files: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

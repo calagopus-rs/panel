@@ -60,7 +60,7 @@ mod post {
             .fetch_cached(&state.database)
             .await?
             .api_client(&state.database)
-            .post_servers_server_files_write(server.uuid, &params.file, body)
+            .post_servers_server_files_write(server.uuid, &params.file, body.into())
             .await
         {
             Ok(_) => {}

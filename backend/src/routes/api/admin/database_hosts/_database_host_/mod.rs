@@ -159,24 +159,24 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         public: Option<bool>,
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        public_host: Option<String>,
+        public_host: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        host: Option<String>,
+        host: Option<compact_str::CompactString>,
         public_port: Option<u16>,
         port: Option<u16>,
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        username: Option<String>,
+        username: Option<compact_str::CompactString>,
         #[validate(length(min = 1, max = 512))]
         #[schema(min_length = 1, max_length = 512)]
-        password: Option<String>,
+        password: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -246,13 +246,13 @@ mod patch {
             "UPDATE database_hosts
             SET name = $1, public = $2, public_host = $3, host = $4, public_port = $5, port = $6, username = $7, password = $8
             WHERE database_hosts.uuid = $9",
-            database_host.name,
+            &database_host.name,
             database_host.public,
-            database_host.public_host,
-            database_host.host,
+            database_host.public_host.as_deref(),
+            &database_host.host,
             database_host.public_port,
             database_host.port,
-            database_host.username,
+            &database_host.username,
             database_host.password,
             database_host.uuid,
         )

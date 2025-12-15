@@ -1,7 +1,7 @@
 import { Group, Stack } from '@mantine/core';
-import Switch from '@/elements/input/Switch';
-import TagsInput from '@/elements/input/TagsInput';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import Switch from '@/elements/input/Switch.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepCreateBackup({
   action,

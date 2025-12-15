@@ -5,22 +5,22 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useState } from 'react';
 import { z } from 'zod';
-import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration';
-import createLocation from '@/api/admin/locations/createLocation';
-import { httpErrorToHuman } from '@/api/axios';
-import AlertError from '@/elements/alerts/AlertError';
-import Button from '@/elements/Button';
-import Select from '@/elements/input/Select';
-import TextInput from '@/elements/input/TextInput';
-import { backupDiskLabelMapping } from '@/lib/enums';
-import { OobeComponentProps } from '@/routers/OobeRouter';
-import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic';
-import BackupS3 from '../admin/backupConfigurations/forms/BackupS3';
+import createBackupConfiguration from '@/api/admin/backup-configurations/createBackupConfiguration.ts';
+import createLocation from '@/api/admin/locations/createLocation.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import AlertError from '@/elements/alerts/AlertError.tsx';
+import Button from '@/elements/Button.tsx';
+import Select from '@/elements/input/Select.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { backupDiskLabelMapping } from '@/lib/enums.ts';
 import {
   adminBackupConfigurationResticSchema,
   adminBackupConfigurationS3Schema,
-} from '@/lib/schemas/admin/backupConfigurations';
-import { oobeLocationSchema } from '@/lib/schemas/oobe';
+} from '@/lib/schemas/admin/backupConfigurations.ts';
+import { oobeLocationSchema } from '@/lib/schemas/oobe.ts';
+import { OobeComponentProps } from '@/routers/OobeRouter.tsx';
+import BackupRestic from '../admin/backupConfigurations/forms/BackupRestic.tsx';
+import BackupS3 from '../admin/backupConfigurations/forms/BackupS3.tsx';
 
 export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
   const [loading, setLoading] = useState(false);
@@ -98,47 +98,49 @@ export default function OobeLocation({ onNext, skipFrom }: OobeComponentProps) {
 
       {error && <AlertError error={error} setError={setError} />}
 
-      <Stack gap='md'>
-        <TextInput
-          label='Location Name'
-          placeholder='My home'
-          leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
-          required
-          {...form.getInputProps('locationName')}
-        />
+      <form onSubmit={form.onSubmit(() => onSubmit())}>
+        <Stack gap='md'>
+          <TextInput
+            label='Location Name'
+            placeholder='My home'
+            leftSection={<FontAwesomeIcon icon={faAddressCard} size='sm' />}
+            required
+            {...form.getInputProps('locationName')}
+          />
 
-        <TextInput
-          label='Backup Configuration Name'
-          placeholder='Unicorn Cloud'
-          leftSection={<FontAwesomeIcon icon={faRainbow} size='sm' />}
-          required
-          {...form.getInputProps('backupName')}
-        />
+          <TextInput
+            label='Backup Configuration Name'
+            placeholder='Unicorn Cloud'
+            leftSection={<FontAwesomeIcon icon={faRainbow} size='sm' />}
+            required
+            {...form.getInputProps('backupName')}
+          />
 
-        <Select
-          withAsterisk
-          label='Backup Disk'
-          placeholder='Backup Disk'
-          leftSection={<FontAwesomeIcon icon={faFloppyDisk} size='sm' />}
-          data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
-            value,
-            label,
-          }))}
-          {...form.getInputProps('backupDisk')}
-        />
+          <Select
+            withAsterisk
+            label='Backup Disk'
+            placeholder='Backup Disk'
+            leftSection={<FontAwesomeIcon icon={faFloppyDisk} size='sm' />}
+            data={Object.entries(backupDiskLabelMapping).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+            {...form.getInputProps('backupDisk')}
+          />
 
-        {form.values.backupDisk === 's3' ? <BackupS3 form={backupConfigS3Form} /> : null}
-        {form.values.backupDisk === 'restic' ? <BackupRestic form={backupConfigResticForm} /> : null}
+          {form.values.backupDisk === 's3' ? <BackupS3 form={backupConfigS3Form} /> : null}
+          {form.values.backupDisk === 'restic' ? <BackupRestic form={backupConfigResticForm} /> : null}
 
-        <Group justify='flex-end' mt='xl'>
-          <Button variant='outline' onClick={() => skipFrom('location')}>
-            Skip
-          </Button>
-          <Button disabled={!form.isValid()} loading={loading} onClick={onSubmit}>
-            Create & Continue
-          </Button>
-        </Group>
-      </Stack>
+          <Group justify='flex-end' mt='xl'>
+            <Button variant='outline' onClick={() => skipFrom('location')}>
+              Skip
+            </Button>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Create & Continue
+            </Button>
+          </Group>
+        </Stack>
+      </form>
     </Stack>
   );
 }

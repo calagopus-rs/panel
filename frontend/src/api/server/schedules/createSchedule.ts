@@ -1,14 +1,9 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { z } from 'zod';
+import { axiosInstance } from '@/api/axios.ts';
+import { serverScheduleSchema } from '@/lib/schemas/server/schedule.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
-interface Data {
-  name: string;
-  enabled: boolean;
-  triggers: ScheduleTrigger[];
-  condition: SchedulePreCondition;
-}
-
-export default async (uuid: string, data: Data): Promise<ServerSchedule> => {
+export default async (uuid: string, data: z.infer<typeof serverScheduleSchema>): Promise<ServerSchedule> => {
   return new Promise((resolve, reject) => {
     axiosInstance
       .post(`/api/client/servers/${uuid}/schedules`, transformKeysToSnakeCase(data))

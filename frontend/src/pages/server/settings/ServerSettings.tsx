@@ -1,8 +1,8 @@
 import { Grid, Group, Title } from '@mantine/core';
-import AutokillContainer from './AutokillContainer';
-import ReinstallContainer from './ReinstallContainer';
-import RenameContainer from './RenameContainer';
-import TimezoneContainer from './TimezoneContainer';
+import AutokillContainer from './AutokillContainer.tsx';
+import ReinstallContainer from './ReinstallContainer.tsx';
+import RenameContainer from './RenameContainer.tsx';
+import TimezoneContainer from './TimezoneContainer.tsx';
 
 export default function ServerSettings() {
   return (

@@ -11,8 +11,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Group } from '@mantine/core';
 import { memo } from 'react';
 import { createSearchParams, useNavigate } from 'react-router';
-import Button from '@/elements/Button';
-import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu';
+import Button from '@/elements/Button.tsx';
+import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
 
 interface FileToolbarProps {
   serverUuidShort: string;

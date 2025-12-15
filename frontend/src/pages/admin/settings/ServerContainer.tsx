@@ -3,15 +3,15 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import updateServerSettings from '@/api/admin/settings/updateServerSettings';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import SizeInput from '@/elements/input/SizeInput';
-import Switch from '@/elements/input/Switch';
-import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import updateServerSettings from '@/api/admin/settings/updateServerSettings.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import { adminSettingsServerSchema } from '@/lib/schemas/admin/settings.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function ServerContainer() {
   const { addToast } = useToast();
@@ -55,44 +55,46 @@ export default function ServerContainer() {
         Server Settings
       </Title>
 
-      <Stack>
-        <Group grow>
-          <SizeInput
-            withAsterisk
-            label='Max File Manager View Size'
-            mode='b'
-            min={0}
-            value={form.values.maxFileManagerViewSize}
-            onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
-          />
+      <form onSubmit={form.onSubmit(() => doUpdate())}>
+        <Stack>
+          <Group grow>
+            <SizeInput
+              withAsterisk
+              label='Max File Manager View Size'
+              mode='b'
+              min={0}
+              value={form.values.maxFileManagerViewSize}
+              onChange={(v) => form.setFieldValue('maxFileManagerViewSize', v)}
+            />
 
-          <NumberInput
-            label='Max Server Schedule Steps'
-            placeholder='Max Server Schedule Steps'
-            {...form.getInputProps('maxSchedulesStepCount')}
-          />
+            <NumberInput
+              label='Max Server Schedule Steps'
+              placeholder='Max Server Schedule Steps'
+              {...form.getInputProps('maxSchedulesStepCount')}
+            />
+          </Group>
+
+          <Group grow>
+            <Switch
+              label='Allow Overwriting Custom Docker Image'
+              checked={form.values.allowOverwritingCustomDockerImage}
+              onChange={(e) => form.setFieldValue('allowOverwritingCustomDockerImage', e.target.checked)}
+            />
+
+            <Switch
+              label='Allow Editing Startup Command'
+              checked={form.values.allowEditingStartupCommand}
+              onChange={(e) => form.setFieldValue('allowEditingStartupCommand', e.target.checked)}
+            />
+          </Group>
+        </Stack>
+
+        <Group mt='md'>
+          <Button type='submit' disabled={!form.isValid()} loading={loading}>
+            Save
+          </Button>
         </Group>
-
-        <Group grow>
-          <Switch
-            label='Allow Overwriting Custom Docker Image'
-            checked={form.values.allowOverwritingCustomDockerImage}
-            onChange={(e) => form.setFieldValue('allowOverwritingCustomDockerImage', e.target.checked)}
-          />
-
-          <Switch
-            label='Allow Editing Startup Command'
-            checked={form.values.allowEditingStartupCommand}
-            onChange={(e) => form.setFieldValue('allowEditingStartupCommand', e.target.checked)}
-          />
-        </Group>
-      </Stack>
-
-      <Group mt='md'>
-        <Button onClick={doUpdate} disabled={!form.isValid()} loading={loading}>
-          Save
-        </Button>
-      </Group>
+      </form>
     </>
   );
 }

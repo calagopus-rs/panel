@@ -10,11 +10,11 @@ use utoipa::ToSchema;
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct BackupConfigsS3 {
-    pub access_key: String,
-    pub secret_key: String,
-    pub bucket: String,
-    pub region: String,
-    pub endpoint: String,
+    pub access_key: compact_str::CompactString,
+    pub secret_key: compact_str::CompactString,
+    pub bucket: compact_str::CompactString,
+    pub region: compact_str::CompactString,
+    pub endpoint: compact_str::CompactString,
     pub path_style: bool,
     pub part_size: u64,
 }
@@ -27,7 +27,8 @@ impl BackupConfigsS3 {
         self.secret_key = base32::encode(
             base32::Alphabet::Z,
             &database.encrypt(self.secret_key.clone()).await?,
-        );
+        )
+        .into();
 
         Ok(())
     }
@@ -44,15 +45,15 @@ impl BackupConfigsS3 {
     }
 
     pub fn censor(&mut self) {
-        self.secret_key = "".to_string();
+        self.secret_key = "".into();
     }
 
     pub fn into_client(self) -> Result<Box<s3::Bucket>, s3::error::S3Error> {
         let mut bucket = s3::Bucket::new(
             &self.bucket,
             s3::Region::Custom {
-                region: self.region,
-                endpoint: self.endpoint,
+                region: self.region.into(),
+                endpoint: self.endpoint.into(),
             },
             s3::creds::Credentials::new(
                 Some(&self.access_key),
@@ -74,10 +75,10 @@ impl BackupConfigsS3 {
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct BackupConfigsRestic {
-    pub repository: String,
+    pub repository: compact_str::CompactString,
     pub retry_lock_seconds: u64,
 
-    pub environment: IndexMap<String, String>,
+    pub environment: IndexMap<compact_str::CompactString, compact_str::CompactString>,
 }
 
 impl BackupConfigsRestic {
@@ -86,7 +87,8 @@ impl BackupConfigsRestic {
         database: &crate::database::Database,
     ) -> Result<(), anyhow::Error> {
         for value in self.environment.values_mut() {
-            *value = base32::encode(base32::Alphabet::Z, &database.encrypt(value.clone()).await?);
+            *value =
+                base32::encode(base32::Alphabet::Z, &database.encrypt(value.clone()).await?).into();
         }
 
         Ok(())
@@ -108,7 +110,7 @@ impl BackupConfigsRestic {
     pub fn censor(&mut self) {
         for (key, value) in self.environment.iter_mut() {
             if key == "RESTIC_PASSWORD" || key == "AWS_SECRET_ACCESS_KEY" {
-                *value = "".to_string();
+                *value = "".into();
             }
         }
     }
@@ -167,8 +169,8 @@ impl BackupConfigs {
 pub struct BackupConfiguration {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     pub backup_disk: super::server_backup::BackupDisk,
     pub backup_configs: BackupConfigs,
@@ -180,25 +182,34 @@ impl BaseModel for BackupConfiguration {
     const NAME: &'static str = "backup_configuration";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("backup_configurations.uuid", format!("{prefix}uuid")),
-            ("backup_configurations.name", format!("{prefix}name")),
+            (
+                "backup_configurations.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "backup_configurations.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
             (
                 "backup_configurations.description",
-                format!("{prefix}description"),
+                compact_str::format_compact!("{prefix}description"),
             ),
             (
                 "backup_configurations.backup_disk",
-                format!("{prefix}backup_disk"),
+                compact_str::format_compact!("{prefix}backup_disk"),
             ),
             (
                 "backup_configurations.backup_configs",
-                format!("{prefix}backup_configs"),
+                compact_str::format_compact!("{prefix}backup_configs"),
             ),
-            ("backup_configurations.created", format!("{prefix}created")),
+            (
+                "backup_configurations.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -207,15 +218,17 @@ impl BaseModel for BackupConfiguration {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            backup_disk: row.try_get(format!("{prefix}backup_disk").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            backup_disk: row
+                .try_get(compact_str::format_compact!("{prefix}backup_disk").as_str())?,
             backup_configs: serde_json::from_value(
-                row.get(format!("{prefix}backup_configs").as_str()),
+                row.get(compact_str::format_compact!("{prefix}backup_configs").as_str()),
             )
             .unwrap_or_default(),
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -367,8 +380,8 @@ impl DeletableModel for BackupConfiguration {
 pub struct AdminApiBackupConfiguration {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     pub backup_disk: super::server_backup::BackupDisk,
     pub backup_configs: BackupConfigs,

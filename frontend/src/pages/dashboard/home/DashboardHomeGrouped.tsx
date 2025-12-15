@@ -1,18 +1,18 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useMemo, useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import getServerGroups from '@/api/me/servers/groups/getServerGroups';
-import updateServerGroupsOrder from '@/api/me/servers/groups/updateServerGroupsOrder';
-import Button from '@/elements/Button';
-import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
-import Spinner from '@/elements/Spinner';
-import { useToast } from '@/providers/ToastProvider';
-import { useUserStore } from '@/stores/user';
-import DashboardHomeTitle from './DashboardHomeTitle';
-import ServerGroupCreateModal from './modals/ServerGroupCreateModal';
-import ServerGroupItem from './ServerGroupItem';
-import { useTranslations } from '@/providers/TranslationProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import getServerGroups from '@/api/me/servers/groups/getServerGroups.ts';
+import updateServerGroupsOrder from '@/api/me/servers/groups/updateServerGroupsOrder.ts';
+import Button from '@/elements/Button.tsx';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import { useUserStore } from '@/stores/user.ts';
+import DashboardHomeTitle from './DashboardHomeTitle.tsx';
+import ServerGroupCreateModal from './modals/ServerGroupCreateModal.tsx';
+import ServerGroupItem from './ServerGroupItem.tsx';
 
 interface DndServerGroup extends UserServerGroup, DndItem {
   id: string;

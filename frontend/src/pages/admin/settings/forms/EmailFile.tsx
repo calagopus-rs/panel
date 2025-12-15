@@ -2,8 +2,8 @@ import { Group, Stack } from '@mantine/core';
 import { UseFormReturnType } from '@mantine/form';
 import { useEffect } from 'react';
 import { z } from 'zod';
-import TextInput from '@/elements/input/TextInput';
-import { adminSettingsEmailFilesystemSchema } from '@/lib/schemas/admin/settings';
+import TextInput from '@/elements/input/TextInput.tsx';
+import { adminSettingsEmailFilesystemSchema } from '@/lib/schemas/admin/settings.ts';
 
 export default function EmailFile({
   form,

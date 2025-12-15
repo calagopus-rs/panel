@@ -19,7 +19,7 @@ mod post {
     pub struct Payload {
         #[validate(length(min = 1, max = 1024))]
         #[schema(min_length = 1, max_length = 1024)]
-        command: String,
+        command: compact_str::CompactString,
     }
 
     #[derive(ToSchema, Serialize)]

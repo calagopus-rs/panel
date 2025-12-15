@@ -1,6 +1,6 @@
 import { Progress as MantineProgress, ProgressRootProps } from '@mantine/core';
 import classNames from 'classnames';
-import AnimatedHourglass from './AnimatedHourglass';
+import AnimatedHourglass from './AnimatedHourglass.tsx';
 
 export default function Progress({
   value,

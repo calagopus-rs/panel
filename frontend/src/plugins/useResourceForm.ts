@@ -1,8 +1,8 @@
 import { UseFormReturnType } from '@mantine/form';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import { useToast } from '@/providers/ToastProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
 
 interface HasUuid {
   uuid: string;

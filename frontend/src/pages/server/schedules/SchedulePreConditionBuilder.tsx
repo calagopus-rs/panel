@@ -1,15 +1,15 @@
 import { faMinus, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Group, Select, Stack, Text } from '@mantine/core';
-import Button from '@/elements/Button';
-import NumberInput from '@/elements/input/NumberInput';
-import SizeInput from '@/elements/input/SizeInput';
-import TextInput from '@/elements/input/TextInput';
+import Button from '@/elements/Button.tsx';
+import NumberInput from '@/elements/input/NumberInput.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
 import {
   scheduleComparatorLabelMapping,
   schedulePreConditionLabelMapping,
   serverPowerStateLabelMapping,
-} from '@/lib/enums';
+} from '@/lib/enums.ts';
 
 const maxConditionDepth = 3;
 

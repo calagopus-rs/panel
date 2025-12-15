@@ -56,7 +56,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     method: Method,
     endpoint: impl AsRef<str>,
     body: Option<&impl Serialize>,
-    body_raw: Option<String>,
+    body_raw: Option<compact_str::CompactString>,
 ) -> Result<T, ApiHttpError> {
     let url = format!(
         "{}{}",
@@ -72,7 +72,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     if let Some(body) = body {
         request = request.json(body);
     } else if let Some(body_raw) = body_raw {
-        request = request.body(body_raw);
+        request = request.body(Vec::from(body_raw));
     }
 
     match request.send().await {
@@ -86,7 +86,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                         Err(err) => Err(ApiHttpError::Http(
                             StatusCode::PRECONDITION_FAILED,
                             super::ApiError {
-                                error: err.to_string(),
+                                error: err.to_string().into(),
                             },
                         )),
                     };
@@ -100,7 +100,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                 Err(ApiHttpError::Http(
                     response.status(),
                     response.json().await.unwrap_or_else(|err| super::ApiError {
-                        error: err.to_string(),
+                        error: err.to_string().into(),
                     }),
                 ))
             }
@@ -183,7 +183,7 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 output.write(`        pub type Response${code} = ${schema.$ref.split('/').at(-1)};\n\n`)
             } else {
                 if ((schema as oas31.SchemaObject).type !== 'object') {
-                    output.write(`        pub type Response${code} = ${convertType(schema as any)};\n\n`)
+                    output.write(`        pub type Response${code} = ${convertType(schema as any)};\n\n`.replace('compact_str::CompactString', 'String'))
                 } else {
                     generateSchemaObject(output, 8, null, `Response${code}`, schema as any)
                 }
@@ -210,8 +210,8 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
             const params: string[] = []
 
             for (const param of (data.parameters ?? []) as oas31.ParameterObject[]) {
-                const type = param.schema? convertType(param.schema) : 'String'
-                params.push(`${param.name}: ${type === 'String' ? '&str' : type}`)
+                const type = param.schema? convertType(param.schema) : 'compact_str::CompactString'
+                params.push(`${param.name}: ${type === 'compact_str::CompactString' ? '&str' : type}`)
             }
 
             const body = data.requestBody
@@ -236,8 +236,8 @@ for (const [path, route] of Object.entries(openapi.paths ?? {})) {
                 if (param.in === 'query') {
                     if (params.find((p) => p.startsWith(param.name))?.endsWith('&str')) {
                         clientOutput.write(`        let ${param.name} = urlencoding::encode(${param.name});\n`)
-                    } else if (params.find((p) => p.startsWith(param.name))?.endsWith('Vec<String>')) {
-                        clientOutput.write(`        let ${param.name} = ${param.name}.into_iter().map(|s| urlencoding::encode(&s).into_owned()).collect::<Vec<_>>().join("&${param.name}=");\n`)
+                    } else if (params.find((p) => p.startsWith(param.name))?.endsWith('Vec<compact_str::CompactString>')) {
+                        clientOutput.write(`        let ${param.name} = ${param.name}.into_iter().map(|s| urlencoding::encode(&s).into()).collect::<Vec<compact_str::CompactString>>().join("&${param.name}=");\n`)
                     }
 
                     query += `${param.name}={${param.name}}&`

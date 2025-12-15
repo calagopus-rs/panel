@@ -37,7 +37,7 @@ mod get {
 
         let settings = state.settings.get().await;
 
-        let client = BasicClient::new(ClientId::new(oauth_provider.client_id.clone()))
+        let client = BasicClient::new(ClientId::new(oauth_provider.client_id.to_string()))
             .set_auth_uri(AuthUrl::new(oauth_provider.auth_url.clone())?)
             .set_redirect_uri(RedirectUrl::new(format!(
                 "{}/api/auth/oauth/{}",
@@ -49,7 +49,7 @@ mod get {
 
         let mut url = client.authorize_url(CsrfToken::new_random);
         for scope in oauth_provider.scopes {
-            url = url.add_scope(Scope::new(scope));
+            url = url.add_scope(Scope::new(scope.into()));
         }
 
         let (authorization_url, csrf_state) = url.url();

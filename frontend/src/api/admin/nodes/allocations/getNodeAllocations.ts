@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (nodeUuid: string, page: number, search?: string): Promise<ResponseMeta<NodeAllocation>> => {
   return new Promise((resolve, reject) => {

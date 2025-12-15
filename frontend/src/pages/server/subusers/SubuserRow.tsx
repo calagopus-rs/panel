@@ -1,16 +1,16 @@
 import { faLock, faLockOpen, faPencil, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteSubuser from '@/api/server/subusers/deleteSubuser';
-import updateSubuser from '@/api/server/subusers/updateSubuser';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { TableData, TableRow } from '@/elements/Table';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
-import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteSubuser from '@/api/server/subusers/deleteSubuser.ts';
+import updateSubuser from '@/api/server/subusers/updateSubuser.ts';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import SubuserCreateOrUpdateModal from './modals/SubuserCreateOrUpdateModal.tsx';
 
 export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
   const { addToast } = useToast();

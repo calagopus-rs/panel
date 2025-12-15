@@ -23,10 +23,10 @@ pub struct ServerDatabase {
     pub server: Fetchable<super::server::Server>,
     pub database_host: super::database_host::DatabaseHost,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub locked: bool,
 
-    pub username: String,
+    pub username: compact_str::CompactString,
     pub password: Vec<u8>,
 
     pub created: chrono::NaiveDateTime,
@@ -36,20 +36,38 @@ impl BaseModel for ServerDatabase {
     const NAME: &'static str = "server_database";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("server_databases.uuid", format!("{prefix}uuid")),
+            (
+                "server_databases.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
             (
                 "server_databases.server_uuid",
-                format!("{prefix}server_uuid"),
+                compact_str::format_compact!("{prefix}server_uuid"),
             ),
-            ("server_databases.name", format!("{prefix}name")),
-            ("server_databases.locked", format!("{prefix}locked")),
-            ("server_databases.username", format!("{prefix}username")),
-            ("server_databases.password", format!("{prefix}password")),
-            ("server_databases.created", format!("{prefix}created")),
+            (
+                "server_databases.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "server_databases.locked",
+                compact_str::format_compact!("{prefix}locked"),
+            ),
+            (
+                "server_databases.username",
+                compact_str::format_compact!("{prefix}username"),
+            ),
+            (
+                "server_databases.password",
+                compact_str::format_compact!("{prefix}password"),
+            ),
+            (
+                "server_databases.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::database_host::DatabaseHost::columns(Some(
@@ -64,16 +82,16 @@ impl BaseModel for ServerDatabase {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             server: super::server::Server::get_fetchable(
-                row.try_get(format!("{prefix}server_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}server_uuid").as_str())?,
             ),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row)?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            locked: row.try_get(format!("{prefix}locked").as_str())?,
-            username: row.try_get(format!("{prefix}username").as_str())?,
-            password: row.try_get(format!("{prefix}password").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            locked: row.try_get(compact_str::format_compact!("{prefix}locked").as_str())?,
+            username: row.try_get(compact_str::format_compact!("{prefix}username").as_str())?,
+            password: row.try_get(compact_str::format_compact!("{prefix}password").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -610,14 +628,14 @@ pub struct AdminApiServerDatabase {
     pub server: super::server::AdminApiServer,
 
     pub r#type: DatabaseType,
-    pub host: String,
+    pub host: compact_str::CompactString,
     pub port: i32,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub is_locked: bool,
 
-    pub username: String,
-    pub password: String,
+    pub username: compact_str::CompactString,
+    pub password: compact_str::CompactString,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -628,14 +646,14 @@ pub struct ApiServerDatabase {
     pub uuid: uuid::Uuid,
 
     pub r#type: DatabaseType,
-    pub host: String,
+    pub host: compact_str::CompactString,
     pub port: i32,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub is_locked: bool,
 
-    pub username: String,
-    pub password: Option<String>,
+    pub username: compact_str::CompactString,
+    pub password: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

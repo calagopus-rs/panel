@@ -93,17 +93,17 @@ mod post {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: String,
+        name: compact_str::CompactString,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        source: String,
+        source: compact_str::CompactString,
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        target: String,
+        target: compact_str::CompactString,
 
         read_only: bool,
         user_mountable: bool,

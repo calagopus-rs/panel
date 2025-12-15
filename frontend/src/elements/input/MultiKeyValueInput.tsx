@@ -1,10 +1,10 @@
-import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop';
 import { faCheck, faGripVertical, faPencil, faTrash, faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ActionIcon, Badge, Button, Group, Input, Stack, Text, TextInput } from '@mantine/core';
 import { ComponentProps, useEffect, useRef, useState } from 'react';
-import Card from '../Card';
-import { useTranslations } from '@/providers/TranslationProvider';
+import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
+import { useTranslations } from '@/providers/TranslationProvider.tsx';
+import Card from '../Card.tsx';
 
 interface MultiKeyValueInputProps {
   label?: string;

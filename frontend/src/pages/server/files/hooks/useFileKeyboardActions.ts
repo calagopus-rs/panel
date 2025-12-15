@@ -1,5 +1,5 @@
-import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts';
-import { useServerStore } from '@/stores/server';
+import { useKeyboardShortcuts } from '@/plugins/useKeyboardShortcuts.ts';
+import { useServerStore } from '@/stores/server.ts';
 
 interface UseFileKeyboardActionsOptions {
   onDelete?: () => void;

@@ -10,21 +10,21 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
 import { createSearchParams, useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import deleteBackup from '@/api/server/backups/deleteBackup';
-import downloadBackup from '@/api/server/backups/downloadBackup';
-import Code from '@/elements/Code';
-import ContextMenu from '@/elements/ContextMenu';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import Progress from '@/elements/Progress';
-import { TableData, TableRow } from '@/elements/Table';
-import { streamingArchiveFormatLabelMapping } from '@/lib/enums';
-import { bytesToString } from '@/lib/size';
-import { formatTimestamp } from '@/lib/time';
-import { useToast } from '@/providers/ToastProvider';
-import { useServerStore } from '@/stores/server';
-import BackupEditModal from './modals/BackupEditModal';
-import BackupRestoreModal from './modals/BackupRestoreModal';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import deleteBackup from '@/api/server/backups/deleteBackup.ts';
+import downloadBackup from '@/api/server/backups/downloadBackup.ts';
+import Code from '@/elements/Code.tsx';
+import ContextMenu from '@/elements/ContextMenu.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import Progress from '@/elements/Progress.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import { streamingArchiveFormatLabelMapping } from '@/lib/enums.ts';
+import { bytesToString } from '@/lib/size.ts';
+import { formatTimestamp } from '@/lib/time.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useServerStore } from '@/stores/server.ts';
+import BackupEditModal from './modals/BackupEditModal.tsx';
+import BackupRestoreModal from './modals/BackupRestoreModal.tsx';
 
 export default function BackupRow({ backup }: { backup: ServerBackupWithProgress }) {
   const { addToast } = useToast();

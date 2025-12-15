@@ -200,7 +200,7 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         enabled: Option<bool>,
 
         triggers: Option<Vec<wings_api::ScheduleTrigger>>,

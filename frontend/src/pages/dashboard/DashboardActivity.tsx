@@ -1,14 +1,14 @@
 import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
-import { getEmptyPaginationSet } from '@/api/axios';
-import getUserActivity from '@/api/me/getUserActivity';
-import ActivityInfoButton from '@/elements/activity/ActivityInfoButton';
-import Code from '@/elements/Code';
-import TextInput from '@/elements/input/TextInput';
-import Table, { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
-import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import getUserActivity from '@/api/me/getUserActivity.ts';
+import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
+import Code from '@/elements/Code.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import Table, { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
+import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 
 export default function DashboardActivity() {
   const [activities, setActivities] = useState<ResponseMeta<UserActivity>>(getEmptyPaginationSet());

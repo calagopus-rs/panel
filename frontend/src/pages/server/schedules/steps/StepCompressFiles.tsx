@@ -1,9 +1,9 @@
 import { Stack } from '@mantine/core';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import TagsInput from '@/elements/input/TagsInput';
-import { archiveFormatLabelMapping } from '@/lib/enums';
-import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import { archiveFormatLabelMapping } from '@/lib/enums.ts';
+import ScheduleDynamicParameterInput from '../ScheduleDynamicParameterInput.tsx';
 
 export default function StepCompressFiles({
   action,

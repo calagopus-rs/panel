@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (userUuid: string, oauthProviderUuid: string, identifier: string): Promise<UserOAuthLink> => {
   return new Promise((resolve, reject) => {

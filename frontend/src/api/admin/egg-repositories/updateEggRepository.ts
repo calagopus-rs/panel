@@ -1,5 +1,5 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
+import { axiosInstance } from '@/api/axios.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 export default async (eggRepositoryUuid: string, data: AdminUpdateEggRepository): Promise<void> => {
   return new Promise((resolve, reject) => {

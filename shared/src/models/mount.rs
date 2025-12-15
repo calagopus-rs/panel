@@ -11,11 +11,11 @@ use utoipa::ToSchema;
 pub struct Mount {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub source: String,
-    pub target: String,
+    pub source: compact_str::CompactString,
+    pub target: compact_str::CompactString,
 
     pub read_only: bool,
     pub user_mountable: bool,
@@ -27,18 +27,36 @@ impl BaseModel for Mount {
     const NAME: &'static str = "mount";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("mounts.uuid", format!("{prefix}uuid")),
-            ("mounts.name", format!("{prefix}name")),
-            ("mounts.description", format!("{prefix}description")),
-            ("mounts.source", format!("{prefix}source")),
-            ("mounts.target", format!("{prefix}target")),
-            ("mounts.read_only", format!("{prefix}read_only")),
-            ("mounts.user_mountable", format!("{prefix}user_mountable")),
-            ("mounts.created", format!("{prefix}created")),
+            ("mounts.uuid", compact_str::format_compact!("{prefix}uuid")),
+            ("mounts.name", compact_str::format_compact!("{prefix}name")),
+            (
+                "mounts.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "mounts.source",
+                compact_str::format_compact!("{prefix}source"),
+            ),
+            (
+                "mounts.target",
+                compact_str::format_compact!("{prefix}target"),
+            ),
+            (
+                "mounts.read_only",
+                compact_str::format_compact!("{prefix}read_only"),
+            ),
+            (
+                "mounts.user_mountable",
+                compact_str::format_compact!("{prefix}user_mountable"),
+            ),
+            (
+                "mounts.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -47,14 +65,16 @@ impl BaseModel for Mount {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            source: row.try_get(format!("{prefix}source").as_str())?,
-            target: row.try_get(format!("{prefix}target").as_str())?,
-            read_only: row.try_get(format!("{prefix}read_only").as_str())?,
-            user_mountable: row.try_get(format!("{prefix}user_mountable").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            source: row.try_get(compact_str::format_compact!("{prefix}source").as_str())?,
+            target: row.try_get(compact_str::format_compact!("{prefix}target").as_str())?,
+            read_only: row.try_get(compact_str::format_compact!("{prefix}read_only").as_str())?,
+            user_mountable: row
+                .try_get(compact_str::format_compact!("{prefix}user_mountable").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -230,11 +250,11 @@ impl DeletableModel for Mount {
 pub struct AdminApiMount {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub source: String,
-    pub target: String,
+    pub source: compact_str::CompactString,
+    pub target: compact_str::CompactString,
 
     pub read_only: bool,
     pub user_mountable: bool,

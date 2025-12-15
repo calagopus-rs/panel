@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (backupConfigUuid: string): Promise<BackupConfiguration> => {
   return new Promise((resolve, reject) => {

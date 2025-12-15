@@ -1,11 +1,11 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import getMe from '@/api/me/getMe';
-import logout from '@/api/me/logout';
-import Spinner from '@/elements/Spinner';
-import { useToast } from './ToastProvider';
-import { useTranslations } from './TranslationProvider';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import getMe from '@/api/me/getMe.ts';
+import logout from '@/api/me/logout.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import { useToast } from './ToastProvider.tsx';
+import { useTranslations } from './TranslationProvider.tsx';
 
 interface AuthContextType {
   user: User | null;

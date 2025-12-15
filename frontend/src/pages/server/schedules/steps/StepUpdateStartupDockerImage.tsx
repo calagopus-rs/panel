@@ -1,7 +1,7 @@
 import { Stack } from '@mantine/core';
-import Select from '@/elements/input/Select';
-import Switch from '@/elements/input/Switch';
-import { useServerStore } from '@/stores/server';
+import Select from '@/elements/input/Select.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import { useServerStore } from '@/stores/server.ts';
 
 export default function StepUpdateStartupDockerImage({
   action,

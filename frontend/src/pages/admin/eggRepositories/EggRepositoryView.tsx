@@ -2,13 +2,13 @@ import { faCog, faEgg } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
-import { httpErrorToHuman } from '@/api/axios';
-import Spinner from '@/elements/Spinner';
-import SubNavigation from '@/elements/SubNavigation';
-import { useToast } from '@/providers/ToastProvider';
-import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate';
-import getEggRepository from '@/api/admin/egg-repositories/getEggRepository';
-import EggRepositoryEggs from './eggs/EggRepositoryEggs';
+import getEggRepository from '@/api/admin/egg-repositories/getEggRepository.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Spinner from '@/elements/Spinner.tsx';
+import SubNavigation from '@/elements/SubNavigation.tsx';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import EggRepositoryCreateOrUpdate from './EggRepositoryCreateOrUpdate.tsx';
+import EggRepositoryEggs from './eggs/EggRepositoryEggs.tsx';
 
 export default function EggRepositoryView() {
   const params = useParams<'eggRepositoryId'>();

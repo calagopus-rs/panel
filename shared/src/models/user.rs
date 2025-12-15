@@ -26,12 +26,12 @@ pub type GetPermissionManager = axum::extract::Extension<PermissionManager>;
 #[derive(Clone)]
 pub struct PermissionManager {
     user_admin: bool,
-    role_admin_permissions: Option<Arc<Vec<String>>>,
-    role_server_permissions: Option<Arc<Vec<String>>>,
-    api_key_user_permissions: Option<Arc<Vec<String>>>,
-    api_key_admin_permissions: Option<Arc<Vec<String>>>,
-    api_key_server_permissions: Option<Arc<Vec<String>>>,
-    server_subuser_permissions: Option<Arc<Vec<String>>>,
+    role_admin_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    role_server_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    api_key_user_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    api_key_admin_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    api_key_server_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    server_subuser_permissions: Option<Arc<Vec<compact_str::CompactString>>>,
 }
 
 impl PermissionManager {
@@ -55,7 +55,10 @@ impl PermissionManager {
         self
     }
 
-    pub fn add_subuser_permissions(mut self, permissions: Option<Arc<Vec<String>>>) -> Self {
+    pub fn add_subuser_permissions(
+        mut self,
+        permissions: Option<Arc<Vec<compact_str::CompactString>>>,
+    ) -> Self {
         self.server_subuser_permissions = permissions;
 
         self
@@ -175,20 +178,20 @@ pub enum UserToastPosition {
 pub struct User {
     pub uuid: uuid::Uuid,
     pub role: Option<super::role::Role>,
-    pub external_id: Option<String>,
+    pub external_id: Option<compact_str::CompactString>,
 
     pub avatar: Option<String>,
-    pub username: String,
-    pub email: String,
+    pub username: compact_str::CompactString,
+    pub email: compact_str::CompactString,
 
-    pub name_first: String,
-    pub name_last: String,
+    pub name_first: compact_str::CompactString,
+    pub name_last: compact_str::CompactString,
 
     pub admin: bool,
     pub totp_enabled: bool,
     pub totp_secret: Option<String>,
 
-    pub language: String,
+    pub language: compact_str::CompactString,
     pub toast_position: UserToastPosition,
     pub start_on_grouped_servers: bool,
 
@@ -199,27 +202,57 @@ impl BaseModel for User {
     const NAME: &'static str = "user";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("users.uuid", format!("{prefix}uuid")),
-            ("users.external_id", format!("{prefix}external_id")),
-            ("users.avatar", format!("{prefix}avatar")),
-            ("users.username", format!("{prefix}username")),
-            ("users.email", format!("{prefix}email")),
-            ("users.name_first", format!("{prefix}name_first")),
-            ("users.name_last", format!("{prefix}name_last")),
-            ("users.admin", format!("{prefix}admin")),
-            ("users.totp_enabled", format!("{prefix}totp_enabled")),
-            ("users.totp_secret", format!("{prefix}totp_secret")),
-            ("users.language", format!("{prefix}language")),
-            ("users.toast_position", format!("{prefix}toast_position")),
+            ("users.uuid", compact_str::format_compact!("{prefix}uuid")),
+            (
+                "users.external_id",
+                compact_str::format_compact!("{prefix}external_id"),
+            ),
+            (
+                "users.avatar",
+                compact_str::format_compact!("{prefix}avatar"),
+            ),
+            (
+                "users.username",
+                compact_str::format_compact!("{prefix}username"),
+            ),
+            ("users.email", compact_str::format_compact!("{prefix}email")),
+            (
+                "users.name_first",
+                compact_str::format_compact!("{prefix}name_first"),
+            ),
+            (
+                "users.name_last",
+                compact_str::format_compact!("{prefix}name_last"),
+            ),
+            ("users.admin", compact_str::format_compact!("{prefix}admin")),
+            (
+                "users.totp_enabled",
+                compact_str::format_compact!("{prefix}totp_enabled"),
+            ),
+            (
+                "users.totp_secret",
+                compact_str::format_compact!("{prefix}totp_secret"),
+            ),
+            (
+                "users.language",
+                compact_str::format_compact!("{prefix}language"),
+            ),
+            (
+                "users.toast_position",
+                compact_str::format_compact!("{prefix}toast_position"),
+            ),
             (
                 "users.start_on_grouped_servers",
-                format!("{prefix}start_on_grouped_servers"),
+                compact_str::format_compact!("{prefix}start_on_grouped_servers"),
             ),
-            ("users.created", format!("{prefix}created")),
+            (
+                "users.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::role::Role::columns(Some("role_")));
@@ -232,29 +265,36 @@ impl BaseModel for User {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             role: if row
-                .try_get::<uuid::Uuid, _>(format!("{prefix}role_uuid").as_str())
+                .try_get::<uuid::Uuid, _>(
+                    compact_str::format_compact!("{prefix}role_uuid").as_str(),
+                )
                 .is_ok()
             {
                 Some(super::role::Role::map(Some("role_"), row)?)
             } else {
                 None
             },
-            external_id: row.try_get(format!("{prefix}external_id").as_str())?,
-            avatar: row.try_get(format!("{prefix}avatar").as_str())?,
-            username: row.try_get(format!("{prefix}username").as_str())?,
-            email: row.try_get(format!("{prefix}email").as_str())?,
-            name_first: row.try_get(format!("{prefix}name_first").as_str())?,
-            name_last: row.try_get(format!("{prefix}name_last").as_str())?,
-            admin: row.try_get(format!("{prefix}admin").as_str())?,
-            totp_enabled: row.try_get(format!("{prefix}totp_enabled").as_str())?,
-            totp_secret: row.try_get(format!("{prefix}totp_secret").as_str())?,
-            language: row.try_get(format!("{prefix}language").as_str())?,
-            toast_position: row.try_get(format!("{prefix}toast_position").as_str())?,
-            start_on_grouped_servers: row
-                .try_get(format!("{prefix}start_on_grouped_servers").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            external_id: row
+                .try_get(compact_str::format_compact!("{prefix}external_id").as_str())?,
+            avatar: row.try_get(compact_str::format_compact!("{prefix}avatar").as_str())?,
+            username: row.try_get(compact_str::format_compact!("{prefix}username").as_str())?,
+            email: row.try_get(compact_str::format_compact!("{prefix}email").as_str())?,
+            name_first: row.try_get(compact_str::format_compact!("{prefix}name_first").as_str())?,
+            name_last: row.try_get(compact_str::format_compact!("{prefix}name_last").as_str())?,
+            admin: row.try_get(compact_str::format_compact!("{prefix}admin").as_str())?,
+            totp_enabled: row
+                .try_get(compact_str::format_compact!("{prefix}totp_enabled").as_str())?,
+            totp_secret: row
+                .try_get(compact_str::format_compact!("{prefix}totp_secret").as_str())?,
+            language: row.try_get(compact_str::format_compact!("{prefix}language").as_str())?,
+            toast_position: row
+                .try_get(compact_str::format_compact!("{prefix}toast_position").as_str())?,
+            start_on_grouped_servers: row.try_get(
+                compact_str::format_compact!("{prefix}start_on_grouped_servers").as_str(),
+            )?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -776,8 +816,8 @@ impl ByUuid for User {
 pub struct ApiUser {
     pub uuid: uuid::Uuid,
 
-    pub username: String,
-    pub role: Option<String>,
+    pub username: compact_str::CompactString,
+    pub role: Option<compact_str::CompactString>,
     pub avatar: Option<String>,
 
     pub admin: bool,
@@ -791,18 +831,18 @@ pub struct ApiUser {
 pub struct ApiFullUser {
     pub uuid: uuid::Uuid,
 
-    pub username: String,
+    pub username: compact_str::CompactString,
     pub role: Option<super::role::AdminApiRole>,
     pub avatar: Option<String>,
-    pub email: String,
+    pub email: compact_str::CompactString,
 
-    pub name_first: String,
-    pub name_last: String,
+    pub name_first: compact_str::CompactString,
+    pub name_last: compact_str::CompactString,
 
     pub admin: bool,
     pub totp_enabled: bool,
 
-    pub language: String,
+    pub language: compact_str::CompactString,
     pub toast_position: UserToastPosition,
     pub start_on_grouped_servers: bool,
 

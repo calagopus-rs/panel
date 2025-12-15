@@ -1,4 +1,4 @@
-import { axiosInstance } from '@/api/axios';
+import { axiosInstance } from '@/api/axios.ts';
 
 export default async (page: number): Promise<ResponseMeta<UserOAuthLink>> => {
   return new Promise((resolve, reject) => {

@@ -12,9 +12,9 @@ use utoipa::ToSchema;
 pub struct EggRepository {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub git_repository: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub git_repository: compact_str::CompactString,
 
     pub last_synced: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
@@ -24,25 +24,34 @@ impl BaseModel for EggRepository {
     const NAME: &'static str = "egg_repository";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("egg_repositories.uuid", format!("{prefix}uuid")),
-            ("egg_repositories.name", format!("{prefix}name")),
+            (
+                "egg_repositories.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "egg_repositories.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
             (
                 "egg_repositories.description",
-                format!("{prefix}description"),
+                compact_str::format_compact!("{prefix}description"),
             ),
             (
                 "egg_repositories.git_repository",
-                format!("{prefix}git_repository"),
+                compact_str::format_compact!("{prefix}git_repository"),
             ),
             (
                 "egg_repositories.last_synced",
-                format!("{prefix}last_synced"),
+                compact_str::format_compact!("{prefix}last_synced"),
             ),
-            ("egg_repositories.created", format!("{prefix}created")),
+            (
+                "egg_repositories.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -51,12 +60,15 @@ impl BaseModel for EggRepository {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            git_repository: row.try_get(format!("{prefix}git_repository").as_str())?,
-            last_synced: row.try_get(format!("{prefix}last_synced").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            git_repository: row
+                .try_get(compact_str::format_compact!("{prefix}git_repository").as_str())?,
+            last_synced: row
+                .try_get(compact_str::format_compact!("{prefix}last_synced").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -287,9 +299,9 @@ impl DeletableModel for EggRepository {
 pub struct AdminApiEggRepository {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub git_repository: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub git_repository: compact_str::CompactString,
 
     pub last_synced: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,

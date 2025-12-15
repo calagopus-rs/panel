@@ -3,21 +3,21 @@ import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
-import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable';
-import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable';
-import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable';
-import { httpErrorToHuman } from '@/api/axios';
-import Button from '@/elements/Button';
-import Card from '@/elements/Card';
-import Code from '@/elements/Code';
-import Switch from '@/elements/input/Switch';
-import TagsInput from '@/elements/input/TagsInput';
-import TextArea from '@/elements/input/TextArea';
-import TextInput from '@/elements/input/TextInput';
-import ConfirmationModal from '@/elements/modals/ConfirmationModal';
-import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs';
-import { useToast } from '@/providers/ToastProvider';
-import { useAdminStore } from '@/stores/admin';
+import createEggVariable from '@/api/admin/nests/eggs/variables/createEggVariable.ts';
+import deleteEggVariable from '@/api/admin/nests/eggs/variables/deleteEggVariable.ts';
+import updateEggVariable from '@/api/admin/nests/eggs/variables/updateEggVariable.ts';
+import { httpErrorToHuman } from '@/api/axios.ts';
+import Button from '@/elements/Button.tsx';
+import Card from '@/elements/Card.tsx';
+import Code from '@/elements/Code.tsx';
+import Switch from '@/elements/input/Switch.tsx';
+import TagsInput from '@/elements/input/TagsInput.tsx';
+import TextArea from '@/elements/input/TextArea.tsx';
+import TextInput from '@/elements/input/TextInput.tsx';
+import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
+import { adminEggVariableSchema } from '@/lib/schemas/admin/eggs.ts';
+import { useToast } from '@/providers/ToastProvider.tsx';
+import { useAdminStore } from '@/stores/admin.tsx';
 
 export default function EggVariableContainer({
   contextNest,
@@ -132,45 +132,47 @@ export default function EggVariableContainer({
       </ConfirmationModal>
 
       <Card className='flex flex-col justify-between h-full'>
-        <Stack>
-          <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
+        <form onSubmit={form.onSubmit(doCreateOrUpdate)}>
+          <Stack>
+            <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
 
-          <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
+            <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} />
 
-          <Group grow>
-            <TextInput
-              withAsterisk
-              label='Environment Variable'
-              placeholder='Environment Variable'
-              {...form.getInputProps('envVariable')}
-              onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
-            />
+            <Group grow>
+              <TextInput
+                withAsterisk
+                label='Environment Variable'
+                placeholder='Environment Variable'
+                {...form.getInputProps('envVariable')}
+                onChange={(e) => form.setFieldValue('envVariable', e.target.value.toUpperCase())}
+              />
 
-            <TextInput
-              withAsterisk
-              label='Default Value'
-              placeholder='server.jar'
-              {...form.getInputProps('defaultValue')}
-            />
+              <TextInput
+                withAsterisk
+                label='Default Value'
+                placeholder='server.jar'
+                {...form.getInputProps('defaultValue')}
+              />
+            </Group>
+
+            <Group grow>
+              <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
+
+              <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
+            </Group>
+
+            <TagsInput label='Rules' {...form.getInputProps('rules')} />
+          </Stack>
+
+          <Group pt='md' mt='auto'>
+            <Button type='submit' disabled={!form.isValid()} loading={loading}>
+              Save
+            </Button>
+            <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
+              Remove
+            </Button>
           </Group>
-
-          <Group grow>
-            <Switch label='User Viewable' name='user_viewable' {...form.getInputProps('userViewable')} />
-
-            <Switch label='User Editable' name='user_editable' {...form.getInputProps('userEditable')} />
-          </Group>
-
-          <TagsInput label='Rules' {...form.getInputProps('rules')} />
-        </Stack>
-
-        <Group pt='md' mt='auto'>
-          <Button onClick={doCreateOrUpdate} disabled={!form.isValid()} loading={loading}>
-            Save
-          </Button>
-          <Button color='red' variant='outline' onClick={() => setOpenModal('delete')}>
-            Remove
-          </Button>
-        </Group>
+        </form>
       </Card>
     </>
   );

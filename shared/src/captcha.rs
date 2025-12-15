@@ -63,9 +63,9 @@ impl Captcha {
                 let response = CLIENT
                     .get("https://www.google.com/recaptcha/api/siteverify")
                     .query(&[
-                        ("secret", secret_key),
-                        ("response", &captcha),
-                        ("remoteip", &ip.to_string()),
+                        ("secret", secret_key.as_str()),
+                        ("response", captcha.as_str()),
+                        ("remoteip", ip.to_string().as_str()),
                     ])
                     .send()
                     .await

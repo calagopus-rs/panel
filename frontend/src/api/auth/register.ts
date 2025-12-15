@@ -1,8 +1,7 @@
-import { axiosInstance } from '@/api/axios';
-import { transformKeysToSnakeCase } from '@/lib/transformers';
 import { z } from 'zod';
-
-import { authRegisterSchema } from '@/lib/schemas/auth';
+import { axiosInstance } from '@/api/axios.ts';
+import { authRegisterSchema } from '@/lib/schemas/auth.ts';
+import { transformKeysToSnakeCase } from '@/lib/transformers.ts';
 
 interface Data extends z.infer<typeof authRegisterSchema> {
   captcha?: string | null;

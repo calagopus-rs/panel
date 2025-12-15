@@ -1,6 +1,6 @@
-import { getEmptyPaginationSet } from '@/api/axios';
-import { AdminStore } from '@/stores/admin';
 import { StateCreator } from 'zustand';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
+import { AdminStore } from '@/stores/admin.tsx';
 
 export interface MountsSlice {
   mounts: ResponseMeta<Mount>;

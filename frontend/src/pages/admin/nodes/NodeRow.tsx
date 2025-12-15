@@ -2,12 +2,12 @@ import { faGlobe, faHeart, faHeartBroken } from '@fortawesome/free-solid-svg-ico
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router';
-import { axiosInstance } from '@/api/axios';
-import Code from '@/elements/Code';
-import Spinner from '@/elements/Spinner';
-import { TableData, TableRow } from '@/elements/Table';
-import Tooltip from '@/elements/Tooltip';
-import { formatDateTime, formatTimestamp } from '@/lib/time';
+import { axiosInstance } from '@/api/axios.ts';
+import Code from '@/elements/Code.tsx';
+import Spinner from '@/elements/Spinner.tsx';
+import { TableData, TableRow } from '@/elements/Table.tsx';
+import Tooltip from '@/elements/Tooltip.tsx';
+import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 
 export default function NodeRow({ node }: { node: Node }) {
   const [version, setVersion] = useState<string | null>(null);
