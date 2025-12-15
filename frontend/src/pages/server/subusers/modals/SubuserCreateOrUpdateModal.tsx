@@ -35,7 +35,7 @@ export default function SubuserCreateOrUpdateModal({ subuser, onCreate, onUpdate
   useEffect(() => {
     if (subuser) {
       form.setValues({
-        email: subuser.user.email,
+        email: 'unknown@email.com',
         permissions: subuser.permissions,
         ignoredFiles: subuser.ignoredFiles,
       });
