@@ -15,8 +15,8 @@ mod post {
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
-        query: String,
+        root: compact_str::CompactString,
+        query: compact_str::CompactString,
 
         #[serde(default)]
         #[schema(default = false)]

@@ -19,17 +19,17 @@ impl BaseModel for LocationDatabaseHost {
     const NAME: &'static str = "location_database_host";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
             (
                 "location_database_hosts.location_uuid",
-                format!("{prefix}location_uuid"),
+                compact_str::format_compact!("{prefix}location_uuid"),
             ),
             (
                 "location_database_hosts.created",
-                format!("{prefix}created"),
+                compact_str::format_compact!("{prefix}created"),
             ),
         ]);
 
@@ -46,10 +46,10 @@ impl BaseModel for LocationDatabaseHost {
 
         Ok(Self {
             location: super::location::Location::get_fetchable(
-                row.try_get(format!("{prefix}location_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}location_uuid").as_str())?,
             ),
             database_host: super::database_host::DatabaseHost::map(Some("database_host_"), row)?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

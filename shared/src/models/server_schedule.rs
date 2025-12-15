@@ -12,7 +12,7 @@ use validator::Validate;
 pub struct ExportedServerSchedule {
     #[validate(length(min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
@@ -25,7 +25,7 @@ pub struct ExportedServerSchedule {
 pub struct ServerSchedule {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,
@@ -40,21 +40,42 @@ impl BaseModel for ServerSchedule {
     const NAME: &'static str = "server_schedule";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("server_schedules.uuid", format!("{prefix}uuid")),
-            ("server_schedules.name", format!("{prefix}name")),
-            ("server_schedules.enabled", format!("{prefix}enabled")),
-            ("server_schedules.triggers", format!("{prefix}triggers")),
-            ("server_schedules.condition", format!("{prefix}condition")),
-            ("server_schedules.last_run", format!("{prefix}last_run")),
+            (
+                "server_schedules.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "server_schedules.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "server_schedules.enabled",
+                compact_str::format_compact!("{prefix}enabled"),
+            ),
+            (
+                "server_schedules.triggers",
+                compact_str::format_compact!("{prefix}triggers"),
+            ),
+            (
+                "server_schedules.condition",
+                compact_str::format_compact!("{prefix}condition"),
+            ),
+            (
+                "server_schedules.last_run",
+                compact_str::format_compact!("{prefix}last_run"),
+            ),
             (
                 "server_schedules.last_failure",
-                format!("{prefix}last_failure"),
+                compact_str::format_compact!("{prefix}last_failure"),
             ),
-            ("server_schedules.created", format!("{prefix}created")),
+            (
+                "server_schedules.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -63,14 +84,19 @@ impl BaseModel for ServerSchedule {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            enabled: row.try_get(format!("{prefix}enabled").as_str())?,
-            triggers: serde_json::from_value(row.try_get(format!("{prefix}triggers").as_str())?)?,
-            condition: serde_json::from_value(row.try_get(format!("{prefix}condition").as_str())?)?,
-            last_run: row.try_get(format!("{prefix}last_run").as_str())?,
-            last_failure: row.try_get(format!("{prefix}last_failure").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            enabled: row.try_get(compact_str::format_compact!("{prefix}enabled").as_str())?,
+            triggers: serde_json::from_value(
+                row.try_get(compact_str::format_compact!("{prefix}triggers").as_str())?,
+            )?,
+            condition: serde_json::from_value(
+                row.try_get(compact_str::format_compact!("{prefix}condition").as_str())?,
+            )?,
+            last_run: row.try_get(compact_str::format_compact!("{prefix}last_run").as_str())?,
+            last_failure: row
+                .try_get(compact_str::format_compact!("{prefix}last_failure").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -276,7 +302,7 @@ impl DeletableModel for ServerSchedule {
 pub struct ApiServerSchedule {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub enabled: bool,
 
     pub triggers: Vec<wings_api::ScheduleTrigger>,

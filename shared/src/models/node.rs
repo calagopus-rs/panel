@@ -16,13 +16,13 @@ pub struct Node {
     pub location: super::location::Location,
     pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub public: bool,
-    pub description: Option<String>,
+    pub description: Option<compact_str::CompactString>,
 
     pub public_url: Option<reqwest::Url>,
     pub url: reqwest::Url,
-    pub sftp_host: Option<String>,
+    pub sftp_host: Option<compact_str::CompactString>,
     pub sftp_port: i32,
 
     pub maintenance_message: Option<String>,
@@ -30,7 +30,7 @@ pub struct Node {
     pub memory: i64,
     pub disk: i64,
 
-    pub token_id: String,
+    pub token_id: compact_str::CompactString,
     pub token: Vec<u8>,
 
     pub created: chrono::NaiveDateTime,
@@ -40,31 +40,55 @@ impl BaseModel for Node {
     const NAME: &'static str = "node";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("nodes.uuid", format!("{prefix}uuid")),
+            ("nodes.uuid", compact_str::format_compact!("{prefix}uuid")),
             (
                 "nodes.backup_configuration_uuid",
-                format!("{prefix}node_backup_configuration_uuid"),
+                compact_str::format_compact!("{prefix}node_backup_configuration_uuid"),
             ),
-            ("nodes.name", format!("{prefix}name")),
-            ("nodes.public", format!("{prefix}public")),
-            ("nodes.description", format!("{prefix}description")),
-            ("nodes.public_url", format!("{prefix}public_url")),
-            ("nodes.url", format!("{prefix}url")),
-            ("nodes.sftp_host", format!("{prefix}sftp_host")),
-            ("nodes.sftp_port", format!("{prefix}sftp_port")),
+            ("nodes.name", compact_str::format_compact!("{prefix}name")),
+            (
+                "nodes.public",
+                compact_str::format_compact!("{prefix}public"),
+            ),
+            (
+                "nodes.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "nodes.public_url",
+                compact_str::format_compact!("{prefix}public_url"),
+            ),
+            ("nodes.url", compact_str::format_compact!("{prefix}url")),
+            (
+                "nodes.sftp_host",
+                compact_str::format_compact!("{prefix}sftp_host"),
+            ),
+            (
+                "nodes.sftp_port",
+                compact_str::format_compact!("{prefix}sftp_port"),
+            ),
             (
                 "nodes.maintenance_message",
-                format!("{prefix}maintenance_message"),
+                compact_str::format_compact!("{prefix}maintenance_message"),
             ),
-            ("nodes.memory", format!("{prefix}memory")),
-            ("nodes.disk", format!("{prefix}disk")),
-            ("nodes.token_id", format!("{prefix}token_id")),
-            ("nodes.token", format!("{prefix}token")),
-            ("nodes.created", format!("{prefix}created")),
+            (
+                "nodes.memory",
+                compact_str::format_compact!("{prefix}memory"),
+            ),
+            ("nodes.disk", compact_str::format_compact!("{prefix}disk")),
+            (
+                "nodes.token_id",
+                compact_str::format_compact!("{prefix}token_id"),
+            ),
+            ("nodes.token", compact_str::format_compact!("{prefix}token")),
+            (
+                "nodes.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::location::Location::columns(Some("location_")));
@@ -77,32 +101,36 @@ impl BaseModel for Node {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             location: super::location::Location::map(Some("location_"), row)?,
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
-                    format!("{prefix}node_backup_configuration_uuid"),
+                    compact_str::format_compact!("{prefix}node_backup_configuration_uuid"),
                 ),
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            public: row.try_get(format!("{prefix}public").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            public: row.try_get(compact_str::format_compact!("{prefix}public").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
             public_url: row
-                .try_get::<Option<String>, _>(format!("{prefix}public_url").as_str())?
+                .try_get::<Option<String>, _>(
+                    compact_str::format_compact!("{prefix}public_url").as_str(),
+                )?
                 .try_map(|url| url.parse())
                 .map_err(anyhow::Error::new)?,
             url: row
-                .try_get::<String, _>(format!("{prefix}url").as_str())?
+                .try_get::<String, _>(compact_str::format_compact!("{prefix}url").as_str())?
                 .parse()
                 .map_err(anyhow::Error::new)?,
-            sftp_host: row.try_get(format!("{prefix}sftp_host").as_str())?,
-            sftp_port: row.try_get(format!("{prefix}sftp_port").as_str())?,
-            maintenance_message: row.try_get(format!("{prefix}maintenance_message").as_str())?,
-            memory: row.try_get(format!("{prefix}memory").as_str())?,
-            disk: row.try_get(format!("{prefix}disk").as_str())?,
-            token_id: row.try_get(format!("{prefix}token_id").as_str())?,
-            token: row.try_get(format!("{prefix}token").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            sftp_host: row.try_get(compact_str::format_compact!("{prefix}sftp_host").as_str())?,
+            sftp_port: row.try_get(compact_str::format_compact!("{prefix}sftp_port").as_str())?,
+            maintenance_message: row
+                .try_get(compact_str::format_compact!("{prefix}maintenance_message").as_str())?,
+            memory: row.try_get(compact_str::format_compact!("{prefix}memory").as_str())?,
+            disk: row.try_get(compact_str::format_compact!("{prefix}disk").as_str())?,
+            token_id: row.try_get(compact_str::format_compact!("{prefix}token_id").as_str())?,
+            token: row.try_get(compact_str::format_compact!("{prefix}token").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -377,7 +405,7 @@ impl Node {
     ) -> wings_api::client::WingsClient {
         wings_api::client::WingsClient::new(
             self.url.to_string(),
-            database.decrypt_sync(&self.token).unwrap(),
+            database.decrypt_sync(&self.token).unwrap().into(),
         )
     }
 
@@ -506,15 +534,15 @@ pub struct AdminApiNode {
     pub location: super::location::AdminApiLocation,
     pub backup_configuration: Option<super::backup_configurations::AdminApiBackupConfiguration>,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub public: bool,
-    pub description: Option<String>,
+    pub description: Option<compact_str::CompactString>,
 
     #[schema(format = "uri")]
     pub public_url: Option<String>,
     #[schema(format = "uri")]
     pub url: String,
-    pub sftp_host: Option<String>,
+    pub sftp_host: Option<compact_str::CompactString>,
     pub sftp_port: i32,
 
     pub maintenance_message: Option<String>,
@@ -522,8 +550,8 @@ pub struct AdminApiNode {
     pub memory: i64,
     pub disk: i64,
 
-    pub token_id: String,
-    pub token: String,
+    pub token_id: compact_str::CompactString,
+    pub token: compact_str::CompactString,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

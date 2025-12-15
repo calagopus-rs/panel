@@ -8,7 +8,7 @@ mod get {
 
     #[derive(ToSchema, Serialize)]
     struct Response<'a> {
-        languages: &'a [String],
+        languages: &'a [compact_str::CompactString],
     }
 
     #[utoipa::path(get, path = "/", responses(

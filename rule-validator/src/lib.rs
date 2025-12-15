@@ -4,7 +4,7 @@ use validator::ValidationError;
 mod rules;
 
 #[inline]
-pub fn validate_rules(rules: &[String]) -> Result<(), ValidationError> {
+pub fn validate_rules(rules: &[compact_str::CompactString]) -> Result<(), ValidationError> {
     for rule in rules {
         if let Err(err) = rules::parse_validation_rule(rule) {
             return Err(ValidationError::new("invalid").with_message(err.into()));
@@ -20,7 +20,9 @@ pub struct Validator<'a> {
 }
 
 impl<'a> Validator<'a> {
-    pub fn new(data: HashMap<&'a str, (&'a [String], &'a str)>) -> Result<Self, String> {
+    pub fn new(
+        data: HashMap<&'a str, (&'a [compact_str::CompactString], &'a str)>,
+    ) -> Result<Self, compact_str::CompactString> {
         let mut rules: HashMap<&'a str, Vec<Box<dyn ValidateRule>>> = HashMap::new();
         for (key, (key_rules, _)) in &data {
             let mut rule_objects: Vec<Box<dyn ValidateRule>> = Vec::new();
@@ -28,7 +30,9 @@ impl<'a> Validator<'a> {
             for rule in key_rules.iter() {
                 match rules::parse_validation_rule(rule) {
                     Ok(parsed_rule) => rule_objects.push(parsed_rule),
-                    Err(err) => return Err(format!("invalid rule '{rule}': {err}")),
+                    Err(err) => {
+                        return Err(compact_str::format_compact!("invalid rule '{rule}': {err}"));
+                    }
                 }
             }
 
@@ -81,9 +85,15 @@ impl<'a> Validator<'a> {
 pub trait ValidateRule: Send + Sync {
     fn label(&self) -> &'static str;
 
-    fn validate(&self, key: &str, validator: &Validator) -> Result<bool, String>;
+    fn validate(
+        &self,
+        key: &str,
+        validator: &Validator,
+    ) -> Result<bool, compact_str::CompactString>;
 }
 
 pub trait ParseValidationRule: Send + Sync {
-    fn parse_rule(rules: &[String]) -> Result<Box<dyn ValidateRule>, String>;
+    fn parse_rule(
+        rules: &[compact_str::CompactString],
+    ) -> Result<Box<dyn ValidateRule>, compact_str::CompactString>;
 }

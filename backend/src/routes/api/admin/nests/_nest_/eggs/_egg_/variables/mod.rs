@@ -71,15 +71,15 @@ mod post {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: String,
+        name: compact_str::CompactString,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
         order: i16,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        env_variable: String,
+        env_variable: compact_str::CompactString,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         default_value: Option<String>,
@@ -87,7 +87,7 @@ mod post {
         user_viewable: bool,
         user_editable: bool,
         #[validate(custom(function = "rule_validator::validate_rules"))]
-        rules: Vec<String>,
+        rules: Vec<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]

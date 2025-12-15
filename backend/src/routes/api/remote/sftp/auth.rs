@@ -21,7 +21,7 @@ mod post {
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
         r#type: AuthenticationType,
-        username: String,
+        username: compact_str::CompactString,
         password: String,
     }
 
@@ -31,7 +31,7 @@ mod post {
         server: uuid::Uuid,
 
         permissions: Vec<&'a str>,
-        ignored_files: &'a [String],
+        ignored_files: &'a [compact_str::CompactString],
     }
 
     #[utoipa::path(post, path = "/", responses(

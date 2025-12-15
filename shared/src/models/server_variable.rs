@@ -17,12 +17,18 @@ impl BaseModel for ServerVariable {
     const NAME: &'static str = "server_variable";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("server_variables.value", format!("{prefix}value")),
-            ("server_variables.created", format!("{prefix}created")),
+            (
+                "server_variables.value",
+                compact_str::format_compact!("{prefix}value"),
+            ),
+            (
+                "server_variables.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::nest_egg_variable::NestEggVariable::columns(Some(
@@ -38,7 +44,7 @@ impl BaseModel for ServerVariable {
 
         let variable = super::nest_egg_variable::NestEggVariable::map(Some("variable_"), row)?;
         let value = row
-            .try_get(format!("{prefix}value").as_str())
+            .try_get(compact_str::format_compact!("{prefix}value").as_str())
             .unwrap_or_else(|_| {
                 variable
                     .default_value
@@ -50,7 +56,7 @@ impl BaseModel for ServerVariable {
             variable,
             value,
             created: row
-                .try_get(format!("{prefix}created").as_str())
+                .try_get(compact_str::format_compact!("{prefix}created").as_str())
                 .unwrap_or_else(|_| chrono::Utc::now().naive_utc()),
         })
     }
@@ -122,14 +128,14 @@ impl ServerVariable {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "ServerVariable")]
 pub struct ApiServerVariable {
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub env_variable: String,
+    pub env_variable: compact_str::CompactString,
     pub default_value: Option<String>,
     pub value: String,
     pub is_editable: bool,
-    pub rules: Vec<String>,
+    pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

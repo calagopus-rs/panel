@@ -85,7 +85,7 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -137,7 +137,7 @@ mod patch {
             "UPDATE user_ssh_keys
             SET name = $1
             WHERE user_ssh_keys.uuid = $2",
-            ssh_key.name,
+            &ssh_key.name,
             ssh_key.uuid,
         )
         .execute(state.database.write())

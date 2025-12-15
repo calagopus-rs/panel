@@ -13,9 +13,9 @@ pub struct EggRepositoryEgg {
     pub path: String,
     pub egg_repository: Fetchable<super::egg_repository::EggRepository>,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub exported_egg: super::nest_egg::ExportedNestEgg,
 }
@@ -24,25 +24,37 @@ impl BaseModel for EggRepositoryEgg {
     const NAME: &'static str = "egg_repository_egg";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("egg_repository_eggs.uuid", format!("{prefix}uuid")),
-            ("egg_repository_eggs.path", format!("{prefix}path")),
+            (
+                "egg_repository_eggs.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "egg_repository_eggs.path",
+                compact_str::format_compact!("{prefix}path"),
+            ),
             (
                 "egg_repository_eggs.egg_repository_uuid",
-                format!("{prefix}egg_repository_uuid"),
+                compact_str::format_compact!("{prefix}egg_repository_uuid"),
             ),
-            ("egg_repository_eggs.name", format!("{prefix}name")),
+            (
+                "egg_repository_eggs.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
             (
                 "egg_repository_eggs.description",
-                format!("{prefix}description"),
+                compact_str::format_compact!("{prefix}description"),
             ),
-            ("egg_repository_eggs.author", format!("{prefix}author")),
+            (
+                "egg_repository_eggs.author",
+                compact_str::format_compact!("{prefix}author"),
+            ),
             (
                 "egg_repository_eggs.exported_egg",
-                format!("{prefix}exported_egg"),
+                compact_str::format_compact!("{prefix}exported_egg"),
             ),
         ])
     }
@@ -52,16 +64,17 @@ impl BaseModel for EggRepositoryEgg {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            path: row.try_get(format!("{prefix}path").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            path: row.try_get(compact_str::format_compact!("{prefix}path").as_str())?,
             egg_repository: super::egg_repository::EggRepository::get_fetchable(
-                row.try_get(format!("{prefix}egg_repository_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}egg_repository_uuid").as_str())?,
             ),
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            author: row.try_get(format!("{prefix}author").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            author: row.try_get(compact_str::format_compact!("{prefix}author").as_str())?,
             exported_egg: serde_json::from_value(
-                row.try_get(format!("{prefix}exported_egg").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}exported_egg").as_str())?,
             )?,
         })
     }
@@ -282,9 +295,9 @@ pub struct AdminApiEggRepositoryEgg {
     pub uuid: uuid::Uuid,
     pub path: String,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub exported_egg: super::nest_egg::ExportedNestEgg,
 }
@@ -296,9 +309,9 @@ pub struct AdminApiEggEggRepositoryEgg {
     pub path: String,
     pub egg_repository: super::egg_repository::AdminApiEggRepository,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub exported_egg: super::nest_egg::ExportedNestEgg,
 }

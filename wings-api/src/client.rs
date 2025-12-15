@@ -33,7 +33,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     method: Method,
     endpoint: impl AsRef<str>,
     body: Option<&impl Serialize>,
-    body_raw: Option<String>,
+    body_raw: Option<compact_str::CompactString>,
 ) -> Result<T, ApiHttpError> {
     let url = format!(
         "{}{}",
@@ -49,7 +49,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
     if let Some(body) = body {
         request = request.json(body);
     } else if let Some(body_raw) = body_raw {
-        request = request.body(body_raw);
+        request = request.body(Vec::from(body_raw));
     }
 
     match request.send().await {
@@ -63,7 +63,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                         Err(err) => Err(ApiHttpError::Http(
                             StatusCode::PRECONDITION_FAILED,
                             super::ApiError {
-                                error: err.to_string(),
+                                error: err.to_string().into(),
                             },
                         )),
                     };
@@ -77,7 +77,7 @@ async fn request_impl<T: DeserializeOwned + 'static>(
                 Err(ApiHttpError::Http(
                     response.status(),
                     response.json().await.unwrap_or_else(|err| super::ApiError {
-                        error: err.to_string(),
+                        error: err.to_string().into(),
                     }),
                 ))
             }
@@ -336,12 +336,12 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         algorithm: Algorithm,
-        files: Vec<String>,
+        files: Vec<compact_str::CompactString>,
     ) -> Result<super::servers_server_files_fingerprints::get::Response, ApiHttpError> {
         let files = files
             .into_iter()
-            .map(|s| urlencoding::encode(&s).into_owned())
-            .collect::<Vec<_>>()
+            .map(|s| urlencoding::encode(&s).into())
+            .collect::<Vec<compact_str::CompactString>>()
             .join("&files=");
         request_impl(
             self,
@@ -357,15 +357,15 @@ impl WingsClient {
         &self,
         server: uuid::Uuid,
         directory: &str,
-        ignored: Vec<String>,
+        ignored: Vec<compact_str::CompactString>,
         per_page: u64,
         page: u64,
     ) -> Result<super::servers_server_files_list::get::Response, ApiHttpError> {
         let directory = urlencoding::encode(directory);
         let ignored = ignored
             .into_iter()
-            .map(|s| urlencoding::encode(&s).into_owned())
-            .collect::<Vec<_>>()
+            .map(|s| urlencoding::encode(&s).into())
+            .collect::<Vec<compact_str::CompactString>>()
             .join("&ignored=");
         request_impl(self, Method::GET, format!("/api/servers/{server}/files/list?directory={directory}&ignored={ignored}&per_page={per_page}&page={page}"), None::<&()>, None).await
     }

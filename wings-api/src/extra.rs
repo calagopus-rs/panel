@@ -98,13 +98,13 @@ impl std::fmt::Display for Game {
 
 #[derive(ToSchema, Clone, Deserialize, Serialize)]
 pub struct ScheduleVariable {
-    pub variable: String,
+    pub variable: compact_str::CompactString,
 }
 
 #[derive(ToSchema, Clone, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum ScheduleDynamicParameter {
-    Raw(String),
+    Raw(compact_str::CompactString),
     Variable(ScheduleVariable),
 }
 
@@ -162,7 +162,7 @@ pub enum ScheduleActionInner {
         foreground: bool,
 
         name: Option<ScheduleDynamicParameter>,
-        ignored_files: Vec<String>,
+        ignored_files: Vec<compact_str::CompactString>,
     },
     CreateDirectory {
         ignore_failure: bool,
@@ -186,7 +186,7 @@ pub enum ScheduleActionInner {
     },
     DeleteFiles {
         root: ScheduleDynamicParameter,
-        files: Vec<String>,
+        files: Vec<compact_str::CompactString>,
     },
     RenameFiles {
         root: ScheduleDynamicParameter,
@@ -197,7 +197,7 @@ pub enum ScheduleActionInner {
         foreground: bool,
 
         root: ScheduleDynamicParameter,
-        files: Vec<String>,
+        files: Vec<compact_str::CompactString>,
         format: super::ArchiveFormat,
         name: ScheduleDynamicParameter,
     },

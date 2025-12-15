@@ -58,16 +58,16 @@ pub enum DatabaseType {
 pub struct DatabaseHost {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub public: bool,
     pub r#type: DatabaseType,
 
-    pub public_host: Option<String>,
-    pub host: String,
+    pub public_host: Option<compact_str::CompactString>,
+    pub host: compact_str::CompactString,
     pub public_port: Option<i32>,
     pub port: i32,
 
-    pub username: String,
+    pub username: compact_str::CompactString,
     pub password: Vec<u8>,
 
     pub created: chrono::NaiveDateTime,
@@ -77,21 +77,54 @@ impl BaseModel for DatabaseHost {
     const NAME: &'static str = "database_host";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("database_hosts.uuid", format!("{prefix}uuid")),
-            ("database_hosts.name", format!("{prefix}name")),
-            ("database_hosts.public", format!("{prefix}public")),
-            ("database_hosts.type", format!("{prefix}type")),
-            ("database_hosts.public_host", format!("{prefix}public_host")),
-            ("database_hosts.host", format!("{prefix}host")),
-            ("database_hosts.public_port", format!("{prefix}public_port")),
-            ("database_hosts.port", format!("{prefix}port")),
-            ("database_hosts.username", format!("{prefix}username")),
-            ("database_hosts.password", format!("{prefix}password")),
-            ("database_hosts.created", format!("{prefix}created")),
+            (
+                "database_hosts.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "database_hosts.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "database_hosts.public",
+                compact_str::format_compact!("{prefix}public"),
+            ),
+            (
+                "database_hosts.type",
+                compact_str::format_compact!("{prefix}type"),
+            ),
+            (
+                "database_hosts.public_host",
+                compact_str::format_compact!("{prefix}public_host"),
+            ),
+            (
+                "database_hosts.host",
+                compact_str::format_compact!("{prefix}host"),
+            ),
+            (
+                "database_hosts.public_port",
+                compact_str::format_compact!("{prefix}public_port"),
+            ),
+            (
+                "database_hosts.port",
+                compact_str::format_compact!("{prefix}port"),
+            ),
+            (
+                "database_hosts.username",
+                compact_str::format_compact!("{prefix}username"),
+            ),
+            (
+                "database_hosts.password",
+                compact_str::format_compact!("{prefix}password"),
+            ),
+            (
+                "database_hosts.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -100,17 +133,19 @@ impl BaseModel for DatabaseHost {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            public: row.try_get(format!("{prefix}public").as_str())?,
-            r#type: row.try_get(format!("{prefix}type").as_str())?,
-            public_host: row.try_get(format!("{prefix}public_host").as_str())?,
-            host: row.try_get(format!("{prefix}host").as_str())?,
-            public_port: row.try_get(format!("{prefix}public_port").as_str())?,
-            port: row.try_get(format!("{prefix}port").as_str())?,
-            username: row.try_get(format!("{prefix}username").as_str())?,
-            password: row.try_get(format!("{prefix}password").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            public: row.try_get(compact_str::format_compact!("{prefix}public").as_str())?,
+            r#type: row.try_get(compact_str::format_compact!("{prefix}type").as_str())?,
+            public_host: row
+                .try_get(compact_str::format_compact!("{prefix}public_host").as_str())?,
+            host: row.try_get(compact_str::format_compact!("{prefix}host").as_str())?,
+            public_port: row
+                .try_get(compact_str::format_compact!("{prefix}public_port").as_str())?,
+            port: row.try_get(compact_str::format_compact!("{prefix}port").as_str())?,
+            username: row.try_get(compact_str::format_compact!("{prefix}username").as_str())?,
+            password: row.try_get(compact_str::format_compact!("{prefix}password").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -350,16 +385,16 @@ impl DeletableModel for DatabaseHost {
 pub struct AdminApiDatabaseHost {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub public: bool,
     pub r#type: DatabaseType,
 
-    pub public_host: Option<String>,
-    pub host: String,
+    pub public_host: Option<compact_str::CompactString>,
+    pub host: compact_str::CompactString,
     pub public_port: Option<i32>,
     pub port: i32,
 
-    pub username: String,
+    pub username: compact_str::CompactString,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -369,9 +404,9 @@ pub struct AdminApiDatabaseHost {
 pub struct ApiDatabaseHost {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub r#type: DatabaseType,
 
-    pub host: String,
+    pub host: compact_str::CompactString,
     pub port: i32,
 }

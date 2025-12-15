@@ -25,11 +25,14 @@ where
     })
 }
 
-pub fn deserialize_string_option<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+pub fn deserialize_string_option<'de, D>(
+    deserializer: D,
+) -> Result<Option<compact_str::CompactString>, D::Error>
 where
     D: Deserializer<'de>,
 {
-    let value: Option<String> = Option::deserialize(deserializer).unwrap_or_default();
+    let value: Option<compact_str::CompactString> =
+        Option::deserialize(deserializer).unwrap_or_default();
     Ok(value.filter(|s| !s.is_empty()))
 }
 
@@ -86,7 +89,7 @@ where
                 value: Some(match value.as_str() {
                     "^C" => "SIGINT".into(),
                     "^^C" => "SIGKILL".into(),
-                    _ => value,
+                    _ => value.into(),
                 }),
             }
         }),
@@ -98,7 +101,10 @@ where
 
 pub fn deserialize_nest_egg_config_files<'de, D>(
     deserializer: D,
-) -> Result<IndexMap<String, crate::models::nest_egg::ExportedNestEggConfigsFilesFile>, D::Error>
+) -> Result<
+    IndexMap<compact_str::CompactString, crate::models::nest_egg::ExportedNestEggConfigsFilesFile>,
+    D::Error,
+>
 where
     D: Deserializer<'de>,
 {
@@ -113,12 +119,13 @@ where
     #[derive(Deserialize, Clone)]
     pub struct OldExportedNestEggConfigsFilesFile {
         pub parser: crate::models::nest_egg::ServerConfigurationFileParser,
-        pub find: IndexMap<String, serde_json::Value>,
+        pub find: IndexMap<compact_str::CompactString, serde_json::Value>,
     }
 
-    if let Ok(value) = serde_json::from_value::<IndexMap<String, OldExportedNestEggConfigsFilesFile>>(
-        value.clone(),
-    ) {
+    if let Ok(value) = serde_json::from_value::<
+        IndexMap<compact_str::CompactString, OldExportedNestEggConfigsFilesFile>,
+    >(value.clone())
+    {
         Ok(value
             .into_iter()
             .map(|(k, v)| {
@@ -149,13 +156,15 @@ where
     }
 }
 
-pub fn deserialize_nest_egg_variable_rules<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+pub fn deserialize_nest_egg_variable_rules<'de, D>(
+    deserializer: D,
+) -> Result<Vec<compact_str::CompactString>, D::Error>
 where
     D: Deserializer<'de>,
 {
     let value: serde_json::Value = serde_json::Value::deserialize(deserializer)?;
-    let value: Vec<String> = match value {
-        serde_json::Value::String(value) => value.split('|').map(|v| v.to_string()).collect(),
+    let value: Vec<compact_str::CompactString> = match value {
+        serde_json::Value::String(value) => value.split('|').map(|v| v.into()).collect(),
         value => serde_json::from_value(value).map_err(serde::de::Error::custom)?,
     };
 

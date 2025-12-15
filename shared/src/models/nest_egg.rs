@@ -27,18 +27,18 @@ pub enum ServerConfigurationFileParser {
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ProcessConfigurationFileReplacement {
-    pub r#match: String,
+    pub r#match: compact_str::CompactString,
     #[serde(default)]
     pub insert_new: bool,
     #[serde(default = "true_fn")]
     pub update_existing: bool,
-    pub if_value: Option<String>,
+    pub if_value: Option<compact_str::CompactString>,
     pub replace_with: serde_json::Value,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ProcessConfigurationFile {
-    pub file: String,
+    pub file: compact_str::CompactString,
     #[serde(default = "true_fn")]
     pub create_new: bool,
     #[schema(inline)]
@@ -63,21 +63,21 @@ pub struct NestEggConfigStartup {
         default,
         deserialize_with = "crate::deserialize::deserialize_array_or_not"
     )]
-    pub done: Vec<String>,
+    pub done: Vec<compact_str::CompactString>,
     #[serde(default)]
     pub strip_ansi: bool,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone, Default)]
 pub struct NestEggConfigStop {
-    pub r#type: String,
-    pub value: Option<String>,
+    pub r#type: compact_str::CompactString,
+    pub value: Option<compact_str::CompactString>,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct NestEggConfigScript {
-    pub container: String,
-    pub entrypoint: String,
+    pub container: compact_str::CompactString,
+    pub entrypoint: compact_str::CompactString,
     #[serde(alias = "script")]
     pub content: String,
 }
@@ -133,7 +133,7 @@ pub struct ExportedNestEggConfigs {
         default,
         deserialize_with = "crate::deserialize::deserialize_nest_egg_config_files"
     )]
-    pub files: IndexMap<String, ExportedNestEggConfigsFilesFile>,
+    pub files: IndexMap<compact_str::CompactString, ExportedNestEggConfigsFilesFile>,
     #[schema(inline)]
     #[serde(
         default,
@@ -163,14 +163,14 @@ pub struct ExportedNestEgg {
     pub uuid: uuid::Uuid,
     #[validate(length(min = 3, max = 255))]
     #[schema(min_length = 3, max_length = 255)]
-    pub name: String,
+    pub name: compact_str::CompactString,
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
     #[serde(deserialize_with = "crate::deserialize::deserialize_string_option")]
-    pub description: Option<String>,
+    pub description: Option<compact_str::CompactString>,
     #[validate(length(min = 2, max = 255))]
     #[schema(min_length = 2, max_length = 255)]
-    pub author: String,
+    pub author: compact_str::CompactString,
 
     #[schema(inline)]
     pub config: ExportedNestEggConfigs,
@@ -179,7 +179,7 @@ pub struct ExportedNestEgg {
 
     #[validate(length(min = 1, max = 8192))]
     #[schema(min_length = 1, max_length = 8192)]
-    pub startup: String,
+    pub startup: compact_str::CompactString,
     #[serde(default)]
     pub force_outgoing_ip: bool,
     #[serde(default)]
@@ -189,13 +189,13 @@ pub struct ExportedNestEgg {
         default,
         deserialize_with = "crate::deserialize::deserialize_defaultable"
     )]
-    pub features: Vec<String>,
-    pub docker_images: IndexMap<String, String>,
+    pub features: Vec<compact_str::CompactString>,
+    pub docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
     #[serde(
         default,
         deserialize_with = "crate::deserialize::deserialize_defaultable"
     )]
-    pub file_denylist: Vec<String>,
+    pub file_denylist: Vec<compact_str::CompactString>,
 
     #[schema(inline)]
     pub variables: Vec<super::nest_egg_variable::ExportedNestEggVariable>,
@@ -207,9 +207,9 @@ pub struct NestEgg {
     pub nest: Fetchable<super::nest::Nest>,
     pub egg_repository_egg: Option<Fetchable<super::egg_repository_egg::EggRepositoryEgg>>,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub config_files: Vec<ProcessConfigurationFile>,
     pub config_startup: NestEggConfigStartup,
@@ -217,13 +217,13 @@ pub struct NestEgg {
     pub config_script: NestEggConfigScript,
     pub config_allocations: NestEggConfigAllocations,
 
-    pub startup: String,
+    pub startup: compact_str::CompactString,
     pub force_outgoing_ip: bool,
     pub separate_port: bool,
 
-    pub features: Vec<String>,
-    pub docker_images: IndexMap<String, String>,
-    pub file_denylist: Vec<String>,
+    pub features: Vec<compact_str::CompactString>,
+    pub docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
+    pub file_denylist: Vec<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -232,41 +232,86 @@ impl BaseModel for NestEgg {
     const NAME: &'static str = "nest_egg";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("nest_eggs.uuid", format!("{prefix}uuid")),
-            ("nest_eggs.nest_uuid", format!("{prefix}nest_uuid")),
+            (
+                "nest_eggs.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "nest_eggs.nest_uuid",
+                compact_str::format_compact!("{prefix}nest_uuid"),
+            ),
             (
                 "nest_eggs.egg_repository_egg_uuid",
-                format!("{prefix}egg_repository_egg_uuid"),
+                compact_str::format_compact!("{prefix}egg_repository_egg_uuid"),
             ),
-            ("nest_eggs.name", format!("{prefix}name")),
-            ("nest_eggs.description", format!("{prefix}description")),
-            ("nest_eggs.author", format!("{prefix}author")),
-            ("nest_eggs.config_files", format!("{prefix}config_files")),
+            (
+                "nest_eggs.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "nest_eggs.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "nest_eggs.author",
+                compact_str::format_compact!("{prefix}author"),
+            ),
+            (
+                "nest_eggs.config_files",
+                compact_str::format_compact!("{prefix}config_files"),
+            ),
             (
                 "nest_eggs.config_startup",
-                format!("{prefix}config_startup"),
+                compact_str::format_compact!("{prefix}config_startup"),
             ),
-            ("nest_eggs.config_stop", format!("{prefix}config_stop")),
-            ("nest_eggs.config_script", format!("{prefix}config_script")),
+            (
+                "nest_eggs.config_stop",
+                compact_str::format_compact!("{prefix}config_stop"),
+            ),
+            (
+                "nest_eggs.config_script",
+                compact_str::format_compact!("{prefix}config_script"),
+            ),
             (
                 "nest_eggs.config_allocations",
-                format!("{prefix}config_allocations"),
+                compact_str::format_compact!("{prefix}config_allocations"),
             ),
-            ("nest_eggs.startup", format!("{prefix}startup")),
+            (
+                "nest_eggs.startup",
+                compact_str::format_compact!("{prefix}startup"),
+            ),
             (
                 "nest_eggs.force_outgoing_ip",
-                format!("{prefix}force_outgoing_ip"),
+                compact_str::format_compact!("{prefix}force_outgoing_ip"),
             ),
-            ("nest_eggs.separate_port", format!("{prefix}separate_port")),
-            ("nest_eggs.features", format!("{prefix}features")),
-            ("nest_eggs.docker_images", format!("{prefix}docker_images")),
-            ("nest_eggs.file_denylist", format!("{prefix}file_denylist")),
-            ("nest_eggs.created", format!("{prefix}created")),
-            ("nest_eggs.created", format!("{prefix}created")),
+            (
+                "nest_eggs.separate_port",
+                compact_str::format_compact!("{prefix}separate_port"),
+            ),
+            (
+                "nest_eggs.features",
+                compact_str::format_compact!("{prefix}features"),
+            ),
+            (
+                "nest_eggs.docker_images",
+                compact_str::format_compact!("{prefix}docker_images"),
+            ),
+            (
+                "nest_eggs.file_denylist",
+                compact_str::format_compact!("{prefix}file_denylist"),
+            ),
+            (
+                "nest_eggs.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
+            (
+                "nest_eggs.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -275,43 +320,47 @@ impl BaseModel for NestEgg {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             nest: super::nest::Nest::get_fetchable(
-                row.try_get(format!("{prefix}nest_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}nest_uuid").as_str())?,
             ),
             egg_repository_egg: row
                 .try_get::<Option<uuid::Uuid>, _>(
-                    format!("{prefix}egg_repository_egg_uuid").as_str(),
+                    compact_str::format_compact!("{prefix}egg_repository_egg_uuid").as_str(),
                 )?
                 .map(super::egg_repository_egg::EggRepositoryEgg::get_fetchable),
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            author: row.try_get(format!("{prefix}author").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            author: row.try_get(compact_str::format_compact!("{prefix}author").as_str())?,
             config_files: serde_json::from_value(
-                row.try_get(format!("{prefix}config_files").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}config_files").as_str())?,
             )?,
             config_startup: serde_json::from_value(
-                row.try_get(format!("{prefix}config_startup").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}config_startup").as_str())?,
             )?,
             config_stop: serde_json::from_value(
-                row.try_get(format!("{prefix}config_stop").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}config_stop").as_str())?,
             )?,
             config_script: serde_json::from_value(
-                row.try_get(format!("{prefix}config_script").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}config_script").as_str())?,
             )?,
             config_allocations: serde_json::from_value(
-                row.try_get(format!("{prefix}config_allocations").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}config_allocations").as_str())?,
             )?,
-            startup: row.try_get(format!("{prefix}startup").as_str())?,
-            force_outgoing_ip: row.try_get(format!("{prefix}force_outgoing_ip").as_str())?,
-            separate_port: row.try_get(format!("{prefix}separate_port").as_str())?,
-            features: row.try_get(format!("{prefix}features").as_str())?,
-            docker_images: serde_json::from_str(
-                row.try_get::<&str, _>(format!("{prefix}docker_images").as_str())?,
-            )
+            startup: row.try_get(compact_str::format_compact!("{prefix}startup").as_str())?,
+            force_outgoing_ip: row
+                .try_get(compact_str::format_compact!("{prefix}force_outgoing_ip").as_str())?,
+            separate_port: row
+                .try_get(compact_str::format_compact!("{prefix}separate_port").as_str())?,
+            features: row.try_get(compact_str::format_compact!("{prefix}features").as_str())?,
+            docker_images: serde_json::from_str(row.try_get::<&str, _>(
+                compact_str::format_compact!("{prefix}docker_images").as_str(),
+            )?)
             .unwrap_or_default(),
-            file_denylist: row.try_get(format!("{prefix}file_denylist").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            file_denylist: row
+                .try_get(compact_str::format_compact!("{prefix}file_denylist").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -333,9 +382,9 @@ impl NestEgg {
         startup: &str,
         force_outgoing_ip: bool,
         separate_port: bool,
-        features: &[String],
-        docker_images: IndexMap<String, String>,
-        file_denylist: &[String],
+        features: &[compact_str::CompactString],
+        docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
+        file_denylist: &[compact_str::CompactString],
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
@@ -449,9 +498,9 @@ impl NestEgg {
                 docker_images = $14, file_denylist = $15
             WHERE nest_eggs.uuid = $1",
             self.uuid,
-            exported_egg.author,
-            exported_egg.name,
-            exported_egg.description,
+            &exported_egg.author,
+            &exported_egg.name,
+            exported_egg.description.as_deref(),
             serde_json::to_value(
                 &exported_egg
                     .config
@@ -469,12 +518,20 @@ impl NestEgg {
             serde_json::to_value(&exported_egg.config.stop)?,
             serde_json::to_value(&exported_egg.scripts.installation)?,
             serde_json::to_value(&exported_egg.config.allocations)?,
-            exported_egg.startup,
+            &exported_egg.startup,
             exported_egg.force_outgoing_ip,
             exported_egg.separate_port,
-            &exported_egg.features,
+            &exported_egg
+                .features
+                .into_iter()
+                .map(|f| f.into())
+                .collect::<Vec<_>>(),
             serde_json::to_string(&exported_egg.docker_images)?,
-            &exported_egg.file_denylist,
+            &exported_egg
+                .file_denylist
+                .into_iter()
+                .map(|f| f.into())
+                .collect::<Vec<_>>(),
         )
         .execute(database.write())
         .await?;
@@ -487,8 +544,8 @@ impl NestEgg {
             &exported_egg
                 .variables
                 .iter()
-                .map(|v| &v.env_variable)
-                .collect::<Vec<_>>() as &[&String]
+                .map(|v| v.env_variable.as_str())
+                .collect::<Vec<_>>() as &[&str]
         )
         .fetch_all(database.read())
         .await?;
@@ -524,7 +581,11 @@ impl NestEgg {
                 variable.default_value.as_deref(),
                 variable.user_viewable,
                 variable.user_editable,
-                &variable.rules
+                &variable
+                    .rules
+                    .iter()
+                    .map(|r| r.as_str())
+                    .collect::<Vec<_>>() as &[&str]
             )
             .execute(database.read())
             .await
@@ -798,9 +859,9 @@ pub struct AdminApiNestEgg {
     pub uuid: uuid::Uuid,
     pub egg_repository_egg: Option<super::egg_repository_egg::AdminApiEggEggRepositoryEgg>,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     #[schema(inline)]
     pub config_files: Vec<ProcessConfigurationFile>,
@@ -813,13 +874,13 @@ pub struct AdminApiNestEgg {
     #[schema(inline)]
     pub config_allocations: NestEggConfigAllocations,
 
-    pub startup: String,
+    pub startup: compact_str::CompactString,
     pub force_outgoing_ip: bool,
     pub separate_port: bool,
 
-    pub features: Vec<String>,
-    pub docker_images: IndexMap<String, String>,
-    pub file_denylist: Vec<String>,
+    pub features: Vec<compact_str::CompactString>,
+    pub docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
+    pub file_denylist: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }
@@ -829,14 +890,14 @@ pub struct AdminApiNestEgg {
 pub struct ApiNestEgg {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
-    pub startup: String,
+    pub startup: compact_str::CompactString,
     pub separate_port: bool,
 
-    pub features: Vec<String>,
-    pub docker_images: IndexMap<String, String>,
+    pub features: Vec<compact_str::CompactString>,
+    pub docker_images: IndexMap<compact_str::CompactString, compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

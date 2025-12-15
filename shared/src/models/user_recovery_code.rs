@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 
 #[derive(Serialize, Deserialize)]
 pub struct UserRecoveryCode {
-    pub code: String,
+    pub code: compact_str::CompactString,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -15,12 +15,18 @@ impl BaseModel for UserRecoveryCode {
     const NAME: &'static str = "user_recovery_code";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_recovery_codes.code", format!("{prefix}code")),
-            ("user_recovery_codes.created", format!("{prefix}created")),
+            (
+                "user_recovery_codes.code",
+                compact_str::format_compact!("{prefix}code"),
+            ),
+            (
+                "user_recovery_codes.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -29,8 +35,8 @@ impl BaseModel for UserRecoveryCode {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            code: row.try_get(format!("{prefix}code").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            code: row.try_get(compact_str::format_compact!("{prefix}code").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

@@ -19,12 +19,12 @@ mod post {
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
+        root: compact_str::CompactString,
 
         #[validate(url)]
         #[schema(format = "uri")]
         url: String,
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
 
         #[serde(default)]
         use_header: bool,
@@ -71,7 +71,7 @@ mod post {
 
         let request_body = wings_api::servers_server_files_pull::post::RequestBody {
             root: data.root,
-            url: data.url,
+            url: data.url.into(),
             file_name: data.name,
             use_header: data.use_header,
             foreground: data.foreground,

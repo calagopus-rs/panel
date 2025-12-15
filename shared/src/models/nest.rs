@@ -11,9 +11,9 @@ use utoipa::ToSchema;
 pub struct Nest {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -22,15 +22,24 @@ impl BaseModel for Nest {
     const NAME: &'static str = "nest";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("nests.uuid", format!("{prefix}uuid")),
-            ("nests.name", format!("{prefix}name")),
-            ("nests.description", format!("{prefix}description")),
-            ("nests.author", format!("{prefix}author")),
-            ("nests.created", format!("{prefix}created")),
+            ("nests.uuid", compact_str::format_compact!("{prefix}uuid")),
+            ("nests.name", compact_str::format_compact!("{prefix}name")),
+            (
+                "nests.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "nests.author",
+                compact_str::format_compact!("{prefix}author"),
+            ),
+            (
+                "nests.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -39,11 +48,12 @@ impl BaseModel for Nest {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            author: row.try_get(format!("{prefix}author").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            author: row.try_get(compact_str::format_compact!("{prefix}author").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -185,9 +195,9 @@ impl DeletableModel for Nest {
 pub struct AdminApiNest {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
-    pub author: String,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
+    pub author: compact_str::CompactString,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

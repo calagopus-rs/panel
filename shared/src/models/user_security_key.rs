@@ -11,7 +11,7 @@ use utoipa::ToSchema;
 pub struct UserSecurityKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
 
     pub passkey: Option<webauthn_rs::prelude::Passkey>,
     pub registration: Option<webauthn_rs::prelude::PasskeyRegistration>,
@@ -24,19 +24,34 @@ impl BaseModel for UserSecurityKey {
     const NAME: &'static str = "user_security_key";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_security_keys.uuid", format!("{prefix}uuid")),
-            ("user_security_keys.name", format!("{prefix}name")),
-            ("user_security_keys.passkey", format!("{prefix}passkey")),
+            (
+                "user_security_keys.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_security_keys.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "user_security_keys.passkey",
+                compact_str::format_compact!("{prefix}passkey"),
+            ),
             (
                 "user_security_keys.registration",
-                format!("{prefix}registration"),
+                compact_str::format_compact!("{prefix}registration"),
             ),
-            ("user_security_keys.last_used", format!("{prefix}last_used")),
-            ("user_security_keys.created", format!("{prefix}created")),
+            (
+                "user_security_keys.last_used",
+                compact_str::format_compact!("{prefix}last_used"),
+            ),
+            (
+                "user_security_keys.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -45,26 +60,36 @@ impl BaseModel for UserSecurityKey {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
             passkey: if row
-                .try_get::<serde_json::Value, _>(format!("{prefix}passkey").as_str())
+                .try_get::<serde_json::Value, _>(
+                    compact_str::format_compact!("{prefix}passkey").as_str(),
+                )
                 .is_ok()
             {
-                serde_json::from_value(row.try_get(format!("{prefix}passkey").as_str())?).ok()
+                serde_json::from_value(
+                    row.try_get(compact_str::format_compact!("{prefix}passkey").as_str())?,
+                )
+                .ok()
             } else {
                 None
             },
             registration: if row
-                .try_get::<serde_json::Value, _>(format!("{prefix}registration").as_str())
+                .try_get::<serde_json::Value, _>(
+                    compact_str::format_compact!("{prefix}registration").as_str(),
+                )
                 .is_ok()
             {
-                serde_json::from_value(row.try_get(format!("{prefix}registration").as_str())?).ok()
+                serde_json::from_value(
+                    row.try_get(compact_str::format_compact!("{prefix}registration").as_str())?,
+                )
+                .ok()
             } else {
                 None
             },
-            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            last_used: row.try_get(compact_str::format_compact!("{prefix}last_used").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -207,7 +232,7 @@ impl DeletableModel for UserSecurityKey {
 pub struct ApiUserSecurityKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
 
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,

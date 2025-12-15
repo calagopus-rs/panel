@@ -19,7 +19,7 @@ pub struct ServerScheduleStep {
 
     pub action: wings_api::ScheduleActionInner,
     pub order: i16,
-    pub error: Option<String>,
+    pub error: Option<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -28,15 +28,30 @@ impl BaseModel for ServerScheduleStep {
     const NAME: &'static str = "server_schedule_step";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("server_schedule_steps.uuid", format!("{prefix}uuid")),
-            ("server_schedule_steps.action", format!("{prefix}action")),
-            ("server_schedule_steps.order_", format!("{prefix}order")),
-            ("server_schedule_steps.error", format!("{prefix}error")),
-            ("server_schedule_steps.created", format!("{prefix}created")),
+            (
+                "server_schedule_steps.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "server_schedule_steps.action",
+                compact_str::format_compact!("{prefix}action"),
+            ),
+            (
+                "server_schedule_steps.order_",
+                compact_str::format_compact!("{prefix}order"),
+            ),
+            (
+                "server_schedule_steps.error",
+                compact_str::format_compact!("{prefix}error"),
+            ),
+            (
+                "server_schedule_steps.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -45,11 +60,13 @@ impl BaseModel for ServerScheduleStep {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            action: serde_json::from_value(row.try_get(format!("{prefix}action").as_str())?)?,
-            order: row.try_get(format!("{prefix}order").as_str())?,
-            error: row.try_get(format!("{prefix}error").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            action: serde_json::from_value(
+                row.try_get(compact_str::format_compact!("{prefix}action").as_str())?,
+            )?,
+            order: row.try_get(compact_str::format_compact!("{prefix}order").as_str())?,
+            error: row.try_get(compact_str::format_compact!("{prefix}error").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -202,7 +219,7 @@ pub struct ApiServerScheduleStep {
 
     pub action: wings_api::ScheduleActionInner,
     pub order: i16,
-    pub error: Option<String>,
+    pub error: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

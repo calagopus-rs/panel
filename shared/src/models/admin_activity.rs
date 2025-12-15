@@ -40,7 +40,7 @@ pub struct AdminActivity {
     pub user: Option<super::user::User>,
     pub api_key_uuid: Option<uuid::Uuid>,
 
-    pub event: String,
+    pub event: compact_str::CompactString,
     pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
     pub data: serde_json::Value,
 
@@ -51,18 +51,30 @@ impl BaseModel for AdminActivity {
     const NAME: &'static str = "admin_activity";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
             (
                 "admin_activities.api_key_uuid",
-                format!("{prefix}api_key_uuid"),
+                compact_str::format_compact!("{prefix}api_key_uuid"),
             ),
-            ("admin_activities.event", format!("{prefix}event")),
-            ("admin_activities.ip", format!("{prefix}ip")),
-            ("admin_activities.data", format!("{prefix}data")),
-            ("admin_activities.created", format!("{prefix}created")),
+            (
+                "admin_activities.event",
+                compact_str::format_compact!("{prefix}event"),
+            ),
+            (
+                "admin_activities.ip",
+                compact_str::format_compact!("{prefix}ip"),
+            ),
+            (
+                "admin_activities.data",
+                compact_str::format_compact!("{prefix}data"),
+            ),
+            (
+                "admin_activities.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::user::User::columns(Some("user_")));
@@ -83,11 +95,12 @@ impl BaseModel for AdminActivity {
             } else {
                 None
             },
-            api_key_uuid: row.try_get(format!("{prefix}api_key_uuid").as_str())?,
-            event: row.try_get(format!("{prefix}event").as_str())?,
-            ip: row.try_get(format!("{prefix}ip").as_str())?,
-            data: row.try_get(format!("{prefix}data").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            api_key_uuid: row
+                .try_get(compact_str::format_compact!("{prefix}api_key_uuid").as_str())?,
+            event: row.try_get(compact_str::format_compact!("{prefix}event").as_str())?,
+            ip: row.try_get(compact_str::format_compact!("{prefix}ip").as_str())?,
+            data: row.try_get(compact_str::format_compact!("{prefix}data").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -167,7 +180,9 @@ impl AdminActivity {
                 .user
                 .map(|user| user.into_api_object(storage_url_retriever)),
             event: self.event,
-            ip: self.ip.map(|ip| ip.ip().to_string()),
+            ip: self
+                .ip
+                .map(|ip| compact_str::format_compact!("{}", ip.ip())),
             data: self.data,
             is_api: self.api_key_uuid.is_some(),
             created: self.created.and_utc(),
@@ -180,8 +195,8 @@ impl AdminActivity {
 pub struct AdminApiAdminActivity {
     pub user: Option<super::user::ApiUser>,
 
-    pub event: String,
-    pub ip: Option<String>,
+    pub event: compact_str::CompactString,
+    pub ip: Option<compact_str::CompactString>,
     pub data: serde_json::Value,
 
     pub is_api: bool,

@@ -12,12 +12,12 @@ use utoipa::ToSchema;
 pub struct UserApiKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub key_start: String,
+    pub name: compact_str::CompactString,
+    pub key_start: compact_str::CompactString,
 
-    pub user_permissions: Arc<Vec<String>>,
-    pub admin_permissions: Arc<Vec<String>>,
-    pub server_permissions: Arc<Vec<String>>,
+    pub user_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub last_used: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
@@ -27,27 +27,42 @@ impl BaseModel for UserApiKey {
     const NAME: &'static str = "user_api_key";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_api_keys.uuid", format!("{prefix}uuid")),
-            ("user_api_keys.name", format!("{prefix}name")),
-            ("user_api_keys.key_start", format!("{prefix}key_start")),
+            (
+                "user_api_keys.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_api_keys.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "user_api_keys.key_start",
+                compact_str::format_compact!("{prefix}key_start"),
+            ),
             (
                 "user_api_keys.user_permissions",
-                format!("{prefix}user_permissions"),
+                compact_str::format_compact!("{prefix}user_permissions"),
             ),
             (
                 "user_api_keys.admin_permissions",
-                format!("{prefix}admin_permissions"),
+                compact_str::format_compact!("{prefix}admin_permissions"),
             ),
             (
                 "user_api_keys.server_permissions",
-                format!("{prefix}server_permissions"),
+                compact_str::format_compact!("{prefix}server_permissions"),
             ),
-            ("user_api_keys.last_used", format!("{prefix}last_used")),
-            ("user_api_keys.created", format!("{prefix}created")),
+            (
+                "user_api_keys.last_used",
+                compact_str::format_compact!("{prefix}last_used"),
+            ),
+            (
+                "user_api_keys.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -56,18 +71,20 @@ impl BaseModel for UserApiKey {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            key_start: row.try_get(format!("{prefix}key_start").as_str())?,
-            user_permissions: Arc::new(row.try_get(format!("{prefix}user_permissions").as_str())?),
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            key_start: row.try_get(compact_str::format_compact!("{prefix}key_start").as_str())?,
+            user_permissions: Arc::new(
+                row.try_get(compact_str::format_compact!("{prefix}user_permissions").as_str())?,
+            ),
             admin_permissions: Arc::new(
-                row.try_get(format!("{prefix}admin_permissions").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}admin_permissions").as_str())?,
             ),
             server_permissions: Arc::new(
-                row.try_get(format!("{prefix}server_permissions").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}server_permissions").as_str())?,
             ),
-            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            last_used: row.try_get(compact_str::format_compact!("{prefix}last_used").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -77,12 +94,12 @@ impl UserApiKey {
         database: &crate::database::Database,
         user_uuid: uuid::Uuid,
         name: &str,
-        user_permissions: &[String],
-        admin_permissions: &[String],
-        server_permissions: &[String],
+        user_permissions: &[compact_str::CompactString],
+        admin_permissions: &[compact_str::CompactString],
+        server_permissions: &[compact_str::CompactString],
     ) -> Result<(String, Self), crate::database::DatabaseError> {
         let key = format!(
-            "clgp_{}",
+            "c7sp_{}",
             rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 43)
         );
 
@@ -224,12 +241,12 @@ impl DeletableModel for UserApiKey {
 pub struct ApiUserApiKey {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub key_start: String,
+    pub name: compact_str::CompactString,
+    pub key_start: compact_str::CompactString,
 
-    pub user_permissions: Arc<Vec<String>>,
-    pub admin_permissions: Arc<Vec<String>>,
-    pub server_permissions: Arc<Vec<String>>,
+    pub user_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub admin_permissions: Arc<Vec<compact_str::CompactString>>,
+    pub server_permissions: Arc<Vec<compact_str::CompactString>>,
 
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,

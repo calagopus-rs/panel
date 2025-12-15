@@ -9,18 +9,18 @@ enum Transport {
     None,
     Smtp {
         transport: lettre::AsyncSmtpTransport<lettre::Tokio1Executor>,
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
     Sendmail {
         transport: lettre::AsyncSendmailTransport<lettre::Tokio1Executor>,
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
     Filesystem {
         transport: lettre::AsyncFileTransport<lettre::Tokio1Executor>,
-        from_address: String,
-        from_name: Option<String>,
+        from_address: compact_str::CompactString,
+        from_name: Option<compact_str::CompactString>,
     },
 }
 
@@ -48,25 +48,27 @@ impl Mail {
                 from_name,
             } => {
                 let mut transport =
-                    lettre::AsyncSmtpTransport::<lettre::Tokio1Executor>::builder_dangerous(host)
-                        .port(*port)
-                        .tls(if *use_tls {
-                            lettre::transport::smtp::client::Tls::Required(
-                                lettre::transport::smtp::client::TlsParametersBuilder::new(
-                                    host.clone(),
-                                )
-                                .build_rustls()
-                                .unwrap(),
+                    lettre::AsyncSmtpTransport::<lettre::Tokio1Executor>::builder_dangerous(
+                        host.as_str(),
+                    )
+                    .port(*port)
+                    .tls(if *use_tls {
+                        lettre::transport::smtp::client::Tls::Required(
+                            lettre::transport::smtp::client::TlsParametersBuilder::new(
+                                host.to_string(),
                             )
-                        } else {
-                            lettre::transport::smtp::client::Tls::None
-                        });
+                            .build_rustls()
+                            .unwrap(),
+                        )
+                    } else {
+                        lettre::transport::smtp::client::Tls::None
+                    });
 
                 if let Some(username) = username {
                     transport = transport.credentials(
                         lettre::transport::smtp::authentication::Credentials::new(
-                            username.clone(),
-                            password.clone().unwrap_or_default(),
+                            username.to_string(),
+                            password.clone().unwrap_or_default().into(),
                         ),
                     );
                 }
@@ -109,7 +111,12 @@ impl Mail {
         }
     }
 
-    pub async fn send(&self, destination: String, subject: String, body: String) {
+    pub async fn send(
+        &self,
+        destination: compact_str::CompactString,
+        subject: compact_str::CompactString,
+        body: String,
+    ) {
         let transport = match self.get_transport().await {
             Ok(transport) => transport,
             Err(e) => {
@@ -120,8 +127,8 @@ impl Mail {
 
         tracing::debug!(
             transport = ?transport,
-            destination = destination,
-            subject = subject,
+            destination = ?destination,
+            subject = ?subject,
             "sending email"
         );
 
@@ -140,7 +147,7 @@ impl Mail {
                                     .subject(subject)
                                     .to(lettre::message::Mailbox::new(None, destination.parse()?))
                                     .from(lettre::message::Mailbox::new(
-                                        from_name,
+                                        from_name.map(String::from),
                                         from_address.parse()?,
                                     ))
                                     .header(lettre::message::header::ContentType::TEXT_HTML)
@@ -159,7 +166,7 @@ impl Mail {
                                     .subject(subject)
                                     .to(lettre::message::Mailbox::new(None, destination.parse()?))
                                     .from(lettre::message::Mailbox::new(
-                                        from_name,
+                                        from_name.map(String::from),
                                         from_address.parse()?,
                                     ))
                                     .header(lettre::message::header::ContentType::TEXT_HTML)
@@ -178,7 +185,7 @@ impl Mail {
                                     .subject(subject)
                                     .to(lettre::message::Mailbox::new(None, destination.parse()?))
                                     .from(lettre::message::Mailbox::new(
-                                        from_name,
+                                        from_name.map(String::from),
                                         from_address.parse()?,
                                     ))
                                     .header(lettre::message::header::ContentType::TEXT_HTML)

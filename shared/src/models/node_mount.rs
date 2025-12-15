@@ -19,13 +19,22 @@ impl BaseModel for NodeMount {
     const NAME: &'static str = "node_mount";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("node_mounts.mount_uuid", format!("{prefix}mount_uuid")),
-            ("node_mounts.node_uuid", format!("{prefix}node_uuid")),
-            ("node_mounts.created", format!("{prefix}created")),
+            (
+                "node_mounts.mount_uuid",
+                compact_str::format_compact!("{prefix}mount_uuid"),
+            ),
+            (
+                "node_mounts.node_uuid",
+                compact_str::format_compact!("{prefix}node_uuid"),
+            ),
+            (
+                "node_mounts.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -35,12 +44,12 @@ impl BaseModel for NodeMount {
 
         Ok(Self {
             mount: super::mount::Mount::get_fetchable(
-                row.try_get(format!("{prefix}mount_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}mount_uuid").as_str())?,
             ),
             node: super::node::Node::get_fetchable(
-                row.try_get(format!("{prefix}node_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}node_uuid").as_str())?,
             ),
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

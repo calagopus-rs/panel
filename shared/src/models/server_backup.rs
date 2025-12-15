@@ -42,19 +42,19 @@ pub struct ServerBackup {
     pub node: Fetchable<super::node::Node>,
     pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
-    pub name: String,
+    pub name: compact_str::CompactString,
     pub successful: bool,
     pub browsable: bool,
     pub streaming: bool,
     pub locked: bool,
 
-    pub ignored_files: Vec<String>,
+    pub ignored_files: Vec<compact_str::CompactString>,
     pub checksum: Option<String>,
     pub bytes: i64,
     pub files: i64,
 
     pub disk: BackupDisk,
-    pub upload_id: Option<String>,
+    pub upload_id: Option<compact_str::CompactString>,
     pub upload_path: Option<String>,
 
     pub completed: Option<chrono::NaiveDateTime>,
@@ -66,35 +66,86 @@ impl BaseModel for ServerBackup {
     const NAME: &'static str = "server_backup";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("server_backups.uuid", format!("{prefix}uuid")),
-            ("server_backups.server_uuid", format!("{prefix}server_uuid")),
-            ("server_backups.node_uuid", format!("{prefix}node_uuid")),
+            (
+                "server_backups.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "server_backups.server_uuid",
+                compact_str::format_compact!("{prefix}server_uuid"),
+            ),
+            (
+                "server_backups.node_uuid",
+                compact_str::format_compact!("{prefix}node_uuid"),
+            ),
             (
                 "server_backups.backup_configuration_uuid",
-                format!("{prefix}backup_configuration_uuid"),
+                compact_str::format_compact!("{prefix}backup_configuration_uuid"),
             ),
-            ("server_backups.name", format!("{prefix}name")),
-            ("server_backups.successful", format!("{prefix}successful")),
-            ("server_backups.browsable", format!("{prefix}browsable")),
-            ("server_backups.streaming", format!("{prefix}streaming")),
-            ("server_backups.locked", format!("{prefix}locked")),
+            (
+                "server_backups.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "server_backups.successful",
+                compact_str::format_compact!("{prefix}successful"),
+            ),
+            (
+                "server_backups.browsable",
+                compact_str::format_compact!("{prefix}browsable"),
+            ),
+            (
+                "server_backups.streaming",
+                compact_str::format_compact!("{prefix}streaming"),
+            ),
+            (
+                "server_backups.locked",
+                compact_str::format_compact!("{prefix}locked"),
+            ),
             (
                 "server_backups.ignored_files",
-                format!("{prefix}ignored_files"),
+                compact_str::format_compact!("{prefix}ignored_files"),
             ),
-            ("server_backups.checksum", format!("{prefix}checksum")),
-            ("server_backups.bytes", format!("{prefix}bytes")),
-            ("server_backups.files", format!("{prefix}files")),
-            ("server_backups.disk", format!("{prefix}disk")),
-            ("server_backups.upload_id", format!("{prefix}upload_id")),
-            ("server_backups.upload_path", format!("{prefix}upload_path")),
-            ("server_backups.completed", format!("{prefix}completed")),
-            ("server_backups.deleted", format!("{prefix}deleted")),
-            ("server_backups.created", format!("{prefix}created")),
+            (
+                "server_backups.checksum",
+                compact_str::format_compact!("{prefix}checksum"),
+            ),
+            (
+                "server_backups.bytes",
+                compact_str::format_compact!("{prefix}bytes"),
+            ),
+            (
+                "server_backups.files",
+                compact_str::format_compact!("{prefix}files"),
+            ),
+            (
+                "server_backups.disk",
+                compact_str::format_compact!("{prefix}disk"),
+            ),
+            (
+                "server_backups.upload_id",
+                compact_str::format_compact!("{prefix}upload_id"),
+            ),
+            (
+                "server_backups.upload_path",
+                compact_str::format_compact!("{prefix}upload_path"),
+            ),
+            (
+                "server_backups.completed",
+                compact_str::format_compact!("{prefix}completed"),
+            ),
+            (
+                "server_backups.deleted",
+                compact_str::format_compact!("{prefix}deleted"),
+            ),
+            (
+                "server_backups.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -103,34 +154,36 @@ impl BaseModel for ServerBackup {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             server: super::server::Server::get_fetchable_from_row(
                 row,
-                format!("{prefix}server_uuid"),
+                compact_str::format_compact!("{prefix}server_uuid"),
             ),
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
-                    format!("{prefix}backup_configuration_uuid"),
+                    compact_str::format_compact!("{prefix}backup_configuration_uuid"),
                 ),
             node: super::node::Node::get_fetchable(
-                row.try_get(format!("{prefix}node_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}node_uuid").as_str())?,
             ),
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            successful: row.try_get(format!("{prefix}successful").as_str())?,
-            browsable: row.try_get(format!("{prefix}browsable").as_str())?,
-            streaming: row.try_get(format!("{prefix}streaming").as_str())?,
-            locked: row.try_get(format!("{prefix}locked").as_str())?,
-            ignored_files: row.try_get(format!("{prefix}ignored_files").as_str())?,
-            checksum: row.try_get(format!("{prefix}checksum").as_str())?,
-            bytes: row.try_get(format!("{prefix}bytes").as_str())?,
-            files: row.try_get(format!("{prefix}files").as_str())?,
-            disk: row.try_get(format!("{prefix}disk").as_str())?,
-            upload_id: row.try_get(format!("{prefix}upload_id").as_str())?,
-            upload_path: row.try_get(format!("{prefix}upload_path").as_str())?,
-            completed: row.try_get(format!("{prefix}completed").as_str())?,
-            deleted: row.try_get(format!("{prefix}deleted").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            successful: row.try_get(compact_str::format_compact!("{prefix}successful").as_str())?,
+            browsable: row.try_get(compact_str::format_compact!("{prefix}browsable").as_str())?,
+            streaming: row.try_get(compact_str::format_compact!("{prefix}streaming").as_str())?,
+            locked: row.try_get(compact_str::format_compact!("{prefix}locked").as_str())?,
+            ignored_files: row
+                .try_get(compact_str::format_compact!("{prefix}ignored_files").as_str())?,
+            checksum: row.try_get(compact_str::format_compact!("{prefix}checksum").as_str())?,
+            bytes: row.try_get(compact_str::format_compact!("{prefix}bytes").as_str())?,
+            files: row.try_get(compact_str::format_compact!("{prefix}files").as_str())?,
+            disk: row.try_get(compact_str::format_compact!("{prefix}disk").as_str())?,
+            upload_id: row.try_get(compact_str::format_compact!("{prefix}upload_id").as_str())?,
+            upload_path: row
+                .try_get(compact_str::format_compact!("{prefix}upload_path").as_str())?,
+            completed: row.try_get(compact_str::format_compact!("{prefix}completed").as_str())?,
+            deleted: row.try_get(compact_str::format_compact!("{prefix}deleted").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -206,7 +259,7 @@ impl ServerBackup {
                         &wings_api::servers_server_backup::post::RequestBody {
                             adapter: backup_disk.to_wings_adapter(),
                             uuid,
-                            ignore: ignored_files.join("\n"),
+                            ignore: ignored_files.join("\n").into(),
                         },
                     )
                     .await
@@ -473,7 +526,7 @@ impl ServerBackup {
                                     None => &Self::s3_path(server.uuid, self.uuid),
                                 };
 
-                                Some(client.presign_get(file_path, 60 * 60, None).await?)
+                                Some(client.presign_get(file_path, 60 * 60, None).await?.into())
                             } else {
                                 None
                             }
@@ -679,8 +732,8 @@ impl DeletableModel for ServerBackup {
 pub struct ApiServerBackup {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub ignored_files: Vec<String>,
+    pub name: compact_str::CompactString,
+    pub ignored_files: Vec<compact_str::CompactString>,
 
     pub is_successful: bool,
     pub is_locked: bool,

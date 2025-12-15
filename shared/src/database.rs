@@ -153,7 +153,7 @@ impl Database {
     pub async fn decrypt(
         &self,
         data: impl AsRef<[u8]> + Send + 'static,
-    ) -> Result<String, anyhow::Error> {
+    ) -> Result<compact_str::CompactString, anyhow::Error> {
         if self.use_decryption_cache {
             return self
                 .cache
@@ -169,7 +169,7 @@ impl Database {
 
                         tokio::task::spawn_blocking(move || {
                             simple_crypt::decrypt(&data, encryption_key.as_bytes())
-                                .map(|s| String::from_utf8_lossy(&s).to_string())
+                                .map(|s| compact_str::CompactString::from_utf8_lossy(&s))
                         })
                         .await?
                     },
@@ -181,15 +181,15 @@ impl Database {
 
         tokio::task::spawn_blocking(move || {
             simple_crypt::decrypt(data.as_ref(), encryption_key.as_bytes())
-                .map(|s| String::from_utf8_lossy(&s).to_string())
+                .map(|s| compact_str::CompactString::from_utf8_lossy(&s))
         })
         .await?
     }
 
     #[inline]
-    pub fn decrypt_sync(&self, data: impl AsRef<[u8]>) -> Option<String> {
+    pub fn decrypt_sync(&self, data: impl AsRef<[u8]>) -> Option<compact_str::CompactString> {
         simple_crypt::decrypt(data.as_ref(), self.encryption_key.as_bytes())
-            .map(|s| String::from_utf8_lossy(&s).to_string())
+            .map(|s| compact_str::CompactString::from_utf8_lossy(&s))
             .ok()
     }
 

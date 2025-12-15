@@ -17,6 +17,7 @@ export function convertType(object: oas31.SchemaObject | oas31.ReferenceObject):
                 switch (object.format ?? 'int64') {
                     case 'int32': return (object.minimum ?? -1) >= 0 ? 'u32' : 'i32'
                     case 'int64': return (object.minimum ?? -1) >= 0 ? 'u64' : 'i64'
+                    default: return 'i64'
                 }
             }
             case 'number': return 'f64'
@@ -26,7 +27,7 @@ export function convertType(object: oas31.SchemaObject | oas31.ReferenceObject):
                     case 'date-time': return 'chrono::DateTime<chrono::Utc>'
                 }
 
-                return 'String'
+                return 'compact_str::CompactString'
             }
             case 'array': return `Vec<${convertType(object.items!)}>`
         }

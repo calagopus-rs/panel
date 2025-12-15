@@ -78,7 +78,7 @@ pub struct PaginationParamsWithSearch {
         default,
         deserialize_with = "crate::deserialize::deserialize_string_option"
     )]
-    pub search: Option<String>,
+    pub search: Option<compact_str::CompactString>,
 }
 
 #[derive(ToSchema, Serialize)]
@@ -149,7 +149,7 @@ impl<T: Serialize> Pagination<T> {
 pub trait BaseModel: Serialize + DeserializeOwned {
     const NAME: &'static str;
 
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String>;
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString>;
 
     #[inline]
     fn columns_sql(prefix: Option<&str>) -> String {

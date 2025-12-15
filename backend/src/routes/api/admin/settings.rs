@@ -44,23 +44,23 @@ mod put {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadApp {
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(url)]
-        url: Option<String>,
+        url: Option<compact_str::CompactString>,
         #[validate(
             length(min = 5, max = 15),
             custom(function = "shared::validate_language")
         )]
-        language: Option<String>,
+        language: Option<compact_str::CompactString>,
         telemetry_enabled: Option<bool>,
         registration_enabled: Option<bool>,
     }
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct PayloadWebauthn {
-        rp_id: Option<String>,
+        rp_id: Option<compact_str::CompactString>,
         #[validate(url)]
-        rp_origin: Option<String>,
+        rp_origin: Option<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Deserialize)]
@@ -74,7 +74,7 @@ mod put {
 
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
-        oobe_step: Option<String>,
+        oobe_step: Option<compact_str::CompactString>,
 
         storage_driver: Option<shared::settings::StorageDriver>,
         mail_mode: Option<shared::settings::MailMode>,

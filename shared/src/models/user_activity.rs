@@ -39,7 +39,7 @@ impl UserActivityLogger {
 pub struct UserActivity {
     pub api_key_uuid: Option<uuid::Uuid>,
 
-    pub event: String,
+    pub event: compact_str::CompactString,
     pub ip: Option<sqlx::types::ipnetwork::IpNetwork>,
     pub data: serde_json::Value,
 
@@ -50,18 +50,30 @@ impl BaseModel for UserActivity {
     const NAME: &'static str = "user_activity";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
             (
                 "user_activities.api_key_uuid",
-                format!("{prefix}api_key_uuid"),
+                compact_str::format_compact!("{prefix}api_key_uuid"),
             ),
-            ("user_activities.event", format!("{prefix}event")),
-            ("user_activities.ip", format!("{prefix}ip")),
-            ("user_activities.data", format!("{prefix}data")),
-            ("user_activities.created", format!("{prefix}created")),
+            (
+                "user_activities.event",
+                compact_str::format_compact!("{prefix}event"),
+            ),
+            (
+                "user_activities.ip",
+                compact_str::format_compact!("{prefix}ip"),
+            ),
+            (
+                "user_activities.data",
+                compact_str::format_compact!("{prefix}data"),
+            ),
+            (
+                "user_activities.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -70,11 +82,12 @@ impl BaseModel for UserActivity {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            api_key_uuid: row.try_get(format!("{prefix}api_key_uuid").as_str())?,
-            event: row.try_get(format!("{prefix}event").as_str())?,
-            ip: row.try_get(format!("{prefix}ip").as_str())?,
-            data: row.try_get(format!("{prefix}data").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            api_key_uuid: row
+                .try_get(compact_str::format_compact!("{prefix}api_key_uuid").as_str())?,
+            event: row.try_get(compact_str::format_compact!("{prefix}event").as_str())?,
+            ip: row.try_get(compact_str::format_compact!("{prefix}ip").as_str())?,
+            data: row.try_get(compact_str::format_compact!("{prefix}data").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -148,7 +161,9 @@ impl UserActivity {
     pub fn into_api_object(self) -> ApiUserActivity {
         ApiUserActivity {
             event: self.event,
-            ip: self.ip.map(|ip| ip.ip().to_string()),
+            ip: self
+                .ip
+                .map(|ip| compact_str::format_compact!("{}", ip.ip())),
             data: self.data,
             is_api: self.api_key_uuid.is_some(),
             created: self.created.and_utc(),
@@ -159,8 +174,8 @@ impl UserActivity {
 #[derive(ToSchema, Serialize)]
 #[schema(title = "UserActivity")]
 pub struct ApiUserActivity {
-    pub event: String,
-    pub ip: Option<String>,
+    pub event: compact_str::CompactString,
+    pub ip: Option<compact_str::CompactString>,
     pub data: serde_json::Value,
 
     pub is_api: bool,

@@ -94,7 +94,7 @@ mod post {
         name: String,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         backup_disk: shared::models::server_backup::BackupDisk,
         #[serde(default)]

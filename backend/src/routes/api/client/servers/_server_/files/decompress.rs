@@ -18,8 +18,8 @@ mod post {
     pub struct Payload {
         #[serde(default)]
         #[schema(default = "/")]
-        root: String,
-        file: String,
+        root: compact_str::CompactString,
+        file: compact_str::CompactString,
 
         #[serde(default)]
         foreground: bool,

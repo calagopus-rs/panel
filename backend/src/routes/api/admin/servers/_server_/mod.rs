@@ -207,26 +207,26 @@ mod patch {
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        external_id: Option<String>,
+        external_id: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         limits: Option<shared::models::server::ApiServerLimits>,
         pinned_cpus: Option<Vec<i16>>,
 
         #[validate(length(min = 1, max = 8192))]
         #[schema(min_length = 1, max_length = 8192)]
-        startup: Option<String>,
+        startup: Option<compact_str::CompactString>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        image: Option<String>,
+        image: Option<compact_str::CompactString>,
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        timezone: Option<String>,
+        timezone: Option<compact_str::CompactString>,
 
         feature_limits: Option<shared::models::server::ApiServerFeatureLimits>,
     }
@@ -315,7 +315,7 @@ mod patch {
             if external_id.is_empty() {
                 server.external_id = None;
             } else {
-                server.external_id = Some(external_id.to_string());
+                server.external_id = Some(external_id.clone());
             }
         }
         if let Some(name) = data.name {
@@ -381,18 +381,18 @@ mod patch {
                 .as_ref()
                 .map(|backup_configuration| backup_configuration.uuid),
             server.suspended,
-            server.external_id,
-            server.name,
-            server.description,
+            server.external_id.as_deref(),
+            &server.name,
+            server.description.as_deref(),
             server.cpu,
             server.memory,
             server.swap,
             server.disk,
             server.io_weight,
             &server.pinned_cpus,
-            server.startup,
-            server.image,
-            server.timezone,
+            &server.startup,
+            &server.image,
+            server.timezone.as_deref(),
             server.allocation_limit,
             server.backup_limit,
             server.database_limit,

@@ -62,20 +62,20 @@ mod patch {
         )]
         #[schema(min_length = 3, max_length = 15)]
         #[schema(pattern = "^[a-zA-Z0-9_]+$")]
-        username: Option<String>,
+        username: Option<compact_str::CompactString>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_first: Option<String>,
+        name_first: Option<compact_str::CompactString>,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        name_last: Option<String>,
+        name_last: Option<compact_str::CompactString>,
 
         #[validate(
             length(min = 5, max = 15),
             custom(function = "shared::validate_language")
         )]
         #[schema(min_length = 5, max_length = 15)]
-        language: Option<String>,
+        language: Option<compact_str::CompactString>,
         toast_position: Option<UserToastPosition>,
         start_on_grouped_servers: Option<bool>,
     }
@@ -122,10 +122,10 @@ mod patch {
             SET username = $2, name_first = $3, name_last = $4, language = $5, toast_position = $6, start_on_grouped_servers = $7
             WHERE users.uuid = $1",
             user.uuid,
-            user.username,
-            user.name_first,
-            user.name_last,
-            user.language,
+            &user.username,
+            &user.name_first,
+            &user.name_last,
+            &user.language,
             user.toast_position as UserToastPosition,
             user.start_on_grouped_servers,
         )

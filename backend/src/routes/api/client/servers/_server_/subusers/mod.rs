@@ -108,8 +108,8 @@ mod post {
         #[schema(format = "email")]
         email: String,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
-        permissions: Vec<String>,
-        ignored_files: Vec<String>,
+        permissions: Vec<compact_str::CompactString>,
+        ignored_files: Vec<compact_str::CompactString>,
 
         captcha: Option<String>,
     }

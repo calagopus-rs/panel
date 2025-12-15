@@ -13,7 +13,7 @@ pub struct UserOAuthLink {
     pub user: Fetchable<super::user::User>,
     pub oauth_provider: Fetchable<super::oauth_provider::OAuthProvider>,
 
-    pub identifier: String,
+    pub identifier: compact_str::CompactString,
 
     pub last_used: Option<chrono::NaiveDateTime>,
     pub created: chrono::NaiveDateTime,
@@ -23,19 +23,34 @@ impl BaseModel for UserOAuthLink {
     const NAME: &'static str = "user_oauth_link";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_oauth_links.uuid", format!("{prefix}uuid")),
-            ("user_oauth_links.user_uuid", format!("{prefix}user_uuid")),
+            (
+                "user_oauth_links.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_oauth_links.user_uuid",
+                compact_str::format_compact!("{prefix}user_uuid"),
+            ),
             (
                 "user_oauth_links.oauth_provider_uuid",
-                format!("{prefix}oauth_provider_uuid"),
+                compact_str::format_compact!("{prefix}oauth_provider_uuid"),
             ),
-            ("user_oauth_links.identifier", format!("{prefix}identifier")),
-            ("user_oauth_links.last_used", format!("{prefix}last_used")),
-            ("user_oauth_links.created", format!("{prefix}created")),
+            (
+                "user_oauth_links.identifier",
+                compact_str::format_compact!("{prefix}identifier"),
+            ),
+            (
+                "user_oauth_links.last_used",
+                compact_str::format_compact!("{prefix}last_used"),
+            ),
+            (
+                "user_oauth_links.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -44,16 +59,16 @@ impl BaseModel for UserOAuthLink {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             user: super::user::User::get_fetchable(
-                row.try_get(format!("{prefix}user_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}user_uuid").as_str())?,
             ),
             oauth_provider: super::oauth_provider::OAuthProvider::get_fetchable(
-                row.try_get(format!("{prefix}oauth_provider_uuid").as_str())?,
+                row.try_get(compact_str::format_compact!("{prefix}oauth_provider_uuid").as_str())?,
             ),
-            identifier: row.try_get(format!("{prefix}identifier").as_str())?,
-            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            identifier: row.try_get(compact_str::format_compact!("{prefix}identifier").as_str())?,
+            last_used: row.try_get(compact_str::format_compact!("{prefix}last_used").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -342,7 +357,7 @@ pub struct AdminApiUserOAuthLink {
     pub uuid: uuid::Uuid,
     pub user: super::user::ApiFullUser,
 
-    pub identifier: String,
+    pub identifier: compact_str::CompactString,
 
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,
@@ -354,7 +369,7 @@ pub struct ApiUserOAuthLink {
     pub uuid: uuid::Uuid,
     pub oauth_provider: super::oauth_provider::ApiOAuthProvider,
 
-    pub identifier: String,
+    pub identifier: compact_str::CompactString,
 
     pub last_used: Option<chrono::DateTime<chrono::Utc>>,
     pub created: chrono::DateTime<chrono::Utc>,

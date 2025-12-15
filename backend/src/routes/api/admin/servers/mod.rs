@@ -120,23 +120,23 @@ mod post {
 
         #[validate(length(max = 255))]
         #[schema(max_length = 255)]
-        external_id: Option<String>,
+        external_id: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: String,
+        name: compact_str::CompactString,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         limits: shared::models::server::ApiServerLimits,
         pinned_cpus: Vec<i16>,
 
         #[validate(length(min = 1, max = 8192))]
         #[schema(min_length = 1, max_length = 8192)]
-        startup: String,
+        startup: compact_str::CompactString,
         #[validate(length(min = 2, max = 255))]
         #[schema(min_length = 2, max_length = 255)]
-        image: String,
+        image: compact_str::CompactString,
         #[schema(min_length = 3, max_length = 255, value_type = String)]
         timezone: Option<chrono_tz::Tz>,
 

@@ -10,7 +10,7 @@ pub use extra::*;
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ApiError {
         #[schema(inline)]
-        pub error: String,
+        pub error: compact_str::CompactString,
     }
 }
 
@@ -65,15 +65,15 @@ pub enum CompressionLevel {
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct DirectoryEntry {
         #[schema(inline)]
-        pub name: String,
+        pub name: compact_str::CompactString,
         #[schema(inline)]
         pub created: chrono::DateTime<chrono::Utc>,
         #[schema(inline)]
         pub modified: chrono::DateTime<chrono::Utc>,
         #[schema(inline)]
-        pub mode: String,
+        pub mode: compact_str::CompactString,
         #[schema(inline)]
-        pub mode_bits: String,
+        pub mode_bits: compact_str::CompactString,
         #[schema(inline)]
         pub size: u64,
         #[schema(inline)]
@@ -83,7 +83,7 @@ nestify::nest! {
         #[schema(inline)]
         pub symlink: bool,
         #[schema(inline)]
-        pub mime: String,
+        pub mime: compact_str::CompactString,
     }
 }
 
@@ -92,7 +92,7 @@ nestify::nest! {
         #[schema(inline)]
         pub identifier: uuid::Uuid,
         #[schema(inline)]
-        pub destination: String,
+        pub destination: compact_str::CompactString,
         #[schema(inline)]
         pub progress: u64,
         #[schema(inline)]
@@ -103,22 +103,22 @@ nestify::nest! {
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct InstallationScript {
         #[schema(inline)]
-        pub container_image: String,
+        pub container_image: compact_str::CompactString,
         #[schema(inline)]
-        pub entrypoint: String,
+        pub entrypoint: compact_str::CompactString,
         #[schema(inline)]
-        pub script: String,
+        pub script: compact_str::CompactString,
         #[schema(inline)]
-        pub environment: IndexMap<String, serde_json::Value>,
+        pub environment: IndexMap<compact_str::CompactString, serde_json::Value>,
     }
 }
 
 nestify::nest! {
     #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Mount {
         #[schema(inline)]
-        pub target: String,
+        pub target: compact_str::CompactString,
         #[schema(inline)]
-        pub source: String,
+        pub source: compact_str::CompactString,
         #[schema(inline)]
         pub read_only: bool,
     }
@@ -193,21 +193,21 @@ nestify::nest! {
         #[schema(inline)]
         pub meta: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationMeta {
             #[schema(inline)]
-            pub name: String,
+            pub name: compact_str::CompactString,
             #[schema(inline)]
-            pub description: String,
+            pub description: compact_str::CompactString,
         },
 
         #[schema(inline)]
         pub suspended: bool,
         #[schema(inline)]
-        pub invocation: String,
+        pub invocation: compact_str::CompactString,
         #[schema(inline)]
         pub skip_egg_scripts: bool,
         #[schema(inline)]
-        pub environment: IndexMap<String, serde_json::Value>,
+        pub environment: IndexMap<compact_str::CompactString, serde_json::Value>,
         #[schema(inline)]
-        pub labels: IndexMap<String, String>,
+        pub labels: IndexMap<compact_str::CompactString, compact_str::CompactString>,
         #[schema(inline)]
         pub backups: Vec<uuid::Uuid>,
         #[schema(inline)]
@@ -219,12 +219,12 @@ nestify::nest! {
             #[schema(inline)]
             pub default: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationAllocationsDefault {
                 #[schema(inline)]
-                pub ip: String,
+                pub ip: compact_str::CompactString,
                 #[schema(inline)]
                 pub port: u32,
             }>,
             #[schema(inline)]
-            pub mappings: IndexMap<String, Vec<u32>>,
+            pub mappings: IndexMap<compact_str::CompactString, Vec<u32>>,
         },
 
         #[schema(inline)]
@@ -240,7 +240,7 @@ nestify::nest! {
             #[schema(inline)]
             pub disk_space: u64,
             #[schema(inline)]
-            pub threads: Option<String>,
+            pub threads: Option<compact_str::CompactString>,
             #[schema(inline)]
             pub oom_disabled: bool,
         },
@@ -252,7 +252,7 @@ nestify::nest! {
             #[schema(inline)]
             pub id: uuid::Uuid,
             #[schema(inline)]
-            pub file_denylist: Vec<String>,
+            pub file_denylist: Vec<compact_str::CompactString>,
         },
 
         #[schema(inline)]
@@ -260,13 +260,13 @@ nestify::nest! {
             #[schema(inline)]
             pub privileged: bool,
             #[schema(inline)]
-            pub image: String,
+            pub image: compact_str::CompactString,
             #[schema(inline)]
-            pub timezone: Option<String>,
+            pub timezone: Option<compact_str::CompactString>,
             #[schema(inline)]
             pub seccomp: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct ServerConfigurationContainerSeccomp {
                 #[schema(inline)]
-                pub remove_allowed: Vec<String>,
+                pub remove_allowed: Vec<compact_str::CompactString>,
             },
 
         },
@@ -339,7 +339,7 @@ nestify::nest! {
             #[schema(inline)]
             pub threads: u64,
             #[schema(inline)]
-            pub model: String,
+            pub model: compact_str::CompactString,
         },
 
         #[schema(inline)]
@@ -490,7 +490,7 @@ pub mod servers_server_backup {
                 #[schema(inline)]
                 pub uuid: uuid::Uuid,
                 #[schema(inline)]
-                pub ignore: String,
+                pub ignore: compact_str::CompactString,
             }
         }
 
@@ -533,7 +533,7 @@ pub mod servers_server_backup_backup_restore {
                 #[schema(inline)]
                 pub truncate_directory: bool,
                 #[schema(inline)]
-                pub download_url: Option<String>,
+                pub download_url: Option<compact_str::CompactString>,
             }
         }
 
@@ -556,7 +556,7 @@ pub mod servers_server_commands {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub commands: Vec<String>,
+                pub commands: Vec<compact_str::CompactString>,
             }
         }
 
@@ -579,13 +579,13 @@ pub mod servers_server_files_chmod {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
                 pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyFiles {
                     #[schema(inline)]
-                    pub file: String,
+                    pub file: compact_str::CompactString,
                     #[schema(inline)]
-                    pub mode: String,
+                    pub mode: compact_str::CompactString,
                 }>,
             }
         }
@@ -615,11 +615,11 @@ pub mod servers_server_files_compress {
                 #[schema(inline)]
                 pub format: ArchiveFormat,
                 #[schema(inline)]
-                pub name: Option<String>,
+                pub name: Option<compact_str::CompactString>,
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub files: Vec<String>,
+                pub files: Vec<compact_str::CompactString>,
                 #[schema(inline)]
                 pub foreground: bool,
             }
@@ -672,9 +672,9 @@ pub mod servers_server_files_copy {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub location: String,
+                pub location: compact_str::CompactString,
                 #[schema(inline)]
-                pub name: Option<String>,
+                pub name: Option<compact_str::CompactString>,
             }
         }
 
@@ -696,9 +696,9 @@ pub mod servers_server_files_create_directory {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub name: String,
+                pub name: compact_str::CompactString,
                 #[schema(inline)]
-                pub path: String,
+                pub path: compact_str::CompactString,
             }
         }
 
@@ -723,9 +723,9 @@ pub mod servers_server_files_decompress {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub file: String,
+                pub file: compact_str::CompactString,
                 #[schema(inline)]
                 pub foreground: bool,
             }
@@ -764,9 +764,9 @@ pub mod servers_server_files_delete {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub files: Vec<String>,
+                pub files: Vec<compact_str::CompactString>,
             }
         }
 
@@ -793,7 +793,7 @@ pub mod servers_server_files_fingerprints {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub fingerprints: IndexMap<String, String>,
+                pub fingerprints: IndexMap<compact_str::CompactString, compact_str::CompactString>,
             }
         }
 
@@ -875,11 +875,11 @@ pub mod servers_server_files_pull {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub url: String,
+                pub url: compact_str::CompactString,
                 #[schema(inline)]
-                pub file_name: Option<String>,
+                pub file_name: Option<compact_str::CompactString>,
                 #[schema(inline)]
                 pub use_header: bool,
                 #[schema(inline)]
@@ -934,13 +934,13 @@ pub mod servers_server_files_rename {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
                 pub files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyFiles {
                     #[schema(inline)]
-                    pub from: String,
+                    pub from: compact_str::CompactString,
                     #[schema(inline)]
-                    pub to: String,
+                    pub to: compact_str::CompactString,
                 }>,
             }
         }
@@ -966,9 +966,9 @@ pub mod servers_server_files_search {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub root: String,
+                pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub query: String,
+                pub query: compact_str::CompactString,
                 #[schema(inline)]
                 pub include_content: bool,
                 #[schema(inline)]
@@ -996,7 +996,7 @@ pub mod servers_server_files_write {
     pub mod post {
         use super::*;
 
-        pub type RequestBody = String;
+        pub type RequestBody = compact_str::CompactString;
 
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
@@ -1035,7 +1035,7 @@ pub mod servers_server_logs {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub data: String,
+                pub data: compact_str::CompactString,
             }
         }
 
@@ -1158,9 +1158,9 @@ pub mod servers_server_script {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub stdout: String,
+                pub stdout: compact_str::CompactString,
                 #[schema(inline)]
-                pub stderr: String,
+                pub stderr: compact_str::CompactString,
             }
         }
 
@@ -1210,9 +1210,9 @@ pub mod servers_server_transfer {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub url: String,
+                pub url: compact_str::CompactString,
                 #[schema(inline)]
-                pub token: String,
+                pub token: compact_str::CompactString,
                 #[schema(inline)]
                 pub archive_format: TransferArchiveFormat,
                 #[schema(inline)]
@@ -1245,7 +1245,7 @@ pub mod servers_server_version {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub hash: String,
+                pub hash: compact_str::CompactString,
             }
         }
 
@@ -1263,7 +1263,7 @@ pub mod servers_server_ws_deny {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub jtis: Vec<String>,
+                pub jtis: Vec<compact_str::CompactString>,
             }
         }
 
@@ -1288,9 +1288,9 @@ pub mod servers_server_ws_permissions {
                     #[schema(inline)]
                     pub user: uuid::Uuid,
                     #[schema(inline)]
-                    pub permissions: Vec<String>,
+                    pub permissions: Vec<compact_str::CompactString>,
                     #[schema(inline)]
-                    pub ignored_files: Vec<String>,
+                    pub ignored_files: Vec<compact_str::CompactString>,
                 }>,
             }
         }
@@ -1312,15 +1312,15 @@ pub mod system {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
                 #[schema(inline)]
-                pub architecture: String,
+                pub architecture: compact_str::CompactString,
                 #[schema(inline)]
                 pub cpu_count: u64,
                 #[schema(inline)]
-                pub kernel_version: String,
+                pub kernel_version: compact_str::CompactString,
                 #[schema(inline)]
-                pub os: String,
+                pub os: compact_str::CompactString,
                 #[schema(inline)]
-                pub version: String,
+                pub version: compact_str::CompactString,
             }
         }
 
@@ -1338,17 +1338,17 @@ pub mod system_config {
                 #[schema(inline)]
                 pub debug: bool,
                 #[schema(inline)]
-                pub app_name: String,
+                pub app_name: compact_str::CompactString,
                 #[schema(inline)]
                 pub uuid: uuid::Uuid,
                 #[schema(inline)]
-                pub token_id: String,
+                pub token_id: compact_str::CompactString,
                 #[schema(inline)]
-                pub token: String,
+                pub token: compact_str::CompactString,
                 #[schema(inline)]
                 pub api: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Api {
                     #[schema(inline)]
-                    pub host: String,
+                    pub host: compact_str::CompactString,
                     #[schema(inline)]
                     pub port: u32,
                     #[schema(inline)]
@@ -1356,9 +1356,9 @@ pub mod system_config {
                         #[schema(inline)]
                         pub enabled: bool,
                         #[schema(inline)]
-                        pub cert: String,
+                        pub cert: compact_str::CompactString,
                         #[schema(inline)]
-                        pub key: String,
+                        pub key: compact_str::CompactString,
                     }>,
                     #[schema(inline)]
                     pub disable_openapi_docs: bool,
@@ -1367,7 +1367,7 @@ pub mod system_config {
                     #[schema(inline)]
                     pub server_remote_download_limit: u64,
                     #[schema(inline)]
-                    pub remote_download_blocked_cidrs: Vec<String>,
+                    pub remote_download_blocked_cidrs: Vec<compact_str::CompactString>,
                     #[schema(inline)]
                     pub disable_directory_size: bool,
                     #[schema(inline)]
@@ -1385,27 +1385,27 @@ pub mod system_config {
                     #[schema(inline)]
                     pub max_jwt_uses: u64,
                     #[schema(inline)]
-                    pub trusted_proxies: Vec<String>,
+                    pub trusted_proxies: Vec<compact_str::CompactString>,
                 },
 
                 #[schema(inline)]
                 pub system: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200System {
                     #[schema(inline)]
-                    pub root_directory: String,
+                    pub root_directory: compact_str::CompactString,
                     #[schema(inline)]
-                    pub log_directory: String,
+                    pub log_directory: compact_str::CompactString,
                     #[schema(inline)]
-                    pub data: String,
+                    pub data: compact_str::CompactString,
                     #[schema(inline)]
-                    pub archive_directory: String,
+                    pub archive_directory: compact_str::CompactString,
                     #[schema(inline)]
-                    pub backup_directory: String,
+                    pub backup_directory: compact_str::CompactString,
                     #[schema(inline)]
-                    pub tmp_directory: String,
+                    pub tmp_directory: compact_str::CompactString,
                     #[schema(inline)]
-                    pub username: String,
+                    pub username: compact_str::CompactString,
                     #[schema(inline)]
-                    pub timezone: String,
+                    pub timezone: compact_str::CompactString,
                     #[schema(inline)]
                     pub user: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUser {
                         #[schema(inline)]
@@ -1427,7 +1427,7 @@ pub mod system_config {
                         #[schema(inline)]
                         pub enabled: bool,
                         #[schema(inline)]
-                        pub directory: String,
+                        pub directory: compact_str::CompactString,
                     }>,
                     #[schema(inline)]
                     pub disk_check_interval: u64,
@@ -1448,13 +1448,13 @@ pub mod system_config {
                     #[schema(inline)]
                     pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftp {
                         #[schema(inline)]
-                        pub bind_address: String,
+                        pub bind_address: compact_str::CompactString,
                         #[schema(inline)]
                         pub bind_port: u32,
                         #[schema(inline)]
                         pub read_only: bool,
                         #[schema(inline)]
-                        pub key_algorithm: String,
+                        pub key_algorithm: compact_str::CompactString,
                         #[schema(inline)]
                         pub disable_password_auth: bool,
                         #[schema(inline)]
@@ -1468,7 +1468,7 @@ pub mod system_config {
                             #[schema(inline)]
                             pub cli: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShellCli {
                                 #[schema(inline)]
-                                pub name: String,
+                                pub name: compact_str::CompactString,
                             }>,
                         }>,
                     }>,
@@ -1494,7 +1494,7 @@ pub mod system_config {
                             #[schema(inline)]
                             pub enabled: bool,
                             #[schema(inline)]
-                            pub path: String,
+                            pub path: compact_str::CompactString,
                         }>,
                         #[schema(inline)]
                         pub wings: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsWings {
@@ -1524,13 +1524,13 @@ pub mod system_config {
                         #[schema(inline)]
                         pub restic: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsRestic {
                             #[schema(inline)]
-                            pub repository: String,
+                            pub repository: compact_str::CompactString,
                             #[schema(inline)]
-                            pub password_file: String,
+                            pub password_file: compact_str::CompactString,
                             #[schema(inline)]
                             pub retry_lock_seconds: u64,
                             #[schema(inline)]
-                            pub environment: IndexMap<String, String>,
+                            pub environment: IndexMap<compact_str::CompactString, compact_str::CompactString>,
                         }>,
                         #[schema(inline)]
                         pub btrfs: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsBtrfs {
@@ -1555,7 +1555,7 @@ pub mod system_config {
                 #[schema(inline)]
                 pub docker: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200Docker {
                     #[schema(inline)]
-                    pub socket: String,
+                    pub socket: compact_str::CompactString,
                     #[schema(inline)]
                     pub server_name_in_container_name: bool,
                     #[schema(inline)]
@@ -1563,19 +1563,19 @@ pub mod system_config {
                     #[schema(inline)]
                     pub network: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetwork {
                         #[schema(inline)]
-                        pub interface: String,
+                        pub interface: compact_str::CompactString,
                         #[schema(inline)]
                         pub disable_interface_binding: bool,
                         #[schema(inline)]
-                        pub dns: Vec<String>,
+                        pub dns: Vec<compact_str::CompactString>,
                         #[schema(inline)]
-                        pub name: String,
+                        pub name: compact_str::CompactString,
                         #[schema(inline)]
                         pub ispn: bool,
                         #[schema(inline)]
-                        pub driver: String,
+                        pub driver: compact_str::CompactString,
                         #[schema(inline)]
-                        pub mode: String,
+                        pub mode: compact_str::CompactString,
                         #[schema(inline)]
                         pub is_internal: bool,
                         #[schema(inline)]
@@ -1587,23 +1587,23 @@ pub mod system_config {
                             #[schema(inline)]
                             pub v4: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV4 {
                                 #[schema(inline)]
-                                pub subnet: String,
+                                pub subnet: compact_str::CompactString,
                                 #[schema(inline)]
-                                pub gateway: String,
+                                pub gateway: compact_str::CompactString,
                             }>,
                             #[schema(inline)]
                             pub v6: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV6 {
                                 #[schema(inline)]
-                                pub subnet: String,
+                                pub subnet: compact_str::CompactString,
                                 #[schema(inline)]
-                                pub gateway: String,
+                                pub gateway: compact_str::CompactString,
                             }>,
                         }>,
                     }>,
                     #[schema(inline)]
-                    pub domainname: String,
+                    pub domainname: compact_str::CompactString,
                     #[schema(inline)]
-                    pub registries: IndexMap<String, serde_json::Value>,
+                    pub registries: IndexMap<compact_str::CompactString, serde_json::Value>,
                     #[schema(inline)]
                     pub tmpfs_size: u64,
                     #[schema(inline)]
@@ -1624,16 +1624,16 @@ pub mod system_config {
                         #[schema(inline)]
                         pub default_multiplier: f64,
                         #[schema(inline)]
-                        pub multipliers: IndexMap<String, f64>,
+                        pub multipliers: IndexMap<compact_str::CompactString, f64>,
                     }>,
                     #[schema(inline)]
-                    pub userns_mode: String,
+                    pub userns_mode: compact_str::CompactString,
                     #[schema(inline)]
                     pub log_config: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerLogConfig {
                         #[schema(inline)]
-                        pub r#type: String,
+                        pub r#type: compact_str::CompactString,
                         #[schema(inline)]
-                        pub config: IndexMap<String, String>,
+                        pub config: IndexMap<compact_str::CompactString, compact_str::CompactString>,
                     }>,
                 },
 
@@ -1648,9 +1648,9 @@ pub mod system_config {
                 },
 
                 #[schema(inline)]
-                pub remote: String,
+                pub remote: compact_str::CompactString,
                 #[schema(inline)]
-                pub remote_headers: IndexMap<String, String>,
+                pub remote_headers: IndexMap<compact_str::CompactString, compact_str::CompactString>,
                 #[schema(inline)]
                 pub remote_query: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200RemoteQuery {
                     #[schema(inline)]
@@ -1662,9 +1662,9 @@ pub mod system_config {
                 },
 
                 #[schema(inline)]
-                pub allowed_mounts: Vec<String>,
+                pub allowed_mounts: Vec<compact_str::CompactString>,
                 #[schema(inline)]
-                pub allowed_origins: Vec<String>,
+                pub allowed_origins: Vec<compact_str::CompactString>,
                 #[schema(inline)]
                 pub allow_cors_private_network: bool,
                 #[schema(inline)]
@@ -1686,7 +1686,7 @@ pub mod system_logs {
                 #[schema(inline)]
                 pub log_files: Vec<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200LogFiles {
                     #[schema(inline)]
-                    pub name: String,
+                    pub name: compact_str::CompactString,
                     #[schema(inline)]
                     pub size: u64,
                     #[schema(inline)]
@@ -1736,15 +1736,15 @@ pub mod system_upgrade {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBody {
                 #[schema(inline)]
-                pub url: String,
+                pub url: compact_str::CompactString,
                 #[schema(inline)]
-                pub headers: IndexMap<String, String>,
+                pub headers: IndexMap<compact_str::CompactString, compact_str::CompactString>,
                 #[schema(inline)]
-                pub sha256: String,
+                pub sha256: compact_str::CompactString,
                 #[schema(inline)]
-                pub restart_command: String,
+                pub restart_command: compact_str::CompactString,
                 #[schema(inline)]
-                pub restart_command_args: Vec<String>,
+                pub restart_command_args: Vec<compact_str::CompactString>,
             }
         }
 
@@ -1756,7 +1756,7 @@ pub mod system_upgrade {
         nestify::nest! {
             #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response409 {
                 #[schema(inline)]
-                pub error: String,
+                pub error: compact_str::CompactString,
             }
         }
 
@@ -1808,11 +1808,11 @@ pub mod update {
                 #[schema(inline)]
                 pub debug: Option<bool>,
                 #[schema(inline)]
-                pub app_name: Option<String>,
+                pub app_name: Option<compact_str::CompactString>,
                 #[schema(inline)]
                 pub api: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyApi {
                     #[schema(inline)]
-                    pub host: Option<String>,
+                    pub host: Option<compact_str::CompactString>,
                     #[schema(inline)]
                     pub port: Option<u32>,
                     #[schema(inline)]
@@ -1820,9 +1820,9 @@ pub mod update {
                         #[schema(inline)]
                         pub enabled: Option<bool>,
                         #[schema(inline)]
-                        pub cert: Option<String>,
+                        pub cert: Option<compact_str::CompactString>,
                         #[schema(inline)]
-                        pub key: Option<String>,
+                        pub key: Option<compact_str::CompactString>,
                     }>,
                     #[schema(inline)]
                     pub upload_limit: Option<u64>,
@@ -1832,13 +1832,13 @@ pub mod update {
                     #[schema(inline)]
                     pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodySystemSftp {
                         #[schema(inline)]
-                        pub bind_address: Option<String>,
+                        pub bind_address: Option<compact_str::CompactString>,
                         #[schema(inline)]
                         pub bind_port: Option<u32>,
                     }>,
                 }>,
                 #[schema(inline)]
-                pub allowed_origins: Option<Vec<String>>,
+                pub allowed_origins: Option<Vec<compact_str::CompactString>>,
                 #[schema(inline)]
                 pub allow_cors_private_network: Option<bool>,
                 #[schema(inline)]

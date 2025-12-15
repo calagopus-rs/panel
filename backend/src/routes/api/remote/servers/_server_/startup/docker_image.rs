@@ -49,7 +49,7 @@ mod put {
             .egg
             .docker_images
             .values()
-            .any(|image| image == &data.image)
+            .any(|image| image == data.image)
         {
             return ApiResponse::error("the specified docker image is not available")
                 .with_status(StatusCode::EXPECTATION_FAILED)
@@ -63,7 +63,7 @@ mod put {
                 .egg
                 .docker_images
                 .iter()
-                .any(|(_, image)| image == &server.image)
+                .any(|(_, image)| image == server.image)
         {
             return ApiResponse::error("overwriting custom docker images is not allowed")
                 .with_status(StatusCode::EXPECTATION_FAILED)

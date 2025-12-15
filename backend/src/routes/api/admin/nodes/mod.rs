@@ -89,21 +89,21 @@ mod post {
 
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: String,
+        name: compact_str::CompactString,
         public: bool,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         #[validate(length(min = 3, max = 255), url)]
         #[schema(min_length = 3, max_length = 255, format = "uri")]
-        public_url: Option<String>,
+        public_url: Option<compact_str::CompactString>,
         #[validate(length(min = 3, max = 255), url)]
         #[schema(min_length = 3, max_length = 255, format = "uri")]
-        url: String,
+        url: compact_str::CompactString,
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        sftp_host: Option<String>,
+        sftp_host: Option<compact_str::CompactString>,
         sftp_port: u16,
 
         #[validate(length(max = 1024))]

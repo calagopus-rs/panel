@@ -15,7 +15,7 @@ mod put {
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
-        #[schema(min_length = 3, max_length = 255, value_type = String)]
+        #[schema(min_length = 3, max_length = 255, value_type = Option<String>)]
         timezone: Option<chrono_tz::Tz>,
     }
 

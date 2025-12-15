@@ -12,16 +12,16 @@ use validator::Validate;
 pub struct ExportedNestEggVariable {
     #[validate(length(min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]
-    pub name: String,
+    pub name: compact_str::CompactString,
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
-    pub description: Option<String>,
+    pub description: Option<compact_str::CompactString>,
     #[serde(default, alias = "sort")]
     pub order: i16,
 
     #[validate(length(min = 1, max = 255))]
     #[schema(min_length = 1, max_length = 255)]
-    pub env_variable: String,
+    pub env_variable: compact_str::CompactString,
     #[validate(length(max = 1024))]
     #[schema(max_length = 1024)]
     #[serde(
@@ -36,22 +36,22 @@ pub struct ExportedNestEggVariable {
         default,
         deserialize_with = "crate::deserialize::deserialize_nest_egg_variable_rules"
     )]
-    pub rules: Vec<String>,
+    pub rules: Vec<compact_str::CompactString>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct NestEggVariable {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
     pub order: i16,
 
-    pub env_variable: String,
+    pub env_variable: compact_str::CompactString,
     pub default_value: Option<String>,
     pub user_viewable: bool,
     pub user_editable: bool,
-    pub rules: Vec<String>,
+    pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -60,35 +60,50 @@ impl BaseModel for NestEggVariable {
     const NAME: &'static str = "nest_egg_variable";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("nest_egg_variables.uuid", format!("{prefix}uuid")),
-            ("nest_egg_variables.name", format!("{prefix}name")),
+            (
+                "nest_egg_variables.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "nest_egg_variables.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
             (
                 "nest_egg_variables.description",
-                format!("{prefix}description"),
+                compact_str::format_compact!("{prefix}description"),
             ),
-            ("nest_egg_variables.order_", format!("{prefix}order")),
+            (
+                "nest_egg_variables.order_",
+                compact_str::format_compact!("{prefix}order"),
+            ),
             (
                 "nest_egg_variables.env_variable",
-                format!("{prefix}env_variable"),
+                compact_str::format_compact!("{prefix}env_variable"),
             ),
             (
                 "nest_egg_variables.default_value",
-                format!("{prefix}default_value"),
+                compact_str::format_compact!("{prefix}default_value"),
             ),
             (
                 "nest_egg_variables.user_viewable",
-                format!("{prefix}user_viewable"),
+                compact_str::format_compact!("{prefix}user_viewable"),
             ),
             (
                 "nest_egg_variables.user_editable",
-                format!("{prefix}user_editable"),
+                compact_str::format_compact!("{prefix}user_editable"),
             ),
-            ("nest_egg_variables.rules", format!("{prefix}rules")),
-            ("nest_egg_variables.created", format!("{prefix}created")),
+            (
+                "nest_egg_variables.rules",
+                compact_str::format_compact!("{prefix}rules"),
+            ),
+            (
+                "nest_egg_variables.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -97,16 +112,21 @@ impl BaseModel for NestEggVariable {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            order: row.try_get(format!("{prefix}order").as_str())?,
-            env_variable: row.try_get(format!("{prefix}env_variable").as_str())?,
-            default_value: row.try_get(format!("{prefix}default_value").as_str())?,
-            user_viewable: row.try_get(format!("{prefix}user_viewable").as_str())?,
-            user_editable: row.try_get(format!("{prefix}user_editable").as_str())?,
-            rules: row.try_get(format!("{prefix}rules").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            order: row.try_get(compact_str::format_compact!("{prefix}order").as_str())?,
+            env_variable: row
+                .try_get(compact_str::format_compact!("{prefix}env_variable").as_str())?,
+            default_value: row
+                .try_get(compact_str::format_compact!("{prefix}default_value").as_str())?,
+            user_viewable: row
+                .try_get(compact_str::format_compact!("{prefix}user_viewable").as_str())?,
+            user_editable: row
+                .try_get(compact_str::format_compact!("{prefix}user_editable").as_str())?,
+            rules: row.try_get(compact_str::format_compact!("{prefix}rules").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -123,7 +143,7 @@ impl NestEggVariable {
         default_value: Option<&str>,
         user_viewable: bool,
         user_editable: bool,
-        rules: &[String],
+        rules: &[compact_str::CompactString],
     ) -> Result<Self, crate::database::DatabaseError> {
         let row = sqlx::query(&format!(
             r#"
@@ -267,15 +287,15 @@ impl DeletableModel for NestEggVariable {
 pub struct AdminApiNestEggVariable {
     pub uuid: uuid::Uuid,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
     pub order: i16,
 
-    pub env_variable: String,
+    pub env_variable: compact_str::CompactString,
     pub default_value: Option<String>,
     pub user_viewable: bool,
     pub user_editable: bool,
-    pub rules: Vec<String>,
+    pub rules: Vec<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

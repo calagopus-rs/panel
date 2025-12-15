@@ -12,8 +12,8 @@ pub struct Location {
     pub uuid: uuid::Uuid,
     pub backup_configuration: Option<Fetchable<super::backup_configurations::BackupConfiguration>>,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     pub created: chrono::NaiveDateTime,
 }
@@ -22,18 +22,30 @@ impl BaseModel for Location {
     const NAME: &'static str = "location";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("locations.uuid", format!("{prefix}uuid")),
+            (
+                "locations.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
             (
                 "locations.backup_configuration_uuid",
-                format!("{prefix}location_backup_configuration_uuid"),
+                compact_str::format_compact!("{prefix}location_backup_configuration_uuid"),
             ),
-            ("locations.name", format!("{prefix}name")),
-            ("locations.description", format!("{prefix}description")),
-            ("locations.created", format!("{prefix}created")),
+            (
+                "locations.name",
+                compact_str::format_compact!("{prefix}name"),
+            ),
+            (
+                "locations.description",
+                compact_str::format_compact!("{prefix}description"),
+            ),
+            (
+                "locations.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -42,15 +54,16 @@ impl BaseModel for Location {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             backup_configuration:
                 super::backup_configurations::BackupConfiguration::get_fetchable_from_row(
                     row,
-                    format!("{prefix}location_backup_configuration_uuid"),
+                    compact_str::format_compact!("{prefix}location_backup_configuration_uuid"),
                 ),
-            name: row.try_get(format!("{prefix}name").as_str())?,
-            description: row.try_get(format!("{prefix}description").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            name: row.try_get(compact_str::format_compact!("{prefix}name").as_str())?,
+            description: row
+                .try_get(compact_str::format_compact!("{prefix}description").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }
@@ -247,8 +260,8 @@ pub struct AdminApiLocation {
     pub uuid: uuid::Uuid,
     pub backup_configuration: Option<super::backup_configurations::AdminApiBackupConfiguration>,
 
-    pub name: String,
-    pub description: Option<String>,
+    pub name: compact_str::CompactString,
+    pub description: Option<compact_str::CompactString>,
 
     pub created: chrono::DateTime<chrono::Utc>,
 }

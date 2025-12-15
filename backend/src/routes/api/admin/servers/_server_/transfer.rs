@@ -3,6 +3,7 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod post {
     use axum::http::StatusCode;
+    use compact_str::ToCompactString;
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
@@ -148,8 +149,8 @@ mod post {
             .post_servers_server_transfer(
                 server.uuid,
                 &wings_api::servers_server_transfer::post::RequestBody {
-                    url: url.to_string(),
-                    token: format!("Bearer {token}"),
+                    url: url.to_compact_string(),
+                    token: format!("Bearer {token}").into(),
                     backups: data.backups,
                     delete_backups: data.delete_source_backups,
                     archive_format: data.archive_format,

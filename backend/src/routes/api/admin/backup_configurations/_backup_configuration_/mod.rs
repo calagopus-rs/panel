@@ -167,10 +167,10 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
 
         backup_disk: Option<shared::models::server_backup::BackupDisk>,
         backup_configs: Option<shared::models::backup_configurations::BackupConfigs>,
@@ -232,8 +232,8 @@ mod patch {
             SET name = $2, description = $3, backup_disk = $4, backup_configs = $5
             WHERE backup_configurations.uuid = $1",
             backup_configuration.uuid,
-            backup_configuration.name,
-            backup_configuration.description,
+            &backup_configuration.name,
+            backup_configuration.description.as_deref(),
             backup_configuration.backup_disk as shared::models::server_backup::BackupDisk,
             serde_json::to_value(&backup_configuration.backup_configs)?,
         )

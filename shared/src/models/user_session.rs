@@ -27,15 +27,30 @@ impl BaseModel for UserSession {
     const NAME: &'static str = "user_session";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         BTreeMap::from([
-            ("user_sessions.uuid", format!("{prefix}uuid")),
-            ("user_sessions.ip", format!("{prefix}ip")),
-            ("user_sessions.user_agent", format!("{prefix}user_agent")),
-            ("user_sessions.last_used", format!("{prefix}last_used")),
-            ("user_sessions.created", format!("{prefix}created")),
+            (
+                "user_sessions.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_sessions.ip",
+                compact_str::format_compact!("{prefix}ip"),
+            ),
+            (
+                "user_sessions.user_agent",
+                compact_str::format_compact!("{prefix}user_agent"),
+            ),
+            (
+                "user_sessions.last_used",
+                compact_str::format_compact!("{prefix}last_used"),
+            ),
+            (
+                "user_sessions.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ])
     }
 
@@ -44,11 +59,11 @@ impl BaseModel for UserSession {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
-            ip: row.try_get(format!("{prefix}ip").as_str())?,
-            user_agent: row.try_get(format!("{prefix}user_agent").as_str())?,
-            last_used: row.try_get(format!("{prefix}last_used").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
+            ip: row.try_get(compact_str::format_compact!("{prefix}ip").as_str())?,
+            user_agent: row.try_get(compact_str::format_compact!("{prefix}user_agent").as_str())?,
+            last_used: row.try_get(compact_str::format_compact!("{prefix}last_used").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

@@ -106,7 +106,7 @@ pub fn unlikely(b: bool) -> bool {
 
 pub const FRONTEND_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
-pub static FRONTEND_LANGUAGES: LazyLock<Vec<String>> = LazyLock::new(|| {
+pub static FRONTEND_LANGUAGES: LazyLock<Vec<compact_str::CompactString>> = LazyLock::new(|| {
     let mut languages = Vec::new();
 
     let Some(translations) = FRONTEND_ASSETS.get_dir("translations") else {
@@ -118,18 +118,13 @@ pub static FRONTEND_LANGUAGES: LazyLock<Vec<String>> = LazyLock::new(|| {
             continue;
         };
 
-        languages.push(
-            file_name
-                .to_string_lossy()
-                .trim_end_matches(".json")
-                .to_string(),
-        );
+        languages.push(file_name.to_string_lossy().trim_end_matches(".json").into());
     }
 
     languages
 });
 
-pub fn validate_language(language: &String) -> Result<(), ValidationError> {
+pub fn validate_language(language: &compact_str::CompactString) -> Result<(), ValidationError> {
     if !FRONTEND_LANGUAGES.contains(language) {
         return Err(ValidationError::new("language")
             .with_message(format!("invalid language: {language}").into()));

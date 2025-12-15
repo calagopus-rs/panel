@@ -47,7 +47,7 @@ mod get {
             user_uuid: uuid::Uuid,
             unique_id: uuid::Uuid,
 
-            ignored_files: &'a [String],
+            ignored_files: &'a [compact_str::CompactString],
         }
 
         let node = server.node.fetch_cached(&state.database).await?;

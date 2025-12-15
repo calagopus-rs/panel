@@ -105,7 +105,7 @@ mod delete {
                     .post_servers_server_ws_deny(
                         server.uuid,
                         &wings_api::servers_server_ws_deny::post::RequestBody {
-                            jtis: vec![subuser.user.uuid.to_string()],
+                            jtis: vec![subuser.user.uuid.to_string().into()],
                         },
                     )
                     .await
@@ -138,8 +138,8 @@ mod patch {
     #[derive(ToSchema, Validate, Deserialize)]
     pub struct Payload {
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
-        permissions: Option<Vec<String>>,
-        ignored_files: Option<Vec<String>>,
+        permissions: Option<Vec<compact_str::CompactString>>,
+        ignored_files: Option<Vec<compact_str::CompactString>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -218,8 +218,8 @@ mod patch {
             "UPDATE server_subusers
             SET permissions = $1, ignored_files = $2
             WHERE server_subusers.server_uuid = $3 AND server_subusers.user_uuid = $4",
-            &subuser.permissions,
-            &subuser.ignored_files,
+            &subuser.permissions as &[compact_str::CompactString],
+            &subuser.ignored_files as &[compact_str::CompactString],
             server.uuid,
             subuser.user.uuid,
         )
@@ -260,7 +260,7 @@ mod patch {
                         &wings_api::servers_server_ws_permissions::post::RequestBody {
                             user_permissions: vec![wings_api::servers_server_ws_permissions::post::RequestBodyUserPermissions {
                                 user: subuser.user.uuid,
-                                permissions: server.wings_permissions(&subuser.user).into_iter().map(String::from).collect(),
+                                permissions: server.wings_permissions(&subuser.user).into_iter().map(compact_str::CompactString::from).collect(),
                                 ignored_files: subuser.ignored_files,
                             }]
                         }

@@ -98,15 +98,15 @@ mod patch {
     pub struct Payload {
         #[validate(length(min = 3, max = 255))]
         #[schema(min_length = 3, max_length = 255)]
-        name: Option<String>,
+        name: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
-        description: Option<String>,
+        description: Option<compact_str::CompactString>,
         order: Option<i16>,
 
         #[validate(length(min = 1, max = 255))]
         #[schema(min_length = 1, max_length = 255)]
-        env_variable: Option<String>,
+        env_variable: Option<compact_str::CompactString>,
         #[validate(length(max = 1024))]
         #[schema(max_length = 1024)]
         default_value: Option<String>,
@@ -114,7 +114,7 @@ mod patch {
         user_viewable: Option<bool>,
         user_editable: Option<bool>,
         #[validate(custom(function = "rule_validator::validate_rules"))]
-        rules: Option<Vec<String>>,
+        rules: Option<Vec<compact_str::CompactString>>,
     }
 
     #[derive(ToSchema, Serialize)]
@@ -208,14 +208,14 @@ mod patch {
                 name = $1, description = $2, order_ = $3, env_variable = $4,
                 default_value = $5, user_viewable = $6, user_editable = $7, rules = $8
             WHERE nest_egg_variables.uuid = $9",
-            egg_variable.name,
-            egg_variable.description,
+            &egg_variable.name,
+            egg_variable.description.as_deref(),
             egg_variable.order,
-            egg_variable.env_variable,
+            &egg_variable.env_variable,
             egg_variable.default_value,
             egg_variable.user_viewable,
             egg_variable.user_editable,
-            &egg_variable.rules,
+            &egg_variable.rules as &[compact_str::CompactString],
             egg_variable.uuid,
         )
         .execute(state.database.write())

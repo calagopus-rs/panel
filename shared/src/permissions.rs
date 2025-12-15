@@ -48,9 +48,12 @@ impl PermissionMap {
         &self.list
     }
 
-    pub fn validate_permissions(&self, permissions: &[String]) -> Result<(), ValidationError> {
+    pub fn validate_permissions(
+        &self,
+        permissions: &[compact_str::CompactString],
+    ) -> Result<(), ValidationError> {
         for permission in permissions {
-            if !self.list().contains(permission) {
+            if !self.list().contains(&**permission) {
                 return Err(ValidationError::new("permissions")
                     .with_message(format!("invalid permission: {permission}").into()));
             }
@@ -196,7 +199,9 @@ pub fn get_user_permissions() -> RwLockReadGuard<'static, PermissionMap> {
 }
 
 #[inline]
-pub fn validate_user_permissions(permissions: &[String]) -> Result<(), ValidationError> {
+pub fn validate_user_permissions(
+    permissions: &[compact_str::CompactString],
+) -> Result<(), ValidationError> {
     get_user_permissions().validate_permissions(permissions)
 }
 
@@ -462,7 +467,9 @@ pub fn get_admin_permissions() -> RwLockReadGuard<'static, PermissionMap> {
 }
 
 #[inline]
-pub fn validate_admin_permissions(permissions: &[String]) -> Result<(), ValidationError> {
+pub fn validate_admin_permissions(
+    permissions: &[compact_str::CompactString],
+) -> Result<(), ValidationError> {
     get_admin_permissions().validate_permissions(permissions)
 }
 
@@ -683,6 +690,8 @@ pub fn get_server_permissions() -> RwLockReadGuard<'static, PermissionMap> {
 }
 
 #[inline]
-pub fn validate_server_permissions(permissions: &[String]) -> Result<(), ValidationError> {
+pub fn validate_server_permissions(
+    permissions: &[compact_str::CompactString],
+) -> Result<(), ValidationError> {
     get_server_permissions().validate_permissions(permissions)
 }

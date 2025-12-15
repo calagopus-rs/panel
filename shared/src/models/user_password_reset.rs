@@ -18,13 +18,22 @@ impl BaseModel for UserPasswordReset {
     const NAME: &'static str = "user_password_reset";
 
     #[inline]
-    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, String> {
+    fn columns(prefix: Option<&str>) -> BTreeMap<&'static str, compact_str::CompactString> {
         let prefix = prefix.unwrap_or_default();
 
         let mut columns = BTreeMap::from([
-            ("user_password_resets.uuid", format!("{prefix}uuid")),
-            ("user_password_resets.token", format!("{prefix}token")),
-            ("user_password_resets.created", format!("{prefix}created")),
+            (
+                "user_password_resets.uuid",
+                compact_str::format_compact!("{prefix}uuid"),
+            ),
+            (
+                "user_password_resets.token",
+                compact_str::format_compact!("{prefix}token"),
+            ),
+            (
+                "user_password_resets.created",
+                compact_str::format_compact!("{prefix}created"),
+            ),
         ]);
 
         columns.extend(super::user::User::columns(Some("user_")));
@@ -37,10 +46,10 @@ impl BaseModel for UserPasswordReset {
         let prefix = prefix.unwrap_or_default();
 
         Ok(Self {
-            uuid: row.try_get(format!("{prefix}uuid").as_str())?,
+            uuid: row.try_get(compact_str::format_compact!("{prefix}uuid").as_str())?,
             user: super::user::User::map(Some("user_"), row)?,
-            token: row.try_get(format!("{prefix}token").as_str())?,
-            created: row.try_get(format!("{prefix}created").as_str())?,
+            token: row.try_get(compact_str::format_compact!("{prefix}token").as_str())?,
+            created: row.try_get(compact_str::format_compact!("{prefix}created").as_str())?,
         })
     }
 }

@@ -99,14 +99,14 @@ mod post {
     pub struct Payload {
         #[validate(length(min = 3, max = 31))]
         #[schema(min_length = 3, max_length = 31)]
-        name: String,
+        name: compact_str::CompactString,
 
         #[validate(custom(function = "shared::permissions::validate_user_permissions"))]
-        user_permissions: Vec<String>,
+        user_permissions: Vec<compact_str::CompactString>,
         #[validate(custom(function = "shared::permissions::validate_admin_permissions"))]
-        admin_permissions: Vec<String>,
+        admin_permissions: Vec<compact_str::CompactString>,
         #[validate(custom(function = "shared::permissions::validate_server_permissions"))]
-        server_permissions: Vec<String>,
+        server_permissions: Vec<compact_str::CompactString>,
     }
 
     #[derive(ToSchema, Serialize)]
