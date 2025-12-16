@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import getAvailableNodeAllocations from '@/api/admin/nodes/allocations/getAvailableNodeAllocations.ts';
 import getNodes from '@/api/admin/nodes/getNodes.ts';
 import postTransfer from '@/api/admin/servers/postTransfer.ts';
-import { httpErrorToHuman } from '@/api/axios.ts';
+import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
 import getBackups from '@/api/server/backups/getBackups.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
@@ -35,11 +35,17 @@ export default function ServerTransferModal({ server, opened, onClose }: ModalPr
 
   const nodes = useSearchableResource<Node>({ fetcher: (search) => getNodes(1, search) });
   const availablePrimaryAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid!, 1, search),
+    fetcher: (search) =>
+      selectedNodeUuid
+        ? getAvailableNodeAllocations(selectedNodeUuid, 1, search)
+        : Promise.resolve(getEmptyPaginationSet()),
     deps: [selectedNodeUuid],
   });
   const availableAllocations = useSearchableResource<NodeAllocation>({
-    fetcher: (search) => getAvailableNodeAllocations(selectedNodeUuid!, 1, search),
+    fetcher: (search) =>
+      selectedNodeUuid
+        ? getAvailableNodeAllocations(selectedNodeUuid, 1, search)
+        : Promise.resolve(getEmptyPaginationSet()),
     deps: [selectedNodeUuid],
   });
   const backups = useSearchableResource<ServerBackup>({ fetcher: (search) => getBackups(server.uuid, 1, search) });

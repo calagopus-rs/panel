@@ -12,6 +12,7 @@ import getEggs from '@/api/admin/nests/eggs/getEggs.ts';
 import getNests from '@/api/admin/nests/getNests.ts';
 import updateServer from '@/api/admin/servers/updateServer.ts';
 import getUsers from '@/api/admin/users/getUsers.ts';
+import { getEmptyPaginationSet } from '@/api/axios.ts';
 import Alert from '@/elements/Alert.tsx';
 import Button from '@/elements/Button.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
@@ -99,7 +100,8 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
     defaultSearchValue: contextServer?.nest.name,
   });
   const eggs = useSearchableResource<AdminNestEgg>({
-    fetcher: (search) => getEggs(selectedNestUuid!, 1, search),
+    fetcher: (search) =>
+      selectedNestUuid ? getEggs(selectedNestUuid, 1, search) : Promise.resolve(getEmptyPaginationSet()),
     defaultSearchValue: contextServer?.egg.name,
     deps: [selectedNestUuid],
   });
