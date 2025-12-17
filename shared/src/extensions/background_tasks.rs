@@ -8,6 +8,7 @@ pub type LoopFunc =
 
 pub struct BackgroundTask {
     pub name: &'static str,
+    pub last_execution: std::time::Instant,
     pub last_error: Option<anyhow::Error>,
 
     pub task: tokio::task::JoinHandle<()>,
@@ -38,9 +39,14 @@ impl BackgroundTaskBuilder {
             name,
             BackgroundTask {
                 name,
+                last_execution: std::time::Instant::now(),
                 last_error: None,
                 task: tokio::spawn(async move {
                     loop {
+                        if let Some(task) = tasks.write().await.get_mut(name) {
+                            task.last_execution = std::time::Instant::now();
+                        }
+
                         tracing::debug!(name, "running background task loop function");
                         let result = AssertUnwindSafe(loop_fn(state.clone()))
                             .catch_unwind()
