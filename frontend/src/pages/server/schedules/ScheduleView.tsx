@@ -337,7 +337,7 @@ export default function ScheduleView() {
   }
 
   return (
-    <ServerContentContainer title={`Schedule (${schedule.name})`}>
+    <ServerContentContainer title='Schedule' hideTitleComponent>
       <ScheduleCreateOrUpdateModal
         propSchedule={schedule}
         onScheduleUpdate={(s) => setSchedule({ ...schedule, ...s })}

@@ -141,7 +141,7 @@ export default function ServerFiles() {
   }, [browsingDirectory, browsingBackup, loading]);
 
   return (
-    <ServerContentContainer title={`Files (${browsingDirectory})`}>
+    <ServerContentContainer title='Files' hideTitleComponent>
       <div className='h-fit relative'>
         <input
           ref={fileInputRef}

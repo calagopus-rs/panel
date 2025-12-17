@@ -33,7 +33,7 @@ export default function ServerConsole() {
   }, [statsRef.current]);
 
   return (
-    <ServerContentContainer title='Console'>
+    <ServerContentContainer title='Console' hideTitleComponent>
       <Group justify='space-between' mb='md'>
         <div className='flex flex-col'>
           <Title order={1} c='white'>

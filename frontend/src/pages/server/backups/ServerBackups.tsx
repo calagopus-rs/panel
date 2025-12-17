@@ -25,35 +25,28 @@ export default function ServerBackups() {
   });
 
   return (
-    <ServerContentContainer title='Backups'>
-      <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Backups
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {backups.total} of {server.featureLimits.backups} maximum backups created.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <ConditionalTooltip
-            enabled={backups.total >= server.featureLimits.backups}
-            label={`This server is limited to ${server.featureLimits.backups} backups.`}
+    <ServerContentContainer
+      title='Backups'
+      subtitle={`${backups.total} of ${server.featureLimits.backups} maximum backups created.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <ConditionalTooltip
+          enabled={backups.total >= server.featureLimits.backups}
+          label={`This server is limited to ${server.featureLimits.backups} backups.`}
+        >
+          <Button
+            disabled={backups.total >= server.featureLimits.backups}
+            onClick={() => setOpenModal('create')}
+            color='blue'
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            <Button
-              disabled={backups.total >= server.featureLimits.backups}
-              onClick={() => setOpenModal('create')}
-              color='blue'
-              leftSection={<FontAwesomeIcon icon={faPlus} />}
-            >
-              Create
-            </Button>
-          </ConditionalTooltip>
-        </Group>
-      </Group>
+            Create
+          </Button>
+        </ConditionalTooltip>
+      }
+    >
+      <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <ContextMenuProvider>
         <Table

@@ -22,14 +22,7 @@ export default function ServerActivity() {
   });
 
   return (
-    <ServerContentContainer title='Activity'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Activity
-        </Title>
-        <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-      </Group>
-
+    <ServerContentContainer title='Activity' search={search} setSearch={setSearch}>
       <Table
         columns={['', 'Actor', 'Event', 'IP', 'When', '']}
         loading={loading}

@@ -8,13 +8,7 @@ import TimezoneContainer from './TimezoneContainer.tsx';
 export default function ServerSettings() {
   return (
     <ServerContentContainer title='Settings'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Settings
-        </Title>
-      </Group>
-
-      <Grid grow>
+      <Grid grow mt='xs'>
         <RenameContainer />
         <AutokillContainer />
         <TimezoneContainer />

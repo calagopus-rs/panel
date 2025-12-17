@@ -36,34 +36,27 @@ export default function ServerNetwork() {
   };
 
   return (
-    <ServerContentContainer title='Network'>
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Network
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {allocations.total} of {server.featureLimits.allocations} maximum allocations assigned.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <ConditionalTooltip
-            enabled={allocations.total >= server.featureLimits.allocations}
-            label={`This server is limited to ${server.featureLimits.allocations} allocations.`}
+    <ServerContentContainer
+      title='Network'
+      subtitle={`${allocations.total} of ${server.featureLimits.allocations} maximum allocations assigned.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <ConditionalTooltip
+          enabled={allocations.total >= server.featureLimits.allocations}
+          label={`This server is limited to ${server.featureLimits.allocations} allocations.`}
+        >
+          <Button
+            disabled={allocations.total >= server.featureLimits.allocations}
+            onClick={doAdd}
+            color='blue'
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            <Button
-              disabled={allocations.total >= server.featureLimits.allocations}
-              onClick={doAdd}
-              color='blue'
-              leftSection={<FontAwesomeIcon icon={faPlus} />}
-            >
-              Add
-            </Button>
-          </ConditionalTooltip>
-        </Group>
-      </Group>
-
+            Add
+          </Button>
+        </ConditionalTooltip>
+      }
+    >
       <ContextMenuProvider>
         <Table
           columns={['', 'Hostname', 'Port', 'Notes', 'Created', '']}

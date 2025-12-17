@@ -61,20 +61,13 @@ export default function ServerSchedules() {
   };
 
   return (
-    <ServerContentContainer title='Schedules'>
-      <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Schedules
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {schedules.total} of {server.featureLimits.schedules} maximum schedules created.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <ServerContentContainer
+      title='Schedules'
+      subtitle={`${schedules.total} of ${server.featureLimits.schedules} maximum schedules created.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -100,8 +93,10 @@ export default function ServerSchedules() {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
+        </>
+      }
+    >
+      <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <ContextMenuProvider>
         <Table
