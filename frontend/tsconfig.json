@@ -6,6 +6,7 @@
     "target": "esnext",
     "baseUrl": ".",
     "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["./src/*"]
     },

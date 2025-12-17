@@ -159,6 +159,18 @@ impl UserSession {
         })
     }
 
+    pub async fn delete_unused(database: &crate::database::Database) -> Result<u64, sqlx::Error> {
+        Ok(sqlx::query(
+            r#"
+            DELETE FROM user_sessions
+            WHERE user_sessions.last_used < NOW() - INTERVAL '30 days'
+            "#,
+        )
+        .execute(database.write())
+        .await?
+        .rows_affected())
+    }
+
     #[inline]
     pub fn into_api_object(self, auth: &GetAuthMethod) -> ApiUserSession {
         ApiUserSession {

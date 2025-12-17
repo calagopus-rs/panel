@@ -23,6 +23,7 @@ import { adminNodeSchema } from '@/lib/schemas/admin/nodes.ts';
 import { useResourceForm } from '@/plugins/useResourceForm.ts';
 import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
 
 export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node }) {
   const { addToast } = useToast();
@@ -165,19 +166,21 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
           </Group>
 
           <Group grow>
-            <NumberInput
+            <SizeInput
               withAsterisk
-              label='Memory MB'
-              placeholder='Memory MB'
-              min={1024}
-              {...form.getInputProps('memory')}
+              label='Memory'
+              mode='mb'
+              min={0}
+              value={form.values.memory}
+              onChange={(value) => form.setFieldValue('memory', value)}
             />
-            <NumberInput
+            <SizeInput
               withAsterisk
-              label='Disk MB'
-              placeholder='Disk MB'
-              min={1024}
-              {...form.getInputProps('disk')}
+              label='Disk'
+              mode='mb'
+              min={0}
+              value={form.values.memory}
+              onChange={(value) => form.setFieldValue('disk', value)}
             />
           </Group>
 

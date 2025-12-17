@@ -10,6 +10,7 @@ use std::{
 use utoipa::ToSchema;
 use utoipa_axum::router::OpenApiRouter;
 
+pub mod background_tasks;
 pub mod commands;
 pub mod distr;
 pub mod manager;
@@ -201,6 +202,15 @@ pub trait Extension: Send + Sync {
     /// Your extension entrypoint, this runs as soon as the database is migrated and before the webserver starts
     async fn initialize(&mut self, state: State) {}
 
+    /// Your extension cli entrypoint, this runs after the env has been parsed
+    async fn initialize_cli(
+        &mut self,
+        env: Option<&Arc<crate::env::Env>>,
+        builder: commands::CliCommandGroupBuilder,
+    ) -> commands::CliCommandGroupBuilder {
+        builder
+    }
+
     /// Your extension routes entrypoint, this runs as soon as the database is migrated and before the webserver starts
     async fn initialize_router(
         &mut self,
@@ -210,12 +220,12 @@ pub trait Extension: Send + Sync {
         builder
     }
 
-    /// Your extension cli entrypoint, this runs after the env has been parsed
-    async fn initialize_cli(
+    /// Your extension routes entrypoint, this runs as soon as the database is migrated and before the webserver starts
+    async fn initialize_background_tasks(
         &mut self,
-        env: Option<&Arc<crate::env::Env>>,
-        builder: commands::CliCommandGroupBuilder,
-    ) -> commands::CliCommandGroupBuilder {
+        state: State,
+        builder: background_tasks::BackgroundTaskBuilder,
+    ) -> background_tasks::BackgroundTaskBuilder {
         builder
     }
 
@@ -231,7 +241,7 @@ pub trait Extension: Send + Sync {
     /// Your extension call processor, this can be called by other extensions to interact with yours,
     /// if the call does not apply to your extension, simply return `None` to continue the matching process.
     ///
-    /// Optimally (if applies) make sure your calls are globally unique, for example by prepending them with `yourauthorname_yourextensioname_`
+    /// Optimally (if applies) make sure your calls are globally unique, for example by prepending them with your package name
     async fn process_call(
         &self,
         name: &str,
@@ -245,7 +255,7 @@ pub trait Extension: Send + Sync {
     ///
     /// The only difference to `process_call` is that this takes an owned vec, its automatically implemented in terms of `process_call`.
     ///
-    /// Optimally (if applies) make sure your calls are globally unique, for example by prepending them with `yourauthorname_yourextensioname_`
+    /// Optimally (if applies) make sure your calls are globally unique, for example by prepending them with your package name
     async fn process_call_owned(
         &self,
         name: &str,

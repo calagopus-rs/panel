@@ -208,6 +208,8 @@ async fn main() {
         }
     }
 
+    let background_tasks =
+        Arc::new(shared::extensions::background_tasks::BackgroundTaskManager::default());
     let settings = Arc::new(shared::settings::Settings::new(database.clone()).await);
     let storage = Arc::new(shared::storage::Storage::new(settings.clone()));
     let captcha = Arc::new(shared::captcha::Captcha::new(settings.clone()));
@@ -215,7 +217,12 @@ async fn main() {
 
     let state = Arc::new(shared::AppState {
         start_time: Instant::now(),
-        is_container: std::env::var("OCI_CONTAINER").is_ok_and(|v| v == "official"),
+        container_type: match std::env::var("OCI_CONTAINER").as_deref() {
+            Ok("official") => shared::AppContainerType::Official,
+            Ok("official-heavy") => shared::AppContainerType::OfficialHeavy,
+            Ok(_) => shared::AppContainerType::Unknown,
+            Err(_) => shared::AppContainerType::None,
+        },
         version: format!("{}:{}", shared::VERSION, shared::GIT_COMMIT),
 
         client: reqwest::ClientBuilder::new()
@@ -224,6 +231,7 @@ async fn main() {
             .unwrap(),
 
         extensions: extensions.clone(),
+        background_tasks: background_tasks.clone(),
         settings: settings.clone(),
         jwt,
         storage,
@@ -234,7 +242,7 @@ async fn main() {
         env,
     });
 
-    let routes = extensions.init(state.clone()).await;
+    let (routes, background_task_builder) = extensions.init(state.clone()).await;
     let mut extension_router = OpenApiRouter::new().with_state(state.clone());
 
     if let Some(global) = routes.global {
@@ -303,6 +311,31 @@ async fn main() {
                 )),
         );
     }
+
+    background_task_builder
+        .add_task(
+            "delete_expired_sessions",
+            Box::new(|state| {
+                Box::pin(async move {
+                    let deleted_sessions =
+                        shared::models::user_session::UserSession::delete_unused(&state.database)
+                            .await?;
+
+                    if deleted_sessions > 0 {
+                        tracing::info!("deleted {} expired user sessions", deleted_sessions);
+                    }
+
+                    tokio::time::sleep(std::time::Duration::from_mins(5)).await;
+
+                    Ok(())
+                })
+            }),
+        )
+        .await;
+
+    background_tasks
+        .merge_builder(background_task_builder)
+        .await;
 
     let app = OpenApiRouter::new()
         .merge(panel_rs::routes::router(&state))
