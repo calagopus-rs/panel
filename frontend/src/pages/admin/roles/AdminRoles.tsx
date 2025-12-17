@@ -4,6 +4,7 @@ import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getRoles from '@/api/admin/roles/getRoles.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { roleTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ function RolesContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Roles'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Roles
@@ -45,7 +46,7 @@ function RolesContainer() {
           <RoleRow key={role.uuid} role={role} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

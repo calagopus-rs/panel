@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountNodes from '@/api/admin/mounts/nodes/getMountNodes.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeTableColumns } from '@/lib/tableColumns.ts';
@@ -17,7 +18,7 @@ export default function AdminMountNodes({ mount }: { mount: Mount }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Mount Nodes'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Mount Nodes</Title>
         <Group>
@@ -30,6 +31,6 @@ export default function AdminMountNodes({ mount }: { mount: Mount }) {
           <NodeRow key={nodeMount.node.uuid} node={nodeMount.node} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

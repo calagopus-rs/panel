@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { isIP } from '@/lib/ip.ts';
 import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings.ts';
@@ -58,7 +59,7 @@ export default function WebauthnContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Webauthn Settings'>
       <Title mt='md' order={2}>
         Webauthn Settings
       </Title>
@@ -80,6 +81,6 @@ export default function WebauthnContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

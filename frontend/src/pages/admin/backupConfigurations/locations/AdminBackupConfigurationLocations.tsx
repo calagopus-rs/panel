@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { locationTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ export default function AdminBackupConfigurationLocations({
   });
 
   return (
-    <>
+    <AdminContentContainer title={`Backup Config Locations (${backupConfiguration.name})`}>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Backup Configuration Locations</Title>
         <Group>
@@ -41,6 +42,6 @@ export default function AdminBackupConfigurationLocations({
           <LocationRow key={location.uuid} location={location} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

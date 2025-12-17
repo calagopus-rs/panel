@@ -1,4 +1,5 @@
 import { Grid, Group, Title } from '@mantine/core';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import AutokillContainer from './AutokillContainer.tsx';
 import ReinstallContainer from './ReinstallContainer.tsx';
 import RenameContainer from './RenameContainer.tsx';
@@ -6,7 +7,7 @@ import TimezoneContainer from './TimezoneContainer.tsx';
 
 export default function ServerSettings() {
   return (
-    <>
+    <ServerContentContainer title='Settings'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Settings
@@ -19,6 +20,6 @@ export default function ServerSettings() {
         <TimezoneContainer />
         <ReinstallContainer />
       </Grid>
-    </>
+    </ServerContentContainer>
   );
 }

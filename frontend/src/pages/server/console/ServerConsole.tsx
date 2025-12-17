@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import debounce from 'debounce';
 import { useEffect, useRef, useState } from 'react';
 import Can from '@/elements/Can.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import Console from './Console.tsx';
 import ServerDetails from './ServerDetails.tsx';
@@ -32,7 +33,7 @@ export default function ServerConsole() {
   }, [statsRef.current]);
 
   return (
-    <>
+    <ServerContentContainer title='Console'>
       <Group justify='space-between' mb='md'>
         <div className='flex flex-col'>
           <Title order={1} c='white'>
@@ -56,6 +57,6 @@ export default function ServerConsole() {
       </div>
 
       <ServerStats />
-    </>
+    </ServerContentContainer>
   );
 }

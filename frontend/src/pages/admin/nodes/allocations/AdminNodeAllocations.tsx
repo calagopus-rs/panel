@@ -4,6 +4,7 @@ import { Group, Title } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, Ref, useEffect, useState } from 'react';
 import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import SelectionArea from '@/elements/SelectionArea.tsx';
 import Table from '@/elements/Table.tsx';
@@ -77,7 +78,7 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Node Allocations'>
       <NodeAllocationsCreateModal
         node={node}
         loadAllocations={refetch}
@@ -118,6 +119,6 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
           ))}
         </Table>
       </SelectionArea>
-    </>
+    </AdminContentContainer>
   );
 }

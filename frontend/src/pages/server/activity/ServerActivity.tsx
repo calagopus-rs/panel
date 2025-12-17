@@ -4,6 +4,7 @@ import { getEmptyPaginationSet } from '@/api/axios.ts';
 import getServerActivity from '@/api/server/getServerActivity.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
@@ -21,7 +22,7 @@ export default function ServerActivity() {
   });
 
   return (
-    <>
+    <ServerContentContainer title='Activity'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Activity
@@ -67,6 +68,6 @@ export default function ServerActivity() {
           </TableRow>
         ))}
       </Table>
-    </>
+    </ServerContentContainer>
   );
 }

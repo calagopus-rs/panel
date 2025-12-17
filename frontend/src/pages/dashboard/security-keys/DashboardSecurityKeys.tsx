@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getSecurityKeys from '@/api/me/security-keys/getSecurityKeys.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -23,7 +24,7 @@ export default function DashboardSecurityKeys() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='Security Keys'>
       <SecurityKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -50,6 +51,6 @@ export default function DashboardSecurityKeys() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AccountContentContainer>
   );
 }

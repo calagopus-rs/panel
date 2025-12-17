@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getServerMounts from '@/api/admin/servers/mounts/getServerMounts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverMountTableColumns } from '@/lib/tableColumns.ts';
@@ -24,7 +25,7 @@ export default function AdminServerMounts({ server }: { server: AdminServer }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Server Mounts'>
       <ServerMountAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -44,6 +45,6 @@ export default function AdminServerMounts({ server }: { server: AdminServer }) {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

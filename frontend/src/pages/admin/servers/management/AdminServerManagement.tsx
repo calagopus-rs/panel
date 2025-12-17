@@ -2,6 +2,7 @@ import { Grid, Stack, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import ServerDeleteModal from '@/pages/admin/servers/management/modals/ServerDeleteModal.tsx';
 import ServerSuspendModal from '@/pages/admin/servers/management/modals/ServerSuspendModal.tsx';
 import ServerTransferModal from '@/pages/admin/servers/management/modals/ServerTransferModal.tsx';
@@ -14,7 +15,7 @@ export default function AdminServerManagement({ server }: { server: AdminServer 
   );
 
   return (
-    <>
+    <AdminContentContainer title='Server Management'>
       <ServerTransferModal server={server} opened={openModal === 'transfer'} onClose={() => setOpenModal(null)} />
       <ServerSuspendModal server={server} opened={openModal === 'suspend'} onClose={() => setOpenModal(null)} />
       <ServerUnsuspendModal server={server} opened={openModal === 'unsuspend'} onClose={() => setOpenModal(null)} />
@@ -85,6 +86,6 @@ export default function AdminServerManagement({ server }: { server: AdminServer 
           </Card>
         </Grid.Col>
       </Grid>
-    </>
+    </AdminContentContainer>
   );
 }

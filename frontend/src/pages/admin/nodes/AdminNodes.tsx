@@ -4,6 +4,7 @@ import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getNodes from '@/api/admin/nodes/getNodes.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ function NodesContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Nodes'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Nodes
@@ -45,7 +46,7 @@ function NodesContainer() {
           <NodeRow key={node.uuid} node={node} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

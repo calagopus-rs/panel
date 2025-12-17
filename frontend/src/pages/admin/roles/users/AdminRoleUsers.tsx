@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getRoleUsers from '@/api/admin/roles/users/getRoleUsers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { userTableColumns } from '@/lib/tableColumns.ts';
@@ -17,7 +18,7 @@ export default function AdminRoleUsers({ role }: { role: Role }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Role Users'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Role Users</Title>
         <Group>
@@ -30,6 +31,6 @@ export default function AdminRoleUsers({ role }: { role: Role }) {
           <UserRow key={user.uuid} user={user} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

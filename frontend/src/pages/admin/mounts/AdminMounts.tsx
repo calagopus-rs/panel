@@ -4,6 +4,7 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getMounts from '@/api/admin/mounts/getMounts.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { mountTableColumns } from '@/lib/tableColumns.ts';
 import MountView from '@/pages/admin/mounts/MountView.tsx';
@@ -22,7 +23,7 @@ function MountsContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Mounts'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Mounts
@@ -44,7 +45,7 @@ function MountsContainer() {
           <MountRow key={m.uuid} mount={m} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

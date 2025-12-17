@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationServers from '@/api/admin/backup-configurations/servers/getBackupConfigurationServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ export default function AdminBackupConfigurationServers({
   });
 
   return (
-    <>
+    <AdminContentContainer title={`Backup Config Servers (${backupConfiguration.name})`}>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Backup Configuration Servers</Title>
         <Group>
@@ -41,6 +42,6 @@ export default function AdminBackupConfigurationServers({
           <ServerRow key={server.uuid} server={server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

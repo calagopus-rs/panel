@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateEmailSettings from '@/api/admin/settings/updateEmailSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import { mailModeTypeLabelMapping } from '@/lib/enums.ts';
 import {
@@ -53,7 +54,7 @@ export default function EmailContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Email Settings'>
       <Title mt='md' order={2}>
         Email Settings
       </Title>
@@ -82,6 +83,6 @@ export default function EmailContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

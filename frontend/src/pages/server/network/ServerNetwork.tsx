@@ -7,6 +7,7 @@ import getAllocations from '@/api/server/allocations/getAllocations.ts';
 import Button from '@/elements/Button.tsx';
 import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -35,7 +36,7 @@ export default function ServerNetwork() {
   };
 
   return (
-    <>
+    <ServerContentContainer title='Network'>
       <Group justify='space-between' align='start' mb='md'>
         <div>
           <Title order={1} c='white'>
@@ -75,6 +76,6 @@ export default function ServerNetwork() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

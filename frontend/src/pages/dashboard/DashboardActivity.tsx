@@ -4,6 +4,7 @@ import { getEmptyPaginationSet } from '@/api/axios.ts';
 import getUserActivity from '@/api/me/getUserActivity.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
@@ -19,7 +20,7 @@ export default function DashboardActivity() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='Activity'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Activity
@@ -59,6 +60,6 @@ export default function DashboardActivity() {
           </TableRow>
         ))}
       </Table>
-    </>
+    </AccountContentContainer>
   );
 }

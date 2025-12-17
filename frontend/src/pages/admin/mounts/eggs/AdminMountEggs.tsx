@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountNestEggs from '@/api/admin/mounts/nest-eggs/getMountNestEggs.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggTableColumns } from '@/lib/tableColumns.ts';
@@ -19,7 +20,7 @@ export default function AdminMountNestEggs({ mount }: { mount: Mount }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Mount Eggs'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Mount Eggs</Title>
         <Group>
@@ -32,6 +33,6 @@ export default function AdminMountNestEggs({ mount }: { mount: Mount }) {
           <EggRow key={nestEggMount.nestEgg.uuid} nest={nestEggMount.nest} egg={nestEggMount.nestEgg} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

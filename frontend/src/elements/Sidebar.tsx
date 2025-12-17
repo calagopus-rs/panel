@@ -85,23 +85,17 @@ function Link({ to, end, icon, name, title = name }: LinkProps) {
 
   return (
     <NavLink to={to} end={end} onClick={doNavigate} onContextMenu={doOpenWindow} className='w-full'>
-      {({ isActive }) => {
-        if (isActive) {
-          document.title = `${title} | ${settings.app.name}`;
-        }
-
-        return (
-          <Button
-            color={isActive ? 'blue' : 'gray'}
-            className={isActive ? 'cursor-default!' : undefined}
-            variant='subtle'
-            fullWidth
-            styles={{ label: { width: '100%' } }}
-          >
-            {icon && <FontAwesomeIcon icon={icon} className='mr-2' />} {name}
-          </Button>
-        );
-      }}
+      {({ isActive }) => (
+        <Button
+          color={isActive ? 'blue' : 'gray'}
+          className={isActive ? 'cursor-default!' : undefined}
+          variant='subtle'
+          fullWidth
+          styles={{ label: { width: '100%' } }}
+        >
+          {icon && <FontAwesomeIcon icon={icon} className='mr-2' />} {name}
+        </Button>
+      )}
     </NavLink>
   );
 }

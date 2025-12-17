@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getUserServers from '@/api/admin/users/servers/getUserServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
@@ -20,7 +21,7 @@ export default function AdminUserServers({ user }: { user: User }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='User Servers'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>User Servers</Title>
         <Group>
@@ -38,6 +39,6 @@ export default function AdminUserServers({ user }: { user: User }) {
           <ServerRow key={server.uuid} server={server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

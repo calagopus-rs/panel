@@ -10,6 +10,7 @@ import updateDatabaseHost from '@/api/admin/database-hosts/updateDatabaseHost.ts
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
@@ -87,7 +88,7 @@ export default function DatabaseHostCreateOrUpdate({
   };
 
   return (
-    <>
+    <AdminContentContainer title={`${contextDatabaseHost ? 'Update' : 'Create'} Database Host`}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -173,6 +174,6 @@ export default function DatabaseHostCreateOrUpdate({
           </Group>
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

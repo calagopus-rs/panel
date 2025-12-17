@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import SizeInput from '@/elements/input/SizeInput.tsx';
 import Switch from '@/elements/input/Switch.tsx';
@@ -50,7 +51,7 @@ export default function ServerContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Server Settings'>
       <Title mt='md' order={2}>
         Server Settings
       </Title>
@@ -95,6 +96,6 @@ export default function ServerContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateCaptchaSettings from '@/api/admin/settings/updateCaptchaSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import { captchaProviderTypeLabelMapping } from '@/lib/enums.ts';
 import {
@@ -52,7 +53,7 @@ export default function CaptchaContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Captcha Settings'>
       <Title mt='md' order={2}>
         Captcha Settings
       </Title>
@@ -83,6 +84,6 @@ export default function CaptchaContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

@@ -4,6 +4,7 @@ import getServerVariables from '@/api/admin/servers/variables/getServerVariables
 import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import VariableContainer from '@/elements/VariableContainer.tsx';
 import { useKeyboardShortcut } from '@/plugins/useKeyboardShortcuts.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -56,7 +57,7 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
   );
 
   return (
-    <>
+    <AdminContentContainer title='Server Variables'>
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Server Variables</Title>
         <Group>
@@ -78,6 +79,6 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
           />
         ))}
       </div>
-    </>
+    </AdminContentContainer>
   );
 }

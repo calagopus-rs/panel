@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getOAuthProviderUsers from '@/api/admin/oauth-providers/users/getOAuthProviderUsers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { adminOAuthProviderUsersTableColumns } from '@/lib/tableColumns.ts';
@@ -19,7 +20,7 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
   });
 
   return (
-    <>
+    <AdminContentContainer title='OAuth Provider Users'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>OAuth Provider Users</Title>
         <Group>
@@ -37,6 +38,6 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
           <UserOAuthLinkRow key={userOAuthLink.uuid} userOAuthLink={userOAuthLink} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

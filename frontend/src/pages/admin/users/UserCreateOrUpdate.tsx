@@ -10,6 +10,7 @@ import updateUser from '@/api/admin/users/updateUser.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -84,7 +85,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   };
 
   return (
-    <>
+    <AdminContentContainer title={`${contextUser ? 'Update' : 'Create'} User`}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -189,6 +190,6 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
           )}
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

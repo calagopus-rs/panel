@@ -8,6 +8,7 @@ import getEggs from '@/api/admin/nests/eggs/getEggs.ts';
 import importEgg from '@/api/admin/nests/eggs/importEgg.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggTableColumns } from '@/lib/tableColumns.ts';
@@ -60,7 +61,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Eggs'>
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Eggs</Title>
         <Group>
@@ -92,7 +93,7 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
           <EggRow key={egg.uuid} nest={contextNest} egg={egg} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

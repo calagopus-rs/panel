@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getServerAllocations from '@/api/admin/servers/allocations/getServerAllocations.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverAllocationTableColumns } from '@/lib/tableColumns.ts';
@@ -24,7 +25,7 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
   });
 
   return (
-    <>
+    <AdminContentContainer title='Server Allocations'>
       <ServerAllocationAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -49,6 +50,6 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

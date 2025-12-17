@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateStorageSettings from '@/api/admin/settings/updateStorageSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import { storageDriverTypeLabelMapping } from '@/lib/enums.ts';
 import {
@@ -52,7 +53,7 @@ export default function StorageContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Storage Settings'>
       <Title mt='md' order={2}>
         Storage Settings
       </Title>
@@ -79,6 +80,6 @@ export default function StorageContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

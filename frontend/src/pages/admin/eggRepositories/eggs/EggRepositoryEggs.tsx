@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggRepositoryEggTableColumns } from '@/lib/tableColumns.ts';
@@ -17,7 +18,7 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
   });
 
   return (
-    <>
+    <AdminContentContainer title='Egg Repository Eggs'>
       <Group justify='space-between' align='start' mb='md'>
         <Title order={2}>Egg Repository Eggs</Title>
         <Group>
@@ -39,6 +40,6 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
           />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

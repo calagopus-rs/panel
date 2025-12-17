@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLocationDatabaseHosts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { locationDatabaseHostTableColumns } from '@/lib/tableColumns.ts';
@@ -24,7 +25,7 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
   });
 
   return (
-    <>
+    <AdminContentContainer title='Location Database Hosts'>
       <LocationDatabaseHostCreateModal
         location={location}
         opened={openModal === 'create'}
@@ -57,6 +58,6 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

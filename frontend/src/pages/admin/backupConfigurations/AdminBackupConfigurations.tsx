@@ -4,6 +4,7 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { backupConfigurationTableColumns } from '@/lib/tableColumns.ts';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate.tsx';
@@ -22,7 +23,7 @@ function BackupConfigurationsContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Backup Configurations'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Backup Configurations
@@ -49,7 +50,7 @@ function BackupConfigurationsContainer() {
           <BackupConfigurationRow key={bc.uuid} backupConfiguration={bc} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

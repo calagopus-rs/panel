@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getEggMounts from '@/api/admin/nests/eggs/mounts/getEggMounts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -29,7 +30,7 @@ export default function AdminEggMounts({
   });
 
   return (
-    <>
+    <AdminContentContainer title='Egg Mounts'>
       <EggMountAddModal
         nest={contextNest}
         egg={contextEgg}
@@ -59,6 +60,6 @@ export default function AdminEggMounts({
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

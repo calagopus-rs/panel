@@ -4,6 +4,7 @@ import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getDatabaseHosts from '@/api/admin/database-hosts/getDatabaseHosts.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { databaseHostTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -22,7 +23,7 @@ function DatabaseHostsContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Database Hosts'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Database Hosts
@@ -44,7 +45,7 @@ function DatabaseHostsContainer() {
           <DatabaseHostRow key={dh.uuid} databaseHost={dh} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

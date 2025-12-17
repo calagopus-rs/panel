@@ -8,6 +8,7 @@ import deleteMount from '@/api/admin/mounts/deleteMount.ts';
 import updateMount from '@/api/admin/mounts/updateMount.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -55,7 +56,7 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
   }, [contextMount]);
 
   return (
-    <>
+    <AdminContentContainer title={`${contextMount ? 'Update' : 'Create'} Mount`}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -110,6 +111,6 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
           </Group>
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

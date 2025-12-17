@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountServers from '@/api/admin/mounts/servers/getMountServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
@@ -19,7 +20,7 @@ export default function AdminMountServers({ mount }: { mount: Mount }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Mount Servers'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Mount Servers</Title>
         <Group>
@@ -32,6 +33,6 @@ export default function AdminMountServers({ mount }: { mount: Mount }) {
           <ServerRow key={serverMount.server.uuid} server={serverMount.server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getUserOAuthLinks from '@/api/admin/users/oauthLinks/getUserOAuthLinks.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { adminUserOAuthLinkTableColumns } from '@/lib/tableColumns.ts';
@@ -24,7 +25,7 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='User OAuth Links'>
       <UserOAuthLinkAddModal user={user} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -49,6 +50,6 @@ export default function AdminUserOAuthLinks({ user }: { user: User }) {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

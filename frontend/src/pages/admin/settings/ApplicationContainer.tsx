@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateApplicationSettings from '@/api/admin/settings/updateApplicationSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -52,7 +53,7 @@ export default function ApplicationContainer() {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Application Settings'>
       <Title mt='md' order={2}>
         Application Settings
       </Title>
@@ -98,6 +99,6 @@ export default function ApplicationContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

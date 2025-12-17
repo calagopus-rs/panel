@@ -4,6 +4,7 @@ import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getLocations from '@/api/admin/locations/getLocations.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { locationTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ function LocationsContainer() {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Locations'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Locations
@@ -45,7 +46,7 @@ function LocationsContainer() {
           <LocationRow key={location.uuid} location={location} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

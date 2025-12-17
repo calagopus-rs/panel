@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import stripAnsi from 'strip-ansi';
 import { axiosInstance, httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { bytesToString } from '@/lib/size.ts';
@@ -95,7 +96,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Node Logs'>
       <Title order={2}>Node Logs</Title>
 
       {!logs.length ? (
@@ -138,6 +139,6 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
           </div>
         </div>
       )}
-    </>
+    </AdminContentContainer>
   );
 }

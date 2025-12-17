@@ -6,6 +6,7 @@ import getBackup from '@/api/server/backups/getBackup.ts';
 import cancelOperation from '@/api/server/files/cancelOperation.ts';
 import loadDirectory from '@/api/server/files/loadDirectory.ts';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import SelectionArea from '@/elements/SelectionArea.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import Table from '@/elements/Table.tsx';
@@ -140,95 +141,97 @@ export default function ServerFiles() {
   }, [browsingDirectory, browsingBackup, loading]);
 
   return (
-    <div className='h-fit relative'>
-      <input
-        ref={fileInputRef}
-        type='file'
-        multiple
-        style={{ display: 'none' }}
-        onChange={(e) => handleFileSelect(e, fileInputRef)}
-      />
-      <input
-        ref={folderInputRef}
-        type='file'
-        multiple
-        style={{ display: 'none' }}
-        onChange={(e) => handleFolderSelect(e, folderInputRef)}
-        {...{ webkitdirectory: '', directory: '' }}
-      />
+    <ServerContentContainer title={`Files (${browsingDirectory})`}>
+      <div className='h-fit relative'>
+        <input
+          ref={fileInputRef}
+          type='file'
+          multiple
+          style={{ display: 'none' }}
+          onChange={(e) => handleFileSelect(e, fileInputRef)}
+        />
+        <input
+          ref={folderInputRef}
+          type='file'
+          multiple
+          style={{ display: 'none' }}
+          onChange={(e) => handleFolderSelect(e, folderInputRef)}
+          {...{ webkitdirectory: '', directory: '' }}
+        />
 
-      <SftpDetailsModal opened={openModal === 'sftpDetails'} onClose={() => setOpenModal(null)} />
-      <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
-      <PullFileModal opened={openModal === 'pullFile'} onClose={() => setOpenModal(null)} />
+        <SftpDetailsModal opened={openModal === 'sftpDetails'} onClose={() => setOpenModal(null)} />
+        <DirectoryNameModal opened={openModal === 'nameDirectory'} onClose={() => setOpenModal(null)} />
+        <PullFileModal opened={openModal === 'pullFile'} onClose={() => setOpenModal(null)} />
 
-      <FileActionBar />
+        <FileActionBar />
 
-      <Group justify='space-between' align='center' mb='md'>
-        <Title order={1} c='white'>
-          Files
-        </Title>
-        {!browsingBackup && (
-          <Group>
-            <FileOperationsProgress
-              uploadingFiles={uploadingFiles}
-              fileOperations={fileOperations}
-              aggregatedUploadProgress={aggregatedUploadProgress}
-              onCancelFileUpload={cancelFileUpload}
-              onCancelFolderUpload={cancelFolderUpload}
-              onCancelOperation={doCancelOperation}
-            />
-            <FileToolbar
-              serverUuidShort={server.uuidShort}
-              browsingDirectory={browsingDirectory}
-              onSftpDetailsClick={() => setOpenModal('sftpDetails')}
-              onNewDirectoryClick={() => setOpenModal('nameDirectory')}
-              onPullFileClick={() => setOpenModal('pullFile')}
-              onFileUploadClick={() => fileInputRef.current?.click()}
-              onFolderUploadClick={() => folderInputRef.current?.click()}
-            />
-          </Group>
+        <Group justify='space-between' align='center' mb='md'>
+          <Title order={1} c='white'>
+            Files
+          </Title>
+          {!browsingBackup && (
+            <Group>
+              <FileOperationsProgress
+                uploadingFiles={uploadingFiles}
+                fileOperations={fileOperations}
+                aggregatedUploadProgress={aggregatedUploadProgress}
+                onCancelFileUpload={cancelFileUpload}
+                onCancelFolderUpload={cancelFolderUpload}
+                onCancelOperation={doCancelOperation}
+              />
+              <FileToolbar
+                serverUuidShort={server.uuidShort}
+                browsingDirectory={browsingDirectory}
+                onSftpDetailsClick={() => setOpenModal('sftpDetails')}
+                onNewDirectoryClick={() => setOpenModal('nameDirectory')}
+                onPullFileClick={() => setOpenModal('pullFile')}
+                onFileUploadClick={() => fileInputRef.current?.click()}
+                onFolderUploadClick={() => folderInputRef.current?.click()}
+              />
+            </Group>
+          )}
+        </Group>
+
+        {loading ? (
+          <Spinner.Centered />
+        ) : (
+          <>
+            <FileUploadOverlay visible={isDragging && !browsingBackup} />
+
+            <div className='bg-[#282828] border border-[#424242] rounded-lg mb-2 p-4'>
+              <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
+            </div>
+            <SelectionArea
+              onSelectedStart={onSelectedStart}
+              onSelected={onSelected}
+              className='h-full'
+              disabled={movingFileNames.size > 0 || !!openModal || childOpenModal}
+            >
+              <ContextMenuProvider>
+                <Table
+                  columns={['', 'Name', 'Size', 'Modified', '']}
+                  pagination={browsingEntries}
+                  onPageSelect={onPageSelect}
+                  allowSelect={false}
+                >
+                  {browsingEntries.data.map((file) => (
+                    <SelectionArea.Selectable key={file.name} item={file}>
+                      {(innerRef: Ref<HTMLElement>) => (
+                        <FileRow
+                          key={file.name}
+                          file={file}
+                          ref={innerRef as Ref<HTMLTableRowElement>}
+                          setChildOpenModal={setChildOpenModal}
+                        />
+                      )}
+                    </SelectionArea.Selectable>
+                  ))}
+                </Table>
+              </ContextMenuProvider>
+            </SelectionArea>
+          </>
         )}
-      </Group>
-
-      {loading ? (
-        <Spinner.Centered />
-      ) : (
-        <>
-          <FileUploadOverlay visible={isDragging && !browsingBackup} />
-
-          <div className='bg-[#282828] border border-[#424242] rounded-lg mb-2 p-4'>
-            <FileBreadcrumbs path={decodeURIComponent(browsingDirectory)} browsingBackup={browsingBackup} />
-          </div>
-          <SelectionArea
-            onSelectedStart={onSelectedStart}
-            onSelected={onSelected}
-            className='h-full'
-            disabled={movingFileNames.size > 0 || !!openModal || childOpenModal}
-          >
-            <ContextMenuProvider>
-              <Table
-                columns={['', 'Name', 'Size', 'Modified', '']}
-                pagination={browsingEntries}
-                onPageSelect={onPageSelect}
-                allowSelect={false}
-              >
-                {browsingEntries.data.map((file) => (
-                  <SelectionArea.Selectable key={file.name} item={file}>
-                    {(innerRef: Ref<HTMLElement>) => (
-                      <FileRow
-                        key={file.name}
-                        file={file}
-                        ref={innerRef as Ref<HTMLTableRowElement>}
-                        setChildOpenModal={setChildOpenModal}
-                      />
-                    )}
-                  </SelectionArea.Selectable>
-                ))}
-              </Table>
-            </ContextMenuProvider>
-          </SelectionArea>
-        </>
-      )}
-    </div>
+      </div>
+    </ServerContentContainer>
   );
 }

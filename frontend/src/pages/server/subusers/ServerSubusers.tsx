@@ -8,6 +8,7 @@ import createSubuser from '@/api/server/subusers/createSubuser.ts';
 import getSubusers from '@/api/server/subusers/getSubusers.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -48,7 +49,7 @@ export default function ServerSubusers() {
   };
 
   return (
-    <>
+    <ServerContentContainer title='Subusers'>
       <SubuserCreateOrUpdateModal
         onCreate={doCreate}
         opened={openModal === 'create'}
@@ -79,6 +80,6 @@ export default function ServerSubusers() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

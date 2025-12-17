@@ -9,6 +9,7 @@ import updateRole from '@/api/admin/roles/updateRole.ts';
 import getPermissions from '@/api/getPermissions.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
@@ -64,7 +65,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
   }, []);
 
   return (
-    <>
+    <AdminContentContainer title={`${contextRole ? 'Update' : 'Create'} Role`}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -124,6 +125,6 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
           </Group>
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

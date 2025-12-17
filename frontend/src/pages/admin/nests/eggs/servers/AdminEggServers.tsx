@@ -2,6 +2,7 @@ import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getEggServers from '@/api/admin/nests/eggs/servers/getEggServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
@@ -23,7 +24,7 @@ export default function AdminEggServers({
   });
 
   return (
-    <>
+    <AdminContentContainer title='Egg Servers'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>Egg Servers</Title>
         <Group>
@@ -36,6 +37,6 @@ export default function AdminEggServers({
           <ServerRow key={server.uuid} server={server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

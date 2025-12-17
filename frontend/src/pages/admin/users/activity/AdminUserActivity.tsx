@@ -4,6 +4,7 @@ import getUserActivity from '@/api/admin/users/getUserActivity.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
@@ -19,7 +20,7 @@ export default function AdminUserActivity({ user }: { user: User }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='User Activity'>
       <Group justify='space-between' mb='md'>
         <Title order={2}>User Activity</Title>
         <Group>
@@ -57,6 +58,6 @@ export default function AdminUserActivity({ user }: { user: User }) {
           </TableRow>
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

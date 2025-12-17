@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getApiKeys from '@/api/me/api-keys/getApiKeys.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import ApiKeyCreateOrUpdateModal from '@/pages/dashboard/api-keys/modals/ApiKeyCreateOrUpdateModal.tsx';
@@ -23,7 +24,7 @@ export default function DashboardApiKeys() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='API Keys'>
       <ApiKeyCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -50,6 +51,6 @@ export default function DashboardApiKeys() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AccountContentContainer>
   );
 }

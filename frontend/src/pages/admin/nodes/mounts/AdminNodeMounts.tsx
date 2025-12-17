@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getNodeMounts from '@/api/admin/nodes/mounts/getNodeMounts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeMountTableColumns } from '@/lib/tableColumns.ts';
@@ -24,7 +25,7 @@ export default function AdminNodeMounts({ node }: { node: Node }) {
   });
 
   return (
-    <>
+    <AdminContentContainer title='Node Mounts'>
       <NodeMountAddModal node={node} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
 
       <Group justify='space-between' align='start' mb='md'>
@@ -44,6 +45,6 @@ export default function AdminNodeMounts({ node }: { node: Node }) {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

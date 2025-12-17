@@ -27,6 +27,7 @@ import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
 import Code from '@/elements/Code.tsx';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { scheduleStepIconMapping } from '@/lib/enums.ts';
@@ -336,7 +337,7 @@ export default function ScheduleView() {
   }
 
   return (
-    <>
+    <ServerContentContainer title={`Schedule (${schedule.name})`}>
       <ScheduleCreateOrUpdateModal
         propSchedule={schedule}
         onScheduleUpdate={(s) => setSchedule({ ...schedule, ...s })}
@@ -526,6 +527,6 @@ export default function ScheduleView() {
           </Tabs.Panel>
         </Tabs>
       </Stack>
-    </>
+    </ServerContentContainer>
   );
 }

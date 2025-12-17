@@ -8,6 +8,7 @@ import TextInput from '@/elements/input/TextInput.tsx';
 import 'highlight.js/styles/a11y-dark.min.css';
 import jsYaml from 'js-yaml';
 import { useState } from 'react';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 
 hljs.registerLanguage('yaml', yaml);
 
@@ -44,7 +45,7 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
   };
 
   return (
-    <>
+    <AdminContentContainer title='Node Configuration'>
       <Title order={2}>Node Configuration</Title>
 
       <div className='grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'>
@@ -88,6 +89,6 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
           </Stack>
         </Card>
       </div>
-    </>
+    </AdminContentContainer>
   );
 }
