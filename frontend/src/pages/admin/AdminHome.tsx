@@ -4,6 +4,7 @@ import getBackupStats, { type BackupStats } from '@/api/admin/stats/getBackupSta
 import getGeneralStats, { type GeneralStats } from '@/api/admin/stats/getGeneralStats.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Card from '@/elements/Card.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { bytesToString } from '@/lib/size.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -37,7 +38,7 @@ export default function AdminHome() {
   }, []);
 
   return (
-    <>
+    <AdminContentContainer title='Admin' hideTitleComponent>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Home
@@ -210,6 +211,6 @@ export default function AdminHome() {
           </div>
         )}
       </div>
-    </>
+    </AdminContentContainer>
   );
 }

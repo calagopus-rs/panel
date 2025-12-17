@@ -1,4 +1,4 @@
-import { Group, Title } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { UseFormReturnType, useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateStorageSettings from '@/api/admin/settings/updateStorageSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import { storageDriverTypeLabelMapping } from '@/lib/enums.ts';
 import {
@@ -52,11 +53,7 @@ export default function StorageContainer() {
   };
 
   return (
-    <>
-      <Title mt='md' order={2}>
-        Storage Settings
-      </Title>
-
+    <AdminContentContainer title='Storage Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Select
           label='Driver'
@@ -79,6 +76,6 @@ export default function StorageContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getMountServers from '@/api/admin/mounts/servers/getMountServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -19,19 +18,12 @@ export default function AdminMountServers({ mount }: { mount: Mount }) {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Mount Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Mount Servers' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={serverTableColumns} loading={loading} pagination={mountServers} onPageSelect={setPage}>
         {mountServers.data.map((serverMount) => (
           <ServerRow key={serverMount.server.uuid} server={serverMount.server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

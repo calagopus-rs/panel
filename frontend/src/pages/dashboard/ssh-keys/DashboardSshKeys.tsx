@@ -5,6 +5,7 @@ import { useState } from 'react';
 import getSshKeys from '@/api/me/ssh-keys/getSshKeys.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -24,7 +25,7 @@ export default function DashboardSshKeys() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='SSH Keys'>
       <SshKeyCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
       <SshKeyImportModal opened={openModal === 'import'} onClose={() => setOpenModal(null)} />
 
@@ -59,6 +60,6 @@ export default function DashboardSshKeys() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AccountContentContainer>
   );
 }

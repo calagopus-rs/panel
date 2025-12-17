@@ -1,10 +1,9 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { MouseEvent as ReactMouseEvent, Ref, useEffect, useState } from 'react';
 import getNodeAllocations from '@/api/admin/nodes/allocations/getNodeAllocations.ts';
 import Button from '@/elements/Button.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import SelectionArea from '@/elements/SelectionArea.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeAllocationTableColumns } from '@/lib/tableColumns.ts';
@@ -77,7 +76,17 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
   });
 
   return (
-    <>
+    <AdminContentContainer
+      title='Node Allocations'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Create
+        </Button>
+      }
+    >
       <NodeAllocationsCreateModal
         node={node}
         loadAllocations={refetch}
@@ -86,16 +95,6 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
       />
 
       <AllocationActionBar node={node} loadAllocations={refetch} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Node Allocations</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
-        </Group>
-      </Group>
 
       <SelectionArea onSelectedStart={onSelectedStart} onSelected={onSelected} disabled={!!openModal}>
         <Table
@@ -118,6 +117,6 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
           ))}
         </Table>
       </SelectionArea>
-    </>
+    </AdminContentContainer>
   );
 }

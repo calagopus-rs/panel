@@ -1,11 +1,10 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getServerMounts from '@/api/admin/servers/mounts/getServerMounts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverMountTableColumns } from '@/lib/tableColumns.ts';
 import ServerMountAddModal from '@/pages/admin/servers/mounts/modals/ServerMountAddModal.tsx';
@@ -24,18 +23,18 @@ export default function AdminServerMounts({ server }: { server: AdminServer }) {
   });
 
   return (
-    <>
+    <AdminContentContainer
+      title='Server Mounts'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Add
+        </Button>
+      }
+    >
       <ServerMountAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Server Mounts</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Add
-          </Button>
-        </Group>
-      </Group>
 
       <ContextMenuProvider>
         <Table columns={serverMountTableColumns} loading={loading} pagination={serverMounts} onPageSelect={setPage}>
@@ -44,6 +43,6 @@ export default function AdminServerMounts({ server }: { server: AdminServer }) {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

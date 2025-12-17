@@ -1,6 +1,5 @@
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, TextInput, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
@@ -9,6 +8,7 @@ import createOAuthProvider from '@/api/admin/oauth-providers/createOAuthProvider
 import getOAuthProviders from '@/api/admin/oauth-providers/getOAuthProviders.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { adminOAuthProviderSchema } from '@/lib/schemas/admin/oauthProviders.ts';
 import { oauthProviderTableColumns } from '@/lib/tableColumns.ts';
@@ -66,13 +66,13 @@ function OAuthProvidersContainer() {
   };
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          OAuth Providers
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <AdminContentContainer
+      title='OAuth Providers'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -92,15 +92,15 @@ function OAuthProvidersContainer() {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <Table columns={oauthProviderTableColumns} loading={loading} pagination={oauthProviders} onPageSelect={setPage}>
         {oauthProviders.data.map((oauthProvider) => (
           <DatabaseHostRow key={oauthProvider.uuid} oauthProvider={oauthProvider} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

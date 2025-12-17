@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import deleteNest from '@/api/admin/nests/deleteNest.ts';
 import updateNest from '@/api/admin/nests/updateNest.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
@@ -48,7 +49,7 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
   }, [contextNest]);
 
   return (
-    <>
+    <AdminContentContainer title={`${contextNest ? 'Update' : 'Create'} Nest`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -60,9 +61,7 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
@@ -87,6 +86,6 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
           )}
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

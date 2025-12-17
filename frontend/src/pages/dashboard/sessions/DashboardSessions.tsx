@@ -1,6 +1,7 @@
 import { Group, Title } from '@mantine/core';
 import getSessions from '@/api/me/sessions/getSessions.ts';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -16,7 +17,7 @@ export default function DashboardSessions() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='Sessions'>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Sessions
@@ -38,6 +39,6 @@ export default function DashboardSessions() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AccountContentContainer>
   );
 }

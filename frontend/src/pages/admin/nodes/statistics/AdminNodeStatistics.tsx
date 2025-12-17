@@ -2,6 +2,7 @@ import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { axiosInstance, httpErrorToHuman } from '@/api/axios.ts';
 import Card from '@/elements/Card.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import SemiCircleProgress from '@/elements/SemiCircleProgress.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { bytesToString } from '@/lib/size.ts';
@@ -62,9 +63,7 @@ export default function AdminNodeStatistics({ node }: { node: Node }) {
   }, []);
 
   return (
-    <>
-      <Title order={2}>Node Statistics</Title>
-
+    <AdminContentContainer title='Node Statistics' titleOrder={2}>
       {!statistics ? (
         <Spinner.Centered />
       ) : (
@@ -110,6 +109,6 @@ export default function AdminNodeStatistics({ node }: { node: Node }) {
           </Card>
         </div>
       )}
-    </>
+    </AdminContentContainer>
   );
 }

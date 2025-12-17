@@ -1,10 +1,10 @@
-import { Group, Title } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { useState } from 'react';
 import getUserActivity from '@/api/admin/users/getUserActivity.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
@@ -19,14 +19,7 @@ export default function AdminUserActivity({ user }: { user: User }) {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>User Activity</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='User Activity' titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={['Actor', 'Event', 'IP', 'When', '']}
         loading={loading}
@@ -57,6 +50,6 @@ export default function AdminUserActivity({ user }: { user: User }) {
           </TableRow>
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

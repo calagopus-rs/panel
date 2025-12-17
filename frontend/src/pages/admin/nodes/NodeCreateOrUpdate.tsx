@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -13,6 +13,7 @@ import updateNode from '@/api/admin/nodes/updateNode.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import Select from '@/elements/input/Select.tsx';
 import Switch from '@/elements/input/Switch.tsx';
@@ -105,7 +106,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
   };
 
   return (
-    <>
+    <AdminContentContainer title={`${contextNode ? 'Update' : 'Create'} Node`} contentRight={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -117,9 +118,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextNode ? 'Update' : 'Create'} Node</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select
@@ -240,6 +239,6 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
           </Group>
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

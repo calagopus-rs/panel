@@ -5,6 +5,7 @@ import { createSearchParams, useNavigate, useParams, useSearchParams } from 'rea
 import getFileContent from '@/api/server/files/getFileContent.ts';
 import saveFileContent from '@/api/server/files/saveFileContent.ts';
 import Button from '@/elements/Button.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { getLanguageFromExtension } from '@/lib/files.ts';
 import NotFound from '@/pages/NotFound.tsx';
@@ -80,58 +81,62 @@ export default function FileEditor() {
     return <NotFound />;
   }
 
-  return loading ? (
-    <div className='w-full h-screen flex items-center justify-center'>
-      <Spinner size={75} />
-    </div>
-  ) : (
-    <div className='flex flex-col'>
-      <FileNameModal
-        onFileName={(name: string) => saveFile(name)}
-        opened={nameModalOpen}
-        onClose={() => setNameModalOpen(false)}
-      />
-
-      <div className='flex justify-between w-full p-4'>
-        <FileBreadcrumbs
-          inFileEditor
-          path={join(decodeURIComponent(browsingDirectory!), fileName)}
-          browsingBackup={browsingBackup}
-        />
-        <div hidden={!!browsingBackup}>
-          {params.action === 'edit' ? (
-            <Button loading={saving} onClick={() => saveFile()}>
-              Save
-            </Button>
-          ) : (
-            <Button loading={saving} onClick={() => setNameModalOpen(true)}>
-              Create
-            </Button>
-          )}
+  return (
+    <ServerContentContainer title={`File Editor (${fileName || 'New File'})`}>
+      {loading ? (
+        <div className='w-full h-screen flex items-center justify-center'>
+          <Spinner size={75} />
         </div>
-      </div>
-      <div className='mx-4 rounded-md overflow-hidden'>
-        <Editor
-          height='82vh'
-          theme='vs-dark'
-          defaultLanguage={language}
-          defaultValue={content}
-          onChange={(value) => setContent(value || '')}
-          onMount={(editor, monaco) => {
-            editorRef.current = editor;
-            editor.onDidChangeModelContent(() => {
-              contentRef.current = editor.getValue();
-            });
-            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-              if (params.action === 'new') {
-                setNameModalOpen(true);
-              } else {
-                saveFile();
-              }
-            });
-          }}
-        />
-      </div>
-    </div>
+      ) : (
+        <div className='flex flex-col'>
+          <FileNameModal
+            onFileName={(name: string) => saveFile(name)}
+            opened={nameModalOpen}
+            onClose={() => setNameModalOpen(false)}
+          />
+
+          <div className='flex justify-between w-full p-4'>
+            <FileBreadcrumbs
+              inFileEditor
+              path={join(decodeURIComponent(browsingDirectory!), fileName)}
+              browsingBackup={browsingBackup}
+            />
+            <div hidden={!!browsingBackup}>
+              {params.action === 'edit' ? (
+                <Button loading={saving} onClick={() => saveFile()}>
+                  Save
+                </Button>
+              ) : (
+                <Button loading={saving} onClick={() => setNameModalOpen(true)}>
+                  Create
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className='mx-4 rounded-md overflow-hidden'>
+            <Editor
+              height='82vh'
+              theme='vs-dark'
+              defaultLanguage={language}
+              defaultValue={content}
+              onChange={(value) => setContent(value || '')}
+              onMount={(editor, monaco) => {
+                editorRef.current = editor;
+                editor.onDidChangeModelContent(() => {
+                  contentRef.current = editor.getValue();
+                });
+                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                  if (params.action === 'new') {
+                    setNameModalOpen(true);
+                  } else {
+                    saveFile();
+                  }
+                });
+              }}
+            />
+          </div>
+        </div>
+      )}
+    </ServerContentContainer>
   );
 }

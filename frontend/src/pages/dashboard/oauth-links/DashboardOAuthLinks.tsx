@@ -6,6 +6,7 @@ import getOAuthProviders from '@/api/auth/getOAuthProviders.ts';
 import getOAuthLinks from '@/api/me/oauth-links/getOAuthLinks.ts';
 import Button from '@/elements/Button.tsx';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useUserStore } from '@/stores/user.ts';
@@ -27,7 +28,7 @@ export default function DashboardOAuthLinks() {
   });
 
   return (
-    <>
+    <AccountContentContainer title='OAuth Links'>
       <Group justify='space-between' align='center' mb='md'>
         <Title order={1} c='white'>
           OAuth Links
@@ -80,6 +81,6 @@ export default function DashboardOAuthLinks() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AccountContentContainer>
   );
 }

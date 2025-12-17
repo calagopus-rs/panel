@@ -1,11 +1,10 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getLocationDatabaseHosts from '@/api/admin/locations/database-hosts/getLocationDatabaseHosts.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { locationDatabaseHostTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -24,22 +23,22 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
   });
 
   return (
-    <>
+    <AdminContentContainer
+      title='Location Database Hosts'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Add
+        </Button>
+      }
+    >
       <LocationDatabaseHostCreateModal
         location={location}
         opened={openModal === 'create'}
         onClose={() => setOpenModal(null)}
       />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Location Database Hosts</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
-        </Group>
-      </Group>
 
       <ContextMenuProvider>
         <Table
@@ -57,6 +56,6 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </AdminContentContainer>
   );
 }

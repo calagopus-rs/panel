@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import updateEggRepository from '@/api/admin/egg-repositories/updateEggRepositor
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import ConfirmationModal from '@/elements/modals/ConfirmationModal.tsx';
@@ -72,7 +73,7 @@ export default function EggRepositoryCreateOrUpdate({
   };
 
   return (
-    <>
+    <AdminContentContainer title={`${contextEggRepository ? 'Update' : 'Create'} Egg Repository`}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -84,9 +85,7 @@ export default function EggRepositoryCreateOrUpdate({
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextEggRepository ? 'Update' : 'Create'} Egg Repository</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <TextInput
@@ -121,6 +120,6 @@ export default function EggRepositoryCreateOrUpdate({
           )}
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

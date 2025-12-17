@@ -1,6 +1,5 @@
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
@@ -9,7 +8,7 @@ import importSchedule from '@/api/server/schedules/importSchedule.ts';
 import Button from '@/elements/Button.tsx';
 import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -60,20 +59,13 @@ export default function ServerSchedules() {
   };
 
   return (
-    <>
-      <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Schedules
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {schedules.total} of {server.featureLimits.schedules} maximum schedules created.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <ServerContentContainer
+      title='Schedules'
+      subtitle={`${schedules.total} of ${server.featureLimits.schedules} maximum schedules created.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -99,8 +91,10 @@ export default function ServerSchedules() {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
+        </>
+      }
+    >
+      <ScheduleCreateOrUpdateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <ContextMenuProvider>
         <Table
@@ -114,6 +108,6 @@ export default function ServerSchedules() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

@@ -1,6 +1,5 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import getPermissions from '@/api/getPermissions.ts';
@@ -8,7 +7,7 @@ import createSubuser from '@/api/server/subusers/createSubuser.ts';
 import getSubusers from '@/api/server/subusers/getSubusers.ts';
 import Button from '@/elements/Button.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -48,24 +47,21 @@ export default function ServerSubusers() {
   };
 
   return (
-    <>
+    <ServerContentContainer
+      title='Subusers'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Create
+        </Button>
+      }
+    >
       <SubuserCreateOrUpdateModal
         onCreate={doCreate}
         opened={openModal === 'create'}
         onClose={() => setOpenModal(null)}
       />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={1} c='white'>
-          Subusers
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
-        </Group>
-      </Group>
 
       <ContextMenuProvider>
         <Table
@@ -79,6 +75,6 @@ export default function ServerSubusers() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

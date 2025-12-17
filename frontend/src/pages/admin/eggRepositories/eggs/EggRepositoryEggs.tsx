@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getEggRepositoryEggs from '@/api/admin/egg-repositories/eggs/getEggRepositoryEggs.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggRepositoryEggTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -17,14 +16,7 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
   });
 
   return (
-    <>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Egg Repository Eggs</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Egg Repository Eggs' search={search} setSearch={setSearch}>
       <Table
         columns={eggRepositoryEggTableColumns}
         loading={loading}
@@ -39,6 +31,6 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
           />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
