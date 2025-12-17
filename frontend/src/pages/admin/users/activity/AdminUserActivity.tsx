@@ -20,14 +20,7 @@ export default function AdminUserActivity({ user }: { user: User }) {
   });
 
   return (
-    <AdminContentContainer title='User Activity'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>User Activity</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='User Activity' titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={['Actor', 'Event', 'IP', 'When', '']}
         loading={loading}

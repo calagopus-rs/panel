@@ -24,23 +24,20 @@ function RolesContainer() {
   });
 
   return (
-    <AdminContentContainer title='Roles'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Roles
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/roles/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Roles'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/roles/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={roleTableColumns} loading={loading} pagination={roles} onPageSelect={setPage}>
         {roles.data.map((role) => (
           <RoleRow key={role.uuid} role={role} />

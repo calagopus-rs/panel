@@ -53,11 +53,7 @@ export default function CaptchaContainer() {
   };
 
   return (
-    <AdminContentContainer title='Captcha Settings'>
-      <Title mt='md' order={2}>
-        Captcha Settings
-      </Title>
-
+    <AdminContentContainer title='Captcha Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Select
           label='Provider'

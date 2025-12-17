@@ -49,7 +49,7 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
   }, [contextNest]);
 
   return (
-    <AdminContentContainer title={`${contextNest ? 'Update' : 'Create'} Nest`}>
+    <AdminContentContainer title={`${contextNest ? 'Update' : 'Create'} Nest`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -61,9 +61,7 @@ export default function NestCreateOrUpdate({ contextNest }: { contextNest?: Admi
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextNest ? 'Update' : 'Create'} Nest</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Author' placeholder='Author' {...form.getInputProps('author')} />
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />

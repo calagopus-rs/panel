@@ -105,7 +105,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
   };
 
   return (
-    <AdminContentContainer title={`${contextNode ? 'Update' : 'Create'} Node`}>
+    <AdminContentContainer title={`${contextNode ? 'Update' : 'Create'} Node`} contentRight={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -117,9 +117,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextNode ? 'Update' : 'Create'} Node</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select

@@ -113,7 +113,7 @@ export default function EggVariableContainer({
   };
 
   return (
-    <AdminContentContainer title='Egg Variables'>
+    <>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -175,6 +175,6 @@ export default function EggVariableContainer({
           </Group>
         </form>
       </Card>
-    </AdminContentContainer>
+    </>
   );
 }

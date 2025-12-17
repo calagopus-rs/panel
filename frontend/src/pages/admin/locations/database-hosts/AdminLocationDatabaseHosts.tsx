@@ -25,22 +25,22 @@ export default function AdminLocationDatabaseHosts({ location }: { location: Loc
   });
 
   return (
-    <AdminContentContainer title='Location Database Hosts'>
+    <AdminContentContainer
+      title='Location Database Hosts'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Add
+        </Button>
+      }
+    >
       <LocationDatabaseHostCreateModal
         location={location}
         opened={openModal === 'create'}
         onClose={() => setOpenModal(null)}
       />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Location Database Hosts</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
-        </Group>
-      </Group>
 
       <ContextMenuProvider>
         <Table

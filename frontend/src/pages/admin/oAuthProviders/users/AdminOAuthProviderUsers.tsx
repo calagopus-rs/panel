@@ -20,14 +20,7 @@ export default function AdminOAuthProviderUsers({ oauthProvider }: { oauthProvid
   });
 
   return (
-    <AdminContentContainer title='OAuth Provider Users'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>OAuth Provider Users</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='OAuth Provider Users' titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={adminOAuthProviderUsersTableColumns}
         loading={loading}

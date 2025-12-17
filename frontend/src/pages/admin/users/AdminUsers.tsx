@@ -24,23 +24,20 @@ function UsersContainer() {
   });
 
   return (
-    <AdminContentContainer title='Users'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Users
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/users/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Users'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/users/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={userTableColumns} loading={loading} pagination={users} onPageSelect={setPage}>
         {users.data.map((user) => (
           <UserRow key={user.uuid} user={user} />

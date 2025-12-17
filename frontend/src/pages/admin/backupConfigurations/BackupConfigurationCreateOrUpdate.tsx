@@ -98,7 +98,7 @@ export default function BackupConfigurationCreateOrUpdate({
   }, [contextBackupConfiguration]);
 
   return (
-    <AdminContentContainer title={`${contextBackupConfiguration ? 'Update' : 'Create'} Backup Config`}>
+    <AdminContentContainer title={`${contextBackupConfiguration ? 'Update' : 'Create'} Backup Config`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -110,9 +110,7 @@ export default function BackupConfigurationCreateOrUpdate({
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select

@@ -85,7 +85,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
   };
 
   return (
-    <AdminContentContainer title={`${contextUser ? 'Update' : 'Create'} User`}>
+    <AdminContentContainer title={`${contextUser ? 'Update' : 'Create'} User`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -106,9 +106,7 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextUser ? 'Update' : 'Create'} User</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Username' placeholder='Username' {...form.getInputProps('username')} />
             <TextInput withAsterisk label='Email' placeholder='Email' type='email' {...form.getInputProps('email')} />

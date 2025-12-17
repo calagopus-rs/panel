@@ -147,7 +147,7 @@ export default function OAuthProviderCreateOrUpdate({
   };
 
   return (
-    <AdminContentContainer title={`${contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider`}>
+    <AdminContentContainer title={`${contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -159,9 +159,7 @@ export default function OAuthProviderCreateOrUpdate({
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextOAuthProvider ? 'Update' : 'Create'} OAuth Provider</Title>
-
+        <Stack mt='xs'>
           <Group grow align='start'>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <TextArea label='Description' placeholder='Description' rows={3} {...form.getInputProps('description')} />

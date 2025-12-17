@@ -30,11 +30,7 @@ export default function AdminBackupConfigurationStats({
   }, []);
 
   return (
-    <AdminContentContainer title={`Backup Config Stats (${backupConfiguration.name})`}>
-      <Title order={2} mb='md'>
-        Backup Configuration Stats
-      </Title>
-
+    <AdminContentContainer title={`Backup Config Stats`} titleOrder={2}>
       {!stats ? (
         <Spinner.Centered />
       ) : (

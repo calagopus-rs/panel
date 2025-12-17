@@ -96,9 +96,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
   };
 
   return (
-    <AdminContentContainer title='Node Logs'>
-      <Title order={2}>Node Logs</Title>
-
+    <AdminContentContainer title='Node Logs' titleOrder={2}>
       {!logs.length ? (
         <Spinner.Centered />
       ) : (

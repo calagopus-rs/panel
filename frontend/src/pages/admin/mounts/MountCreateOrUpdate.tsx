@@ -56,7 +56,7 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
   }, [contextMount]);
 
   return (
-    <AdminContentContainer title={`${contextMount ? 'Update' : 'Create'} Mount`}>
+    <AdminContentContainer title={`${contextMount ? 'Update' : 'Create'} Mount`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -68,9 +68,7 @@ export default function MountCreateOrUpdate({ contextMount }: { contextMount?: M
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextMount ? 'Update' : 'Create'} Mount</Title>
-
+        <Stack mt='xs'>
           <Group grow align='start'>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <TextArea label='Description' placeholder='Description' {...form.getInputProps('description')} rows={3} />

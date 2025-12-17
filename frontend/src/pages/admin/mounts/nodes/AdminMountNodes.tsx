@@ -18,14 +18,7 @@ export default function AdminMountNodes({ mount }: { mount: Mount }) {
   });
 
   return (
-    <AdminContentContainer title='Mount Nodes'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Mount Nodes</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Mount Nodes' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={nodeTableColumns} loading={loading} pagination={mountNodes} onPageSelect={setPage}>
         {mountNodes.data.map((nodeMount) => (
           <NodeRow key={nodeMount.node.uuid} node={nodeMount.node} />

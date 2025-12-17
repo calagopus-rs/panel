@@ -15,7 +15,7 @@ export default function AdminServerManagement({ server }: { server: AdminServer 
   );
 
   return (
-    <AdminContentContainer title='Server Management'>
+    <AdminContentContainer title='Server Management' hideTitleComponent>
       <ServerTransferModal server={server} opened={openModal === 'transfer'} onClose={() => setOpenModal(null)} />
       <ServerSuspendModal server={server} opened={openModal === 'suspend'} onClose={() => setOpenModal(null)} />
       <ServerUnsuspendModal server={server} opened={openModal === 'unsuspend'} onClose={() => setOpenModal(null)} />

@@ -63,9 +63,7 @@ export default function AdminNodeStatistics({ node }: { node: Node }) {
   }, []);
 
   return (
-    <AdminContentContainer title='Node Statistics'>
-      <Title order={2}>Node Statistics</Title>
-
+    <AdminContentContainer title='Node Statistics' titleOrder={2}>
       {!statistics ? (
         <Spinner.Centered />
       ) : (

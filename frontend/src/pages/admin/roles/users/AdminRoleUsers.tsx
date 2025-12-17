@@ -18,14 +18,7 @@ export default function AdminRoleUsers({ role }: { role: Role }) {
   });
 
   return (
-    <AdminContentContainer title='Role Users'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Role Users</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Role Users' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={userTableColumns} loading={loading} pagination={roleUsers} onPageSelect={setPage}>
         {roleUsers.data.map((user) => (
           <UserRow key={user.uuid} user={user} />

@@ -24,23 +24,20 @@ function ServersContainer() {
   });
 
   return (
-    <AdminContentContainer title='Servers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Servers
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/servers/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Servers'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/servers/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={serverTableColumns} loading={loading} pagination={servers} onPageSelect={setPage}>
         {servers.data.map((server) => (
           <ServerRow key={server.uuid} server={server} />

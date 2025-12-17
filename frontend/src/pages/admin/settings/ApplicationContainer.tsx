@@ -53,11 +53,7 @@ export default function ApplicationContainer() {
   };
 
   return (
-    <AdminContentContainer title='Application Settings'>
-      <Title mt='md' order={2}>
-        Application Settings
-      </Title>
-
+    <AdminContentContainer title='Application Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>

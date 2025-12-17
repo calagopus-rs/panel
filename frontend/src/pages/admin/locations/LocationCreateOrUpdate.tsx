@@ -58,7 +58,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   });
 
   return (
-    <AdminContentContainer title={`${contextLocation ? 'Update' : 'Create'} Location`}>
+    <AdminContentContainer title={`${contextLocation ? 'Update' : 'Create'} Location`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -70,9 +70,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select

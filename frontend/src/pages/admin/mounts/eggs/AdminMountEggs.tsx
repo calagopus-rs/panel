@@ -20,14 +20,7 @@ export default function AdminMountNestEggs({ mount }: { mount: Mount }) {
   });
 
   return (
-    <AdminContentContainer title='Mount Eggs'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Mount Eggs</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Mount Eggs' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={eggTableColumns} loading={loading} pagination={mountNestEggs} onPageSelect={setPage}>
         {mountNestEggs.data.map((nestEggMount) => (
           <EggRow key={nestEggMount.nestEgg.uuid} nest={nestEggMount.nest} egg={nestEggMount.nestEgg} />

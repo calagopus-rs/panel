@@ -53,11 +53,7 @@ export default function StorageContainer() {
   };
 
   return (
-    <AdminContentContainer title='Storage Settings'>
-      <Title mt='md' order={2}>
-        Storage Settings
-      </Title>
-
+    <AdminContentContainer title='Storage Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Select
           label='Driver'

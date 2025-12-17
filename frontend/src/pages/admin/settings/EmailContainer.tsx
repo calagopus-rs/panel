@@ -54,11 +54,7 @@ export default function EmailContainer() {
   };
 
   return (
-    <AdminContentContainer title='Email Settings'>
-      <Title mt='md' order={2}>
-        Email Settings
-      </Title>
-
+    <AdminContentContainer title='Email Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Select
           label='Provider'

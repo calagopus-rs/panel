@@ -22,14 +22,7 @@ export default function AdminBackupConfigurationNodes({
   });
 
   return (
-    <AdminContentContainer title={`Backup Config Nodes (${backupConfiguration.name})`}>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Backup Configuration Nodes</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title={`Backup Config Nodes`} titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={nodeTableColumns} loading={loading} pagination={backupConfigurationNodes} onPageSelect={setPage}>
         {backupConfigurationNodes.data.map((node) => (
           <NodeRow key={node.uuid} node={node} />

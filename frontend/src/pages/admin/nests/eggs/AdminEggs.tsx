@@ -61,11 +61,13 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   };
 
   return (
-    <AdminContentContainer title='Eggs'>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Eggs</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <AdminContentContainer
+      title='Eggs'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -85,9 +87,9 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <Table columns={eggTableColumns} loading={loading} pagination={eggs} onPageSelect={setPage}>
         {eggs.data.map((egg) => (
           <EggRow key={egg.uuid} nest={contextNest} egg={egg} />

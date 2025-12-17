@@ -23,23 +23,20 @@ function MountsContainer() {
   });
 
   return (
-    <AdminContentContainer title='Mounts'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Mounts
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/mounts/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Mounts'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/mounts/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={mountTableColumns} loading={loading} pagination={mounts} onPageSelect={setPage}>
         {mounts.data.map((m) => (
           <MountRow key={m.uuid} mount={m} />

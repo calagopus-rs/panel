@@ -20,14 +20,7 @@ export default function AdminMountServers({ mount }: { mount: Mount }) {
   });
 
   return (
-    <AdminContentContainer title='Mount Servers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Mount Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Mount Servers' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={serverTableColumns} loading={loading} pagination={mountServers} onPageSelect={setPage}>
         {mountServers.data.map((serverMount) => (
           <ServerRow key={serverMount.server.uuid} server={serverMount.server} />

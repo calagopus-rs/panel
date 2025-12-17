@@ -21,19 +21,19 @@ export default function AdminUserServers({ user }: { user: User }) {
   });
 
   return (
-    <AdminContentContainer title='User Servers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>User Servers</Title>
-        <Group>
-          <Switch
-            label="Only show users' owned servers"
-            checked={showOwnedUserServers}
-            onChange={(e) => setShowOwnedUserServers(e.currentTarget.checked)}
-          />
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='User Servers'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Switch
+          label="Only show users' owned servers"
+          checked={showOwnedUserServers}
+          onChange={(e) => setShowOwnedUserServers(e.currentTarget.checked)}
+        />
+      }
+    >
       <Table columns={serverTableColumns} loading={loading} pagination={userServers} onPageSelect={setPage}>
         {userServers.data.map((server) => (
           <ServerRow key={server.uuid} server={server} />

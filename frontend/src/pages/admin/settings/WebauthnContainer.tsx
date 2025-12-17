@@ -59,11 +59,7 @@ export default function WebauthnContainer() {
   };
 
   return (
-    <AdminContentContainer title='Webauthn Settings'>
-      <Title mt='md' order={2}>
-        Webauthn Settings
-      </Title>
-
+    <AdminContentContainer title='Webauthn Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>

@@ -78,7 +78,17 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
   });
 
   return (
-    <AdminContentContainer title='Node Allocations'>
+    <AdminContentContainer
+      title='Node Allocations'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+            Create
+          </Button>
+      }
+    >
       <NodeAllocationsCreateModal
         node={node}
         loadAllocations={refetch}
@@ -87,16 +97,6 @@ export default function AdminNodeAllocations({ node }: { node: Node }) {
       />
 
       <AllocationActionBar node={node} loadAllocations={refetch} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Node Allocations</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('create')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Create
-          </Button>
-        </Group>
-      </Group>
 
       <SelectionArea onSelectedStart={onSelectedStart} onSelected={onSelected} disabled={!!openModal}>
         <Table

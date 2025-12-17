@@ -51,11 +51,7 @@ export default function ServerContainer() {
   };
 
   return (
-    <AdminContentContainer title='Server Settings'>
-      <Title mt='md' order={2}>
-        Server Settings
-      </Title>
-
+    <AdminContentContainer title='Server Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>

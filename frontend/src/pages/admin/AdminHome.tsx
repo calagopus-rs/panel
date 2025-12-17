@@ -38,7 +38,7 @@ export default function AdminHome() {
   }, []);
 
   return (
-    <AdminContentContainer title='Admin'>
+    <AdminContentContainer title='Admin' hideTitleComponent>
       <Group justify='space-between' mb='md'>
         <Title order={1} c='white'>
           Home

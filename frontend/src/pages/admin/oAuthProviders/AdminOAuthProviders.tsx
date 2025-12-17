@@ -67,13 +67,13 @@ function OAuthProvidersContainer() {
   };
 
   return (
-    <AdminContentContainer title='OAuth Providers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          OAuth Providers
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <AdminContentContainer
+      title='OAuth Providers'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -93,9 +93,9 @@ function OAuthProvidersContainer() {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <Table columns={oauthProviderTableColumns} loading={loading} pagination={oauthProviders} onPageSelect={setPage}>
         {oauthProviders.data.map((oauthProvider) => (
           <DatabaseHostRow key={oauthProvider.uuid} oauthProvider={oauthProvider} />

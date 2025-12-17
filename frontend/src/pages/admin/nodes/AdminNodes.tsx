@@ -24,23 +24,20 @@ function NodesContainer() {
   });
 
   return (
-    <AdminContentContainer title='Nodes'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Nodes
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/nodes/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Nodes'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/nodes/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={nodeTableColumns} loading={loading} pagination={nodes} onPageSelect={setPage}>
         {nodes.data.map((node) => (
           <NodeRow key={node.uuid} node={node} />

@@ -24,14 +24,7 @@ export default function AdminBackupConfigurationServers({
   });
 
   return (
-    <AdminContentContainer title={`Backup Config Servers (${backupConfiguration.name})`}>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Backup Configuration Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title={`Backup Config Servers`} titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={serverTableColumns}
         loading={loading}

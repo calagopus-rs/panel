@@ -24,23 +24,20 @@ function LocationsContainer() {
   });
 
   return (
-    <AdminContentContainer title='Locations'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Locations
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/locations/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Locations'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/locations/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={locationTableColumns} loading={loading} pagination={locations} onPageSelect={setPage}>
         {locations.data.map((location) => (
           <LocationRow key={location.uuid} location={location} />

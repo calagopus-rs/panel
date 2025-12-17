@@ -65,7 +65,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
   }, []);
 
   return (
-    <AdminContentContainer title={`${contextRole ? 'Update' : 'Create'} Role`}>
+    <AdminContentContainer title={`${contextRole ? 'Update' : 'Create'} Role`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -77,8 +77,7 @@ export default function RoleCreateOrUpdate({ contextRole }: { contextRole?: Role
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextRole ? 'Update' : 'Create'} Role</Title>
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
           </Group>

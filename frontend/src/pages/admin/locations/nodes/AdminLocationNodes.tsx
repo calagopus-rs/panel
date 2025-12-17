@@ -18,14 +18,7 @@ export default function AdminLocationNodes({ location }: { location: Location })
   });
 
   return (
-    <AdminContentContainer title='Location Nodes'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Location Nodes</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Location Nodes' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={nodeTableColumns} loading={loading} pagination={locationNodes} onPageSelect={setPage}>
         {locationNodes.data.map((node) => (
           <NodeRow key={node.uuid} node={node} />

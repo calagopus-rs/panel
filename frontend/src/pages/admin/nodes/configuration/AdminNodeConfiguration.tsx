@@ -45,9 +45,7 @@ export default function AdminNodeConfiguration({ node }: { node: Node }) {
   };
 
   return (
-    <AdminContentContainer title='Node Configuration'>
-      <Title order={2}>Node Configuration</Title>
-
+    <AdminContentContainer title='Node Configuration' titleOrder={2}>
       <div className='grid md:grid-cols-4 grid-cols-1 grid-rows-2 gap-4'>
         <div className='flex flex-col md:col-span-3'>
           <Code

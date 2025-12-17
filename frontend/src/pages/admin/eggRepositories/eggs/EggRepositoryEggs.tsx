@@ -18,14 +18,7 @@ export default function EggRepositoryEggs({ contextEggRepository }: { contextEgg
   });
 
   return (
-    <AdminContentContainer title='Egg Repository Eggs'>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Egg Repository Eggs</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Egg Repository Eggs' search={search} setSearch={setSearch}>
       <Table
         columns={eggRepositoryEggTableColumns}
         loading={loading}

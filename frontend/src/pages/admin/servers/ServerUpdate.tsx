@@ -126,11 +126,9 @@ export default function ServerUpdate({ contextServer }: { contextServer: AdminSe
   }, [form.values.eggUuid, eggs.items, contextServer]);
 
   return (
-    <AdminContentContainer title='Update Server'>
+    <AdminContentContainer title='Update Server' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
         <Stack>
-          <Title order={2}>Update Server</Title>
-
           {contextServer.suspended && (
             <Alert title='Server Suspended' color='orange' icon={<FontAwesomeIcon icon={faCircleInfo} />}>
               This server is suspended.

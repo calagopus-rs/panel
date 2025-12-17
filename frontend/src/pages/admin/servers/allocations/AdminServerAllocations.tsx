@@ -25,18 +25,18 @@ export default function AdminServerAllocations({ server }: { server: AdminServer
   });
 
   return (
-    <AdminContentContainer title='Server Allocations'>
+    <AdminContentContainer
+      title='Server Allocations'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
+          Add
+        </Button>
+      }
+    >
       <ServerAllocationAddModal server={server} opened={openModal === 'add'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Server Allocations</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button onClick={() => setOpenModal('add')} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
-            Add
-          </Button>
-        </Group>
-      </Group>
 
       <ContextMenuProvider>
         <Table

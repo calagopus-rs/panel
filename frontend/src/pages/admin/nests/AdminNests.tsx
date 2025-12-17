@@ -24,23 +24,20 @@ function NestsContainer() {
   });
 
   return (
-    <AdminContentContainer title='Nests'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Nests
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/nests/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Nests'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/nests/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={nestTableColumns} loading={loading} pagination={nests} onPageSelect={setPage}>
         {nests.data.map((nest) => (
           <NestRow key={nest.uuid} nest={nest} />

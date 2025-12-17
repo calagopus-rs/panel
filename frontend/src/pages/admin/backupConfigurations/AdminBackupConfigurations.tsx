@@ -23,23 +23,20 @@ function BackupConfigurationsContainer() {
   });
 
   return (
-    <AdminContentContainer title='Backup Configurations'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Backup Configurations
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/backup-configurations/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Backup Configurations'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/backup-configurations/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table
         columns={backupConfigurationTableColumns}
         loading={loading}

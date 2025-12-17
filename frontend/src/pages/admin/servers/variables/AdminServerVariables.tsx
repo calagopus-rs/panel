@@ -57,16 +57,15 @@ export default function AdminServerVariables({ server }: { server: AdminServer }
   );
 
   return (
-    <AdminContentContainer title='Server Variables'>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Server Variables</Title>
-        <Group>
-          <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color='blue'>
-            Save
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Server Variables'
+      titleOrder={2}
+      contentRight={
+        <Button onClick={doUpdate} disabled={Object.keys(values).length === 0} loading={loading} color='blue'>
+          Save
+        </Button>
+      }
+    >
       <div className='grid grid-cols-1 xl:grid-cols-2 gap-4 mt-4'>
         {serverVariables.map((variable) => (
           <VariableContainer

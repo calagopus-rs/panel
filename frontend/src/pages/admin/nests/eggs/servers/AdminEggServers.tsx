@@ -24,14 +24,7 @@ export default function AdminEggServers({
   });
 
   return (
-    <AdminContentContainer title='Egg Servers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Egg Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Egg Servers' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={serverTableColumns} loading={loading} pagination={eggServers} onPageSelect={setPage}>
         {eggServers.data.map((server) => (
           <ServerRow key={server.uuid} server={server} />

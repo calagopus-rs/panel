@@ -18,14 +18,7 @@ export default function AdminNodeServers({ node }: { node: Node }) {
   });
 
   return (
-    <AdminContentContainer title='Node Servers'>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Node Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Node Servers' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={serverTableColumns} loading={loading} pagination={nodeServers} onPageSelect={setPage}>
         {nodeServers.data.map((server) => (
           <ServerRow key={server.uuid} server={server} />

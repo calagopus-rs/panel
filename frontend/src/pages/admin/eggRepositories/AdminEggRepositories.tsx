@@ -24,13 +24,11 @@ function EggRepositoriesContainer() {
   });
 
   return (
-    <AdminContentContainer title='Egg Repositories'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Egg Repositories
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <AdminContentContainer
+      title='Egg Repositories'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
           <Button
             onClick={() => navigate('/admin/egg-repositories/new')}
             color='blue'
@@ -38,9 +36,8 @@ function EggRepositoriesContainer() {
           >
             Create
           </Button>
-        </Group>
-      </Group>
-
+      }
+    >
       <Table columns={eggRepositoryTableColumns} loading={loading} pagination={eggRepositories} onPageSelect={setPage}>
         {eggRepositories.data.map((eggRepository) => (
           <EggRepositoryRow key={eggRepository.uuid} eggRepository={eggRepository} />

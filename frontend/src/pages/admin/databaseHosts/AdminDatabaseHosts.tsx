@@ -23,23 +23,20 @@ function DatabaseHostsContainer() {
   });
 
   return (
-    <AdminContentContainer title='Database Hosts'>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Database Hosts
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/database-hosts/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Database Hosts'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/database-hosts/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={databaseHostTableColumns} loading={loading} pagination={databaseHosts} onPageSelect={setPage}>
         {databaseHosts.data.map((dh) => (
           <DatabaseHostRow key={dh.uuid} databaseHost={dh} />

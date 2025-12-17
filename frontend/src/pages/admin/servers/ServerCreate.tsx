@@ -152,11 +152,9 @@ export default function ServerCreate() {
   }, [selectedNestUuid, form.values.eggUuid]);
 
   return (
-    <AdminContentContainer title='Create Server'>
+    <AdminContentContainer title='Create Server' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
         <Stack>
-          <Title order={2}>Create Server</Title>
-
           <Group grow align='normal'>
             <Paper withBorder p='md'>
               <Stack>

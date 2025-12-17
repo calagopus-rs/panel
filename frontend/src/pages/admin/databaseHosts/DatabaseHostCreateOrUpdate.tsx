@@ -88,7 +88,7 @@ export default function DatabaseHostCreateOrUpdate({
   };
 
   return (
-    <AdminContentContainer title={`${contextDatabaseHost ? 'Update' : 'Create'} Database Host`}>
+    <AdminContentContainer title={`${contextDatabaseHost ? 'Update' : 'Create'} Database Host`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -100,9 +100,7 @@ export default function DatabaseHostCreateOrUpdate({
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextDatabaseHost ? 'Update' : 'Create'} Database Host</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select
