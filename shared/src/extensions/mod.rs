@@ -220,7 +220,7 @@ pub trait Extension: Send + Sync {
         builder
     }
 
-    /// Your extension routes entrypoint, this runs as soon as the database is migrated and before the webserver starts
+    /// Your extension background tasks entrypoint, this runs as soon as the database is migrated and before the webserver starts
     async fn initialize_background_tasks(
         &mut self,
         state: State,
