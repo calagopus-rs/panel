@@ -1,6 +1,5 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getMounts from '@/api/admin/mounts/getMounts.ts';
 import Button from '@/elements/Button.tsx';

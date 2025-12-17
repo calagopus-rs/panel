@@ -1,4 +1,3 @@
-import { Title } from '@mantine/core';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useState } from 'react';
 import stripAnsi from 'strip-ansi';

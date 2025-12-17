@@ -1,6 +1,5 @@
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, TextInput, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';

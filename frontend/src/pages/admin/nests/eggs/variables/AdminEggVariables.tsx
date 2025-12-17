@@ -1,7 +1,6 @@
 import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables.ts';
 import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder.ts';

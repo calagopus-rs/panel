@@ -1,11 +1,9 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories.ts';
 import Button from '@/elements/Button.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggRepositoryTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -29,13 +27,13 @@ function EggRepositoriesContainer() {
       search={search}
       setSearch={setSearch}
       contentRight={
-          <Button
-            onClick={() => navigate('/admin/egg-repositories/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
+        <Button
+          onClick={() => navigate('/admin/egg-repositories/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
       }
     >
       <Table columns={eggRepositoryTableColumns} loading={loading} pagination={eggRepositories} onPageSelect={setPage}>

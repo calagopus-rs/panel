@@ -1,4 +1,3 @@
-import { Group, Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import getServerVariables from '@/api/admin/servers/variables/getServerVariables.ts';
 import updateServerVariables from '@/api/admin/servers/variables/updateServerVariables.ts';

@@ -12,7 +12,6 @@ import Drawer from '@/elements/Drawer.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useWindows } from '@/providers/WindowProvider.tsx';
 import RouterRoutes from '@/RouterRoutes.tsx';
-import { useGlobalStore } from '@/stores/global.ts';
 
 type SidebarProps = {
   children: ReactNode;
@@ -63,7 +62,6 @@ type LinkProps = {
 function Link({ to, end, icon, name, title = name }: LinkProps) {
   const navigate = useNavigate();
   const { addWindow } = useWindows();
-  const { settings } = useGlobalStore();
 
   const doNavigate = (e: ReactMouseEvent) => {
     e.preventDefault();

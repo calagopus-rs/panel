@@ -1,4 +1,4 @@
-import { Grid, Group, Title } from '@mantine/core';
+import { Grid } from '@mantine/core';
 import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import AutokillContainer from './AutokillContainer.tsx';
 import ReinstallContainer from './ReinstallContainer.tsx';

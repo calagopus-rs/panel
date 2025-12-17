@@ -1,6 +1,6 @@
 import { faServer } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
-import AccountContentContainer from '@/elements/containers/AccountContentContainer';
+import AccountContentContainer from '@/elements/containers/AccountContentContainer.tsx';
 import SubNavigation from '@/elements/SubNavigation.tsx';
 import { useAuth } from '@/providers/AuthProvider.tsx';
 import { useTranslations } from '@/providers/TranslationProvider.tsx';

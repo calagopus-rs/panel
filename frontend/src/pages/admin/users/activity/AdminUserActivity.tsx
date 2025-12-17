@@ -1,11 +1,10 @@
-import { Group, Title } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { useState } from 'react';
 import getUserActivity from '@/api/admin/users/getUserActivity.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
