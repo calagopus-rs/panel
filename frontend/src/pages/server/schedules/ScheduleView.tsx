@@ -134,8 +134,6 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
 }
 
 function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStatus: ScheduleStatus }) {
-  const getScheduleStepError = useServerStore((state) => state.getScheduleStepError);
-
   const renderActionDetails = () => {
     const action = step.action;
     switch (action.type) {
@@ -255,8 +253,6 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
     }
   };
 
-  const stepError = getScheduleStepError(step);
-
   return (
     <Timeline.Item
       bullet={
@@ -272,8 +268,8 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
             Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}{' '}
           </Text>
           {scheduleStatus.step === step.uuid && <Badge ml='md'>Running</Badge>}
-          {stepError && (
-            <Tooltip label={stepError}>
+          {step.error && (
+            <Tooltip label={step.error}>
               <ThemeIcon size='sm' color='red'>
                 <FontAwesomeIcon icon={faExclamationTriangle} size='xs' />
               </ThemeIcon>

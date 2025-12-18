@@ -16,6 +16,7 @@ import Code from '@/elements/Code.tsx';
 import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import Select from '@/elements/input/Select.tsx';
+import SizeInput from '@/elements/input/SizeInput.tsx';
 import Switch from '@/elements/input/Switch.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -24,7 +25,6 @@ import { adminNodeSchema } from '@/lib/schemas/admin/nodes.ts';
 import { useResourceForm } from '@/plugins/useResourceForm.ts';
 import { useSearchableResource } from '@/plugins/useSearchableResource.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
-import SizeInput from '@/elements/input/SizeInput.tsx';
 
 export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node }) {
   const { addToast } = useToast();

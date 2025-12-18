@@ -1,6 +1,6 @@
 use crate::State;
 use futures_util::FutureExt;
-use std::{collections::HashMap, panic::AssertUnwindSafe, pin::Pin, sync::Arc};
+use std::{borrow::Cow, collections::HashMap, panic::AssertUnwindSafe, pin::Pin, sync::Arc};
 use tokio::sync::{OwnedRwLockReadGuard, RwLock};
 
 pub type LoopFunc =
@@ -55,13 +55,14 @@ impl BackgroundTaskBuilder {
                         let result = match result {
                             Ok(result) => result,
                             Err(err) => {
-                                let err_msg = if let Some(s) = err.downcast_ref::<&str>() {
-                                    s.to_string()
-                                } else if let Some(s) = err.downcast_ref::<String>() {
-                                    s.clone()
-                                } else {
-                                    "Unknown panic".to_string()
-                                };
+                                let err_msg: Cow<'_, str> =
+                                    if let Some(s) = err.downcast_ref::<&str>() {
+                                        (*s).into()
+                                    } else if let Some(s) = err.downcast_ref::<String>() {
+                                        s.clone().into()
+                                    } else {
+                                        "Unknown panic".into()
+                                    };
 
                                 tracing::error!(name, "background task panicked: {}", err_msg);
                                 sentry::capture_message(
