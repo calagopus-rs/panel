@@ -13,6 +13,7 @@ use shared::{
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod download;
+mod restore;
 
 pub type GetServerBackup = shared::extract::ConsumingExtension<ServerBackup>;
 
@@ -39,8 +40,8 @@ pub async fn auth(
 
     let backup = ServerBackup::by_node_uuid_uuid(&state.database, node.uuid, backup).await;
     let backup = match backup {
-        Ok(Some(backup)) if backup.server.is_none() => backup,
-        Ok(_) => {
+        Ok(Some(backup)) => backup,
+        Ok(None) => {
             return Ok(ApiResponse::error("backup not found")
                 .with_status(StatusCode::NOT_FOUND)
                 .into_response());
@@ -176,6 +177,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(get::route))
         .routes(routes!(delete::route))
         .nest("/download", download::router(state))
+        .nest("/restore", restore::router(state))
         .route_layer(axum::middleware::from_fn_with_state(state.clone(), auth))
         .with_state(state.clone())
 }
