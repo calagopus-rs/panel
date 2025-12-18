@@ -68,7 +68,6 @@ function OAuthProvidersContainer() {
   return (
     <AdminContentContainer
       title='OAuth Providers'
-      titleOrder={2}
       search={search}
       setSearch={setSearch}
       contentRight={

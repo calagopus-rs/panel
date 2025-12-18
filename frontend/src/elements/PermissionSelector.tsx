@@ -34,8 +34,6 @@ export default function PermissionSelector({
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const permissionIcons = window.extensionContext.permissionIcons;
 
-  console.log(permissionIcons[permissionIconMap[permissionsMapType]]);
-
   const allPermissionKeys = useMemo(() => {
     return Object.entries(permissions).flatMap(([category, { permissions: perms }]) =>
       Object.keys(perms).map((perm) => `${category}.${perm}`),

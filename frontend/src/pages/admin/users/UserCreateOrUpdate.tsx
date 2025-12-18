@@ -133,15 +133,16 @@ export default function UserCreateOrUpdate({ contextUser }: { contextUser?: User
             <Select
               label='Role'
               placeholder='Role'
-              data={roles.items.map((nest) => ({
-                label: nest.name,
-                value: nest.uuid,
+              data={roles.items.map((role) => ({
+                label: role.name,
+                value: role.uuid,
               }))}
               searchable
               searchValue={roles.search}
               onSearchChange={roles.setSearch}
               allowDeselect
               {...form.getInputProps('roleUuid')}
+              onChange={(value) => form.setFieldValue('roleUuid', value || uuidNil)}
             />
           </Group>
 
