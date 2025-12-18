@@ -178,7 +178,7 @@ export default function NodeCreateOrUpdate({ contextNode }: { contextNode?: Node
               label='Disk'
               mode='mb'
               min={0}
-              value={form.values.memory}
+              value={form.values.disk}
               onChange={(value) => form.setFieldValue('disk', value)}
             />
           </Group>
