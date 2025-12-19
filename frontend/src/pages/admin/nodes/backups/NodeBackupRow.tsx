@@ -1,5 +1,4 @@
-import { faFileArrowDown, faLock, faLockOpen, faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFileArrowDown, faRotateLeft, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { useState } from 'react';
 import { NavLink } from 'react-router';
 import deleteNodeBackup from '@/api/admin/nodes/backups/deleteNodeBackup.ts';
@@ -90,7 +89,6 @@ export default function NodeBackupRow({ node, backup }: { node: Node; backup: Ad
           {
             icon: faTrash,
             label: 'Delete',
-            disabled: backup.isLocked,
             onClick: () => setOpenModal('delete'),
             color: 'red',
           },
@@ -133,14 +131,6 @@ export default function NodeBackupRow({ node, backup }: { node: Node; backup: Ad
             <TableData>{backup.completed ? backup.files : null}</TableData>
 
             <TableData>{formatTimestamp(backup.created)}</TableData>
-
-            <TableData>
-              {backup.isLocked ? (
-                <FontAwesomeIcon className='text-green-500' icon={faLock} />
-              ) : (
-                <FontAwesomeIcon className='text-red-500' icon={faLockOpen} />
-              )}
-            </TableData>
 
             <ContextMenu.Toggle openMenu={openMenu} />
           </TableRow>

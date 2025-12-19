@@ -35,7 +35,7 @@ export default function AdminNodeBackups({ node }: { node: Node }) {
     >
       <ContextMenuProvider>
         <Table
-          columns={['Name', 'Server', 'Checksum', 'Size', 'Files', 'Created At', 'Locked?', '']}
+          columns={['Name', 'Server', 'Checksum', 'Size', 'Files', 'Created At', '']}
           loading={loading}
           pagination={nodeBackups}
           onPageSelect={setPage}
