@@ -3,8 +3,8 @@ use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
     use crate::routes::api::admin::nodes::_node_::backups::_backup_::GetServerBackup;
-    use axum::http::StatusCode;
-    use serde::Serialize;
+    use axum::{extract::Query, http::StatusCode};
+    use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
         jwt::BasePayload,
@@ -16,6 +16,12 @@ mod get {
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
+
+    #[derive(ToSchema, Deserialize)]
+    pub struct Params {
+        #[serde(default)]
+        archive_format: wings_api::StreamableArchiveFormat,
+    }
 
     #[derive(ToSchema, Serialize)]
     struct Response {
@@ -45,6 +51,7 @@ mod get {
         user: GetUser,
         node: GetNode,
         backup: GetServerBackup,
+        Query(params): Query<Params>,
     ) -> ApiResponseResult {
         permissions.has_admin_permission("nodes.backups")?;
 
@@ -123,7 +130,11 @@ mod get {
 
         let mut url = node.public_url();
         url.set_path("/download/backup");
-        url.set_query(Some(&format!("token={}", urlencoding::encode(&token))));
+        url.set_query(Some(&format!(
+            "token={}&archive_format={}",
+            urlencoding::encode(&token),
+            params.archive_format
+        )));
 
         ApiResponse::json(Response {
             url: url.to_string(),
