@@ -1,12 +1,11 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackups from '@/api/server/backups/getBackups.ts';
 import Button from '@/elements/Button.tsx';
 import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useServerStore } from '@/stores/server.ts';
@@ -24,35 +23,28 @@ export default function ServerBackups() {
   });
 
   return (
-    <>
-      <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Backups
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {backups.total} of {server.featureLimits.backups} maximum backups created.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <ConditionalTooltip
-            enabled={backups.total >= server.featureLimits.backups}
-            label={`This server is limited to ${server.featureLimits.backups} backups.`}
+    <ServerContentContainer
+      title='Backups'
+      subtitle={`${backups.total} of ${server.featureLimits.backups} maximum backups created.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <ConditionalTooltip
+          enabled={backups.total >= server.featureLimits.backups}
+          label={`This server is limited to ${server.featureLimits.backups} backups.`}
+        >
+          <Button
+            disabled={backups.total >= server.featureLimits.backups}
+            onClick={() => setOpenModal('create')}
+            color='blue'
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            <Button
-              disabled={backups.total >= server.featureLimits.backups}
-              onClick={() => setOpenModal('create')}
-              color='blue'
-              leftSection={<FontAwesomeIcon icon={faPlus} />}
-            >
-              Create
-            </Button>
-          </ConditionalTooltip>
-        </Group>
-      </Group>
+            Create
+          </Button>
+        </ConditionalTooltip>
+      }
+    >
+      <BackupCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <ContextMenuProvider>
         <Table
@@ -66,6 +58,6 @@ export default function ServerBackups() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateWebauthnSettings from '@/api/admin/settings/updateWebauthnSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
 import { isIP } from '@/lib/ip.ts';
 import { adminSettingsWebauthnSchema } from '@/lib/schemas/admin/settings.ts';
@@ -58,11 +59,7 @@ export default function WebauthnContainer() {
   };
 
   return (
-    <>
-      <Title mt='md' order={2}>
-        Webauthn Settings
-      </Title>
-
+    <AdminContentContainer title='Webauthn Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>
@@ -80,6 +77,6 @@ export default function WebauthnContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

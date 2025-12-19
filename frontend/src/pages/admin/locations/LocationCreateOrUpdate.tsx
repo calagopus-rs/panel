@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -10,6 +10,7 @@ import deleteLocation from '@/api/admin/locations/deleteLocation.ts';
 import updateLocation from '@/api/admin/locations/updateLocation.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -57,7 +58,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
   });
 
   return (
-    <>
+    <AdminContentContainer title={`${contextLocation ? 'Update' : 'Create'} Location`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -69,9 +70,7 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextLocation ? 'Update' : 'Create'} Location</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select
@@ -115,6 +114,6 @@ export default ({ contextLocation }: { contextLocation?: Location }) => {
           </Group>
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 };

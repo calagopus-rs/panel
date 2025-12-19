@@ -10,6 +10,7 @@ import updateDockerImage from '@/api/server/startup/updateDockerImage.ts';
 import updateVariables from '@/api/server/startup/updateVariables.ts';
 import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import VariableContainer from '@/elements/VariableContainer.tsx';
@@ -102,11 +103,7 @@ export default function ServerStartup() {
   );
 
   return (
-    <>
-      <Title order={1} c='white' mb='md'>
-        Startup
-      </Title>
-
+    <ServerContentContainer title='Startup'>
       <div className='grid grid-cols-3 gap-4'>
         <Card className='flex flex-col justify-between rounded-md p-4 h-full col-span-2'>
           <TextArea
@@ -172,6 +169,6 @@ export default function ServerStartup() {
           />
         ))}
       </div>
-    </>
+    </ServerContentContainer>
   );
 }

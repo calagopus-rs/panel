@@ -20,6 +20,7 @@ import { getEmptyPaginationSet, httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import MultiKeyValueInput from '@/elements/input/MultiKeyValueInput.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import Select from '@/elements/input/Select.tsx';
@@ -230,7 +231,7 @@ export default function EggCreateOrUpdate({
   };
 
   return (
-    <>
+    <AdminContentContainer title={`${contextEgg ? 'Update' : 'Create'} Egg`} hideTitleComponent>
       {contextEgg && (
         <EggMoveModal
           opened={openModal === 'move'}
@@ -477,6 +478,6 @@ export default function EggCreateOrUpdate({
           )}
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getNodeServers from '@/api/admin/nodes/servers/getNodeServers.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { serverTableColumns } from '@/lib/tableColumns.ts';
 import ServerRow from '@/pages/admin/servers/ServerRow.tsx';
@@ -17,19 +16,12 @@ export default function AdminNodeServers({ node }: { node: Node }) {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Node Servers</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title='Node Servers' titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={serverTableColumns} loading={loading} pagination={nodeServers} onPageSelect={setPage}>
         {nodeServers.data.map((server) => (
           <ServerRow key={server.uuid} server={server} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

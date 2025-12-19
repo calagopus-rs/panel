@@ -1,7 +1,3 @@
-use std::sync::Arc;
-
-use tokio::sync::{RwLock, RwLockReadGuard};
-
 use crate::{
     State,
     extensions::{
@@ -9,6 +5,8 @@ use crate::{
         commands::CliCommandGroupBuilder,
     },
 };
+use std::sync::Arc;
+use tokio::sync::{RwLock, RwLockReadGuard};
 
 pub struct ExtensionManager {
     vec: RwLock<Vec<ConstructedExtension>>,
@@ -21,8 +19,16 @@ impl ExtensionManager {
         }
     }
 
-    pub async fn init(&self, state: State) -> ExtensionRouteBuilder {
+    pub async fn init(
+        &self,
+        state: State,
+    ) -> (
+        ExtensionRouteBuilder,
+        super::background_tasks::BackgroundTaskBuilder,
+    ) {
         let mut route_builder = ExtensionRouteBuilder::new(state.clone());
+        let mut background_tasks_builder =
+            super::background_tasks::BackgroundTaskBuilder::new(state.clone());
         let mut permissions_builder = ExtensionPermissionsBuilder::new(
             crate::permissions::BASE_USER_PERMISSIONS.clone(),
             crate::permissions::BASE_ADMIN_PERMISSIONS.clone(),
@@ -33,6 +39,9 @@ impl ExtensionManager {
             ext.initialize(state.clone()).await;
 
             route_builder = ext.initialize_router(state.clone(), route_builder).await;
+            background_tasks_builder = ext
+                .initialize_background_tasks(state.clone(), background_tasks_builder)
+                .await;
             permissions_builder = ext
                 .initialize_permissions(state.clone(), permissions_builder)
                 .await;
@@ -51,7 +60,7 @@ impl ExtensionManager {
             .unwrap()
             .replace(permissions_builder.server_permissions);
 
-        route_builder
+        (route_builder, background_tasks_builder)
     }
 
     pub async fn init_cli(

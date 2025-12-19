@@ -12,15 +12,11 @@ export interface SchedulesSlice {
   schedule: ServerSchedule | null;
   scheduleSteps: ScheduleStep[];
   scheduleStatus: Map<string, ScheduleStatus>;
-  scheduleStepErrors: Map<string, string>;
 
   setSchedule: (scheduleStep: ServerSchedule) => void;
   setScheduleSteps: (scheduleSteps: ScheduleStep[]) => void;
   setScheduleStatus: (schedule: string, status: ScheduleStatus) => void;
   getScheduleStatus: (schedule: string) => ScheduleStatus;
-  setScheduleStepError: (scheduleStep: string, error: string) => void;
-  getScheduleStepError: (scheduleStep: ScheduleStep) => string | null;
-  removeScheduleStepError: (scheduleStep: string) => void;
 }
 
 export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSlice> = (set, get): SchedulesSlice => ({
@@ -47,7 +43,6 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
   schedule: null,
   scheduleSteps: [],
   scheduleStatus: new Map(),
-  scheduleStepErrors: new Map(),
 
   setSchedule: (schedule) => set((state) => ({ ...state, schedule })),
   setScheduleSteps: (steps) => set((state) => ({ ...state, scheduleSteps: steps })),
@@ -58,17 +53,4 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
       return { ...state };
     }),
   getScheduleStatus: (schedule) => get().scheduleStatus.get(schedule) ?? { running: false, step: null },
-  setScheduleStepError: (step, error) =>
-    set((state) => {
-      state.scheduleStepErrors.set(step, error);
-
-      return { ...state };
-    }),
-  getScheduleStepError: (step) => get().scheduleStepErrors.get(step.uuid) ?? step.error,
-  removeScheduleStepError: (step) =>
-    set((state) => {
-      state.scheduleStepErrors.delete(step);
-
-      return { ...state };
-    }),
 });

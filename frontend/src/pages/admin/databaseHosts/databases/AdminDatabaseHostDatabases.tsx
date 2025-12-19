@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getDatabaseHostDatabases from '@/api/admin/database-hosts/getDatabaseHostDatabases.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { databaseHostDatabaseTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -19,14 +18,7 @@ export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseH
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Database Host Databases</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title={`Database Host Databases`} titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={databaseHostDatabaseTableColumns}
         loading={loading}
@@ -37,6 +29,6 @@ export default function AdminDatabaseHostDatabases({ databaseHost }: { databaseH
           <DatabaseRow key={database.uuid} database={database} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

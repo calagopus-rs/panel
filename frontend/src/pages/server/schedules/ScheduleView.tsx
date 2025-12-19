@@ -27,6 +27,7 @@ import Button from '@/elements/Button.tsx';
 import Card from '@/elements/Card.tsx';
 import Code from '@/elements/Code.tsx';
 import ContextMenu, { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { scheduleStepIconMapping } from '@/lib/enums.ts';
@@ -133,8 +134,6 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
 }
 
 function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStatus: ScheduleStatus }) {
-  const getScheduleStepError = useServerStore((state) => state.getScheduleStepError);
-
   const renderActionDetails = () => {
     const action = step.action;
     switch (action.type) {
@@ -254,8 +253,6 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
     }
   };
 
-  const stepError = getScheduleStepError(step);
-
   return (
     <Timeline.Item
       bullet={
@@ -271,8 +268,8 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
             Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}{' '}
           </Text>
           {scheduleStatus.step === step.uuid && <Badge ml='md'>Running</Badge>}
-          {stepError && (
-            <Tooltip label={stepError}>
+          {step.error && (
+            <Tooltip label={step.error}>
               <ThemeIcon size='sm' color='red'>
                 <FontAwesomeIcon icon={faExclamationTriangle} size='xs' />
               </ThemeIcon>
@@ -336,7 +333,7 @@ export default function ScheduleView() {
   }
 
   return (
-    <>
+    <ServerContentContainer title='Schedule' hideTitleComponent>
       <ScheduleCreateOrUpdateModal
         propSchedule={schedule}
         onScheduleUpdate={(s) => setSchedule({ ...schedule, ...s })}
@@ -526,6 +523,6 @@ export default function ScheduleView() {
           </Tabs.Panel>
         </Tabs>
       </Stack>
-    </>
+    </ServerContentContainer>
   );
 }

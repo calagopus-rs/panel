@@ -36,6 +36,7 @@ pub struct Env {
     pub bind: String,
     pub port: u16,
 
+    pub app_primary: bool,
     pub app_debug: bool,
     pub app_use_decryption_cache: bool,
     pub app_use_internal_cache: bool,
@@ -104,6 +105,11 @@ impl Env {
                 .parse()
                 .context("Invalid PORT value")?,
 
+            app_primary: std::env::var("APP_PRIMARY")
+                .unwrap_or("true".to_string())
+                .trim_matches('"')
+                .parse()
+                .context("Invalid APP_DEBUG value")?,
             app_debug: std::env::var("APP_DEBUG")
                 .unwrap_or("false".to_string())
                 .trim_matches('"')

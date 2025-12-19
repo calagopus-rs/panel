@@ -1,12 +1,11 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getDatabases from '@/api/server/databases/getDatabases.ts';
 import Button from '@/elements/Button.tsx';
 import ConditionalTooltip from '@/elements/ConditionalTooltip.tsx';
 import { ContextMenuProvider } from '@/elements/ContextMenu.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
 import { useServerStore } from '@/stores/server.ts';
@@ -24,35 +23,28 @@ export default function ServerDatabases() {
   });
 
   return (
-    <>
-      <DatabaseCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
-
-      <Group justify='space-between' align='start' mb='md'>
-        <div>
-          <Title order={1} c='white'>
-            Databases
-          </Title>
-          <p className='text-xs text-gray-300!'>
-            {databases.total} of {server.featureLimits.databases} maximum databases created.
-          </p>
-        </div>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <ConditionalTooltip
-            enabled={databases.total >= server.featureLimits.databases}
-            label={`This server is limited to ${server.featureLimits.databases} databases.`}
+    <ServerContentContainer
+      title='Databases'
+      subtitle={`${databases.total} of ${server.featureLimits.databases} maximum databases created.`}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <ConditionalTooltip
+          enabled={databases.total >= server.featureLimits.databases}
+          label={`This server is limited to ${server.featureLimits.databases} databases.`}
+        >
+          <Button
+            disabled={databases.total >= server.featureLimits.databases}
+            onClick={() => setOpenModal('create')}
+            color='blue'
+            leftSection={<FontAwesomeIcon icon={faPlus} />}
           >
-            <Button
-              disabled={databases.total >= server.featureLimits.databases}
-              onClick={() => setOpenModal('create')}
-              color='blue'
-              leftSection={<FontAwesomeIcon icon={faPlus} />}
-            >
-              Create
-            </Button>
-          </ConditionalTooltip>
-        </Group>
-      </Group>
+            Create
+          </Button>
+        </ConditionalTooltip>
+      }
+    >
+      <DatabaseCreateModal opened={openModal === 'create'} onClose={() => setOpenModal(null)} />
 
       <ContextMenuProvider>
         <Table
@@ -66,6 +58,6 @@ export default function ServerDatabases() {
           ))}
         </Table>
       </ContextMenuProvider>
-    </>
+    </ServerContentContainer>
   );
 }

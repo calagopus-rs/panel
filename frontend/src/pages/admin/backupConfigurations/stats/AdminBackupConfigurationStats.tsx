@@ -5,6 +5,7 @@ import getBackupConfigurationStats, {
 } from '@/api/admin/backup-configurations/getBackupConfigurationStats.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Card from '@/elements/Card.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import { bytesToString } from '@/lib/size.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
@@ -29,11 +30,7 @@ export default function AdminBackupConfigurationStats({
   }, []);
 
   return (
-    <>
-      <Title order={2} mb='md'>
-        Backup Configuration Stats
-      </Title>
-
+    <AdminContentContainer title={`Backup Config Stats`} titleOrder={2}>
       {!stats ? (
         <Spinner.Centered />
       ) : (
@@ -155,6 +152,6 @@ export default function AdminBackupConfigurationStats({
           </Card>
         </div>
       )}
-    </>
+    </AdminContentContainer>
   );
 }

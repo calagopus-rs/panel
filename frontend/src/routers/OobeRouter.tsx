@@ -14,6 +14,7 @@ import { Route, Routes, useLocation, useNavigate } from 'react-router';
 import updateOobeSettings from '@/api/admin/settings/updateOobeSettings.ts';
 import minecraftBackground from '@/assets/minecraft_background.webp';
 import Card from '@/elements/Card.tsx';
+import ContentContainer from '@/elements/containers/ContentContainer.tsx';
 import { to } from '@/lib/routes.ts';
 import OobeConfiguration from '@/pages/oobe/OobeConfiguration.tsx';
 import OobeFinished from '@/pages/oobe/OobeFinished.tsx';
@@ -158,30 +159,32 @@ export default function OobeRouter() {
   };
 
   return (
-    <BackgroundImage src={minecraftBackground} h='100vh'>
-      <Center h='100%'>
-        <Container w='100%'>
-          <Card>
-            <Stepper active={filteredSteps().findIndex((s) => s.path === activeStep?.path)}>
-              {filteredSteps().map((step, index) => (
-                <Stepper.Step
-                  key={index}
-                  label={step.label}
-                  icon={step.icon ? <FontAwesomeIcon icon={step.icon} /> : null}
-                />
-              ))}
-            </Stepper>
-
-            <Box>
-              <Routes>
-                {steps.map(({ component: Component, ...step }, index) => (
-                  <Route key={index} path={step.path} element={<Component onNext={onNext} skipFrom={skipFrom} />} />
+    <ContentContainer title={`Setting up ${settings.app.name}`}>
+      <BackgroundImage src={minecraftBackground} h='100vh'>
+        <Center h='100%'>
+          <Container w='100%'>
+            <Card>
+              <Stepper active={filteredSteps().findIndex((s) => s.path === activeStep?.path)}>
+                {filteredSteps().map((step, index) => (
+                  <Stepper.Step
+                    key={index}
+                    label={step.label}
+                    icon={step.icon ? <FontAwesomeIcon icon={step.icon} /> : null}
+                  />
                 ))}
-              </Routes>
-            </Box>
-          </Card>
-        </Container>
-      </Center>
-    </BackgroundImage>
+              </Stepper>
+
+              <Box>
+                <Routes>
+                  {steps.map(({ component: Component, ...step }, index) => (
+                    <Route key={index} path={step.path} element={<Component onNext={onNext} skipFrom={skipFrom} />} />
+                  ))}
+                </Routes>
+              </Box>
+            </Card>
+          </Container>
+        </Center>
+      </BackgroundImage>
+    </ContentContainer>
   );
 }

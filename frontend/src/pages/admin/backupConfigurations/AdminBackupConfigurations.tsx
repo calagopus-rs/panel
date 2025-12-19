@@ -1,9 +1,9 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, TextInput, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getBackupConfigurations from '@/api/admin/backup-configurations/getBackupConfigurations.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { backupConfigurationTableColumns } from '@/lib/tableColumns.ts';
 import BackupConfigurationCreateOrUpdate from '@/pages/admin/backupConfigurations/BackupConfigurationCreateOrUpdate.tsx';
@@ -22,23 +22,20 @@ function BackupConfigurationsContainer() {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Backup Configurations
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/backup-configurations/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Backup Configurations'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/backup-configurations/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table
         columns={backupConfigurationTableColumns}
         loading={loading}
@@ -49,7 +46,7 @@ function BackupConfigurationsContainer() {
           <BackupConfigurationRow key={bc.uuid} backupConfiguration={bc} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

@@ -1,12 +1,12 @@
 import { rectSortingStrategy } from '@dnd-kit/sortable';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { useEffect, useMemo, useState } from 'react';
 import getEggVariables from '@/api/admin/nests/eggs/variables/getEggVariables.ts';
 import updateEggVariableOrder from '@/api/admin/nests/eggs/variables/updateEggVariableOrder.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import { DndContainer, DndItem, SortableItem } from '@/elements/DragAndDrop.tsx';
 import Spinner from '@/elements/Spinner.tsx';
 import EggVariableContainer from '@/pages/admin/nests/eggs/variables/EggVariableContainer.tsx';
@@ -65,14 +65,15 @@ export default function AdminEggVariables({
   }));
 
   return (
-    <>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Egg Variables</Title>
+    <AdminContentContainer
+      title='Egg Variables'
+      titleOrder={2}
+      contentRight={
         <Button onClick={addVariable} color='blue' leftSection={<FontAwesomeIcon icon={faPlus} />}>
           Add
         </Button>
-      </Group>
-
+      }
+    >
       {loading ? (
         <Spinner.Centered />
       ) : (
@@ -131,6 +132,6 @@ export default function AdminEggVariables({
           )}
         </DndContainer>
       )}
-    </>
+    </AdminContentContainer>
   );
 }

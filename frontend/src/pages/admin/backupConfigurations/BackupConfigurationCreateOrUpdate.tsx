@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import deleteBackupConfiguration from '@/api/admin/backup-configurations/deleteB
 import updateBackupConfiguration from '@/api/admin/backup-configurations/updateBackupConfiguration.ts';
 import Button from '@/elements/Button.tsx';
 import Code from '@/elements/Code.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Select from '@/elements/input/Select.tsx';
 import TextArea from '@/elements/input/TextArea.tsx';
 import TextInput from '@/elements/input/TextInput.tsx';
@@ -97,7 +98,7 @@ export default function BackupConfigurationCreateOrUpdate({
   }, [contextBackupConfiguration]);
 
   return (
-    <>
+    <AdminContentContainer title={`${contextBackupConfiguration ? 'Update' : 'Create'} Backup Config`} titleOrder={2}>
       <ConfirmationModal
         opened={openModal === 'delete'}
         onClose={() => setOpenModal(null)}
@@ -109,9 +110,7 @@ export default function BackupConfigurationCreateOrUpdate({
       </ConfirmationModal>
 
       <form onSubmit={form.onSubmit(() => doCreateOrUpdate(false))}>
-        <Stack>
-          <Title order={2}>{contextBackupConfiguration ? 'Update' : 'Create'} Backup Configuration</Title>
-
+        <Stack mt='xs'>
           <Group grow>
             <TextInput withAsterisk label='Name' placeholder='Name' {...form.getInputProps('name')} />
             <Select
@@ -168,6 +167,6 @@ export default function BackupConfigurationCreateOrUpdate({
           )}
         </Stack>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

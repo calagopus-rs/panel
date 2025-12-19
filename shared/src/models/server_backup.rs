@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{prelude::*, storage::StorageUrlRetriever};
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use sqlx::{Row, postgres::PgRow, prelude::Type};
@@ -405,6 +405,90 @@ impl ServerBackup {
         })
     }
 
+    pub async fn by_node_uuid_with_pagination(
+        database: &crate::database::Database,
+        node_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_backups
+            WHERE
+                server_backups.node_uuid = $1
+                AND server_backups.deleted IS NULL
+                AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
+            ORDER BY server_backups.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(node_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
+            per_page,
+            page,
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
+        })
+    }
+
+    pub async fn by_backup_configuration_uuid_with_pagination(
+        database: &crate::database::Database,
+        backup_configuration_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_backups
+            WHERE
+                server_backups.backup_configuration_uuid = $1
+                AND server_backups.deleted IS NULL
+                AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
+            ORDER BY server_backups.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(backup_configuration_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
+            per_page,
+            page,
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
+        })
+    }
+
     pub async fn by_detached_node_uuid_with_pagination(
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
@@ -586,6 +670,38 @@ impl ServerBackup {
     }
 
     #[inline]
+    pub async fn into_admin_api_object(
+        self,
+        database: &crate::database::Database,
+        storage_url_retriever: &StorageUrlRetriever<'_>,
+    ) -> Result<AdminApiServerBackup, anyhow::Error> {
+        Ok(AdminApiServerBackup {
+            uuid: self.uuid,
+            server: match self.server {
+                Some(server) => Some(
+                    server
+                        .fetch_cached(database)
+                        .await?
+                        .into_admin_api_object(database, storage_url_retriever)
+                        .await?,
+                ),
+                None => None,
+            },
+            name: self.name,
+            ignored_files: self.ignored_files,
+            is_successful: self.successful,
+            is_locked: self.locked,
+            is_browsable: self.browsable,
+            is_streaming: self.streaming,
+            checksum: self.checksum,
+            bytes: self.bytes,
+            files: self.files,
+            completed: self.completed.map(|dt| dt.and_utc()),
+            created: self.created.and_utc(),
+        })
+    }
+
+    #[inline]
     pub fn into_api_object(self) -> ApiServerBackup {
         ApiServerBackup {
             uuid: self.uuid,
@@ -725,6 +841,28 @@ impl DeletableModel for ServerBackup {
             Ok(())
         }).await?
     }
+}
+
+#[derive(ToSchema, Serialize)]
+#[schema(title = "AdminServerBackup")]
+pub struct AdminApiServerBackup {
+    pub uuid: uuid::Uuid,
+    pub server: Option<super::server::AdminApiServer>,
+
+    pub name: compact_str::CompactString,
+    pub ignored_files: Vec<compact_str::CompactString>,
+
+    pub is_successful: bool,
+    pub is_locked: bool,
+    pub is_browsable: bool,
+    pub is_streaming: bool,
+
+    pub checksum: Option<String>,
+    pub bytes: i64,
+    pub files: i64,
+
+    pub completed: Option<chrono::DateTime<chrono::Utc>>,
+    pub created: chrono::DateTime<chrono::Utc>,
 }
 
 #[derive(ToSchema, Serialize)]

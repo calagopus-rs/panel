@@ -59,14 +59,24 @@ impl ApiError {
     }
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AppContainerType {
+    Official,
+    OfficialHeavy,
+    Unknown,
+    None,
+}
+
 pub struct AppState {
     pub start_time: Instant,
-    pub is_container: bool,
+    pub container_type: AppContainerType,
     pub version: String,
 
     pub client: reqwest::Client,
 
     pub extensions: Arc<extensions::manager::ExtensionManager>,
+    pub background_tasks: Arc<extensions::background_tasks::BackgroundTaskManager>,
     pub settings: Arc<settings::Settings>,
     pub jwt: Arc<jwt::Jwt>,
     pub storage: Arc<storage::Storage>,

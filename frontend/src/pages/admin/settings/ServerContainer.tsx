@@ -1,4 +1,4 @@
-import { Group, Stack, Title } from '@mantine/core';
+import { Group, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { zod4Resolver } from 'mantine-form-zod-resolver';
 import { useEffect, useState } from 'react';
@@ -6,6 +6,7 @@ import { z } from 'zod';
 import updateServerSettings from '@/api/admin/settings/updateServerSettings.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import NumberInput from '@/elements/input/NumberInput.tsx';
 import SizeInput from '@/elements/input/SizeInput.tsx';
 import Switch from '@/elements/input/Switch.tsx';
@@ -50,11 +51,7 @@ export default function ServerContainer() {
   };
 
   return (
-    <>
-      <Title mt='md' order={2}>
-        Server Settings
-      </Title>
-
+    <AdminContentContainer title='Server Settings' titleOrder={2}>
       <form onSubmit={form.onSubmit(() => doUpdate())}>
         <Stack>
           <Group grow>
@@ -95,6 +92,6 @@ export default function ServerContainer() {
           </Button>
         </Group>
       </form>
-    </>
+    </AdminContentContainer>
   );
 }

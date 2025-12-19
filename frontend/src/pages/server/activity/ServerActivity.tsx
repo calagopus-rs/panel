@@ -1,10 +1,10 @@
-import { Group, Title } from '@mantine/core';
+import { Group } from '@mantine/core';
 import { useState } from 'react';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
 import getServerActivity from '@/api/server/getServerActivity.ts';
 import ActivityInfoButton from '@/elements/activity/ActivityInfoButton.tsx';
 import Code from '@/elements/Code.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import ServerContentContainer from '@/elements/containers/ServerContentContainer.tsx';
 import Table, { TableData, TableRow } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
@@ -21,14 +21,7 @@ export default function ServerActivity() {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Activity
-        </Title>
-        <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-      </Group>
-
+    <ServerContentContainer title='Activity' search={search} setSearch={setSearch}>
       <Table
         columns={['', 'Actor', 'Event', 'IP', 'When', '']}
         loading={loading}
@@ -69,6 +62,6 @@ export default function ServerActivity() {
           </TableRow>
         ))}
       </Table>
-    </>
+    </ServerContentContainer>
   );
 }

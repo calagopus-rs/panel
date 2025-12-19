@@ -7,13 +7,15 @@ mod post {
     use serde::{Deserialize, Serialize};
     use shared::{
         ApiError, GetState,
-        models::server_activity::ServerActivity,
+        models::{node::GetNode, server_activity::ServerActivity},
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
 
     #[derive(ToSchema, Deserialize)]
     pub struct Payload {
+        server_uuid: Option<uuid::Uuid>,
+
         successful: bool,
     }
 
@@ -32,23 +34,29 @@ mod post {
     ), request_body = inline(Payload))]
     pub async fn route(
         state: GetState,
+        node: GetNode,
         backup: GetBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        let server_uuid = match &backup.server {
-            Some(server) => server.uuid,
+        let server_uuid = match data.server_uuid {
+            Some(server_uuid) => server_uuid,
             None => {
-                return ApiResponse::error("server uuid not found")
-                    .with_status(StatusCode::NOT_FOUND)
-                    .ok();
+                if let Some(server) = &backup.server {
+                    server.uuid
+                } else {
+                    return ApiResponse::error("server uuid not found")
+                        .with_status(StatusCode::NOT_FOUND)
+                        .ok();
+                }
             }
         };
 
         if sqlx::query!(
             "UPDATE servers
             SET status = NULL
-            WHERE servers.uuid = $1 AND servers.status = 'RESTORING_BACKUP'",
-            server_uuid
+            WHERE servers.uuid = $1 AND servers.node_uuid = $2 AND servers.status = 'RESTORING_BACKUP'",
+            server_uuid,
+            node.uuid
         )
         .execute(state.database.write())
         .await?

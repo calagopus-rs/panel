@@ -5,6 +5,7 @@ import { AdminStore } from '@/stores/admin.tsx';
 export interface NodesSlice {
   nodes: ResponseMeta<Node>;
   nodeMounts: ResponseMeta<NodeMount>;
+  nodeBackups: ResponseMeta<AdminServerBackup>;
   nodeAllocations: ResponseMeta<NodeAllocation>;
   selectedNodeAllocations: NodeAllocation[];
 
@@ -15,6 +16,9 @@ export interface NodesSlice {
   setNodeMounts: (mounts: ResponseMeta<NodeMount>) => void;
   addNodeMount: (mount: NodeMount) => void;
   removeNodeMount: (mount: NodeMount) => void;
+
+  setNodeBackups: (backups: ResponseMeta<AdminServerBackup>) => void;
+  removeNodeBackup: (backup: AdminServerBackup) => void;
 
   setNodeAllocations: (allocations: ResponseMeta<NodeAllocation>) => void;
   removeNodeAllocations: (allocations: NodeAllocation[]) => void;
@@ -28,6 +32,7 @@ export interface NodesSlice {
 export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (set, get): NodesSlice => ({
   nodes: getEmptyPaginationSet<Node>(),
   nodeMounts: getEmptyPaginationSet<NodeMount>(),
+  nodeBackups: getEmptyPaginationSet<AdminServerBackup>(),
   nodeAllocations: getEmptyPaginationSet<NodeAllocation>(),
   selectedNodeAllocations: [],
 
@@ -64,6 +69,16 @@ export const createNodesSlice: StateCreator<AdminStore, [], [], NodesSlice> = (s
         ...state.nodeMounts,
         data: state.nodeMounts.data.filter((l) => l.mount.uuid !== mount.mount.uuid),
         total: state.nodeMounts.total - 1,
+      },
+    })),
+
+  setNodeBackups: (value) => set((state) => ({ ...state, nodeBackups: value })),
+  removeNodeBackup: (backup) =>
+    set((state) => ({
+      nodeBackups: {
+        ...state.nodeBackups,
+        data: state.nodeBackups.data.filter((b) => b.uuid !== backup.uuid),
+        total: state.nodeBackups.total - 1,
       },
     })),
 

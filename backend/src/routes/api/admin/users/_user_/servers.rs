@@ -62,6 +62,11 @@ mod get {
             description = "Search term for server name",
             example = "example-server",
         ),
+        (
+            "owned" = bool, Query,
+            description = "Only show servers the user explicitly owns",
+            example = "false",
+        ),
     ))]
     pub async fn route(
         state: GetState,

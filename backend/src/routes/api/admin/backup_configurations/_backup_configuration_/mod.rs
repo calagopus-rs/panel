@@ -12,6 +12,7 @@ use shared::{
 };
 use utoipa_axum::{router::OpenApiRouter, routes};
 
+mod backups;
 mod locations;
 mod nodes;
 mod servers;
@@ -204,7 +205,7 @@ mod patch {
                 .ok();
         }
 
-        permissions.has_admin_permission("backup-configuration.update")?;
+        permissions.has_admin_permission("backup-configurations.update")?;
 
         if let Some(name) = data.name {
             backup_configuration.name = name;
@@ -276,6 +277,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
         .routes(routes!(delete::route))
         .routes(routes!(patch::route))
         .nest("/stats", stats::router(state))
+        .nest("/backups", backups::router(state))
         .nest("/locations", locations::router(state))
         .nest("/nodes", nodes::router(state))
         .nest("/servers", servers::router(state))

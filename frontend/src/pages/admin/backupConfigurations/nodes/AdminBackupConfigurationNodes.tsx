@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationNodes from '@/api/admin/backup-configurations/nodes/getBackupConfigurationNodes.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { nodeTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -21,19 +20,12 @@ export default function AdminBackupConfigurationNodes({
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Backup Configuration Nodes</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title={`Backup Config Nodes`} titleOrder={2} search={search} setSearch={setSearch}>
       <Table columns={nodeTableColumns} loading={loading} pagination={backupConfigurationNodes} onPageSelect={setPage}>
         {backupConfigurationNodes.data.map((node) => (
           <NodeRow key={node.uuid} node={node} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

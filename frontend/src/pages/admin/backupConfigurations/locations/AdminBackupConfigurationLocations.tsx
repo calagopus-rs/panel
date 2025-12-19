@@ -1,8 +1,7 @@
-import { Group, Title } from '@mantine/core';
 import { useState } from 'react';
 import getBackupConfigurationLocations from '@/api/admin/backup-configurations/locations/getBackupConfigurationLocations.ts';
 import { getEmptyPaginationSet } from '@/api/axios.ts';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { locationTableColumns } from '@/lib/tableColumns.ts';
 import LocationRow from '@/pages/admin/locations/LocationRow.tsx';
@@ -23,14 +22,7 @@ export default function AdminBackupConfigurationLocations({
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={2}>Backup Configuration Locations</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-        </Group>
-      </Group>
-
+    <AdminContentContainer title={`Backup Config Locations`} titleOrder={2} search={search} setSearch={setSearch}>
       <Table
         columns={locationTableColumns}
         loading={loading}
@@ -41,6 +33,6 @@ export default function AdminBackupConfigurationLocations({
           <LocationRow key={location.uuid} location={location} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }

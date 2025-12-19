@@ -1,6 +1,5 @@
 import { faPlus, faUpload } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import jsYaml from 'js-yaml';
 import { ChangeEvent, useRef } from 'react';
 import { Route, Routes, useNavigate } from 'react-router';
@@ -8,7 +7,7 @@ import getEggs from '@/api/admin/nests/eggs/getEggs.ts';
 import importEgg from '@/api/admin/nests/eggs/importEgg.ts';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import Button from '@/elements/Button.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggTableColumns } from '@/lib/tableColumns.ts';
 import EggView from '@/pages/admin/nests/eggs/EggView.tsx';
@@ -60,11 +59,13 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
   };
 
   return (
-    <>
-      <Group justify='space-between' align='start' mb='md'>
-        <Title order={2}>Eggs</Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
+    <AdminContentContainer
+      title='Eggs'
+      titleOrder={2}
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <>
           <Button onClick={() => fileInputRef.current?.click()} color='blue'>
             <FontAwesomeIcon icon={faUpload} className='mr-2' />
             Import
@@ -84,15 +85,15 @@ function EggsContainer({ contextNest }: { contextNest: AdminNest }) {
             className='hidden'
             onChange={handleFileUpload}
           />
-        </Group>
-      </Group>
-
+        </>
+      }
+    >
       <Table columns={eggTableColumns} loading={loading} pagination={eggs} onPageSelect={setPage}>
         {eggs.data.map((egg) => (
           <EggRow key={egg.uuid} nest={contextNest} egg={egg} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

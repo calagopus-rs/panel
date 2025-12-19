@@ -119,8 +119,8 @@ impl Mail {
     ) {
         let transport = match self.get_transport().await {
             Ok(transport) => transport,
-            Err(e) => {
-                tracing::error!("failed to get mail transport: {:#?}", e);
+            Err(err) => {
+                tracing::error!("failed to get mail transport: {:#?}", err);
                 return;
             }
         };

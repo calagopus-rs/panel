@@ -11,6 +11,8 @@ export default function WebsocketListener() {
   const {
     socketConnected,
     socketInstance,
+    scheduleStatus,
+    scheduleSteps,
     updateServer,
     setImagePull,
     removeImagePull,
@@ -19,7 +21,7 @@ export default function WebsocketListener() {
     setBackupRestoreProgress,
     updateBackup,
     setScheduleStatus,
-    setScheduleStepError,
+    setScheduleSteps,
     fileOperations,
     setFileOperation,
     removeFileOperation,
@@ -125,11 +127,15 @@ export default function WebsocketListener() {
       return;
     }
 
+    if (!scheduleStatus.get(uuid)?.running) {
+      setScheduleSteps(scheduleSteps.map((s) => ({ ...s, error: null })));
+    }
+
     setScheduleStatus(uuid, wsData);
   });
 
   useWebsocketEvent(SocketEvent.SCHEDULE_STEP_ERROR, (uuid, error) => {
-    setScheduleStepError(uuid, error);
+    setScheduleSteps(scheduleSteps.map((s) => (s.uuid === uuid ? { ...s, error } : s)));
   });
 
   useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {

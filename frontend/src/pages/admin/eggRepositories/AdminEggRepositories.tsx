@@ -1,10 +1,9 @@
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Group, Title } from '@mantine/core';
 import { Route, Routes, useNavigate } from 'react-router';
 import getEggRepositories from '@/api/admin/egg-repositories/getEggRepositories.ts';
 import Button from '@/elements/Button.tsx';
-import TextInput from '@/elements/input/TextInput.tsx';
+import AdminContentContainer from '@/elements/containers/AdminContentContainer.tsx';
 import Table from '@/elements/Table.tsx';
 import { eggRepositoryTableColumns } from '@/lib/tableColumns.ts';
 import { useSearchablePaginatedTable } from '@/plugins/useSearchablePageableTable.ts';
@@ -23,29 +22,26 @@ function EggRepositoriesContainer() {
   });
 
   return (
-    <>
-      <Group justify='space-between' mb='md'>
-        <Title order={1} c='white'>
-          Egg Repositories
-        </Title>
-        <Group>
-          <TextInput placeholder='Search...' value={search} onChange={(e) => setSearch(e.target.value)} w={250} />
-          <Button
-            onClick={() => navigate('/admin/egg-repositories/new')}
-            color='blue'
-            leftSection={<FontAwesomeIcon icon={faPlus} />}
-          >
-            Create
-          </Button>
-        </Group>
-      </Group>
-
+    <AdminContentContainer
+      title='Egg Repositories'
+      search={search}
+      setSearch={setSearch}
+      contentRight={
+        <Button
+          onClick={() => navigate('/admin/egg-repositories/new')}
+          color='blue'
+          leftSection={<FontAwesomeIcon icon={faPlus} />}
+        >
+          Create
+        </Button>
+      }
+    >
       <Table columns={eggRepositoryTableColumns} loading={loading} pagination={eggRepositories} onPageSelect={setPage}>
         {eggRepositories.data.map((eggRepository) => (
           <EggRepositoryRow key={eggRepository.uuid} eggRepository={eggRepository} />
         ))}
       </Table>
-    </>
+    </AdminContentContainer>
   );
 }
 

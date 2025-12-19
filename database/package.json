@@ -24,10 +24,10 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
-    "@types/pg": "^8.15.6",
-    "drizzle-kit": "^0.31.7",
-    "esbuild": "^0.27.0",
+    "@types/node": "^24.10.4",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8",
+    "esbuild": "^0.27.2",
     "typescript": "^5.9.3"
   },
   "pnpm": {

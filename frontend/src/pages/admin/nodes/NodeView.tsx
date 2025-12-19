@@ -1,4 +1,5 @@
 import {
+  faArchive,
   faCog,
   faComputer,
   faExternalLink,
@@ -16,6 +17,7 @@ import Spinner from '@/elements/Spinner.tsx';
 import SubNavigation from '@/elements/SubNavigation.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import AdminNodeAllocations from './allocations/AdminNodeAllocations.tsx';
+import AdminNodeBackups from './backups/AdminNodeBackups.tsx';
 import AdminNodeConfiguration from './configuration/AdminNodeConfiguration.tsx';
 import AdminNodeLogs from './logs/AdminNodeLogs.tsx';
 import AdminNodeMounts from './mounts/AdminNodeMounts.tsx';
@@ -79,6 +81,11 @@ export default function NodeView() {
             link: `/admin/nodes/${params.id}/mounts`,
           },
           {
+            name: 'Backups',
+            icon: faArchive,
+            link: `/admin/nodes/${params.id}/backups`,
+          },
+          {
             name: 'Servers',
             icon: faComputer,
             link: `/admin/nodes/${params.id}/servers`,
@@ -93,6 +100,7 @@ export default function NodeView() {
         <Route path='/logs' element={<AdminNodeLogs node={node} />} />
         <Route path='/allocations' element={<AdminNodeAllocations node={node} />} />
         <Route path='/mounts' element={<AdminNodeMounts node={node} />} />
+        <Route path='/backups' element={<AdminNodeBackups node={node} />} />
         <Route path='/servers' element={<AdminNodeServers node={node} />} />
       </Routes>
     </>

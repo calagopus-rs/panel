@@ -2,12 +2,13 @@ use super::State;
 use utoipa_axum::{router::OpenApiRouter, routes};
 
 mod get {
+    use crate::routes::api::admin::backup_configurations::_backup_configuration_::GetBackupConfiguration;
     use axum::{extract::Query, http::StatusCode};
     use serde::Serialize;
     use shared::{
         ApiError, GetState,
         models::{
-            Pagination, PaginationParamsWithSearch, node::GetNode, server_backup::ServerBackup,
+            Pagination, PaginationParamsWithSearch, server_backup::ServerBackup,
             user::GetPermissionManager,
         },
         response::{ApiResponse, ApiResponseResult},
@@ -17,16 +18,16 @@ mod get {
     #[derive(ToSchema, Serialize)]
     struct Response {
         #[schema(inline)]
-        backups: Pagination<shared::models::server_backup::ApiServerBackup>,
+        backups: Pagination<shared::models::server_backup::AdminApiServerBackup>,
     }
 
     #[utoipa::path(get, path = "/", responses(
         (status = OK, body = inline(Response)),
-        (status = UNAUTHORIZED, body = ApiError),
+        (status = NOT_FOUND, body = ApiError),
     ), params(
         (
-            "node" = uuid::Uuid,
-            description = "The node ID",
+            "backup_configuration" = uuid::Uuid,
+            description = "The backup configuration ID",
             example = "123e4567-e89b-12d3-a456-426614174000",
         ),
         (
@@ -47,7 +48,7 @@ mod get {
     pub async fn route(
         state: GetState,
         permissions: GetPermissionManager,
-        node: GetNode,
+        backup_configuration: GetBackupConfiguration,
         Query(params): Query<PaginationParamsWithSearch>,
     ) -> ApiResponseResult {
         if let Err(errors) = shared::utils::validate_data(&params) {
@@ -56,28 +57,25 @@ mod get {
                 .ok();
         }
 
-        permissions.has_admin_permission("nodes.backups")?;
+        permissions.has_admin_permission("backup-configurations.backups")?;
 
-        let backups = ServerBackup::by_detached_node_uuid_with_pagination(
+        let backups = ServerBackup::by_backup_configuration_uuid_with_pagination(
             &state.database,
-            node.uuid,
+            backup_configuration.uuid,
             params.page,
             params.per_page,
             params.search.as_deref(),
         )
         .await?;
 
+        let storage_url_retriever = state.storage.retrieve_urls().await;
+
         ApiResponse::json(Response {
-            backups: Pagination {
-                total: backups.total,
-                per_page: backups.per_page,
-                page: backups.page,
-                data: backups
-                    .data
-                    .into_iter()
-                    .map(|backup| backup.into_api_object())
-                    .collect(),
-            },
+            backups: backups
+                .try_async_map(|backup| {
+                    backup.into_admin_api_object(&state.database, &storage_url_retriever)
+                })
+                .await?,
         })
         .ok()
     }
