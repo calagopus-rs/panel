@@ -1,4 +1,4 @@
-import { faChartBar, faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
+import { faArchive, faChartBar, faCog, faDesktop, faEarthAmerica, faServer } from '@fortawesome/free-solid-svg-icons';
 import { Title } from '@mantine/core';
 import { useEffect, useState } from 'react';
 import { Route, Routes, useParams } from 'react-router';
@@ -12,6 +12,7 @@ import AdminBackupConfigurationServers from '@/pages/admin/backupConfigurations/
 import AdminBackupConfigurationStats from '@/pages/admin/backupConfigurations/stats/AdminBackupConfigurationStats.tsx';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import BackupConfigurationCreateOrUpdate from './BackupConfigurationCreateOrUpdate.tsx';
+import AdminBackupConfigurationBackups from './backups/AdminBackupConfigurationBackups.tsx';
 
 export default function BackupConfigurationView() {
   const params = useParams<'id'>();
@@ -49,6 +50,11 @@ export default function BackupConfigurationView() {
             link: `/admin/backup-configurations/${params.id}/stats`,
           },
           {
+            name: 'Backups',
+            icon: faArchive,
+            link: `/admin/backup-configurations/${params.id}/backups`,
+          },
+          {
             name: 'Locations',
             icon: faEarthAmerica,
             link: `/admin/backup-configurations/${params.id}/locations`,
@@ -72,6 +78,10 @@ export default function BackupConfigurationView() {
           element={<BackupConfigurationCreateOrUpdate contextBackupConfiguration={backupConfiguration} />}
         />
         <Route path='/stats' element={<AdminBackupConfigurationStats backupConfiguration={backupConfiguration} />} />
+        <Route
+          path='/backups'
+          element={<AdminBackupConfigurationBackups backupConfiguration={backupConfiguration} />}
+        />
         <Route
           path='/locations'
           element={<AdminBackupConfigurationLocations backupConfiguration={backupConfiguration} />}

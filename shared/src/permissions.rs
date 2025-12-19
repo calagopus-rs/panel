@@ -292,6 +292,10 @@ pub(crate) static BASE_ADMIN_PERMISSIONS: LazyLock<IndexMap<&'static str, Permis
                             "delete",
                             "Allows to delete backup configurations from the panel.",
                         ),
+                        (
+                            "backups",
+                            "Allows to view a backup configurations' backups.",
+                        ),
                     ]),
                 },
             ),
@@ -313,10 +317,7 @@ pub(crate) static BASE_ADMIN_PERMISSIONS: LazyLock<IndexMap<&'static str, Permis
                             "Allows to view and manage a nodes' allocations.",
                         ),
                         ("mounts", "Allows to view and manage a nodes' mounts."),
-                        (
-                            "backups",
-                            "Allows to view and manage a nodes' (detached) backups.",
-                        ),
+                        ("backups", "Allows to view and manage a nodes' backups."),
                     ]),
                 },
             ),

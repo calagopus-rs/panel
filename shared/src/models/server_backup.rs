@@ -447,6 +447,48 @@ impl ServerBackup {
         })
     }
 
+    pub async fn by_backup_configuration_uuid_with_pagination(
+        database: &crate::database::Database,
+        backup_configuration_uuid: uuid::Uuid,
+        page: i64,
+        per_page: i64,
+        search: Option<&str>,
+    ) -> Result<super::Pagination<Self>, crate::database::DatabaseError> {
+        let offset = (page - 1) * per_page;
+
+        let rows = sqlx::query(&format!(
+            r#"
+            SELECT {}, COUNT(*) OVER() AS total_count
+            FROM server_backups
+            WHERE
+                server_backups.backup_configuration_uuid = $1
+                AND server_backups.deleted IS NULL
+                AND ($2 IS NULL OR server_backups.name ILIKE '%' || $2 || '%')
+            ORDER BY server_backups.created
+            LIMIT $3 OFFSET $4
+            "#,
+            Self::columns_sql(None)
+        ))
+        .bind(backup_configuration_uuid)
+        .bind(search)
+        .bind(per_page)
+        .bind(offset)
+        .fetch_all(database.read())
+        .await?;
+
+        Ok(super::Pagination {
+            total: rows
+                .first()
+                .map_or(Ok(0), |row| row.try_get("total_count"))?,
+            per_page,
+            page,
+            data: rows
+                .into_iter()
+                .map(|row| Self::map(None, &row))
+                .try_collect_vec()?,
+        })
+    }
+
     pub async fn by_detached_node_uuid_with_pagination(
         database: &crate::database::Database,
         node_uuid: uuid::Uuid,
