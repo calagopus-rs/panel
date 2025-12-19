@@ -8,7 +8,11 @@ mod get {
     use shared::{
         ApiError, GetState,
         jwt::BasePayload,
-        models::{node::GetNode, server_backup::BackupDisk, user::GetUser},
+        models::{
+            node::GetNode,
+            server_backup::BackupDisk,
+            user::{GetPermissionManager, GetUser},
+        },
         response::{ApiResponse, ApiResponseResult},
     };
     use utoipa::ToSchema;
@@ -37,10 +41,13 @@ mod get {
     ))]
     pub async fn route(
         state: GetState,
+        permissions: GetPermissionManager,
         user: GetUser,
         node: GetNode,
         backup: GetServerBackup,
     ) -> ApiResponseResult {
+        permissions.has_admin_permission("nodes.backups")?;
+
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")
                 .with_status(StatusCode::EXPECTATION_FAILED)

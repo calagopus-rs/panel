@@ -362,6 +362,22 @@ declare global {
     created: Date;
   }
 
+  interface AdminServerBackup {
+    uuid: string;
+    server: AdminServer | null;
+    name: string;
+    ignoredFiles: string[];
+    isSuccessful: boolean;
+    isLocked: boolean;
+    isBrowsable: boolean;
+    isStreaming: boolean;
+    checksum: string | null;
+    bytes: number;
+    files: number;
+    completed: Date | null;
+    created: Date;
+  }
+
   interface ServerBackup {
     uuid: string;
     name: string;

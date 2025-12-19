@@ -50,7 +50,7 @@ mod post {
         backup: GetServerBackup,
         axum::Json(data): axum::Json<Payload>,
     ) -> ApiResponseResult {
-        permissions.has_server_permission("backups.restore")?;
+        permissions.has_admin_permission("nodes.backups")?;
 
         if backup.completed.is_none() {
             return ApiResponse::error("backup has not been completed yet")
