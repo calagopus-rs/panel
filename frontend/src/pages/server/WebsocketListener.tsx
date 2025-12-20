@@ -11,7 +11,7 @@ export default function WebsocketListener() {
   const {
     socketConnected,
     socketInstance,
-    scheduleStatus,
+    schedule,
     scheduleSteps,
     updateServer,
     setImagePull,
@@ -20,7 +20,7 @@ export default function WebsocketListener() {
     setBackupProgress,
     setBackupRestoreProgress,
     updateBackup,
-    setScheduleStatus,
+    setRunningScheduleStep,
     setScheduleSteps,
     fileOperations,
     setFileOperation,
@@ -100,6 +100,10 @@ export default function WebsocketListener() {
     });
   });
 
+  useWebsocketEvent(SocketEvent.BACKUP_RESTORE_STARTED, () => {
+    updateServer({ status: 'restoring_backup' });
+  });
+
   useWebsocketEvent(SocketEvent.BACKUP_RESTORE_PROGRESS, (data) => {
     let wsData: { progress: number; total: number };
     try {
@@ -119,23 +123,24 @@ export default function WebsocketListener() {
     updateServer({ status: successful === 'true' ? null : 'install_failed' });
   });
 
-  useWebsocketEvent(SocketEvent.SCHEDULE_STATUS, (uuid, data) => {
-    let wsData: ScheduleStatus;
-    try {
-      wsData = JSON.parse(data);
-    } catch {
-      return;
-    }
-
-    if (!scheduleStatus.get(uuid)?.running) {
+  useWebsocketEvent(SocketEvent.SCHEDULE_STARTED, (uuid) => {
+    if (schedule?.uuid === uuid) {
       setScheduleSteps(scheduleSteps.map((s) => ({ ...s, error: null })));
     }
+  });
 
-    setScheduleStatus(uuid, wsData);
+  useWebsocketEvent(SocketEvent.SCHEDULE_STEP_STATUS, (uuid, stepUuid) => {
+    setRunningScheduleStep(uuid, stepUuid);
   });
 
   useWebsocketEvent(SocketEvent.SCHEDULE_STEP_ERROR, (uuid, error) => {
-    setScheduleSteps(scheduleSteps.map((s) => (s.uuid === uuid ? { ...s, error } : s)));
+    if (schedule?.uuid === uuid) {
+      setScheduleSteps(scheduleSteps.map((s) => (s.uuid === uuid ? { ...s, error } : s)));
+    }
+  });
+
+  useWebsocketEvent(SocketEvent.SCHEDULE_COMPLETED, (uuid) => {
+    setRunningScheduleStep(uuid, null);
   });
 
   useWebsocketEvent(SocketEvent.OPERATION_PROGRESS, (uuid, data) => {

@@ -133,7 +133,7 @@ function TriggerCard({ trigger }: { trigger: ScheduleTrigger }) {
   );
 }
 
-function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStatus: ScheduleStatus }) {
+function ActionStep({ step, isActive }: { step: ScheduleStep; isActive: boolean }) {
   const renderActionDetails = () => {
     const action = step.action;
     switch (action.type) {
@@ -256,7 +256,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
   return (
     <Timeline.Item
       bullet={
-        scheduleStatus.step === step.uuid ? (
+        isActive ? (
           <AnimatedHourglass />
         ) : (
           <FontAwesomeIcon icon={scheduleStepIconMapping[step.action.type]} size='sm' />
@@ -267,7 +267,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
           <Text fw={600}>
             Step {step.order}: {step.action.type.replace(/_/g, ' ').toUpperCase()}{' '}
           </Text>
-          {scheduleStatus.step === step.uuid && <Badge ml='md'>Running</Badge>}
+          {isActive && <Badge ml='md'>Running</Badge>}
           {step.error && (
             <Tooltip label={step.error}>
               <ThemeIcon size='sm' color='red'>
@@ -288,7 +288,7 @@ function ActionStep({ step, scheduleStatus }: { step: ScheduleStep; scheduleStat
 export default function ScheduleView() {
   const params = useParams<'id'>();
   const { addToast } = useToast();
-  const { server, schedule, setSchedule, scheduleStatus, scheduleSteps, setScheduleSteps } = useServerStore();
+  const { server, schedule, setSchedule, runningScheduleSteps, scheduleSteps, setScheduleSteps } = useServerStore();
 
   const [openModal, setOpenModal] = useState<'actions' | 'update' | null>(null);
   const [loading, setLoading] = useState(false);
@@ -462,7 +462,7 @@ export default function ScheduleView() {
               ) : (
                 <Timeline
                   active={
-                    scheduleSteps.findIndex((step) => step.uuid === scheduleStatus.get(schedule.uuid)?.step) ?? -1
+                    scheduleSteps.findIndex((step) => step.uuid === runningScheduleSteps.get(schedule.uuid)) ?? -1
                   }
                   color='blue'
                   bulletSize={40}
@@ -472,12 +472,7 @@ export default function ScheduleView() {
                     <ActionStep
                       key={step.uuid}
                       step={step}
-                      scheduleStatus={
-                        scheduleStatus.get(schedule.uuid) ?? {
-                          running: false,
-                          step: null,
-                        }
-                      }
+                      isActive={step.uuid === runningScheduleSteps.get(schedule.uuid)}
                     />
                   ))}
                 </Timeline>
