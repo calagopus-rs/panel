@@ -23,6 +23,8 @@ export default function ServerContainer() {
   const form = useForm<z.infer<typeof adminSettingsServerSchema>>({
     initialValues: {
       maxFileManagerViewSize: 0,
+      maxFileManagerContentSearchSize: 0,
+      maxFileManagerSearchResults: 1,
       maxSchedulesStepCount: 0,
       allowOverwritingCustomDockerImage: false,
       allowEditingStartupCommand: false,
@@ -65,9 +67,28 @@ export default function ServerContainer() {
             />
 
             <NumberInput
+              withAsterisk
               label='Max Server Schedule Steps'
               placeholder='Max Server Schedule Steps'
               {...form.getInputProps('maxSchedulesStepCount')}
+            />
+          </Group>
+
+          <Group grow>
+            <SizeInput
+              withAsterisk
+              label='Max File Manager Content Search Size'
+              mode='b'
+              min={0}
+              value={form.values.maxFileManagerContentSearchSize}
+              onChange={(v) => form.setFieldValue('maxFileManagerContentSearchSize', v)}
+            />
+
+            <NumberInput
+              withAsterisk
+              label='Max File Manager Search Results'
+              placeholder='Max File Manager Search Results'
+              {...form.getInputProps('maxFileManagerSearchResults')}
             />
           </Group>
 

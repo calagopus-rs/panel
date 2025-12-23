@@ -1095,6 +1095,8 @@ declare global {
     };
     server: {
       maxFileManagerViewSize: number;
+      maxFileManagerContentSearchSize: number;
+      maxFileManagerSearchResults: number;
       maxSchedulesStepCount: number;
       allowOverwritingCustomDockerImage: boolean;
       allowEditingStartupCommand: boolean;
@@ -1119,6 +1121,8 @@ declare global {
     };
     server: {
       maxFileManagerViewSize: number;
+      maxFileManagerContentSearchSize: number;
+      maxFileManagerSearchResults: number;
       maxSchedulesStepCount: number;
       allowOverwritingCustomDockerImage: boolean;
       allowEditingStartupCommand: boolean;

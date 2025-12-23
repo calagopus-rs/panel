@@ -167,6 +167,8 @@ nestify::nest! {
         #[schema(inline)]
         pub running: bool,
         #[schema(inline)]
+        pub errors: IndexMap<compact_str::CompactString, compact_str::CompactString>,
+        #[schema(inline)]
         pub step: Option<uuid::Uuid>,
     }
 }
@@ -968,13 +970,32 @@ pub mod servers_server_files_search {
                 #[schema(inline)]
                 pub root: compact_str::CompactString,
                 #[schema(inline)]
-                pub query: compact_str::CompactString,
+                pub path_filter: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyPathFilter {
+                    #[schema(inline)]
+                    pub include: Vec<compact_str::CompactString>,
+                    #[schema(inline)]
+                    pub exclude: Vec<compact_str::CompactString>,
+                }>,
                 #[schema(inline)]
-                pub include_content: bool,
+                pub size_filter: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodySizeFilter {
+                    #[schema(inline)]
+                    pub min: u64,
+                    #[schema(inline)]
+                    pub max: u64,
+                }>,
                 #[schema(inline)]
-                pub limit: Option<u64>,
+                pub content_filter: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodyContentFilter {
+                    #[schema(inline)]
+                    pub query: compact_str::CompactString,
+                    #[schema(inline)]
+                    pub max_search_size: u64,
+                    #[schema(inline)]
+                    pub include_unmatched: bool,
+                    #[schema(inline)]
+                    pub case_insensitive: bool,
+                }>,
                 #[schema(inline)]
-                pub max_size: Option<u64>,
+                pub per_page: u64,
             }
         }
 
@@ -1352,14 +1373,15 @@ pub mod system_config {
                     #[schema(inline)]
                     pub port: u32,
                     #[schema(inline)]
-                    pub ssl: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200ApiSsl {
+                    pub ssl: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200ApiSsl {
                         #[schema(inline)]
                         pub enabled: bool,
                         #[schema(inline)]
                         pub cert: compact_str::CompactString,
                         #[schema(inline)]
                         pub key: compact_str::CompactString,
-                    }>,
+                    },
+
                     #[schema(inline)]
                     pub disable_openapi_docs: bool,
                     #[schema(inline)]
@@ -1407,34 +1429,37 @@ pub mod system_config {
                     #[schema(inline)]
                     pub timezone: compact_str::CompactString,
                     #[schema(inline)]
-                    pub user: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUser {
+                    pub user: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUser {
                         #[schema(inline)]
-                        pub rootless: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUserRootless {
+                        pub rootless: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemUserRootless {
                             #[schema(inline)]
                             pub enabled: bool,
                             #[schema(inline)]
                             pub container_uid: u32,
                             #[schema(inline)]
                             pub container_gid: u32,
-                        }>,
+                        },
+
                         #[schema(inline)]
                         pub uid: u32,
                         #[schema(inline)]
                         pub gid: u32,
-                    }>,
+                    },
+
                     #[schema(inline)]
-                    pub passwd: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemPasswd {
+                    pub passwd: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemPasswd {
                         #[schema(inline)]
                         pub enabled: bool,
                         #[schema(inline)]
                         pub directory: compact_str::CompactString,
-                    }>,
+                    },
+
                     #[schema(inline)]
                     pub disk_check_interval: u64,
                     #[schema(inline)]
                     pub disk_check_threads: u64,
                     #[schema(inline)]
-                    pub disk_limiter_mode: Option<SystemDiskLimiterMode>,
+                    pub disk_limiter_mode: SystemDiskLimiterMode,
                     #[schema(inline)]
                     pub activity_send_interval: u64,
                     #[schema(inline)]
@@ -1446,7 +1471,9 @@ pub mod system_config {
                     #[schema(inline)]
                     pub websocket_log_count: u64,
                     #[schema(inline)]
-                    pub sftp: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftp {
+                    pub sftp: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftp {
+                        #[schema(inline)]
+                        pub enabled: bool,
                         #[schema(inline)]
                         pub bind_address: compact_str::CompactString,
                         #[schema(inline)]
@@ -1462,67 +1489,75 @@ pub mod system_config {
                         #[schema(inline)]
                         pub directory_entry_send_amount: u64,
                         #[schema(inline)]
-                        pub shell: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShell {
+                        pub shell: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShell {
                             #[schema(inline)]
                             pub enabled: bool,
                             #[schema(inline)]
-                            pub cli: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShellCli {
+                            pub cli: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShellCli {
                                 #[schema(inline)]
                                 pub name: compact_str::CompactString,
-                            }>,
-                        }>,
-                    }>,
+                            },
+
+                        },
+
+                    },
+
                     #[schema(inline)]
-                    pub crash_detection: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemCrashDetection {
+                    pub crash_detection: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemCrashDetection {
                         #[schema(inline)]
                         pub enabled: bool,
                         #[schema(inline)]
                         pub detect_clean_exit_as_crash: bool,
                         #[schema(inline)]
                         pub timeout: u64,
-                    }>,
+                    },
+
                     #[schema(inline)]
-                    pub backups: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackups {
+                    pub backups: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackups {
                         #[schema(inline)]
                         pub write_limit: u64,
                         #[schema(inline)]
                         pub read_limit: u64,
                         #[schema(inline)]
-                        pub compression_level: Option<CompressionLevel>,
+                        pub compression_level: CompressionLevel,
                         #[schema(inline)]
-                        pub mounting: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsMounting {
+                        pub mounting: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsMounting {
                             #[schema(inline)]
                             pub enabled: bool,
                             #[schema(inline)]
                             pub path: compact_str::CompactString,
-                        }>,
+                        },
+
                         #[schema(inline)]
-                        pub wings: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsWings {
+                        pub wings: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsWings {
                             #[schema(inline)]
                             pub create_threads: u64,
                             #[schema(inline)]
                             pub restore_threads: u64,
                             #[schema(inline)]
-                            pub archive_format: Option<ArchiveFormat>,
-                        }>,
+                            pub archive_format: ArchiveFormat,
+                        },
+
                         #[schema(inline)]
-                        pub s3: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsS3 {
+                        pub s3: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsS3 {
                             #[schema(inline)]
                             pub create_threads: u64,
                             #[schema(inline)]
                             pub part_upload_timeout: u64,
                             #[schema(inline)]
                             pub retry_limit: u64,
-                        }>,
+                        },
+
                         #[schema(inline)]
-                        pub ddup_bak: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsDdupBak {
+                        pub ddup_bak: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsDdupBak {
                             #[schema(inline)]
                             pub create_threads: u64,
                             #[schema(inline)]
-                            pub compression_format: Option<SystemBackupsDdupBakCompressionFormat>,
-                        }>,
+                            pub compression_format: SystemBackupsDdupBakCompressionFormat,
+                        },
+
                         #[schema(inline)]
-                        pub restic: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsRestic {
+                        pub restic: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsRestic {
                             #[schema(inline)]
                             pub repository: compact_str::CompactString,
                             #[schema(inline)]
@@ -1531,25 +1566,30 @@ pub mod system_config {
                             pub retry_lock_seconds: u64,
                             #[schema(inline)]
                             pub environment: IndexMap<compact_str::CompactString, compact_str::CompactString>,
-                        }>,
+                        },
+
                         #[schema(inline)]
-                        pub btrfs: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsBtrfs {
+                        pub btrfs: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsBtrfs {
                             #[schema(inline)]
                             pub restore_threads: u64,
                             #[schema(inline)]
                             pub create_read_only: bool,
-                        }>,
+                        },
+
                         #[schema(inline)]
-                        pub zfs: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsZfs {
+                        pub zfs: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemBackupsZfs {
                             #[schema(inline)]
                             pub restore_threads: u64,
-                        }>,
-                    }>,
+                        },
+
+                    },
+
                     #[schema(inline)]
-                    pub transfers: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemTransfers {
+                    pub transfers: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemTransfers {
                         #[schema(inline)]
                         pub download_limit: u64,
-                    }>,
+                    },
+
                 },
 
                 #[schema(inline)]
@@ -1561,7 +1601,7 @@ pub mod system_config {
                     #[schema(inline)]
                     pub delete_container_on_stop: bool,
                     #[schema(inline)]
-                    pub network: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetwork {
+                    pub network: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetwork {
                         #[schema(inline)]
                         pub interface: compact_str::CompactString,
                         #[schema(inline)]
@@ -1583,23 +1623,27 @@ pub mod system_config {
                         #[schema(inline)]
                         pub network_mtu: u64,
                         #[schema(inline)]
-                        pub interfaces: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfaces {
+                        pub interfaces: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfaces {
                             #[schema(inline)]
-                            pub v4: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV4 {
+                            pub v4: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV4 {
                                 #[schema(inline)]
                                 pub subnet: compact_str::CompactString,
                                 #[schema(inline)]
                                 pub gateway: compact_str::CompactString,
-                            }>,
+                            },
+
                             #[schema(inline)]
-                            pub v6: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV6 {
+                            pub v6: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerNetworkInterfacesV6 {
                                 #[schema(inline)]
                                 pub subnet: compact_str::CompactString,
                                 #[schema(inline)]
                                 pub gateway: compact_str::CompactString,
-                            }>,
-                        }>,
-                    }>,
+                            },
+
+                        },
+
+                    },
+
                     #[schema(inline)]
                     pub domainname: compact_str::CompactString,
                     #[schema(inline)]
@@ -1609,32 +1653,35 @@ pub mod system_config {
                     #[schema(inline)]
                     pub container_pid_limit: u64,
                     #[schema(inline)]
-                    pub installer_limits: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerInstallerLimits {
+                    pub installer_limits: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerInstallerLimits {
                         #[schema(inline)]
                         pub timeout: u64,
                         #[schema(inline)]
                         pub memory: u64,
                         #[schema(inline)]
                         pub cpu: u64,
-                    }>,
+                    },
+
                     #[schema(inline)]
-                    pub overhead: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerOverhead {
+                    pub overhead: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerOverhead {
                         #[schema(inline)]
                         pub r#override: bool,
                         #[schema(inline)]
                         pub default_multiplier: f64,
                         #[schema(inline)]
                         pub multipliers: IndexMap<compact_str::CompactString, f64>,
-                    }>,
+                    },
+
                     #[schema(inline)]
                     pub userns_mode: compact_str::CompactString,
                     #[schema(inline)]
-                    pub log_config: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerLogConfig {
+                    pub log_config: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200DockerLogConfig {
                         #[schema(inline)]
                         pub r#type: compact_str::CompactString,
                         #[schema(inline)]
                         pub config: IndexMap<compact_str::CompactString, compact_str::CompactString>,
-                    }>,
+                    },
+
                 },
 
                 #[schema(inline)]

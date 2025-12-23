@@ -9,9 +9,11 @@ import {
   faFileZipper,
   faFolder,
   faTrash,
+  faWindowRestore,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { forwardRef, memo, useEffect, useState } from 'react';
+import { createSearchParams, MemoryRouter } from 'react-router';
 import { httpErrorToHuman } from '@/api/axios.ts';
 import decompressFile from '@/api/server/files/decompressFile.ts';
 import downloadFiles from '@/api/server/files/downloadFiles.ts';
@@ -24,6 +26,8 @@ import { isArchiveType } from '@/lib/files.ts';
 import { bytesToString } from '@/lib/size.ts';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
+import { useWindows } from '@/providers/WindowProvider.tsx';
+import RouterRoutes from '@/RouterRoutes.tsx';
 import { useServerStore } from '@/stores/server.ts';
 import { FileTableRow } from './FileTableRow.tsx';
 import ArchiveCreateModal from './modals/ArchiveCreateModal.tsx';
@@ -40,6 +44,7 @@ interface FileRowProps {
 const FileRow = memo(
   forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow({ file, setChildOpenModal }, ref) {
     const { addToast } = useToast();
+    const { addWindow } = useWindows();
     const {
       server,
       browsingDirectory,
@@ -84,6 +89,30 @@ const FileRow = memo(
 
         <ContextMenu
           items={[
+            {
+              icon: faWindowRestore,
+              label: 'Open in new Window',
+              hidden: !matchMedia('(pointer: fine)').matches,
+              onClick: () =>
+                addWindow(
+                  file.file ? faFile : faFolder,
+                  file.name,
+                  <MemoryRouter
+                    initialEntries={[
+                      file.directory
+                        ? `/server/${server.uuidShort}/files?${createSearchParams({
+                            directory: `${browsingDirectory}/${file.name}`.replace('//', '/'),
+                          })}`
+                        : `/server/${server.uuidShort}/files/edit?${createSearchParams({
+                            directory: browsingDirectory,
+                            file: file.name,
+                          })}`,
+                    ]}
+                  >
+                    <RouterRoutes isNormal={false} />
+                  </MemoryRouter>,
+                ),
+            },
             {
               icon: faFilePen,
               label: 'Rename',

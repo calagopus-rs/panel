@@ -8,7 +8,7 @@ on:
 env:
   BIN_NAME: panel-rs
   PROJECT_NAME: panel-rs
-  REPO_NAME: calagopus-rs/panel
+  REPO_NAME: calagopus/panel
 
 jobs:
   build-frontend:
@@ -69,7 +69,7 @@ jobs:
           - x86_64-linux
           - aarch64-linux
           - riscv64-linux
-          - powerpc64le-linux
+          - ppc64le-linux
           - x86_64-macos
           - aarch64-macos
           - x86_64-windows
@@ -86,7 +86,7 @@ jobs:
             os: ubuntu-24.04
             target: riscv64gc-unknown-linux-gnu
             binary_suffix: ""
-          - build: powerpc64le-linux
+          - build: ppc64le-linux
             os: ubuntu-24.04
             target: powerpc64le-unknown-linux-gnu
             binary_suffix: ""
@@ -237,7 +237,7 @@ jobs:
           cp dist/${{ env.PROJECT_NAME }}-x86_64-linux/${{ env.BIN_NAME }}-x86_64-linux .docker/amd64/panel-rs
           cp dist/${{ env.PROJECT_NAME }}-aarch64-linux/${{ env.BIN_NAME }}-aarch64-linux .docker/arm64/panel-rs
           cp dist/${{ env.PROJECT_NAME }}-riscv64-linux/${{ env.BIN_NAME }}-riscv64-linux .docker/riscv64/panel-rs
-          cp dist/${{ env.PROJECT_NAME }}-powerpc64le-linux/${{ env.BIN_NAME }}-powerpc64le-linux .docker/ppc64le/panel-rs
+          cp dist/${{ env.PROJECT_NAME }}-ppc64le-linux/${{ env.BIN_NAME }}-ppc64le-linux .docker/ppc64le/panel-rs
 
           chmod +x .docker/*/panel-rs
 

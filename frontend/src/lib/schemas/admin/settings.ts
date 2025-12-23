@@ -69,6 +69,8 @@ export const adminSettingsEmailSchema = z.discriminatedUnion('type', [
 
 export const adminSettingsServerSchema = z.object({
   maxFileManagerViewSize: z.number().min(0),
+  maxFileManagerContentSearchSize: z.number().min(0),
+  maxFileManagerSearchResults: z.number().min(1),
   maxSchedulesStepCount: z.number().min(0),
   allowOverwritingCustomDockerImage: z.boolean(),
   allowEditingStartupCommand: z.boolean(),
