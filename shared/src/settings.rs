@@ -241,7 +241,7 @@ impl AppSettingsServer {
             max_file_manager_content_search_size: map
                 .remove("server::max_file_manager_content_search_size")
                 .and_then(|s| s.parse().ok())
-                .unwrap_or(50 * 1024 * 1024),
+                .unwrap_or(5 * 1024 * 1024),
             max_file_manager_search_results: map
                 .remove("server::max_file_manager_search_results")
                 .and_then(|s| s.parse().ok())
