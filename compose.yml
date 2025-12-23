@@ -1,6 +1,6 @@
 services:
   web:
-    image: ghcr.io/calagopus-rs/panel:latest
+    image: ghcr.io/calagopus/panel:latest
     restart: unless-stopped
     environment:
       - TZ=Europe/Berlin
@@ -22,7 +22,7 @@ services:
       - cache
 
   db:
-    image: pgautoupgrade/pgautoupgrade:18-alpine
+    image: ghcr.io/calagopus/pgautoupgrade:18-alpine
     restart: unless-stopped
     environment:
       - TZ=Europe/Berlin
@@ -34,7 +34,7 @@ services:
       - ./postgres:/data
 
   cache:
-    image: ghcr.io/calagopus-rs/valkey:latest
+    image: ghcr.io/calagopus/valkey:latest
     restart: unless-stopped
     command: --protected-mode no --save 60 1
     environment:

@@ -1,11 +1,12 @@
-import { faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import { faDoorOpen, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breadcrumbs } from '@mantine/core';
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useMemo, useState } from 'react';
 import { createSearchParams, NavLink } from 'react-router';
 import Button from '@/elements/Button.tsx';
 import Checkbox from '@/elements/input/Checkbox.tsx';
 import { useServerStore } from '@/stores/server.ts';
+import FileSearchModal from './modals/FileSearchModal.tsx';
 
 export default function FileBreadcrumbs({
   path,
@@ -17,6 +18,8 @@ export default function FileBreadcrumbs({
   inFileEditor?: boolean;
 }) {
   const { server, browsingEntries, selectedFileNames, setSelectedFiles, movingFileNames } = useServerStore();
+
+  const [openModal, setOpenModal] = useState<'search' | null>(null);
 
   const splittedPath = path.split('/').filter(Boolean);
   const pathItems = splittedPath.map((item, index) => {
@@ -61,30 +64,45 @@ export default function FileBreadcrumbs({
   }, [inFileEditor, browsingBackup, pathItems]);
 
   return (
-    <div className='flex flex-row items-center justify-between'>
-      <Breadcrumbs separatorMargin='xs'>
-        <Checkbox
-          disabled={movingFileNames.size > 0}
-          checked={!inFileEditor && selectedFileNames.size > 0 && selectedFileNames.size >= browsingEntries.data.length}
-          indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
-          className='mr-2'
-          hidden={inFileEditor}
-          onChange={() => {
-            if (selectedFileNames.size >= browsingEntries.data.length) {
-              setSelectedFiles([]);
-            } else {
-              setSelectedFiles(browsingEntries.data);
-            }
-          }}
-        />
-        {items}
-      </Breadcrumbs>
+    <>
+      <FileSearchModal opened={openModal === 'search'} onClose={() => setOpenModal(null)} />
 
-      <NavLink to={`/server/${server?.uuidShort}/files`} hidden={!browsingBackup}>
-        <Button variant='light' leftSection={<FontAwesomeIcon icon={faDoorOpen} />}>
-          Exit Backup
-        </Button>
-      </NavLink>
-    </div>
+      <div className='flex flex-row items-center justify-between'>
+        <Breadcrumbs separatorMargin='xs'>
+          <Checkbox
+            disabled={movingFileNames.size > 0}
+            checked={
+              !inFileEditor && selectedFileNames.size > 0 && selectedFileNames.size >= browsingEntries.data.length
+            }
+            indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
+            className='mr-2'
+            hidden={inFileEditor}
+            onChange={() => {
+              if (selectedFileNames.size >= browsingEntries.data.length) {
+                setSelectedFiles([]);
+              } else {
+                setSelectedFiles(browsingEntries.data);
+              }
+            }}
+          />
+          {items}
+        </Breadcrumbs>
+
+        <NavLink to={`/server/${server?.uuidShort}/files`} hidden={!browsingBackup || inFileEditor}>
+          <Button variant='light' leftSection={<FontAwesomeIcon icon={faDoorOpen} />}>
+            Exit Backup
+          </Button>
+        </NavLink>
+        <span hidden={!!browsingBackup || inFileEditor}>
+          <Button
+            variant='light'
+            leftSection={<FontAwesomeIcon icon={faSearch} />}
+            onClick={() => setOpenModal('search')}
+          >
+            Search
+          </Button>
+        </span>
+      </div>
+    </>
   );
 }

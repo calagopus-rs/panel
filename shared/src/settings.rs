@@ -195,6 +195,8 @@ impl AppSettingsWebauthn {
 #[derive(ToSchema, Serialize, Deserialize)]
 pub struct AppSettingsServer {
     pub max_file_manager_view_size: u64,
+    pub max_file_manager_content_search_size: u64,
+    pub max_file_manager_search_results: u64,
     pub max_schedules_step_count: u64,
 
     pub allow_overwriting_custom_docker_image: bool,
@@ -208,6 +210,13 @@ impl AppSettingsServer {
 
         keys.push("server::max_file_manager_view_size");
         values.push(self.max_file_manager_view_size.to_compact_string());
+        keys.push("server::max_file_manager_content_search_size");
+        values.push(
+            self.max_file_manager_content_search_size
+                .to_compact_string(),
+        );
+        keys.push("server::max_file_manager_search_results");
+        values.push(self.max_file_manager_search_results.to_compact_string());
         keys.push("server::max_schedules_step_count");
         values.push(self.max_schedules_step_count.to_compact_string());
         keys.push("server::allow_overwriting_custom_docker_image");
@@ -229,6 +238,14 @@ impl AppSettingsServer {
                 .remove("server::max_file_manager_view_size")
                 .and_then(|s| s.parse().ok())
                 .unwrap_or(10 * 1024 * 1024),
+            max_file_manager_content_search_size: map
+                .remove("server::max_file_manager_content_search_size")
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(5 * 1024 * 1024),
+            max_file_manager_search_results: map
+                .remove("server::max_file_manager_search_results")
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(100),
             max_schedules_step_count: map
                 .remove("server::max_schedules_step_count")
                 .and_then(|s| s.parse().ok())

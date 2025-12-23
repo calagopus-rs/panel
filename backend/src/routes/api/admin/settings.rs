@@ -66,6 +66,8 @@ mod put {
     #[derive(ToSchema, Deserialize)]
     pub struct PayloadServer {
         max_file_manager_view_size: Option<u64>,
+        max_file_manager_content_search_size: Option<u64>,
+        max_file_manager_search_results: Option<u64>,
         max_schedules_step_count: Option<u64>,
 
         allow_overwriting_custom_docker_image: Option<bool>,
@@ -156,6 +158,15 @@ mod put {
         if let Some(server) = data.server {
             if let Some(max_file_manager_view_size) = server.max_file_manager_view_size {
                 settings.server.max_file_manager_view_size = max_file_manager_view_size;
+            }
+            if let Some(max_file_manager_content_search_size) =
+                server.max_file_manager_content_search_size
+            {
+                settings.server.max_file_manager_content_search_size =
+                    max_file_manager_content_search_size;
+            }
+            if let Some(max_file_manager_search_results) = server.max_file_manager_search_results {
+                settings.server.max_file_manager_search_results = max_file_manager_search_results;
             }
             if let Some(max_schedules_step_count) = server.max_schedules_step_count {
                 settings.server.max_schedules_step_count = max_schedules_step_count;

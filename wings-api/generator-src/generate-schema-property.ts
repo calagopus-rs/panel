@@ -5,7 +5,7 @@ import generateSchemaObject from "@/generate-schema-object"
 
 export function convertType(object: oas31.SchemaObject | oas31.ReferenceObject): string {
     if (object.$ref) {
-        return object.$ref.split('/').at(-1)!
+        return object.$ref.endsWith('/CompactString') ? 'compact_str::CompactString' : object.$ref.split('/').at(-1)!
     }
 
     object = object as oas31.SchemaObject
@@ -51,8 +51,14 @@ export default function generateSchemaProperty(output: fs.WriteStream, _spaces: 
     output.write(`${spaces}${name !== snakeCase(name) ? `#[serde(rename = "${name}")] ` : ''}`)
     output.write(`pub ${rustPropertyEscape(snakeCase(name))}: `)
 
+    object = object as oas31.SchemaObject
+
+    if (!object.type && object.oneOf?.length === 1) {
+        object = object.oneOf[0];
+    }
+
     if (object.$ref) {
-        output.write(`${object.$ref.split('/').at(-1)},\n`)
+        output.write(`${object.$ref.endsWith('/CompactString') ? 'compact_str::CompactString' : object.$ref.split('/').at(-1)!},\n`)
 
         return;
     }
@@ -64,7 +70,7 @@ export default function generateSchemaProperty(output: fs.WriteStream, _spaces: 
 
         output.write('Option<')
         if (schema.$ref) {
-            output.write(`${schema.$ref.split('/').at(-1)}>,\n`)
+            output.write(`${schema.$ref.endsWith('/CompactString') ? 'compact_str::CompactString' : schema.$ref.split('/').at(-1)!}>,\n`)
             return
         } else {
             generateSchemaObject(output, _spaces + 4, parent, pascalCase(parent) + pascalCase(name), schema as any, true)

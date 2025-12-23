@@ -143,7 +143,7 @@ impl WingsClient {
 `)
 
 for (const [name, schema] of Object.entries(openapi.components?.schemas || {})) {
-    if (schema.$ref) continue
+    if (schema.$ref || name === 'CompactString') continue
 
     generateSchemaObject(output, 0, null, name, schema as oas31.SchemaObject)
 }

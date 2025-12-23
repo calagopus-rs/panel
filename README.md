@@ -1,4 +1,4 @@
-# calagopus-rs panel (basically stable)
+# Calagopus Panel
 
 a rewrite of [pterodactyl panel](https://github.com/pterodactyl/panel) in the rust programming language. This rewrite aims to be a better alternative to the original panel, implementing new features, better performance and a new UI.
 
@@ -15,7 +15,7 @@ This "guide" assumes you have the docker daemon installed on your system.
 mkdir calagopus
 cd calagopus
 
-wget https://raw.githubusercontent.com/calagopus-rs/panel/refs/heads/main/compose.yml
+wget https://raw.githubusercontent.com/calagopus/panel/refs/heads/main/compose.yml
 RANDOM_STRING=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
 sed -i -e "s/CHANGEME/$RANDOM_STRING/g" compose.yml
 

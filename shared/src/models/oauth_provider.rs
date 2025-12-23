@@ -305,42 +305,53 @@ impl OAuthProvider {
     }
 
     pub fn extract_email(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
-        Ok(serde_json_path::JsonPath::parse(match &self.email_path {
-            Some(path) => path,
-            None => {
-                return Err(crate::response::DisplayError::new(
-                    "no email path defined, unable to register",
-                )
-                .into());
-            }
-        })?
-        .query(value)
-        .first()
-        .ok_or_else(|| {
-            crate::response::DisplayError::new(format!("unable to extract email from {:?}", value))
-        })?
-        .to_string())
+        Ok(
+            match serde_json_path::JsonPath::parse(match &self.email_path {
+                Some(path) => path,
+                None => {
+                    return Err(crate::response::DisplayError::new(
+                        "no email path defined, unable to register",
+                    )
+                    .into());
+                }
+            })?
+            .query(value)
+            .first()
+            .ok_or_else(|| {
+                crate::response::DisplayError::new(format!(
+                    "unable to extract email from {:?}",
+                    value
+                ))
+            })? {
+                serde_json::Value::String(string) => string.clone(),
+                val => val.to_string(),
+            },
+        )
     }
 
     pub fn extract_username(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
-        Ok(serde_json_path::JsonPath::parse(match &self.username_path {
-            Some(path) => path,
-            None => return Ok(rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 10)),
-        })?
-        .query(value)
-        .first()
-        .ok_or_else(|| {
-            crate::response::DisplayError::new(format!(
-                "unable to extract username from {:?}",
-                value
-            ))
-        })?
-        .to_string())
+        Ok(
+            match serde_json_path::JsonPath::parse(match &self.username_path {
+                Some(path) => path,
+                None => return Ok(rand::distr::Alphanumeric.sample_string(&mut rand::rng(), 10)),
+            })?
+            .query(value)
+            .first()
+            .ok_or_else(|| {
+                crate::response::DisplayError::new(format!(
+                    "unable to extract username from {:?}",
+                    value
+                ))
+            })? {
+                serde_json::Value::String(string) => string.clone(),
+                val => val.to_string(),
+            },
+        )
     }
 
     pub fn extract_name_first(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
         Ok(
-            serde_json_path::JsonPath::parse(match &self.name_first_path {
+            match serde_json_path::JsonPath::parse(match &self.name_first_path {
                 Some(path) => path,
                 None => return Ok("First".to_string()),
             })?
@@ -351,14 +362,16 @@ impl OAuthProvider {
                     "unable to extract first name from {:?}",
                     value
                 ))
-            })?
-            .to_string(),
+            })? {
+                serde_json::Value::String(string) => string.clone(),
+                val => val.to_string(),
+            },
         )
     }
 
     pub fn extract_name_last(&self, value: &serde_json::Value) -> Result<String, anyhow::Error> {
         Ok(
-            serde_json_path::JsonPath::parse(match &self.name_last_path {
+            match serde_json_path::JsonPath::parse(match &self.name_last_path {
                 Some(path) => path,
                 None => return Ok("Last".to_string()),
             })?
@@ -369,8 +382,10 @@ impl OAuthProvider {
                     "unable to extract last name from {:?}",
                     value
                 ))
-            })?
-            .to_string(),
+            })? {
+                serde_json::Value::String(string) => string.clone(),
+                val => val.to_string(),
+            },
         )
     }
 
