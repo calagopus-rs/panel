@@ -4,23 +4,23 @@ import { ServerStore } from '@/stores/server.ts';
 
 export interface SchedulesSlice {
   schedules: ResponseMeta<ServerSchedule>;
+  runningScheduleSteps: Map<string, string | null>;
 
   setSchedules: (schedules: ResponseMeta<ServerSchedule>) => void;
   addSchedule: (schedule: ServerSchedule) => void;
   removeSchedule: (schedule: ServerSchedule) => void;
+  setRunningScheduleStep: (schedule: string, step: string | null) => void;
 
   schedule: ServerSchedule | null;
   scheduleSteps: ScheduleStep[];
-  scheduleStatus: Map<string, ScheduleStatus>;
 
   setSchedule: (scheduleStep: ServerSchedule) => void;
   setScheduleSteps: (scheduleSteps: ScheduleStep[]) => void;
-  setScheduleStatus: (schedule: string, status: ScheduleStatus) => void;
-  getScheduleStatus: (schedule: string) => ScheduleStatus;
 }
 
 export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSlice> = (set, get): SchedulesSlice => ({
   schedules: getEmptyPaginationSet<ServerSchedule>(),
+  runningScheduleSteps: new Map(),
 
   setSchedules: (value) => set((state) => ({ ...state, schedules: value })),
   addSchedule: (schedule) =>
@@ -39,18 +39,16 @@ export const createSchedulesSlice: StateCreator<ServerStore, [], [], SchedulesSl
         total: state.schedules.total - 1,
       },
     })),
-
-  schedule: null,
-  scheduleSteps: [],
-  scheduleStatus: new Map(),
-
-  setSchedule: (schedule) => set((state) => ({ ...state, schedule })),
-  setScheduleSteps: (steps) => set((state) => ({ ...state, scheduleSteps: steps })),
-  setScheduleStatus: (schedule, status) =>
+  setRunningScheduleStep: (schedule, step) =>
     set((state) => {
-      state.scheduleStatus.set(schedule, status);
+      state.runningScheduleSteps.set(schedule, step);
 
       return { ...state };
     }),
-  getScheduleStatus: (schedule) => get().scheduleStatus.get(schedule) ?? { running: false, step: null },
+
+  schedule: null,
+  scheduleSteps: [],
+
+  setSchedule: (schedule) => set((state) => ({ ...state, schedule })),
+  setScheduleSteps: (steps) => set((state) => ({ ...state, scheduleSteps: steps })),
 });

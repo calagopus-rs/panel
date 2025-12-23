@@ -6,7 +6,7 @@ export const toSnakeCase = (str: string): string => {
   return str.replace(/([A-Z])/g, '_$1').toLowerCase();
 };
 
-export const transformKeysToCamelCase = (obj: Record<string, object>): object => {
+export const transformKeysToCamelCase = (obj: object): object => {
   if (Array.isArray(obj)) {
     return obj.map((item) => transformKeysToCamelCase(item));
   } else if (obj !== null && typeof obj === 'object') {
@@ -14,7 +14,7 @@ export const transformKeysToCamelCase = (obj: Record<string, object>): object =>
     for (const key in obj) {
       if (Object.hasOwn(obj, key)) {
         const newKey = toCamelCase(key);
-        newObj[newKey] = transformKeysToCamelCase(obj[key] as Record<string, object>);
+        newObj[newKey] = transformKeysToCamelCase((obj as Record<string, object>)[key] as Record<string, object>);
       }
     }
     return newObj;
@@ -22,7 +22,7 @@ export const transformKeysToCamelCase = (obj: Record<string, object>): object =>
   return obj;
 };
 
-export const transformKeysToSnakeCase = (obj: Record<string, unknown>): object => {
+export const transformKeysToSnakeCase = (obj: object): object => {
   if (Array.isArray(obj)) {
     return obj.map((item) => transformKeysToSnakeCase(item));
   } else if (obj !== null && typeof obj === 'object') {
@@ -30,7 +30,7 @@ export const transformKeysToSnakeCase = (obj: Record<string, unknown>): object =
     for (const key in obj) {
       if (Object.hasOwn(obj, key)) {
         const newKey = toSnakeCase(key);
-        newObj[newKey] = transformKeysToSnakeCase(obj[key] as Record<string, object>);
+        newObj[newKey] = transformKeysToSnakeCase((obj as Record<string, object>)[key] as Record<string, object>);
       }
     }
     return newObj;
