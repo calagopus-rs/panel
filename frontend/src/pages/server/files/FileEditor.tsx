@@ -115,7 +115,7 @@ export default function FileEditor() {
           </div>
           <div className='mx-4 rounded-md overflow-hidden'>
             <Editor
-              height='82vh'
+              height='77vh'
               theme='vs-dark'
               defaultLanguage={language}
               defaultValue={content}

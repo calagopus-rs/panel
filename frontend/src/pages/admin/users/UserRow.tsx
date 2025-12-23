@@ -10,7 +10,7 @@ export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>
       <TableData>
-        <div className="size-5 aspect-square relative">
+        <div className='size-5 aspect-square relative'>
           <img src={user.avatar ?? '/icon.svg'} alt={user.username} className='object-cover rounded-full select-none' />
         </div>
       </TableData>

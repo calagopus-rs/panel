@@ -22,6 +22,8 @@ export default function FileSearchModal({ opened, onClose }: ModalProps) {
   const { server, browsingDirectory, setBrowsingEntries } = useServerStore();
 
   const [loading, setLoading] = useState(false);
+  const [advanced, setAdvanced] = useState(false);
+  const [query, setQuery] = useState('');
 
   const form = useForm<z.infer<typeof serverFilesSearchSchema>>({
     initialValues: {
@@ -42,6 +44,18 @@ export default function FileSearchModal({ opened, onClose }: ModalProps) {
     }
   }, [form.values.contentFilter]);
 
+  useEffect(() => {
+    form.setFieldValue('pathFilter', { include: [`**${query}**`], exclude: [] });
+  }, [query]);
+
+  useEffect(() => {
+    form.reset();
+
+    if (!advanced) {
+      form.setFieldValue('pathFilter', { include: [`**${query}**`], exclude: [] });
+    }
+  }, [advanced]);
+
   const doSearch = () => {
     setLoading(true);
 
@@ -60,108 +74,124 @@ export default function FileSearchModal({ opened, onClose }: ModalProps) {
     <Modal title='Search Files' onClose={onClose} opened={opened}>
       <form onSubmit={form.onSubmit(() => doSearch())}>
         <Stack>
-          <Switch
-            checked={!!form.values.pathFilter}
-            onChange={(e) =>
-              form.setFieldValue('pathFilter', e.target.checked ? { include: ['**/**'], exclude: [] } : null)
-            }
-            label='Enable File Path filter'
-          />
-          {form.values.pathFilter && (
-            <Group grow align='start'>
-              <TagsInput
-                label='Include Patterns'
-                placeholder='Include Patterns'
-                {...form.getInputProps('pathFilter.include')}
-              />
-              <TagsInput
-                label='Exclude Patterns'
-                placeholder='Exclude Patterns'
-                {...form.getInputProps('pathFilter.exclude')}
-              />
-            </Group>
+          <Switch checked={advanced} onChange={(e) => setAdvanced(e.target.checked)} label='Advanced mode toggle' />
+
+          {!advanced && (
+            <TextInput
+              withAsterisk
+              label='File name'
+              placeholder='Query'
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           )}
 
-          <Switch
-            checked={!!form.values.sizeFilter}
-            onChange={(e) =>
-              form.setFieldValue('sizeFilter', e.target.checked ? { min: 0, max: 100 * 1024 * 1024 } : null)
-            }
-            label='Enable File Size filter'
-          />
-          {form.values.sizeFilter && (
-            <Group grow>
-              <SizeInput
-                withAsterisk
-                label='Minimum'
-                mode='b'
-                min={0}
-                value={form.values.sizeFilter.min}
-                onChange={(value) => form.setFieldValue('sizeFilter.min', value)}
-              />
-              <SizeInput
-                withAsterisk
-                label='Maximum'
-                mode='b'
-                min={0}
-                value={form.values.sizeFilter.max}
-                onChange={(value) => form.setFieldValue('sizeFilter.max', value)}
-              />
-            </Group>
-          )}
-
-          <Switch
-            checked={!!form.values.contentFilter}
-            onChange={(e) =>
-              form.setFieldValue(
-                'contentFilter',
-                e.target.checked
-                  ? {
-                      query: '',
-                      maxSearchSize: settings.server.maxFileManagerContentSearchSize,
-                      includeUnmatched: false,
-                      caseInsensitive: true,
-                    }
-                  : null,
-              )
-            }
-            label='Enable File Content filter'
-          />
-          {form.values.contentFilter && (
+          {advanced && (
             <>
-              <Group grow align='start'>
-                <TextInput
-                  withAsterisk
-                  label='Query'
-                  placeholder='Query'
-                  className='col-span-3'
-                  {...form.getInputProps('contentFilter.query')}
-                />
+              <Switch
+                checked={!!form.values.pathFilter}
+                onChange={(e) =>
+                  form.setFieldValue('pathFilter', e.target.checked ? { include: ['**/**'], exclude: [] } : null)
+                }
+                label='File Path filter'
+              />
+              {form.values.pathFilter && (
+                <Group grow align='start'>
+                  <TagsInput
+                    label='Include Patterns'
+                    placeholder='Include Patterns'
+                    {...form.getInputProps('pathFilter.include')}
+                  />
+                  <TagsInput
+                    label='Exclude Patterns'
+                    placeholder='Exclude Patterns'
+                    {...form.getInputProps('pathFilter.exclude')}
+                  />
+                </Group>
+              )}
 
-                <SizeInput
-                  withAsterisk
-                  label='Maximum Search File Size'
-                  mode='b'
-                  min={0}
-                  value={form.values.contentFilter.maxSearchSize}
-                  onChange={(value) => form.setFieldValue('contentFilter.maxSearchSize', value)}
-                />
-              </Group>
+              <Switch
+                checked={!!form.values.contentFilter}
+                onChange={(e) =>
+                  form.setFieldValue(
+                    'contentFilter',
+                    e.target.checked
+                      ? {
+                        query: '',
+                        maxSearchSize: settings.server.maxFileManagerContentSearchSize,
+                        includeUnmatched: false,
+                        caseInsensitive: true,
+                      }
+                      : null,
+                  )
+                }
+                label='File Content filter'
+              />
+              {form.values.contentFilter && (
+                <>
+                  <Group grow align='start'>
+                    <TextInput
+                      withAsterisk
+                      label='Query'
+                      placeholder='Query'
+                      className='col-span-3'
+                      {...form.getInputProps('contentFilter.query')}
+                    />
 
-              <Group grow align='start'>
-                <Switch
-                  label='Include Unmatched Files'
-                  description='If a file matches the other filters, but cannot match the content filter due to being too big, still include it.'
-                  checked={form.values.contentFilter.includeUnmatched}
-                  onChange={(e) => form.setFieldValue('contentFilter.includeUnmatched', e.target.checked)}
-                />
-                <Switch
-                  label='Search Case Insensitive'
-                  description='Search file content using the query in insensitive mode, "A" will still match "a".'
-                  checked={form.values.contentFilter.caseInsensitive}
-                  onChange={(e) => form.setFieldValue('contentFilter.caseInsensitive', e.target.checked)}
-                />
-              </Group>
+                    <SizeInput
+                      withAsterisk
+                      label='Maximum Search File Size'
+                      mode='b'
+                      min={0}
+                      value={form.values.contentFilter.maxSearchSize}
+                      onChange={(value) => form.setFieldValue('contentFilter.maxSearchSize', value)}
+                    />
+                  </Group>
+
+                  <Group grow align='start'>
+                    <Switch
+                      label='Include Unmatched Files'
+                      description='If a file matches the other filters, but cannot match the content filter due to being too big, still include it.'
+                      checked={form.values.contentFilter.includeUnmatched}
+                      onChange={(e) => form.setFieldValue('contentFilter.includeUnmatched', e.target.checked)}
+                    />
+                    <Switch
+                      label='Search Case Insensitive'
+                      description='Search file content using the query in insensitive mode, "A" will still match "a".'
+                      checked={form.values.contentFilter.caseInsensitive}
+                      onChange={(e) => form.setFieldValue('contentFilter.caseInsensitive', e.target.checked)}
+                    />
+                  </Group>
+                </>
+              )}
+
+              <Switch
+                checked={!!form.values.sizeFilter}
+                onChange={(e) =>
+                  form.setFieldValue('sizeFilter', e.target.checked ? { min: 0, max: 100 * 1024 * 1024 } : null)
+                }
+                label='File Size filter'
+              />
+              {form.values.sizeFilter && (
+                <Group grow>
+                  <SizeInput
+                    withAsterisk
+                    label='Minimum'
+                    mode='b'
+                    min={0}
+                    value={form.values.sizeFilter.min}
+                    onChange={(value) => form.setFieldValue('sizeFilter.min', value)}
+                  />
+                  <SizeInput
+                    withAsterisk
+                    label='Maximum'
+                    mode='b'
+                    min={0}
+                    value={form.values.sizeFilter.max}
+                    onChange={(value) => form.setFieldValue('sizeFilter.max', value)}
+                  />
+                </Group>
+              )}
             </>
           )}
         </Stack>

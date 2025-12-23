@@ -31,7 +31,7 @@ export default function ServerActivity() {
         {activities.data.map((activity) => (
           <TableRow key={activity.created.toString()}>
             <TableData>
-              <div className="size-5 aspect-square relative">
+              <div className='size-5 aspect-square relative'>
                 <img
                   src={activity.user?.avatar ?? '/icon.svg'}
                   alt={activity.user?.username}
