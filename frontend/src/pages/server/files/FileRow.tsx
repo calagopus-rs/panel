@@ -22,12 +22,13 @@ import Checkbox from '@/elements/input/Checkbox.tsx';
 import { TableData } from '@/elements/Table.tsx';
 import Tooltip from '@/elements/Tooltip.tsx';
 import { streamingArchiveFormatLabelMapping } from '@/lib/enums.ts';
-import { isArchiveType } from '@/lib/files.ts';
+import { isArchiveType, isEditableFile } from '@/lib/files.ts';
 import { bytesToString } from '@/lib/size.ts';
 import { formatDateTime, formatTimestamp } from '@/lib/time.ts';
 import { useToast } from '@/providers/ToastProvider.tsx';
 import { useWindows } from '@/providers/WindowProvider.tsx';
 import RouterRoutes from '@/RouterRoutes.tsx';
+import { useGlobalStore } from '@/stores/global.ts';
 import { useServerStore } from '@/stores/server.ts';
 import { FileTableRow } from './FileTableRow.tsx';
 import ArchiveCreateModal from './modals/ArchiveCreateModal.tsx';
@@ -45,6 +46,7 @@ const FileRow = memo(
   forwardRef<HTMLTableRowElement, FileRowProps>(function FileRow({ file, setChildOpenModal }, ref) {
     const { addToast } = useToast();
     const { addWindow } = useWindows();
+    const { settings } = useGlobalStore();
     const {
       server,
       browsingDirectory,
@@ -92,7 +94,9 @@ const FileRow = memo(
             {
               icon: faWindowRestore,
               label: 'Open in new Window',
-              hidden: !matchMedia('(pointer: fine)').matches,
+              hidden:
+                !matchMedia('(pointer: fine)').matches ||
+                !((isEditableFile(file.mime) && file.size <= settings.server.maxFileManagerViewSize) || file.directory),
               onClick: () =>
                 addWindow(
                   file.file ? faFile : faFolder,
