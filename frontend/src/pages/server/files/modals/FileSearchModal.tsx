@@ -152,12 +152,14 @@ export default function FileSearchModal({ opened, onClose }: ModalProps) {
                 <Switch
                   label='Include Unmatched Files'
                   description='If a file matches the other filters, but cannot match the content filter due to being too big, still include it.'
-                  {...form.getInputProps('contentFilter.includeUnmatched')}
+                  checked={form.values.contentFilter.includeUnmatched}
+                  onChange={(e) => form.setFieldValue('contentFilter.includeUnmatched', e.target.checked)}
                 />
                 <Switch
                   label='Search Case Insensitive'
                   description='Search file content using the query in insensitive mode, "A" will still match "a".'
-                  {...form.getInputProps('contentFilter.caseInsensitive')}
+                  checked={form.values.contentFilter.caseInsensitive}
+                  onChange={(e) => form.setFieldValue('contentFilter.caseInsensitive', e.target.checked)}
                 />
               </Group>
             </>
