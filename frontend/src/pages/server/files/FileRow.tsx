@@ -105,12 +105,12 @@ const FileRow = memo(
                     initialEntries={[
                       file.directory
                         ? `/server/${server.uuidShort}/files?${createSearchParams({
-                            directory: `${browsingDirectory}/${file.name}`.replace('//', '/'),
-                          })}`
+                          directory: `${browsingDirectory}/${file.name}`.replace('//', '/'),
+                        })}`
                         : `/server/${server.uuidShort}/files/edit?${createSearchParams({
-                            directory: browsingDirectory,
-                            file: file.name,
-                          })}`,
+                          directory: browsingDirectory,
+                          file: file.name,
+                        })}`,
                     ]}
                   >
                     <RouterRoutes isNormal={false} />
@@ -146,19 +146,19 @@ const FileRow = memo(
             },
             isArchiveType(file.mime) && !browsingBackup
               ? {
-                  icon: faEnvelopesBulk,
-                  label: 'Unarchive',
-                  hidden: !!browsingBackup,
-                  onClick: doUnarchive,
-                  color: 'gray',
-                }
+                icon: faEnvelopesBulk,
+                label: 'Unarchive',
+                hidden: !!browsingBackup,
+                onClick: doUnarchive,
+                color: 'gray',
+              }
               : {
-                  icon: faFileZipper,
-                  label: 'Archive',
-                  hidden: !!browsingBackup,
-                  onClick: () => setOpenModal('archive'),
-                  color: 'gray',
-                },
+                icon: faFileZipper,
+                label: 'Archive',
+                hidden: !!browsingBackup,
+                onClick: () => setOpenModal('archive'),
+                color: 'gray',
+              },
             {
               icon: faFileArrowDown,
               label: 'Download',
@@ -166,11 +166,11 @@ const FileRow = memo(
               color: 'gray',
               items: file.directory
                 ? Object.entries(streamingArchiveFormatLabelMapping).map(([mime, label]) => ({
-                    icon: faFileArrowDown,
-                    label: `Download as ${label}`,
-                    onClick: () => doDownload(mime as StreamingArchiveFormat),
-                    color: 'gray',
-                  }))
+                  icon: faFileArrowDown,
+                  label: `Download as ${label}`,
+                  onClick: () => doDownload(mime as StreamingArchiveFormat),
+                  color: 'gray',
+                }))
                 : [],
             },
             {
@@ -202,6 +202,7 @@ const FileRow = memo(
                   id={file.name}
                   disabled={movingFileNames.size > 0}
                   checked={isFileSelected(file)}
+                  classNames={{ input: 'cursor-pointer!' }}
                   onChange={() => {
                     if (isFileSelected(file)) {
                       removeSelectedFile(file);

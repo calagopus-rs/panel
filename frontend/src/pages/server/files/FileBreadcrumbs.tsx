@@ -37,8 +37,8 @@ export default function FileBreadcrumbs({
         to={
           browsingBackup
             ? `/server/${server?.uuidShort}/files?${createSearchParams({
-                directory: `/.backups/${browsingBackup.uuid}`,
-              })}`
+              directory: `/.backups/${browsingBackup.uuid}`,
+            })}`
             : `/server/${server?.uuidShort}/files`
         }
         className=' text-blue-300 hover:text-blue-200'
@@ -76,6 +76,7 @@ export default function FileBreadcrumbs({
             }
             indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
             className='mr-2'
+            classNames={{ input: 'cursor-pointer!' }}
             hidden={inFileEditor}
             onChange={() => {
               if (selectedFileNames.size >= browsingEntries.data.length) {
