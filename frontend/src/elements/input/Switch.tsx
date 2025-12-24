@@ -1,5 +1,4 @@
 import { Switch as MantineSwitch, SwitchProps } from '@mantine/core';
-
 import { forwardRef } from 'react';
 
 const Switch = forwardRef<HTMLInputElement, SwitchProps>(({ className, description, ...rest }, ref) => {
