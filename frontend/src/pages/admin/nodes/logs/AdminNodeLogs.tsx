@@ -125,7 +125,7 @@ export default function AdminNodeLogs({ node }: { node: Node }) {
 
           <div className='mt-4 rounded-md overflow-hidden'>
             <Editor
-              height='66vh'
+              height='65vh'
               theme='vs-dark'
               value={content || ''}
               defaultLanguage='text'

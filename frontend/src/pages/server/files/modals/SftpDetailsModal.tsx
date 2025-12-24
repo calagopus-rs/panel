@@ -16,13 +16,31 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
     <Modal title='SFTP Details' onClose={onClose} opened={opened}>
       <div className='grid grid-cols-4 gap-2'>
         <CopyOnClick content='SFTP' className='text-left'>
-          <TextInput label='Protocol' value='SFTP' className='pointer-events-none' disabled />
+          <TextInput
+            label='Protocol'
+            value='SFTP'
+            className='pointer-events-none'
+            disabled
+            classNames={{ input: 'text-white/80!' }}
+          />
         </CopyOnClick>
         <CopyOnClick content={server.sftpPort.toString()} className='text-left'>
-          <TextInput label='Port' value={server.sftpPort} className='pointer-events-none' disabled />
+          <TextInput
+            label='Port'
+            value={server.sftpPort}
+            className='pointer-events-none'
+            disabled
+            classNames={{ input: 'text-white/80!' }}
+          />
         </CopyOnClick>
         <CopyOnClick content={server.sftpHost} className='col-span-2 text-left'>
-          <TextInput label='Host' value={server.sftpHost} className='pointer-events-none' disabled />
+          <TextInput
+            label='Host'
+            value={server.sftpHost}
+            className='pointer-events-none'
+            disabled
+            classNames={{ input: 'text-white/80!' }}
+          />
         </CopyOnClick>
 
         <CopyOnClick content={`${user!.username}.${server.uuidShort}`} className='col-span-4 text-left'>
@@ -31,6 +49,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
             value={`${user!.username}.${server.uuidShort}`}
             className='pointer-events-none'
             disabled
+            classNames={{ input: 'text-white/80!' }}
           />
         </CopyOnClick>
 
@@ -38,6 +57,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
           label='Password'
           value='Your Control Panel Password'
           className='col-span-4 pointer-events-none'
+          classNames={{ input: 'text-white/80!' }}
           disabled
         />
       </div>

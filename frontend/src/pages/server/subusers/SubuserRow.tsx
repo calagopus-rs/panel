@@ -78,7 +78,9 @@ export default function SubuserRow({ subuser }: { subuser: ServerSubuser }) {
               <div className='size-5 aspect-square relative'>
                 <img
                   src={subuser.user.avatar ?? '/icon.svg'}
-                  alt={subuser.user.username} className='object-cover rounded-full select-none' />
+                  alt={subuser.user.username}
+                  className='object-cover rounded-full select-none'
+                />
               </div>
             </TableData>
 
