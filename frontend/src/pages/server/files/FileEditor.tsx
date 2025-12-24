@@ -82,7 +82,7 @@ export default function FileEditor() {
   }
 
   return (
-    <ServerContentContainer title={`File Editor (${fileName || 'New File'})`}>
+    <ServerContentContainer title={`${fileName ? `Editing ${fileName}` : 'New File'}`}>
       {loading ? (
         <div className='w-full h-screen flex items-center justify-center'>
           <Spinner size={75} />
@@ -95,7 +95,7 @@ export default function FileEditor() {
             onClose={() => setNameModalOpen(false)}
           />
 
-          <div className='flex justify-between w-full p-4'>
+          <div className='flex justify-between w-full py-4'>
             <FileBreadcrumbs
               inFileEditor
               path={join(decodeURIComponent(browsingDirectory!), fileName)}
@@ -113,7 +113,7 @@ export default function FileEditor() {
               )}
             </div>
           </div>
-          <div className='mx-4 rounded-md overflow-hidden'>
+          <div className='rounded-md overflow-hidden'>
             <Editor
               height='77vh'
               theme='vs-dark'
