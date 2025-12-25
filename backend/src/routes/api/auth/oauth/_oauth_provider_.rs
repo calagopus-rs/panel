@@ -56,7 +56,7 @@ pub fn router(state: &State) -> OpenApiRouter<State> {
             if state
                 .cache
                 .client
-                .get::<String, u16>(format!("oauth_state::{}", params.state))
+                .get::<u16>(format!("oauth_state::{}", params.state))
                 .await
                 .is_err()
             {

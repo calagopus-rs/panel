@@ -1050,17 +1050,21 @@ pub mod servers_server_install_abort {
     }
 }
 pub mod servers_server_logs {
+    pub mod get {
+        pub type Response200 = String;
+
+        pub type Response = Response200;
+    }
+}
+pub mod servers_server_logs_install {
     use super::*;
 
     pub mod get {
         use super::*;
 
-        nestify::nest! {
-            #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200 {
-                #[schema(inline)]
-                pub data: compact_str::CompactString,
-            }
-        }
+        pub type Response200 = String;
+
+        pub type Response404 = ApiError;
 
         pub type Response = Response200;
     }
@@ -1491,6 +1495,16 @@ pub mod system_config {
                         #[schema(inline)]
                         pub directory_entry_send_amount: u64,
                         #[schema(inline)]
+                        pub limits: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpLimits {
+                            #[schema(inline)]
+                            pub authentication_password_attempts: u64,
+                            #[schema(inline)]
+                            pub authentication_pubkey_attempts: u64,
+                            #[schema(inline)]
+                            pub authentication_cooldown: u64,
+                        },
+
+                        #[schema(inline)]
                         pub shell: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpShell {
                             #[schema(inline)]
                             pub enabled: bool,
@@ -1500,6 +1514,14 @@ pub mod system_config {
                                 pub name: compact_str::CompactString,
                             },
 
+                        },
+
+                        #[schema(inline)]
+                        pub activity: #[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct Response200SystemSftpActivity {
+                            #[schema(inline)]
+                            pub log_logins: bool,
+                            #[schema(inline)]
+                            pub log_file_reads: bool,
                         },
 
                     },

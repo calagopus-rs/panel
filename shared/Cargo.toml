@@ -20,7 +20,7 @@ tracing-appender = { workspace = true }
 clap = { workspace = true }
 include_dir = { workspace = true }
 lettre = { version = "0.11.17", default-features = false, features = ["builder", "pool", "smtp-transport", "sendmail-transport", "file-transport", "tokio1-rustls-tls", "tokio1"] }
-zip = { version = "6.0.0", default-features = false, features = ["deflate", "sha1"] }
+zip = { version = "7.0.0", default-features = false, features = ["deflate"] }
 toml = "0.9.7"
 serde = { workspace = true }
 serde_json_path = "0.7.2"

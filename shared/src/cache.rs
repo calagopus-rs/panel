@@ -115,7 +115,7 @@ impl Cache {
             now as u64 + limit_window
         };
 
-        let limit_used = self.client.get::<_, u64>(&key).await.unwrap_or_default() + 1;
+        let limit_used = self.client.get::<u64>(&key).await.unwrap_or_default() + 1;
         self.client
             .set_with_options(
                 key,

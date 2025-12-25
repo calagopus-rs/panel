@@ -510,11 +510,26 @@ impl WingsClient {
     pub async fn get_servers_server_logs(
         &self,
         server: uuid::Uuid,
+        lines: u64,
     ) -> Result<super::servers_server_logs::get::Response, ApiHttpError> {
         request_impl(
             self,
             Method::GET,
-            format!("/api/servers/{server}/logs"),
+            format!("/api/servers/{server}/logs?lines={lines}"),
+            None::<&()>,
+            None,
+        )
+        .await
+    }
+
+    pub async fn get_servers_server_logs_install(
+        &self,
+        server: uuid::Uuid,
+    ) -> Result<super::servers_server_logs_install::get::Response, ApiHttpError> {
+        request_impl(
+            self,
+            Method::GET,
+            format!("/api/servers/{server}/logs/install"),
             None::<&()>,
             None,
         )

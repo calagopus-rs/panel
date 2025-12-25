@@ -118,7 +118,7 @@ mod post {
         let authentication: PasskeyAuthentication = match state
             .cache
             .client
-            .get::<String, String>(format!("security_key_authentication::{}", data.uuid))
+            .get::<String>(format!("security_key_authentication::{}", data.uuid))
             .await
         {
             Ok(authentication) => {
