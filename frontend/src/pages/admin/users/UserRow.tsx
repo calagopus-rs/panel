@@ -10,7 +10,9 @@ export default function UserRow({ user }: { user: User }) {
   return (
     <TableRow>
       <TableData>
-        <img src={user.avatar ?? '/icon.svg'} alt={user.username} className='h-5 w-5 rounded-full select-none' />
+        <div className='size-5 aspect-square relative'>
+          <img src={user.avatar ?? '/icon.svg'} alt={user.username} className='object-cover rounded-full select-none' />
+        </div>
       </TableData>
 
       <TableData>

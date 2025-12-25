@@ -31,11 +31,13 @@ export default function ServerActivity() {
         {activities.data.map((activity) => (
           <TableRow key={activity.created.toString()}>
             <TableData>
-              <img
-                src={activity.user?.avatar ?? '/icon.svg'}
-                alt={activity.user?.username}
-                className='h-5 w-5 rounded-full select-none'
-              />
+              <div className='size-5 aspect-square relative'>
+                <img
+                  src={activity.user?.avatar ?? '/icon.svg'}
+                  alt={activity.user?.username}
+                  className='size-5 object-cover rounded-full select-none'
+                />
+              </div>
             </TableData>
 
             <TableData>

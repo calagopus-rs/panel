@@ -9,11 +9,13 @@ export default function ActivityRow({ activity }: { activity: AdminActivity }) {
   return (
     <TableRow>
       <TableData>
-        <img
-          src={activity.user?.avatar ?? '/icon.svg'}
-          alt={activity.user?.username}
-          className='h-5 w-5 rounded-full select-none'
-        />
+        <div className='size-5 aspect-square relative'>
+          <img
+            src={activity.user?.avatar ?? '/icon.svg'}
+            alt={activity.user?.username}
+            className='object-cover rounded-full select-none'
+          />
+        </div>
       </TableData>
 
       <TableData>

@@ -76,6 +76,7 @@ export default function FileBreadcrumbs({
             }
             indeterminate={selectedFileNames.size > 0 && selectedFileNames.size < browsingEntries.data.length}
             className='mr-2'
+            classNames={{ input: 'cursor-pointer!' }}
             hidden={inFileEditor}
             onChange={() => {
               if (selectedFileNames.size >= browsingEntries.data.length) {

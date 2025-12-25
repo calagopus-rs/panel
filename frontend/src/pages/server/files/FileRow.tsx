@@ -202,6 +202,7 @@ const FileRow = memo(
                   id={file.name}
                   disabled={movingFileNames.size > 0}
                   checked={isFileSelected(file)}
+                  classNames={{ input: 'cursor-pointer!' }}
                   onChange={() => {
                     if (isFileSelected(file)) {
                       removeSelectedFile(file);
