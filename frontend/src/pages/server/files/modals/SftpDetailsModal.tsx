@@ -20,8 +20,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
             label='Protocol'
             value='SFTP'
             className='pointer-events-none'
-            disabled
-            classNames={{ input: 'text-white/80!' }}
+            readOnly
           />
         </CopyOnClick>
         <CopyOnClick content={server.sftpPort.toString()} className='text-left'>
@@ -29,8 +28,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
             label='Port'
             value={server.sftpPort}
             className='pointer-events-none'
-            disabled
-            classNames={{ input: 'text-white/80!' }}
+            readOnly
           />
         </CopyOnClick>
         <CopyOnClick content={server.sftpHost} className='col-span-2 text-left'>
@@ -38,8 +36,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
             label='Host'
             value={server.sftpHost}
             className='pointer-events-none'
-            disabled
-            classNames={{ input: 'text-white/80!' }}
+            readOnly
           />
         </CopyOnClick>
 
@@ -48,8 +45,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
             label='Username'
             value={`${user!.username}.${server.uuidShort}`}
             className='pointer-events-none'
-            disabled
-            classNames={{ input: 'text-white/80!' }}
+            readOnly
           />
         </CopyOnClick>
 
@@ -58,7 +54,7 @@ export default function SftpDetailsModal({ opened, onClose }: ModalProps) {
           value='Your Control Panel Password'
           className='col-span-4 pointer-events-none'
           classNames={{ input: 'text-white/80!' }}
-          disabled
+          readOnly
         />
       </div>
 
