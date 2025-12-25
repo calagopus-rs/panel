@@ -975,6 +975,8 @@ pub mod servers_server_files_search {
                     pub include: Vec<compact_str::CompactString>,
                     #[schema(inline)]
                     pub exclude: Vec<compact_str::CompactString>,
+                    #[schema(inline)]
+                    pub case_insensitive: bool,
                 }>,
                 #[schema(inline)]
                 pub size_filter: Option<#[derive(Debug, ToSchema, Deserialize, Serialize, Clone)] pub struct RequestBodySizeFilter {
