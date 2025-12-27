@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE user_api_keys\n            SET name = $2, allowed_ips = $3, user_permissions = $4, admin_permissions = $5, server_permissions = $6, expires = $7\n            WHERE user_api_keys.uuid = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "InetArray",
+        "VarcharArray",
+        "VarcharArray",
+        "VarcharArray",
+        "Timestamp"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "97e9b23f4a29464e20094cf597bba1a8fd75cf755c4c2c112dc7745bb2856dad"
+}
